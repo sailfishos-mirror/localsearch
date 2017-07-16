@@ -13,8 +13,8 @@ sources = [
 ]
 
 tracker_miner_fs_deps = [
+     tracker_miner,
      tracker_common_dep,
-     tracker_miner_dep,
      tracker_extract_dep
 ]
 
@@ -33,10 +33,6 @@ executable('tracker-miner-fs', sources,
     install_dir: get_option('libexecdir'),
     install_rpath: tracker_internal_libs_dir,
 )
-
-install_data(
-    sources: 'tracker-miner-files-index.xml',
-    install_dir: join_paths(get_option('datadir'), 'tracker'))
 
 dbus_service_file_untranslated = configure_file(
     input: 'org.freedesktop.Tracker1.Miner.Files.service.in.in',

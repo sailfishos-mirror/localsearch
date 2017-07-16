@@ -1,5 +1,3 @@
-subdir('ipc')
-
 test_runner = find_program('test-runner.sh')
 
 functional_tests = [
@@ -12,8 +10,6 @@ functional_tests = [
   '07-graph',
   '08-unique-insertions',
   '09-concurrent-query',
-  '10-sqlite-misused',
-  '11-sqlite-batch-misused',
   '12-transactions',
   '13-threaded-store',
   '14-signals',

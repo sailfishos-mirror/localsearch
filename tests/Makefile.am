@@ -2,16 +2,7 @@ include $(top_srcdir)/Makefile.decl
 
 SUBDIRS =                                              \
 	common                                         \
-	gvdb					       \
-	libtracker-common                              \
-	libtracker-miner                               \
-	libtracker-data                                \
-	libtracker-sparql                              \
-	tracker-steroids
-
-if HAVE_TRACKER_FTS
-SUBDIRS += libtracker-fts
-endif
+	libtracker-common
 
 if HAVE_TRACKER_EXTRACT
 SUBDIRS += libtracker-extract

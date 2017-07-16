@@ -38,8 +38,6 @@
 #include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#include <libtracker-data/tracker-db-manager.h>
-
 #include "tracker-power.h"
 #include "tracker-miner-files.h"
 #include "tracker-config.h"

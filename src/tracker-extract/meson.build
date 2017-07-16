@@ -144,8 +144,7 @@ tracker_extract_sources = [
 ]
 
 tracker_extract_dependencies = [
-  tracker_common_dep, tracker_data_dep, tracker_extract_dep,
-  tracker_miner_dep, tracker_sparql_dep
+  tracker_sparql, tracker_miner, tracker_common_dep, tracker_extract_dep
 ]
 
 if libgsf.found()
@@ -160,10 +159,6 @@ executable('tracker-extract',
   dependencies: tracker_extract_dependencies,
   install: true,
   install_dir: join_paths(get_option('prefix'), get_option('libexecdir')))
-
-install_data(
-  'tracker-extract-priority.xml',
-  install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'tracker'))
 
 dbus_service_file_untranslated = configure_file(
   input: 'org.freedesktop.Tracker1.Miner.Extract.service.in.in',

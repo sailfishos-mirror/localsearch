@@ -1,5 +1,5 @@
 module_flags = -module -avoid-version -no-undefined
-modulesdir = $(libdir)/tracker-$(TRACKER_API_VERSION)/writeback-modules
+modulesdir = $(libdir)/tracker-miners-$(TRACKER_API_VERSION)/writeback-modules
 
 AM_CPPFLAGS =                                          \
 	$(BUILD_CFLAGS)                                \
@@ -54,16 +54,11 @@ tracker_writeback_SOURCES = \
 	tracker-main.c
 
 tracker_writeback_LDADD = \
-	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
-	$(top_builddir)/src/libtracker-miner/libtracker-miner-@TRACKER_API_VERSION@.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(BUILD_LIBS) \
 	$(TRACKER_WRITEBACK_LIBS)
 
-# DBus interfaces (XML files) and services
-configdir = $(datadir)/tracker
-config_DATA = tracker-writeback.xml
-
+# DBus services
 %.service: %.service.in
 	@sed -e "s|@libexecdir[@]|${libexecdir}|" $< > $@
 
@@ -74,7 +69,7 @@ systemd_userdir = $(prefix)/lib/systemd/user
 systemd_user_DATA = tracker-writeback.service
 
 # Configuration / GSettings
-gsettings_ENUM_NAMESPACE = org.freedesktop.Tracker
+gsettings_ENUM_NAMESPACE = org.freedesktop.TrackerMiners
 gsettings_ENUM_FILES = $(top_srcdir)/src/libtracker-common/tracker-enums.h
 
 gsettings_SCHEMAS = org.freedesktop.Tracker.Writeback.gschema.xml

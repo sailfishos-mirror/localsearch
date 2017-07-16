@@ -40,8 +40,6 @@
 
 #include <libtracker-common/tracker-common.h>
 
-#include <libtracker-data/tracker-db-manager.h>
-
 #include "tracker-config.h"
 #include "tracker-main.h"
 #include "tracker-extract.h"

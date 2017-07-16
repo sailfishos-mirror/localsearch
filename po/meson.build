@@ -1,1 +1,1 @@
-i18n.gettext('tracker', preset: 'glib')
+i18n.gettext('tracker-miners', preset: 'glib')

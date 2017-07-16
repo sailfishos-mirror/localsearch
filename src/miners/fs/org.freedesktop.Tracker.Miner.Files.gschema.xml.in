@@ -19,7 +19,7 @@ Boston, MA  02110-1301, USA.
 -->
 <schemalist>
   <schema id="org.freedesktop.Tracker.Miner.Files" path="/org/freedesktop/tracker/miner/files/" gettext-domain="tracker">
-    <key name="verbosity" enum="org.freedesktop.Tracker.TrackerVerbosity">
+    <key name="verbosity" enum="org.freedesktop.TrackerMiners.TrackerVerbosity">
       <default>'errors'</default>
       <_summary>Log verbosity</_summary>
       <_description>Log verbosity.</_description>
@@ -32,7 +32,7 @@ Boston, MA  02110-1301, USA.
       <default>15</default>
     </key>
 
-    <key name="sched-idle" enum="org.freedesktop.Tracker.TrackerSchedIdle">
+    <key name="sched-idle" enum="org.freedesktop.TrackerMiners.TrackerSchedIdle">
       <default>'first-index'</default>
       <_summary>Scheduler priority when idle</_summary>
       <_description>

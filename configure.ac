@@ -40,14 +40,14 @@ m4_define([tracker_lt_current_minus_age],
 # TRACKER_BINARY_VERSION=$TRACKER_MAJOR_VERSION.$TRACKER_MINOR_VERSION.$LT_CURRENT
 m4_define([tracker_binary_version], [1.0.0])
 
-AC_INIT([tracker],
+AC_INIT([tracker-miners],
         [tracker_version],
         [http://bugzilla.gnome.org/enter_bug.cgi?product=tracker],
-        [tracker],
+        [tracker-miners],
         [https://wiki.gnome.org/Projects/Tracker])
 
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_SRCDIR([src/tracker-store/tracker-main.vala])
+AC_CONFIG_SRCDIR([src/miners/fs/tracker-main.c])
 AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_HEADERS([config.h])
 
@@ -225,10 +225,6 @@ LIBEXIF_REQUIRED=0.6
 LIBGSF_REQUIRED=1.14.24
 LIBOSINFO_REQUIRED=0.2.9
 EXEMPI_REQUIRED=2.1.0
-EVO_REQUIRED=2.32.0
-EVO_SHELL_REQUIRED=2.32.0
-EDS_REQUIRED=2.32.0
-CAMEL_REQUIRED=2.32.0
 TAGLIB_REQUIRED=1.6
 LIBGRSS_REQUIRED=0.7
 GSTREAMER_REQUIRED=0.10.31
@@ -236,34 +232,17 @@ GUPNP_DLNA_REQUIRED=0.9.4
 LIBPNG_REQUIRED=1.2
 JSON_GLIB_REQUIRED=1.0
 LIBSOUP_REQUIRED=2.40
-
-# 3.6.11 for sqlite_backup API
-# 3.6.16 to fix test failures
-# 3.6.17 for shared cache mode with virtual tables
-# 3.7.0 for WAL
-# 3.7.9 for FTS4 content= support
-# 3.7.15 for sqlite3_errstr() support
-SQLITE_REQUIRED=3.7.15
-
-# Needed to generate .gir files,
-# see http://live.gnome.org/GnomeGoals/AddGObjectIntrospectionSupport
-GOBJECT_INTROSPECTION_CHECK([0.9.5])
+TRACKER_CORE_REQUIRED=1.99
 
 GLIB_PREFIX="`$PKG_CONFIG --variable=prefix glib-2.0`"
 AC_SUBST(GLIB_PREFIX)
 
 # Check requirements for gvdb
 GVDB_REQUIRED="glib-2.0 >= $GLIB_REQUIRED"
-PKG_CHECK_MODULES(GVDB, [$GVDB_REQUIRED])
-
-# Check requirements for libtracker-bus
-LIBTRACKER_BUS_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                         gio-unix-2.0 >= $GLIB_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_BUS, [$LIBTRACKER_BUS_REQUIRED])
 
 # Check requirements for libtracker-common
-LIBTRACKER_COMMON_REQUIRED="glib-2.0        >= $GLIB_REQUIRED
+LIBTRACKER_COMMON_REQUIRED="tracker-sparql-2.0 >= TRACKER_CORE_REQUIRED
+                            glib-2.0        >= $GLIB_REQUIRED
                             gio-unix-2.0    >= $GLIB_REQUIRED"
 
 PKG_CHECK_MODULES(LIBTRACKER_COMMON, [$LIBTRACKER_COMMON_REQUIRED])
@@ -274,68 +253,13 @@ case $host in
     ;;
 esac
 
-# Check requirements for libtracker-data
-LIBTRACKER_DATA_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                          gio-unix-2.0 >= $GLIB_REQUIRED
-                          sqlite3      >= $SQLITE_REQUIRED
-                          uuid"
-PKG_CHECK_MODULES(LIBTRACKER_DATA, [$LIBTRACKER_DATA_REQUIRED])
-
-LIBTRACKER_DATA_LIBS="$LIBTRACKER_DATA_LIBS -lz -lm"
-
-# Check requirements for libtracker-direct
-LIBTRACKER_DIRECT_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                            gio-unix-2.0 >= $GLIB_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_DIRECT, [$LIBTRACKER_DIRECT_REQUIRED])
-
-# Check requirements for libtracker-remote
-LIBTRACKER_REMOTE_REQUIRED="glib-2.0       >= $GLIB_REQUIRED
-                            libsoup-2.4    >= $LIBSOUP_REQUIRED
-                            libxml-2.0     >= $LIBXML2_REQUIRED
-                            json-glib-1.0  >= $JSON_GLIB_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_REMOTE, [$LIBTRACKER_REMOTE_REQUIRED])
-
 # Check requirements for libtracker-extract
-LIBTRACKER_EXTRACT_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
+LIBTRACKER_EXTRACT_REQUIRED="tracker-sparql-2.0 >= TRACKER_CORE_REQUIRED
+                             glib-2.0     >= $GLIB_REQUIRED
                              gio-unix-2.0 >= $GLIB_REQUIRED
 			     gmodule-2.0  >= $GLIB_REQUIRED"
 
 PKG_CHECK_MODULES(LIBTRACKER_EXTRACT, [$LIBTRACKER_EXTRACT_REQUIRED])
-
-# Check requirements for libtracker-fts
-LIBTRACKER_FTS_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                         gio-unix-2.0 >= $GLIB_REQUIRED
-                         sqlite3      >= $SQLITE_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_FTS, [$LIBTRACKER_FTS_REQUIRED])
-
-# Check requirements for libtracker-miner
-LIBTRACKER_MINER_REQUIRED="glib-2.0        >= $GLIB_REQUIRED
-                           gio-unix-2.0    >= $GLIB_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_MINER, [$LIBTRACKER_MINER_REQUIRED])
-
-# Check requirements for libtracker-control
-LIBTRACKER_CONTROL_REQUIRED="glib-2.0        >= $GLIB_REQUIRED
-                             gio-unix-2.0    >= $GLIB_REQUIRED"
-
-PKG_CHECK_MODULES(LIBTRACKER_CONTROL, [$LIBTRACKER_CONTROL_REQUIRED])
-
-# Check requirements for libtracker-sparql
-LIBTRACKER_SPARQL_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                            gio-unix-2.0 >= $GLIB_REQUIRED
-                            uuid"
-
-PKG_CHECK_MODULES(LIBTRACKER_SPARQL, [$LIBTRACKER_SPARQL_REQUIRED])
-
-# Check requirements for tracker-control
-TRACKER_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                  gio-unix-2.0 >= $GLIB_REQUIRED
-                  uuid"
-
-PKG_CHECK_MODULES(TRACKER, [$TRACKER_REQUIRED])
 
 # Check requirements for tracker-resdump
 TRACKER_RESDUMP_REQUIRED="glib-2.0     >= $GLIB_REQUIRED"
@@ -344,29 +268,20 @@ PKG_CHECK_MODULES(TRACKER_RESDUMP, [$TRACKER_RESDUMP_REQUIRED],
                   [have_tracker_resdump=yes],
                   [have_tracker_resdump=no])
 
-# Check requirements for tracker-store
-TRACKER_STORE_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
-                        gio-unix-2.0 >= $GLIB_REQUIRED
-                        gmodule-2.0  >= $GLIB_REQUIRED
-                        sqlite3      >= $SQLITE_REQUIRED"
-
-PKG_CHECK_MODULES(TRACKER_STORE, [$TRACKER_STORE_REQUIRED])
-
-TRACKER_STORE_LIBS="$TRACKER_STORE_LIBS -lz -lm"
-
 # Check requirements for tracker-extract
-TRACKER_EXTRACT_REQUIRED="glib-2.0        >= $GLIB_REQUIRED
+TRACKER_EXTRACT_REQUIRED="tracker-miner-2.0 >= TRACKER_CORE_REQUIRED
+                          glib-2.0        >= $GLIB_REQUIRED
                           gio-unix-2.0    >= $GLIB_REQUIRED
                           gmodule-2.0     >= $GLIB_REQUIRED"
 
 PKG_CHECK_MODULES(TRACKER_EXTRACT, [$TRACKER_EXTRACT_REQUIRED])
 
-TRACKER_EXTRACT_MODULES_DIR="${libdir}/tracker-${TRACKER_API_VERSION}/extract-modules"
+TRACKER_EXTRACT_MODULES_DIR="${libdir}/tracker-miners-${TRACKER_API_VERSION}/extract-modules"
 AC_SUBST(TRACKER_EXTRACT_MODULES_DIR)
 
 # NOTE: We don't use ${TRACKER_API_VERSION} because other content like
 # the ontology is installed to the same location.
-TRACKER_EXTRACT_RULES_DIR="${datadir}/tracker/extract-rules"
+TRACKER_EXTRACT_RULES_DIR="${datadir}/tracker-miners/extract-rules"
 AC_SUBST(TRACKER_EXTRACT_RULES_DIR)
 
 # Check requirements for tracker-extract modules
@@ -375,14 +290,16 @@ TRACKER_EXTRACT_MODULES_REQUIRED="glib-2.0     >= $GLIB_REQUIRED"
 PKG_CHECK_MODULES(TRACKER_EXTRACT_MODULES, [$TRACKER_EXTRACT_MODULES_REQUIRED])
 
 # Check requirements for tracker-writeback
-TRACKER_WRITEBACK_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
+TRACKER_WRITEBACK_REQUIRED="tracker-sparql-2.0 >= TRACKER_CORE_REQUIRED
+                            glib-2.0     >= $GLIB_REQUIRED
                             gio-unix-2.0 >= $GLIB_REQUIRED
                             gmodule-2.0  >= $GLIB_REQUIRED"
 
 PKG_CHECK_MODULES(TRACKER_WRITEBACK, [$TRACKER_WRITEBACK_REQUIRED])
 
 # Check requirements for tracker-miner-fs
-TRACKER_MINER_FS_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
+TRACKER_MINER_FS_REQUIRED="tracker-miner-2.0 >= TRACKER_CORE_REQUIRED
+                           glib-2.0     >= $GLIB_REQUIRED
                            gio-unix-2.0 >= $GLIB_REQUIRED
                            gmodule-2.0  >= $GLIB_REQUIRED"
 
@@ -391,13 +308,15 @@ PKG_CHECK_MODULES(TRACKER_MINER_FS, [$TRACKER_MINER_FS_REQUIRED])
 TRACKER_MINER_FS_LIBS="$TRACKER_MINER_FS_LIBS -lz -lm"
 
 # Check requirements for tracker-miner-apps
-TRACKER_MINER_APPS_REQUIRED="glib-2.0     >= $GLIB_REQUIRED
+TRACKER_MINER_APPS_REQUIRED="tracker-miner-2.0 >= TRACKER_CORE_REQUIRED
+                             glib-2.0     >= $GLIB_REQUIRED
                              gio-unix-2.0 >= $GLIB_REQUIRED"
 
 PKG_CHECK_MODULES(TRACKER_MINER_APPS, [$TRACKER_MINER_APPS_REQUIRED])
 
 # Check requirements for tracker-miner-rss
-TRACKER_MINER_RSS_REQUIRED="glib-2.0 >= $GLIB_REQUIRED
+TRACKER_MINER_RSS_REQUIRED="tracker-miner-2.0 >= TRACKER_CORE_REQUIRED
+                            glib-2.0 >= $GLIB_REQUIRED
                             libgrss  >= $LIBGRSS_REQUIRED"
 
 PKG_CHECK_MODULES(TRACKER_MINER_RSS, [$TRACKER_MINER_RSS_REQUIRED],
@@ -477,28 +396,6 @@ fi
 AC_SUBST(DTAGS_LDFLAGS)
 
 ####################################################################
-# Check for minimal
-####################################################################
-
-AC_ARG_ENABLE(minimal,
-              AS_HELP_STRING([--enable-minimal],
-                             [disabled EVERYTHING except the very core (tracker-store and foundation libraries) [[default=no]]]),
-              [enable_minmal=$enableval],
-              [enable_minmal=no])
-
-# WE only disable the binaries we're building here, not optional
-# extras for those binaries
-if test "x$enable_minimal" = "xyes"; then
-   AC_MSG_WARN([Building minimal configuration])
-
-   enable_tracker_extract=no
-   enable_tracker_writeback=no
-   enable_miner_fs=no
-   enable_miner_apps=no
-   enable_miner_rss=no
-fi
-
-####################################################################
 # Check for functional-test include/exclude
 ####################################################################
 AC_ARG_ENABLE([functional-tests],
@@ -521,23 +418,6 @@ if test x$enable_functional_tests != "xno"; then
 fi
 
 AM_CONDITIONAL(DIST_FUNCTIONAL_TESTS, test "x$enable_functional_tests" != "xno")
-
-####################################################################
-# Check for gtk-doc and docbook-tools
-####################################################################
-
-# Check for GTK_DOC_CHECK availability. The GTK_DOC_CHECK invocation
-# must be on its own line, gtkdocize relies on it
-m4_ifdef([GTK_DOC_CHECK], [
-GTK_DOC_CHECK([1.8])
-
-# NOTE: We need to use a separate automake conditional for this
-#       to make this work with the tarballs.
-AM_CONDITIONAL([ENABLE_GTK_DOC], test "x$enable_gtk_doc" = xyes)
-],
-[
-AM_CONDITIONAL([ENABLE_GTK_DOC], false)
-])
 
 ####################################################################
 # Check if we should install Windows specific binaries
@@ -580,49 +460,6 @@ if test "x$enable_journal" = "xno" ; then
    AC_DEFINE(DISABLE_JOURNAL, 1, [Define if we disable the journal])
 fi
 
-####################################################################
-# Check for SQLite
-####################################################################
-
-PKG_CHECK_MODULES(SQLITE3, [sqlite3 >= $SQLITE_REQUIRED])
-AC_SUBST(SQLITE3_CFLAGS)
-AC_SUBST(SQLITE3_LIBS)
-
-# Make sure SQLite is compiled thread-safe
-AX_SQLITE_THREADSAFE
-if test "x$ax_cv_sqlite_threadsafe" != "xyes"; then
-  AC_MSG_ERROR([sqlite3 is not compiled thread-safe])
-fi
-
-# Make sure we're not using versions which cause problems.
-#
-# Avoid versions:
-#   3.7.10 - 3.7.13: https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html
-#   3.8.1:           https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html
-#   3.8.4.1:         https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html
-#
-AC_MSG_CHECKING(whether SQLite3 version is safe)
-
-PKG_CHECK_EXISTS([sqlite3 <= 3.7.9], sqlite_safe=yes, sqlite_safe=no)
-if test "x$sqlite_safe" != "xyes"; then
-   PKG_CHECK_EXISTS([sqlite3 >= 3.7.14], sqlite_safe=yes, sqlite_safe=no)
-fi
-
-if test "x$sqlite_safe" = "xyes"; then
-   PKG_CHECK_EXISTS([sqlite3 = 3.8.1], sqlite_safe=no, sqlite_safe=yes)
-fi
-
-if test "x$sqlite_safe" = "xyes"; then
-   PKG_CHECK_EXISTS([sqlite3 = 3.8.4.2], sqlite_safe=no, sqlite_safe=yes)
-fi
-
-
-if test "x$sqlite_safe" != "xyes"; then
-   AC_MSG_RESULT(no)
-else
-   AC_MSG_RESULT(yes)
-fi
-
 ##################################################################
 # Check for libtracker-common, make sure libstemmer exists
 ##################################################################
@@ -651,69 +488,6 @@ if test "x$enable_libstemmer" = "xyes"; then
 fi
 
 AM_CONDITIONAL(HAVE_LIBSTEMMER, test "x$have_libstemmer" = "xyes")
-
-##################################################################
-# Check for tracker-fts, allow disabling FTS support
-##################################################################
-
-AC_ARG_ENABLE([tracker-fts],
-              AS_HELP_STRING([--enable-tracker-fts],
-                             [enable the tracker FTS [[default=auto]]]),
-              [enable_tracker_fts=$enableval],
-              [enable_tracker_fts=auto])
-
-if test "x$enable_tracker_fts" = "xno" ; then
-   have_tracker_fts="no  (disabled)"
-else
-   have_tracker_fts="yes"
-fi
-
-if test "x$have_tracker_fts" = "xyes"; then
-   AC_DEFINE(HAVE_TRACKER_FTS, [1], [Define to 1 if tracker FTS is compiled])
-
-   AX_SQLITE_BUILTIN_FTS5
-   if test "x$ax_cv_sqlite_builtin_fts5" = "xyes" ; then
-      have_builtin_fts5="yes"
-      AC_DEFINE(HAVE_BUILTIN_FTS, [], [Defined if Sqlite has FTS5 compiled in])
-   else
-      have_builtin_fts5="no"
-
-      # Make sure SQLite has extension loading enabled
-      AX_SQLITE_AUTO_EXTENSION
-      if test "x$ax_cv_sqlite_auto_extension" != "xyes"; then
-        AC_MSG_ERROR([sqlite3 cannot load extensions])
-      fi
-   fi
-else
-   AC_DEFINE(HAVE_TRACKER_FTS, [0], [Define to 0 if tracker FTS is not compiled])
-   have_builtin_fts5="disabled"
-fi
-
-AM_CONDITIONAL(HAVE_BUILTIN_FTS, test "$have_builtin_fts5" = "yes")
-AM_CONDITIONAL(HAVE_TRACKER_FTS, test "$have_tracker_fts" = "yes")
-
-####################################################################
-# bash-completion
-####################################################################
-
-AC_ARG_WITH([bash-completion-dir],
-    AS_HELP_STRING([--with-bash-completion-dir[=PATH]],
-        [Install the bash auto-completion script in this directory. @<:@default=yes@:>@]),
-    [],
-    [with_bash_completion_dir=yes])
-
-if test "x$with_bash_completion_dir" = "xyes"; then
-   PKG_CHECK_MODULES([BASH_COMPLETION], [bash-completion >= 2.0],
-       [BASH_COMPLETION_DIR=$($PKG_CONFIG --variable=completionsdir bash-completion)],
-       [BASH_COMPLETION_DIR="${datadir}/bash-completion/completions"])
-elif test "x$with_bash_completion_dir" != "xno"; then
-   # Set with_bash_completions_dir to avoid printing path twice below
-   BASH_COMPLETION_DIR="$with_bash_completion_dir"
-   with_bash_completion_dir="yes"
-fi
-
-AC_SUBST([BASH_COMPLETION_DIR])
-AM_CONDITIONAL([WITH_BASH_COMPLETION],[test "x$with_bash_completion_dir" != "xno"])
 
 ####################################################################
 # Check for D-Bus requirements
@@ -933,39 +707,6 @@ LIBTRACKER_EXTRACT_LIBS="$LIBTRACKER_EXTRACT_LIBS $UNICODE_SUPPORT_LIBS"
 
 AM_CONDITIONAL(BUILD_LIBUNISTRING_PARSER, test "x$with_unicode_support" = "xlibunistring")
 AM_CONDITIONAL(BUILD_LIBICU_PARSER, test "x$with_unicode_support" = "xlibicu")
-
-##################################################################
-# Check for libtracker-miner: network-manager for web miners
-##################################################################
-
-AC_ARG_ENABLE(network_manager,
-              AS_HELP_STRING([--enable-network-manager],
-                             [enable NetworkManager support to detect network status [[default=auto]]]),
-              [enable_network_manager=$enableval],
-              [enable_network_manager=auto])
-
-if test "x$enable_network_manager" != "xno"; then
-
-   PKG_CHECK_MODULES(NETWORK_MANAGER,
-                     [libnm],
-                     [have_network_manager=yes],
-                     [have_network_manager=no])
-
-   LIBTRACKER_MINER_CFLAGS="$LIBTRACKER_MINER_CFLAGS $NETWORK_MANAGER_CFLAGS"
-   LIBTRACKER_MINER_LIBS="$LIBTRACKER_MINER_LIBS $NETWORK_MANAGER_LIBS"
-
-   if test "x$have_network_manager" = "xyes"; then
-      AC_DEFINE(HAVE_NETWORK_MANAGER, [], [Define if we have NetworkManager for network status detection])
-   fi
-fi
-
-if test "x$enable_network_manager" = "xyes"; then
-   if test "x$have_network_manager" != "xyes"; then
-      AC_MSG_ERROR([Could not find libnm.])
-   fi
-fi
-
-AM_CONDITIONAL(HAVE_NETWORK_MANAGER, test "x$have_network_manager" = "xyes")
 
 ##################################################################
 # Check for libtracker-extract: libexif
@@ -2094,34 +1835,6 @@ if test "x$enable_guarantee_metadata" != "xno"; then
   AC_DEFINE(GUARANTEE_METADATA, 1, [Guarantee existence of some metadata])
 fi
 
-####################################################################
-# Check if we should use initctl or sysvinit
-####################################################################
-
-# Check for initcl
-AC_PATH_PROG(INITCTL, initctl, [])
-AC_SUBST(INITCTL)
-AM_CONDITIONAL(HAVE_UPSTART, test "x$INITCTL" != "x")
-
-####################################################################
-# Check whether we should install artwork
-####################################################################
-
-AC_ARG_ENABLE(artwork,
-              AS_HELP_STRING([--enable-artwork],
-                             [install artwork, e.g. data/icons/* [[default=auto]]]),
-              [enable_artwork=$enableval],
-              [enable_artwork=auto])
-
-if test "x$enable_artwork" != "xno"; then
-   AC_DEFINE(HAVE_ARTWORK, [], [Define if we should install artwork])
-   have_artwork=yes
-else
-   have_artwork="no  (disabled)"
-fi
-
-AM_CONDITIONAL(HAVE_ARTWORK, test "x$have_artwork" = "xyes")
-
 ##################################################################
 # Check for libseccomp
 ##################################################################
@@ -2148,79 +1861,21 @@ AC_CONFIG_FILES([
 	docs/Makefile
 	docs/design/Makefile
 	docs/manpages/Makefile
-	docs/reference/Makefile
-	docs/reference/libtracker-control/Makefile
-	docs/reference/libtracker-control/version.xml
-	docs/reference/libtracker-sparql/Makefile
-	docs/reference/libtracker-sparql/version.xml
-	docs/reference/libtracker-miner/Makefile
-	docs/reference/libtracker-miner/version.xml
-	docs/reference/ontology/Makefile
-	docs/reference/ontology/version.xml
-	docs/tools/Makefile
 	Makefile
 	po/Makefile.in
-	src/gvdb/Makefile
 	src/libtracker-common/Makefile
-	src/libtracker-common/stop-words/Makefile
-	src/libtracker-sparql/Makefile
-	src/libtracker-sparql/tracker-sparql.pc
-	src/libtracker-bus/Makefile
-	src/libtracker-control/Makefile
-	src/libtracker-control/tracker-control.pc
-	src/libtracker-data/Makefile
-	src/libtracker-direct/Makefile
-	src/libtracker-remote/Makefile
-	src/libtracker-sparql-backend/Makefile
-	src/libtracker-fts/Makefile
 	src/libtracker-extract/Makefile
-	src/libtracker-miner/Makefile
-	src/libtracker-miner/tracker-miner.pc
 	src/Makefile
 	src/miners/Makefile
 	src/miners/fs/Makefile
 	src/miners/apps/Makefile
 	src/miners/rss/Makefile
-	src/ontologies/Makefile
-	src/tracker-store/Makefile
-	src/tracker/Makefile
 	src/tracker-extract/Makefile
 	src/tracker-writeback/Makefile
 	tests/common/Makefile
-        tests/gvdb/Makefile
 	tests/libtracker-common/Makefile
 	tests/libtracker-extract/Makefile
-	tests/libtracker-data/Makefile
-	tests/libtracker-data/aggregates/Makefile
-	tests/libtracker-data/algebra/Makefile
-	tests/libtracker-data/anon/Makefile
-	tests/libtracker-data/ask/Makefile
-	tests/libtracker-data/basic/Makefile
-	tests/libtracker-data/bind/Makefile
-	tests/libtracker-data/bnode-coreference/Makefile
-	tests/libtracker-data/bound/Makefile
-	tests/libtracker-data/datetime/Makefile
-	tests/libtracker-data/expr-ops/Makefile
-	tests/libtracker-data/functions/Makefile
-	tests/libtracker-data/graph/Makefile
-	tests/libtracker-data/nie/Makefile
-	tests/libtracker-data/nmo/Makefile
-	tests/libtracker-data/mixed-cardinality/Makefile
-	tests/libtracker-data/optional/Makefile
-	tests/libtracker-data/regex/Makefile
-	tests/libtracker-data/sort/Makefile
-	tests/libtracker-data/subqueries/Makefile
-	tests/libtracker-data/error/Makefile
-	tests/libtracker-data/backup/Makefile
-	tests/libtracker-data/turtle/Makefile
-	tests/libtracker-data/update/Makefile
-	tests/libtracker-miner/Makefile
-	tests/libtracker-fts/Makefile
-	tests/libtracker-fts/limits/Makefile
-	tests/libtracker-fts/prefix/Makefile
-	tests/libtracker-sparql/Makefile
 	tests/functional-tests/Makefile
-	tests/functional-tests/ipc/Makefile
 	tests/functional-tests/common/Makefile
 	tests/functional-tests/common/utils/configuration.py
 	tests/functional-tests/common/utils/Makefile
@@ -2246,21 +1901,8 @@ AC_CONFIG_FILES([
 	tests/functional-tests/test-ontologies/property-promotion/Makefile
 	tests/functional-tests/test-ontologies/basic-future/Makefile
 	tests/functional-tests/test-apps-data/Makefile
-	tests/functional-tests/ttl/Makefile
 	tests/Makefile
-	tests/tracker-steroids/Makefile
 	tests/tracker-writeback/Makefile
-	utils/Makefile
-	utils/ontology/Makefile
-	utils/data-generators/Makefile
-	utils/data-generators/cc/Makefile
-	utils/mtp/Makefile
-	utils/sandbox/Makefile
-	utils/tracker-resdump/Makefile
-	examples/Makefile
-	examples/libtracker-miner/Makefile
-	examples/libtracker-sparql/Makefile
-	examples/rss-reader/Makefile
 ])
 
 AC_OUTPUT
@@ -2277,8 +1919,6 @@ Build Configuration:
 
 	Win32:                                  $native_win32
 
-	Enable gtk doc (for documentation):     $enable_gtk_doc
-
 	Enable functional tests:                $enable_functional_tests
 	Enable unit tests:                      $have_unit_tests
 
@@ -2286,16 +1926,9 @@ Feature Support:
 
 	Support for HAL:                        $have_hal
 	Support for UPower:                     $have_upower
-	Support for network status detection:   $have_network_manager
 	Unicode support library:                $with_unicode_support
 
 	Build with Journal support:             $have_tracker_journal
-	Build with SQLite FTS support:          $have_tracker_fts (built-in FTS: $have_builtin_fts5)
-	Build with Stemming support:            $have_libstemmer
-
-	Install artwork                         $have_artwork
-
-	Bash completion support:                $with_bash_completion_dir ($BASH_COMPLETION_DIR)
 
 Data Miners / Writebacks:
 
@@ -2348,20 +1981,6 @@ Frameworks / Options:
 	Support Guaranteed Metadata             $enable_guarantee_metadata (e.g. guess nie:title from files)
 
 "
-
-# Any warnings we need to issue...
-if test "x$sqlite_safe" = "xno"; then
-sqlite_version=$($PKG_CONFIG --modversion sqlite3)
-echo "
-WARNING:
-        SQLite3 version $sqlite_version is not safe. For details see:
-        3.7.10 - 3.7.13: https://mail.gnome.org/archives/tracker-list/2012-October/msg00028.html
-        3.8.1:           https://mail.gnome.org/archives/tracker-list/2013-November/msg00021.html
-        3.8.4.2:         https://mail.gnome.org/archives/tracker-list/2014-April/msg00001.html
-
-
-"
-fi
 
 if test "$have_libseccomp" = "no"; then
 echo "

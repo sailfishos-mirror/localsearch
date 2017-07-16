@@ -1,10 +1,8 @@
 SUBDIRS = \
-	ipc \
 	common \
 	test-extraction-data \
 	test-writeback-data \
 	test-apps-data \
-	ttl \
 	unittest2 \
 	test-ontologies
 
@@ -21,9 +19,7 @@ config_SCRIPTS = \
 standard_tests = \
 	01-insertion.py \
 	02-sparql-bugs.py
-if HAVE_TRACKER_FTS
-standard_tests += 03-fts-functions.py
-endif
+
 standard_tests += \
 	04-group-concat.py \
 	05-coalesce.py \
@@ -38,9 +34,7 @@ standard_tests += \
 	200-backup-restore.py \
 	300-miner-basic-ops.py \
 	301-miner-resource-removal.py
-if HAVE_TRACKER_FTS
-standard_tests += 310-fts-indexing.py
-endif
+
 standard_tests += \
 	400-extractor-metadata.py \
 	410-extractor-decorator.py \
@@ -50,17 +44,8 @@ standard_tests += \
 	601-applications-sync.py
 
 slow_tests = \
-	10-sqlite-misused.py \
-	11-sqlite-batch-misused.py \
 	12-transactions.py \
 	13-threaded-store.py
-
-10-sqlite-misused.py: ttl/gen-test-data.stamp
-11-sqlite-misused-batch.py: ttl/gen-test-data.stamp
-13-busy-store.py: ttl/gen-test-data.stamp
-
-ttl/gen-test-data.stamp:
-	cd ttl && $(MAKE) $(AM_MAKEFLAGS)
 
 TEST_RUNNER = $(top_srcdir)/tests/functional-tests/test-runner.sh
 

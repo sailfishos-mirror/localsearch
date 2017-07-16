@@ -35,8 +35,6 @@
 #include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-miner/tracker-miner.h>
 
-#include <libtracker-data/tracker-db-manager.h>
-
 #include "tracker-config.h"
 #include "tracker-miner-files.h"
 #include "tracker-miner-files-index.h"

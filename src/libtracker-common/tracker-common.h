@@ -35,7 +35,6 @@
 #include "tracker-ioprio.h"
 #include "tracker-language.h"
 #include "tracker-log.h"
-#include "tracker-parser.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
 #include "tracker-type-utils.h"

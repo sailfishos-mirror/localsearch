@@ -2,16 +2,13 @@ include $(top_srcdir)/Makefile.decl
 
 noinst_PROGRAMS += $(test_programs)
 
-check_PROGRAMS += tracker-parser
-
 test_programs = \
 	tracker-type-utils                             \
 	tracker-dbus                                   \
 	tracker-file-utils                             \
 	tracker-utils				       \
 	tracker-sched-test			       \
-	tracker-date-time-test \
-        tracker-parser-test
+	tracker-date-time-test
 
 AM_CPPFLAGS =                                      \
 	-DTOP_SRCDIR=\"$(abs_top_srcdir)\"             \
@@ -39,10 +36,6 @@ tracker_utils_SOURCES = tracker-utils-test.c
 tracker_sched_test_SOURCES = tracker-sched-test.c
 
 tracker_date_time_test_SOURCES = tracker-date-time-test.c
-
-tracker_parser_test_SOURCES = tracker-parser-test.c
-
-tracker_parser_SOURCES = tracker-parser.c
 
 EXTRA_DIST += \
 	non-utf8.txt \

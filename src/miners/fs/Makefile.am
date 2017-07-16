@@ -50,18 +50,12 @@ tracker_miner_fs_SOURCES =                             \
 	tracker-writeback.h
 
 tracker_miner_fs_LDADD =                               \
-	$(top_builddir)/src/libtracker-miner/libtracker-miner-@TRACKER_API_VERSION@.la \
-	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
 	$(top_builddir)/src/libtracker-extract/libtracker-extract.la \
-	$(top_builddir)/src/libtracker-data/libtracker-data.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(BUILD_LIBS)                                  \
 	$(TRACKER_MINER_FS_LIBS)
 
-# DBus interfaces (XML files) and services
-configdir = $(datadir)/tracker
-config_DATA = tracker-miner-files-index.xml
-
+# DBus services
 %.service.in: %.service.in.in
 	@sed -e "s|@libexecdir[@]|${libexecdir}|" $< > $@
 
@@ -97,7 +91,7 @@ autostart_DATA = tracker-miner-fs.desktop
 @INTLTOOL_DESKTOP_RULE@
 
 # Configuration / GSettings
-gsettings_ENUM_NAMESPACE = org.freedesktop.Tracker
+gsettings_ENUM_NAMESPACE = org.freedesktop.TrackerMiners
 gsettings_ENUM_FILES = $(top_srcdir)/src/libtracker-common/tracker-enums.h
 
 gsettings_SCHEMAS = org.freedesktop.Tracker.Miner.Files.gschema.xml

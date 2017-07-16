@@ -1,15 +1,8 @@
-subdir('stop-words')
-
 enums = gnome.mkenums('tracker-enum-types',
   sources: 'tracker-enums.h',
   c_template: 'tracker-enum-types.c.template',
   h_template: 'tracker-enum-types.h.template',
 )
-
-tracker_common_parser_sha1_header = configure_file(
-  input: 'tracker-parser-sha1.h.in',
-  output: 'tracker-parser-sha1.h',
-  command: ['generate-tracker-parser-sha1-header.sh'])
 
 tracker_common_enum_header = enums[1]
 
@@ -24,18 +17,10 @@ tracker_common_sources = [
   'tracker-type-utils.c',
   'tracker-utils.c',
   'tracker-locale.c',
-  'tracker-parser-utils.c',
   'tracker-language.c',
   'tracker-seccomp.c',
   enums[0], enums[1],
-  tracker_common_parser_sha1_header,
 ]
-
-if unicode_library_name == 'icu'
-  tracker_common_sources += 'tracker-parser-libicu.c'
-else
-  tracker_common_sources += 'tracker-parser-libunistring.c'
-endif
 
 # FIXME: need to link against -lkvm on OpenBSD, see configure.ac
 tracker_common_dependencies = [glib, gio, gio_unix, libmath]
@@ -61,7 +46,7 @@ commoninc = include_directories('.')
 #
 # Upstream issue: https://github.com/mesonbuild/meson/issues/671
 tracker_common_dep = declare_dependency(
-  sources: [tracker_common_enum_header, tracker_common_parser_sha1_header],
+  sources: [tracker_common_enum_header],
   link_with: libtracker_common,
   dependencies: tracker_common_dependencies,
   include_directories: [configinc, srcinc, commoninc],

@@ -531,10 +531,7 @@ tracker_extract_SOURCES = \
 	tracker-main.h
 
 tracker_extract_LDADD = \
-	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
-	$(top_builddir)/src/libtracker-miner/libtracker-miner-@TRACKER_API_VERSION@.la \
 	$(top_builddir)/src/libtracker-extract/libtracker-extract.la \
-	$(top_builddir)/src/libtracker-data/libtracker-data.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(BUILD_LIBS) \
 	$(TRACKER_EXTRACT_LIBS)
@@ -552,12 +549,12 @@ tracker-extract-priority-dbus.c: tracker-extract-priority-dbus-stamp
 tracker-extract-priority-dbus.h: tracker-extract-priority-dbus-stamp
 	@:
 
-tracker-extract-priority-dbus-stamp: Makefile.am $(top_srcdir)/src/tracker-extract/tracker-extract-priority.xml
+tracker-extract-priority-dbus-stamp: Makefile.am $(srcdir)/tracker-extract-priority.xml
 	$(AM_V_GEN) $(GDBUS_CODEGEN) \
 	              --interface-prefix org.freedesktop.Tracker1.Extract. \
 	              --generate-c-code tracker-extract-priority-dbus \
 	              --c-namespace TrackerExtractDBus \
-	              $(top_srcdir)/src/tracker-extract/tracker-extract-priority.xml
+	              $(srcdir)/tracker-extract-priority.xml
 	touch $@
 
 BUILT_SOURCES = \
@@ -570,11 +567,7 @@ CLEANFILES = $(BUILT_SOURCES)
 
 EXTRA_DIST = $(rules_files)
 
-# DBus interfaces (XML files) and services
-configdir = $(datadir)/tracker
-config_DATA = \
-	tracker-extract-priority.xml
-
+# DBus services
 %.service.in: %.service.in.in
 	@sed -e "s|@libexecdir[@]|${libexecdir}|" $< > $@
 
@@ -610,7 +603,7 @@ autostart_DATA = tracker-extract.desktop
 @INTLTOOL_DESKTOP_RULE@
 
 # Configuration / GSettings
-gsettings_ENUM_NAMESPACE = org.freedesktop.Tracker
+gsettings_ENUM_NAMESPACE = org.freedesktop.TrackerMiners
 gsettings_ENUM_FILES = $(top_srcdir)/src/libtracker-common/tracker-enums.h
 
 gsettings_SCHEMAS = org.freedesktop.Tracker.Extract.gschema.xml
@@ -634,4 +627,5 @@ EXTRA_DIST += \
 	$(service_DATA:.service=.service.in.in) \
 	$(systemd_user_DATA:.service=.service.in) \
 	$(gsettings_SCHEMAS:.xml=.xml.in) \
+	tracker-extract-priority.xml \
 	meson.build

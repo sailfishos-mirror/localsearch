@@ -15,8 +15,6 @@ tracker_miner_apps_SOURCES =                           \
 	tracker-miner-applications.h
 
 tracker_miner_apps_LDADD =                             \
-	$(top_builddir)/src/libtracker-miner/libtracker-miner-@TRACKER_API_VERSION@.la \
-	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(BUILD_LIBS)                                  \
 	$(TRACKER_MINER_APPS_LIBS)

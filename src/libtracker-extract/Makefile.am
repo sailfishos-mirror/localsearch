@@ -7,11 +7,10 @@ AM_CPPFLAGS =                                          \
 	-DTRACKER_EXTRACTORS_DIR=\""$(TRACKER_EXTRACT_MODULES_DIR)"\" \
 	$(LIBTRACKER_EXTRACT_CFLAGS)
 
-libtracker_extractdir = $(libdir)/tracker-$(TRACKER_API_VERSION)
+libtracker_extractdir = $(libdir)/tracker-miners-$(TRACKER_API_VERSION)
 libtracker_extract_LTLIBRARIES = libtracker-extract.la
 
 libtracker_extract_la_LIBADD =   \
-	$(top_builddir)/src/libtracker-sparql-backend/libtracker-sparql-@TRACKER_API_VERSION@.la \
 	$(top_builddir)/src/libtracker-common/libtracker-common.la \
 	$(BUILD_LIBS)                                  \
 	$(LIBTRACKER_EXTRACT_LIBS)

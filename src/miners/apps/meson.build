@@ -4,7 +4,7 @@ sources = [
 ]
 
 executable('tracker-miner-apps', sources,
-    dependencies: [tracker_common_dep, tracker_miner_dep, tracker_sparql_dep],
+    dependencies: [tracker_miner, tracker_sparql, tracker_common_dep],
     c_args: tracker_c_args,
     install: true,
     install_dir: get_option('libexecdir'),
