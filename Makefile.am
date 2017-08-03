@@ -91,7 +91,7 @@ EXTRA_DIST +=                                          \
 	po/meson.build \
 	meson.build \
 	meson_options.txt \
-	tracker.doap \
+	tracker-miners.doap \
 	tap-driver.sh \
 	tap-test
 
