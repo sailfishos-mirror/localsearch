@@ -1,3 +1,13 @@
+NEW in 1.99.2 - 2017-08-07
+==========================
+
+  WARNING: This is unstable development towards 2.0. There are API and
+           ABI incompatibilities that might affect you.
+
+  * Tracker miners have been split from this package, all tracker libraries
+    and infrastructure remain at: https://git.gnome.org/browse/tracker
+  * Support for RSS enclosures have been added to the RSS miner.
+
 NEW in 1.99.1 - 2017-07-19
 ==========================
 
