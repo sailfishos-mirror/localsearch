@@ -473,7 +473,7 @@ extract_uint32_7bit (gconstpointer data)
 	        ((ptr[2] & 0x7F) << 14) |
 	        ((ptr[3] & 0x7F) << 21));
 #else
-	g_warning ("Can't figure endianness");
+	#error "Can’t figure endianness"
 	return 0;
 #endif
 }
@@ -492,7 +492,7 @@ extract_uint32_3byte (gconstpointer data)
 	        (ptr[1] << 8) |
 	        (ptr[2] << 16));
 #else
-	g_warning ("Can't figure endianness");
+	#error "Can’t figure endianness"
 	return 0;
 #endif
 }
