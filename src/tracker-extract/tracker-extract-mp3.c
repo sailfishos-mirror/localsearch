@@ -1835,18 +1835,18 @@ parse_id3v24 (const gchar           *data,
 	ext_header = (data[5] & 0x40) > 0;
 	experimental = (data[5] & 0x20) > 0;
 
+	/* We don't handle experimental cases */
+	if (experimental) {
+		g_message ("[v24] Experimental MP3s are not extracted, doing nothing");
+		return;
+	}
+
 	/* Get the complete tag size (zz) in the header:
 	 * Tag size is size of the complete tag after
 	 * unsychronisation, including padding, excluding the header
 	 * but not excluding the extended header (total tag size - 10)
 	 */
 	tsize = extract_uint32_7bit (&data[6]);
-
-	/* We don't handle experimental cases */
-	if (experimental) {
-		g_message ("[v24] Experimental MP3s are not extracted, doing nothing");
-		return;
-	}
 
 	/* Check if we can read even the first frame, The complete
 	 * tag size (tsize) does not include the header which is 10
@@ -2037,18 +2037,18 @@ parse_id3v23 (const gchar          *data,
 	ext_header = (data[5] & 0x40) > 0;
 	experimental = (data[5] & 0x20) > 0;
 
+	/* We don't handle experimental cases */
+	if (experimental) {
+		g_message ("[v23] Experimental MP3s are not extracted, doing nothing");
+		return;
+	}
+
 	/* Get the complete tag size (zz) in the header:
 	 * Tag size is size of the complete tag after
 	 * unsychronisation, including padding, excluding the header
 	 * but not excluding the extended header (total tag size - 10)
 	 */
 	tsize = extract_uint32_7bit (&data[6]);
-
-	/* We don't handle experimental cases */
-	if (experimental) {
-		g_message ("[v23] Experimental MP3s are not extracted, doing nothing");
-		return;
-	}
 
 	/* Check if we can read even the first frame, The complete
 	 * tag size (tsize) does not include the header which is 10
