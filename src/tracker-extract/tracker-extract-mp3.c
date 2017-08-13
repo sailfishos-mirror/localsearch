@@ -1852,7 +1852,7 @@ parse_id3v24 (const gchar           *data,
 	 * tag size (tsize) does not include the header which is 10
 	 * bytes, so we check that there is some content AFTER the
 	 * headers. */
-	if (tsize + header_size > size) {
+	if (tsize > size - header_size) {
 		g_message ("[v24] Expected MP3 tag size and header size to be within file size boundaries");
 		return;
 	}
@@ -1874,7 +1874,7 @@ parse_id3v24 (const gchar           *data,
 		 * simply the total tag size excluding the frames and
 		 * the headers, in other words the padding.
 		 */
-		if (tsize + header_size + ext_header_size > size) {
+		if (ext_header_size > size - header_size - tsize) {
 			g_message ("[v24] Expected MP3 tag size and extended header size to be within file size boundaries");
 			return;
 		}
@@ -1917,7 +1917,7 @@ parse_id3v24 (const gchar           *data,
 
 		csize = (size_t) extract_uint32_7bit (&data[pos + 4]);
 
-		if (pos + frame_size + csize > size) {
+		if (csize > size - frame_size - pos) {
 			g_debug ("[v24] Size of current frame '%s' (%" G_GSIZE_FORMAT ") "
 			         "exceeds file boundaries (%" G_GSIZE_FORMAT "), "
 			         "not processing any more frames",
@@ -2054,7 +2054,7 @@ parse_id3v23 (const gchar          *data,
 	 * tag size (tsize) does not include the header which is 10
 	 * bytes, so we check that there is some content AFTER the
 	 * headers. */
-	if (tsize + header_size > size) {
+	if (tsize > size - header_size) {
 		g_message ("[v23] Expected MP3 tag size and header size to be within file size boundaries");
 		return;
 	}
@@ -2076,7 +2076,7 @@ parse_id3v23 (const gchar          *data,
 		 * simply the total tag size excluding the frames and
 		 * the headers, in other words the padding.
 		 */
-		if (tsize + header_size + ext_header_size > size) {
+		if (ext_header_size > size - header_size - tsize) {
 			g_message ("[v23] Expected MP3 tag size and extended header size to be within file size boundaries");
 			return;
 		}
@@ -2113,7 +2113,7 @@ parse_id3v23 (const gchar          *data,
 
 		csize = (size_t) extract_uint32 (&data[pos + 4]);
 
-		if (pos + frame_size + csize > size) {
+		if (csize > size - frame_size - pos) {
 			g_debug ("[v23] Size of current frame '%s' (%" G_GSIZE_FORMAT ") "
 			         "exceeds file boundaries (%" G_GSIZE_FORMAT "), "
 			         "not processing any more frames",
