@@ -1888,6 +1888,8 @@ parse_id3v24 (const gchar           *data,
 		size_t csize;
 		unsigned short flags;
 
+		g_assert (pos <= size - frame_size);
+
 		/* Frames are 10 bytes each and made up of:
 		 *   Frame ID       $xx xx xx xx (4 chars)
 		 *   Size           $xx xx xx xx
@@ -2090,6 +2092,8 @@ parse_id3v23 (const gchar          *data,
 		size_t csize;
 		unsigned short flags;
 
+		g_assert (pos <= size - frame_size);
+
 		/* Frames are 10 bytes each and made up of:
 		 *   Frame ID       $xx xx xx xx (4 chars)
 		 *   Size           $xx xx xx xx
@@ -2225,6 +2229,8 @@ parse_id3v20 (const gchar          *data,
 		const char *frame_name;
 		id3v2frame frame;
 		size_t csize;
+
+		g_assert (pos <= size - frame_size);
 
 		if (pos + frame_size > tsize + header_size)  {
 			g_message ("[v20] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
