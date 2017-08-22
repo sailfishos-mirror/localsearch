@@ -2145,6 +2145,7 @@ parse_id3v23 (const gchar          *data,
 			break;
 		} else if (csize == 0) {
 			g_debug ("[v23] Content size was 0, moving to next frame");
+			continue;
 		}
 
 		/* Frame flags expected are in format of:
