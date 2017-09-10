@@ -3,6 +3,7 @@
 # This file is distributed under the same license as the tracker package.
 # Gil Forcada <gilforcada@guifi.net>, 2007, 2008, 2010, 2013, 2014.
 # Jordi Mas i Hernàndez <jmas@softcatala.org>, 2015
+# Jordi Serratosa <jordis@softcatala.cat>, 2017.
 #
 # data miner -> extractor de dades
 #
@@ -11,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=tracker&keywords=I18N+L10N&component=Miners\n"
-"POT-Creation-Date: 2017-09-01 12:03+0000\n"
+"POT-Creation-Date: 2017-09-09 12:08+0000\n"
 "PO-Revision-Date: 2017-09-01 14:15+0200\n"
 "Last-Translator: Gil Forcada <gilforcada@guifi.net>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
@@ -345,7 +346,7 @@ msgstr ""
 #: ../src/miners/fs/tracker-main.c:82
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr ""
-"Temps d'espera inicial (en segons), entre 0 i 1000¡ (predeterminat =15)"
+"Temps d'espera inicial (en segons), entre 0 i 1000 (predeterminat =15)"
 
 #: ../src/miners/fs/tracker-main.c:87
 msgid "Runs until all configured locations are indexed and then exits"
@@ -380,7 +381,7 @@ msgstr ""
 #: ../src/miners/fs/tracker-main.c:477
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr ""
-"No es pot fer extraccions de dades del directori (basant-se en les regles)"
+"No es poden fer extraccions de dades del directori (basant-se en les regles)"
 
 #: ../src/miners/fs/tracker-main.c:497
 msgid "Directory is eligible to be mined (based on contents)"
@@ -627,7 +628,7 @@ msgstr "Extractor de metadades Tracker"
 
 #: ../src/tracker-extract/tracker-extract.desktop.in.in.h:2
 msgid "Extracts metadata from local files"
-msgstr "Extrau metadades dels fitxers locals"
+msgstr "Extreu metadades dels fitxers locals"
 
 #: ../src/tracker-writeback/tracker-main.c:62
 msgid "Disable shutting down after 30 seconds of inactivity"
