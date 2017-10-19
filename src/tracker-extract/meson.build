@@ -35,7 +35,7 @@ endif
 if generic_media_handler_name == 'gstreamer'
   sources = ['tracker-extract-gstreamer.c', 'tracker-cue-sheet.c']
   rules = ['10-svg.rule', '15-gstreamer-guess.rule', '90-gstreamer-image-generic.rule', '90-gstreamer-audio-generic.rule', '90-gstreamer-video-generic.rule']
-  dependencies = [gstreamer, libcue, tracker_common_dep]
+  dependencies = [gstreamer, gstreamer_pbutils, libcue, tracker_common_dep]
 
   if gstreamer_backend_name == 'GUPnP-DNLA'
     rules += '91-gstreamer-generic-dnla.rule'
