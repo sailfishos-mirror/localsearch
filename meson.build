@@ -38,6 +38,7 @@ libgxps = dependency('libgxps', required: false)
 libiptcdata = dependency('libiptcdata', required: false)
 libosinfo = dependency('libosinfo', version: '> 0.2.9', required: false)
 libpng = dependency('libpng', version: '> 0.89', required: false)
+libseccomp = dependency('libseccomp', version: '>= 2.0', required: false)
 libtiff = dependency('libtiff-4', required: false)
 libxml2 = dependency('libxml-2.0', version: '> 2.6')
 libvorbis = dependency('vorbisfile', version: '> 0.22')
@@ -213,6 +214,14 @@ if generic_media_handler_name == 'gstreamer'
   endif
 endif
 
+##################################################################
+# Check for libseccomp
+##################################################################
+
+if not libseccomp.found() and host_machine.system() == 'linux'
+  error('Libseccomp is mandatory for sandboxed metadata extraction')
+endif
+
 ####################################################################
 # D-Bus service files
 ####################################################################
@@ -290,6 +299,7 @@ conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
 conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
 conf.set('HAVE_LIBSTEMMER', have_libstemmer)
+conf.set('HAVE_LIBSECCOMP', libseccomp.found())
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 
 conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))
