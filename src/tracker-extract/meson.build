@@ -189,7 +189,7 @@ custom_target('tracker-extract-settings-schema',
   output: 'org.freedesktop.Tracker.Extract.gschema.xml',
   command: ['intltool-merge', '--quiet', '--xml-style', '--utf8', join_paths(meson.source_root(), 'po'), '@INPUT@', '@OUTPUT@'],
   install: true,
-  install_dir: join_paths(get_option('datadir'), 'glib-2.0', 'schemas'))
+  install_dir: gsettings_schema_dir)
 
 if install_systemd_user_services
   configure_file(

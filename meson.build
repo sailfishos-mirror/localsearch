@@ -352,7 +352,10 @@ tracker_extract_rules_dir = join_paths(get_option('prefix'), get_option('datadir
 tracker_miner_services_dir = join_paths(get_option('prefix'), get_option('datadir'), 'tracker/miners')
 tracker_writeback_modules_dir = join_paths(get_option('prefix'), get_option('libdir'), 'tracker-miners-@0@/writeback-modules'.format(tracker_api_version))
 
+gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
 vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
+
+glib_mkenums = find_program('glib-mkenums')
 
 subdir('src')
 
