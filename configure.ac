@@ -226,6 +226,7 @@ LIBOSINFO_REQUIRED=0.2.9
 EXEMPI_REQUIRED=2.1.0
 TAGLIB_REQUIRED=1.6
 LIBGRSS_REQUIRED=0.7
+GEXIV2_REQUIRED="any version"
 GSTREAMER_REQUIRED=0.10.31
 GUPNP_DLNA_REQUIRED=0.9.4
 LIBPNG_REQUIRED=1.2
@@ -965,6 +966,40 @@ if test "x$enable_libxml2" = "xyes"; then
 fi
 
 AM_CONDITIONAL(HAVE_LIBXML2, test "x$have_libxml2" = "xyes")
+
+##################################################################
+# Check for tracker-extract: gexiv2
+##################################################################
+
+AC_ARG_ENABLE(gexiv2,
+              AS_HELP_STRING([--enable-gexiv2],
+                             [enable extractor for RAW metadata [[default=auto]]]),
+              [enable_gexiv2=$enableval],
+              [enable_gexiv2=auto])
+
+if test "x$enable_gexiv2" != "xno" ; then
+   PKG_CHECK_MODULES(GEXIV2,
+                     [gexiv2],
+		     [have_gexiv2=yes],
+		     [have_gexiv2=no])
+
+   AC_SUBST(GEXIV2_CFLAGS)
+   AC_SUBST(GEXIV2_LIBS)
+
+   if test "x$have_gexiv2" = "xyes"; then
+      AC_DEFINE(HAVE_GEXIV2, [], [Define if we have gexiv2])
+   fi
+else
+   have_gexiv2="no  (disabled)"
+fi
+
+if test "x$enable_gexiv2" = "xyes"; then
+   if test "x$have_gexiv2" != "xyes"; then
+      AC_MSG_ERROR([Could not find gexiv2.])
+   fi
+fi
+
+AM_CONDITIONAL(HAVE_GEXIV2, test "x$have_gexiv2" = "xyes")
 
 ####################################################################
 # Check for tracker-extract: gstreamer/etc
@@ -1858,6 +1893,7 @@ Metadata Extractors:
 	Support XPS:                            $have_libgxps
 	Support GIF:                            $have_libgif (xmp: $have_exempi)
 	Support JPEG:                           $have_libjpeg (xmp: $have_exempi, exif: $have_libexif, iptc: $have_libiptcdata)
+	Support RAW:                            $have_gexiv2
 	Support TIFF:                           $have_libtiff (xmp: $have_exempi, exif: yes, iptc: $have_libiptcdata)
 	Support Vorbis (ogg/etc):               $have_libvorbis
 	Support Flac:                           $have_libflac

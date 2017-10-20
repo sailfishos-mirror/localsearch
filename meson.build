@@ -31,6 +31,7 @@ avutil = dependency('libavutil', version: '>= 0.8.4', required: false)
 dbus = dependency('dbus-1', version: '> 1.3.1')
 exempi = dependency('exempi-2.0', version: '> 2.1.0', required: false)
 flac = dependency('flac', version: '> 1.2.1', required: false)
+gexiv2 = dependency('gexiv2', required: false)
 gio = dependency('gio-2.0', version: '>' + glib_required)
 gio_unix = dependency('gio-unix-2.0', version: '>' + glib_required)
 glib = dependency('glib-2.0', version: '>' + glib_required)
@@ -381,6 +382,7 @@ if have_tracker_extract
     '    Support GIF:                            @0@ (xmp: @1@)'.format(libgif.found().to_string(), exempi.found().to_string()),
     '    Support JPEG:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
         libjpeg.found().to_string(), exempi.found().to_string(), libexif.found().to_string(), libiptcdata.found().to_string()),
+    '    Support RAW:                            ' + gexiv2.found().to_string(),
     '    Support TIFF:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
         libtiff.found().to_string(), exempi.found().to_string(), libexif.found().to_string(), libiptcdata.found().to_string()),
     '    Support Vorbis (ogg/etc):               ' + libvorbis.found().to_string(),
