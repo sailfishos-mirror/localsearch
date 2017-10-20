@@ -35,6 +35,7 @@ rules_files = \
 	10-pdf.rule \
 	10-png.rule \
 	10-ps.rule \
+	10-raw.rule \
 	10-svg.rule \
 	10-tiff.rule \
 	10-vorbis.rule \
@@ -118,6 +119,11 @@ endif
 if HAVE_POPPLER
 extractmodules_LTLIBRARIES += libextract-pdf.la
 rules_DATA += 10-pdf.rule
+endif
+
+if HAVE_GEXIV2
+extractmodules_LTLIBRARIES += libextract-raw.la
+rules_DATA += 10-raw.rule
 endif
 
 if HAVE_GSTREAMER
@@ -269,7 +275,6 @@ libextract_png_la_LIBADD = \
 	$(TRACKER_EXTRACT_MODULES_LIBS) \
 	$(LIBPNG_LIBS)
 
-
 # PS
 libextract_ps_la_SOURCES = tracker-extract-ps.c
 libextract_ps_la_CFLAGS = $(TRACKER_EXTRACT_MODULES_CFLAGS)
@@ -362,6 +367,19 @@ libextract_dvi_la_LIBADD = \
 	$(top_builddir)/src/libtracker-miners-common/libtracker-miners-common.la \
 	$(BUILD_LIBS) \
 	$(TRACKER_EXTRACT_MODULES_LIBS)
+
+# GEXIV2
+libextract_raw_la_SOURCES = tracker-extract-raw.c
+libextract_raw_la_CFLAGS = \
+	$(TRACKER_EXTRACT_MODULES_CFLAGS) \
+	$(GEXIV2_CFLAGS)
+libextract_raw_la_LDFLAGS = $(module_flags)
+libextract_raw_la_LIBADD = \
+	$(top_builddir)/src/libtracker-extract/libtracker-extract.la \
+	$(top_builddir)/src/libtracker-miners-common/libtracker-miners-common.la \
+	$(BUILD_LIBS) \
+	$(TRACKER_EXTRACT_MODULES_LIBS) \
+	$(GEXIV2_LIBS)
 
 # GStreamer
 libextract_gstreamer_la_SOURCES = \
