@@ -2,8 +2,6 @@ option('docs', type: 'boolean', value: true,
        description: 'Enable the documentation')
 option('extract', type: 'boolean', value: true,
        description: 'Enable the Tracker metadata extractor')
-option('fts', type: 'boolean', value: true,
-       description: 'Enable the Tracker full-text search feature')
 option('functional_tests', type: 'boolean', value: true,
        description: 'Enable the Tracker functional test suite')
 option('guarantee_metadata', type: 'boolean', value: true,
@@ -41,8 +39,6 @@ option('stemmer', type: 'combo', choices: ['auto', 'no', 'yes'], value: 'no',
 option('unicode_support', type: 'combo', choices: ['icu', 'unistring', 'auto'], value: 'auto',
        description: 'Unicode support library to use')
 
-option('bash_completion', type: 'string', default: 'yes',
-       description: 'Directory to install Bash completion files (or "yes" for default directory, "no" to disable installation')
 option('dbus_services', type: 'string', default: '',
        description: 'Directory to install D-Bus .service files (leave blank to use the value from dbus-1.pc)')
 option('systemd_user_services', type: 'string', default: 'yes',

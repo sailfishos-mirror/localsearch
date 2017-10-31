@@ -253,27 +253,6 @@ else
   systemd_user_services_dir = get_option('systemd_user_services')
 endif
 
-####################################################################
-# bash-completion
-####################################################################
-
-install_bash_completion = false
-if get_option('bash_completion') == 'yes' or get_option('bash_completion') == 'auto'
-  bash_completion_package = dependency('bash-completion', required: false)
-  if bash_completion_package.found()
-    bash_completion_dir = bash_completion_package.get_pkgconfig_variable('completionsdir')
-  else
-    bash_completion_dir = join_paths(get_option('prefix'), get_option('datadir'), 'bash-completion', 'completions')
-  endif
-  install_bash_completion = true
-elif get_option('bash_completion') == 'no' or get_option('bash_completion') == ''
-  install_bash_completion = false
-  bash_completion_dir = '(disabled)'
-else
-  install_bash_completion = true
-  bash_completion_dir = get_option('bash_completion')
-endif
-
 tracker_major_version = meson.project_version().split('.')[0].to_int()
 tracker_minor_version = meson.project_version().split('.')[1].to_int()
 tracker_micro_version = meson.project_version().split('.')[2].to_int()
