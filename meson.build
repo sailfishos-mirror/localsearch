@@ -65,9 +65,6 @@ uuid = cc.find_library('uuid')
 add_project_arguments('-Wno-pointer-sign', language: 'c')
 add_project_arguments('-DTRACKER_COMPILATION', language: 'c')
 
-enable_extract = get_option('extract')
-enable_writeback = get_option('writeback')
-
 ##################################################################
 # Check for libtracker-common, make sure libstemmer exists
 ##################################################################
@@ -263,9 +260,6 @@ conf = configuration_data()
 conf.set('DISABLE_JOURNAL', get_option('journal') == false)
 conf.set('USING_UNZIPPSFILES', get_option('unzip_ps_gz_files') == true)
 
-conf.set('HAVE_TRACKER_EXTRACT', enable_extract)
-conf.set('HAVE_TRACKER_WRITEBACK', enable_writeback)
-
 conf.set('HAVE_ENCA', charset_library_name == 'enca')
 conf.set('HAVE_EXEMPI', exempi.found())
 conf.set('HAVE_GSTREAMER', generic_media_handler_name == 'gstreamer')
@@ -323,11 +317,11 @@ tracker_c_args = [
   '-D_LARGEFILE64_SOURCE',
 ]
 
-have_tracker_miner_fs = true
-have_tracker_miner_apps = true
-have_tracker_miner_rss = true
-have_tracker_extract = true
-have_tracker_writeback = true
+have_tracker_extract = get_option('extract')
+have_tracker_miner_apps = get_option('miner_apps')
+have_tracker_miner_fs = get_option('miner_fs')
+have_tracker_miner_rss = get_option('miner_rss')
+have_tracker_writeback = get_option('writeback')
 
 configinc = include_directories('./')
 srcinc = include_directories('src/')
