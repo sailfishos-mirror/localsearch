@@ -9,8 +9,22 @@ tracker_api_version = '2.0'
 
 glib_required = '2.40.0'
 
-tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 1.99.0', required: true)
-tracker_miner = dependency('tracker-miner-2.0', version: '>= 1.99.0', required: true)
+tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 1.99.0', required: false)
+tracker_miner = dependency('tracker-miner-2.0', version: '>= 1.99.0', required: false)
+
+if not tracker_sparql.found() or not tracker_miner.found()
+  message('Tracker libraries were not found or are too old. A local copy will be built if possible.')
+  tracker_subproject = subproject('tracker',
+    default_options: [
+       'dbus_services=@0@'.format(get_option('dbus_services')),
+       'docs=@0@'.format(get_option('docs')),
+       'systemd_user_services=@0@'.format(get_option('systemd_user_services')),
+    ])
+
+  tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
+  tracker_miner = tracker_subproject.get_variable('tracker_miner_dep')
+endif
+
 avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
 avformat = dependency('libavformat', version: '>= 0.8.4', required: false)
 avutil = dependency('libavutil', version: '>= 0.8.4', required: false)
