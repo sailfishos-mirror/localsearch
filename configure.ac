@@ -1774,7 +1774,7 @@ AC_CONFIG_FILES([
 	docs/manpages/Makefile
 	Makefile
 	po/Makefile.in
-	src/libtracker-common/Makefile
+	src/libtracker-miners-common/Makefile
 	src/libtracker-extract/Makefile
 	src/Makefile
 	src/miners/Makefile
@@ -1784,7 +1784,7 @@ AC_CONFIG_FILES([
 	src/tracker-extract/Makefile
 	src/tracker-writeback/Makefile
 	tests/common/Makefile
-	tests/libtracker-common/Makefile
+	tests/libtracker-miners-common/Makefile
 	tests/libtracker-extract/Makefile
 	tests/functional-tests/Makefile
 	tests/functional-tests/common/Makefile

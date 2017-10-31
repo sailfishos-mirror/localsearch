@@ -27,8 +27,8 @@
 #include <glib/gstdio.h>
 #include <gio/gio.h>
 
-#include <libtracker-common/tracker-file-utils.h>
-#include <libtracker-common/tracker-locale.h>
+#include <libtracker-miners-common/tracker-file-utils.h>
+#include <libtracker-miners-common/tracker-locale.h>
 
 #include <tracker-test-helpers.h>
 

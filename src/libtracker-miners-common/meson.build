@@ -1,12 +1,12 @@
-enums = gnome.mkenums('tracker-enum-types',
+enums = gnome.mkenums('tracker-miners-enum-types',
   sources: 'tracker-enums.h',
-  c_template: 'tracker-enum-types.c.template',
-  h_template: 'tracker-enum-types.h.template',
+  c_template: 'tracker-miners-enum-types.c.template',
+  h_template: 'tracker-miners-enum-types.h.template',
 )
 
-tracker_common_enum_header = enums[1]
+tracker_miners_common_enum_header = enums[1]
 
-tracker_common_sources = [
+tracker_miners_common_sources = [
   'tracker-date-time.c',
   'tracker-dbus.c',
   'tracker-domain-ontology.c',
@@ -23,17 +23,17 @@ tracker_common_sources = [
 ]
 
 # FIXME: need to link against -lkvm on OpenBSD, see configure.ac
-tracker_common_dependencies = [glib, gio, gio_unix, libmath]
+tracker_miners_common_dependencies = [glib, gio, gio_unix, libmath]
 
-tracker_common_private_dependencies = [charset_library]
+tracker_miners_common_private_dependencies = [charset_library]
 if libseccomp.found()
-  tracker_common_private_dependencies += [libseccomp]
+  tracker_miners_common_private_dependencies += [libseccomp]
 endif
 
 
-libtracker_common = library('tracker-common',
-  tracker_common_sources,
-  dependencies: tracker_common_dependencies + tracker_common_private_dependencies,
+libtracker_miners_common = library('tracker-miners-common',
+  tracker_miners_common_sources,
+  dependencies: tracker_miners_common_dependencies + tracker_miners_common_private_dependencies,
   c_args: tracker_c_args,
   include_directories: [configinc, srcinc],
   install: true,
@@ -51,9 +51,9 @@ commoninc = include_directories('.')
 #     ninja: fatal: posix_spawn: Argument list too long
 #
 # Upstream issue: https://github.com/mesonbuild/meson/issues/671
-tracker_common_dep = declare_dependency(
-  sources: [tracker_common_enum_header],
-  link_with: libtracker_common,
-  dependencies: tracker_common_dependencies,
+tracker_miners_common_dep = declare_dependency(
+  sources: [tracker_miners_common_enum_header],
+  link_with: libtracker_miners_common,
+  dependencies: tracker_miners_common_dependencies,
   include_directories: [configinc, srcinc, commoninc],
 )

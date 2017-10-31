@@ -20,16 +20,16 @@
 [CCode (cprefix = "Tracker", gir_namespace = "Tracker",
         gir_version = "1.0", lower_case_cprefix = "tracker_")]
 namespace Tracker {
-	[CCode (cheader_filename = "libtracker-common/tracker-date-time.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-date-time.h")]
 	public double string_to_date (string date_string, out int offset) throws DateError;
 
-	[CCode (cheader_filename = "libtracker-common/tracker-date-time.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-date-time.h")]
 	public errordomain DateError {
 		OFFSET,
 		INVALID_ISO8601
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	public class ConfigFile : GLib.Object {
 		[CCode (has_construct_function = false)]
 		public ConfigFile ();
@@ -43,7 +43,7 @@ namespace Tracker {
 		public GLib.KeyFile key_file;
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	public class KeyfileObject {
 		public static string blurb (void *object, string property);
 		public static bool default_boolean (void *object, string property);
@@ -61,25 +61,25 @@ namespace Tracker {
 		public static void save_directory_list (void *object, string property, GLib.KeyFile key_file, string group, string key);
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	namespace Log {
 		public bool init (int verbosity, out string used_filename);
 		public void shutdown ();
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-locale.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-locale.h")]
 	namespace Locale {
 		public void sanity_check ();
 	}
 
 	[Compact]
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	namespace IPC {
 		public GLib.BusType bus ();
 	}
 
 	[Compact]
-	[CCode (ref_function = "", unref_function = "", cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (ref_function = "", unref_function = "", cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	public class DBusRequest {
 		public static DBusRequest begin (string? sender, string format,...);
 		public void debug (string format,...);
@@ -88,7 +88,7 @@ namespace Tracker {
 		public static void enable_client_lookup (bool enable);
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-domain-ontology.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-domain-ontology.h")]
 	public class DomainOntology : GLib.Object, GLib.Initable {
 		public DomainOntology (string? name, GLib.Cancellable? cancellable) throws GLib.Error;
 		public GLib.File get_cache ();
@@ -97,7 +97,7 @@ namespace Tracker {
 		public string get_domain (string? suffix = null);
 	}
 
-	[CCode (cheader_filename = "libtracker-common/tracker-common.h")]
+	[CCode (cheader_filename = "libtracker-miners-common/tracker-common.h")]
 	public void ioprio_init ();
 
 	[CCode (cname = "g_message", cheader_filename = "glib.h")]

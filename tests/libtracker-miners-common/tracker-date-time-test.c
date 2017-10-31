@@ -23,7 +23,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libtracker-common/tracker-date-time.h>
+#include <libtracker-miners-common/tracker-date-time.h>
 
 /* This define was committed in glib 18.07.2011
  * https://bugzilla.gnome.org/show_bug.cgi?id=577231

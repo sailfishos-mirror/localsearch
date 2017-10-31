@@ -34,7 +34,7 @@
 #include <gio/gunixfdlist.h>
 #include <gio/gunixinputstream.h>
 
-#include <libtracker-common/tracker-common.h>
+#include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-extract/tracker-extract.h>
 

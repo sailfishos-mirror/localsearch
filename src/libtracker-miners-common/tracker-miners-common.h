@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016, Red Hat Inc.
+ * Copyright (C) 2008, Nokia <ivan.frade@nokia.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,19 +17,19 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#ifndef __TRACKER_SECCOMP_H__
-#define __TRACKER_SECCOMP_H__
+#ifndef __LIBTRACKER_MINERS_COMMON_H_
+#define __LIBTRACKER_MINERS_COMMON_H__
+
+#if !defined (__LIBTRACKER_MINERS_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
+#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
+#endif
 
 #include <glib.h>
 
-G_BEGIN_DECLS
+#define __LIBTRACKER_MINERS_COMMON_INSIDE__
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-common/tracker-common.h> must be included directly."
-#endif
+#include "tracker-seccomp.h"
 
-gboolean tracker_seccomp_init (void);
+#undef __LIBTRACKER_MINERS_COMMON_INSIDE__
 
-G_END_DECLS
-
-#endif /* __TRACKER_SECCOMP_H__ */
+#endif /* __LIBTRACKER_MINERS_COMMON_H__ */

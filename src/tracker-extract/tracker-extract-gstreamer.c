@@ -50,7 +50,7 @@
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
 
-#include <libtracker-common/tracker-common.h>
+#include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-cue-sheet.h"

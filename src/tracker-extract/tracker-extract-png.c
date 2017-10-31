@@ -22,8 +22,8 @@
 
 #include <png.h>
 
-#include <libtracker-common/tracker-file-utils.h>
-#include <libtracker-common/tracker-date-time.h>
+#include <libtracker-miners-common/tracker-file-utils.h>
+#include <libtracker-miners-common/tracker-date-time.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #define RFC1123_DATE_FORMAT "%d %B %Y %H:%M:%S %z"

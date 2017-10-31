@@ -26,7 +26,7 @@
 G_BEGIN_DECLS
 
 #if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-common/tracker-common.h> must be included directly."
+#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
 #endif
 
 #define TRACKER_TYPE_LANGUAGE         (tracker_language_get_type ())

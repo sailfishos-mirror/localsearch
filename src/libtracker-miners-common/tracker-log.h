@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2013-2014 Jolla Ltd. <andrew.den.exter@jollamobile.com>
- * Author: Philip Van Hoof <philip@codeminded.be>
+ * Copyright (C) 2008, Nokia <ivan.frade@nokia.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -9,7 +8,7 @@
  *
  * This library is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.          See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
@@ -18,14 +17,21 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#include "config.h"
+#ifndef __LIBTRACKER_COMMON_LOG_H__
+#define __LIBTRACKER_COMMON_LOG_H__
 
-#include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
+#include <glib.h>
 
-G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
-{
-	/* Nothing */
-	return TRUE;
-}
+G_BEGIN_DECLS
+
+#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
+#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
+#endif
+
+gboolean tracker_log_init          (gint             verbosity,
+                                    gchar          **used_filename);
+void     tracker_log_shutdown      (void);
+
+G_END_DECLS
+
+#endif /* __LIBTRACKER_COMMON_LOG_H__ */

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2011, Nokia <ivan.frade@nokia.com>
+ * Copyright (C) 2008, Nokia <ivan.frade@nokia.com>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,19 +17,31 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#ifndef __LIBTRACKER_COMMON_SCHED_H__
-#define __LIBTRACKER_COMMON_SCHED_H__
+#ifndef __LIBTRACKER_COMMON_H__
+#define __LIBTRACKER_COMMON_H__
+
+#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
+#error "only <libtracker-miners-common/tracker-miners-common.h> must be included directly."
+#endif
 
 #include <glib.h>
 
-G_BEGIN_DECLS
+#define __LIBTRACKER_COMMON_INSIDE__
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-common/tracker-common.h> must be included directly."
-#endif
+#include "tracker-date-time.h"
+#include "tracker-dbus.h"
+#include "tracker-domain-ontology.h"
+#include "tracker-file-utils.h"
+#include "tracker-ioprio.h"
+#include "tracker-language.h"
+#include "tracker-log.h"
+#include "tracker-sched.h"
+#include "tracker-seccomp.h"
+#include "tracker-type-utils.h"
+#include "tracker-utils.h"
+#include "tracker-locale.h"
+#include "tracker-miners-enum-types.h"
 
-gboolean tracker_sched_idle (void);
+#undef __LIBTRACKER_COMMON_INSIDE__
 
-G_END_DECLS
-
-#endif /* __LIBTRACKER_COMMON_SCHED_H__ */
+#endif /* __LIBTRACKER_COMMON_H__ */

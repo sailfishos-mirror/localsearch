@@ -1,7 +1,7 @@
 /*** BEGIN file-header ***/
 #include <config.h>
 
-#include "tracker-enum-types.h"
+#include "tracker-miners-enum-types.h"
 
 /*** END file-header ***/
 
