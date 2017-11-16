@@ -1296,7 +1296,8 @@ tracker_extract_module_init (GError **error)
 	/* Lifted from totem-video-thumbnailer */
 	const gchar *blacklisted[] = {
 		"bcmdec",
-		"vaapi"
+		"vaapi",
+		"video4linux2"
 	};
 	GstRegistry *registry;
 	guint i;
