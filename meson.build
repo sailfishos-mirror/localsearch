@@ -63,7 +63,7 @@ zlib = dependency('zlib')
 
 libgif = cc.find_library('libgif', required: false)
 libjpeg = cc.find_library('libjpeg', required: false)
-libmath = cc.find_library('m')
+libmath = cc.find_library('m', required: false)
 
 # FIXME: here we work around a quirk todo with Meson and Vala: the 'uuid'
 # pkg-config component corresponds to 'libuuid.vapi', but Meson assumes that
