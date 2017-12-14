@@ -158,7 +158,8 @@ executable('tracker-extract',
   c_args: tracker_c_args + ['-I' + meson.build_root()],
   dependencies: tracker_extract_dependencies,
   install: true,
-  install_dir: join_paths(get_option('prefix'), get_option('libexecdir')))
+  install_dir: join_paths(get_option('prefix'), get_option('libexecdir')),
+  install_rpath: tracker_internal_libs_dir)
 
 dbus_service_file_untranslated = configure_file(
   input: 'org.freedesktop.Tracker1.Miner.Extract.service.in.in',
