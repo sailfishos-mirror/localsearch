@@ -158,7 +158,7 @@ else
   endif
 endif
 
-if charset_library_name == 'none' and get_option('charset_library') != 'none'
+if charset_library_name == 'none' and get_option('charset_detection') != 'none'
   enca = dependency('enca', version: '>= 1.9', required: false)
 
   if enca.found()
