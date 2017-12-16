@@ -79,20 +79,6 @@ add_project_arguments('-Wno-pointer-sign', language: 'c')
 add_project_arguments('-DTRACKER_COMPILATION', language: 'c')
 
 ##################################################################
-# Check for libtracker-common, make sure libstemmer exists
-##################################################################
-
-have_libstemmer = false
-if get_option('stemmer') != 'no'
-    stemmer = cc.find_library('stemmer')
-    if stemmer.found()
-        have_libstemmer = true
-    elif get_option('stemmer') == 'yes'
-        error('stemmer support explicitly requested, but stemmer library couldn\'t be found')
-    endif
-endif
-
-##################################################################
 # Check for libtracker-common: battery/mains power detection
 #
 # By default, AUTO with this order of preference:
@@ -284,7 +270,6 @@ conf.set('HAVE_LIBCUE2', libcue.version() >= '2.0.0')
 conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
 conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
-conf.set('HAVE_LIBSTEMMER', have_libstemmer)
 conf.set('HAVE_LIBSECCOMP', libseccomp.found())
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 

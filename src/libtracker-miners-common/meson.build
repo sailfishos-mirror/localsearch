@@ -17,7 +17,6 @@ tracker_miners_common_sources = [
   'tracker-type-utils.c',
   'tracker-utils.c',
   'tracker-locale.c',
-  'tracker-language.c',
   'tracker-seccomp.c',
   enums[0], enums[1],
 ]

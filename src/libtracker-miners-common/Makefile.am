@@ -19,8 +19,7 @@ libtracker_miners_common_la_SOURCES = \
 	tracker-seccomp.c \
 	tracker-type-utils.c \
 	tracker-utils.c \
-	tracker-locale.c \
-	tracker-language.c
+	tracker-locale.c
 
 noinst_HEADERS = \
 	tracker-dbus.h \
@@ -35,8 +34,7 @@ noinst_HEADERS = \
 	tracker-seccomp.h \
 	tracker-type-utils.h \
 	tracker-utils.h \
-	tracker-locale.h \
-	tracker-language.h
+	tracker-locale.h
 
 libtracker_miners_common_la_LIBADD = \
 	$(BUILD_LIBS) \
