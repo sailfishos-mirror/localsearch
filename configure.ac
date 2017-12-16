@@ -1837,7 +1837,6 @@ Feature Support:
 
 	Support for HAL:                        $have_hal
 	Support for UPower:                     $have_upower
-	Unicode support library:                $with_unicode_support
 
 	Build with Journal support:             $have_tracker_journal
 
