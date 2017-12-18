@@ -45,7 +45,6 @@ icu_i18n = dependency('icu-i18n', version: '> 4.8.1.1', required: false)
 icu_uc = dependency('icu-uc', version: '> 4.8.1.1', required: false)
 libcue = dependency('libcue', required: false)
 libexif = dependency('libexif', version: '> 0.6', required: false)
-libgrss = dependency('libgrss', version: '> 0.7', required: false)
 libgsf = dependency('libgsf-1', version: '> 1.14.24', required: false)
 libgxps = dependency('libgxps', required: false)
 libiptcdata = dependency('libiptcdata', required: false)
@@ -72,6 +71,20 @@ libmath = cc.find_library('m', required: false)
 # a dependency object back that won't cause any `--pkg` arguments to be added
 # to the Vala commandline, but still works as expected for C code.
 uuid = cc.find_library('uuid')
+
+have_tracker_extract = get_option('extract')
+have_tracker_miner_apps = get_option('miner_apps')
+have_tracker_miner_fs = get_option('miner_fs')
+have_tracker_miner_rss = get_option('miner_rss')
+have_tracker_writeback = get_option('writeback')
+
+if have_tracker_miner_rss
+  libgrss = dependency('libgrss', version: '> 0.7', required: false)
+  if not libgrss.found()
+    error('libgrss is required for the RSS feed miner. You can disable ' +
+          'this miner by passing -Dminer_rss=false if needed.')
+  endif
+endif
 
 # There are various gchar vs. unsigned char warnings that occur in extract
 # modules, it's not worth adding casts everywhere so we disable the warning.
@@ -314,12 +327,6 @@ tracker_c_args = [
   # Needed for statvfs64, and probably other stuff
   '-D_LARGEFILE64_SOURCE',
 ]
-
-have_tracker_extract = get_option('extract')
-have_tracker_miner_apps = get_option('miner_apps')
-have_tracker_miner_fs = get_option('miner_fs')
-have_tracker_miner_rss = get_option('miner_rss')
-have_tracker_writeback = get_option('writeback')
 
 configinc = include_directories('./')
 srcinc = include_directories('src/')
