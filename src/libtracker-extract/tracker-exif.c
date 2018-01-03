@@ -57,6 +57,17 @@ enum {
 	EXIF_FLASH_DID_NOT_FIRE_AUTO_RED_EYE_REDUCTION = 0x0058,
 };
 
+enum {
+	EXIF_METERING_MODE_UNKNOWN = 0,
+	EXIF_METERING_MODE_AVERAGE = 1,
+	EXIF_METERING_MODE_CENTER_WEIGHTED_AVERAGE = 2,
+	EXIF_METERING_MODE_SPOT = 3,
+	EXIF_METERING_MODE_MULTISPOT = 4,
+	EXIF_METERING_MODE_PATTERN = 5,
+	EXIF_METERING_MODE_PARTIAL = 6,
+	EXIF_METERING_MODE_OTHER = 255,
+};
+
 static gchar *
 get_date (ExifData *exif,
           ExifTag   tag)
@@ -243,18 +254,20 @@ get_metering_mode (ExifData *exif,
 		metering = exif_get_short (entry->data, order);
 
 		switch (metering) {
-		case 1:
+		case EXIF_METERING_MODE_AVERAGE:
 			return g_strdup ("nmm:metering-mode-average");
-		case 2:
+		case EXIF_METERING_MODE_CENTER_WEIGHTED_AVERAGE:
 			return g_strdup ("nmm:metering-mode-center-weighted-average");
-		case 3:
+		case EXIF_METERING_MODE_SPOT:
 			return g_strdup ("nmm:metering-mode-spot");
-		case 4:
+		case EXIF_METERING_MODE_MULTISPOT:
 			return g_strdup ("nmm:metering-mode-multispot");
-		case 5:
+		case EXIF_METERING_MODE_PATTERN:
 			return g_strdup ("nmm:metering-mode-pattern");
-		case 6:
+		case EXIF_METERING_MODE_PARTIAL:
 			return g_strdup ("nmm:metering-mode-partial");
+		case EXIF_METERING_MODE_UNKNOWN:
+		case EXIF_METERING_MODE_OTHER:
 		default:
 			return g_strdup ("nmm:metering-mode-other");
 		}
