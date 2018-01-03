@@ -48,6 +48,15 @@
  * using these standards.
  **/
 
+enum {
+	EXIF_FLASH_NONE = 0x0000,
+	EXIF_FLASH_FIRED_MISSING_STROBE = 0x0005,
+	EXIF_FLASH_DID_NOT_FIRE_COMPULSORY_ON = 0x0008,
+	EXIF_FLASH_DID_NOT_FIRE_COMPULSORY_OFF = 0x0010,
+	EXIF_FLASH_DID_NOT_FIRE_AUTO = 0x0018,
+	EXIF_FLASH_DID_NOT_FIRE_AUTO_RED_EYE_REDUCTION = 0x0058,
+};
+
 static gchar *
 get_date (ExifData *exif,
           ExifTag   tag)
@@ -101,12 +110,12 @@ get_flash (ExifData *exif,
 		flash = exif_get_short (entry->data, order);
 
 		switch (flash) {
-		case 0x0000: /* No flash */
-		case 0x0005: /* Without strobe */
-		case 0x0008: /* Flash did not fire */
-		case 0x0010: /* Flash in compulsory mode, did not fire */
-		case 0x0018: /* Flash in auto mode, did not fire */
-		case 0x0058: /* Only red-eye reduction mode */
+		case EXIF_FLASH_NONE:
+		case EXIF_FLASH_FIRED_MISSING_STROBE:
+		case EXIF_FLASH_DID_NOT_FIRE_COMPULSORY_ON:
+		case EXIF_FLASH_DID_NOT_FIRE_COMPULSORY_OFF:
+		case EXIF_FLASH_DID_NOT_FIRE_AUTO:
+		case EXIF_FLASH_DID_NOT_FIRE_AUTO_RED_EYE_REDUCTION:
 			return g_strdup ("nmm:flash-off");
 		default:
 			return g_strdup ("nmm:flash-on");
