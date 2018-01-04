@@ -49,6 +49,12 @@
 #include <libiptcdata/iptc-jpeg.h>
 #endif /* HAVE_LIBIPTCDATA */
 
+enum {
+	JPEG_RESOLUTION_UNIT_UNKNOWN = 0,
+	JPEG_RESOLUTION_UNIT_PER_INCH = 1,
+	JPEG_RESOLUTION_UNIT_PER_CENTIMETER = 2,
+};
+
 typedef struct {
 	const gchar *make;
 	const gchar *model;
@@ -532,13 +538,13 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	if (cinfo.density_unit != 0 || ed->x_resolution) {
 		gdouble value;
 
-		if (cinfo.density_unit == 0) {
-			if (ed->resolution_unit != 3)
-				value = g_strtod (ed->x_resolution, NULL);
-			else
+		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
+			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
 				value = g_strtod (ed->x_resolution, NULL) * CM_TO_INCH;
+			else
+				value = g_strtod (ed->x_resolution, NULL);
 		} else {
-			if (cinfo.density_unit == 1)
+			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
 				value = cinfo.X_density;
 			else
 				value = cinfo.X_density * CM_TO_INCH;
@@ -550,13 +556,13 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	if (cinfo.density_unit != 0 || ed->y_resolution) {
 		gdouble value;
 
-		if (cinfo.density_unit == 0) {
-			if (ed->resolution_unit != 3)
-				value = g_strtod (ed->y_resolution, NULL);
-			else
+		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
+			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
 				value = g_strtod (ed->y_resolution, NULL) * CM_TO_INCH;
+			else
+				value = g_strtod (ed->y_resolution, NULL);
 		} else {
-			if (cinfo.density_unit == 1)
+			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
 				value = cinfo.Y_density;
 			else
 				value = cinfo.Y_density * CM_TO_INCH;

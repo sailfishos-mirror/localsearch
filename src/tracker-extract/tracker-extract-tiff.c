@@ -632,14 +632,22 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	if (ed->x_resolution) {
 		gdouble value;
 
-		value = ed->resolution_unit != 3 ? g_strtod (ed->x_resolution, NULL) : g_strtod (ed->x_resolution, NULL) * CM_TO_INCH;
+		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
+			value = g_strtod (ed->x_resolution, NULL) * CM_TO_INCH;
+		else
+			value = g_strtod (ed->x_resolution, NULL);
+
 		tracker_resource_set_double (metadata, "nfo:horizontalResolution", value);
 	}
 
 	if (ed->y_resolution) {
 		gdouble value;
 
-		value = ed->resolution_unit != 3 ? g_strtod (ed->y_resolution, NULL) : g_strtod (ed->y_resolution, NULL) * CM_TO_INCH;
+		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
+			value = g_strtod (ed->y_resolution, NULL) * CM_TO_INCH;
+		else
+			value = g_strtod (ed->y_resolution, NULL);
+
 		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
 	}
 
