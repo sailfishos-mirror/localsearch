@@ -33,7 +33,7 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#define CM_TO_INCH          0.393700787
+#define CM_TO_INCH          2.54
 
 typedef enum {
 	TAG_TYPE_UNDEFINED = 0,

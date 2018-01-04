@@ -31,7 +31,7 @@
 
 #include "tracker-main.h"
 
-#define CM_TO_INCH              0.393700787
+#define CM_TO_INCH              2.54
 
 #ifdef HAVE_LIBEXIF
 #define EXIF_NAMESPACE          "Exif"

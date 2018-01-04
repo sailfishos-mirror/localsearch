@@ -27,7 +27,7 @@
 #include <libtracker-extract/tracker-extract.h>
 
 #define RFC1123_DATE_FORMAT "%d %B %Y %H:%M:%S %z"
-#define CM_TO_INCH          0.393700787
+#define CM_TO_INCH          2.54
 
 typedef struct {
 	const gchar *title;
