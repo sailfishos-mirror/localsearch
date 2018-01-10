@@ -78,6 +78,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (exit_group);
 	ALLOW_RULE (getuid);
 	ALLOW_RULE (getuid32);
+	ALLOW_RULE (getegid);
+	ALLOW_RULE (getegid32);
 	ALLOW_RULE (geteuid);
 	ALLOW_RULE (geteuid32);
 	ALLOW_RULE (getppid);
