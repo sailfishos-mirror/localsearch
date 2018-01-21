@@ -72,6 +72,7 @@ static gchar *force_module;
 static gchar *output_format_name;
 static gboolean version;
 static gchar *domain_ontology_name = NULL;
+static guint shutdown_timeout_id = 0;
 
 static TrackerConfig *config;
 
@@ -307,6 +308,36 @@ on_domain_vanished (GDBusConnection *connection,
 	g_main_loop_quit (loop);
 }
 
+static void
+on_decorator_items_available (TrackerDecorator *decorator)
+{
+	if (shutdown_timeout_id) {
+		g_source_remove (shutdown_timeout_id);
+		shutdown_timeout_id = 0;
+	}
+}
+
+static gboolean
+shutdown_timeout_cb (gpointer user_data)
+{
+	GMainLoop *loop = user_data;
+
+	g_debug ("Shutting down after 10 seconds inactivity");
+	g_main_loop_quit (loop);
+	shutdown_timeout_id = 0;
+	return G_SOURCE_REMOVE;
+}
+
+static void
+on_decorator_finished (TrackerDecorator *decorator,
+                       GMainLoop        *loop)
+{
+	if (shutdown_timeout_id != 0)
+		return;
+	shutdown_timeout_id = g_timeout_add_seconds (10, shutdown_timeout_cb,
+	                                             main_loop);
+}
+
 int
 main (int argc, char *argv[])
 {
@@ -463,6 +494,13 @@ main (int argc, char *argv[])
 		                                NULL, on_domain_vanished,
 		                                main_loop, NULL);
 	}
+
+	g_signal_connect (decorator, "finished",
+	                  G_CALLBACK (on_decorator_finished),
+	                  main_loop);
+	g_signal_connect (decorator, "items-available",
+	                  G_CALLBACK (on_decorator_items_available),
+	                  main_loop);
 
 	initialize_signal_handler ();
 

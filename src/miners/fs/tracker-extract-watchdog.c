@@ -24,10 +24,16 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-miner/tracker-miner.h>
 
+enum {
+	LOST,
+	N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = { 0, };
+
 struct _TrackerExtractWatchdog {
 	GObject parent_class;
 	guint extractor_watchdog_id;
-	guint timeout_id;
 	gboolean initializing;
 };
 
@@ -43,17 +49,6 @@ extract_watchdog_stop (TrackerExtractWatchdog *watchdog)
 		g_bus_unwatch_name (watchdog->extractor_watchdog_id);
 		watchdog->extractor_watchdog_id = 0;
 	}
-}
-
-static gboolean
-extract_watchdog_name_vanished_timeout (gpointer user_data)
-{
-	TrackerExtractWatchdog *watchdog = user_data;
-
-	watchdog->timeout_id = 0;
-	extract_watchdog_start (watchdog, TRUE);
-
-	return G_SOURCE_REMOVE;
 }
 
 static void
@@ -79,6 +74,11 @@ extract_watchdog_name_vanished (GDBusConnection *conn,
 	if (conn == NULL)
 		return;
 
+	/* Close the name watch, so we'll create another one that will
+	 * autostart the service if it not already running.
+	 */
+	extract_watchdog_stop (watchdog);
+
 	/* We will ignore the first call after initialization, as we
 	 * don't want to autostart tracker-extract in this case (useful
 	 * for debugging purposes).
@@ -88,19 +88,7 @@ extract_watchdog_name_vanished (GDBusConnection *conn,
 		return;
 	}
 
-	g_debug ("tracker-extract vanished, restarting after grace period.");
-
-	/* Close the name watch, so we'll create another one that will
-	 * autostart the service if it not already running.
-	 */
-	extract_watchdog_stop (watchdog);
-
-	/* Give a period of grace before restarting, so we allow replacing
-	 * from eg. a terminal.
-	 */
-	watchdog->timeout_id =
-		g_timeout_add_seconds (1, extract_watchdog_name_vanished_timeout,
-				       watchdog);
+	g_signal_emit (watchdog, signals[LOST], 0);
 }
 
 static void
@@ -128,10 +116,6 @@ tracker_extract_watchdog_finalize (GObject *object)
 
 	extract_watchdog_stop (watchdog);
 
-	if (watchdog->timeout_id) {
-		g_source_remove (watchdog->timeout_id);
-	}
-
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
 }
 
@@ -141,6 +125,12 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = tracker_extract_watchdog_finalize;
+
+	signals[LOST] = g_signal_new ("lost",
+	                              G_OBJECT_CLASS_TYPE (object_class),
+	                              G_SIGNAL_RUN_LAST,
+	                              0, NULL, NULL, NULL,
+	                              G_TYPE_NONE, 0);
 }
 
 static void
@@ -155,4 +145,11 @@ tracker_extract_watchdog_new (void)
 {
 	return g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
 			     NULL);
+}
+
+void
+tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
+{
+	if (!watchdog->extractor_watchdog_id)
+		extract_watchdog_start (watchdog, TRUE);
 }
