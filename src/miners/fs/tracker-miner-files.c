@@ -2350,8 +2350,10 @@ process_file_cb (GObject      *object,
 	}
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_miner_fs_query_urn (TRACKER_MINER_FS (data->miner), parent);
-	g_object_unref (parent);
+	if (parent != NULL) {
+		parent_urn = tracker_miner_fs_query_urn (TRACKER_MINER_FS (data->miner), parent);
+		g_object_unref (parent);
+	}
 
 	if (parent_urn) {
 		tracker_sparql_builder_predicate (sparql, "nfo:belongsToContainer");
