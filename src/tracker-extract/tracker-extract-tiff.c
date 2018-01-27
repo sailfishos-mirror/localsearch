@@ -33,7 +33,7 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#define CM_TO_INCH          2.54
+#define CMS_PER_INCH        2.54
 
 typedef enum {
 	TAG_TYPE_UNDEFINED = 0,
@@ -633,7 +633,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		gdouble value;
 
 		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-			value = g_strtod (ed->x_resolution, NULL) * CM_TO_INCH;
+			value = g_strtod (ed->x_resolution, NULL) * CMS_PER_INCH;
 		else
 			value = g_strtod (ed->x_resolution, NULL);
 
@@ -644,7 +644,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		gdouble value;
 
 		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-			value = g_strtod (ed->y_resolution, NULL) * CM_TO_INCH;
+			value = g_strtod (ed->y_resolution, NULL) * CMS_PER_INCH;
 		else
 			value = g_strtod (ed->y_resolution, NULL);
 

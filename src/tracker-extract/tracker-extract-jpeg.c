@@ -31,7 +31,7 @@
 
 #include "tracker-main.h"
 
-#define CM_TO_INCH              2.54
+#define CMS_PER_INCH            2.54
 
 #ifdef HAVE_LIBEXIF
 #define EXIF_NAMESPACE          "Exif"
@@ -540,14 +540,14 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
 			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-				value = g_strtod (ed->x_resolution, NULL) * CM_TO_INCH;
+				value = g_strtod (ed->x_resolution, NULL) * CMS_PER_INCH;
 			else
 				value = g_strtod (ed->x_resolution, NULL);
 		} else {
 			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
 				value = cinfo.X_density;
 			else
-				value = cinfo.X_density * CM_TO_INCH;
+				value = cinfo.X_density * CMS_PER_INCH;
 		}
 
 		tracker_resource_set_double (metadata, "nfo:horizontalResolution", value);
@@ -558,14 +558,14 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
 			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-				value = g_strtod (ed->y_resolution, NULL) * CM_TO_INCH;
+				value = g_strtod (ed->y_resolution, NULL) * CMS_PER_INCH;
 			else
 				value = g_strtod (ed->y_resolution, NULL);
 		} else {
 			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
 				value = cinfo.Y_density;
 			else
-				value = cinfo.Y_density * CM_TO_INCH;
+				value = cinfo.Y_density * CMS_PER_INCH;
 		}
 
 		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
