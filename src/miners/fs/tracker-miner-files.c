@@ -2754,12 +2754,10 @@ miner_files_move_file (TrackerMinerFS *fs,
 	                        "DELETE { "
 	                        "  <%s> nfo:fileName ?f ; "
 	                        "       nie:url ?u ; "
-	                        "       nie:isStoredAs ?s ; "
 	                        "       nfo:belongsToContainer ?b"
 	                        "} WHERE { "
 	                        "  <%s> nfo:fileName ?f ; "
-	                        "       nie:url ?u ; "
-	                        "       nie:isStoredAs ?s . "
+	                        "       nie:url ?u . "
 	                        "       OPTIONAL { <%s> nfo:belongsToContainer ?b }"
 	                        "} ",
 	                        source_iri, source_iri, source_iri);
@@ -2771,9 +2769,8 @@ miner_files_move_file (TrackerMinerFS *fs,
 	g_string_append_printf (sparql,
 	                        "INSERT INTO <" TRACKER_OWN_GRAPH_URN "> {"
 	                        "  <%s> nfo:fileName \"%s\" ; "
-	                        "       nie:url \"%s\" ; "
-	                        "       nie:isStoredAs <%s> ",
-	                        source_iri, display_name, uri, source_iri);
+	                        "       nie:url \"%s\" ",
+	                        source_iri, display_name, uri);
 
 	if (new_parent && new_parent_iri) {
 		g_string_append_printf (sparql, "; nfo:belongsToContainer \"%s\"",
