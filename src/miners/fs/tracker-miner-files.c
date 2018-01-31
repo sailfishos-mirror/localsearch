@@ -2389,7 +2389,8 @@ process_file_cb (GObject      *object,
 
 	miner_files_add_to_datasource (data->miner, file, sparql);
 
-        miner_files_add_rdf_types (sparql, file, mime_type);
+	if (g_file_info_get_size (file_info) > 0)
+		miner_files_add_rdf_types (sparql, file, mime_type);
 
 	sparql_builder_finish (data, NULL, NULL, NULL, NULL);
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
