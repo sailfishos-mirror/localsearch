@@ -61,8 +61,8 @@ totem_plparser = dependency('totem-plparser', required: false)
 upower = dependency('upower-glib', version: '> 0.9.0', required: false)
 zlib = dependency('zlib')
 
-libgif = cc.find_library('libgif', required: false)
-libjpeg = cc.find_library('libjpeg', required: false)
+libgif = cc.find_library('gif', required: false)
+libjpeg = cc.find_library('jpeg', required: false)
 libmath = cc.find_library('m', required: false)
 
 # FIXME: here we work around a quirk todo with Meson and Vala: the 'uuid'
