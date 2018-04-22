@@ -44,7 +44,7 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define DBUS_NAME_SUFFIX "Miner.Applications"
+#define DBUS_NAME_SUFFIX "Tracker1.Miner.Applications"
 #define DBUS_PATH "/org/freedesktop/Tracker1/Miner/Applications"
 
 static GMainLoop *main_loop;
@@ -186,7 +186,7 @@ main (gint argc, gchar *argv[])
 	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
 	TrackerDomainOntology *domain_ontology;
-	gchar *dbus_name;
+	gchar *domain_name, *dbus_name;
 
 	main_loop = NULL;
 
@@ -248,11 +248,13 @@ main (gint argc, gchar *argv[])
 
 	main_loop = g_main_loop_new (NULL, FALSE);
 
-	if (domain_ontology && domain_ontology_name) {
-		g_bus_watch_name_on_connection (connection, domain_ontology_name,
+	if (domain_ontology) {
+		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
+		g_bus_watch_name_on_connection (connection, domain_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                main_loop, NULL);
+		g_free (domain_name);
 	}
 
 	g_message ("Checking if we're running as a daemon:");
