@@ -29,7 +29,7 @@ if flac.found()
 endif
 
 if gexiv2.found()
-  modules += [['extract-raw', 'tracker-extract-raw.c', '10-raw.rule', [gexiv2, tracker_common_dep]]]
+  modules += [['extract-raw', 'tracker-extract-raw.c', '10-raw.rule', [gexiv2, tracker_miners_common_dep]]]
 endif
 
 if libgif.found()
