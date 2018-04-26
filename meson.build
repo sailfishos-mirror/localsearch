@@ -49,6 +49,7 @@ libexif = dependency('libexif', version: '> 0.6', required: false)
 libgsf = dependency('libgsf-1', version: '> 1.14.24', required: false)
 libgxps = dependency('libgxps', required: false)
 libiptcdata = dependency('libiptcdata', required: false)
+libjpeg = dependency('libjpeg', required: false)
 libosinfo = dependency('libosinfo-1.0', version: '> 0.2.9', required: false)
 libpng = dependency('libpng', version: '> 0.89', required: false)
 libseccomp = dependency('libseccomp', version: '>= 2.0', required: false)
@@ -62,7 +63,6 @@ upower = dependency('upower-glib', version: '> 0.9.0', required: false)
 zlib = dependency('zlib')
 
 libgif = cc.find_library('gif', required: false)
-libjpeg = cc.find_library('jpeg', required: false)
 libmath = cc.find_library('m', required: false)
 
 # FIXME: here we work around a quirk todo with Meson and Vala: the 'uuid'
