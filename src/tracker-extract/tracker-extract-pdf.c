@@ -35,7 +35,7 @@
 
 #include <glib.h>
 #include <glib/gstdio.h>
-#include <glib/poppler.h>
+#include <poppler.h>
 
 #include <gio/gunixoutputstream.h>
 #include <gio/gunixinputstream.h>
