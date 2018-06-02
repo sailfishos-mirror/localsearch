@@ -148,7 +148,7 @@ tracker_extract_sources = [
 ]
 
 tracker_extract_dependencies = [
-  tracker_sparql, tracker_miner, tracker_miners_common_dep, tracker_extract_dep
+  tracker_miner, tracker_miners_common_dep, tracker_extract_dep
 ]
 
 if libgsf.found()
