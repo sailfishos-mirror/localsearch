@@ -1348,13 +1348,6 @@ LIBS="$OLD_LIBS"
 # FIXME: This should be package based. Unfortunately in several main
 # distros, it is not.
 
-OLD_CFLAGS="$CFLAGS"
-OLD_LDFLAGS="$LDFLAGS"
-OLD_LIBS="$LIBS"
-CFLAGS=""
-LDFLAGS=""
-LIBS=""
-
 AC_ARG_ENABLE(libjpeg,
               AS_HELP_STRING([--enable-libjpeg],
                              [enable extractor for JPEG metadata [[default=auto]]]),
@@ -1362,13 +1355,10 @@ AC_ARG_ENABLE(libjpeg,
               [enable_libjpeg=auto])
 
 if test "x$enable_libjpeg" != "xno" ; then
-   AC_CHECK_HEADER(jpeglib.h,
-   AC_CHECK_LIB(jpeg, jpeg_CreateCompress))
-
-   have_libjpeg=${ac_cv_lib_jpeg_jpeg_CreateCompress:-no}
-
-   LIBJPEG_CFLAGS="$CFLAGS"
-   LIBJPEG_LIBS="$LIBS"
+   PKG_CHECK_MODULES(LIBJPEG,
+                     [libjpeg],
+                     [have_libjpeg=yes],
+                     [have_libjpeg=no])
 
    AC_SUBST(LIBJPEG_CFLAGS)
    AC_SUBST(LIBJPEG_LIBS)
@@ -1387,10 +1377,6 @@ if test "x$enable_libjpeg" = "xyes"; then
 fi
 
 AM_CONDITIONAL(HAVE_LIBJPEG, test "x$have_libjpeg" = "xyes")
-
-CFLAGS="$OLD_CFLAGS"
-LDFLAGS="$OLD_LDFLAGS"
-LIBS="$OLD_LIBS"
 
 ##################################################################
 # Check for tracker-extract: libtiff
