@@ -844,14 +844,14 @@ extract_metadata (MetadataExtractor      *extractor,
 
 		geolocation = extractor_get_geolocation (extractor, extractor->tagcache);
 		if (geolocation) {
+			address = extractor_get_address (extractor, extractor->tagcache);
+			if (address) {
+				tracker_resource_set_relation (geolocation, "slo:postalAddress", address);
+				g_object_unref (address);
+			}
+
 			tracker_resource_set_relation (resource, "slo:location", geolocation);
 			g_object_unref (geolocation);
-		}
-
-		address = extractor_get_address (extractor, extractor->tagcache);
-		if (address) {
-			tracker_resource_set_relation (resource, "slo:postalAddress", address);
-			g_object_unref (address);
 		}
 
 		if (extractor->mime == EXTRACT_MIME_VIDEO) {
