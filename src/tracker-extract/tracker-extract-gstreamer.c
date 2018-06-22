@@ -436,7 +436,7 @@ extractor_get_address (MetadataExtractor     *extractor,
 		address_uri = tracker_sparql_get_uuid_urn ();
 		address = tracker_resource_new (address_uri);
 
-		tracker_resource_set_string (address, "rdf:type", "nco:PostalAddress");
+		tracker_resource_set_uri (address, "rdf:type", "nco:PostalAddress");
 
 		if (sublocation) {
 			tracker_resource_set_string (address, "nco:region", sublocation);
