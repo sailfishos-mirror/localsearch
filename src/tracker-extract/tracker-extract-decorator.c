@@ -360,12 +360,16 @@ tracker_extract_decorator_finished (TrackerDecorator *decorator)
 {
 	TrackerExtractDecoratorPrivate *priv;
 	gchar *time_str;
+	gdouble elapsed = 0;
 
 	priv = TRACKER_EXTRACT_DECORATOR (decorator)->priv;
-	time_str = tracker_seconds_to_string ((gint) g_timer_elapsed (priv->timer, NULL), TRUE);
+	if (priv->timer) {
+		elapsed = g_timer_elapsed (priv->timer, NULL);
+		g_clear_pointer (&priv->timer, g_timer_destroy);
+	}
+
+	time_str = tracker_seconds_to_string (elapsed, TRUE);
 	g_message ("Extraction finished in %s", time_str);
-	g_timer_destroy (priv->timer);
-	priv->timer = NULL;
 	g_free (time_str);
 }
 
