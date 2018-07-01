@@ -78,9 +78,7 @@ class Helper:
         sys.excepthook = new_hook
 
     def _start_process (self):
-        path = getattr (self,
-                        "PROCESS_PATH",
-                        os.path.join (cfg.EXEC_PREFIX, self.PROCESS_NAME))
+        path = self.PROCESS_PATH
         flags = getattr (self,
                          "FLAGS",
                          [])
@@ -93,7 +91,10 @@ class Helper:
 
         command = [path] + flags
         log ("Starting %s" % ' '.join(command))
-        return subprocess.Popen ([path] + flags, **kws)
+        try:
+            return subprocess.Popen ([path] + flags, **kws)
+        except OSError as e:
+            raise RuntimeError("Error starting %s: %s" % (path, e))
 
     def _bus_name_appeared(self, name, owner, data):
         log ("[%s] appeared in the bus as %s" % (self.PROCESS_NAME, owner))
@@ -212,6 +213,7 @@ class StoreHelper (Helper):
     """
 
     PROCESS_NAME = "tracker-store"
+    PROCESS_PATH = cfg.TRACKER_STORE_PATH
     BUS_NAME = cfg.TRACKER_BUSNAME
 
     graph_updated_handler_id = 0
@@ -469,6 +471,9 @@ class StoreHelper (Helper):
     def update (self, update_sparql, timeout=5000, **kwargs):
         return self.resources.SparqlUpdate ('(s)', update_sparql, timeout=timeout, **kwargs)
 
+    def load (self, ttl_uri, timeout=5000, **kwargs):
+        return self.resources.Load ('(s)', ttl_uri, timeout=timeout, **kwargs)
+
     def batch_update (self, update_sparql, **kwargs):
         return self.resources.BatchSparqlUpdate ('(s)', update_sparql, **kwargs)
 
@@ -542,7 +547,7 @@ class StoreHelper (Helper):
 class MinerFsHelper (Helper):
 
     PROCESS_NAME = 'tracker-miner-fs'
-    PROCESS_PATH = os.path.join (cfg.EXEC_PREFIX, "tracker-miner-fs")
+    PROCESS_PATH = cfg.TRACKER_MINER_FS_PATH
     BUS_NAME = cfg.MINERFS_BUSNAME
 
     FLAGS = ['--initial-sleep=0']
@@ -567,11 +572,12 @@ class MinerFsHelper (Helper):
 class ExtractorHelper (Helper):
 
     PROCESS_NAME = 'tracker-extract'
+    PROCESS_PATH = cfg.TRACKER_EXTRACT_PATH
     BUS_NAME = cfg.TRACKER_EXTRACT_BUSNAME
 
 
 class WritebackHelper (Helper):
 
     PROCESS_NAME = 'tracker-writeback'
-    PROCESS_PATH = os.path.join (cfg.EXEC_PREFIX, 'tracker-writeback')
+    PROCESS_PATH = cfg.TRACKER_WRITEBACK_PATH
     BUS_NAME = cfg.WRITEBACK_BUSNAME

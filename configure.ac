@@ -436,6 +436,9 @@ if test "$native_win32" = "yes" ; then
    AC_DEFINE(OS_WIN32, 1, [Define if we are on win32])
 fi
 
+AC_SUBST(FUNCTIONAL_TESTS_ONTOLOGIES_DIR, "${datadir}/tracker-tests/test-ontologies")
+AC_SUBST(FUNCTIONAL_TESTS_TRACKER_STORE_PATH, "${libexecdir}/tracker-store")
+
 ####################################################################
 # Check if we should disable the journal
 ####################################################################
@@ -1808,8 +1811,8 @@ AC_CONFIG_FILES([
 	tests/libtracker-miners-common/Makefile
 	tests/libtracker-extract/Makefile
 	tests/functional-tests/Makefile
+	tests/functional-tests/configuration.json
 	tests/functional-tests/common/Makefile
-	tests/functional-tests/common/utils/configuration.py
 	tests/functional-tests/common/utils/Makefile
 	tests/functional-tests/unittest2/Makefile
 	tests/functional-tests/test-extraction-data/Makefile

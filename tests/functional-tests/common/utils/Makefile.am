@@ -13,6 +13,4 @@ utils_SCRIPTS =                                        \
 	options.py				       \
 	system.py
 
-EXTRA_DIST =                                           \
-	configuration.py.in                            \
-	$(utils_SCRIPTS)
+EXTRA_DIST = $(utils_SCRIPTS)

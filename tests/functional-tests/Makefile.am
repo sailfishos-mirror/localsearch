@@ -9,33 +9,16 @@ SUBDIRS = \
 configdir = $(datadir)/tracker-tests
 
 config_DATA = \
+	configuration.json \
 	trackertest
 
 config_SCRIPTS = \
 	__init__.py \
-	$(slow_tests) \
-	$(standard_tests)
+	$(tests)
 
-standard_tests = \
-	01-insertion.py \
-	02-sparql-bugs.py
-
-standard_tests += \
-	04-group-concat.py \
-	05-coalesce.py \
-	06-distance.py \
-	07-graph.py \
-	08-unique-insertions.py \
-	09-concurrent-query.py \
-	14-signals.py \
-	15-statistics.py \
-	16-collation.py \
-	17-ontology-changes.py  \
-	200-backup-restore.py \
+tests = \
 	300-miner-basic-ops.py \
 	301-miner-resource-removal.py
-
-standard_tests += \
 	400-extractor-metadata.py \
 	410-extractor-decorator.py \
 	500-writeback.py \
@@ -43,24 +26,20 @@ standard_tests += \
 	600-applications-camera.py \
 	601-applications-sync.py
 
-slow_tests = \
-	12-transactions.py \
-	13-threaded-store.py
-
 TEST_RUNNER = $(top_srcdir)/tests/functional-tests/test-runner.sh
 
-functional-test: ${standard_tests}
-	for test in ${standard_tests} ; do \
-		$(TEST_RUNNER) python $(top_srcdir)/tests/functional-tests/$$test; \
-	done
-
-functional-test-slow: ${slow_tests}
-	@for test in ${slow_tests} ; do \
+functional-test: ${tests}
+	for test in ${tests} ; do \
+		export DCONF_PROFILE=$(abs_srcdir)/trackertest ; \
+		export TRACKER_EXTRACTORS_DIR=$(top_builddir)/src/tracker-extract; \
+		export TRACKER_EXTRACTOR_RULES_DIR=$(top_srcdir)/src/tracker-extract; \
+		export TRACKER_FUNCTIONAL_TEST_CONFIG=$(top_builddir)/tests/functional-tests/configuration.json ; \
 		$(TEST_RUNNER) python $(top_srcdir)/tests/functional-tests/$$test; \
 	done
 
 EXTRA_DIST = \
 	$(config_SCRIPTS) \
 	$(config_DATA) \
+	configuration.json.in \
 	test-runner.sh \
 	meson.build

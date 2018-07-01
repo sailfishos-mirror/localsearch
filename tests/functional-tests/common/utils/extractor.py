@@ -258,7 +258,7 @@ def get_tracker_extract_output(filename, mime_type=None):
     Runs `tracker-extract --file` to extract metadata from a file.
     """
 
-    tracker_extract = os.path.join (cfg.EXEC_PREFIX, 'tracker-extract')
+    tracker_extract = os.path.join (cfg.TRACKER_EXTRACT_PATH)
     command = [tracker_extract, '--file', filename]
     if mime_type is not None:
         command.extend(['--mime', mime_type])
@@ -267,8 +267,8 @@ def get_tracker_extract_output(filename, mime_type=None):
         log ('Running: %s' % ' '.join(command))
         output = subprocess.check_output (command)
     except subprocess.CalledProcessError as e:
-        raise Exception("Error %i from tracker-extract, output: %s" %
-                        (e.returncode, e.output))
+        raise Exception("Error %i from %s, output: %s" %
+                        (e.returncode, tracker_extract, e.output))
 
     parser = ExtractorParser()
     return parser.parse_tracker_extract_output(output)
