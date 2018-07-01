@@ -25,8 +25,10 @@ if not tracker_sparql.found() or not tracker_miner.found()
   tracker_miner = tracker_subproject.get_variable('tracker_miner_dep')
 
   tracker_store = tracker_subproject.get_variable('tracker_store')
+  tracker_store_path = tracker_store.full_path()
 else
   tracker_store = find_program(join_paths(get_option('prefix'), get_option('libexecdir'), 'tracker-store'))
+  tracker_store_path = find_program(join_paths(get_option('prefix'), get_option('libexecdir'), 'tracker-store')).path()
 endif
 
 avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
@@ -327,7 +329,7 @@ conf.set('FUNCTIONAL_TESTS_TRACKER_EXTRACT_PATH', join_paths(meson.current_build
 conf.set('FUNCTIONAL_TESTS_TRACKER_MINER_FS_PATH', join_paths(meson.current_build_dir(), 'src', 'miners', 'fs', 'tracker-miner-fs'))
 conf.set('FUNCTIONAL_TESTS_TRACKER_WRITEBACK_PATH', join_paths(meson.current_build_dir(), 'src', 'tracker-writeback', 'tracker-writeback'))
 
-conf.set('FUNCTIONAL_TESTS_TRACKER_STORE_PATH', tracker_store.path())
+conf.set('FUNCTIONAL_TESTS_TRACKER_STORE_PATH', tracker_store_path)
 
 configure_file(input: 'config.h.meson.in',
                output: 'config.h',
