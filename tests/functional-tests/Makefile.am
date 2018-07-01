@@ -3,8 +3,7 @@ SUBDIRS = \
 	test-extraction-data \
 	test-writeback-data \
 	test-apps-data \
-	unittest2 \
-	test-ontologies
+	unittest2
 
 configdir = $(datadir)/tracker-tests
 

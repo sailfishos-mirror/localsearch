@@ -436,7 +436,6 @@ if test "$native_win32" = "yes" ; then
    AC_DEFINE(OS_WIN32, 1, [Define if we are on win32])
 fi
 
-AC_SUBST(FUNCTIONAL_TESTS_ONTOLOGIES_DIR, "${datadir}/tracker-tests/test-ontologies")
 AC_SUBST(FUNCTIONAL_TESTS_TRACKER_STORE_PATH, "${libexecdir}/tracker-store")
 
 ####################################################################
@@ -1822,19 +1821,6 @@ AC_CONFIG_FILES([
 	tests/functional-tests/test-extraction-data/video/Makefile
 	tests/functional-tests/test-extraction-data/playlists/Makefile
 	tests/functional-tests/test-writeback-data/Makefile
-	tests/functional-tests/test-ontologies/Makefile
-	tests/functional-tests/test-ontologies/basic/Makefile
-	tests/functional-tests/test-ontologies/property-range-int-to-string/Makefile
-	tests/functional-tests/test-ontologies/property-range-string-to-date/Makefile
-	tests/functional-tests/test-ontologies/cardinality/Makefile
-	tests/functional-tests/test-ontologies/notify/Makefile
-	tests/functional-tests/test-ontologies/indexed/Makefile
-	tests/functional-tests/test-ontologies/add-class/Makefile
-	tests/functional-tests/test-ontologies/add-prop/Makefile
-	tests/functional-tests/test-ontologies/add-domainIndex/Makefile
-	tests/functional-tests/test-ontologies/superclass-remove/Makefile
-	tests/functional-tests/test-ontologies/property-promotion/Makefile
-	tests/functional-tests/test-ontologies/basic-future/Makefile
 	tests/functional-tests/test-apps-data/Makefile
 	tests/Makefile
 	tests/tracker-writeback/Makefile
