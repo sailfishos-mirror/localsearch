@@ -364,6 +364,12 @@ main (int argc, char *argv[])
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_parse (context, &argc, &argv, &error);
 
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		g_error_free (error);
+		return EXIT_FAILURE;
+	}
+
 	if (!filename && mime_type) {
 		gchar *help;
 
