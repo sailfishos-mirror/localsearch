@@ -1,22 +1,6 @@
 test_runner = find_program('test-runner.sh')
 
 functional_tests = [
-  '01-insertion',
-  '02-sparql-bugs',
-  '03-fts-functions',
-  '04-group-concat',
-  '05-coalesce',
-  '06-distance',
-  '07-graph',
-  '08-unique-insertions',
-  '09-concurrent-query',
-  '12-transactions',
-  '13-threaded-store',
-  '14-signals',
-  '15-statistics',
-  '16-collation',
-  '17-ontology-changes',
-  '200-backup-restore',
   '300-miner-basic-ops',
   '301-miner-resource-removal',
   '310-fts-indexing',
