@@ -283,6 +283,7 @@ conf = configuration_data()
 
 # Config that goes in config.h
 conf.set('DISABLE_JOURNAL', get_option('journal') == false)
+conf.set('GUARANTEE_METADATA', get_option('guarantee_metadata') == true)
 conf.set('USING_UNZIPPSFILES', get_option('unzip_ps_gz_files') == true)
 
 conf.set('HAVE_ENCA', charset_library_name == 'enca')
