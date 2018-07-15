@@ -17,15 +17,15 @@ extract_info_test = executable('tracker-extract-info-test',
 )
 test('extract-info-test', extract_info_test)
 
-utils_test = executable('tracker-test-utils',
-  'tracker-test-utils.c',
+utils_test = executable('tracker-utils-test',
+  'tracker-utils-test.c',
   dependencies: [tracker_miners_common_dep, tracker_extract_dep],
   c_args: test_c_args,
 )
 test('extract-utils', utils_test)
 
-xmp_test = executable('tracker-test-xmp',
-  'tracker-test-xmp.c',
+xmp_test = executable('tracker-xmp-test',
+  'tracker-xmp-test.c',
   dependencies: [tracker_miners_common_dep, tracker_extract_dep],
   c_args: test_c_args,
 )
