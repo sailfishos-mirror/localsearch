@@ -375,6 +375,11 @@ if get_option('docs')
   subdir('docs')
 endif
 
+test_c_args = tracker_c_args + [
+  '-DTOP_BUILDDIR="@0@/"'.format(meson.build_root()),
+  '-DTOP_SRCDIR="@0@/"'.format(meson.source_root()),
+]
+
 subdir('tests')
 
 subdir('po')
