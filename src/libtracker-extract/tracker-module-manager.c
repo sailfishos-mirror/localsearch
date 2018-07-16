@@ -126,10 +126,6 @@ load_extractor_rule (GKeyFile  *key_file,
 		rule.patterns = g_list_prepend (rule.patterns, pattern);
 	}
 
-	if (G_UNLIKELY (!rules)) {
-		rules = g_array_new (FALSE, TRUE, sizeof (RuleInfo));
-	}
-
 	g_array_append_val (rules, rule);
 	g_strfreev (mimetypes);
 	g_free (module_path);
@@ -174,6 +170,8 @@ tracker_extract_module_manager_init (void)
 	}
 
 	g_message ("Loading extractor rules... (%s)", extractors_dir);
+
+	rules = g_array_new (FALSE, TRUE, sizeof (RuleInfo));
 
 	for (l = files; l; l = l->next) {
 		GKeyFile *key_file;
