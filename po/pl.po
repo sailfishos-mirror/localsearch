@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-07-16 22:25+0200\n"
-"PO-Revision-Date: 2018-07-16 22:27+0200\n"
+"POT-Creation-Date: 2018-07-17 15:58+0200\n"
+"PO-Revision-Date: 2018-07-17 15:59+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -586,8 +586,8 @@ msgid "MODULE"
 msgstr "MODUŁ"
 
 #: ../src/tracker-extract/tracker-main.c:98
-msgid "Output results format: “sparql”, “turtle” or “jsonld”"
-msgstr "Format wyników wyjścia: „sparql”, „turtle” lub „jsonld”"
+msgid "Output results format: “sparql”, “turtle” or “json-ld”"
+msgstr "Format wyników wyjścia: „sparql”, „turtle” lub „json-ld”"
 
 #: ../src/tracker-extract/tracker-main.c:99
 msgid "FORMAT"
