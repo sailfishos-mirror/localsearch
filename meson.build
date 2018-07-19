@@ -92,7 +92,7 @@ have_tracker_miner_rss = get_option('miner_rss')
 have_tracker_writeback = get_option('writeback')
 
 if have_tracker_miner_rss
-  libgrss = dependency('libgrss', version: '> 0.7', required: false)
+  libgrss = dependency('libgrss', version: '>= 0.7', required: false)
   if not libgrss.found()
     error('libgrss is required for the RSS feed miner. You can disable ' +
           'this miner by passing -Dminer_rss=false if needed.')
