@@ -65,7 +65,8 @@ def expandvars (variable):
     result = variable
     for var, value in [("${datarootdir}", RAW_DATAROOT_DIR),
                        ("${exec_prefix}", RAW_EXEC_PREFIX),
-                       ("${prefix}", PREFIX)]:
+                       ("${prefix}", PREFIX),
+                       ("@top_builddir@", TOP_BUILDDIR)]:
         result = result.replace (var, value)
 
 
@@ -76,29 +77,31 @@ def expandvars (variable):
 PREFIX = config['PREFIX']
 RAW_EXEC_PREFIX = config['RAW_EXEC_PREFIX']
 RAW_DATAROOT_DIR = config['RAW_DATAROOT_DIR']
+TOP_BUILDDIR = os.environ['TRACKER_FUNCTIONAL_TEST_BUILD_DIR']
 
 TRACKER_EXTRACT_PATH = os.path.normpath(expandvars(config['TRACKER_EXTRACT_PATH']))
 TRACKER_MINER_FS_PATH = os.path.normpath(expandvars(config['TRACKER_MINER_FS_PATH']))
 TRACKER_STORE_PATH = os.path.normpath(expandvars(config['TRACKER_STORE_PATH']))
 TRACKER_WRITEBACK_PATH = os.path.normpath(expandvars(config['TRACKER_WRITEBACK_PATH']))
 
+DATADIR = os.path.normpath(expandvars(config['RAW_DATAROOT_DIR']))
+
 TEST_TMP_DIR = os.path.join (os.environ["HOME"], "tracker-tests")
 
 TEST_MONITORED_TMP_DIR = TEST_TMP_DIR
 
 if TEST_TMP_DIR.startswith('/tmp'):
-	if os.environ.has_key('REAL_HOME'):
-		TEST_MONITORED_TMP_DIR = os.path.join (os.environ["REAL_HOME"], "tracker-tests")
-	else:
-		print ("HOME is in the /tmp prefix - this will cause tests that rely " +
-		       "on filesystem monitoring to fail as changes in that prefix are " +
-		       "ignored.")
+    if os.environ.has_key('REAL_HOME'):
+        # Note that this MUST NOT be a hidden directory, as Tracker is
+        # hardcoded to ignore those. The 'ignore-files' configuration option
+        # can be changed, but the 'filter-hidden' property of
+        # TrackerIndexingTree is hardwired to be True at present :/
+        TEST_MONITORED_TMP_DIR = os.path.join (os.environ["REAL_HOME"], "tracker-tests")
+    else:
+        print ("HOME is in the /tmp prefix - this will cause tests that rely " +
+                "on filesystem monitoring to fail as changes in that prefix are " +
+                "ignored.")
 
-
-BUILD_DIR = os.environ.get('TRACKER_FUNCTIONAL_TEST_BUILD_DIR')
 
 def generated_ttl_dir():
-    if BUILD_DIR:
-        return os.path.join(BUILD_DIR, 'tests', 'functional-tests', 'ttl')
-    else:
-        return 'ttl'
+    return os.path.join(TOP_BUILD_DIR, 'tests', 'functional-tests', 'ttl')

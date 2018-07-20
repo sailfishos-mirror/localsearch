@@ -37,16 +37,27 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
     if mime_type is not None:
         command.extend(['--mime', mime_type])
 
+    # We depend on parsing the output, so verbosity MUST be 0.
+    env = os.environ.copy()
+    env['TRACKER_VERBOSITY'] = '0'
+
+    log ('Running: %s' % ' '.join(command))
+    p = subprocess.Popen (command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = p.communicate()
+
+    if p.returncode != 0:
+        raise RuntimeError(
+            "tracker-extract returned non-zero exit code: %s\n"
+            "Error output:\n%s\n" % (p.returncode, stderr.decode('unicode-escape').strip()))
+
+    if len(stderr) > 0:
+        log ("Error output from tracker-extract:\n%s" % stderr.decode('unicode-escape').strip())
+
     try:
-        log ('Running: %s' % ' '.join(command))
-        output = subprocess.check_output (command)
-    except subprocess.CalledProcessError as e:
-        raise Exception("Error %i from %s, output, see stderr for details" %
-                        (e.returncode, tracker_extract))
-    try:
+        output = stdout.decode('utf-8')
         data = json.loads(output)
     except ValueError as e:
-        raise RuntimeError("Invalid JSON returned by tracker-extract: "
-                        "%s.\nOutput was: %s" % (e, output))
+        raise RuntimeError("tracker-extract did not return valid JSON data: %s\n"
+                           "Output was: %s" % (e, output))
 
     return data

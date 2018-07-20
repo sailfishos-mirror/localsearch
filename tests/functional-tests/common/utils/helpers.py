@@ -20,6 +20,7 @@
 from gi.repository import Gio
 from gi.repository import GLib
 from gi.repository import GObject
+import atexit
 import os
 import sys
 import subprocess
@@ -27,6 +28,7 @@ import time
 import re
 
 import configuration as cfg
+import mainloop
 import options
 
 class NoMetadataException (Exception):
@@ -37,6 +39,16 @@ REASONABLE_TIMEOUT = 30
 def log (message):
     if options.is_verbose ():
         print (message)
+
+
+_process_list = []
+
+def _cleanup_processes():
+    for process in _process_list:
+        log("helpers._cleanup_processes: stopping %s" % process)
+        process.stop()
+atexit.register(_cleanup_processes)
+
 
 class Helper:
     """
@@ -61,23 +73,14 @@ class Helper:
         self.process = None
         self.available = False
 
-        self.loop = GObject.MainLoop ()
-        self.install_glib_excepthook(self.loop)
+        self.loop = mainloop.MainLoop()
 
         self.bus = Gio.bus_get_sync(Gio.BusType.SESSION, None)
 
-    def install_glib_excepthook(self, loop):
-        """
-        Handler to abort test if an exception occurs inside the GLib main loop.
-        """
-        old_hook = sys.excepthook
-        def new_hook(etype, evalue, etb):
-            old_hook(etype, evalue, etb)
-            GLib.MainLoop.quit(loop)
-            sys.exit(1)
-        sys.excepthook = new_hook
-
     def _start_process (self):
+        global _process_list
+        _process_list.append(self)
+
         path = self.PROCESS_PATH
         flags = getattr (self,
                          "FLAGS",
@@ -107,7 +110,7 @@ class Helper:
         self.loop.quit()
 
     def _process_watch_cb (self):
-        if self.process_watch_timeout == 0:
+        if self.process_watch_timeout == 0 or self.process is None:
             # The GLib seems to call the timeout after we've removed it
             # sometimes, which causes errors unless we detect it.
             return False
@@ -143,7 +146,7 @@ class Helper:
         self._bus_name_watch_id = Gio.bus_watch_name_on_connection(
             self.bus, self.BUS_NAME, Gio.BusNameWatcherFlags.NONE,
             self._bus_name_appeared, self._bus_name_vanished)
-        self.loop.run()
+        self.loop.run_checked()
 
         if options.is_manual_start():
             print ("Start %s manually" % self.PROCESS_NAME)
@@ -160,11 +163,13 @@ class Helper:
         self.abort_if_process_exits_with_status_0 = True
 
         # Run the loop until the bus name appears, or the process dies.
-        self.loop.run ()
+        self.loop.run_checked ()
 
         self.abort_if_process_exits_with_status_0 = False
 
     def stop (self):
+        global _process_list
+
         if self.process is None:
             # Seems that it didn't even start...
             return
@@ -184,15 +189,19 @@ class Helper:
                     self.process.kill()
                     self.process.wait()
 
-        log ("[%s] stopped." % self.PROCESS_NAME)
+            log ("[%s] stopped." % self.PROCESS_NAME)
 
-        # Run the loop until the bus name appears, or the process dies.
-        self.loop.run ()
-        Gio.bus_unwatch_name(self._bus_name_watch_id)
+            # Run the loop until the bus name disappears, or the process dies.
+            self.loop.run_checked ()
+            Gio.bus_unwatch_name(self._bus_name_watch_id)
 
         self.process = None
+        _process_list.remove(self)
+
 
     def kill (self):
+        global _process_list
+
         if options.is_manual_start():
             log ("kill(): ignoring, because process was started manually.")
             return
@@ -200,10 +209,11 @@ class Helper:
         self.process.kill ()
 
         # Name owner changed callback should take us out from this loop
-        self.loop.run ()
+        self.loop.run_checked ()
         Gio.bus_unwatch_name(self._bus_name_watch_id)
 
         self.process = None
+        _process_list.remove(self)
 
         log ("[%s] killed." % self.PROCESS_NAME)
 
@@ -377,7 +387,7 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.inserts_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run ()
+            self.loop.run_checked ()
             self.inserts_match_function = None
 
         if self.graph_updated_timed_out:
@@ -418,7 +428,7 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.deletes_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run ()
+            self.loop.run_checked ()
             self.deletes_match_function = None
 
         if self.graph_updated_timed_out:
@@ -437,33 +447,41 @@ class StoreHelper (Helper):
 
         property_id = self.get_resource_id_by_uri(property_uri)
 
-        def find_property_change (inserts_list):
+        def find_property_change (change_list):
             matched = False
             remaining_events = []
 
-            for insert in inserts_list:
-                if insert[1] == subject_id and insert[2] == property_id:
-                    log("Matched property change: %s" % str(insert))
+            for change in change_list:
+                if change[1] == subject_id and change[2] == property_id:
+                    log("Matched property change: %s" % str(change))
                     matched = True
                 else:
-                    remaining_events += [insert]
+                    remaining_events += [change]
 
             return matched, remaining_events
 
-        def match_cb (inserts_list):
+        def match_inserts_cb (inserts_list):
             matched, remaining_events = find_property_change (inserts_list)
+            exit_loop = matched
+            return exit_loop, remaining_events
+
+        def match_deletes_cb (deletes_list):
+            matched, remaining_events = find_property_change (deletes_list)
             exit_loop = matched
             return exit_loop, remaining_events
 
         # Check the list of previously received events for matches
         (existing_match, self.inserts_list) = find_property_change (self.inserts_list)
+        (existing_match, self.deletes_list) = find_property_change (self.deletes_list)
 
         if not existing_match:
             self._enable_await_timeout ()
-            self.inserts_match_function = match_cb
+            self.inserts_match_function = match_inserts_cb
+            self.deletes_match_function = match_deletes_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run ()
+            self.loop.run_checked ()
             self.inserts_match_function = None
+            self.deletes_match_function = None
 
         if self.graph_updated_timed_out:
             raise Exception ("Timeout waiting for property change, subject %i "
