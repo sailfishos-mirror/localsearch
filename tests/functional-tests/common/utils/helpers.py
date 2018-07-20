@@ -189,11 +189,11 @@ class Helper:
                     self.process.kill()
                     self.process.wait()
 
-        log ("[%s] stopped." % self.PROCESS_NAME)
+            log ("[%s] stopped." % self.PROCESS_NAME)
 
-        # Run the loop until the bus name appears, or the process dies.
-        self.loop.run_checked ()
-        Gio.bus_unwatch_name(self._bus_name_watch_id)
+            # Run the loop until the bus name disappears, or the process dies.
+            self.loop.run_checked ()
+            Gio.bus_unwatch_name(self._bus_name_watch_id)
 
         self.process = None
         _process_list.remove(self)
