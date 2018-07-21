@@ -31,6 +31,10 @@ import os
 import unittest2 as ut
 
 
+NFO_DOCUMENT = 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Document'
+NMM_MUSIC_PIECE = 'http://www.tracker-project.org/temp/nmm#MusicPiece'
+
+
 class MinerResourceRemovalTest (CommonTrackerMinerTest):
 
     def prepare_directories (self):
@@ -46,7 +50,7 @@ class MinerResourceRemovalTest (CommonTrackerMinerTest):
 
         self.tracker.update (sparql)
 
-        return self.tracker.await_resource_inserted (rdf_class = 'nmm:MusicPiece',
+        return self.tracker.await_resource_inserted (rdf_class = NMM_MUSIC_PIECE,
                                                      title = title)
 
     def create_test_file (self, file_name):
@@ -56,7 +60,7 @@ class MinerResourceRemovalTest (CommonTrackerMinerTest):
         file.write ("Test")
         file.close ()
 
-        return self.tracker.await_resource_inserted (rdf_class = 'nfo:Document',
+        return self.tracker.await_resource_inserted (rdf_class = NFO_DOCUMENT,
                                                      url = self.uri(file_name))
 
     def test_01_file_deletion (self):
@@ -72,8 +76,8 @@ class MinerResourceRemovalTest (CommonTrackerMinerTest):
 
         os.unlink (self.path ("test-monitored/test_1.txt"))
 
-        self.tracker.await_resource_deleted (file_1_id)
-        self.tracker.await_resource_deleted (ie_1_id,
+        self.tracker.await_resource_deleted (NFO_DOCUMENT, file_1_id)
+        self.tracker.await_resource_deleted (NFO_DOCUMENT, ie_1_id,
                                              "Associated logical resource failed to be deleted " \
                                              "when its containing file was removed.")
 

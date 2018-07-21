@@ -32,6 +32,8 @@ TEST_FILE_JPEG = "writeback-test-1.jpeg"
 TEST_FILE_TIFF = "writeback-test-2.tif"
 TEST_FILE_PNG = "writeback-test-4.png"
 
+NFO_IMAGE = 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Image'
+
 WRITEBACK_TMP_DIR = os.path.join (cfg.TEST_MONITORED_TMP_DIR, "writeback")
 
 index_dirs = [WRITEBACK_TMP_DIR]
@@ -92,7 +94,7 @@ class CommonTrackerWritebackTest (ut.TestCase):
             # tracker-extract. The extractor adds nie:contentCreated for
             # image resources, so know once this property is set the
             # extraction is complete.
-            self.system.store.await_resource_inserted('nfo:Image', url=url, required_property='nfo:width')
+            self.system.store.await_resource_inserted(NFO_IMAGE, url=url, required_property='nfo:width')
 
         await_resource_extraction (self.get_test_filename_jpeg())
         await_resource_extraction (self.get_test_filename_tiff())

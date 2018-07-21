@@ -33,6 +33,8 @@ import unittest2 as ut
 from common.utils.helpers import log
 from common.utils.minertest import CommonTrackerMinerTest
 
+NFO_TEXT_DOCUMENT = 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#TextDocument'
+
 class MinerCrawlTest (CommonTrackerMinerTest):
     """
     Test cases to check if miner is able to monitor files that are created, deleted or moved
@@ -98,7 +100,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         dest = os.path.join (self.datadir, "test-monitored", "file0.txt")
         shutil.copyfile (source, dest)
 
-        dest_id, dest_urn = self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(dest))
+        dest_id, dest_urn = self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(dest))
 
         # verify if miner indexed this file.
         result = self.__get_text_documents ()
@@ -145,7 +147,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         dest = os.path.join (self.datadir, "test-monitored", "dir1", "dir2", "file-test04.txt")
         shutil.copyfile (source, dest)
 
-        dest_id, dest_urn = self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(dest))
+        dest_id, dest_urn = self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(dest))
 
         result = self.__get_text_documents ()
         self.assertEquals (len (result), 4)
@@ -168,7 +170,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         source = os.path.join (self.datadir, "test-no-monitored", "file0.txt")
         dest = os.path.join (self.datadir, "test-monitored", "dir1", "file-test05.txt")
         shutil.move (source, dest)
-        dest_id, dest_urn = self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(dest))
+        dest_id, dest_urn = self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(dest))
 
         result = self.__get_text_documents ()
         self.assertEquals (len (result), 4)
@@ -205,7 +207,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
 
         # Restore the file
         shutil.move (dest, source)
-        self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(source))
+        self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(source))
         self.assertEquals (3, self.tracker.count_instances ("nfo:TextDocument"))
 
 
@@ -269,7 +271,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         f = open (victim, "w")
         f.write ("Don't panic, everything is fine")
         f.close ()
-        self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(victim))
+        self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(victim))
 
     def test_09_deletion_directory (self):
         """
@@ -297,7 +299,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
             writer = open (filename, "w")
             writer.write ("Don't panic, everything is fine")
             writer.close ()
-            self.system.store.await_resource_inserted ('nfo:TextDocument', self.uri(f))
+            self.system.store.await_resource_inserted (NFO_TEXT_DOCUMENT, self.uri(f))
 
         # Check everything is fine
         result = self.__get_text_documents ()
