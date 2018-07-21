@@ -444,37 +444,30 @@ class StoreHelper (Helper):
 
         property_id = self.get_resource_id_by_uri(property_uri)
 
-        def find_property_change (change_list):
+        def find_property_change (inserts_list):
             matched = False
             remaining_events = []
 
-            for change in change_list:
-                if change[1] == subject_id and change[2] == property_id:
-                    log("Matched property change: %s" % str(change))
+            for insert in inserts_list:
+                if insert[1] == subject_id and insert[2] == property_id:
+                    log("Matched property change: %s" % str(insert))
                     matched = True
                 else:
-                    remaining_events += [change]
+                    remaining_events += [insert]
 
             return matched, remaining_events
 
-        def match_inserts_cb (inserts_list):
+        def match_cb (inserts_list):
             matched, remaining_events = find_property_change (inserts_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        def match_deletes_cb (deletes_list):
-            matched, remaining_events = find_property_change (deletes_list)
             exit_loop = matched
             return exit_loop, remaining_events
 
         # Check the list of previously received events for matches
         (existing_match, self.inserts_list) = find_property_change (self.inserts_list)
-        (existing_match, self.deletes_list) = find_property_change (self.deletes_list)
 
         if not existing_match:
             self._enable_await_timeout ()
-            self.inserts_match_function = match_inserts_cb
-            self.deletes_match_function = match_deletes_cb
+            self.inserts_match_function = match_cb
             # Run the event loop until the correct notification arrives
             try:
                 self.loop.run_checked ()
@@ -482,7 +475,6 @@ class StoreHelper (Helper):
                 raise GraphUpdateTimeoutException(
                     "Timeout waiting for property change, subject %i property %s" % (subject_id, property_uri))
             self.inserts_match_function = None
-            self.deletes_match_function = None
 
     def query (self, query, timeout=5000, **kwargs):
         return self.resources.SparqlQuery ('(s)', query, timeout=timeout, **kwargs)
