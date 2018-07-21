@@ -218,6 +218,9 @@ class Helper:
         log ("[%s] killed." % self.PROCESS_NAME)
 
 
+class GraphUpdateTimeoutException(RuntimeError):
+    pass
+
 class StoreHelper (Helper):
     """
     Wrapper for the Store API
@@ -281,13 +284,9 @@ class StoreHelper (Helper):
         self.deletes_list = []
         self.inserts_match_function = None
         self.deletes_match_function = None
-        self.graph_updated_timed_out = False
 
     def _graph_updated_timeout_cb (self):
-        # Don't fail here, exceptions don't get propagated correctly
-        # from the GMainLoop
-        self.graph_updated_timed_out = True
-        self.loop.quit ()
+        raise GraphUpdateTimeoutException()
 
     def _graph_updated_cb (self, class_name, deletes_list, inserts_list):
         """
@@ -387,15 +386,16 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.inserts_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
-            self.inserts_match_function = None
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException as e:
+                raise GraphUpdateTimeoutException("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title))
 
-        if self.graph_updated_timed_out:
-            raise Exception ("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title))
+            self.inserts_match_function = None
 
         return (self.matched_resource_id, self.matched_resource_urn)
 
-    def await_resource_deleted (self, id, fail_message = None):
+    def await_resource_deleted (self, id):
         """
         Block until we are notified of a resources deletion
         """
@@ -428,14 +428,11 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.deletes_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException:
+                raise GraphUpdateTimeoutException ("Resource %i has not been deleted." % id)
             self.deletes_match_function = None
-
-        if self.graph_updated_timed_out:
-            if fail_message is not None:
-                raise Exception (fail_message)
-            else:
-                raise Exception ("Resource %i has not been deleted." % id)
 
         return
 
@@ -479,13 +476,13 @@ class StoreHelper (Helper):
             self.inserts_match_function = match_inserts_cb
             self.deletes_match_function = match_deletes_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException:
+                raise GraphUpdateTimeoutException(
+                    "Timeout waiting for property change, subject %i property %s" % (subject_id, property_uri))
             self.inserts_match_function = None
             self.deletes_match_function = None
-
-        if self.graph_updated_timed_out:
-            raise Exception ("Timeout waiting for property change, subject %i "
-                             "property %s" % (subject_id, property_uri))
 
     def query (self, query, timeout=5000, **kwargs):
         return self.resources.SparqlQuery ('(s)', query, timeout=timeout, **kwargs)
