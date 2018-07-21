@@ -27,6 +27,7 @@ from gi.repository import GLib
 
 import os
 import shutil
+import tempfile
 import time
 
 import common.utils.configuration as cfg
@@ -41,7 +42,7 @@ CORRUPT_FILE = os.path.join(
 VALID_FILE = os.path.join(
     os.path.dirname(__file__), 'test-extraction-data', 'audio',
     'audio-test-1.mp3')
-VALID_FILE_CLASS = 'nmm:MusicPiece'
+VALID_FILE_CLASS = 'http://www.tracker-project.org/temp/nmm#MusicPiece'
 VALID_FILE_TITLE = 'Simply Juvenile'
 
 TRACKER_EXTRACT_FAILURE_DATA_SOURCE = 'tracker:extractor-failure-data-source'
@@ -65,6 +66,9 @@ class ExtractorDecoratorTest(ut.TestCase):
                 'index-single-directories': GLib.Variant.new_strv([self.datadir]),
                 'index-optical-discs': GLib.Variant.new_boolean(False),
                 'index-removable-devices': GLib.Variant.new_boolean(False),
+            },
+            'org.freedesktop.Tracker.Store': {
+                'graphupdated-delay': GLib.Variant('i', 100)
             }
         }
 
@@ -76,7 +80,6 @@ class ExtractorDecoratorTest(ut.TestCase):
 
         shutil.rmtree(self.datadir)
 
-    @ut.skip("Currently fails; possible regression")
     def test_reextraction(self):
         """Tests whether known files are still re-extracted on user request."""
         miner_fs = self.system.miner_fs
@@ -92,7 +95,7 @@ class ExtractorDecoratorTest(ut.TestCase):
         store.update(
             'DELETE { <%s> nie:title ?title }'
             ' WHERE { <%s> nie:title ?title }' % (file_urn, file_urn))
-        store.await_property_changed(file_id, 'nie:title')
+        store.await_property_changed(VALID_FILE_CLASS, file_id, 'nie:title')
         assert not store.ask('ASK { <%s> nie:title ?title }' % file_urn)
 
         log("Sending re-index request")
@@ -101,7 +104,7 @@ class ExtractorDecoratorTest(ut.TestCase):
 
         # The extractor should reindex the file and re-add the metadata that we
         # deleted, so we should see the nie:title property change.
-        store.await_property_changed(file_id, 'nie:title')
+        store.await_property_changed(VALID_FILE_CLASS, file_id, 'nie:title')
 
         title_result = store.query('SELECT ?title { <%s> nie:title ?title }' % file_urn)
         assert len(title_result) == 1

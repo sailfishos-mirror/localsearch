@@ -218,6 +218,9 @@ class Helper:
         log ("[%s] killed." % self.PROCESS_NAME)
 
 
+class GraphUpdateTimeoutException(RuntimeError):
+    pass
+
 class StoreHelper (Helper):
     """
     Wrapper for the Store API
@@ -229,8 +232,6 @@ class StoreHelper (Helper):
     PROCESS_NAME = "tracker-store"
     PROCESS_PATH = cfg.TRACKER_STORE_PATH
     BUS_NAME = cfg.TRACKER_BUSNAME
-
-    graph_updated_handler_id = 0
 
     def start (self):
         Helper.start (self)
@@ -277,17 +278,14 @@ class StoreHelper (Helper):
     # not yet happened.
 
     def reset_graph_updates_tracking (self):
+        self.class_to_track = None
         self.inserts_list = []
         self.deletes_list = []
         self.inserts_match_function = None
         self.deletes_match_function = None
-        self.graph_updated_timed_out = False
 
     def _graph_updated_timeout_cb (self):
-        # Don't fail here, exceptions don't get propagated correctly
-        # from the GMainLoop
-        self.graph_updated_timed_out = True
-        self.loop.quit ()
+        raise GraphUpdateTimeoutException()
 
     def _graph_updated_cb (self, class_name, deletes_list, inserts_list):
         """
@@ -295,21 +293,26 @@ class StoreHelper (Helper):
         """
         exit_loop = False
 
-        if inserts_list is not None:
-            if self.inserts_match_function is not None:
-                # The match function will remove matched entries from the list
-                (exit_loop, inserts_list) = self.inserts_match_function (inserts_list)
-            self.inserts_list += inserts_list
+        if class_name == self.class_to_track:
+            log("GraphUpdated for %s: %i deletes, %i inserts" % (class_name, len(deletes_list), len(inserts_list)))
 
-        if deletes_list is not None:
-            if self.deletes_match_function is not None:
-                (exit_loop, deletes_list) = self.deletes_match_function (deletes_list)
-            self.deletes_list += deletes_list
+            if inserts_list is not None:
+                if self.inserts_match_function is not None:
+                    # The match function will remove matched entries from the list
+                    (exit_loop, inserts_list) = self.inserts_match_function (inserts_list)
+                self.inserts_list += inserts_list
 
-        if exit_loop:
-            GLib.source_remove(self.graph_updated_timeout_id)
-            self.graph_updated_timeout_id = 0
-            self.loop.quit ()
+            if not exit_loop and deletes_list is not None:
+                if self.deletes_match_function is not None:
+                    (exit_loop, deletes_list) = self.deletes_match_function (deletes_list)
+                self.deletes_list += deletes_list
+
+            if exit_loop:
+                GLib.source_remove(self.graph_updated_timeout_id)
+                self.graph_updated_timeout_id = 0
+                self.loop.quit ()
+        else:
+            log("Ignoring GraphUpdated for class %s, currently tracking %s" % (class_name, self.class_to_track))
 
     def _enable_await_timeout (self):
         self.graph_updated_timeout_id = GLib.timeout_add_seconds (REASONABLE_TIMEOUT,
@@ -320,6 +323,9 @@ class StoreHelper (Helper):
         Block until a resource matching the parameters becomes available
         """
         assert (self.inserts_match_function == None)
+        assert (self.class_to_track == None)
+
+        self.class_to_track = rdf_class
 
         self.matched_resource_urn = None
         self.matched_resource_id = None
@@ -342,7 +348,7 @@ class StoreHelper (Helper):
                 id = insert[1]
 
                 if not matched_creation:
-                    where = "  ?urn a %s " % rdf_class
+                    where = "  ?urn a <%s> " % rdf_class
 
                     if url is not None:
                         where += "; nie:url \"%s\"" % url
@@ -387,19 +393,22 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.inserts_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
-            self.inserts_match_function = None
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException as e:
+                raise GraphUpdateTimeoutException("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title))
 
-        if self.graph_updated_timed_out:
-            raise Exception ("Timeout waiting for resource: class %s, URL %s, title %s" % (rdf_class, url, title))
+            self.inserts_match_function = None
+            self.class_to_track = None
 
         return (self.matched_resource_id, self.matched_resource_urn)
 
-    def await_resource_deleted (self, id, fail_message = None):
+    def await_resource_deleted (self, rdf_class, id):
         """
         Block until we are notified of a resources deletion
         """
         assert (self.deletes_match_function == None)
+        assert (self.class_to_track == None)
 
         def find_resource_deletion (deletes_list):
             log ("find_resource_deletion: looking for %i in %s" % (id, deletes_list))
@@ -428,64 +437,61 @@ class StoreHelper (Helper):
             self._enable_await_timeout ()
             self.deletes_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException:
+                raise GraphUpdateTimeoutException ("Resource %i has not been deleted." % id)
             self.deletes_match_function = None
-
-        if self.graph_updated_timed_out:
-            if fail_message is not None:
-                raise Exception (fail_message)
-            else:
-                raise Exception ("Resource %i has not been deleted." % id)
+            self.class_to_track = None
 
         return
 
-    def await_property_changed (self, subject_id, property_uri):
+    def await_property_changed (self, rdf_class, subject_id, property_uri):
         """
         Block until a property of a resource is updated or inserted.
         """
         assert (self.inserts_match_function == None)
+        assert (self.deletes_match_function == None)
+        assert (self.class_to_track == None)
+
+        log ("Await change to %i %s (%i, %i existing)" % (subject_id, property_uri, len(self.inserts_list), len(self.deletes_list)))
+
+        self.class_to_track = rdf_class
 
         property_id = self.get_resource_id_by_uri(property_uri)
 
-        def find_property_change (change_list):
+        def find_property_change (inserts_list):
             matched = False
             remaining_events = []
 
-            for change in change_list:
-                if change[1] == subject_id and change[2] == property_id:
-                    log("Matched property change: %s" % str(change))
+            for insert in inserts_list:
+                if insert[1] == subject_id and insert[2] == property_id:
+                    log("Matched property change: %s" % str(insert))
                     matched = True
                 else:
-                    remaining_events += [change]
+                    remaining_events += [insert]
 
             return matched, remaining_events
 
-        def match_inserts_cb (inserts_list):
+        def match_cb (inserts_list):
             matched, remaining_events = find_property_change (inserts_list)
-            exit_loop = matched
-            return exit_loop, remaining_events
-
-        def match_deletes_cb (deletes_list):
-            matched, remaining_events = find_property_change (deletes_list)
             exit_loop = matched
             return exit_loop, remaining_events
 
         # Check the list of previously received events for matches
         (existing_match, self.inserts_list) = find_property_change (self.inserts_list)
-        (existing_match, self.deletes_list) = find_property_change (self.deletes_list)
 
         if not existing_match:
             self._enable_await_timeout ()
-            self.inserts_match_function = match_inserts_cb
-            self.deletes_match_function = match_deletes_cb
+            self.inserts_match_function = match_cb
             # Run the event loop until the correct notification arrives
-            self.loop.run_checked ()
+            try:
+                self.loop.run_checked ()
+            except GraphUpdateTimeoutException:
+                raise GraphUpdateTimeoutException(
+                    "Timeout waiting for property change, subject %i property %s (%i)" % (subject_id, property_uri, property_id))
             self.inserts_match_function = None
-            self.deletes_match_function = None
-
-        if self.graph_updated_timed_out:
-            raise Exception ("Timeout waiting for property change, subject %i "
-                             "property %s" % (subject_id, property_uri))
+            self.class_to_track = None
 
     def query (self, query, timeout=5000, **kwargs):
         return self.resources.SparqlQuery ('(s)', query, timeout=timeout, **kwargs)
