@@ -233,8 +233,6 @@ class StoreHelper (Helper):
     PROCESS_PATH = cfg.TRACKER_STORE_PATH
     BUS_NAME = cfg.TRACKER_BUSNAME
 
-    graph_updated_handler_id = 0
-
     def start (self):
         Helper.start (self)
 
