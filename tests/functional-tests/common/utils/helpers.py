@@ -302,7 +302,7 @@ class StoreHelper (Helper):
                     (exit_loop, inserts_list) = self.inserts_match_function (inserts_list)
                 self.inserts_list += inserts_list
 
-            if deletes_list is not None:
+            if not exit_loop and deletes_list is not None:
                 if self.deletes_match_function is not None:
                     (exit_loop, deletes_list) = self.deletes_match_function (deletes_list)
                 self.deletes_list += deletes_list
