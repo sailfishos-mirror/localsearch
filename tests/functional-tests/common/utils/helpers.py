@@ -300,7 +300,7 @@ class StoreHelper (Helper):
                 (exit_loop, inserts_list) = self.inserts_match_function (inserts_list)
             self.inserts_list += inserts_list
 
-        if deletes_list is not None:
+        if not exit_loop and deletes_list is not None:
             if self.deletes_match_function is not None:
                 (exit_loop, deletes_list) = self.deletes_match_function (deletes_list)
             self.deletes_list += deletes_list
@@ -469,7 +469,9 @@ class StoreHelper (Helper):
 
         # Check the list of previously received events for matches
         (existing_match, self.inserts_list) = find_property_change (self.inserts_list)
-        (existing_match, self.deletes_list) = find_property_change (self.deletes_list)
+
+        if not existing_match:
+            (existing_match, self.deletes_list) = find_property_change (self.deletes_list)
 
         if not existing_match:
             self._enable_await_timeout ()
