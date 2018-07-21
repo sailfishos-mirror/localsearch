@@ -27,6 +27,7 @@ from gi.repository import GLib
 
 import os
 import shutil
+import tempfile
 import time
 
 import common.utils.configuration as cfg
