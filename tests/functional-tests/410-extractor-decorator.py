@@ -66,6 +66,9 @@ class ExtractorDecoratorTest(ut.TestCase):
                 'index-single-directories': GLib.Variant.new_strv([self.datadir]),
                 'index-optical-discs': GLib.Variant.new_boolean(False),
                 'index-removable-devices': GLib.Variant.new_boolean(False),
+            },
+            'org.freedesktop.Tracker.Store': {
+                'graphupdated-delay': GLib.Variant('i', 100)
             }
         }
 
