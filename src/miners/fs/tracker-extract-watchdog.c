@@ -95,18 +95,31 @@ static void
 extract_watchdog_start (TrackerExtractWatchdog *watchdog,
 			gboolean                autostart)
 {
+	gchar *domain_name, *tracker_extract_dbus_name;
+
 	g_debug ("Setting up watch on tracker-extract (autostart: %s)",
 		 autostart ? "yes" : "no");
 
+	domain_name = tracker_sparql_connection_get_domain ();
+
+	if (domain_name == NULL) {
+		tracker_extract_dbus_name = g_strdup (TRACKER_MINER_DBUS_NAME_PREFIX "Extract");
+	} else {
+		tracker_extract_dbus_name = g_strconcat (domain_name, ".Tracker1.Miner.Extract", NULL);
+	}
+
 	watchdog->extractor_watchdog_id =
 		g_bus_watch_name (TRACKER_IPC_BUS,
-				  TRACKER_MINER_DBUS_NAME_PREFIX "Extract",
+				  tracker_extract_dbus_name,
 				  (autostart ?
 				   G_BUS_NAME_WATCHER_FLAGS_AUTO_START :
 				   G_BUS_NAME_WATCHER_FLAGS_NONE),
 				  extract_watchdog_name_appeared,
 				  extract_watchdog_name_vanished,
 				  watchdog, NULL);
+
+	g_free (tracker_extract_dbus_name);
+	g_free (domain_name);
 }
 
 static void
