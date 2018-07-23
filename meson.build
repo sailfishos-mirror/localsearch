@@ -1,4 +1,4 @@
-project('tracker-miners', 'c', 'vala', version: '2.0.5')
+project('tracker-miners', 'c', 'vala', version: '2.1.0')
 
 gnome = import('gnome')
 i18n = import('i18n')
@@ -9,8 +9,8 @@ tracker_api_version = '2.0'
 
 glib_required = '2.40.0'
 
-tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 2.0.5', required: false)
-tracker_miner = dependency('tracker-miner-2.0', version: '>= 2.0.5', required: false)
+tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 2.1.0', required: false)
+tracker_miner = dependency('tracker-miner-2.0', version: '>= 2.1.0', required: false)
 
 if not tracker_sparql.found() or not tracker_miner.found()
   message('Tracker libraries were not found or are too old. A local copy will be built if possible.')

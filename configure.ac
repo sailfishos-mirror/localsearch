@@ -12,8 +12,8 @@ AC_PREREQ([2.64])
 # if backwards compatibility has been broken,
 # set TRACKER_BINARY_AGE and TRACKER_INTERFACE_AGE to 0.
 m4_define([tracker_major_version], [2])
-m4_define([tracker_minor_version], [0])
-m4_define([tracker_micro_version], [5])
+m4_define([tracker_minor_version], [1])
+m4_define([tracker_micro_version], [0])
 m4_define([tracker_interface_age], [0])
 m4_define([tracker_binary_age],
           [m4_eval(100 * tracker_minor_version + tracker_micro_version)])
@@ -230,7 +230,7 @@ GEXIV2_REQUIRED="any version"
 GSTREAMER_REQUIRED=0.10.31
 GUPNP_DLNA_REQUIRED=0.9.4
 LIBPNG_REQUIRED=1.2
-TRACKER_CORE_REQUIRED=2.0.5
+TRACKER_CORE_REQUIRED=2.1.0
 
 GLIB_PREFIX="`$PKG_CONFIG --variable=prefix glib-2.0`"
 AC_SUBST(GLIB_PREFIX)
