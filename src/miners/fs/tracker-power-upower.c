@@ -250,7 +250,7 @@ tracker_power_new ()
 	object = g_initable_new (TRACKER_TYPE_POWER, NULL, &error, NULL);
 
 	if (error) {
-		g_warning (error->message);
+		g_warning ("%s", error->message);
 	}
 
 	return object;
