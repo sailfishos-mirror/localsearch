@@ -416,7 +416,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	}
 
 	if (md.copyright) {
-		tracker_resource_set_string (metadata, "nie:copyright", md.copyright);
+		tracker_guarantee_resource_utf8_string (metadata, "nie:copyright", md.copyright);
 	}
 
 	if (md.white_balance) {
@@ -475,7 +475,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	                                                 uri);
 
 	if (md.description) {
-		tracker_resource_set_string(metadata, "nie:description", md.description);
+		tracker_guarantee_resource_utf8_string (metadata, "nie:description", md.description);
 	}
 
 	if (md.metering_mode) {
