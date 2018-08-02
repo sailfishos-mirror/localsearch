@@ -85,14 +85,9 @@ read_toc (PopplerIndexIter  *index,
 		switch (action->type) {
 			case POPPLER_ACTION_GOTO_DEST: {
 				PopplerActionGotoDest *ag = (PopplerActionGotoDest *)action;
-				PopplerDest *agd = ag->dest;
 
 				if (!tracker_is_empty_string (ag->title)) {
 					g_string_append_printf (*toc, "%s ", ag->title);
-				}
-
-				if (!tracker_is_empty_string (agd->named_dest)) {
-					g_string_append_printf (*toc, "%s ", agd->named_dest);
 				}
 
 				break;
