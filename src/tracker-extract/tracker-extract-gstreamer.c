@@ -230,7 +230,7 @@ get_gst_date_time_to_buf (GstDateTime *date_time,
 	if (gst_date_time_has_time (date_time)) {
 		hour = gst_date_time_get_hour (date_time);
 		minute = gst_date_time_get_minute (date_time);
-		offset_str = gst_date_time_get_time_zone_offset (date_time) >= 0 ? "+" : "";
+		offset_str = gst_date_time_get_time_zone_offset (date_time) >= 0 ? "+" : "-";
 		offset = gst_date_time_get_time_zone_offset (date_time);
 	} else {
 		offset_str = "+";
@@ -245,7 +245,7 @@ get_gst_date_time_to_buf (GstDateTime *date_time,
 	          minute,
 	          second,
 	          offset_str,
-	          (gint) offset);
+	          (gint) ABS (offset));
 
 	return complete;
 }
