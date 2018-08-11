@@ -44,7 +44,7 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define DBUS_NAME_SUFFIX "Miner.Applications"
+#define DBUS_NAME_SUFFIX "Tracker1.Miner.Applications"
 #define DBUS_PATH "/org/freedesktop/Tracker1/Miner/Applications"
 
 static GMainLoop *main_loop;

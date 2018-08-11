@@ -60,7 +60,7 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define DBUS_NAME_SUFFIX "Miner.Extract"
+#define DBUS_NAME_SUFFIX "Tracker1.Miner.Extract"
 #define DBUS_PATH "/org/freedesktop/Tracker1/Miner/Extract"
 
 static GMainLoop *main_loop;

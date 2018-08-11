@@ -29,7 +29,7 @@
 
 #include "tracker-miner-rss.h"
 
-#define DBUS_NAME_SUFFIX "Miner.RSS"
+#define DBUS_NAME_SUFFIX "Tracker1.Miner.RSS"
 #define DBUS_PATH "/org/freedesktop/Tracker1/Miner/RSS"
 
 static gint verbosity = -1;
