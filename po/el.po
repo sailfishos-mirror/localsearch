@@ -8,10 +8,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: el\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=tracker&keywords=I18N+L10N&component=Miners\n"
-"POT-Creation-Date: 2017-08-10 22:45+0000\n"
-"PO-Revision-Date: 2018-02-14 19:32+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
+"POT-Creation-Date: 2018-07-16 23:39+0000\n"
+"PO-Revision-Date: 2018-08-14 01:40+0300\n"
 "Last-Translator: Efstathios Iosifidis <iosifidis@opensuse.org>\n"
 "Language-Team: Ελληνικά <>\n"
 "Language: el\n"
@@ -19,66 +18,66 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Poedit 2.0.9\n"
 "X-Project-Style: gnome\n"
 
 # #-#-#-#-#  nautilus.HEAD.el.po (el)  #-#-#-#-#
 #
-#: ../src/libtracker-common/tracker-utils.c:90
+#: ../src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
 msgstr "άγνωστος χρόνος"
 
-#: ../src/libtracker-common/tracker-utils.c:104
-#: ../src/libtracker-common/tracker-utils.c:155
+#: ../src/libtracker-miners-common/tracker-utils.c:104
+#: ../src/libtracker-miners-common/tracker-utils.c:155
 msgid "less than one second"
 msgstr "λιγότερο από ένα δευτερόλεπτο"
 
 #. Translators: this is %d days
-#: ../src/libtracker-common/tracker-utils.c:119
+#: ../src/libtracker-miners-common/tracker-utils.c:119
 #, c-format
 msgid " %dd"
 msgstr " %dd"
 
 #. Translators: this is %2.2d hours
-#: ../src/libtracker-common/tracker-utils.c:123
+#: ../src/libtracker-miners-common/tracker-utils.c:123
 #, c-format
 msgid " %2.2dh"
 msgstr " %2.2dh"
 
 #. Translators: this is %2.2d minutes
-#: ../src/libtracker-common/tracker-utils.c:127
+#: ../src/libtracker-miners-common/tracker-utils.c:127
 #, c-format
 msgid " %2.2dm"
 msgstr " %2.2dm"
 
 #. Translators: this is %2.2d seconds
-#: ../src/libtracker-common/tracker-utils.c:131
+#: ../src/libtracker-miners-common/tracker-utils.c:131
 #, c-format
 msgid " %2.2ds"
 msgstr " %2.2ds"
 
-#: ../src/libtracker-common/tracker-utils.c:135
+#: ../src/libtracker-miners-common/tracker-utils.c:135
 #, c-format
 msgid " %d day"
 msgid_plural " %d days"
 msgstr[0] " %d ημέρα"
 msgstr[1] " %d ημέρες"
 
-#: ../src/libtracker-common/tracker-utils.c:139
+#: ../src/libtracker-miners-common/tracker-utils.c:139
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
 msgstr[0] " %2.2d ώρα"
 msgstr[1] " %2.2d ώρες"
 
-#: ../src/libtracker-common/tracker-utils.c:143
+#: ../src/libtracker-miners-common/tracker-utils.c:143
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
 msgstr[0] " %2.2d λεπτό"
 msgstr[1] " %2.2d λεπτά"
 
-#: ../src/libtracker-common/tracker-utils.c:147
+#: ../src/libtracker-miners-common/tracker-utils.c:147
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
@@ -93,7 +92,7 @@ msgstr "Εφαρμογές"
 msgid "Applications data miner"
 msgstr "Εξορύκτης δεδομένων εφαρμογών"
 
-#: ../src/miners/apps/tracker-main.c:60 ../src/miners/fs/tracker-main.c:77
+#: ../src/miners/apps/tracker-main.c:60 ../src/miners/fs/tracker-main.c:72
 #: ../src/miners/rss/tracker-main.c:43
 #: ../src/tracker-writeback/tracker-main.c:55
 msgid ""
@@ -107,14 +106,14 @@ msgid "Runs until all applications are indexed and then exits"
 msgstr ""
 "Εκτελείται μέχρι όλες οι εφαρμογές να ευρετηριοποιηθούν και έπειτα εξέρχεται"
 
-#: ../src/miners/apps/tracker-main.c:69 ../src/miners/fs/tracker-main.c:95
+#: ../src/miners/apps/tracker-main.c:69 ../src/miners/fs/tracker-main.c:90
 #: ../src/miners/rss/tracker-main.c:57
-#: ../src/tracker-extract/tracker-main.c:101
+#: ../src/tracker-extract/tracker-main.c:102
 msgid "Runs for a specific domain ontology"
 msgstr "Εκτελείται για μια συγκεκριμένη οντολογία τομέα"
 
-#: ../src/miners/apps/tracker-main.c:73 ../src/miners/fs/tracker-main.c:99
-#: ../src/tracker-extract/tracker-main.c:105
+#: ../src/miners/apps/tracker-main.c:73 ../src/miners/fs/tracker-main.c:94
+#: ../src/tracker-extract/tracker-main.c:106
 #: ../src/tracker-writeback/tracker-main.c:51
 msgid "Displays version information"
 msgstr "Εμφανίζει πληροφορίες έκδοσης"
@@ -123,7 +122,6 @@ msgstr "Εμφανίζει πληροφορίες έκδοσης"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/miners/apps/tracker-main.c:205
-#| msgid "- start the application data miner"
 msgid "— start the application data miner"
 msgstr "— έναρξη εξορύκτη δεδομένων εφαρμογής"
 
@@ -217,7 +215,6 @@ msgstr ""
 "μετά από εσφαλμένους τερματισμούς και -2 το απενεργοποιεί πλήρως."
 
 #: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:13
-#| msgid "Removable devices' data permanence threshold"
 msgid "Removable devices’ data permanence threshold"
 msgstr "Κατώφλι για την παραμονή των δεδομένων στις αφαιρούμενες συσκευές"
 
@@ -265,9 +262,6 @@ msgid "Index optical discs"
 msgstr "Ευρετηριοποίηση οπτικών δίσκων"
 
 #: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:22
-#| msgid ""
-#| "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-#| "removable devices are not indexed, optical discs won't be either)"
 msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
@@ -350,116 +344,113 @@ msgstr "Αγνοημένοι κατάλογοι με περιεχόμενο"
 msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Αποφυγή οποιουδήποτε καταλόγου περιέχει αρχείο μαύρης λίστας εδώ"
 
-#: ../src/miners/fs/tracker-main.c:82
+#: ../src/miners/fs/tracker-main.c:77
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Αρχικός χρόνος αδράνειας, σε δευτερόλεπτα, 0->1000 (προεπιλογή=15)"
 
-#: ../src/miners/fs/tracker-main.c:87
+#: ../src/miners/fs/tracker-main.c:82
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Εκτελείται μέχρι όλες οι ρυθμισμένες θέσεις να ευρετηριοποιηθούν και έπειτα "
 "εξέρχεται"
 
-#: ../src/miners/fs/tracker-main.c:91
+#: ../src/miners/fs/tracker-main.c:86
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Κάνει έλεγχο για το αν το ΑΡΧΕΙΟ είναι διαθέσιμο για εξόρυξη, με βάση τις "
 "ρυθμίσεις"
 
-#: ../src/miners/fs/tracker-main.c:92 ../src/tracker-extract/tracker-main.c:87
+#: ../src/miners/fs/tracker-main.c:87 ../src/tracker-extract/tracker-main.c:88
 msgid "FILE"
 msgstr "ΑΡΧΕΙΟ"
 
-#: ../src/miners/fs/tracker-main.c:460
+#: ../src/miners/fs/tracker-main.c:432
 #, c-format
-#| msgid "Data object '%s' currently exists"
 msgid "Data object “%s” currently exists"
 msgstr "Υπάρχει το αντικείμενο δεδομένων «%s»"
 
-#: ../src/miners/fs/tracker-main.c:461
+#: ../src/miners/fs/tracker-main.c:433
 #, c-format
-#| msgid "Data object '%s' currently does not exist"
 msgid "Data object “%s” currently does not exist"
 msgstr "Δεν υπάρχει το αντικείμενο δεδομένων «%s»"
 
-#: ../src/miners/fs/tracker-main.c:476
+#: ../src/miners/fs/tracker-main.c:448
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Ο κατάλογος είναι διαθέσιμος για εξαγωγή (βασισμένο στους κανόνες)"
 
-#: ../src/miners/fs/tracker-main.c:477
+#: ../src/miners/fs/tracker-main.c:449
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος σε κανόνες)"
 
-#: ../src/miners/fs/tracker-main.c:497
+#: ../src/miners/fs/tracker-main.c:469
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Ο κατάλογος είναι διαθέσιμος για εξαγωγή (βασισμένος στα περιεχόμενα)"
 
-#: ../src/miners/fs/tracker-main.c:498
+#: ../src/miners/fs/tracker-main.c:470
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr ""
 "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος στα περιεχόμενα)"
 
-#: ../src/miners/fs/tracker-main.c:545
+#: ../src/miners/fs/tracker-main.c:517
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr ""
 "Ο κατάλογος είναι διαθέσιμος για παρακολούθηση (βασισμένος στις ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:546
+#: ../src/miners/fs/tracker-main.c:518
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για παρακολούθηση (βασισμένος στις "
 "ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:550
+#: ../src/miners/fs/tracker-main.c:522
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Το αρχείο είναι διαθέσιμο για παρακολούθηση (βασισμένο στις ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:551
+#: ../src/miners/fs/tracker-main.c:523
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Το αρχείο ΔΕΝ είναι διαθέσιμο για παρακολούθηση (βασισμένο στις ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:555
+#: ../src/miners/fs/tracker-main.c:527
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "Το αρχείο ή ο κατάλογος είναι διαθέσιμος για παρακολούθηση (βασισμένο στις "
 "ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:556
+#: ../src/miners/fs/tracker-main.c:528
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Το αρχείο ή ο κατάλογος ΔΕΝ είναι διαθέσιμος για παρακολούθηση (βασισμένο "
 "στις ρυθμίσεις)"
 
-#: ../src/miners/fs/tracker-main.c:571
+#: ../src/miners/fs/tracker-main.c:543
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Το αρχείο είναι διαθέσιμο για εξαγωγή (βασισμένο στους κανόνες)"
 
-#: ../src/miners/fs/tracker-main.c:572
+#: ../src/miners/fs/tracker-main.c:544
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Το αρχείο ΔΕΝ είναι διαθέσιμο για εξαγωγή (βασισμένο στους κανόνες)"
 
-#: ../src/miners/fs/tracker-main.c:581
+#: ../src/miners/fs/tracker-main.c:553
 msgid "Would be indexed"
 msgstr "Θα ευρετηριοποιηθεί"
 
-#: ../src/miners/fs/tracker-main.c:582 ../src/miners/fs/tracker-main.c:584
+#: ../src/miners/fs/tracker-main.c:554 ../src/miners/fs/tracker-main.c:556
 msgid "Yes"
 msgstr "Ναι"
 
-#: ../src/miners/fs/tracker-main.c:582 ../src/miners/fs/tracker-main.c:584
+#: ../src/miners/fs/tracker-main.c:554 ../src/miners/fs/tracker-main.c:556
 msgid "No"
 msgstr "Όχι"
 
-#: ../src/miners/fs/tracker-main.c:583
+#: ../src/miners/fs/tracker-main.c:555
 msgid "Would be monitored"
 msgstr "Θα παρακολουθείται"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/fs/tracker-main.c:715
-#| msgid "- start the tracker indexer"
+#: ../src/miners/fs/tracker-main.c:686
 msgid "— start the tracker indexer"
 msgstr "— εκκίνηση ευρετηρίου του tracker"
 
@@ -496,7 +487,6 @@ msgstr "Τίτλος για χρήση (πρέπει να χρησιμοποιη
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/miners/rss/tracker-main.c:94
-#| msgid "- start the feeds indexer"
 msgid "— start the feeds indexer"
 msgstr "— εκκίνηση του ευρετηρίου ροών"
 
@@ -573,13 +563,13 @@ msgstr ""
 msgid "Metadata extraction failed"
 msgstr "Απέτυχε η εξαγωγή μεταδεδομένων"
 
-#: ../src/tracker-extract/tracker-extract.c:751
+#: ../src/tracker-extract/tracker-extract.c:765
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Δεν βρέθηκαν μεταδεδομένα ή αρθρώματα του εξαγωγέα για τον χειρισμό αυτού "
 "του αρχείου"
 
-#: ../src/tracker-extract/tracker-main.c:81
+#: ../src/tracker-extract/tracker-main.c:82
 msgid ""
 "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default = "
 "0)"
@@ -587,51 +577,46 @@ msgstr ""
 "Καταγραφή, 0 = μόνο σφάλματα, 1 = ελάχιστα, 2= λεπτομερώς και 3 = "
 "αποσφαλμάτωση (προεπιλογή = 0)"
 
-#: ../src/tracker-extract/tracker-main.c:86
+#: ../src/tracker-extract/tracker-main.c:87
 msgid "File to extract metadata for"
 msgstr "Αρχείο για το οποίο εξάγονται μεταδεδομένα"
 
-#: ../src/tracker-extract/tracker-main.c:90
+#: ../src/tracker-extract/tracker-main.c:91
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Τύπος MIME για το αρχείο (αν δεν παρασχεθεί, θα γίνει με εικασία)"
 
-#: ../src/tracker-extract/tracker-main.c:91
+#: ../src/tracker-extract/tracker-main.c:92
 msgid "MIME"
 msgstr "MIME"
 
-#: ../src/tracker-extract/tracker-main.c:94
-#| msgid ""
-#| "Force a module to be used for extraction (e.g. \"foo\" for \"foo.so\")"
+#: ../src/tracker-extract/tracker-main.c:95
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr "Εξαναγκασμένη χρήση αρθρώματος για εξαγωγή (π.χ. «foo» για «foo.so»)"
 
-#: ../src/tracker-extract/tracker-main.c:95
+#: ../src/tracker-extract/tracker-main.c:96
 msgid "MODULE"
 msgstr "ΑΡΘΡΩΜΑ"
 
-#: ../src/tracker-extract/tracker-main.c:97
-#| msgid "Output results format: 'sparql', or 'turtle'"
-msgid "Output results format: “sparql”, or “turtle”"
-msgstr "Αποτελέσματα εξόδου: «sparql», ή «turtle»"
-
 #: ../src/tracker-extract/tracker-main.c:98
+msgid "Output results format: “sparql”, “turtle” or “json-ld”"
+msgstr "Αποτελέσματα εξόδου: «sparql», «turtle» ή «json-ld»"
+
+#: ../src/tracker-extract/tracker-main.c:99
 msgid "FORMAT"
 msgstr "ΜΟΡΦΗ"
 
-#: ../src/tracker-extract/tracker-main.c:271
+#: ../src/tracker-extract/tracker-main.c:272
 #, c-format
-#| msgid "Unsupported serialization format '%s'\n"
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Μη υποστηριζόμενη μορφή σειριοποίησης «%s»\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: ../src/tracker-extract/tracker-main.c:331
-#| msgid "- Extract file meta data"
+#: ../src/tracker-extract/tracker-main.c:362
 msgid "— Extract file meta data"
 msgstr "— Εξαγωγή μεταδεδομένων από το αρχείο"
 
-#: ../src/tracker-extract/tracker-main.c:340
+#: ../src/tracker-extract/tracker-main.c:377
 msgid "Filename and mime type must be provided together"
 msgstr "Το όνομα αρχείου και ο τύπος mime θα πρέπει να παρέχονται μαζί"
 
@@ -651,7 +636,6 @@ msgstr "Απενεργοποίηση τερματισμού μετά από 30 �
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/tracker-writeback/tracker-main.c:98
-#| msgid "- start the tracker writeback service"
 msgid "— start the tracker writeback service"
 msgstr "— εκκίνηση της υπηρεσίας επανεγγραφής του tracker"
 
