@@ -464,36 +464,6 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 			tracker_resource_set_string (metadata, "nie:copyright", xd->rights);
 		}
 
-		if (xd->white_balance) {
-			TrackerResource *white_balance;
-
-			white_balance = tracker_resource_new (xd->white_balance);
-			tracker_resource_set_relation (metadata, "nmm:whiteBalance", white_balance);
-			g_object_unref (white_balance);
-		}
-
-		if (xd->fnumber) {
-			gdouble value;
-
-			value = g_strtod (xd->fnumber, NULL);
-			tracker_resource_set_double (metadata, "nmm:fnumber", value);
-		}
-
-		if (xd->flash) {
-			TrackerResource *flash;
-
-			flash = tracker_resource_new (xd->flash);
-			tracker_resource_set_relation (metadata, "nmm:flash", flash);
-			g_object_unref (flash);
-		}
-
-		if (xd->focal_length) {
-			gdouble value;
-
-			value = g_strtod (xd->focal_length, NULL);
-			tracker_resource_set_double (metadata, "nmm:focalLength", value);
-		}
-
 		/* Question: Shouldn't xd->Artist be merged with md.author instead? */
 
 		if (xd->artist || xd->contributor) {
@@ -509,30 +479,8 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 			g_object_unref (artist);
 		}
 
-		if (xd->exposure_time) {
-			gdouble value;
-
-			value = g_strtod (xd->exposure_time, NULL);
-			tracker_resource_set_double (metadata, "nmm:exposureTime", value);
-		}
-
-		if (xd->iso_speed_ratings) {
-			gdouble value;
-
-			value = g_strtod (xd->iso_speed_ratings, NULL);
-			tracker_resource_set_double (metadata, "nmm:isoSpeed", value);
-		}
-
 		if (xd->description) {
 			tracker_resource_set_string (metadata, "nie:description", xd->description);
-		}
-
-		if (xd->metering_mode) {
-			TrackerResource *metering;
-
-			metering = tracker_resource_new (xd->metering_mode);
-			tracker_resource_set_relation (metadata, "nmm:meteringMode", metering);
-			g_object_unref (metering);
 		}
 
 		if (xd->address || xd->state || xd->country || xd->city ||
