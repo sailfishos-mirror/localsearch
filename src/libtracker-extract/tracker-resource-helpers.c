@@ -55,7 +55,7 @@ tracker_extract_new_artist (const char *name)
 	artist = tracker_resource_new (uri);
 
 	tracker_resource_set_uri (artist, "rdf:type", "nmm:Artist");
-	tracker_resource_set_string (artist, "nmm:artistName", name);
+	tracker_guarantee_resource_utf8_string (artist, "nmm:artistName", name);
 
 	g_free (uri);
 
@@ -128,11 +128,11 @@ tracker_extract_new_equipment (const char *make,
 	tracker_resource_set_uri (equipment, "rdf:type", "nfo:Equipment");
 
 	if (make) {
-		tracker_resource_set_string (equipment, "nfo:manufacturer", make);
+		tracker_guarantee_resource_utf8_string (equipment, "nfo:manufacturer", make);
 	}
 
 	if (model) {
-		tracker_resource_set_string (equipment, "nfo:model", model);
+		tracker_guarantee_resource_utf8_string (equipment, "nfo:model", model);
 	}
 
 	g_free (equip_uri);
@@ -185,24 +185,24 @@ tracker_extract_new_location (const char *street_address,
 		addruri = tracker_sparql_get_uuid_urn ();
 		address = tracker_resource_new (addruri);
 
-		tracker_resource_set_uri (address, "rdf:type", "nco:PostalAddress");
+		tracker_resource_set_string (address, "rdf:type", "nco:PostalAddress");
 
 		g_free (addruri);
 
 		if (street_address) {
-			tracker_resource_set_string (address, "nco:streetAddress", street_address);
+			tracker_guarantee_resource_utf8_string (address, "nco:streetAddress", street_address);
 		}
 
 		if (state) {
-			tracker_resource_set_string (address, "nco:region", state);
+			tracker_guarantee_resource_utf8_string (address, "nco:region", state);
 		}
 
 		if (city) {
-			tracker_resource_set_string (address, "nco:locality", city);
+			tracker_guarantee_resource_utf8_string (address, "nco:locality", city);
 		}
 
 		if (country) {
-			tracker_resource_set_string (address, "nco:country", country);
+			tracker_guarantee_resource_utf8_string (address, "nco:country", country);
 		}
 
 		tracker_resource_set_relation (location, "slo:postalAddress", address);
