@@ -526,7 +526,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		        md.state, md.city, md.country, md.gps_altitude,
 		        md.gps_latitude, md.gps_longitude);
 
-		tracker_resource_add_relation (metadata, "slo:location", location);
+		tracker_resource_set_relation (metadata, "slo:location", location);
 
 		g_object_unref (location);
 	}
