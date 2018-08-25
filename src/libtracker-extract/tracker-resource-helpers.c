@@ -185,7 +185,7 @@ tracker_extract_new_location (const char *street_address,
 		addruri = tracker_sparql_get_uuid_urn ();
 		address = tracker_resource_new (addruri);
 
-		tracker_resource_set_string (address, "rdf:type", "nco:PostalAddress");
+		tracker_resource_set_uri (address, "rdf:type", "nco:PostalAddress");
 
 		g_free (addruri);
 
