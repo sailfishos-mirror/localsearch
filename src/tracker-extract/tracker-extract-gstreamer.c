@@ -518,7 +518,7 @@ extractor_apply_general_metadata (MetadataExtractor     *extractor,
 	gst_tag_list_get_string (tag_list, GST_TAG_TITLE, &title);
 
 	if (genre && g_strcmp0 (genre, "Unknown") != 0) {
-		tracker_resource_add_string (resource, "nfo:genre", genre);
+		tracker_resource_set_string (resource, "nfo:genre", genre);
 	}
 
 	tracker_guarantee_resource_title_from_file (resource,

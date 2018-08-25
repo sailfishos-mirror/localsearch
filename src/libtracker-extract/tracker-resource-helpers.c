@@ -290,7 +290,7 @@ tracker_extract_new_music_album_disc (const char      *album_title,
 
 	tracker_resource_set_uri (album_disc, "rdf:type", "nmm:MusicAlbumDisc");
 	tracker_resource_set_int (album_disc, "nmm:setNumber", disc_number > 0 ? disc_number : 1);
-	tracker_resource_add_relation (album_disc, "nmm:albumDiscAlbum", album);
+	tracker_resource_set_relation (album_disc, "nmm:albumDiscAlbum", album);
 
 	g_free (tmp_album_uri);
 	g_free (tmp_disc_uri);

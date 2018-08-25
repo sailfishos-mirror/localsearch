@@ -334,7 +334,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 	if (xd->publisher) {
 		TrackerResource *publisher = tracker_extract_new_contact (xd->publisher);
-		tracker_resource_add_relation (metadata, "nco:publisher", publisher);
+		tracker_resource_set_relation (metadata, "nco:publisher", publisher);
 		g_object_unref (publisher);
 	}
 
@@ -397,7 +397,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 	if (md.make || md.model) {
 		TrackerResource *equipment = tracker_extract_new_equipment (md.make, md.model);
-		tracker_resource_add_relation (metadata, "nfo:equipment", equipment);
+		tracker_resource_set_relation (metadata, "nfo:equipment", equipment);
 		g_object_unref (equipment);
 	}
 
