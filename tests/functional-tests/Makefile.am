@@ -81,4 +81,5 @@ EXTRA_DIST = \
 	$(config_DATA) \
 	configuration.json.in \
 	test-runner.sh \
+	detect-h264-codec.sh \
 	meson.build
