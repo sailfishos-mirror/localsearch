@@ -1,3 +1,8 @@
+NEW in 2.1.3 - 2018-08-30
+=========================
+
+  * Unbreak watch on domain ontology owner. Fixes miners spuriously exiting.
+
 NEW in 2.1.2 - 2018-08-30
 =========================
 
