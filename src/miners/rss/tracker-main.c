@@ -217,8 +217,7 @@ main (int argc, char **argv)
 
 	loop = g_main_loop_new (NULL, FALSE);
 
-	if (domain_ontology) {
-		domain_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker1");
+	if (domain_ontology && domain_ontology_name) {
 		g_bus_watch_name_on_connection (connection, domain_ontology_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
