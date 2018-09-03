@@ -115,6 +115,8 @@ if have_tracker_miner_rss
   endif
 endif
 
+add_project_arguments('-Wformat', '-Wformat-security', language: 'c')
+
 # There are various gchar vs. unsigned char warnings that occur in extract
 # modules, it's not worth adding casts everywhere so we disable the warning.
 add_project_arguments('-Wno-pointer-sign', language: 'c')
