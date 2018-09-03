@@ -4,30 +4,7 @@
 stages:
   - test
 
-test-autotools-fedora-latest:
-  stage: test
-  image: registry.gitlab.gnome.org/sthursfield/tracker-oci-images/amd64/fedora:latest
-
-  script:
-    # First build and install latest Tracker using Meson (the Autotools build
-    # of Tracker is tested already in tracker.git, we don't need to suffer that
-    # again).
-    - mkdir /opt/tracker; chown tracker:tracker /opt/tracker
-    - su tracker -c 'git clone https://gitlab.gnome.org/GNOME/tracker'
-    - su tracker -c 'cd tracker; mkdir build'
-    - su tracker -c 'cd tracker/build; meson .. --prefix=/opt/tracker -Ddbus_services=/opt/tracker/share/dbus-1/services -Dsystemd_user_services=/opt/tracker/lib/systemd/user'
-    - su tracker -c 'cd tracker/build; ninja install'
-    # Delete the build tree now that we're done with it, or `intltool-update`
-    # raise a spurious error later during `make check`.
-    - su tracker -c 'rm -Rf tracker'
-
-    # Now build tracker-miners using Autotools, linking against new Tracker.
-    - PKG_CONFIG_PATH=/opt/tracker/lib64/pkgconfig/ su tracker -c './autogen.sh --prefix=/opt/tracker'
-    - su tracker -c 'make -j'
-    - su tracker -c 'LD_LIBRARY_PATH=/opt/tracker/lib64 VERBOSE=1 make check'
-    - su tracker -c 'LD_LIBRARY_PATH=/opt/tracker/lib64 TRACKER_TESTS_VERBOSE=1 dbus-launch make functional-test'
-
-test-meson-fedora-latest:
+test-fedora-latest:
   stage: test
   image: registry.gitlab.gnome.org/sthursfield/tracker-oci-images/amd64/fedora:latest
 
