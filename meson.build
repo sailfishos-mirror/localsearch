@@ -7,6 +7,9 @@ cc = meson.get_compiler('c')
 # This is the X.Y used in -llibtracker-FOO-X.Y
 tracker_api_version = '2.0'
 
+libdir = join_paths(get_option('prefix'), get_option('libdir'))
+datadir = join_paths(get_option('prefix'), get_option('datadir'))
+
 glib_required = '2.40.0'
 
 if get_option('tracker_core') == 'system'
@@ -265,7 +268,8 @@ endif
 ####################################################################
 
 if get_option('dbus_services') == ''
-  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir')
+  dbus_services_dir = dbus.get_pkgconfig_variable('session_bus_services_dir',
+                                                  define_variable: [ 'datadir', datadir ])
 else
   dbus_services_dir = get_option('dbus_services')
 endif
@@ -278,11 +282,12 @@ install_systemd_user_services = false
 if get_option('systemd_user_services') == 'yes' or get_option('systemd_user_services') == 'auto'
   systemd = dependency('systemd', required: false)
   if systemd.found()
-    systemd_user_services_dir = systemd.get_pkgconfig_variable('systemduserunitdir')
+    install_systemd_user_services = true
+    systemd_user_services_dir = join_paths(libdir, 'systemd', 'user')
   else
-    systemd_user_services_dir = join_paths(get_option('libdir'), 'systemd', 'user')
+    install_systemd_user_services = false
+    systemd_user_services_dir = '(not found)'
   endif
-  install_systemd_user_services = true
 elif get_option('systemd_user_services') == 'no' or get_option('systemd_user_services') == ''
   install_systemd_user_services = false
   systemd_user_services_dir = '(disabled)'
@@ -338,10 +343,10 @@ conf.set('TRACKER_BINARY_AGE', 100 * tracker_minor_version + tracker_micro_versi
 # Config that goes in some other generated files (.desktop, .pc, etc)
 conf.set('exec_prefix', get_option('prefix'))
 conf.set('bindir', join_paths(get_option('prefix'), get_option('bindir')))
-conf.set('datadir', join_paths(get_option('prefix'), get_option('datadir')))
+conf.set('datadir', datadir)
 conf.set('datarootdir', join_paths(get_option('prefix'), get_option('datadir')))
 conf.set('includedir', join_paths(get_option('prefix'), get_option('includedir')))
-conf.set('libdir', join_paths(get_option('prefix'), get_option('libdir')))
+conf.set('libdir', libdir)
 conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')))
 conf.set('prefix', get_option('prefix'))
 conf.set('TRACKER_API_VERSION', '1.0')
