@@ -5,13 +5,17 @@ subdir('libtracker-miners-common')
 subdir('libtracker-extract')
 
 # Public data extract tool & modules
-subdir('tracker-extract')
+if get_option('extract')
+  subdir('tracker-extract')
+endif
 
 # Public miners
 subdir('miners')
 
 # Public metadata writeback tool & modiles
-subdir('tracker-writeback')
+if get_option('writeback')
+  subdir('tracker-writeback')
+endif
 
 custom_target('tracker-miners-settings-enums',
     input: 'libtracker-miners-common/tracker-enums.h',
