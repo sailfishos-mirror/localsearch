@@ -21,6 +21,7 @@
 
 from common.utils import configuration as cfg
 from common.utils.helpers import log
+import errno
 import json
 import os
 import re
@@ -42,7 +43,13 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
     env['TRACKER_VERBOSITY'] = '0'
 
     log ('Running: %s' % ' '.join(command))
-    p = subprocess.Popen (command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        p = subprocess.Popen (command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    except OSError as e:
+        if e.errno == errno.ENOENT:
+            raise RuntimeError("Did not find tracker-extract binary. Is the 'extract' option disabled?")
+        else:
+            raise RuntimeError("Error running tracker-extract: %s" % (e))
     stdout, stderr = p.communicate()
 
     if p.returncode != 0:
