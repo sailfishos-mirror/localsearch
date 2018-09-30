@@ -186,7 +186,7 @@ main (gint argc, gchar *argv[])
 	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
 	TrackerDomainOntology *domain_ontology;
-	gchar *dbus_name;
+	gchar *domain_name, *dbus_name;
 
 	main_loop = NULL;
 
@@ -249,10 +249,17 @@ main (gint argc, gchar *argv[])
 	main_loop = g_main_loop_new (NULL, FALSE);
 
 	if (domain_ontology && domain_ontology_name) {
-		g_bus_watch_name_on_connection (connection, domain_ontology_name,
+		/* If we are running for a specific domain, we tie the lifetime of this
+		 * process to the domain. For example, if the domain name is
+		 * org.example.MyApp then this tracker-miner-apps process will exit as
+		 * soon as org.example.MyApp exits.
+		 */
+		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
+		g_bus_watch_name_on_connection (connection, domain_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                main_loop, NULL);
+		g_free (domain_name);
 	}
 
 	g_message ("Checking if we're running as a daemon:");
