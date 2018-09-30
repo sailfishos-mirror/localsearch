@@ -186,7 +186,7 @@ main (gint argc, gchar *argv[])
 	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
 	TrackerDomainOntology *domain_ontology;
-	gchar *domain_name, *dbus_name;
+	gchar *dbus_name;
 
 	main_loop = NULL;
 
@@ -253,7 +253,6 @@ main (gint argc, gchar *argv[])
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                main_loop, NULL);
-		g_free (domain_name);
 	}
 
 	g_message ("Checking if we're running as a daemon:");

@@ -79,7 +79,7 @@ main (int argc, char **argv)
 	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
 	TrackerDomainOntology *domain_ontology;
-	gchar *domain_name, *dbus_name;
+	gchar *dbus_name;
 
 	setlocale (LC_ALL, "");
 
@@ -222,7 +222,6 @@ main (int argc, char **argv)
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                loop, NULL);
-		g_free (domain_name);
 	}
 
 	g_main_loop_run (loop);
