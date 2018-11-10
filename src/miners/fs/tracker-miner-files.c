@@ -2284,52 +2284,13 @@ process_file_data_free (ProcessFileData *data)
 	g_slice_free (ProcessFileData, data);
 }
 
-static void
-sparql_builder_finish (ProcessFileData *data,
-                       const gchar     *preupdate,
-                       const gchar     *postupdate,
-                       const gchar     *sparql,
-                       const gchar     *where)
+static gchar *
+update_mount_point_sparql (ProcessFileData *data)
 {
 	const gchar *uuid;
 
-	if (sparql && *sparql) {
-		gboolean is_iri;
-		const gchar *urn;
-
-		urn = miner_files_get_file_urn (data->miner, data->file, &is_iri);
-
-		if (is_iri) {
-			gchar *str;
-
-			str = g_strdup_printf ("<%s>", urn);
-			tracker_sparql_builder_append (data->sparql, str);
-			g_free (str);
-		} else {
-			tracker_sparql_builder_append (data->sparql, urn);
-		}
-
-		tracker_sparql_builder_append (data->sparql, sparql);
-	}
-
 	tracker_sparql_builder_graph_close (data->sparql);
 	tracker_sparql_builder_insert_close (data->sparql);
-
-	if (where && *where) {
-		tracker_sparql_builder_where_open (data->sparql);
-		tracker_sparql_builder_append (data->sparql, where);
-		tracker_sparql_builder_where_close (data->sparql);
-	}
-
-	/* Prepend preupdate queries */
-	if (preupdate && *preupdate) {
-		tracker_sparql_builder_prepend (data->sparql, preupdate);
-	}
-
-	/* Append postupdate */
-	if (postupdate && *postupdate) {
-		tracker_sparql_builder_append (data->sparql, postupdate);
-	}
 
 	uuid = g_object_get_qdata (G_OBJECT (data->file),
 	                           data->miner->private->quark_mount_point_uuid);
@@ -2362,11 +2323,13 @@ sparql_builder_finish (ProcessFileData *data,
 		                        "} ",
 		                        removable_device_urn, removable_device_urn, uri);
 
-		tracker_sparql_builder_append (data->sparql, queries->str);
-		g_string_free (queries, TRUE);
 		g_free (removable_device_urn);
 		g_free (uri);
+
+		return g_string_free (queries, FALSE);
 	}
+
+	return NULL;
 }
 
 static void
@@ -2378,10 +2341,11 @@ process_file_cb (GObject      *object,
 	TrackerSparqlBuilder *sparql;
 	ProcessFileData *data;
 	const gchar *mime_type, *urn, *parent_urn;
+	gchar *delete_properties_sparql = NULL, *mount_point_sparql;
 	GFileInfo *file_info;
 	guint64 time_;
 	GFile *file, *parent;
-	gchar *uri;
+	gchar *uri, *sparql_str;
 	GError *error = NULL;
 	gboolean is_iri;
 	gboolean is_directory;
@@ -2407,8 +2371,6 @@ process_file_cb (GObject      *object,
 	data->mime_type = g_strdup (mime_type);
 
 	if (is_iri) {
-		gchar *delete_properties_sparql;
-
 		/* Update: delete all statements inserted by miner except:
 		 *  - rdf:type statements as they could cause implicit deletion of user data
 		 *  - nie:contentCreated so it persists across updates
@@ -2436,9 +2398,6 @@ process_file_cb (GObject      *object,
 			                 TRACKER_OWN_GRAPH_URN, urn,
 			                 TRACKER_OWN_GRAPH_URN, urn,
 			                 urn, urn);
-
-		tracker_sparql_builder_prepend (sparql, delete_properties_sparql);
-		g_free (delete_properties_sparql);
 	}
 
 	tracker_sparql_builder_insert_silent_open (sparql, NULL);
@@ -2504,15 +2463,22 @@ process_file_cb (GObject      *object,
 	if (g_file_info_get_size (file_info) > 0)
 		miner_files_add_rdf_types (sparql, file, mime_type);
 
-	sparql_builder_finish (data, NULL, NULL, NULL, NULL);
+	mount_point_sparql = update_mount_point_sparql (data);
+	sparql_str = g_strdup_printf ("%s %s %s",
+	                              delete_properties_sparql ? delete_properties_sparql : "",
+	                              tracker_sparql_builder_get_result (sparql),
+	                              mount_point_sparql ? mount_point_sparql : "");
+	g_free (delete_properties_sparql);
+	g_free (mount_point_sparql);
+
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
-					tracker_sparql_builder_get_result (sparql),
-					NULL);
+	                                sparql_str, NULL);
 
 	priv->extraction_queue = g_list_remove (priv->extraction_queue, data);
 	process_file_data_free (data);
 
 	g_object_unref (file_info);
+	g_free (sparql_str);
 	g_free (uri);
 }
 
