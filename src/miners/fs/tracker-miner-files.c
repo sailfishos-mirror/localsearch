@@ -63,7 +63,6 @@ typedef struct ProcessFileData ProcessFileData;
 
 struct ProcessFileData {
 	TrackerMinerFiles *miner;
-	TrackerSparqlBuilder *sparql;
 	GCancellable *cancellable;
 	GFile *file;
 	gchar *mime_type;
@@ -2255,7 +2254,6 @@ static void
 process_file_data_free (ProcessFileData *data)
 {
 	g_object_unref (data->miner);
-	g_object_unref (data->sparql);
 	g_object_unref (data->cancellable);
 	g_object_unref (data->file);
 	g_object_unref (data->task);
@@ -2463,7 +2461,6 @@ miner_files_process_file (TrackerMinerFS *fs,
 	data = g_slice_new0 (ProcessFileData);
 	data->miner = g_object_ref (fs);
 	data->cancellable = g_object_ref (g_task_get_cancellable (task));
-	data->sparql = tracker_sparql_builder_new_update ();
 	data->file = g_object_ref (file);
 	data->task = g_object_ref (task);
 
@@ -2493,19 +2490,18 @@ process_file_attributes_cb (GObject      *object,
                             GAsyncResult *result,
                             gpointer      user_data)
 {
-	TrackerSparqlBuilder *sparql;
+	TrackerResource *resource;
 	ProcessFileData *data;
 	const gchar *urn;
 	GFileInfo *file_info;
 	guint64 time_;
 	GFile *file;
-	gchar *uri;
+	gchar *uri, *time_str, *sparql_str;
 	GError *error = NULL;
 	gboolean is_iri;
 
 	data = user_data;
 	file = G_FILE (object);
-	sparql = data->sparql;
 	file_info = g_file_query_info_finish (file, result, &error);
 
 	if (error) {
@@ -2529,55 +2525,31 @@ process_file_attributes_cb (GObject      *object,
 		return;
 	}
 
+	resource = tracker_resource_new (urn);
+
 	/* Update nfo:fileLastModified */
-	tracker_sparql_builder_delete_open (sparql, NULL);
-	tracker_sparql_builder_subject_iri (sparql, urn);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastModified");
-	tracker_sparql_builder_object_variable (sparql, "lastmodified");
-	tracker_sparql_builder_delete_close (sparql);
-	tracker_sparql_builder_where_open (sparql);
-	tracker_sparql_builder_subject_iri (sparql, urn);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastModified");
-	tracker_sparql_builder_object_variable (sparql, "lastmodified");
-	tracker_sparql_builder_where_close (sparql);
-	tracker_sparql_builder_insert_open (sparql, NULL);
-	tracker_sparql_builder_graph_open (sparql, TRACKER_OWN_GRAPH_URN);
-	tracker_sparql_builder_subject_iri (sparql, urn);
 	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastModified");
-	tracker_sparql_builder_object_date (sparql, (time_t *) &time_);
-	tracker_sparql_builder_graph_close (sparql);
-	tracker_sparql_builder_insert_close (sparql);
+	time_str = tracker_date_to_string (time_);
+	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
+	g_free (time_str);
 
 	/* Update nfo:fileLastAccessed */
-	tracker_sparql_builder_delete_open (sparql, NULL);
-	tracker_sparql_builder_subject_iri (sparql, urn);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastAccessed");
-	tracker_sparql_builder_object_variable (sparql, "lastaccessed");
-	tracker_sparql_builder_delete_close (sparql);
-	tracker_sparql_builder_where_open (sparql);
-	tracker_sparql_builder_subject_iri (sparql, urn);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastAccessed");
-	tracker_sparql_builder_object_variable (sparql, "lastaccessed");
-	tracker_sparql_builder_where_close (sparql);
-	tracker_sparql_builder_insert_open (sparql, NULL);
-	tracker_sparql_builder_graph_open (sparql, TRACKER_OWN_GRAPH_URN);
-	tracker_sparql_builder_subject_iri (sparql, urn);
 	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
-	tracker_sparql_builder_predicate (sparql, "nfo:fileLastAccessed");
-	tracker_sparql_builder_object_date (sparql, (time_t *) &time_);
-	tracker_sparql_builder_graph_close (sparql);
-	tracker_sparql_builder_insert_close (sparql);
+	time_str = tracker_date_to_string (time_);
+	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
+	g_free (time_str);
 
 	g_object_unref (file_info);
 	g_free (uri);
 
 	/* Notify about the success */
+	sparql_str = tracker_resource_print_sparql_update (resource, NULL, TRACKER_OWN_GRAPH_URN);
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
-					tracker_sparql_builder_get_result (sparql),
-					NULL);
+	                                sparql_str, NULL);
 
 	process_file_data_free (data);
+	g_object_unref (resource);
+	g_free (sparql_str);
 }
 
 static gboolean
@@ -2591,7 +2563,6 @@ miner_files_process_file_attributes (TrackerMinerFS *fs,
 	data = g_slice_new0 (ProcessFileData);
 	data->miner = g_object_ref (fs);
 	data->cancellable = g_object_ref (g_task_get_cancellable (task));
-	data->sparql = tracker_sparql_builder_new_update ();
 	data->file = g_object_ref (file);
 	data->task = g_object_ref (task);
 
