@@ -297,10 +297,6 @@ else
   systemd_user_services_dir = get_option('systemd_user_services')
 endif
 
-tracker_major_version = meson.project_version().split('.')[0].to_int()
-tracker_minor_version = meson.project_version().split('.')[1].to_int()
-tracker_micro_version = meson.project_version().split('.')[2].to_int()
-
 conf = configuration_data()
 
 # Config that goes in config.h
@@ -335,11 +331,6 @@ conf.set('TRACKER_UI_DIR', '"@0@/@1@/tracker/"'.format(get_option('prefix'), get
 conf.set('GETTEXT_PACKAGE', '"tracker-miners"')
 conf.set('PACKAGE_VERSION', '"@0@"'.format(meson.project_version()))
 conf.set('TRACKER_VERSION', '"@0@"'.format(meson.project_version()))
-conf.set('TRACKER_MAJOR_VERSION', tracker_major_version)
-conf.set('TRACKER_MINOR_VERSION', tracker_minor_version)
-conf.set('TRACKER_MICRO_VERSION', tracker_micro_version)
-conf.set('TRACKER_INTERFACE_AGE', 0)
-conf.set('TRACKER_BINARY_AGE', 100 * tracker_minor_version + tracker_micro_version)
 
 # Config that goes in some other generated files (.desktop, .pc, etc)
 conf.set('exec_prefix', get_option('prefix'))
