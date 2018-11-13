@@ -1,4 +1,4 @@
-project('tracker-miners', 'c', 'vala', version: '2.1.4')
+project('tracker-miners', 'c', 'vala', version: '2.2.0-alpha1')
 
 gnome = import('gnome')
 i18n = import('i18n')
@@ -13,8 +13,8 @@ datadir = join_paths(get_option('prefix'), get_option('datadir'))
 glib_required = '2.40.0'
 
 if get_option('tracker_core') == 'system'
-  tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 2.1.0', required: false)
-  tracker_miner = dependency('tracker-miner-2.0', version: '>= 2.1.0', required: false)
+  tracker_sparql = dependency('tracker-sparql-2.0', version: '>= 2.2.0', required: false)
+  tracker_miner = dependency('tracker-miner-2.0', version: '>= 2.2.0', required: false)
 
   if not tracker_sparql.found() or not tracker_miner.found()
     error('Did not find the required versions of the Tracker core libraries ' +
