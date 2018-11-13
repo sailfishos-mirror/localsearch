@@ -515,6 +515,7 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	priv->extract_check_query = g_strdup_printf ("SELECT ?u { "
 	                                             "  GRAPH <" TRACKER_OWN_GRAPH_URN "> {"
 						     "    ?u a nfo:FileDataObject ;"
+						     "       tracker:available true ; "
 						     "       a ?class . "
 						     "    FILTER (?class IN (%s) && "
 						     "            NOT EXISTS { ?u nie:dataSource <" TRACKER_EXTRACT_DATA_SOURCE "> })"
