@@ -224,7 +224,7 @@ main (int argc, char **argv)
 		 * soon as org.example.MyApp exits.
 		 */
 		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
-		g_bus_watch_name_on_connection (connection, domain_ontology_name,
+		g_bus_watch_name_on_connection (connection, domain_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                loop, NULL);
