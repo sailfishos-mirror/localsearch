@@ -2499,7 +2499,7 @@ miner_files_process_file (TrackerMinerFS *fs,
 	const gchar *attrs;
 
 	data = g_slice_new0 (ProcessFileData);
-	data->miner = g_object_ref (fs);
+	data->miner = TRACKER_MINER_FILES (g_object_ref (fs));
 	data->cancellable = g_object_ref (g_task_get_cancellable (task));
 	data->file = g_object_ref (file);
 	data->task = g_object_ref (task);
@@ -2601,7 +2601,7 @@ miner_files_process_file_attributes (TrackerMinerFS *fs,
 	const gchar *attrs;
 
 	data = g_slice_new0 (ProcessFileData);
-	data->miner = g_object_ref (fs);
+	data->miner = TRACKER_MINER_FILES (g_object_ref (fs));
 	data->cancellable = g_object_ref (g_task_get_cancellable (task));
 	data->file = g_object_ref (file);
 	data->task = g_object_ref (task);
