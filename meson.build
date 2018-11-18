@@ -1,4 +1,6 @@
-project('tracker-miners', 'c', 'vala', version: '2.2.0-alpha1')
+project('tracker-miners', 'c', 'vala',
+        version: '2.2.0-alpha1',
+        meson_version: '>=0.47')
 
 gnome = import('gnome')
 i18n = import('i18n')
