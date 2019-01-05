@@ -32,7 +32,7 @@ import shutil
 import fcntl
 
 from common.utils import configuration as cfg
-import unittest2 as ut
+import unittest as ut
 from common.utils.applicationstest import CommonTrackerApplicationTest as CommonTrackerApplicationTest
 from common.utils.helpers import log
 

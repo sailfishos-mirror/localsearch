@@ -29,7 +29,7 @@ import os
 import shutil
 import time
 
-import unittest2 as ut
+import unittest as ut
 from common.utils.helpers import log
 from common.utils.minertest import CommonTrackerMinerTest
 
