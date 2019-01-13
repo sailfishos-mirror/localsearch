@@ -132,11 +132,10 @@ foreach module : modules
 
   # Populate tracker_uninstalled_extract_rules_dir with the enabled .rule files.
   foreach rule: rules
-    empty_conf = configuration_data()
     configure_file(
       input: rule,
       output: rule,
-      configuration: empty_conf)
+      copy: true)
   endforeach
 endforeach
 
