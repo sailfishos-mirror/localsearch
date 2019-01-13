@@ -28,7 +28,7 @@ from common.utils.minertest import CommonTrackerMinerTest
 from gi.repository import GLib
 
 import os
-import unittest2 as ut
+import unittest as ut
 
 
 NFO_DOCUMENT = 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Document'

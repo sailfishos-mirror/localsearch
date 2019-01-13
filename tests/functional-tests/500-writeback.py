@@ -27,7 +27,7 @@ import time
 from common.utils.extractor import get_tracker_extract_jsonld_output
 from common.utils.helpers import log
 from common.utils.writebacktest import CommonTrackerWritebackTest as CommonTrackerWritebackTest
-import unittest2 as ut
+import unittest as ut
 from common.utils.expectedFailure import expectedFailureBug
 
 REASONABLE_TIMEOUT = 5 # Seconds we wait for tracker-writeback to do the work

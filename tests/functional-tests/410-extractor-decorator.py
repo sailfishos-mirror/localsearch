@@ -21,7 +21,7 @@
 Tests failure cases of tracker-extract.
 """
 
-import unittest2 as ut
+import unittest as ut
 
 from gi.repository import GLib
 
