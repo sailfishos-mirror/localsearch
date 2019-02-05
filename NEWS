@@ -1,3 +1,11 @@
+NEW in 2.2.0-alpha2 - 2019-02-06
+================================
+  * Fixes to desktop file indexing
+  * Multiple build and compile warning fixes
+  * Many test improvements and cleanups
+
+Translations: fr
+
 NEW in 2.2.0-alpha1 - 2018-11-13
 ================================
 
