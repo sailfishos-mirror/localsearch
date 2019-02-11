@@ -21,7 +21,6 @@ from common.utils.writebacktest import CommonTrackerWritebackTest as CommonTrack
 from common.utils.extractor import get_tracker_extract_jsonld_output
 from common.utils.helpers import log
 import unittest as ut
-from common.utils.expectedFailure import expectedFailureBug
 import os
 import time
 
@@ -31,8 +30,7 @@ REASONABLE_TIMEOUT = 5 # Seconds we wait for tracker-writeback to do the work
 class WritebackKeepDateTest (CommonTrackerWritebackTest):
 
     def setUp (self):
-        self.tracker = self.system.store
-        self.extractor = self.system.extractor
+        super(WritebackKeepDateTest, self).setUp()
         self.favorite = self.__prepare_favorite_tag ()
 
     def __prepare_favorite_tag (self):
@@ -86,9 +84,12 @@ class WritebackKeepDateTest (CommonTrackerWritebackTest):
 
         # Check the value is written in the file
         metadata = get_tracker_extract_jsonld_output (filename, "")
-        self.assertIn (self.favorite, metadata ["nao:hasTag"],
+
+        tags = metadata.get('nao:hasTag', [])
+        tag_names = [tag['nao:prefLabel'] for tag in tags]
+        self.assertIn (self.favorite, tag_names,
                        "Tag hasn't been written in the file")
-        
+
         # Now check the modification date of the files and it should be the same :)
         new_results = self.tracker.query (query_images)
         ## for (uri, date) in new_results:
