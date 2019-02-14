@@ -1,4 +1,4 @@
-project('tracker-miners', 'c', 'vala',
+project('tracker-miners', 'c',
         version: '2.2.0-alpha2',
         meson_version: '>=0.47')
 
@@ -382,7 +382,6 @@ tracker_uninstalled_extract_rules_dir = join_paths(meson.current_build_dir(), 's
 tracker_uninstalled_writeback_modules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-writeback')
 
 gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
-vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
 
 glib_mkenums = find_program('glib-mkenums')
 
