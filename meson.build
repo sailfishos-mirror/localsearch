@@ -93,14 +93,6 @@ zlib = dependency('zlib')
 libgif = cc.find_library('gif', required: get_option('gif'))
 libmath = cc.find_library('m', required: false)
 
-# FIXME: here we work around a quirk todo with Meson and Vala: the 'uuid'
-# pkg-config component corresponds to 'libuuid.vapi', but Meson assumes that
-# .vapi name always matches pkg-config name, and will add `--pkg uuid` to the
-# Vala commandline. By finding 'uuid' using find_library() instead, we get
-# a dependency object back that won't cause any `--pkg` arguments to be added
-# to the Vala commandline, but still works as expected for C code.
-uuid = cc.find_library('uuid')
-
 have_tracker_extract = get_option('extract')
 have_tracker_miner_apps = get_option('miner_apps')
 have_tracker_miner_fs = get_option('miner_fs')
