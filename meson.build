@@ -1,4 +1,4 @@
-project('tracker-miners', 'c', 'vala', version: '2.1.5')
+project('tracker-miners', 'c', version: '2.1.5')
 
 gnome = import('gnome')
 i18n = import('i18n')
@@ -399,7 +399,6 @@ tracker_writeback_modules_dir = join_paths(get_option('prefix'), get_option('lib
 tracker_uninstalled_extract_rules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-extract')
 
 gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
-vapi_dir = join_paths(get_option('prefix'), get_option('datadir'), 'vala', 'vapi')
 
 glib_mkenums = find_program('glib-mkenums')
 
