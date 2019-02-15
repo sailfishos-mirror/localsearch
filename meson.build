@@ -256,7 +256,23 @@ endif
 # Check for libseccomp
 ##################################################################
 
-if not libseccomp.found() and host_machine.system() == 'linux'
+host_system = host_machine.system()
+host_cpu = host_machine.cpu()
+unsupported_cpus = [
+  'alpha',
+  'ia64',
+  'm68k',
+  'parisc',
+  'parisc64',
+  'sh4',
+  'sparc',
+  'sparc64',
+]
+system_supports_seccomp = host_system == 'linux'
+cpu_supports_seccomp = not unsupported_cpus.contains(host_cpu)
+seccomp_required = system_supports_seccomp and cpu_supports_seccomp
+
+if not libseccomp.found() and seccomp_required
   error('Libseccomp is mandatory for sandboxed metadata extraction')
 endif
 
