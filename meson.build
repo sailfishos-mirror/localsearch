@@ -255,6 +255,9 @@ endif
 
 host_system = host_machine.system()
 host_cpu = host_machine.cpu()
+
+# You can find a list of architectures that seccomp supports in the seccomp
+# project README. See: https://github.com/seccomp/libseccomp/
 unsupported_cpus = [
   'alpha',
   'ia64',
@@ -265,6 +268,7 @@ unsupported_cpus = [
   'sparc',
   'sparc64',
 ]
+
 system_supports_seccomp = host_system == 'linux'
 cpu_supports_seccomp = not unsupported_cpus.contains(host_cpu)
 seccomp_required = system_supports_seccomp and cpu_supports_seccomp
