@@ -1,3 +1,20 @@
+NEW in 2.2.0 - 2019-02-20
+=========================
+
+  * Disable guarantee_metadata by default. It was the case on autotools
+  * Stop merging translations to schema files
+  * Test suite improvements
+  * Meson build improvements
+
+Translations: cs, da, de, es, gl, hu, id, lt, pl, pt_BR, ro, sl, sv, tr, zh_TW
+
+  Highlighted changes since 2.1.x:
+  --------------------------------
+
+  * The functionality of tracker-miner-apps has been adopted by
+    tracker-miner-fs/tracker-extract.
+  * All usage of deprecated TrackerSparqlBuilder is gone.
+
 NEW in 2.2.0-alpha2 - 2019-02-06
 ================================
   * Fixes to desktop file indexing
