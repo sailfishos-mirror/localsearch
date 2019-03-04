@@ -28,3 +28,8 @@ test-fedora-latest:
       unset $(env|grep -o '^CI_[^=]*')
 
       su tracker -c 'cd build; LANG=en_US.UTF8 dbus-launch meson test --suite tracker-miners --print-errorlogs'
+
+  artifacts:
+    when: always
+    paths:
+    - build/meson-logs/testlog.txt
