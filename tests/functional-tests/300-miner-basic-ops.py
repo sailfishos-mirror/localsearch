@@ -161,6 +161,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         self.assertEquals (3, self.tracker.count_instances ("nfo:TextDocument"))
 
 
+    @ut.skip("https://gitlab.gnome.org/GNOME/tracker-miners/issues/56")
     def test_05_move_from_unmonitored_to_monitored (self):
         """
         Move a file from unmonitored to monitored directory

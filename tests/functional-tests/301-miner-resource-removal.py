@@ -63,6 +63,7 @@ class MinerResourceRemovalTest (CommonTrackerMinerTest):
         return self.tracker.await_resource_inserted (rdf_class = NFO_DOCUMENT,
                                                      url = self.uri(file_name))
 
+    @ut.skip("https://gitlab.gnome.org/GNOME/tracker-miners/issues/57")
     def test_01_file_deletion (self):
         """
         Ensure every logical resource (nie:InformationElement) contained with
