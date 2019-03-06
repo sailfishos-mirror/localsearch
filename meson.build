@@ -37,7 +37,7 @@ if get_option('tracker_core') == 'system'
   # installed locations.
   tracker_uninstalled_domain_rule = join_paths (tracker_sparql.get_pkgconfig_variable('domain_ontologies_dir'), 'default.rule')
   tracker_uninstalled_nepomuk_ontologies_dir = join_paths(tracker_sparql.get_pkgconfig_variable('ontologies_dir'), 'nepomuk')
-  tracker_uninstalled_stop_words_dir = join_paths(get_option('prefix'), get_option('datadir'), 'tracker', 'stop-words', 'default.rule')
+  tracker_uninstalled_stop_words_dir = join_paths(tracker_sparql.get_pkgconfig_variable('datadir'), 'tracker', 'stop-words')
 else
   tracker_subproject = subproject('tracker',
     default_options: [
