@@ -1,3 +1,12 @@
+NEW in 2.2.1 - 2019-03-06
+=========================
+
+  * Whitelist syscall fadvise64_64
+  * Many fixes to functional tests
+  * Fix failed functional tests being reported as successful
+
+Translations: eo, fur, fr, it, ko, lv, nl, ru, sr
+
 NEW in 2.2.0 - 2019-02-20
 =========================
 
