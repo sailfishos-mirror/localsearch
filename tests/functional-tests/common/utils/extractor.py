@@ -41,6 +41,8 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
     # We depend on parsing the output, so verbosity MUST be 0.
     env = os.environ.copy()
     env['TRACKER_VERBOSITY'] = '0'
+    # Tell GStreamer not to fork to create the registry
+    env['GST_REGISTRY_FORK'] = 'no'
 
     log ('Running: %s' % ' '.join(command))
     try:
