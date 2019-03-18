@@ -2360,7 +2360,7 @@ process_file_cb (GObject      *object,
 	GFileInfo *file_info;
 	guint64 time_;
 	GFile *file, *parent;
-	gchar *uri, *sparql_str, *time_str;
+	gchar *uri, *sparql_str, *sparql_update_str, *time_str;
 	GError *error = NULL;
 	gboolean is_iri;
 	gboolean is_directory;
@@ -2471,9 +2471,10 @@ process_file_cb (GObject      *object,
 		miner_files_add_rdf_types (resource, file, mime_type);
 
 	mount_point_sparql = update_mount_point_sparql (data);
+	sparql_update_str = tracker_resource_print_sparql_update (resource, NULL, TRACKER_OWN_GRAPH_URN),
 	sparql_str = g_strdup_printf ("%s %s %s",
 	                              delete_properties_sparql ? delete_properties_sparql : "",
-	                              tracker_resource_print_sparql_update (resource, NULL, TRACKER_OWN_GRAPH_URN),
+	                              sparql_update_str,
 	                              mount_point_sparql ? mount_point_sparql : "");
 	g_free (delete_properties_sparql);
 	g_free (mount_point_sparql);
@@ -2488,6 +2489,7 @@ process_file_cb (GObject      *object,
 	g_object_unref (file_info);
 	g_free (sparql_str);
 	g_free (uri);
+	g_free (sparql_update_str);
 }
 
 static gboolean
