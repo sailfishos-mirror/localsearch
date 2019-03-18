@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 # Copyright (C) 2016, Sam Thursfield (sam@afuera.me.uk)
 #
