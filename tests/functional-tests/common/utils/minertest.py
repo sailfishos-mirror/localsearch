@@ -187,7 +187,7 @@ class CommonTrackerMinerFTSTest (CommonTrackerMinerTest):
         """
         self.set_text (text)
         results = self.search_word (word)
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
         self.assertIn ( self.uri (self.testfile), results)
 
     def _query_id (self, uri):

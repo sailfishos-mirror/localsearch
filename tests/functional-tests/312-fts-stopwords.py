@@ -71,11 +71,11 @@ class MinerFTSStopwordsTest (CommonTrackerMinerFTSTest):
         
         self.set_text (TEXT)
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
         log ("Stopwords: %s" % stopwords)
         for i in range (0, len (stopwords)):
             results = self.search_word (stopwords[i])
-            self.assertEquals (len (results), 0)
+            self.assertEqual (len (results), 0)
 
     ## FIXME add all the special character tests!
     ##  http://git.gnome.org/browse/tracker/commit/?id=81c0d3bd754a6b20ac72323481767dc5b4a6217b

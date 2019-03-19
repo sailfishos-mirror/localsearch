@@ -85,11 +85,9 @@ class ExtractionTestCase (ut.TestCase):
         result = get_tracker_extract_jsonld_output(self.file_to_extract)
         self.__assert_extraction_ok (result)
 
+    @ut.expectedFailure
     def expected_failure_test_extraction (self):
-        try:
-            self.generic_test_extraction ()
-        except Exception:
-            raise ut.case._ExpectedFailure(sys.exc_info())
+        self.generic_test_extraction ()
 
         if self.__get_bugnumber ():
             raise Exception ("Unexpected success. Maybe bug: " + self.__get_bugnumber () + " has been fixed?")
@@ -99,7 +97,7 @@ class ExtractionTestCase (ut.TestCase):
     def assertDictHasKey (self, d, key, msg=None):
         if not isinstance(d, dict):
             self.fail ("Expected dict, got %s" % d)
-        if not d.has_key (key):
+        if key not in d:
             standardMsg = "Missing: %s\n" % (key)
             self.fail (self._formatMessage (msg, standardMsg))
         else:
@@ -135,7 +133,7 @@ class ExtractionTestCase (ut.TestCase):
         unexpected_pairs = []  # List of unexpected (key, value)
         expected_keys = []  # List of expected keys (the key must be there, value doesnt matter)
 
-        for k, v in spec.items():
+        for k, v in list(spec.items()):
             if k.startswith ("!"):
                 unexpected_pairs.append ( (k[1:], v) )
             elif k == '@type':
@@ -178,7 +176,7 @@ class ExtractionTestCase (ut.TestCase):
         for (prop, value) in unexpected_pairs:
             # There is no prop, or it is but not with that value
             if (value == ""):
-                self.assertFalse (result.has_key (prop), error_extra_prop % (prop,
+                self.assertFalse (prop in result, error_extra_prop % (prop,
                                                                              self.file_to_extract,
                                                                              self.descfile))
             else:
@@ -213,7 +211,7 @@ def run_all ():
     else:
         TEST_DATA_PATH = os.path.join (cfg.DATADIR, "tracker-tests",
                                        "test-extraction-data")
-    print "Loading test descriptions from", TEST_DATA_PATH
+    print("Loading test descriptions from", TEST_DATA_PATH)
     extractionTestSuite = ut.TestSuite ()
     for root, dirs, files in os.walk (TEST_DATA_PATH):
          descriptions = [os.path.join (root, f) for f in files if f.endswith ("expected")]

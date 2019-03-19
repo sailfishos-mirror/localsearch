@@ -60,7 +60,7 @@ class WritebackKeepDateTest (CommonTrackerWritebackTest):
           } ORDER BY ?contentCreated
           """
         results = self.tracker.query (query_images)
-        self.assertEquals (len (results), 3, results)
+        self.assertEqual (len (results), 3, results)
 
         log ("Waiting 2 seconds to ensure there is a noticiable difference in the timestamp")
         time.sleep (2)
@@ -101,8 +101,8 @@ class WritebackKeepDateTest (CommonTrackerWritebackTest):
 
         # Indeed the order of the results should be the same
         for i in range (0, len (results)):
-            self.assertEquals (results[i][0], new_results[i][0], "Order of the files is different")
-            self.assertEquals (results[i][1], new_results[i][1], "Date has change in file <%s>" % results[i][0])
+            self.assertEqual (results[i][0], new_results[i][0], "Order of the files is different")
+            self.assertEqual (results[i][1], new_results[i][1], "Date has change in file <%s>" % results[i][0])
         
 
 if __name__ == "__main__":

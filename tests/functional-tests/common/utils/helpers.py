@@ -27,9 +27,9 @@ import subprocess
 import time
 import re
 
-import configuration as cfg
-import mainloop
-import options
+from common.utils import configuration as cfg
+from common.utils import mainloop
+from common.utils import options
 
 class NoMetadataException (Exception):
     pass

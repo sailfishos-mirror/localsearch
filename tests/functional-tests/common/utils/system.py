@@ -3,16 +3,15 @@ import os
 import subprocess
 import shutil
 import tempfile
-import configuration as cfg
 
 from gi.repository import GObject
 from gi.repository import GLib
 import time
 
-import options
-from dconf import DConfClient
-
-import helpers
+from common.utils import configuration as cfg
+from common.utils import options
+from common.utils.dconf import DConfClient
+from common.utils import helpers
 
 TEST_ENV_VARS = {  "LC_COLLATE": "en_GB.utf8" }
 
@@ -57,7 +56,7 @@ class TrackerSystemAbstraction (object):
             "XDG_CACHE_HOME": self.xdg_cache_home()
         }
 
-        for var, directory in self._dirs.items():
+        for var, directory in list(self._dirs.items()):
             os.makedirs (directory)
             os.makedirs (os.path.join(directory, 'tracker'))
             os.environ [var] = directory
@@ -65,7 +64,7 @@ class TrackerSystemAbstraction (object):
         if ontodir:
             os.environ ["TRACKER_DB_ONTOLOGIES_DIR"] = ontodir
 
-        for var, value in TEST_ENV_VARS.iteritems ():
+        for var, value in TEST_ENV_VARS.items ():
             os.environ [var] = value
 
         # Previous loop should have set DCONF_PROFILE to the test location
@@ -73,10 +72,10 @@ class TrackerSystemAbstraction (object):
             self._apply_settings(settings)
 
     def _apply_settings(self, settings):
-        for schema_name, contents in settings.iteritems():
+        for schema_name, contents in settings.items():
             dconf = DConfClient(schema_name)
             dconf.reset()
-            for key, value in contents.iteritems():
+            for key, value in contents.items():
                 dconf.write(key, value)
 
     def tracker_store_testing_start (self, confdir=None, ontodir=None):
@@ -173,6 +172,6 @@ class TrackerSystemAbstraction (object):
         if self.store:
             self.store.stop ()
 
-        for path in self._dirs.values():
+        for path in list(self._dirs.values()):
             shutil.rmtree(path)
         os.rmdir(self._basedir)

@@ -54,7 +54,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
                  nie:url \"%s\" .
           }
           """ % (self.uri (filepath)))
-        self.assertEquals (len (result), 1)
+        self.assertEqual (len (result), 1)
         return result[0][0]
 
     def __get_file_urn (self, filepath):
@@ -64,7 +64,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
                  nie:url \"%s\" .
           }
           """ % (self.uri (filepath)))
-        self.assertEquals (len (result), 1)
+        self.assertEqual (len (result), 1)
         return result[0][0]
 
     """
@@ -75,7 +75,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         The precreated files and folders should be there
         """
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 3)
+        self.assertEqual (len (result), 3)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
@@ -102,7 +102,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
 
         # verify if miner indexed this file.
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 4)
+        self.assertEqual (len (result), 4)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
@@ -128,7 +128,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         time.sleep (1)
         # Nothing changed
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 3, "Results:" + str(result))
+        self.assertEqual (len (result), 3, "Results:" + str(result))
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
@@ -148,7 +148,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         dest_id, dest_urn = self.system.store.await_resource_inserted (NFO_DOCUMENT, self.uri(dest))
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 4)
+        self.assertEqual (len (result), 4)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
@@ -158,7 +158,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         # Clean the file
         os.remove (dest)
         self.system.store.await_resource_deleted (NFO_DOCUMENT, dest_id)
-        self.assertEquals (3, self.tracker.count_instances ("nfo:TextDocument"))
+        self.assertEqual (3, self.tracker.count_instances ("nfo:TextDocument"))
 
 
     @ut.skip("https://gitlab.gnome.org/GNOME/tracker-miners/issues/56")
@@ -172,7 +172,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         dest_id, dest_urn = self.system.store.await_resource_inserted (NFO_DOCUMENT, self.uri(dest))
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 4)
+        self.assertEqual (len (result), 4)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
@@ -182,7 +182,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         # Clean the file
         os.remove (dest)
         self.system.store.await_resource_deleted (NFO_DOCUMENT, dest_id)
-        self.assertEquals (3, self.tracker.count_instances ("nfo:TextDocument"))
+        self.assertEqual (3, self.tracker.count_instances ("nfo:TextDocument"))
 
 ## """ move operation and tracker-miner response test cases """
 ## class move(TestUpdate):
@@ -199,7 +199,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         self.system.store.await_resource_deleted (NFO_DOCUMENT, source_id)
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 2)
+        self.assertEqual (len (result), 2)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
@@ -207,7 +207,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         # Restore the file
         shutil.move (dest, source)
         self.system.store.await_resource_inserted (NFO_DOCUMENT, self.uri(source))
-        self.assertEquals (3, self.tracker.count_instances ("nfo:TextDocument"))
+        self.assertEqual (3, self.tracker.count_instances ("nfo:TextDocument"))
 
 
     def test_07_move_from_monitored_to_monitored (self):
@@ -222,7 +222,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
 
         source_dir_urn = self.__get_file_urn (os.path.dirname(source))
         parent_before = self.__get_parent_urn (source)
-        self.assertEquals (source_dir_urn, parent_before)
+        self.assertEqual (source_dir_urn, parent_before)
 
         shutil.move (source, dest)
         self.tracker.await_property_changed(NFO_DOCUMENT, resource_id, 'nie:url')
@@ -231,11 +231,11 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         # should be changed to the new one
         dest_dir_urn = self.__get_file_urn (os.path.dirname(dest))
         parent_after = self.__get_parent_urn (dest)
-        self.assertNotEquals (parent_before, parent_after)
-        self.assertEquals (dest_dir_urn, parent_after)
+        self.assertNotEqual (parent_before, parent_after)
+        self.assertEqual (dest_dir_urn, parent_after)
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 3)
+        self.assertEqual (len (result), 3)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/file2.txt"), unpacked_result)
@@ -246,7 +246,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         self.tracker.await_property_changed(NFO_DOCUMENT, resource_id, 'nie:url')
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 3)
+        self.assertEqual (len (result), 3)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/dir1/file2.txt"), unpacked_result)
 
@@ -261,7 +261,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         self.system.store.await_resource_deleted (NFO_DOCUMENT, victim_id)
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 2)
+        self.assertEqual (len (result), 2)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
         self.assertIn ( self.uri ("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
@@ -285,7 +285,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
         self.system.store.await_resource_deleted (NFO_DOCUMENT, file_inside_victim_id)
 
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 1)
+        self.assertEqual (len (result), 1)
         unpacked_result = [ r[0] for r in result]
         self.assertIn ( self.uri ("test-monitored/file1.txt"), unpacked_result)
 
@@ -302,7 +302,7 @@ class MinerCrawlTest (CommonTrackerMinerTest):
 
         # Check everything is fine
         result = self.__get_text_documents ()
-        self.assertEquals (len (result), 3)
+        self.assertEqual (len (result), 3)
 
 if __name__ == "__main__":
     ut.main(failfast=True)

@@ -104,7 +104,7 @@ class TrackerSyncApplicationTests (CommonTrackerApplicationTest):
         }
         """ % (dest_fileuri, dest_fileuri)
         self.tracker.update (insert)
-        self.assertEquals (self.get_urn_count_by_url (dest_fileuri), 1)
+        self.assertEqual (self.get_urn_count_by_url (dest_fileuri), 1)
 
         resource_id = self.tracker.get_resource_id(dest_fileuri)
 
@@ -116,13 +116,13 @@ class TrackerSyncApplicationTests (CommonTrackerApplicationTest):
 
         self.system.miner_fs.await_wakeup_count (miner_wakeup_count + 1)
 
-        self.assertEquals (self.get_urn_count_by_url (dest_fileuri), 1)
+        self.assertEqual (self.get_urn_count_by_url (dest_fileuri), 1)
 
         # Clean the new file so the test directory is as before
         log ("Remove and wait")
         os.remove (dest_filepath)
         self.tracker.await_resource_deleted (NMM_MUSICPIECE, resource_id)
-        self.assertEquals (self.get_urn_count_by_url (dest_fileuri), 0)
+        self.assertEqual (self.get_urn_count_by_url (dest_fileuri), 0)
 
 if __name__ == "__main__":
 	ut.main()

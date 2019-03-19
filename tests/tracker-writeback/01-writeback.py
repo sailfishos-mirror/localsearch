@@ -25,7 +25,7 @@ import os
 import shutil
 import re
 import time
-import commands
+import subprocess
 
 TRACKER = 'org.freedesktop.Tracker1'
 TRACKER_OBJ = '/org/freedesktop/Tracker1/Resources'
@@ -43,7 +43,7 @@ class TestInsertion (unittest.TestCase):
 	try:        
 	        os.mkdir (os.getcwd() + "/tmp")
 	except:
-		print ""
+		print("")
 
         shutil.copy2 (os.getcwd() + "/data/test01.jpg",
                       os.getcwd() + "/tmp/test01.jpg")

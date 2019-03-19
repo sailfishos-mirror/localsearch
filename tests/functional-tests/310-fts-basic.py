@@ -51,11 +51,11 @@ class MinerFTSBasicTest (CommonTrackerMinerFTSTest):
         self.set_text (TEXT)
         
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
         self.assertIn (self.uri (self.testfile), results)
 
         results = self.search_word ("unlimited")
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
         self.assertIn (self.uri (self.testfile), results)
 
 
@@ -65,13 +65,13 @@ class MinerFTSBasicTest (CommonTrackerMinerFTSTest):
         self.set_text (TEXT)
 
         results = self.search_word (TEXT)
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
     def test_04_non_existent_word (self):
         TEXT = "This a trick"
         self.set_text (TEXT)
         results = self.search_word ("trikc")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
     def test_05_word_multiple_times_in_file (self):
         TEXT = "automobile is red. automobile is big. automobile is great!"
@@ -101,7 +101,7 @@ class MinerFTSBasicTest (CommonTrackerMinerFTSTest):
         TEXT = "palabra 123123"
         self.set_text (TEXT)
         results = self.search_word ("123123")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
 
 if __name__ == "__main__":

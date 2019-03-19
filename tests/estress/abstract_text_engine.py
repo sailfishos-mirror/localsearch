@@ -64,14 +64,14 @@ class AbstractTextEngine:
     def send_data_cb (self):
         sparql = self.get_insert_sparql ()
         self.iface.SparqlUpdate (sparql)
-        print int(time.time()), self.msgsize, self.publicname
+        print(int(time.time()), self.msgsize, self.publicname)
         return True
 
 
     def get_insert_sparql (self):
-        print "Implement this method in a subclass!!!"
+        print("Implement this method in a subclass!!!")
         assert False
         
     def get_running_label (self):
-        print "Implement this method in a subclass!!!"
+        print("Implement this method in a subclass!!!")
         assert False

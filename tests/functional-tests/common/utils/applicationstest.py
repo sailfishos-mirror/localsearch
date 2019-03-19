@@ -65,7 +65,7 @@ class CommonTrackerApplicationTest (ut.TestCase):
         log ("Copying slowly\n '%s' to\n '%s'" % (src, fdest.name))
         fsrc = open (src, 'rb')
         buffer_ = fsrc.read (rate)
-        while (buffer_ != ""):
+        while (buffer_ != b""):
             fdest.write (buffer_)
             time.sleep (0.1)
             buffer_ = fsrc.read (rate)

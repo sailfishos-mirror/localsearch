@@ -57,7 +57,7 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
         self.tracker.await_resource_deleted (NFO_DOCUMENT, id)
 
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
     def test_02_empty_the_file (self):
         """
@@ -68,7 +68,7 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
 
         self.set_text ("")
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
     @ut.skip("FIXME: this test fails!")
     def test_03_update_the_file (self):
@@ -81,10 +81,10 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
         self.set_text ("airplane is blue and small and wonderful")
 
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
         results = self.search_word ("airplane")
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
 
     # Skip the test_text_13... feel, feet, fee in three diff files and search feet
 
@@ -107,7 +107,7 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
         self.__recreate_file (self.path (TEST_15_FILE), TEXT)
 
         results = self.search_word ("automobile")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
         os.remove (self.path (TEST_15_FILE))
 
@@ -125,7 +125,7 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
         time.sleep (2)
 
         results = self.search_word ("airplane")
-        self.assertEquals (len (results), 0)
+        self.assertEqual (len (results), 0)
 
         shutil.copyfile (self.path (TEST_16_SOURCE), self.path (TEST_16_DEST))
         self.tracker.await_resource_inserted (rdf_class = NFO_DOCUMENT,
@@ -133,7 +133,7 @@ class MinerFTSFileOperationsTest (CommonTrackerMinerFTSTest):
                                               required_property = 'nie:plainTextContent')
 
         results = self.search_word ("airplane")
-        self.assertEquals (len (results), 1)
+        self.assertEqual (len (results), 1)
 
         os.remove (self.path (TEST_16_SOURCE))
         os.remove (self.path (TEST_16_DEST))

@@ -101,7 +101,7 @@ def generated_ttl_dir():
 # present :/
 _TEST_MONITORED_TMP_DIR = os.path.join (os.environ["HOME"], "tracker-tests")
 if _TEST_MONITORED_TMP_DIR.startswith('/tmp'):
-    if os.environ.has_key('REAL_HOME'):
+    if 'REAL_HOME' in os.environ:
         _TEST_MONITORED_TMP_DIR = os.path.join (os.environ["REAL_HOME"], "tracker-tests")
     else:
         print ("HOME is in the /tmp prefix - this will cause tests that rely " +
