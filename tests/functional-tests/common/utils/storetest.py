@@ -27,16 +27,17 @@ from common.utils import configuration as cfg
 
 import unittest as ut
 
-class CommonTrackerStoreTest (ut.TestCase):
-        """
-        Common superclass for tests that just require a fresh store running
-        """
-        @classmethod 
-	def setUpClass (self):
-            self.system = TrackerSystemAbstraction ()
-            self.system.tracker_store_testing_start ()
-            self.tracker = self.system.store
 
-        @classmethod
-        def tearDownClass (self):
-            self.system.finish ()
+class CommonTrackerStoreTest (ut.TestCase):
+    """
+    Common superclass for tests that just require a fresh store running
+    """
+    @classmethod
+    def setUpClass(self):
+        self.system = TrackerSystemAbstraction()
+        self.system.tracker_store_testing_start()
+        self.tracker = self.system.store
+
+    @classmethod
+    def tearDownClass(self):
+        self.system.finish()

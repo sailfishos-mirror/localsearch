@@ -47,6 +47,7 @@ VALID_FILE_TITLE = 'Simply Juvenile'
 
 TRACKER_EXTRACT_FAILURE_DATA_SOURCE = 'tracker:extractor-failure-data-source'
 
+
 class ExtractorDecoratorTest(ut.TestCase):
     def setUp(self):
         self.datadir = cfg.create_monitored_test_dir()
@@ -91,7 +92,7 @@ class ExtractorDecoratorTest(ut.TestCase):
 
         log("Sending re-index request")
         # Request re-indexing (same as `tracker index --file ...`)
-        miner_fs.index_file('file://' + os.path.join (self.datadir, file_path))
+        miner_fs.index_file('file://' + os.path.join(self.datadir, file_path))
 
         # The extractor should reindex the file and re-add the metadata that we
         # deleted, so we should see the nie:title property change.

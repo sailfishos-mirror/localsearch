@@ -41,19 +41,18 @@ class CommonTrackerWritebackTest (ut.TestCase):
     Start all processes including writeback, miner pointing to WRITEBACK_TMP_DIR
     """
 
-    def __prepare_directories (self):
-        if (os.path.exists (os.getcwd() + "/test-writeback-data")):
+    def __prepare_directories(self):
+        if (os.path.exists(os.getcwd() + "/test-writeback-data")):
             # Use local directory if available
             datadir = os.getcwd() + "/test-writeback-data"
         else:
-            datadir = os.path.join (cfg.DATADIR, "tracker-tests",
-                                    "test-writeback-data")
+            datadir = os.path.join(cfg.DATADIR, "tracker-tests",
+                                   "test-writeback-data")
 
-        for testfile in [TEST_FILE_JPEG, TEST_FILE_PNG,TEST_FILE_TIFF]:
-            origin = os.path.join (datadir, testfile)
-            log ("Copying %s -> %s" % (origin, self.workdir))
-            shutil.copy (origin, self.workdir)
-
+        for testfile in [TEST_FILE_JPEG, TEST_FILE_PNG, TEST_FILE_TIFF]:
+            origin = os.path.join(datadir, testfile)
+            log("Copying %s -> %s" % (origin, self.workdir))
+            shutil.copy(origin, self.workdir)
 
     def setUp(self):
         self.workdir = cfg.create_monitored_test_dir()
@@ -72,10 +71,10 @@ class CommonTrackerWritebackTest (ut.TestCase):
             }
         }
 
-        self.__prepare_directories ()
+        self.__prepare_directories()
 
-        self.system = TrackerSystemAbstraction ()
-        self.system.tracker_writeback_testing_start (CONF_OPTIONS)
+        self.system = TrackerSystemAbstraction()
+        self.system.tracker_writeback_testing_start(CONF_OPTIONS)
 
         def await_resource_extraction(url):
             # Make sure a resource has been crawled by the FS miner and by
@@ -84,37 +83,37 @@ class CommonTrackerWritebackTest (ut.TestCase):
             # extraction is complete.
             self.system.store.await_resource_inserted(NFO_IMAGE, url=url, required_property='nfo:width')
 
-        await_resource_extraction (self.get_test_filename_jpeg())
-        await_resource_extraction (self.get_test_filename_tiff())
-        await_resource_extraction (self.get_test_filename_png())
+        await_resource_extraction(self.get_test_filename_jpeg())
+        await_resource_extraction(self.get_test_filename_tiff())
+        await_resource_extraction(self.get_test_filename_png())
 
         self.tracker = self.system.store
         self.extractor = self.system.extractor
 
-    def tearDown (self):
-        self.system.finish ()
+    def tearDown(self):
+        self.system.finish()
 
-        for testfile in [TEST_FILE_JPEG, TEST_FILE_PNG,TEST_FILE_TIFF]:
+        for testfile in [TEST_FILE_JPEG, TEST_FILE_PNG, TEST_FILE_TIFF]:
             os.remove(os.path.join(self.workdir, testfile))
 
         cfg.remove_monitored_test_dir(self.workdir)
 
-    def uri (self, filename):
-        return "file://" + os.path.join (self.workdir, filename)
+    def uri(self, filename):
+        return "file://" + os.path.join(self.workdir, filename)
 
-    def get_test_filename_jpeg (self):
-        return self.uri (TEST_FILE_JPEG)
+    def get_test_filename_jpeg(self):
+        return self.uri(TEST_FILE_JPEG)
 
-    def get_test_filename_tiff (self):
-        return self.uri (TEST_FILE_TIFF)
+    def get_test_filename_tiff(self):
+        return self.uri(TEST_FILE_TIFF)
 
-    def get_test_filename_png (self):
-        return self.uri (TEST_FILE_PNG)
+    def get_test_filename_png(self):
+        return self.uri(TEST_FILE_PNG)
 
-    def get_mtime (self, filename):
+    def get_mtime(self, filename):
         return os.stat(filename).st_mtime
 
-    def wait_for_file_change (self, filename, initial_mtime):
+    def wait_for_file_change(self, filename, initial_mtime):
         start = time.time()
         while time.time() < start + 5:
             mtime = os.stat(filename).st_mtime

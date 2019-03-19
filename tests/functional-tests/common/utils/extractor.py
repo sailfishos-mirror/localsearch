@@ -33,7 +33,7 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
     Runs `tracker-extract --file` to extract metadata from a file.
     """
 
-    tracker_extract = os.path.join (cfg.TRACKER_EXTRACT_PATH)
+    tracker_extract = os.path.join(cfg.TRACKER_EXTRACT_PATH)
     command = [tracker_extract, '--verbosity=0', '--output-format=json-ld', '--file', filename]
     if mime_type is not None:
         command.extend(['--mime', mime_type])
@@ -44,9 +44,9 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
     # Tell GStreamer not to fork to create the registry
     env['GST_REGISTRY_FORK'] = 'no'
 
-    log ('Running: %s' % ' '.join(command))
+    log('Running: %s' % ' '.join(command))
     try:
-        p = subprocess.Popen (command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        p = subprocess.Popen(command, env=env, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     except OSError as e:
         if e.errno == errno.ENOENT:
             raise RuntimeError("Did not find tracker-extract binary. Is the 'extract' option disabled?")
@@ -60,7 +60,7 @@ def get_tracker_extract_jsonld_output(filename, mime_type=None):
             "Error output:\n%s\n" % (p.returncode, stderr.decode('unicode-escape').strip()))
 
     if len(stderr) > 0:
-        log ("Error output from tracker-extract:\n%s" % stderr.decode('unicode-escape').strip())
+        log("Error output from tracker-extract:\n%s" % stderr.decode('unicode-escape').strip())
 
     try:
         output = stdout.decode('utf-8')
