@@ -892,7 +892,8 @@ extract_metadata (MetadataExtractor      *extractor,
 
 					track = extract_track (extractor, node->data, file_url, album_disc);
 					tracker_resource_set_relation (track, "nie:isStoredAs", resource);
-					g_object_unref (track);
+					tracker_resource_set_relation (track, "nie:isLogicalPartOf", resource);
+					tracker_resource_add_take_relation (resource, "nie:hasLogicalPart", track);
 				}
 
 				tracker_resource_set_string (resource, "nie:url", file_url);
