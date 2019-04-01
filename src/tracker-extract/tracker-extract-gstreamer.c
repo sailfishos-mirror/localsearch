@@ -875,13 +875,6 @@ extract_metadata (MetadataExtractor      *extractor,
 		if (extractor->mime == EXTRACT_MIME_AUDIO) {
 			album_disc = extractor_maybe_get_album_disc (extractor, extractor->tagcache);
 
-			extractor_apply_audio_metadata (extractor,
-			                                extractor->tagcache,
-			                                resource,
-			                                performer,
-			                                composer,
-			                                album_disc);
-
 			/* If the audio file contains multiple tracks, we create the tracks
 			 * as abstract information element types and relate them to the
 			 * concrete nfo:FileDataObject using nie:isStoredAs.
@@ -892,10 +885,18 @@ extract_metadata (MetadataExtractor      *extractor,
 
 					track = extract_track (extractor, node->data, file_url, album_disc);
 					tracker_resource_set_relation (track, "nie:isStoredAs", resource);
-					g_object_unref (track);
+					tracker_resource_set_relation (track, "nie:isLogicalPartOf", resource);
+					tracker_resource_add_take_relation (resource, "nie:hasLogicalPart", track);
 				}
 
 				tracker_resource_set_string (resource, "nie:url", file_url);
+			} else {
+				extractor_apply_audio_metadata (extractor,
+				                                extractor->tagcache,
+				                                resource,
+				                                performer,
+				                                composer,
+				                                album_disc);
 			}
 
 			if (album_disc)
