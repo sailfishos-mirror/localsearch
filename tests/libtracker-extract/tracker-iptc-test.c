@@ -120,6 +120,8 @@ load_iptc_blob (const gchar *filename)
 		marker = marker->next;
 	}
 
+        jpeg_destroy_decompress (&cinfo);
+
         g_free (uri);
         fclose (f);
 
