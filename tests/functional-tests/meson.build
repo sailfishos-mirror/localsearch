@@ -16,7 +16,8 @@ extractor_tests = [
   'office/office-doc',
   'office/powerpoint',
   'office/pdf-doc',
-  'office/ps-doc'
+  'office/ps-doc',
+  'office/ps-doc-atend'
 ]
 
 if get_option('unzip_ps_gz_files')

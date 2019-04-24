@@ -101,6 +101,8 @@ extract_ps_from_inputstream (GInputStream *stream)
 	g_autoptr(GDataInputStream) data_stream = NULL;
 	gchar *line;
 	gsize length, accum, max_bytes;
+	gboolean pageno_atend = FALSE;
+	gboolean header_finished = FALSE;
 	g_autoptr(GError) error = NULL;
 
 	metadata = tracker_resource_new (NULL);
@@ -114,9 +116,6 @@ extract_ps_from_inputstream (GInputStream *stream)
 
 	while ((accum < max_bytes) &&
 	       (line = g_data_input_stream_read_line (data_stream, &length, NULL, &error)) != NULL) {
-		gboolean pageno_atend = FALSE;
-		gboolean header_finished = FALSE;
-
 		/* Update accumulated bytes read */
 		accum += length;
 
