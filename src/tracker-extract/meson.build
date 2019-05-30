@@ -114,6 +114,7 @@ if libgxps.found()
   modules += [['extract-xps', 'tracker-extract-xps.c', ['10-xps.rule'], [libgxps, tracker_miners_common_dep]]]
 endif
 
+enabled_rule_files = []
 
 foreach module : modules
   name = module[0]
@@ -130,13 +131,7 @@ foreach module : modules
 
   install_data(rules, install_dir: tracker_extract_rules_dir)
 
-  # Populate tracker_uninstalled_extract_rules_dir with the enabled .rule files.
-  foreach rule: rules
-    configure_file(
-      input: rule,
-      output: rule,
-      copy: true)
-  endforeach
+  enabled_rule_files += rules
 endforeach
 
 tracker_extract_priority_dbus = gnome.gdbus_codegen(
@@ -205,4 +200,14 @@ if install_systemd_user_services
     configuration: conf,
     install: true,
     install_dir: systemd_user_services_dir)
+endif
+
+# Populate a directory inside the build tree with the extract rules that are
+# enabled in this build configuration.
+setup_extract_rules = join_paths(meson.current_source_dir(), 'setup-extract-rules.sh')
+result = run_command(setup_extract_rules, meson.current_source_dir(), tracker_uninstalled_extract_rules_dir, enabled_rule_files)
+if result.returncode() != 0
+    output = result.stdout().strip()
+    errortxt = result.stderr().strip()
+    error('Failed to run @0@.\n@1@\n@2@'.format(setup_extract_rules, errortxt, output))
 endif
