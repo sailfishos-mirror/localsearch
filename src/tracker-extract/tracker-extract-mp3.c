@@ -1468,6 +1468,7 @@ get_id3v24_tags (id3v24frame           frame,
 			break;
 		default:
 			g_free (word);
+			break;
 		}
 	}
 	}
@@ -1652,6 +1653,7 @@ get_id3v23_tags (id3v24frame           frame,
 			break;
 		default:
 			g_free (word);
+			break;
 		}
 	}
 	}
@@ -1783,6 +1785,7 @@ get_id3v20_tags (id3v2frame            frame,
 			break;
 		default:
 			g_free (word);
+			break;
 		}
 	}
 }
