@@ -1,3 +1,9 @@
+test_runner = configure_file(
+    input: 'test-runner.sh.in',
+    output: 'test-runner.sh',
+    configuration: conf)
+test_runner = find_program(test_runner)
+
 extractor_tests = [
   'audio/audio-test-1',
   'audio/empty_albumi_song3',
@@ -38,8 +44,6 @@ functional_tests = [
   '600-applications-camera',
   '601-applications-sync',
 ]
-
-test_runner = find_program('test-runner.sh')
 
 config_json = configure_file(
   input: 'configuration.json.in',
