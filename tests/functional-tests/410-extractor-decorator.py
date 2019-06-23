@@ -54,6 +54,7 @@ class ExtractorDecoratorTest(ut.TestCase):
 
         config = {
             cfg.DCONF_MINER_SCHEMA: {
+                'enable-writeback': GLib.Variant.new_boolean(False),
                 'index-recursive-directories': GLib.Variant.new_strv([]),
                 'index-single-directories': GLib.Variant.new_strv([self.datadir]),
                 'index-optical-discs': GLib.Variant.new_boolean(False),
