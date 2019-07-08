@@ -94,6 +94,9 @@ class CommonTrackerWritebackTest (ut.TestCase):
         self.system.store.await_resource_inserted(expect_mime_type, url=output_path.as_uri(), required_property=expect_property)
         return output_path
 
+    def prepare_test_audio(self, filename):
+        return self.prepare_test_file(filename, 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Audio', 'nfo:duration')
+
     def prepare_test_image(self, filename):
         return self.prepare_test_file(filename, 'http://www.semanticdesktop.org/ontologies/2007/03/22/nfo#Image', 'nfo:width')
 
