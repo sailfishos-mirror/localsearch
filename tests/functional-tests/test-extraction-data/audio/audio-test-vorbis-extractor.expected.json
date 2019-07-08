@@ -12,23 +12,21 @@
         "nie:comment": "I am for simple OGG testing",
         "nmm:trackNumber": "18",
         "nfo:duration": "15",
-        "nmm:mbTrackID": "123456",
-        "nmm:mbRecordingID": "456123",
-    "nmm:performer": {
-        "@type": "nmm:Artist",
-        "nmm:artistName": "AbBaby",
-        "nmm:mbArtistID": "234561"
-    },
-    "nmm:musicAlbum": {
-        "@type": "nmm:MusicAlbum",
-        "nie:title": "SinCos",
-        "nmm:mbReleaseGroupID": "561234",
-        "nmm:mbReleaseID": "345612"
-    },
-    "nfo:hasHash": {
-        "@type": "nfo:hasHash",
-        "nfo:hashAlgorithm": "chromaprint",
-        "nfo:hashValue": "111222"
-    }
+        "nmm:performer": {
+            "@type": "nmm:Artist",
+            "nmm:artistName": "AbBaby",
+            "nmm:mbArtistID": "234561"
+        },
+        "nmm:musicAlbum": {
+            "@type": "nmm:MusicAlbum",
+            "nie:title": "SinCos",
+            "nmm:mbReleaseGroupID": "561234",
+            "nmm:mbReleaseID": "345612"
+        },
+        "nfo:hasHash": {
+            "@type": "nfo:hasHash",
+            "nfo:hashAlgorithm": "chromaprint",
+            "nfo:hashValue": "111222"
+        }
     }
 }
