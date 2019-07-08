@@ -89,7 +89,7 @@ class TrackerExtractTestCase(ut.TestCase):
         if not isinstance(d, dict):
             self.fail("Expected dict, got %s" % d)
         if key not in d:
-            standardMsg = "Missing: %s\n" % (key)
+            standardMsg = "Missing: %s" % (key)
             self.fail(self._formatMessage(msg, standardMsg))
         else:
             return
