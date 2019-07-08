@@ -42,12 +42,7 @@ class CommonTrackerWritebackTest (ut.TestCase):
     """
 
     def __prepare_directories(self):
-        if (os.path.exists(os.getcwd() + "/test-writeback-data")):
-            # Use local directory if available
-            datadir = os.getcwd() + "/test-writeback-data"
-        else:
-            datadir = os.path.join(cfg.DATADIR, "tracker-tests",
-                                   "test-writeback-data")
+        datadir = os.path.join(os.path.dirname(__file__), '..', '..', 'test-writeback-data')
 
         for testfile in [TEST_FILE_JPEG, TEST_FILE_PNG, TEST_FILE_TIFF]:
             origin = os.path.join(datadir, testfile)
