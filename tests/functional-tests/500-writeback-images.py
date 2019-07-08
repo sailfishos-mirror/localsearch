@@ -17,10 +17,10 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 #
-"""
-Write values in tracker and check the actual values are written
-on the files. Note that these tests are highly platform dependant.
-"""
+
+"""Tests for Tracker writeback daemon."""
+
+
 import os
 import sys
 import time
@@ -33,7 +33,7 @@ import unittest as ut
 REASONABLE_TIMEOUT = 5  # Seconds we wait for tracker-writeback to do the work
 
 
-class WritebackBasicDataTest (CommonTrackerWritebackTest):
+class WritebackImagesTest (CommonTrackerWritebackTest):
     """
     Write in tracker store the properties witih writeback support and check
     that the new values are actually in the file
