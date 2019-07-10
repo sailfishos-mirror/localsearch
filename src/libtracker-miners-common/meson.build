@@ -21,7 +21,6 @@ tracker_miners_common_sources = [
   enums[0], enums[1],
 ]
 
-# FIXME: need to link against -lkvm on OpenBSD, see configure.ac
 tracker_miners_common_dependencies = [glib, gio, gio_unix, libmath]
 
 tracker_miners_common_private_dependencies = [charset_library]
