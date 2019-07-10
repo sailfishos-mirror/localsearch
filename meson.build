@@ -399,6 +399,7 @@ tracker_uninstalled_writeback_modules_dir = join_paths(meson.current_build_dir()
 
 gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
 
+glib_compile_schemas = find_program('glib-compile-schemas')
 glib_mkenums = find_program('glib-mkenums')
 
 subdir('src')
@@ -416,6 +417,8 @@ test_c_args = tracker_c_args + [
 subdir('tests')
 
 subdir('po')
+
+meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
 
 summary = [
   '\nBuild Configuration:',

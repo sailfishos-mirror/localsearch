@@ -62,7 +62,7 @@ endif
 
 custom_target('tracker-miners-compile-schemas',
   output: 'gschemas.compiled',
-  command: [find_program('glib-compile-schemas'), meson.current_build_dir()],
+  command: [glib_compile_schemas, meson.current_build_dir()],
   build_by_default: true,
   depends: compile_schemas_deps)
 
