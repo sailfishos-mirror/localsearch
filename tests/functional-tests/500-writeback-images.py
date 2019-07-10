@@ -17,23 +17,23 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA  02110-1301, USA.
 #
-"""
-Write values in tracker and check the actual values are written
-on the files. Note that these tests are highly platform dependant.
-"""
+
+"""Tests for Tracker writeback daemon."""
+
+
 import os
 import sys
 import time
 
 from common.utils.extractor import get_tracker_extract_jsonld_output
 from common.utils.helpers import log
-from common.utils.writebacktest import CommonTrackerWritebackTest as CommonTrackerWritebackTest
+from common.utils.writebacktest import CommonTrackerWritebackTest
 import unittest as ut
 
 REASONABLE_TIMEOUT = 5  # Seconds we wait for tracker-writeback to do the work
 
 
-class WritebackBasicDataTest (CommonTrackerWritebackTest):
+class WritebackImagesTest (CommonTrackerWritebackTest):
     """
     Write in tracker store the properties witih writeback support and check
     that the new values are actually in the file
@@ -50,9 +50,8 @@ class WritebackBasicDataTest (CommonTrackerWritebackTest):
         the @prop is used.
         """
 
-        # FIXME: filename is actually a URI! :(
-        filename_real = filename[len('file://'):]
-        initial_mtime = os.stat(filename_real).st_mtime
+        path = self.prepare_test_image(self.datadir_path(filename))
+        initial_mtime = path.stat().st_mtime
 
         TEST_VALUE = prop.replace(":", "") + "test"
         SPARQL_TMPL = """
@@ -60,13 +59,13 @@ class WritebackBasicDataTest (CommonTrackerWritebackTest):
            INSERT { ?u %s '%s' }
            WHERE  { ?u nie:url '%s' }
         """
-        self.tracker.update(SPARQL_TMPL % (prop, filename, prop, prop, TEST_VALUE, filename))
+        self.tracker.update(SPARQL_TMPL % (prop, path.as_uri(), prop, prop, TEST_VALUE, path.as_uri()))
 
-        log("Waiting for change on %s" % filename_real)
-        self.wait_for_file_change(filename_real, initial_mtime)
+        log("Waiting for change on %s" % path)
+        self.wait_for_file_change(path, initial_mtime)
         log("Got the change")
 
-        results = get_tracker_extract_jsonld_output(filename, mimetype)
+        results = get_tracker_extract_jsonld_output(path, mimetype)
         keyDict = expectedKey or prop
         self.assertIn(TEST_VALUE, results[keyDict])
 
@@ -102,12 +101,10 @@ class WritebackBasicDataTest (CommonTrackerWritebackTest):
     # JPEG test
 
     def test_001_jpeg_title(self):
-        #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-        self.__writeback_test(self.get_test_filename_jpeg(), "image/jpeg", "nie:title")
+        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:title")
 
     def test_002_jpeg_description(self):
-        #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-        self.__writeback_test(self.get_test_filename_jpeg(), "image/jpeg", "nie:description")
+        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:description")
 
     # def test_003_jpeg_keyword (self):
     #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
@@ -121,12 +118,10 @@ class WritebackBasicDataTest (CommonTrackerWritebackTest):
     # TIFF tests
 
     def test_011_tiff_title(self):
-        #FILANAME = "test-writeback-monitored/writeback-test-2.tif"
-        self.__writeback_test(self.get_test_filename_tiff(), "image/tiff", "nie:title")
+        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:title")
 
     def test_012_tiff_description(self):
-        FILENAME = "test-writeback-monitored/writeback-test-2.tif"
-        self.__writeback_test(self.get_test_filename_tiff(), "image/tiff", "nie:description")
+        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:description")
 
     # def test_013_tiff_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
@@ -140,12 +135,10 @@ class WritebackBasicDataTest (CommonTrackerWritebackTest):
     # PNG tests
 
     def test_021_png_title(self):
-        FILENAME = "test-writeback-monitored/writeback-test-4.png"
-        self.__writeback_test(self.get_test_filename_png(), "image/png", "nie:title")
+        self.__writeback_test("writeback-test-4.png", "image/png", "nie:title")
 
     def test_022_png_description(self):
-        FILENAME = "test-writeback-monitored/writeback-test-4.png"
-        self.__writeback_test(self.get_test_filename_png(), "image/png", "nie:description")
+        self.__writeback_test("writeback-test-4.png", "image/png", "nie:description")
 
     # def test_023_png_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-4.png"

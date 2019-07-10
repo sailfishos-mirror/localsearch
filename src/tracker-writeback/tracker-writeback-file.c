@@ -224,14 +224,15 @@ tracker_writeback_file_update_metadata (TrackerWriteback         *writeback,
 	}
 
 	if (!retval) {
+		g_set_error (error,
+		             TRACKER_DBUS_ERROR,
+		             TRACKER_DBUS_ERROR_UNSUPPORTED,
+		             "Module does not support writeback for %s",
+		             mime_type);
+
 		/* module does not support writeback for this file */
 		g_object_unref (file_info);
 		g_object_unref (file);
-
-		g_set_error_literal (error,
-		                     TRACKER_DBUS_ERROR,
-		                     TRACKER_DBUS_ERROR_UNSUPPORTED,
-		                     "Module does not support writeback for this file");
 
 		return FALSE;
 	}

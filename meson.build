@@ -73,6 +73,7 @@ glib = dependency('glib-2.0', version: '>=' + glib_required)
 gmodule = dependency('gmodule-2.0', version: '>=' + glib_required)
 gobject = dependency('gobject-2.0', version: '>=' + glib_required)
 gstreamer = dependency('gstreamer-1.0', required: false)
+gstreamer_audio = dependency('gstreamer-audio-1.0', required: false)
 gstreamer_pbutils = dependency('gstreamer-pbutils-1.0', required: false)
 gstreamer_tag = dependency('gstreamer-tag-1.0', required: false)
 gupnp_dlna = dependency('gupnp-dlna-2.0', version: '>= 0.9.4', required: false)
@@ -92,7 +93,6 @@ libtiff = dependency('libtiff-4', required: get_option('tiff'))
 libxml2 = dependency('libxml-2.0', version: '>= 2.6', required: get_option('xml'))
 libvorbis = dependency('vorbisfile', version: '>= 0.22', required: get_option('vorbis'))
 poppler = dependency('poppler-glib', version: '>= 0.16.0', required: get_option('pdf'))
-taglib = dependency('taglib_c', version: '>= 1.6', required: get_option('taglib'))
 totem_plparser = dependency('totem-plparser', required: get_option('playlist'))
 upower = dependency('upower-glib', version: '>= 0.9.0', required: false)
 zlib = dependency('zlib')
@@ -469,7 +469,7 @@ endif
 if have_tracker_writeback
   summary += [
     '\nWriteback Formats:',
-    '    Audio files using Taglib:               ' + taglib.found().to_string(),
+    '    Audio files using GStreamer:            ' + (gstreamer.found() and gstreamer_tag.found() and gstreamer_audio.found()).to_string(),
     '    XMP:                                    ' + exempi.found().to_string(),
   ]
 endif

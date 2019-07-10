@@ -39,8 +39,9 @@ functional_tests = [
   '312-fts-stopwords',
   '401-extractor-flac-cuesheet',
   '410-extractor-decorator',
-  '500-writeback',
-  '501-writeback-details',
+  '500-writeback-images',
+  '501-writeback-image-details',
+  '502-writeback-audio',
   '600-applications-camera',
   '601-applications-sync',
 ]
