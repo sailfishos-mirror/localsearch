@@ -167,7 +167,7 @@ executable('tracker-extract',
   dependencies: tracker_extract_dependencies,
   install: true,
   install_dir: join_paths(get_option('prefix'), get_option('libexecdir')),
-  install_rpath: tracker_internal_libs_dir)
+  install_rpath: tracker_install_rpath)
 
 dbus_service_file_untranslated = configure_file(
   input: 'org.freedesktop.Tracker1.Miner.Extract.service.in.in',
