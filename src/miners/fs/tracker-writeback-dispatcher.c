@@ -374,7 +374,7 @@ writeback_dispatcher_writeback_file (TrackerMinerFS *fs,
 	data->retry_timeout = 0;
 	data->self = self;
 	g_object_weak_ref (G_OBJECT (data->self), self_weak_notify, data);
-	data->fs = g_object_ref (fs);
+	data->fs = TRACKER_MINER_FILES (g_object_ref (fs));
 	data->file = g_object_ref (file);
 	data->results = g_ptr_array_ref (results);
 	data->rdf_types = g_strdupv (rdf_types);
