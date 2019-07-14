@@ -385,12 +385,14 @@ translate_discoverer_toc (GstToc *gst_toc)
 
 		if (tags) {
 			copy = gst_tag_list_copy (tags);
+		} else {
+			copy = gst_tag_list_new_empty ();
+		}
 
-			if (gst_tag_list_get_tag_size (copy, GST_TAG_TRACK_NUMBER) == 0) {
-				gst_tag_list_add (copy, GST_TAG_MERGE_REPLACE,
-				                  GST_TAG_TRACK_NUMBER, i + 1,
-				                  NULL);
-			}
+		if (gst_tag_list_get_tag_size (copy, GST_TAG_TRACK_NUMBER) == 0) {
+			gst_tag_list_add (copy, GST_TAG_MERGE_REPLACE,
+			                  GST_TAG_TRACK_NUMBER, i + 1,
+			                  NULL);
 		}
 
 		gst_toc_entry_get_start_stop_times (entry, &start, &stop);
