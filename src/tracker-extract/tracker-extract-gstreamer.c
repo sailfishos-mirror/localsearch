@@ -363,6 +363,9 @@ get_embedded_cue_sheet_data (GstTagList *tag_list)
 	return NULL;
 }
 
+/* Utility function to convert from GstToc, as returned by
+ * gst_discoverer_info_get_toc(), to TrackerToc.
+ */
 static TrackerToc *
 translate_discoverer_toc (GstToc *gst_toc)
 {
