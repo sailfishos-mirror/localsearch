@@ -199,32 +199,6 @@ initialize_signal_handler (void)
 }
 
 static void
-log_handler (const gchar    *domain,
-             GLogLevelFlags  log_level,
-             const gchar    *message,
-             gpointer        user_data)
-{
-	switch (log_level) {
-	case G_LOG_LEVEL_WARNING:
-	case G_LOG_LEVEL_CRITICAL:
-	case G_LOG_LEVEL_ERROR:
-	case G_LOG_FLAG_RECURSION:
-	case G_LOG_FLAG_FATAL:
-		g_fprintf (stderr, "%s\n", message);
-		fflush (stderr);
-		break;
-	case G_LOG_LEVEL_MESSAGE:
-	case G_LOG_LEVEL_INFO:
-	case G_LOG_LEVEL_DEBUG:
-	case G_LOG_LEVEL_MASK:
-	default:
-		g_fprintf (stdout, "%s\n", message);
-		fflush (stdout);
-		break;
-	}
-}
-
-static void
 sanity_check_option_values (TrackerConfig *config)
 {
 	g_message ("General options:");
@@ -251,14 +225,6 @@ run_standalone (TrackerConfig *config)
 	GEnumClass *enum_class;
 	GEnumValue *enum_value;
 	TrackerSerializationFormat output_format;
-
-	/* Set log handler for library messages */
-	g_log_set_default_handler (log_handler, NULL);
-
-	/* Set the default verbosity if unset */
-	if (verbosity == -1) {
-		verbosity = 3;
-	}
 
 	if (!output_format_name) {
 		output_format_name = "turtle";
