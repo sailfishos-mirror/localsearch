@@ -1,3 +1,33 @@
+NEW in 2.2.3 - unreleased
+=========================
+
+  * Fixed a bug in the GStreamer audio file extractor that caused
+    CUE sheet handling to fail.
+      (https://gitlab.gnome.org/GNOME/tracker-miners/merge_requests/86,
+       https://gitlab.gnome.org/GNOME/tracker/issues/119)
+  * The 'enable-writeback' config option is now correctly honoured. Note that
+    the writeback daemon was broken in previous releases due to a bug in
+    Tracker core, which is fixed in Tracker 2.2.3.
+  * The text extractor now processes each file even when configured to read 0
+    bytes of text. Previously it would not touch the files if the max-bytes
+    setting was 0, which could cause us to miss some error situations.
+  * Improved how we link to the internal libtracker-miners-common library
+      * This allows building with link-time optimization (LTO) enabled, which
+        was previously broken (https://gitlab.gnome.org/GNOME/tracker/issues/117)
+      * The internal libtracker-miners-common library is no longer installed as
+        a shared library (https://gitlab.gnome.org/GNOME/tracker-miners/issues/41)
+  * Test suite improvements, including:
+    * New testcase for CUE sheet handling.
+    * Fixed and enabled tracker-writeback tests.
+    * Test suite no longer requires Tracker to be installed on the host
+        (https://gitlab.gnome.org/GNOME/tracker/issues/24,
+         https://gitlab.gnome.org/GNOME/tracker-miners/issues/45)
+  * Fixed various compilation warnings
+  * Build system fixes
+  * Rewritten README.md file
+
+Translations: be, el
+
 NEW in 2.2.2 - 2019-05-02
 =========================
 
