@@ -1,5 +1,5 @@
-NEW in 2.2.3-alpha1 - unreleased
-=========================
+NEW in 2.2.99.0 - 2019-08-07
+============================
 
   * Support for reading Musicbrainz metadata from audio files.
   * Tracker Writeback now uses GStreamer to write metadata to audio files,
