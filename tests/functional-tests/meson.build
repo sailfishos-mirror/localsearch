@@ -33,7 +33,6 @@ extractor_tests = [
   'images/xmp-loaded-1',
   'images/test-image-3',
   'images/corrupted-image',
-  'images/test-iptcdata-records',
   'images/roi2',
   'images/test-image-4',
   'images/test-image-2',
@@ -50,6 +49,13 @@ extractor_tests = [
 
 if get_option('unzip_ps_gz_files')
   extractor_tests += 'office/psgz-doc'
+endif
+
+if libiptcdata.found()
+  extractor_tests += [
+    'images/test-image-1-iptc-tags',
+    'images/test-iptcdata-records',
+  ]
 endif
 
 functional_tests = [
