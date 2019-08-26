@@ -2728,30 +2728,27 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		md.album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
 
 		tracker_resource_set_relation (main_resource, "nmm:musicAlbum", md.album);
-		tracker_resource_set_relation (main_resource, "nmm:musicAlbumDisc", album_disc);
+		tracker_resource_set_take_relation (main_resource, "nmm:musicAlbumDisc", album_disc);
 
 		if (md.mb_release_id) {
 			mb_release_id = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Release",
 			                                                       md.mb_release_id);
 
-			tracker_resource_set_relation (md.album, "tracker:hasExternalReference", mb_release_id);
+			tracker_resource_set_take_relation (md.album, "tracker:hasExternalReference", mb_release_id);
 		}
 
 		if (md.mb_release_group_id) {
 			mb_release_group_id = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Release_Group",
 			                                                             md.mb_release_group_id);
 
-			tracker_resource_set_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
+			tracker_resource_set_take_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
 		}
 
 		if (md.track_count > 0) {
 			tracker_resource_set_int (md.album, "nmm:albumTrackCount", md.track_count);
 		}
 
-		g_object_unref (album_disc);
 		g_clear_object (&album_artist);
-		g_object_unref (mb_release_id);
-		g_object_unref (mb_release_group_id);
 	}
 
 	tracker_resource_add_uri (main_resource, "rdf:type", "nmm:MusicPiece");
