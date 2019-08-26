@@ -1362,8 +1362,8 @@ id3_get_ufid_type (const gchar *name)
 static void
 extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
 {
-	gchar *description;
-	gchar *value;
+	gchar *description = NULL;
+	gchar *value = NULL;
 	gchar text_encode;
 	const gchar *text_desc;
 	const gchar *text;
