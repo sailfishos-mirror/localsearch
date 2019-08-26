@@ -2727,7 +2727,6 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		md.album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
 
-		tracker_resource_set_relation (main_resource, "nmm:musicAlbum", md.album);
 		tracker_resource_set_take_relation (main_resource, "nmm:musicAlbumDisc", album_disc);
 
 		if (md.mb_release_id) {
