@@ -1381,11 +1381,11 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 	if (version == 2.3f) {
 		description = id3v2_text_to_utf8 (data[pos], &data[pos + 1], csize - 1, info);
 		value = id3v2_text_to_utf8 (text_encode, text, csize - offset, info);
-	}
-	else if (version == 2.4f) {
+	} else if (version == 2.4f) {
 		description = id3v24_text_to_utf8 (data[pos], &data[pos + 1], csize - 1, info);
 		value = id3v24_text_to_utf8 (text_encode, text, csize - offset, info);
 	}
+
 	if (!tracker_is_empty_string (description)) {
 		g_strstrip (description);
 		txxxtype = id3_get_txxx_type (description);
@@ -1402,6 +1402,7 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 		g_free (value);
 		return;
 	}
+
 	switch (txxxtype) {
 	case ACOUSTID_FINGERPRINT:
 		tag->acoustid_fingerprint = value;
@@ -2731,19 +2732,16 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		if (md.mb_release_id) {
 			mb_release_id = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Release",
-									       md.mb_release_id);
+			                                                       md.mb_release_id);
 
 			tracker_resource_set_relation (md.album, "tracker:hasExternalReference", mb_release_id);
 		}
 
 		if (md.mb_release_group_id) {
 			mb_release_group_id = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Release_Group",
-									 	     md.mb_release_group_id);
+			                                                             md.mb_release_group_id);
 
-			if (mb_release_id) {
-				tracker_resource_add_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
-			} else
-				tracker_resource_set_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
+			tracker_resource_set_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
 		}
 
 		if (md.track_count > 0) {
