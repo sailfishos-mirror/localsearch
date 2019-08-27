@@ -1,6 +1,5 @@
 # List of source files that should NOT be translated.
 # Please keep this file sorted alphabetically.
-src/miners/apps/org.freedesktop.Tracker3.Miner.Applications.service.in
 src/miners/fs/org.freedesktop.Tracker3.Miner.Files.service.in
 src/miners/fs/tracker-miner-fs.desktop.in
 src/miners/rss/org.freedesktop.Tracker3.Miner.RSS.service.in
