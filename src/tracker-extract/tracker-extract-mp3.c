@@ -2740,7 +2740,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 			mb_release_group_id = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Release_Group",
 			                                                             md.mb_release_group_id);
 
-			tracker_resource_set_take_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
+			tracker_resource_add_take_relation (md.album, "tracker:hasExternalReference", mb_release_group_id);
 		}
 
 		if (md.track_count > 0) {
