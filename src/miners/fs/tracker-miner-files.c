@@ -1043,7 +1043,7 @@ set_up_mount_point_type (TrackerMinerFiles *miner,
 	         removable_device_urn);
 
 	g_string_append_printf (accumulator,
-	                        "DELETE { <%s> tracker:isRemovable ?unknown } WHERE { <%s> a tracker:Volume; tracker:isRemovable ?unknown } ",
+	                        "WITH <" TRACKER_OWN_GRAPH_URN "> DELETE { <%s> tracker:isRemovable ?unknown } WHERE { <%s> a tracker:Volume; tracker:isRemovable ?unknown }",
 	                        removable_device_urn, removable_device_urn);
 
 	g_string_append_printf (accumulator,
@@ -1051,7 +1051,7 @@ set_up_mount_point_type (TrackerMinerFiles *miner,
 	                        removable_device_urn, removable ? "true" : "false");
 
 	g_string_append_printf (accumulator,
-	                        "DELETE { <%s> tracker:isOptical ?unknown } WHERE { <%s> a tracker:Volume; tracker:isOptical ?unknown } ",
+	                        "WITH <" TRACKER_OWN_GRAPH_URN "> DELETE { <%s> tracker:isOptical ?unknown } WHERE { <%s> a tracker:Volume; tracker:isOptical ?unknown } ",
 	                        removable_device_urn, removable_device_urn);
 
 	g_string_append_printf (accumulator,
@@ -1088,6 +1088,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 			ensure_mount_point_exists (miner, file, queries);
 
 			g_string_append_printf (queries,
+			                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 			                        "DELETE { "
 			                        "  <%s> tracker:mountPoint ?u "
 			                        "} WHERE { "
@@ -1097,6 +1098,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 			                        removable_device_urn, uri);
 
 			g_string_append_printf (queries,
+			                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 			                        "DELETE { <%s> a rdfs:Resource }  "
 			                        "INSERT { "
 			                        "  <%s> a tracker:Volume; "
@@ -1112,6 +1114,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		}
 
 		g_string_append_printf (queries,
+		                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 		                        "DELETE { <%s> tracker:isMounted ?unknown } WHERE { <%s> a tracker:Volume; tracker:isMounted ?unknown } ",
 		                        removable_device_urn, removable_device_urn);
 
@@ -1137,6 +1140,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		now = tracker_date_to_string (time (NULL));
 
 		g_string_append_printf (queries,
+		                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 		                        "DELETE { <%s> tracker:unmountDate ?unknown } WHERE { <%s> a tracker:Volume; tracker:unmountDate ?unknown } ",
 		                        removable_device_urn, removable_device_urn);
 
@@ -1145,6 +1149,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		                        removable_device_urn, now);
 
 		g_string_append_printf (queries,
+		                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 		                        "DELETE { <%s> tracker:isMounted ?unknown } WHERE { <%s> a tracker:Volume; tracker:isMounted ?unknown } ",
 		                        removable_device_urn, removable_device_urn);
 
@@ -1153,6 +1158,7 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		                        removable_device_urn);
 
 		g_string_append_printf (queries,
+		                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 		                        "DELETE { ?do tracker:available true } WHERE { ?do nie:dataSource <%s> } ",
 		                        removable_device_urn);
 
@@ -3090,6 +3096,7 @@ miner_files_in_removable_media_remove_by_type (TrackerMinerFiles  *miner,
 		/* Delete all resources where nie:dataSource is a volume
 		 * of the given type */
 		g_string_append_printf (queries,
+		                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 		                        "DELETE { "
 		                        "  ?f a rdfs:Resource . "
 		                        "  ?ie a rdfs:Resource "
@@ -3133,6 +3140,7 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles  *miner,
 	/* Delete all resources where nie:dataSource is a volume
 	 * which was last unmounted before the given date */
 	g_string_append_printf (queries,
+	                        "WITH <" TRACKER_OWN_GRAPH_URN "> "
 	                        "DELETE { "
 	                        "  ?f a rdfs:Resource . "
 	                        "  ?ie a rdfs:Resource "
