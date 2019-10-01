@@ -39,7 +39,8 @@ foreach base_name: libtracker_miner_tests
       link_with: [libtracker_miner_private])
 
     test(test_name, binary,
-      env: libtracker_miner_test_environment)
+      env: libtracker_miner_test_environment,
+      suite: 'miner')
 endforeach
 
 foreach base_name: libtracker_miner_slow_tests
@@ -54,5 +55,6 @@ foreach base_name: libtracker_miner_slow_tests
 
     test(test_name, binary,
       env: libtracker_miner_test_environment,
-      timeout: 180)
+      timeout: 180,
+      suite: ['miner', 'slow'])
 endforeach
