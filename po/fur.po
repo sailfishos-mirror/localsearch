@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2019-02-17 15:13+0000\n"
-"PO-Revision-Date: 2019-02-28 19:39+0100\n"
+"POT-Creation-Date: 2019-09-29 14:59+0000\n"
+"PO-Revision-Date: 2019-10-17 14:48+0200\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <f.t.public@gmail.com>\n"
 "Language: fur\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.2.1\n"
+"X-Generator: Poedit 2.2.4\n"
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:1
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:1
@@ -55,24 +55,10 @@ msgid "Maximum number of UTF-8 bytes to extract."
 msgstr "Numar massim di byte UTF-8 di estrai."
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:7
-msgid "Max media art width"
-msgstr "Largjece massime des figuris"
-
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:8
-msgid ""
-"Maximum width in pixels for any media art extracted. Anything bigger is "
-"resized. Set to -1 to disable saving media art from files. Setting to 0 sets "
-"no limit on the media art width."
-msgstr ""
-"Massime largjece in pixel des figuris estratis, cualsisei file plui grant al "
-"ven ridimensionât. Met a -1 par disabilitâ il salvament des figuris, met a 0 "
-"par disabilitâ il limit su la largjece."
-
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:9
 msgid "Wait for FS miner to be done before extracting"
 msgstr "Spiete che l'analizadôr dal file system al finissi prime di estrai"
 
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:10
+#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:8
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
 "crawling before extracting meta-data. This option is useful on constrained "
@@ -232,26 +218,39 @@ msgstr ""
 "Consultâ /etc/xdg/user-dirs.defaults e $HOME/.config/user-dirs.default"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:35
+msgid "Index applications installed on the system"
+msgstr "Met te tabele lis aplicazions instaladis sul sisteme"
+
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:36
+msgid ""
+"If this option is enabled, the filesystem miner will look for .desktop files "
+"in the standard XDG system and user data directories."
+msgstr ""
+"Se cheste opzion e je abilitade, l'analizadôr dal filesystem al cirarà i "
+"file .desktop intes cartelis dal sisteme XDG standard e tes cartelis dai "
+"dâts dal utent."
+
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:37
 msgid "Ignored files"
 msgstr "File ignorâts"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:36
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:38
 msgid "List of file patterns to avoid"
 msgstr "Liste di modei di file di ignorâ"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:37
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
 msgid "Ignored directories"
 msgstr "Cartelis ignoradis"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:38
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
 msgid "List of directories to avoid"
 msgstr "Liste di cartelis di ignorâ"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:41
 msgid "Ignored directories with content"
 msgstr "Cartelis cun contignût di ignorâ"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:42
 msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Ignore cualsisei cartele che e conten un file chi listât"
 
@@ -439,7 +438,7 @@ msgstr "Al vegnarà monitorât"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/fs/tracker-main.c:793
+#: ../src/miners/fs/tracker-main.c:792
 msgid "— start the tracker indexer"
 msgstr "— tache tracker chel che al met in indiç"
 
@@ -475,19 +474,19 @@ msgstr "Titul di doprâ (al scugne jessi doprât cun --add-feed)"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/rss/tracker-main.c:94
+#: ../src/miners/rss/tracker-main.c:93
 msgid "— start the feeds indexer"
 msgstr "— tache chel che al met in indiç i feed"
 
-#: ../src/miners/rss/tracker-main.c:128
+#: ../src/miners/rss/tracker-main.c:127
 msgid "Could not establish a connection to Tracker"
 msgstr "Impussibil stabilî une conession cun Tracker"
 
-#: ../src/miners/rss/tracker-main.c:129
+#: ../src/miners/rss/tracker-main.c:128
 msgid "No error given"
 msgstr "Nissun erôr furnît"
 
-#: ../src/miners/rss/tracker-main.c:156
+#: ../src/miners/rss/tracker-main.c:155
 msgid "Could not add feed"
 msgstr "Impussibil zontâ il feed"
 
@@ -507,11 +506,11 @@ msgstr "Estratôr"
 msgid "Metadata extractor"
 msgstr "Estratôr di meta-dâts"
 
-#: ../src/tracker-extract/tracker-extract.c:685
+#: ../src/tracker-extract/tracker-extract.c:683
 msgid "Metadata extraction failed"
 msgstr "Estrazion dai meta-dâts falide"
 
-#: ../src/tracker-extract/tracker-extract.c:765
+#: ../src/tracker-extract/tracker-extract.c:763
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nol è stât cjatât nissun modul par meta-dâts o di estrazion par gjestî chest "
@@ -555,18 +554,18 @@ msgstr "Formât dai risultâts di jessude: “sparql”, “turtle” o “json-
 msgid "FORMAT"
 msgstr "FORMÂT"
 
-#: ../src/tracker-extract/tracker-main.c:272
+#: ../src/tracker-extract/tracker-main.c:237
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Formât «%s» di serializazion no supuartât\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: ../src/tracker-extract/tracker-main.c:362
+#: ../src/tracker-extract/tracker-main.c:326
 msgid "— Extract file meta data"
 msgstr "— Al tire fûr i meta-dâts dai file"
 
-#: ../src/tracker-extract/tracker-main.c:377
+#: ../src/tracker-extract/tracker-main.c:341
 msgid "Filename and mime type must be provided together"
 msgstr "Il non file e il gjenar di mime a scugnin jessi furnîts adun"
 
@@ -589,6 +588,18 @@ msgstr "Disabilite il distudâ dopo 30 seconts di no ativitât"
 msgid "— start the tracker writeback service"
 msgstr "— tache il servizi di scriture rimandade di tracker"
 
+#~ msgid "Max media art width"
+#~ msgstr "Largjece massime des figuris"
+
+#~ msgid ""
+#~ "Maximum width in pixels for any media art extracted. Anything bigger is "
+#~ "resized. Set to -1 to disable saving media art from files. Setting to 0 "
+#~ "sets no limit on the media art width."
+#~ msgstr ""
+#~ "Massime largjece in pixel des figuris estratis, cualsisei file plui grant "
+#~ "al ven ridimensionât. Met a -1 par disabilitâ il salvament des figuris, "
+#~ "met a 0 par disabilitâ il limit su la largjece."
+
 #~ msgid "Applications"
 #~ msgstr "Aplicazions"
 
@@ -605,9 +616,6 @@ msgstr "— tache il servizi di scriture rimandade di tracker"
 
 #~ msgid "Tracker Application Miner"
 #~ msgstr "Estratôr di dâts des aplicazions"
-
-#~ msgid "Indexes information about applications installed"
-#~ msgstr "Met in indiç informazions su aplicazions instaladis"
 
 #~ msgid "All posts"
 #~ msgstr "Ducj i articui"
