@@ -907,10 +907,12 @@ miner_files_finalize (GObject *object)
 		priv->grace_period_timeout_id = 0;
 	}
 
-	g_signal_handlers_disconnect_by_func (priv->extract_watchdog,
-	                                      on_extractor_lost,
-	                                      NULL);
-	g_clear_object (&priv->extract_watchdog);
+	if (priv->extract_watchdog) {
+		g_signal_handlers_disconnect_by_func (priv->extract_watchdog,
+		                                      on_extractor_lost,
+		                                      NULL);
+		g_clear_object (&priv->extract_watchdog);
+	}
 
 	if (priv->config) {
 		g_signal_handlers_disconnect_by_func (priv->config,
