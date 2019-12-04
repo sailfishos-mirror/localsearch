@@ -1136,7 +1136,7 @@ mp3_parse_header (const gchar          *data,
 	} else if ((!vbr_flag && frames > VBR_THRESHOLD) || (frames > MAX_FRAMES_SCAN)) {
 		/* If not all frames scanned
 		 * Note that bitrate is always > 0, checked before */
-		length = (filedata->size - filedata->id3v2_size) / (avg_bps ? avg_bps : bitrate) / 125;
+		length = (filedata->size - filedata->id3v2_size) / (avg_bps ? avg_bps : (bitrate / 1000)) / 125;
 	} else {
 		/* Note that sample_rate is always > 0, checked before */
 		length = spfp8 * 8 * frames / sample_rate;
