@@ -1,5 +1,5 @@
 # Brazilian Portuguese translation of Tracker.
-# Copyright (C) 2007-2019 Free Software Foundation, Inc.
+# Copyright (C) 2020 Free Software Foundation, Inc.
 # This file is distributed under the same license as the tracker package.
 # Luiz Armesto <luiz.armesto@gmail.com>, 2007, 2008.
 # Leonardo Ferreira Fontenelle <leo.fontenelle@gmail.com>, 2008.
@@ -10,22 +10,22 @@
 # Gabriel Speckhahn <gabspeck@gmail.com>, 2011.
 # Enrico Nicoletto <liverig@gmail.com>, 2013, 2014, 2015.
 # Felipe Braga <fbobraga@gmail.com>, 2015.
-# Rafael Fontenelle <rafaelff@gnome.org>, 2013-2019.
+# Rafael Fontenelle <rafaelff@gnome.org>, 2013-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2019-02-17 15:13+0000\n"
-"PO-Revision-Date: 2019-02-20 08:02-0300\n"
+"POT-Creation-Date: 2019-09-29 14:59+0000\n"
+"PO-Revision-Date: 2020-01-04 23:32-0300\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
-"Language-Team: Portuguese - Brazil <gnome-pt_br-list@gnome.org>\n"
+"Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1)\n"
-"X-Generator: Gtranslator 3.31.90\n"
+"X-Generator: Gtranslator 3.32.0\n"
 "X-Project-Style: gnome\n"
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:1
@@ -65,26 +65,11 @@ msgid "Maximum number of UTF-8 bytes to extract."
 msgstr "Número máximo de bytes UTF-8 a extrair."
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:7
-msgid "Max media art width"
-msgstr "Largura máxima da arte da mídia"
-
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:8
-msgid ""
-"Maximum width in pixels for any media art extracted. Anything bigger is "
-"resized. Set to -1 to disable saving media art from files. Setting to 0 sets "
-"no limit on the media art width."
-msgstr ""
-"Largura máxima em pixels para qualquer arte de mídia extraída. Qualquer uma "
-"que seja maior, é redimensionada. Defina como -1 para desabilitar o "
-"armazenamento de arte de mídia dos arquivos. Atribuir como 0, define nenhum "
-"limite na largura da arte da mídia."
-
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:9
 msgid "Wait for FS miner to be done before extracting"
 msgstr ""
 "Esperar pela mineração de sistema de arquivos finalizar antes de extrair"
 
-#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:10
+#: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:8
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
 "crawling before extracting meta-data. This option is useful on constrained "
@@ -218,11 +203,6 @@ msgid "Directories to index recursively"
 msgstr "Diretórios a indexar recursivamente"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:28
-#| msgid ""
-#| "List of directories to index recursively, Special values include: &amp;"
-#| "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
-#| "PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/xdg/user-dirs."
-#| "defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index recursively, Special values include: &amp;"
 "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
@@ -241,11 +221,6 @@ msgid "Directories to index non-recursively"
 msgstr "Diretórios a indexar não recursivamente"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:32
-#| msgid ""
-#| "List of directories to index without inspecting subfolders, Special "
-#| "values include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, "
-#| "&amp;PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/"
-#| "xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;"
@@ -260,26 +235,40 @@ msgstr ""
 "Veja /etc/xdg/user-dirs.defaults e $HOME/.config/user-dirs.default"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:35
+#| msgid "Indexes information about applications installed"
+msgid "Index applications installed on the system"
+msgstr "Indexa aplicativos instalados no sistema"
+
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:36
+msgid ""
+"If this option is enabled, the filesystem miner will look for .desktop files "
+"in the standard XDG system and user data directories."
+msgstr ""
+"Se esta opção estiver habilidade, o minerador do sistema de arquivos vai "
+"procurar por arquivos .desktop nos diretórios padrão XDG de dados de usuário "
+"e sistema"
+
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:37
 msgid "Ignored files"
 msgstr "Arquivos ignorados"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:36
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:38
 msgid "List of file patterns to avoid"
 msgstr "Lista de padrões de arquivo a evitar"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:37
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
 msgid "Ignored directories"
 msgstr "Diretórios ignorados"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:38
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
 msgid "List of directories to avoid"
 msgstr "Lista de diretórios a evitar"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:41
 msgid "Ignored directories with content"
 msgstr "Diretórios ignorados com conteúdo"
 
-#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
+#: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:42
 msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Evitar qualquer diretório que contenha um arquivo nessa lista negra"
 
@@ -468,7 +457,7 @@ msgstr "Devem ser monitorados"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/fs/tracker-main.c:793
+#: ../src/miners/fs/tracker-main.c:792
 msgid "— start the tracker indexer"
 msgstr "— inicia o indexador do Tracker"
 
@@ -504,19 +493,19 @@ msgstr "Título a usar (deve ser usado com --add-feed)"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/rss/tracker-main.c:94
+#: ../src/miners/rss/tracker-main.c:93
 msgid "— start the feeds indexer"
 msgstr "— inicia o indexador de feeds"
 
-#: ../src/miners/rss/tracker-main.c:128
+#: ../src/miners/rss/tracker-main.c:127
 msgid "Could not establish a connection to Tracker"
 msgstr "Não foi possível estabelecer uma conexão com o Tracker"
 
-#: ../src/miners/rss/tracker-main.c:129
+#: ../src/miners/rss/tracker-main.c:128
 msgid "No error given"
 msgstr "Nenhum erro informado"
 
-#: ../src/miners/rss/tracker-main.c:156
+#: ../src/miners/rss/tracker-main.c:155
 msgid "Could not add feed"
 msgstr "Não foi possível adicionar o feed"
 
@@ -536,11 +525,11 @@ msgstr "Extrator"
 msgid "Metadata extractor"
 msgstr "Extrator de metadados"
 
-#: ../src/tracker-extract/tracker-extract.c:685
+#: ../src/tracker-extract/tracker-extract.c:683
 msgid "Metadata extraction failed"
 msgstr "Extrator de metadados falhou"
 
-#: ../src/tracker-extract/tracker-extract.c:765
+#: ../src/tracker-extract/tracker-extract.c:763
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Não foram encontrados módulos de metadados ou extratores para lidar com este "
@@ -582,18 +571,18 @@ msgstr "Emite formato de resultados: “sparql”, “turtle” ou “json-ld”
 msgid "FORMAT"
 msgstr "FORMATO"
 
-#: ../src/tracker-extract/tracker-main.c:272
+#: ../src/tracker-extract/tracker-main.c:237
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Sem suporte ao formato de serialização “%s”\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: ../src/tracker-extract/tracker-main.c:362
+#: ../src/tracker-extract/tracker-main.c:326
 msgid "— Extract file meta data"
 msgstr "— Extrai metadados do arquivo"
 
-#: ../src/tracker-extract/tracker-main.c:377
+#: ../src/tracker-extract/tracker-main.c:341
 msgid "Filename and mime type must be provided together"
 msgstr "Nome de arquivo e tipo mime devem ser informados juntos"
 
@@ -616,6 +605,19 @@ msgstr "Desabilitar desligamento depois de 30 segundos de inatividade"
 msgid "— start the tracker writeback service"
 msgstr "— inicia o serviço de writeback do Tracker"
 
+#~ msgid "Max media art width"
+#~ msgstr "Largura máxima da arte da mídia"
+
+#~ msgid ""
+#~ "Maximum width in pixels for any media art extracted. Anything bigger is "
+#~ "resized. Set to -1 to disable saving media art from files. Setting to 0 "
+#~ "sets no limit on the media art width."
+#~ msgstr ""
+#~ "Largura máxima em pixels para qualquer arte de mídia extraída. Qualquer "
+#~ "uma que seja maior, é redimensionada. Defina como -1 para desabilitar o "
+#~ "armazenamento de arte de mídia dos arquivos. Atribuir como 0, define "
+#~ "nenhum limite na largura da arte da mídia."
+
 #~ msgid "Applications"
 #~ msgstr "Aplicativos"
 
@@ -630,9 +632,6 @@ msgstr "— inicia o serviço de writeback do Tracker"
 
 #~ msgid "Tracker Application Miner"
 #~ msgstr "Tracker - Aplicativo de mineração de dados"
-
-#~ msgid "Indexes information about applications installed"
-#~ msgstr "Indexa informações a respeito de aplicativos instalados"
 
 #~ msgid "All posts"
 #~ msgstr "Todas as publicações"
