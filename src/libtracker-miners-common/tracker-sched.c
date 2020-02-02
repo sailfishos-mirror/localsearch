@@ -59,6 +59,15 @@ tracker_sched_idle (void)
 
 #else /* __linux__ */
 
+/* Although pthread_setschedparam() should exist on any POSIX compliant OS,
+ * the SCHED_IDLE policy is Linux-specific. The POSIX standard only requires
+ * the existence of realtime and 'other' policies.
+ *
+ * We could set the priority to 0. On FreeBSD the default priority is already
+ * 0, and this may be true on other platforms, so we currently don't bother.
+ * See https://gitlab.gnome.org/GNOME/tracker-miners/merge_requests/140 for
+ * more discussion.
+ */
 #include <glib.h>
 
 #include "tracker-sched.h"
