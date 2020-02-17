@@ -789,11 +789,13 @@ setup_connection_and_endpoint (TrackerDomainOntology    *domain,
                                GError                  **error)
 {
 	GFile *store;
+	GFile *ontology;
 
 	store = tracker_domain_ontology_get_cache (domain);
+	ontology = tracker_domain_ontology_get_ontology (domain);
 	*sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
 	                                              store,
-	                                              NULL,
+	                                              ontology,
 	                                              NULL,
 	                                              error);
 	if (!*sparql_conn)
