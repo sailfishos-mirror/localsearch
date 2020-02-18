@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-01-08 18:02+0000\n"
-"PO-Revision-Date: 2020-02-14 19:15+0300\n"
+"POT-Creation-Date: 2020-02-18 11:35+0000\n"
+"PO-Revision-Date: 2020-02-18 19:21+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -75,6 +75,50 @@ msgstr ""
 "bitirmek için, tracker-miner-fs uygulamasını bekleyecektir. Bu seçenek, "
 "dosyaları mümkün olduğunca hızlı listelemek için ve kısıtlı ortamlarda "
 "listeden sonra üst veriyi getirerek kullanımı kolaylaştırır."
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:1
+msgid "Enable stemmer"
+msgstr "Kök ayırıcıyı etkinleştir"
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:2
+msgid ""
+"Simplify the words to their root to provide more results. E.g. “shelves” and "
+"“shelf” to “shel”"
+msgstr ""
+"Daha çok sonuç sağlamak için sözcük köklerini basitleştirin. Örn. "
+"“shelves” ve “shelf” sözcükleri, “shel” olsun"
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:3
+msgid "Enable unaccent"
+msgstr "Vurgulu harf düzelticiyi etkinleştir"
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:4
+msgid ""
+"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
+"“Idea” for improved matching."
+msgstr ""
+"Vurgulu karakterleri, vurgulu olmayan eşdeğerlerine çevir. Örn. “Idéa” "
+"sözcüğünü, eşleşmeyi arttırmak için “Idea” sözcüğüne çevir."
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:5
+msgid "Ignore numbers"
+msgstr "Sayıları yoksay"
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:6
+msgid "If enabled, numbers will not be indexed."
+msgstr "Etkinleştirildiğinde sayılar indekslenmez."
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:7
+msgid "Ignore stop words"
+msgstr "Durdurma sözcüklerini yok say"
+
+#: ../data/org.freedesktop.Tracker.FTS.gschema.xml.h:8
+msgid ""
+"If enabled, the words listed in the stop-words list are ignored. E.g. common "
+"words like “the”, “yes”, “no”, etc."
+msgstr ""
+"Etkinleştirildiğinde durdurma-sözcüklerinde listelenen sözcükler yok sayılır. "
+"Örneğin; “evet”, “hayır” ve “ve” gibi sözcükler."
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:3
 msgid "Initial sleep"
@@ -378,84 +422,84 @@ msgstr "Belirli bir etki alanı ontolojisi için çalışır"
 msgid "Displays version information"
 msgstr "Sürüm bilgisini görüntüler"
 
-#: ../src/miners/fs/tracker-main.c:539
+#: ../src/miners/fs/tracker-main.c:541
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” veri nesnesi, şu anda var"
 
-#: ../src/miners/fs/tracker-main.c:540
+#: ../src/miners/fs/tracker-main.c:542
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” veri nesnesi, şu anda yok"
 
-#: ../src/miners/fs/tracker-main.c:555
+#: ../src/miners/fs/tracker-main.c:557
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Dizin, tarama için uygun (kurallara göre)"
 
-#: ../src/miners/fs/tracker-main.c:556
+#: ../src/miners/fs/tracker-main.c:558
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Dizin, tarama için uygun değil (kurallara göre)"
 
-#: ../src/miners/fs/tracker-main.c:576
+#: ../src/miners/fs/tracker-main.c:578
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Dizin taranmaya uygun (içeriğe göre)"
 
-#: ../src/miners/fs/tracker-main.c:577
+#: ../src/miners/fs/tracker-main.c:579
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Dizin taranmaya uygun değil (içeriğe göre)"
 
-#: ../src/miners/fs/tracker-main.c:624
+#: ../src/miners/fs/tracker-main.c:626
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Dizin izlenmeye uygun (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:625
+#: ../src/miners/fs/tracker-main.c:627
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Dizin izlenmeye uygun değil (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:629
+#: ../src/miners/fs/tracker-main.c:631
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Dosya izlenmeye uygun (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:630
+#: ../src/miners/fs/tracker-main.c:632
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Dosya izlenmeye uygun değil (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:634
+#: ../src/miners/fs/tracker-main.c:636
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr "Dosya veya Dizin izlenmeye uygun (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:635
+#: ../src/miners/fs/tracker-main.c:637
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr "Dosya veya Dizin izlenmeye uygun değil (yapılandırmaya göre)"
 
-#: ../src/miners/fs/tracker-main.c:650
+#: ../src/miners/fs/tracker-main.c:652
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Dosya taranmaya uygun (kurallara göre)"
 
-#: ../src/miners/fs/tracker-main.c:651
+#: ../src/miners/fs/tracker-main.c:653
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Dosya, taranma için uygun (kurallara göre)"
 
-#: ../src/miners/fs/tracker-main.c:660
+#: ../src/miners/fs/tracker-main.c:662
 msgid "Would be indexed"
 msgstr "Dizinlenecektir"
 
-#: ../src/miners/fs/tracker-main.c:661 ../src/miners/fs/tracker-main.c:663
+#: ../src/miners/fs/tracker-main.c:663 ../src/miners/fs/tracker-main.c:665
 msgid "Yes"
 msgstr "Evet"
 
-#: ../src/miners/fs/tracker-main.c:661 ../src/miners/fs/tracker-main.c:663
+#: ../src/miners/fs/tracker-main.c:663 ../src/miners/fs/tracker-main.c:665
 msgid "No"
 msgstr "Hayır"
 
-#: ../src/miners/fs/tracker-main.c:662
+#: ../src/miners/fs/tracker-main.c:664
 msgid "Would be monitored"
 msgstr "İzlenecektir"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/fs/tracker-main.c:793
+#: ../src/miners/fs/tracker-main.c:850
 msgid "— start the tracker indexer"
 msgstr "— tracker dizinleyicisini çalıştır"
 
@@ -491,36 +535,35 @@ msgstr "Kullanılacak başlık (--add-feed ile birlikte kullanılmalıdır)"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/miners/rss/tracker-main.c:94
+#: ../src/miners/rss/tracker-main.c:147
 msgid "— start the feeds indexer"
 msgstr "— besleme dizinleyicisini çalıştır"
 
-#: ../src/miners/rss/tracker-main.c:128 ../src/tracker/tracker-index.c:195
-#: ../src/tracker/tracker-search.c:1579 ../src/tracker/tracker-status.c:72
-#: ../src/tracker/tracker-status.c:385 ../src/tracker/tracker-tag.c:974
+#: ../src/miners/rss/tracker-main.c:180 ../src/tracker/tracker-index.c:196
+#: ../src/tracker/tracker-search.c:1580 ../src/tracker/tracker-status.c:87
+#: ../src/tracker/tracker-status.c:402 ../src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "Tracker uygulamasına bağlantı kurulamıyor"
 
-#: ../src/miners/rss/tracker-main.c:129 ../src/tracker/tracker-config.c:61
-#: ../src/tracker/tracker-daemon.c:461 ../src/tracker/tracker-daemon.c:482
-#: ../src/tracker/tracker-daemon.c:707 ../src/tracker/tracker-daemon.c:739
-#: ../src/tracker/tracker-daemon.c:889 ../src/tracker/tracker-daemon.c:947
-#: ../src/tracker/tracker-daemon.c:982 ../src/tracker/tracker-daemon.c:1051
-#: ../src/tracker/tracker-daemon.c:1242 ../src/tracker/tracker-daemon.c:1308
-#: ../src/tracker/tracker-daemon.c:1669 ../src/tracker/tracker-dbus.c:45
+#: ../src/miners/rss/tracker-main.c:181 ../src/tracker/tracker-config.c:61
+#: ../src/tracker/tracker-daemon.c:441 ../src/tracker/tracker-daemon.c:462
+#: ../src/tracker/tracker-daemon.c:626 ../src/tracker/tracker-daemon.c:684
+#: ../src/tracker/tracker-daemon.c:719 ../src/tracker/tracker-daemon.c:788
+#: ../src/tracker/tracker-daemon.c:979 ../src/tracker/tracker-daemon.c:1024
+#: ../src/tracker/tracker-daemon.c:1385 ../src/tracker/tracker-dbus.c:45
 #: ../src/tracker/tracker-dbus.c:63 ../src/tracker/tracker-index.c:123
-#: ../src/tracker/tracker-index.c:155 ../src/tracker/tracker-index.c:196
-#: ../src/tracker/tracker-index.c:272 ../src/tracker/tracker-index.c:329
+#: ../src/tracker/tracker-index.c:155 ../src/tracker/tracker-index.c:197
+#: ../src/tracker/tracker-index.c:280 ../src/tracker/tracker-index.c:337
 #: ../src/tracker/tracker-process.c:80 ../src/tracker/tracker-process.c:206
 #: ../src/tracker/tracker-process.c:335 ../src/tracker/tracker-process.c:356
-#: ../src/tracker/tracker-search.c:1580 ../src/tracker/tracker-status.c:73
-#: ../src/tracker/tracker-status.c:302 ../src/tracker/tracker-status.c:312
-#: ../src/tracker/tracker-status.c:386 ../src/tracker/tracker-status.c:431
-#: ../src/tracker/tracker-status.c:460 ../src/tracker/tracker-tag.c:975
+#: ../src/tracker/tracker-search.c:1581 ../src/tracker/tracker-status.c:88
+#: ../src/tracker/tracker-status.c:318 ../src/tracker/tracker-status.c:328
+#: ../src/tracker/tracker-status.c:403 ../src/tracker/tracker-status.c:448
+#: ../src/tracker/tracker-status.c:477 ../src/tracker/tracker-tag.c:976
 msgid "No error given"
 msgstr "Hata belirtilmedi"
 
-#: ../src/miners/rss/tracker-main.c:156
+#: ../src/miners/rss/tracker-main.c:208
 msgid "Could not add feed"
 msgstr "Beseleme eklenemedi"
 
@@ -599,11 +642,11 @@ msgstr "Desteklenmeyen dönüştürme biçimi “%s”\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: ../src/tracker-extract/tracker-main.c:327
+#: ../src/tracker-extract/tracker-main.c:328
 msgid "— Extract file meta data"
 msgstr "— Dosya üstverisini ayıkla"
 
-#: ../src/tracker-extract/tracker-main.c:342
+#: ../src/tracker-extract/tracker-main.c:343
 msgid "Filename and mime type must be provided together"
 msgstr "Dosya adı ve mime türü birlikte sağlanmalıdır"
 
@@ -612,47 +655,47 @@ msgstr "Dosya adı ve mime türü birlikte sağlanmalıdır"
 msgid "Could not get GSettings for miners, manager could not be created, %s"
 msgstr "Tarayıcılar için GSettings alınamadı, yönetici yaratılamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:121 ../src/tracker/tracker-daemon.c:428
+#: ../src/tracker/tracker-daemon.c:116 ../src/tracker/tracker-daemon.c:408
 msgid "Unavailable"
 msgstr "Kullanılamıyor"
 
 #. generic
-#: ../src/tracker/tracker-daemon.c:122
+#: ../src/tracker/tracker-daemon.c:117
 msgid "Initializing"
 msgstr "Başlatılıyor"
 
-#: ../src/tracker/tracker-daemon.c:123
+#: ../src/tracker/tracker-daemon.c:118
 msgid "Processing…"
 msgstr "İşleniyor…"
 
-#: ../src/tracker/tracker-daemon.c:124
+#: ../src/tracker/tracker-daemon.c:119
 msgid "Fetching…"
 msgstr "Getiriliyor…"
 
 #. miner/rss
-#: ../src/tracker/tracker-daemon.c:125
+#: ../src/tracker/tracker-daemon.c:120
 #, c-format
 msgid "Crawling single directory “%s”"
 msgstr "Tek dizin “%s” işleniyor"
 
-#: ../src/tracker/tracker-daemon.c:126
+#: ../src/tracker/tracker-daemon.c:121
 #, c-format
 msgid "Crawling recursively directory “%s”"
 msgstr "Dizin “%s” özyinelemeli işleniyor"
 
-#: ../src/tracker/tracker-daemon.c:127
+#: ../src/tracker/tracker-daemon.c:122
 msgid "Paused"
 msgstr "Duraklatıldı"
 
-#: ../src/tracker/tracker-daemon.c:128
+#: ../src/tracker/tracker-daemon.c:123
 msgid "Idle"
 msgstr "Boşta"
 
-#: ../src/tracker/tracker-daemon.c:134
+#: ../src/tracker/tracker-daemon.c:129
 msgid "Follow status changes as they happen"
 msgstr "Durum değişimlerini olduğu gibi takip et"
 
-#: ../src/tracker/tracker-daemon.c:138
+#: ../src/tracker/tracker-daemon.c:133
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -660,23 +703,19 @@ msgstr ""
 "Gerçek zamanlı olarak veritabanı değişikliklerini izle (örn. eklenmiş olan "
 "kaynaklar veya dosyalar)"
 
-#: ../src/tracker/tracker-daemon.c:139
-msgid "ONTOLOGY"
-msgstr "ONTOLOJİ"
-
-#: ../src/tracker/tracker-daemon.c:142
+#: ../src/tracker/tracker-daemon.c:137
 msgid "List common statuses for miners and the store"
 msgstr "Tarayıcılar ve depo için ortak durumları listeler"
 
-#: ../src/tracker/tracker-daemon.c:147
+#: ../src/tracker/tracker-daemon.c:142
 msgid "Pause a miner (you must use this with --miner)"
 msgstr "Madenciyi duraklat (--miner ile birlikte kullanılır)"
 
-#: ../src/tracker/tracker-daemon.c:148 ../src/tracker/tracker-daemon.c:152
+#: ../src/tracker/tracker-daemon.c:143 ../src/tracker/tracker-daemon.c:147
 msgid "REASON"
 msgstr "NEDEN"
 
-#: ../src/tracker/tracker-daemon.c:151
+#: ../src/tracker/tracker-daemon.c:146
 msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must "
 "use this with --miner)"
@@ -684,15 +723,15 @@ msgstr ""
 "Süreç çağrılırken bir tarayıcıyı duraklat veya devam et (--miner ile "
 "birlikte kullanılır)"
 
-#: ../src/tracker/tracker-daemon.c:155
+#: ../src/tracker/tracker-daemon.c:150
 msgid "Resume a miner (you must use this with --miner)"
 msgstr "Bir tarayıcıyı devam ettir (--miner ile birlikte kullanılır)"
 
-#: ../src/tracker/tracker-daemon.c:156
+#: ../src/tracker/tracker-daemon.c:151
 msgid "COOKIE"
 msgstr "ÇEREZ"
 
-#: ../src/tracker/tracker-daemon.c:159
+#: ../src/tracker/tracker-daemon.c:154
 msgid ""
 "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
 "Applications)"
@@ -700,27 +739,27 @@ msgstr ""
 "Kullanılacak tarayıcı --resume ve ya --ause ile birlikte (ekler "
 "kullanabilirsiniz, örn. Dosyalar veya Uygualamar)"
 
-#: ../src/tracker/tracker-daemon.c:160
+#: ../src/tracker/tracker-daemon.c:155
 msgid "MINER"
 msgstr "TARAYICI"
 
-#: ../src/tracker/tracker-daemon.c:163
+#: ../src/tracker/tracker-daemon.c:158
 msgid "List all miners currently running"
 msgstr "Şu anda çalışan tüm madencileri listele"
 
-#: ../src/tracker/tracker-daemon.c:167
+#: ../src/tracker/tracker-daemon.c:162
 msgid "List all miners installed"
 msgstr "Tüm yüklü madencileri listele"
 
-#: ../src/tracker/tracker-daemon.c:171
+#: ../src/tracker/tracker-daemon.c:166
 msgid "List pause reasons"
 msgstr "Duraklama nedenlerini listele"
 
-#: ../src/tracker/tracker-daemon.c:176
+#: ../src/tracker/tracker-daemon.c:171
 msgid "List all Tracker processes"
 msgstr "Tüm Tracker süreçlerini listele"
 
-#: ../src/tracker/tracker-daemon.c:178
+#: ../src/tracker/tracker-daemon.c:173
 msgid ""
 "Use SIGKILL to stop all matching processes, either “store”, “miners” or "
 "“all” may be used, no parameter equals “all”"
@@ -728,11 +767,11 @@ msgstr ""
 "Tüm eşleşen süreçleri durdurmak için SIGKILL kullanın, “store”, “miners” "
 "veya “all” kullanabilir, \"all\" seçeneğine eşit parametre yoktur"
 
-#: ../src/tracker/tracker-daemon.c:179 ../src/tracker/tracker-daemon.c:182
+#: ../src/tracker/tracker-daemon.c:174 ../src/tracker/tracker-daemon.c:177
 msgid "APPS"
 msgstr "UYGULAMALAR"
 
-#: ../src/tracker/tracker-daemon.c:181
+#: ../src/tracker/tracker-daemon.c:176
 msgid ""
 "Use SIGTERM to stop all matching processes, either “store”, “miners” or "
 "“all” may be used, no parameter equals “all”"
@@ -740,11 +779,11 @@ msgstr ""
 "Tüm eşleşen süreçleri durdurmak için SIGTERM kullanın, “store”, “miners” "
 "veya “all” kullanabilir, \"all\" seçeneğine eşit parametre yoktur"
 
-#: ../src/tracker/tracker-daemon.c:184
+#: ../src/tracker/tracker-daemon.c:179
 msgid "Starts miners (which indirectly starts tracker-store too)"
 msgstr "Tarayıcıları başlatır (doğrudan başlamayan tracker-store dahil)"
 
-#: ../src/tracker/tracker-daemon.c:187 ../src/tracker/tracker-extract.c:42
+#: ../src/tracker/tracker-daemon.c:182 ../src/tracker/tracker-extract.c:42
 msgid ""
 "Sets the logging verbosity to LEVEL (“debug”, “detailed”, “minimal”, "
 "“errors”) for all processes"
@@ -752,260 +791,244 @@ msgstr ""
 "Günlükleme ayrıntı düzeyini, tüm süreçler için DÜZEY (“debug”, “detailed”, "
 "“minimal”, “errors”) yapar"
 
-#: ../src/tracker/tracker-daemon.c:188 ../src/tracker/tracker-extract.c:43
+#: ../src/tracker/tracker-daemon.c:183 ../src/tracker/tracker-extract.c:43
 msgid "LEVEL"
 msgstr "DÜZEY"
 
-#: ../src/tracker/tracker-daemon.c:190
+#: ../src/tracker/tracker-daemon.c:185
 msgid "Show logging values in terms of log verbosity for each process"
 msgstr ""
 "Her bir süreç için günlük ayrıntısı türünden günlükleme değerlerini göster"
 
-#: ../src/tracker/tracker-daemon.c:263
+#: ../src/tracker/tracker-daemon.c:243
 #, c-format
 msgid "Could not get status from miner: %s"
 msgstr "Madenciden durum alınamadı: %s"
 
 #. Translators: %s is a time string
-#: ../src/tracker/tracker-daemon.c:325
+#: ../src/tracker/tracker-daemon.c:305
 #, c-format
 msgid "%s remaining"
 msgstr "%s kaldı"
 
-#: ../src/tracker/tracker-daemon.c:328
+#: ../src/tracker/tracker-daemon.c:308
 msgid "unknown time left"
 msgstr "bilinmeyen süre kaldı"
 
 #. Work out lengths for output spacing
-#: ../src/tracker/tracker-daemon.c:341 ../src/tracker/tracker-daemon.c:1318
+#: ../src/tracker/tracker-daemon.c:321 ../src/tracker/tracker-daemon.c:1034
 msgid "PAUSED"
 msgstr "DURAKLATILDI"
 
-#: ../src/tracker/tracker-daemon.c:358
+#: ../src/tracker/tracker-daemon.c:338
 msgid "Not running or is a disabled plugin"
 msgstr "Çalışmayan ya da devre dışı olan eklenti"
 
-#: ../src/tracker/tracker-daemon.c:460
+#: ../src/tracker/tracker-daemon.c:440
 msgid "Could not retrieve tracker-store status"
 msgstr "tracker-store durumu alınamadı"
 
-#: ../src/tracker/tracker-daemon.c:481
+#: ../src/tracker/tracker-daemon.c:461
 msgid "Could not retrieve tracker-store progress"
 msgstr "tracker-store ilerleme durumu alınamadı"
 
-#: ../src/tracker/tracker-daemon.c:611
-msgid "Unable to retrieve namespace prefixes"
-msgstr "Alan adı ön ekleri alınamıyor"
-
-#: ../src/tracker/tracker-daemon.c:619
-msgid "No namespace prefixes were returned"
-msgstr "Dönen bir alan adı ön eki yok"
-
-#: ../src/tracker/tracker-daemon.c:698 ../src/tracker/tracker-daemon.c:725
-msgid "Could not run SPARQL query"
-msgstr "SPARQL sorgusu çalıştırılamadı"
-
-#: ../src/tracker/tracker-daemon.c:706 ../src/tracker/tracker-daemon.c:738
-msgid "Could not call tracker_sparql_cursor_next() on SPARQL query"
-msgstr "SPARQL sorgusunda tracker_sparql_cursor_next() çağrılamadı"
-
-#: ../src/tracker/tracker-daemon.c:888
+#: ../src/tracker/tracker-daemon.c:625
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
 msgstr "Madenci duraklatılamadı, yönetici oluşturulamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:895
+#: ../src/tracker/tracker-daemon.c:632
 #, c-format
 msgid "Attempting to pause miner “%s” with reason “%s”"
 msgstr "“%s” madencisi “%s” nedeniyle durdurulmaya çalışılıyor"
 
-#: ../src/tracker/tracker-daemon.c:903 ../src/tracker/tracker-daemon.c:909
+#: ../src/tracker/tracker-daemon.c:640 ../src/tracker/tracker-daemon.c:646
 #, c-format
 msgid "Could not pause miner: %s"
 msgstr "Madenci duraklatılamadı: %s"
 
-#: ../src/tracker/tracker-daemon.c:915
+#: ../src/tracker/tracker-daemon.c:652
 #, c-format
 msgid "Cookie is %d"
 msgstr "Çerez %d"
 
-#: ../src/tracker/tracker-daemon.c:922 ../src/tracker/tracker-daemon.c:1275
-#: ../src/tracker/tracker-daemon.c:1419
+#: ../src/tracker/tracker-daemon.c:659 ../src/tracker/tracker-daemon.c:992
+#: ../src/tracker/tracker-daemon.c:1135
 msgid "Press Ctrl+C to stop"
 msgstr "Durdurmak için Ctrl+C'ye basın"
 
-#: ../src/tracker/tracker-daemon.c:946
+#: ../src/tracker/tracker-daemon.c:683
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
 msgstr "Madenci devam ettirilemedi, yönetici oluşturulamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:953
+#: ../src/tracker/tracker-daemon.c:690
 #, c-format
 msgid "Attempting to resume miner %s with cookie %d"
 msgstr "%s tarayıcısı, %d çerezi ile başlıyor"
 
-#: ../src/tracker/tracker-daemon.c:960
+#: ../src/tracker/tracker-daemon.c:697
 #, c-format
 msgid "Could not resume miner: %s"
 msgstr "Madenci devam ettirilemedi: %s"
 
-#: ../src/tracker/tracker-daemon.c:964 ../src/tracker/tracker-index.c:222
+#: ../src/tracker/tracker-daemon.c:701 ../src/tracker/tracker-index.c:230
 msgid "Done"
 msgstr "Tamamlandı"
 
-#: ../src/tracker/tracker-daemon.c:981
+#: ../src/tracker/tracker-daemon.c:718
 #, c-format
 msgid "Could not list miners, manager could not be created, %s"
 msgstr "Madenciler listelenemedi, yönetici oluşturulamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:995
+#: ../src/tracker/tracker-daemon.c:732
 #, c-format
 msgid "Found %d miner installed"
 msgid_plural "Found %d miners installed"
 msgstr[0] "%d adet kurulu madenci bulundu"
 
-#: ../src/tracker/tracker-daemon.c:1018
+#: ../src/tracker/tracker-daemon.c:755
 #, c-format
 msgid "Found %d miner running"
 msgid_plural "Found %d miners running"
 msgstr[0] "%d adet çalışan madenci bulundu"
 
-#: ../src/tracker/tracker-daemon.c:1050
+#: ../src/tracker/tracker-daemon.c:787
 #, c-format
 msgid "Could not get pause details, manager could not be created, %s"
 msgstr "Duraklatma ayrıntıları alınamadı, yönetici oluşturulamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:1060
+#: ../src/tracker/tracker-daemon.c:797
 msgid "No miners are running"
 msgstr "Hiçbir madenci çalışmıyor"
 
-#: ../src/tracker/tracker-daemon.c:1100 ../src/tracker/tracker-daemon.c:1354
-#: ../src/tracker/tracker-daemon.c:1603 ../src/tracker/tracker-daemon.c:1646
+#: ../src/tracker/tracker-daemon.c:837 ../src/tracker/tracker-daemon.c:1070
+#: ../src/tracker/tracker-daemon.c:1319 ../src/tracker/tracker-daemon.c:1362
 msgid "Miners"
 msgstr "Madenciler"
 
-#: ../src/tracker/tracker-daemon.c:1107
+#: ../src/tracker/tracker-daemon.c:844
 msgid "Application"
 msgstr "Uygulama"
 
-#: ../src/tracker/tracker-daemon.c:1109
+#: ../src/tracker/tracker-daemon.c:846
 msgid "Reason"
 msgstr "Neden"
 
-#: ../src/tracker/tracker-daemon.c:1118
+#: ../src/tracker/tracker-daemon.c:855
 msgid "No miners are paused"
 msgstr "Hiçbir madenci duraklatılmadı"
 
-#: ../src/tracker/tracker-daemon.c:1206
+#: ../src/tracker/tracker-daemon.c:943
 msgid "Only one of “all”, “store” and “miners” options are allowed"
 msgstr "“all”, “store” ve “miners” seçeneklerinden yalnızca teki seçilebilir"
 
-#: ../src/tracker/tracker-daemon.c:1241
+#: ../src/tracker/tracker-daemon.c:978
 msgid "Could not get SPARQL connection"
 msgstr "SPARQL bağlantısı alınamadı"
 
-#: ../src/tracker/tracker-daemon.c:1273
+#: ../src/tracker/tracker-daemon.c:990
 msgid "Now listening for resource updates to the database"
 msgstr "Şimdi veritabanındaki kaynak güncellemeleri dinleniyor"
 
-#: ../src/tracker/tracker-daemon.c:1274
+#: ../src/tracker/tracker-daemon.c:991
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "Tüm nie:plainTextContent özellikleri es geçiliyor"
 
-#: ../src/tracker/tracker-daemon.c:1289
+#: ../src/tracker/tracker-daemon.c:1005
 msgid "Common statuses include"
 msgstr "İçerilen ortak durumlar"
 
-#: ../src/tracker/tracker-daemon.c:1307 ../src/tracker/tracker-status.c:459
+#: ../src/tracker/tracker-daemon.c:1023 ../src/tracker/tracker-status.c:476
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "Durum alınamadı, yönetici oluşturulamadı, %s"
 
 #. Display states
-#: ../src/tracker/tracker-daemon.c:1328
+#: ../src/tracker/tracker-daemon.c:1044
 msgid "Store"
 msgstr "Kaydet"
 
-#: ../src/tracker/tracker-daemon.c:1362
+#: ../src/tracker/tracker-daemon.c:1078
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr "“%s” madencisinin ekran adı alınamadı"
 
-#: ../src/tracker/tracker-daemon.c:1460
+#: ../src/tracker/tracker-daemon.c:1176
 msgid "You can not use miner pause and resume switches together"
 msgstr ""
 "Madenci duraklatma ve devam ettirme anahtarlarını aynı anda kullanamazsınız"
 
-#: ../src/tracker/tracker-daemon.c:1466
+#: ../src/tracker/tracker-daemon.c:1182
 msgid "You must provide the miner for pause or resume commands"
 msgstr "Duraklatma ya da devam ettirme komutları için madenci sağlamalısınız"
 
-#: ../src/tracker/tracker-daemon.c:1472
+#: ../src/tracker/tracker-daemon.c:1188
 msgid "You must provide a pause or resume command for the miner"
 msgstr "Madenci için bir duraklatma ya da devam ettirme komutu sağlamalısınız"
 
-#: ../src/tracker/tracker-daemon.c:1508
+#: ../src/tracker/tracker-daemon.c:1224
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "--kill ve --terminate parametrelerini birlikte kullanamazsınız"
 
-#: ../src/tracker/tracker-daemon.c:1514
+#: ../src/tracker/tracker-daemon.c:1230
 msgid "You can not use the --get-logging and --set-logging arguments together"
 msgstr ""
 "--get-logging ve --set-logging parametrelerini birlikte kullanamazsınız"
 
-#: ../src/tracker/tracker-daemon.c:1529 ../src/tracker/tracker-extract.c:105
+#: ../src/tracker/tracker-daemon.c:1245 ../src/tracker/tracker-extract.c:105
 msgid "Invalid log verbosity, try “debug”, “detailed”, “minimal” or “errors”"
 msgstr ""
 "Geçersiz sistem günlüğü ayrıntı düzeyi, şunlardan birini deneyin “debug”, "
 "“detailed”, “minimal” veya “errors”"
 
-#: ../src/tracker/tracker-daemon.c:1557 ../src/tracker/tracker-process.c:305
+#: ../src/tracker/tracker-daemon.c:1273 ../src/tracker/tracker-process.c:305
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
 msgstr[0] "%d PID bulundu…"
 
-#: ../src/tracker/tracker-daemon.c:1567
+#: ../src/tracker/tracker-daemon.c:1283
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "“%2$s” için süreç numarası %1$d bulundu"
 
-#: ../src/tracker/tracker-daemon.c:1597 ../src/tracker/tracker-daemon.c:1640
+#: ../src/tracker/tracker-daemon.c:1313 ../src/tracker/tracker-daemon.c:1356
 msgid "Components"
 msgstr "Bileşenler"
 
-#: ../src/tracker/tracker-daemon.c:1604 ../src/tracker/tracker-daemon.c:1647
+#: ../src/tracker/tracker-daemon.c:1320 ../src/tracker/tracker-daemon.c:1363
 msgid "Only those with config listed"
 msgstr "Sadece yapılandırması listelenmiş olanlar"
 
-#: ../src/tracker/tracker-daemon.c:1623
+#: ../src/tracker/tracker-daemon.c:1339
 #, c-format
 msgid "Setting log verbosity for all components to “%s”…"
 msgstr "Tüm bileşenlerin günlükleme ayrıntı düzeyi “%s” olarak ayarlanıyor…"
 
-#: ../src/tracker/tracker-daemon.c:1663
+#: ../src/tracker/tracker-daemon.c:1379
 msgid "Starting miners…"
 msgstr "Madenciler başlatılıyor…"
 
-#: ../src/tracker/tracker-daemon.c:1668
+#: ../src/tracker/tracker-daemon.c:1384
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "Madenciler başlatılamadı, yönetici oluşturulamadı, %s"
 
-#: ../src/tracker/tracker-daemon.c:1693
+#: ../src/tracker/tracker-daemon.c:1409
 msgid "perhaps a disabled plugin?"
 msgstr "bir eklenti devre dışı olabilir mi?"
 
-#: ../src/tracker/tracker-daemon.c:1743
+#: ../src/tracker/tracker-daemon.c:1459
 msgid ""
 "If no arguments are given, the status of the store and data miners is shown"
 msgstr ""
 "Verilmiş bir değişken yoksa, deponun durumu ve veri tarayıcılar gözükür"
 
-#: ../src/tracker/tracker-daemon.c:1748 ../src/tracker/tracker-extract.c:153
-#: ../src/tracker/tracker-index.c:418 ../src/tracker/tracker-reset.c:331
-#: ../src/tracker/tracker-search.c:1783 ../src/tracker/tracker-status.c:592
-#: ../src/tracker/tracker-tag.c:1083
+#: ../src/tracker/tracker-daemon.c:1464 ../src/tracker/tracker-extract.c:153
+#: ../src/tracker/tracker-index.c:426 ../src/tracker/tracker-reset.c:332
+#: ../src/tracker/tracker-search.c:1784 ../src/tracker/tracker-status.c:609
+#: ../src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
 msgstr "Tanınmayan seçenekler"
 
@@ -1071,27 +1094,27 @@ msgstr "Dosya (yeniden) dizinlenemedi"
 msgid "(Re)indexing file was successful"
 msgstr "Dosya (yeniden) dizinleme başarılı oldu"
 
-#: ../src/tracker/tracker-index.c:206
+#: ../src/tracker/tracker-index.c:208
 msgid "Importing Turtle file"
 msgstr "Turtle dosyası içe aktarma"
 
-#: ../src/tracker/tracker-index.c:215
+#: ../src/tracker/tracker-index.c:223
 msgid "Unable to import Turtle file"
 msgstr "Turtle dosyası içe aktarılamadı"
 
-#: ../src/tracker/tracker-index.c:251
+#: ../src/tracker/tracker-index.c:259
 msgid "Backing up database"
 msgstr "Veritabanı yedekleniyor"
 
-#: ../src/tracker/tracker-index.c:271 ../src/tracker/tracker-index.c:328
+#: ../src/tracker/tracker-index.c:279 ../src/tracker/tracker-index.c:336
 msgid "Could not backup database"
 msgstr "Veritabanı yedeklenemedi"
 
-#: ../src/tracker/tracker-index.c:308
+#: ../src/tracker/tracker-index.c:316
 msgid "Restoring database from backup"
 msgstr "Veritabanı yedekten geri yükleniyor"
 
-#: ../src/tracker/tracker-index.c:443
+#: ../src/tracker/tracker-index.c:451
 msgid ""
 "Only one action (--backup, --restore, --index-file or --import) can be used "
 "at a time"
@@ -1099,15 +1122,15 @@ msgstr ""
 "Aynı anda sadece bir eylem (--backup, --restore, --index-file veya --import) "
 "kullanılabilinir"
 
-#: ../src/tracker/tracker-index.c:445
+#: ../src/tracker/tracker-index.c:453
 msgid "Missing one or more files which are required"
 msgstr "Gerekli olan bir veya daha çok dosya eksik"
 
-#: ../src/tracker/tracker-index.c:447
+#: ../src/tracker/tracker-index.c:455
 msgid "Only one file can be used with --backup and --restore"
 msgstr "--backup ve --restore ile birlikte tek bir dosya kullanılabilir"
 
-#: ../src/tracker/tracker-index.c:449
+#: ../src/tracker/tracker-index.c:457
 msgid ""
 "Actions (--backup, --restore, --index-file and --import) can not be used "
 "with --reindex-mime-type"
@@ -1169,25 +1192,25 @@ msgstr ""
 "Dosya hakkında dizinlenmiş bilgiyi sil, dizinlerde özyinelemeli çalışır"
 
 #. Now, delete the element recursively
-#: ../src/tracker/tracker-reset.c:100
+#: ../src/tracker/tracker-reset.c:101
 msgid "Deleting…"
 msgstr "Siliniyor…"
 
-#: ../src/tracker/tracker-reset.c:121
+#: ../src/tracker/tracker-reset.c:122
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "Bu dosya için dizinlenmiş veri silindi ve yeniden dizinlenecek."
 
 #. TRANSLATORS: --hard and --soft are commandline arguments
-#: ../src/tracker/tracker-reset.c:190
+#: ../src/tracker/tracker-reset.c:191
 msgid "You can not use the --hard and --soft arguments together"
 msgstr "--hard ve --soft değişkenlerini birlikte kullanamazsınız"
 
-#: ../src/tracker/tracker-reset.c:198
+#: ../src/tracker/tracker-reset.c:199
 msgid "CAUTION: This process may irreversibly delete data."
 msgstr "DİKKAT: Bu işlem veriyi geri dönülmez biçimde silebilir."
 
-#: ../src/tracker/tracker-reset.c:199
+#: ../src/tracker/tracker-reset.c:200
 msgid ""
 "Although most content indexed by Tracker can be safely reindexed, it can’t "
 "be assured that this is the case for all data. Be aware that you may be "
@@ -1197,12 +1220,12 @@ msgstr ""
 "bu durum tüm veriyi kapsamayabilir. Veri kaybına maruz kalabileceğinizin "
 "farkında olun, riski göze alarak devam edin."
 
-#: ../src/tracker/tracker-reset.c:204
+#: ../src/tracker/tracker-reset.c:205
 msgid "Are you sure you want to proceed?"
 msgstr "Devam etmek istediğinize emin misiniz?"
 
 #. TRANSLATORS: This is to be displayed on command line output
-#: ../src/tracker/tracker-reset.c:206
+#: ../src/tracker/tracker-reset.c:207
 msgid "[y|N]"
 msgstr "[e|H]"
 
@@ -1210,11 +1233,11 @@ msgstr "[e|H]"
 #. * A partial or full match will be considered an affirmative answer,
 #. * it is intentionally lowercase, so please keep it like this.
 #.
-#: ../src/tracker/tracker-reset.c:215
+#: ../src/tracker/tracker-reset.c:216
 msgid "yes"
 msgstr "evet"
 
-#: ../src/tracker/tracker-reset.c:250
+#: ../src/tracker/tracker-reset.c:251
 msgid "Resetting existing configuration…"
 msgstr "Var olan yapılandırma sıfırlanıyor…"
 
@@ -1449,18 +1472,18 @@ msgstr ""
 "Problem raporlama için kullanışlı olan hata ayıklama bilgisini topla ve "
 "inceleme sonuçlarını terminal çıktısına yazdır"
 
-#: ../src/tracker/tracker-status.c:84
+#: ../src/tracker/tracker-status.c:99
 msgid "Could not get Tracker statistics"
 msgstr "İzleyici istatistikleri alınamadı"
 
-#: ../src/tracker/tracker-status.c:91
+#: ../src/tracker/tracker-status.c:106
 msgid "No statistics available"
 msgstr "Kullanılabilir istatistik yok"
 
 #. To translators: This is to say there are no
 #. * statistics found. We use a "Statistics:
 #. * None" with multiple print statements
-#: ../src/tracker/tracker-status.c:132
+#: ../src/tracker/tracker-status.c:147
 msgid "Statistics:"
 msgstr "İstatistikler:"
 
@@ -1487,92 +1510,92 @@ msgstr "İstatistikler:"
 #. *     None
 #. *
 #.
-#: ../src/tracker/tracker-status.c:135 ../src/tracker/tracker-tag.c:321
+#: ../src/tracker/tracker-status.c:150 ../src/tracker/tracker-tag.c:321
 #: ../src/tracker/tracker-tag.c:453 ../src/tracker/tracker-tag.c:575
 #: ../src/tracker/tracker-tag.c:953
 msgid "None"
 msgstr "Hiçbiri"
 
-#: ../src/tracker/tracker-status.c:169
+#: ../src/tracker/tracker-status.c:184
 msgid "Version"
 msgstr "Sürüm"
 
-#: ../src/tracker/tracker-status.c:176
+#: ../src/tracker/tracker-status.c:191
 msgid "Disk Information"
 msgstr "Disk Bilgileri"
 
-#: ../src/tracker/tracker-status.c:183 ../src/tracker/tracker-status.c:537
+#: ../src/tracker/tracker-status.c:198 ../src/tracker/tracker-status.c:554
 msgid "Remaining space on database partition"
 msgstr "Veritabanı bölümünde kalan alan"
 
 #. 3. Size of dataset (tracker-stats), size of databases
-#: ../src/tracker/tracker-status.c:190
+#: ../src/tracker/tracker-status.c:205
 msgid "Data Set"
 msgstr "Veri Kümesi"
 
-#: ../src/tracker/tracker-status.c:222
+#: ../src/tracker/tracker-status.c:237
 msgid "Configuration"
 msgstr "Yapılandırma"
 
-#: ../src/tracker/tracker-status.c:250
+#: ../src/tracker/tracker-status.c:265
 msgid "No configuration was found"
 msgstr "Yapılandırma bulunamadı"
 
-#: ../src/tracker/tracker-status.c:254
+#: ../src/tracker/tracker-status.c:269
 msgid "States"
 msgstr "Durumlar"
 
-#: ../src/tracker/tracker-status.c:295
+#: ../src/tracker/tracker-status.c:310
 msgid "Data Statistics"
 msgstr "Veri İstatistikleri"
 
-#: ../src/tracker/tracker-status.c:301
+#: ../src/tracker/tracker-status.c:317
 msgid "No connection available"
 msgstr "Bağlantı yok"
 
-#: ../src/tracker/tracker-status.c:311
+#: ../src/tracker/tracker-status.c:327
 msgid "Could not get statistics"
 msgstr "İstatistikler alınamadı"
 
-#: ../src/tracker/tracker-status.c:317
+#: ../src/tracker/tracker-status.c:333
 msgid "No statistics were available"
 msgstr "İstatistik kullanılabilir değildi"
 
-#: ../src/tracker/tracker-status.c:330
+#: ../src/tracker/tracker-status.c:346
 msgid "Database is currently empty"
 msgstr "Veritabanı şu anda boş"
 
-#: ../src/tracker/tracker-status.c:407 ../src/tracker/tracker-status.c:430
+#: ../src/tracker/tracker-status.c:424 ../src/tracker/tracker-status.c:447
 msgid "Could not get basic status for Tracker"
 msgstr "Tracker için temel durum alınamadı"
 
-#: ../src/tracker/tracker-status.c:514
+#: ../src/tracker/tracker-status.c:531
 #, c-format
 msgid "Currently indexed"
 msgstr "Şu anda dizinlenen"
 
-#: ../src/tracker/tracker-status.c:517 ../src/tracker/tracker-tag.c:557
+#: ../src/tracker/tracker-status.c:534 ../src/tracker/tracker-tag.c:557
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d dosya"
 
-#: ../src/tracker/tracker-status.c:523
+#: ../src/tracker/tracker-status.c:540
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d klasör"
 
-#: ../src/tracker/tracker-status.c:549
+#: ../src/tracker/tracker-status.c:566
 msgid "Data is still being indexed"
 msgstr "Veri henüz dizinleniyor"
 
-#: ../src/tracker/tracker-status.c:550
+#: ../src/tracker/tracker-status.c:567
 #, c-format
 msgid "Estimated %s left"
 msgstr "Tahmini kalan %s"
 
-#: ../src/tracker/tracker-status.c:554
+#: ../src/tracker/tracker-status.c:571
 msgid "All data miners are idle, indexing complete"
 msgstr "Tüm veri tarayıcıları boşta, dizinleme tamamlandı"
 
@@ -1721,11 +1744,11 @@ msgstr "Etiketsiz"
 msgid "File not indexed or already untagged"
 msgstr "Dosya dizinlenmemiş ya da zaten etiketi kaldırılmış"
 
-#: ../src/tracker/tracker-tag.c:1092
+#: ../src/tracker/tracker-tag.c:1093
 msgid "The --list option is required for --show-files"
 msgstr "--show-files için --list seçeneği gereklidir"
 
-#: ../src/tracker/tracker-tag.c:1094
+#: ../src/tracker/tracker-tag.c:1095
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1733,11 +1756,11 @@ msgstr ""
 "--and-operator seçeneği sadece --list ile birlikte ve etiket başlığı "
 "değişkenleriyle kullanılabilir"
 
-#: ../src/tracker/tracker-tag.c:1096
+#: ../src/tracker/tracker-tag.c:1097
 msgid "Add and delete actions can not be used together"
 msgstr "Ekle ve sil eylemleri birlikte kullanılamaz"
 
-#: ../src/tracker/tracker-tag.c:1098
+#: ../src/tracker/tracker-tag.c:1099
 msgid "The --description option can only be used with --add"
 msgstr "--description seçeneği sadece --add ile birlikte kullanılabilir"
 
@@ -1751,6 +1774,21 @@ msgstr "30 saniye hareketsizlikten sonra kapatmayı devre dışı bırak"
 #: ../src/tracker-writeback/tracker-main.c:98
 msgid "— start the tracker writeback service"
 msgstr "— tracker geri yazma servisini başlat"
+
+#~ msgid "ONTOLOGY"
+#~ msgstr "ONTOLOJİ"
+
+#~ msgid "Unable to retrieve namespace prefixes"
+#~ msgstr "Alan adı ön ekleri alınamıyor"
+
+#~ msgid "No namespace prefixes were returned"
+#~ msgstr "Dönen bir alan adı ön eki yok"
+
+#~ msgid "Could not run SPARQL query"
+#~ msgstr "SPARQL sorgusu çalıştırılamadı"
+
+#~ msgid "Could not call tracker_sparql_cursor_next() on SPARQL query"
+#~ msgstr "SPARQL sorgusunda tracker_sparql_cursor_next() çağrılamadı"
 
 #~ msgid "Max media art width"
 #~ msgstr "Azami ortam resmi genişliği"
@@ -1805,42 +1843,6 @@ msgstr "— tracker geri yazma servisini başlat"
 #~ msgstr ""
 #~ "İndeksleyici, sadece tek bir belgeden kelimelerin azami sayısını "
 #~ "okuyacaktır."
-
-#~ msgid "Enable stemmer"
-#~ msgstr "Kök ayırıcıyı etkinleştir"
-
-#~ msgid ""
-#~ "Simplify the words to their root to provide more results. E.g. 'shelves' "
-#~ "and 'shelf' to 'shel'"
-#~ msgstr ""
-#~ "Daha fazla sonuç sağlamak için, kelimelerin köklerini basitleştirin. Örn. "
-#~ "'shelves' ve 'shelf' kelimeleri, 'shel' olsun"
-
-#~ msgid "Enable unaccent"
-#~ msgstr "Vurgulu harf düzelticiyi etkinleştir"
-
-#~ msgid ""
-#~ "Translate accented characters to the equivalent unaccented. E.g. 'Idéa' "
-#~ "to 'Idea' for improved matching."
-#~ msgstr ""
-#~ "Vurgulu karakterleri, vurgulu olmayan eşdeğerlerine çebir. Örn. 'Idéa' "
-#~ "kelimesini, eşleşmeyi arttırmak için 'Idea' kelimesine çevir."
-
-#~ msgid "Ignore numbers"
-#~ msgstr "Sayıları yoksay"
-
-#~ msgid "If enabled, numbers will not be indexed."
-#~ msgstr "Etkinleştirildiğinde sayılar indekslenmez."
-
-#~ msgid "Ignore stop words"
-#~ msgstr "Durdurma kelimelerini yoksay"
-
-#~ msgid ""
-#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
-#~ "common words like 'the', 'yes', 'no', etc."
-#~ msgstr ""
-#~ "Etkinleştirildiğinde durdurma-kelimelerinde listelenen kelimeler "
-#~ "yoksayılır. Örneğin; 'evet', 'hayır' ve 've' gibi kelimeler."
 
 #~ msgid "Maximum size of journal"
 #~ msgstr "En yüksek günlük boyutu"
