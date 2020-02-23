@@ -1,7 +1,7 @@
 [D-BUS Service]
 Name=org.freedesktop.Tracker3.Miner.Files
-Exec=@libexecdir@/tracker-miner-fs
-SystemdService=tracker-miner-fs.service
+Exec=@libexecdir@/tracker-miner-fs-3
+SystemdService=tracker-miner-fs-3.service
 
 # Miner details needed for tracker-control
 Path=/org/freedesktop/Tracker3/Miner/Files
