@@ -96,8 +96,6 @@ load_extractor_rule (GKeyFile    *key_file,
 		extractors_dir = g_getenv ("TRACKER_EXTRACTORS_DIR");
 		if (G_LIKELY (extractors_dir == NULL)) {
 			extractors_dir = TRACKER_EXTRACTORS_DIR;
-		} else {
-			g_message ("Extractor rules directory is '%s' (set in env)", extractors_dir);
 		}
 
 		tmp = g_build_filename (extractors_dir, module_path, NULL);
@@ -169,8 +167,6 @@ tracker_extract_module_manager_init (void)
 	extractors_dir = g_getenv ("TRACKER_EXTRACTOR_RULES_DIR");
 	if (G_LIKELY (extractors_dir == NULL)) {
 		extractors_dir = TRACKER_EXTRACTOR_RULES_DIR;
-	} else {
-		g_message ("Extractor rules directory is '%s' (set in env)", extractors_dir);
 	}
 
 	dir = g_dir_open (extractors_dir, 0, &error);
