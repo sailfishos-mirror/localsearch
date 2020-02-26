@@ -63,30 +63,6 @@
 #define GST_TAG_CLASSIFICATION "classification"
 #endif
 
-/* Some additional tagreadbin tags (FIXME until they are defined upstream)*/
-#ifndef GST_TAG_CHANNEL
-#define GST_TAG_CHANNEL "channels"
-#endif
-
-#ifndef GST_TAG_RATE
-#define GST_TAG_RATE "rate"
-#endif
-
-#ifndef GST_TAG_WIDTH
-#define GST_TAG_WIDTH "width"
-#endif
-
-#ifndef GST_TAG_HEIGHT
-#define GST_TAG_HEIGHT "height"
-#endif
-
-#ifndef GST_TAG_PIXEL_RATIO
-#define GST_TAG_PIXEL_RATIO "pixel-aspect-ratio"
-#endif
-
-#ifndef GST_TAG_FRAMERATE
-#define GST_TAG_FRAMERATE "framerate"
-#endif
 
 typedef enum {
 	EXTRACT_MIME_AUDIO,
