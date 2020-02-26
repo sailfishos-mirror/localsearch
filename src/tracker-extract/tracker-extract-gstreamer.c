@@ -58,12 +58,6 @@
 /* We wait this long (seconds) for NULL state before freeing */
 #define TRACKER_EXTRACT_GUARD_TIMEOUT 3
 
-/* An additional tag in gstreamer for the content source. Remove when in upstream */
-#ifndef GST_TAG_CLASSIFICATION
-#define GST_TAG_CLASSIFICATION "classification"
-#endif
-
-
 typedef enum {
 	EXTRACT_MIME_AUDIO,
 	EXTRACT_MIME_VIDEO,
@@ -629,8 +623,6 @@ extractor_apply_video_metadata (MetadataExtractor *extractor,
                                 TrackerResource   *performer,
                                 TrackerResource   *composer)
 {
-	set_property_from_gst_tag (video, "dc:source", tag_list, GST_TAG_CLASSIFICATION);
-
 	if (performer) {
 		tracker_resource_set_relation (video, "nmm:leadActor", performer);
 	}
