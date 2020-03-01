@@ -1,17 +1,18 @@
 # tracker ja.po.
-# Copyright (C) 2008,2010,2011 Free Software Foundation, Inc
+# Copyright (C) 2008-2013, 2020 Free Software Foundation, Inc
 # This file is distributed under the same license as the tracker package.
 # Takao Fujiwara <takao.fujiwara@sun.com>, 2008.
-# Takeshi AIHANA <takeshi.aihana@gmail.com>, 2010,2011.
-# Jiro Matsuzawa <jmatsuzawa@gnome.org>, 2013
+# Takeshi AIHANA <takeshi.aihana@gmail.com>, 2010, 2011.
+# Jiro Matsuzawa <jmatsuzawa@gnome.org>, 2013.
+# sicklylife <translation@sicklylife.jp>, 2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker tracker-0.12\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2019-09-21 08:24+0000\n"
-"PO-Revision-Date: 2013-09-22 21:08+0900\n"
-"Last-Translator: Jiro Matsuzawa <jmatsuzawa@gnome.org>\n"
+"PO-Revision-Date: 2020-03-01 23:12+0900\n"
+"Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
 "Language: ja\n"
 "MIME-Version: 1.0\n"
@@ -89,13 +90,10 @@ msgid "Low disk space limit"
 msgstr "ディスクの空き容量の下限"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:10
-#, fuzzy
-#| msgid ""
-#| "Disk space threshold in MB at which to pause indexing, or -1 to disable."
 msgid ""
 "Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
-"ここで指定した空き容量 (単位は MB) を越えるとインデックス化を停止します。-1 "
+"ここで指定した空き容量 (単位は %) を越えるとインデックス化を停止します。-1 "
 "を指定すると停止しなくなります。"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:11
@@ -114,8 +112,6 @@ msgstr ""
 "し、-2 はクローリングを無効にします。"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:13
-#, fuzzy
-#| msgid "Removable devices' data permanence threshold"
 msgid "Removable devices’ data permanence threshold"
 msgstr "リムーバブルデバイスのデータの保存期間"
 
@@ -162,17 +158,13 @@ msgid "Index optical discs"
 msgstr "光学ディスクのインデックス化を有効にするかどうか"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:22
-#, fuzzy
-#| msgid ""
-#| "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-#| "removable devices are not indexed, optical discs won't be either)"
 msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
 msgstr ""
 "TRUE にすると、CD や DVD といった一般的な光学メディアのインデックス化を有効に"
-"します (もしリムーバブルデバイスのインデックス化が無効になっている場合、光学"
-"ディスクのインデックス化も無効になります)。"
+"します (リムーバブルデバイスのインデックス化が無効になっている場合、光学ディ"
+"スクのインデックス化も無効になります)。"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:23
 msgid "Index when running on battery"
@@ -196,12 +188,6 @@ msgid "Directories to index recursively"
 msgstr "再帰的にインデックス化するディレクトリ"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:28
-#, fuzzy
-#| msgid ""
-#| "List of directories to index recursively, Special values include: &amp;"
-#| "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
-#| "PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/xdg/user-dirs."
-#| "defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index recursively, Special values include: &amp;"
 "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
@@ -211,21 +197,16 @@ msgid ""
 msgstr ""
 "子も同時にインデックス化するディレクトリを要素とするリストです (ここで指定で"
 "きる特殊なディレクトリ: &amp;DESKTOP、&amp;DOCUMENTS、&amp;DOWNLOAD、 &amp;"
-"MUSIC、&amp;PICTURES、&amp;PUBLIC_SHARE、&amp;TEMPLATES、&amp;VIDEOS)。詳細"
-"は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照して"
-"ください。"
+"MUSIC、&amp;PICTURES、&amp;PUBLIC_SHARE、&amp;TEMPLATES、&amp;VIDEOS)。\n"
+"\n"
+"詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
+"してください。"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:31
 msgid "Directories to index non-recursively"
 msgstr "再帰的にインデックス化しないディレクトリ"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:32
-#, fuzzy
-#| msgid ""
-#| "List of directories to index without inspecting subfolders, Special "
-#| "values include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, "
-#| "&amp;PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/"
-#| "xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;"
@@ -235,9 +216,10 @@ msgid ""
 msgstr ""
 "子はインデックス化しないディレクトリを要素とするリストです (ここで指定できる"
 "特殊なディレクトリ: &amp;DESKTOP、&amp;DOCUMENTS、&amp;DOWNLOAD、 &amp;"
-"MUSIC、&amp;PICTURES、&amp;PUBLIC_SHARE、&amp;TEMPLATES、&amp;VIDEOS)。詳細"
-"は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照して"
-"ください。"
+"MUSIC、&amp;PICTURES、&amp;PUBLIC_SHARE、&amp;TEMPLATES、&amp;VIDEOS)。\n"
+"\n"
+"詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
+"してください。"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:35
 msgid "Ignored files"
@@ -364,16 +346,14 @@ msgid "Displays version information"
 msgstr "バージョン情報を表示する"
 
 #: ../src/miners/fs/tracker-main.c:540
-#, fuzzy, c-format
-#| msgid "Data object '%s' currently exists"
+#, c-format
 msgid "Data object “%s” currently exists"
-msgstr "現在、'%s' というデータオブジェクトは存在しています"
+msgstr "現在、“%s”というデータオブジェクトは存在しています"
 
 #: ../src/miners/fs/tracker-main.c:541
-#, fuzzy, c-format
-#| msgid "Data object '%s' currently does not exist"
+#, c-format
 msgid "Data object “%s” currently does not exist"
-msgstr "現在、'%s' というデータオブジェクトは存在していません"
+msgstr "現在、“%s”というデータオブジェクトは存在していません"
 
 #: ../src/miners/fs/tracker-main.c:556
 msgid "Directory is eligible to be mined (based on rules)"
@@ -450,10 +430,8 @@ msgstr "メタデータの収集"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/miners/fs/tracker-main.c:793
-#, fuzzy
-#| msgid "- start the tracker indexer"
 msgid "— start the tracker indexer"
-msgstr "- Tracker 用のインデックス生成デーモン"
+msgstr "— Tracker 用のインデックス生成デーモン"
 
 #: ../src/miners/fs/tracker-miner-fs.desktop.in.in.h:1
 msgid "Tracker File System Miner"
@@ -488,10 +466,8 @@ msgstr "タイトルを指定する (--add-feed も同時に指定すること)"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/miners/rss/tracker-main.c:93
-#, fuzzy
-#| msgid "- start the feeds indexer"
 msgid "— start the feeds indexer"
-msgstr "- 配信元のインデックス生成デーモン"
+msgstr "— 配信元のインデックス生成デーモン"
 
 #: ../src/miners/rss/tracker-main.c:127
 msgid "Could not establish a connection to Tracker"
@@ -552,13 +528,10 @@ msgid "MIME"
 msgstr "MIME"
 
 #: ../src/tracker-extract/tracker-main.c:95
-#, fuzzy
-#| msgid ""
-#| "Force a module to be used for extraction (e.g. \"foo\" for \"foo.so\")"
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr ""
-"内部の展開処理として使用するモジュールを指定する (例: \"foo.so\" ならば \"foo"
-"\" と指定する)"
+"内部の展開処理として使用するモジュールを指定する (例: “foo”ならば“foo.so”"
+"と指定する)"
 
 #: ../src/tracker-extract/tracker-main.c:96
 msgid "MODULE"
@@ -580,10 +553,8 @@ msgstr ""
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
 #: ../src/tracker-extract/tracker-main.c:327
-#, fuzzy
-#| msgid "- Extract file meta data"
 msgid "— Extract file meta data"
-msgstr "- ファイルのメタデータを展開する"
+msgstr "— ファイルのメタデータを展開する"
 
 #: ../src/tracker-extract/tracker-main.c:342
 msgid "Filename and mime type must be provided together"
@@ -605,10 +576,8 @@ msgstr "30秒後に終了する機能を無効にする"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/tracker-writeback/tracker-main.c:98
-#, fuzzy
-#| msgid "- start the tracker writeback service"
 msgid "— start the tracker writeback service"
-msgstr "- Tracker のライトバックサービスを起動する"
+msgstr "— Tracker のライトバックサービスを起動する"
 
 #~ msgid "Maximum size of journal"
 #~ msgstr "ジャーナルのサイズ (最大値)"
