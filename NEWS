@@ -1,3 +1,9 @@
+NEW in 2.3.3 - unreleased
+=========================
+
+  * The secure sandbox for tracker-extract now permits clock_nanosleep() calls,
+    fixing crashes on some systems.
+
 NEW in 2.3.2 - 2020-02-18
 =========================
 
