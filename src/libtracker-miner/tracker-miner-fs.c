@@ -802,19 +802,12 @@ fs_finalize (GObject *object)
 		tracker_file_notifier_stop (priv->file_notifier);
 	}
 
-	/* Cancel every pending task */
-	tracker_task_pool_foreach (priv->task_pool,
-	                           task_pool_cancel_foreach,
-	                           NULL);
-	g_object_unref (priv->task_pool);
+	tracker_miner_fs_cancel_all_tasks (TRACKER_MINER_FS (object));
 
 	if (priv->sparql_buffer) {
 		g_object_unref (priv->sparql_buffer);
 	}
 
-	tracker_priority_queue_foreach (priv->items,
-					(GFunc) queue_event_free,
-					NULL);
 	tracker_priority_queue_unref (priv->items);
 
 	g_object_unref (priv->root);
@@ -2534,4 +2527,29 @@ tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
 	}
 
 	return NULL;
+}
+
+/**
+ * tracker_miner_fs_cancel_all_tasks:
+ * @fs: a #TrackerMinerFS
+ *
+ * Cancels all tasks which are in progress.
+ *
+ * Since: 3.0
+ **/
+void
+tracker_miner_fs_cancel_all_tasks (TrackerMinerFS *fs)
+{
+	TrackerMinerFSPrivate *priv;
+
+	priv = fs->priv;
+
+	/* Cancel every pending task */
+	tracker_task_pool_foreach (priv->task_pool,
+	                           task_pool_cancel_foreach,
+	                           NULL);
+
+	tracker_priority_queue_foreach (priv->items,
+	                               (GFunc) queue_event_free,
+	                               NULL);
 }
