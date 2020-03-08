@@ -172,6 +172,6 @@ foreach t: functional_tests
   test(t, python,
     args: [file],
     env: test_env,
-    suite: ['functional'] + test_suite,
+    suite: ['functional'],
     timeout: 120)
 endforeach
