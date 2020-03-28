@@ -20,12 +20,6 @@ stages:
   script:
     # We can build and test tracker-miners against tracker just by building
     # tracker as a submodule.
-    #
-    # Note that this approach doesn't currently work for the functional-tests,
-    # they require the ontologies and domain rules from tracker to be installed
-    # somewhere. It would be nice to improve the functional-tests so that they
-    # will run without depending on any files outside of the build tree. Note
-    # that Tracker is installed on the host here, thanks to `dnf builddep`.
     - su tracker -c '.gitlab-ci/checkout-tracker.sh'
     - su tracker -c 'mkdir build'
     - su tracker -c 'cd build; meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true'
