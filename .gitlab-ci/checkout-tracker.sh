@@ -29,7 +29,7 @@ fi
 
 if [ -z "$tracker_target" ]; then
   tracker_target=$(git branch -r -l origin/$CI_COMMIT_REF_NAME)
-  tracker_target=${tracker_target:-origin/master}
+  tracker_target=${tracker_target:-origin/tracker-2.3}
   echo Using $tracker_target instead
 fi
 
