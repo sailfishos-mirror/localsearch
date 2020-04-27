@@ -2549,7 +2549,6 @@ tracker_miner_fs_cancel_all_tasks (TrackerMinerFS *fs)
 	                           task_pool_cancel_foreach,
 	                           NULL);
 
-	tracker_priority_queue_foreach (priv->items,
-	                               (GFunc) queue_event_free,
-	                               NULL);
+	tracker_priority_queue_clear (priv->items,
+	                              (GFunc) queue_event_free);
 }
