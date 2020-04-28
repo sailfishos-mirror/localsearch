@@ -1387,7 +1387,8 @@ item_remove (TrackerMinerFS *fs,
 	uri = g_file_get_uri (file);
 
 	TRACKER_NOTE (MINER_FS_EVENTS,
-	              g_message ("Removing item: '%s' (Deleted from filesystem or no longer monitored)", uri));
+	              g_message ("Removing item%s: '%s' (Deleted from filesystem or no longer monitored)",
+	                         only_children? " and children" : "", uri));
 
 	g_object_set_qdata (G_OBJECT (file),
 	                    fs->priv->quark_recursive_removal,
@@ -2550,5 +2551,5 @@ tracker_miner_fs_cancel_all_tasks (TrackerMinerFS *fs)
 	                           NULL);
 
 	tracker_priority_queue_clear (priv->items,
-	                              (GFunc) queue_event_free);
+	                              (GDestroyNotify) queue_event_free);
 }

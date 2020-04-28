@@ -1057,6 +1057,7 @@ main (gint argc, gchar *argv[])
 		g_debug ("Waiting for miner-fs to process removals.");
 		g_signal_connect (miner_files, "finished", G_CALLBACK (quit_on_miner_finished_cb), shutdown_loop);
 		g_main_loop_run (shutdown_loop);
+		g_debug ("Finished processing removals.");
 	} else {
 		g_debug ("No removals to process.");
 	}
@@ -1079,7 +1080,7 @@ main (gint argc, gchar *argv[])
 	tracker_sparql_connection_close (sparql_conn);
 	g_object_unref (sparql_conn);
 
-	g_print ("\nOK\n\n");
+	g_debug ("tracker-miner-fs shutdown complete");
 
 	return EXIT_SUCCESS;
 }

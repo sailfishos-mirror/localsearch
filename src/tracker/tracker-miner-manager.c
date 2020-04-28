@@ -443,6 +443,7 @@ miner_files_processed (GDBusConnection *connection,
 	g_variant_iter_init (&iter, files);
 	while ((file_info = g_variant_iter_next_value (&iter))) {
 		g_variant_get (file_info, "(&sbs)", &url, &status, &message);
+		g_message ("!! %s, %i, %s, .. %p", url, status, message, data->manager);
 
 		if (data->manager) {
 			g_signal_emit (data->manager, signals[MINER_FILE_PROCESSED], 0, data->dbus_name, url, status, message);
@@ -558,6 +559,7 @@ miner_manager_initable_init (GInitable     *initable,
 		                                                           data,
 		                                                           NULL);
 
+		g_message ("Subscribed to %s.FilesProcessed signal for %s", TRACKER_MINER_DBUS_INTERFACE, data->dbus_name);
 		data->files_processed_signal = g_dbus_connection_signal_subscribe (priv->connection,
 		                                                                   data->dbus_name,
 		                                                                   TRACKER_MINER_DBUS_INTERFACE,

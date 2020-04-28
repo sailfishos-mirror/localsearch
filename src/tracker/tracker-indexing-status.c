@@ -361,6 +361,8 @@ file_processed_cb (TrackerMinerManager   *miner_manager,
 	GFile *file;
 	TrackerIndexingStatusPrivate *priv;
 
+	g_message ("file-processed: %s, %s, %i, %s", miner, uri, success, message);
+
 	priv = tracker_indexing_status_get_instance_private (status);
 
 	file = g_file_new_for_uri (uri);

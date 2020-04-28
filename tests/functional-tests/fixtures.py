@@ -65,8 +65,11 @@ def tracker_test_main():
         handler_stderr.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
         handler_stdout = logging.StreamHandler(stream=sys.stderr)
         handler_stdout.addFilter(logging.Filter('trackertestutils.dbusdaemon.stdout'))
+        handler_test_fixtures = logging.StreamHandler(stream=sys.stdout)
+        handler_test_fixtures.addFilter(logging.Filter('fixtures'))
         logging.basicConfig(level=logging.INFO,
-                            handlers=[handler_stderr, handler_stdout],
+                            handlers=[handler_stderr, handler_stdout,
+                                      handler_test_fixtures],
                             format='%(message)s')
 
     # Avoid the test process sending itself SIGTERM via the GDBusConnection
@@ -135,7 +138,8 @@ class TrackerMinerTest(ut.TestCase):
 
     def tearDown(self):
         self.sandbox.stop()
-        cfg.remove_monitored_test_dir(self.workdir)
+        #cfg.remove_monitored_test_dir(self.workdir)
+        log.info("DIR AT %s", self.workdir)
 
     def path(self, filename):
         return os.path.join(self.workdir, filename)
@@ -505,22 +509,25 @@ class TrackerCommandLineTestCase(TrackerMinerTest):
     def setUp(self):
         super(TrackerCommandLineTestCase, self).setUp()
 
-        self.env = os.environ.copy()
-        self.env.update(cfg.test_environment(self.workdir))
+        self.extra_env = cfg.test_environment(self.workdir)
 
-        path = self.env.get('PATH', []).split(':')
-        self.env['PATH'] = ':'.join([cfg.cli_dir()] + path)
+        path = os.environ.get('PATH', []).split(':')
+        self.extra_env['PATH'] = ':'.join([cfg.cli_dir()] + path)
 
-        self.env['DBUS_SESSION_BUS_ADDRESS'] = self.sandbox.daemon.address
+        self.extra_env['DBUS_SESSION_BUS_ADDRESS'] = self.sandbox.daemon.address
 
-        self.tracker_cli = shutil.which('tracker3', path=self.env['PATH'])
+        self.tracker_cli = shutil.which('tracker3', path=self.extra_env['PATH'])
 
     def run_cli(self, command):
         command = [self.tracker_cli] + [str(c) for c in command]
 
-        log.info("Running: %s", ' '.join(command))
+        log.info("env %s %s",
+                 ' '.join('%s=%s' % (k,v) for k,v in self.extra_env.items()),
+                 ' '.join(command))
+
+        env = os.environ.copy().update(self.extra_env)
         result = subprocess.run(command, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE, env=self.env)
+                                stderr=subprocess.PIPE, env=env)
 
         if len(result.stdout) > 0:
             log.debug("stdout: %s", result.stdout.decode('utf-8'))

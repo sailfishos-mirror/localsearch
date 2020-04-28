@@ -46,6 +46,15 @@ class MinerOnDemandTest(fixtures.TrackerMinerTest):
         testfile.write_text("Hello, I'm a test file.")
         return testfile
 
+    def create_test_directory_tree(self):
+        testdir = pathlib.Path(self.workdir).joinpath('test-not-monitored')
+        for dirname in ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']:
+            subdir = testdir.joinpath(dirname)
+            subdir.mkdir(parents=True)
+            subdir_file = subdir.joinpath('content.txt')
+            subdir_file.write_text("Hello, I'm a test file in a subdirectory")
+        return testdir
+
     def test_index_file_basic(self):
         """
         Test on-demand indexing of a file.
@@ -115,6 +124,33 @@ class MinerOnDemandTest(fixtures.TrackerMinerTest):
 
         with self.miner_fs.await_files_processed(expected):
             self.miner_fs.index_file(testdir.as_uri())
+
+    def test_index_for_process_miner_shutdown(self):
+        """
+        Test on-demand indexing linked to a D-Bus connection.
+
+        Similar to test_index_for_process, only this tests what happens in the
+        unusual case that the tracker-miner-fs process terminates before the
+        process that triggered indexing. Data should be removed from the
+        store in the same way.
+        """
+
+        testdir = self.create_test_directory_tree()
+
+        process_conn = self.sandbox.daemon.create_connection()
+        process_miner_fs = helpers.MinerFsHelper(process_conn)
+
+        with self.await_document_inserted(testdir.joinpath('g/content.txt')) as resource:
+            process_miner_fs.index_file_for_process(testdir.as_uri())
+
+        self.assertFileIndexed(testdir.joinpath('g/content.txt'))
+
+        self.sandbox.stop_miner_fs()
+
+        # This query should cause the miner-fs to restart, and the content
+        # should now be gone.
+        log.info("Checking that removal was processed.")
+        self.assertFileNotIndexed(testdir.joinpath('g/content.txt'))
 
 
 if __name__ == "__main__":
