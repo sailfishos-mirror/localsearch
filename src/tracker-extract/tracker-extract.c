@@ -557,6 +557,8 @@ dispatch_task_cb (TrackerExtractTask *task)
 			                     "No mimetype extractor handlers for uri:'%s' and mime:'%s'",
 			                     task->file, task->mimetype);
 		}
+
+		task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
 	}
 
 	if (error) {
@@ -565,8 +567,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 
 		return FALSE;
 	}
-
-	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
 
 	async_queue = g_hash_table_lookup (priv->single_thread_extractors,
 	                                   task->module);
