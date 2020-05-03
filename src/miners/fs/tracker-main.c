@@ -405,8 +405,8 @@ miner_start (TrackerMiner  *miner,
 		return;
 	}
 
-	g_debug ("Performing initial sleep of %d seconds",
-	         initial_sleep);
+	g_message ("Performing initial sleep of %d seconds",
+	           initial_sleep);
 	miners_timeout_id = g_timeout_add_seconds (initial_sleep,
 	                                           miner_start_idle_cb,
 	                                           miner);
