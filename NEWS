@@ -1,3 +1,26 @@
+NEW in 2.99.1 - 2020-05-03
+==========================
+
+  Highlighted updates compared to 2.x:
+  ------------------------------------
+  * tracker-miner-fs/tracker-extract and tracker-miner-rss data are
+    split into 2 endpoints:
+    - org.freedesktop.Tracker3.Miner.Files
+    - org.freedesktop.Tracker3.Miner.RSS
+  * tracker-miner-fs data is split into different graphs:
+    - tracker:FileSystem
+    - tracker:Audio
+    - tracker:Video
+    - tracker:Documents
+    - tracker:Software
+  * Full split between file and content elements. 1:1, 1:N, M:1 and
+    M:N are allowed combinations of those, they relate to each other
+    through the nie:isStoredAs and nie:interpretedAs properties.
+  * Parallel installable to tracker-miners 2.x
+  * Better, more tests
+  * Reincorporated libtracker-miner and libtracker-control code.
+    These are no longer for public consumption
+
 NEW in 2.3.0 - 2019-09-09
 =========================
 
