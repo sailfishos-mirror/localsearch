@@ -55,6 +55,10 @@ struct TrackerWritebackClass {
 	                              TrackerSparqlConnection  *connection,
 	                              GCancellable             *cancellable,
 	                              GError                  **error);
+	gboolean (* write_metadata)  (TrackerWriteback         *writeback,
+	                              TrackerResource          *resource,
+	                              GCancellable             *cancellable,
+	                              GError                  **error);
 };
 
 struct TrackerWritebackModule {
