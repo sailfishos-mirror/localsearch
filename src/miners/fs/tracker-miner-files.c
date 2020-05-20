@@ -94,9 +94,7 @@ struct TrackerMinerFilesPrivate {
 
 	gboolean low_battery_pause;
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 	TrackerPower *power;
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 	gulong finished_handler;
 
 	GDBusConnection *connection;
@@ -169,7 +167,6 @@ static void        mount_point_removed_cb               (TrackerStorage       *s
                                                          const gchar          *uuid,
                                                          const gchar          *mount_point,
                                                          gpointer              user_data);
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 static void        check_battery_status                 (TrackerMinerFiles    *fs);
 static void        battery_status_cb                    (GObject              *object,
                                                          GParamSpec           *pspec,
@@ -177,7 +174,6 @@ static void        battery_status_cb                    (GObject              *o
 static void        index_on_battery_cb                  (GObject    *object,
                                                          GParamSpec *pspec,
                                                          gpointer    user_data);
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 static void        init_mount_points                    (TrackerMinerFiles    *miner);
 static void        init_stale_volume_removal            (TrackerMinerFiles    *miner);
 static void        disk_space_check_start               (TrackerMinerFiles    *mf);
@@ -489,7 +485,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	                  G_CALLBACK (mount_point_removed_cb),
 	                  mf);
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 	priv->power = tracker_power_new ();
 
 	if (priv->power) {
@@ -500,7 +495,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 		                  G_CALLBACK (battery_status_cb),
 		                  mf);
 	}
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 
 	priv->finished_handler = g_signal_connect_after (mf, "finished",
 	                                                 G_CALLBACK (miner_finished_cb),
@@ -632,9 +626,7 @@ miner_files_initable_init (GInitable     *initable,
 		mounts = g_slist_concat (mounts, m);
 	}
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 	check_battery_status (mf);
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from config (IndexSingleDirectory)"));
 
@@ -808,17 +800,12 @@ miner_files_initable_init (GInitable     *initable,
 	g_signal_connect (mf->private->config, "notify::removable-days-threshold",
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  mf);
-
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
-
 	g_signal_connect (mf->private->config, "notify::index-on-battery",
 	                  G_CALLBACK (index_on_battery_cb),
 	                  mf);
 	g_signal_connect (mf->private->config, "notify::index-on-battery-first-time",
 	                  G_CALLBACK (index_on_battery_cb),
 	                  mf);
-
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 
 	g_slist_foreach (mounts, (GFunc) g_free, NULL);
 	g_slist_free (mounts);
@@ -921,11 +908,7 @@ miner_files_finalize (GObject *object)
 		g_slist_free (priv->index_single_directories);
 	}
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
-	if (priv->power) {
-		g_object_unref (priv->power);
-	}
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
+	g_clear_object (&priv->power);
 
 	tracker_domain_ontology_unref (priv->domain_ontology);
 
@@ -1589,8 +1572,6 @@ mount_point_added_cb (TrackerStorage *storage,
 	g_free (urn);
 }
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
-
 static void
 set_up_throttle (TrackerMinerFiles *mf,
                  gboolean           enable)
@@ -1693,8 +1674,6 @@ index_on_battery_cb (GObject    *object,
 	check_battery_status (mf);
 }
 
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
-
 /* Called when mining has finished the first time */
 static void
 miner_finished_cb (TrackerMinerFS *fs,
@@ -1719,9 +1698,7 @@ miner_finished_cb (TrackerMinerFS *fs,
 		mf->private->finished_handler = 0;
 	}
 
-#if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 	check_battery_status (mf);
-#endif /* defined(HAVE_UPOWER) || defined(HAVE_HAL) */
 }
 
 static void
