@@ -33,9 +33,9 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         TEST_VALUE = prop.replace(":", "") + "test"
 
         self.writeback_data({
-            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type': GLib.Variant('s', 'http://tracker.api.gnome.org/ontology/v3/nfo#Audio'),
-            'http://tracker.api.gnome.org/ontology/v3/nie#isStoredAs': GLib.Variant('s', path.as_uri()),
-            'http://tracker.api.gnome.org/ontology/v3/nie#title': GLib.Variant('s', TEST_VALUE),
+            'rdf:type': GLib.Variant('s', 'nfo:Audio'),
+            'nie:isStoredAs': GLib.Variant('s', path.as_uri()),
+            'nie:title': GLib.Variant('s', TEST_VALUE),
         })
 
         self.wait_for_file_change(path, initial_mtime)

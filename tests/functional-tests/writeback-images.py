@@ -54,8 +54,8 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
 
         TEST_VALUE = prop.replace(":", "") + "test"
         self.writeback_data({
-            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type': GLib.Variant('s', 'http://tracker.api.gnome.org/ontology/v3/nfo#Image'),
-            'http://tracker.api.gnome.org/ontology/v3/nie#isStoredAs': GLib.Variant('s', path.as_uri()),
+            'rdf:type': GLib.Variant('s', 'nfo:Image'),
+            'nie:isStoredAs': GLib.Variant('s', path.as_uri()),
             prop: GLib.Variant('s', TEST_VALUE),
         })
 
@@ -93,16 +93,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # JPEG test
 
     def test_001_jpeg_title(self):
-        self.__writeback_test(
-            "writeback-test-1.jpeg", "image/jpeg",
-            "http://tracker.api.gnome.org/ontology/v3/nie#title",
-            "nie:title")
+        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:title")
 
     def test_002_jpeg_description(self):
-        self.__writeback_test(
-            "writeback-test-1.jpeg", "image/jpeg",
-            "http://tracker.api.gnome.org/ontology/v3/nie#description",
-            "nie:description")
+        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:description")
 
     # def test_003_jpeg_keyword (self):
     #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
@@ -116,16 +110,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # TIFF tests
 
     def test_011_tiff_title(self):
-        self.__writeback_test(
-            "writeback-test-2.tif", "image/tiff",
-            "http://tracker.api.gnome.org/ontology/v3/nie#title",
-            "nie:title")
+        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:title")
 
     def test_012_tiff_description(self):
-        self.__writeback_test(
-            "writeback-test-2.tif", "image/tiff",
-            "http://tracker.api.gnome.org/ontology/v3/nie#description",
-            "nie:description")
+        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:description")
 
     # def test_013_tiff_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
@@ -139,16 +127,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # PNG tests
 
     def test_021_png_title(self):
-        self.__writeback_test(
-            "writeback-test-4.png", "image/png",
-            "http://tracker.api.gnome.org/ontology/v3/nie#title",
-            "nie:title")
+        self.__writeback_test("writeback-test-4.png", "image/png", "nie:title")
 
     def test_022_png_description(self):
-        self.__writeback_test(
-            "writeback-test-4.png", "image/png",
-            "http://tracker.api.gnome.org/ontology/v3/nie#description",
-            "nie:description")
+        self.__writeback_test("writeback-test-4.png", "image/png", "nie:description")
 
     # def test_023_png_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-4.png"
