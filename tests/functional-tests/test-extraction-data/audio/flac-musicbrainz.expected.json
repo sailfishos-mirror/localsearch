@@ -47,10 +47,10 @@
             "@type": "nmm:MusicAlbumDisc",
             "nmm:setNumber": 1
         },
-        "nmm:performer": {
-            "@id": "urn:artist:i%20am%20performer1",
+        "nmm:artist": {
+            "@id": "urn:artist:my%20artist",
             "@type": "nmm:Artist",
-            "nmm:artistName": "i am performer1",
+            "nmm:artistName": "my artist",
             "tracker:hasExternalReference": [
                 {
                     "@id": "https://musicbrainz.org/artist/789-feg-7854",
@@ -59,6 +59,11 @@
                     "tracker:referenceIdentifier": "789-feg-7854"
                 }
             ]
+        },
+        "nmm:performer": {
+            "@id": "urn:artist:i%20am%20performer1",
+            "@type": "nmm:Artist",
+            "nmm:artistName": "i am performer1",
         },
         "tracker:hasExternalReference": [
             {
