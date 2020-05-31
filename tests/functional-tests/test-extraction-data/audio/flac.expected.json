@@ -42,9 +42,9 @@
             "nmm:setNumber": 1
         },
         "nmm:performer": {
-            "@id": "urn:artist:my%20artist",
+            "@id": "urn:artist:i%20am%20performer1",
             "@type": "nmm:Artist",
-            "nmm:artistName": "my artist",
+            "nmm:artistName": "i am performer1",
             "tracker:hasExternalReference": [
                 {
                     "@id": "https://musicbrainz.org/artist/789-feg-7854",
