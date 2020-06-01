@@ -1270,7 +1270,7 @@ on_signal_gtask_complete (GObject      *source,
 	task = tracker_task_pool_find (fs->priv->task_pool, file);
 	g_assert (task != NULL);
 
-	ctxt = tracker_task_get_data (task);
+	ctxt = g_task_get_task_data (G_TASK (res));
 	uri = g_file_get_uri (file);
 
 	if (error) {
@@ -1317,13 +1317,6 @@ on_signal_gtask_complete (GObject      *source,
 		}
 	}
 
-	/* Last reference is kept by the pool, removing the task from
-	 * the pool cleans up the task too!
-	 *
-	 * NOTE that calling this any earlier actually causes invalid
-	 * reads because the task frees up the
-	 * UpdateProcessingTaskContext and GFile.
-	 */
 	tracker_task_pool_remove (fs->priv->task_pool, task);
 
 	if (tracker_miner_fs_has_items_to_process (fs) == FALSE &&
@@ -1359,16 +1352,18 @@ item_add_or_update (TrackerMinerFS *fs,
 	ctxt = update_processing_task_context_new (TRACKER_MINER (fs),
 	                                           priority,
 	                                           cancellable);
-	task = tracker_task_new (file, ctxt,
-	                         (GDestroyNotify) update_processing_task_context_free);
-
-	tracker_task_pool_add (priv->task_pool, task);
-	tracker_task_unref (task);
 
 	/* Call ::process-file to see if we handle this resource or not */
 	uri = g_file_get_uri (file);
 
 	gtask = g_task_new (fs, ctxt->cancellable, on_signal_gtask_complete, file);
+	g_task_set_task_data (gtask, ctxt,
+	                      (GDestroyNotify) update_processing_task_context_free);
+
+	task = tracker_task_new (file, g_object_ref (gtask), g_object_unref);
+
+	tracker_task_pool_add (priv->task_pool, task);
+	tracker_task_unref (task);
 
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
@@ -2238,8 +2233,10 @@ task_pool_cancel_foreach (gpointer data,
 	GFile *file = user_data;
 	GFile *task_file;
 	UpdateProcessingTaskContext *ctxt;
+	GTask *gtask;
 
-	ctxt = tracker_task_get_data (task);
+	gtask = tracker_task_get_data (task);
+	ctxt = g_task_get_task_data (gtask);
 	task_file = tracker_task_get_file (task);
 
 	if (ctxt &&
