@@ -6,6 +6,13 @@
     },
     "metadata": {
         "@type": "nmm:MusicPiece",
-        "nie:title": "song3"
+        "nie:title": "song3",
+        "nmm:performer" : [
+            {
+                "@id" : "urn:artist:drummer",
+                "@type" : "nmm:Artist",
+                "nmm:artistName" : "drummer"
+            }
+        ]
     }
 }

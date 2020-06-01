@@ -27,6 +27,18 @@
                 }
             ]
         },
+        "nmm:performer": [
+            {
+                "@id": "urn:artist:harpist",
+                "@type": "nmm:Artist",
+                "nmm:artistName": "harpist"
+            },
+            {
+                "@id": "urn:artist:violinist",
+                "@type": "nmm:Artist",
+                "nmm:artistName": "violinist"
+            }
+        ],
         "nmm:musicAlbum": {
             "@id": "urn:album:Now:Anna%20Abreu",
             "@type": "nmm:MusicAlbum",
