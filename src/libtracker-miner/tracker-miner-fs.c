@@ -158,15 +158,6 @@ struct _TrackerMinerFSPrivate {
 };
 
 typedef enum {
-	QUEUE_NONE,
-	QUEUE_CREATED,
-	QUEUE_UPDATED,
-	QUEUE_DELETED,
-	QUEUE_MOVED,
-	QUEUE_WAIT,
-} QueueState;
-
-typedef enum {
 	QUEUE_ACTION_NONE           = 0,
 	QUEUE_ACTION_DELETE_FIRST   = 1 << 0,
 	QUEUE_ACTION_DELETE_SECOND  = 1 << 1,
