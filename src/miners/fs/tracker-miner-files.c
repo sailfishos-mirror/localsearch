@@ -2435,6 +2435,7 @@ process_file_cb (GObject      *object,
 		                                                      graph ?
 		                                                      graph :
 		                                                      DEFAULT_GRAPH);
+		g_object_unref (element_resource);
 	}
 
 	sparql_str = g_strdup_printf ("%s %s %s %s %s",
