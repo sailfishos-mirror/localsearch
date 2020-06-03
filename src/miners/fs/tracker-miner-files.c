@@ -773,6 +773,8 @@ miner_files_finalize (GObject *object)
 
 	disk_space_check_stop (TRACKER_MINER_FILES (object));
 
+	g_slist_free_full (mf->private->application_dirs, g_object_unref);
+
 	if (priv->index_recursive_directories) {
 		g_slist_foreach (priv->index_recursive_directories, (GFunc) g_free, NULL);
 		g_slist_free (priv->index_recursive_directories);
