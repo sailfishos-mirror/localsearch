@@ -2221,8 +2221,9 @@ miner_files_create_information_element (const gchar *uri,
 	tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
 
 	/* Laying the link between the IE and the DO */
-	tracker_resource_add_relation (resource, "nie:isStoredAs", file_resource);
-	tracker_resource_add_relation (file_resource, "nie:interpretedAs", resource);
+	tracker_resource_add_take_relation (resource, "nie:isStoredAs", file_resource);
+	tracker_resource_add_uri (file_resource, "nie:interpretedAs",
+				  tracker_resource_get_identifier (resource));
 
 	while (rdf_types[i]) {
 		tracker_resource_add_uri (resource, "rdf:type", rdf_types[i]);
