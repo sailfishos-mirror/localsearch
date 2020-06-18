@@ -254,7 +254,6 @@ delete_unbound_messages (TrackerMinerRSS *miner)
 	                                        "                mfo:enclosureList ?encl ."
 	                                        "              FILTER(!BOUND(nmo:communicationChannel(?msg)))"
 	                                        "}",
-	                                        G_PRIORITY_DEFAULT,
 	                                        NULL, NULL, NULL);
 }
 
@@ -315,7 +314,7 @@ delete_message_channels (TrackerMinerRSS *miner,
 	                        "}", ids_str->str);
 
 	tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
-	                                        query->str, G_PRIORITY_DEFAULT,
+	                                        query->str,
 	                                        NULL,
 	                                        delete_message_channels_cb,
 	                                        miner);
@@ -490,7 +489,6 @@ feed_channel_changed_timeout_cb (gpointer user_data)
 
 	tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (fcud->miner)),
 	                                        tracker_resource_print_sparql_update (resource, NULL, NULL),
-	                                        G_PRIORITY_DEFAULT,
 	                                        fcud->cancellable,
 	                                        feed_channel_change_updated_time_cb,
 	                                        fcud);
@@ -884,7 +882,7 @@ check_feed_items_cb (GObject      *source_object,
 	tracker_sparql_connection_update_array_async (tracker_miner_get_connection (TRACKER_MINER (data->miner)),
 	                                              (gchar **) array->pdata,
 	                                              array->len,
-	                                              G_PRIORITY_DEFAULT, NULL,
+	                                              NULL,
 	                                              feed_channel_content_update_cb,
 	                                              array);
 	feed_channel_change_updated_time (data->miner, data->channel);
@@ -991,7 +989,7 @@ update_feed_channel_info (TrackerMinerRSS *miner,
 	g_string_append (update, "}");
 
 	tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
-	                                        update->str, G_PRIORITY_DEFAULT,
+	                                        update->str,
 	                                        NULL, NULL, NULL);
 	g_string_free (update, TRUE);
 }

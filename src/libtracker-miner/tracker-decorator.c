@@ -414,7 +414,6 @@ decorator_commit_info (TrackerDecorator *decorator)
 	tracker_sparql_connection_update_array_async (sparql_conn,
 	                                              (gchar **) array->pdata,
 	                                              array->len,
-	                                              G_PRIORITY_DEFAULT,
 						      priv->cancellable,
 	                                              decorator_commit_cb,
 	                                              decorator);

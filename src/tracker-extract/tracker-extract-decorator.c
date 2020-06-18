@@ -620,7 +620,7 @@ decorator_ignore_file (GFile    *file,
 	                         graph,
 	                         uri);
 
-	tracker_sparql_connection_update (conn, query, G_PRIORITY_DEFAULT, NULL, &error);
+	tracker_sparql_connection_update (conn, query, NULL, &error);
 
 	if (error) {
 		g_warning ("Failed to update ignored file '%s': %s",
