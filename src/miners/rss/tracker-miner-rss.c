@@ -173,7 +173,7 @@ tracker_miner_rss_constructed (GObject *object)
 	priv = TRACKER_MINER_RSS_GET_PRIVATE (object);
 	connection = tracker_miner_get_connection (TRACKER_MINER (object));
 
-	priv->notifier = tracker_sparql_connection_create_notifier (connection, 0);
+	priv->notifier = tracker_sparql_connection_create_notifier (connection);
 	g_signal_connect (priv->notifier, "events",
 	                  G_CALLBACK (notifier_events_cb), object);
 }
