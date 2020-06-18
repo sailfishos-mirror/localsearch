@@ -68,7 +68,6 @@ struct _SparqlUpdate {
 
 struct _TrackerDecoratorPrivate {
 	TrackerNotifier *notifier;
-	gchar *data_source;
 
 	GArray *classes; /* Array of ClassInfo */
 	gchar **class_names;
@@ -101,8 +100,7 @@ struct _TrackerDecoratorPrivate {
 };
 
 enum {
-	PROP_DATA_SOURCE = 1,
-	PROP_CLASS_NAMES,
+	PROP_CLASS_NAMES = 1,
 	PROP_COMMIT_BATCH_SIZE,
 	PROP_PRIORITY_RDF_TYPES,
 };
@@ -853,9 +851,6 @@ tracker_decorator_get_property (GObject    *object,
 	priv = TRACKER_DECORATOR (object)->priv;
 
 	switch (param_id) {
-	case PROP_DATA_SOURCE:
-		g_value_set_string (value, priv->data_source);
-		break;
 	case PROP_CLASS_NAMES:
 		g_value_set_boxed (value, priv->class_names);
 		break;
@@ -911,9 +906,6 @@ tracker_decorator_set_property (GObject      *object,
 	priv = decorator->priv;
 
 	switch (param_id) {
-	case PROP_DATA_SOURCE:
-		priv->data_source = g_value_dup_string (value);
-		break;
 	case PROP_CLASS_NAMES:
 		decorator_set_classes (decorator, g_value_get_boxed (value));
 		break;
@@ -1002,17 +994,6 @@ tracker_decorator_initable_iface_init (GInitableIface *iface)
 }
 
 static void
-tracker_decorator_constructed (GObject *object)
-{
-	TrackerDecoratorPrivate *priv;
-
-	G_OBJECT_CLASS (tracker_decorator_parent_class)->constructed (object);
-
-	priv = TRACKER_DECORATOR (object)->priv;
-	g_assert (priv->data_source);
-}
-
-static void
 tracker_decorator_finalize (GObject *object)
 {
 	TrackerDecoratorPrivate *priv;
@@ -1044,7 +1025,6 @@ tracker_decorator_finalize (GObject *object)
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
 	g_sequence_free (priv->blacklist_items);
-	g_free (priv->data_source);
 	g_timer_destroy (priv->timer);
 
 	G_OBJECT_CLASS (tracker_decorator_parent_class)->finalize (object);
@@ -1101,7 +1081,6 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 
 	object_class->get_property = tracker_decorator_get_property;
 	object_class->set_property = tracker_decorator_set_property;
-	object_class->constructed = tracker_decorator_constructed;
 	object_class->finalize = tracker_decorator_finalize;
 
 	miner_class->paused = tracker_decorator_paused;
@@ -1109,15 +1088,6 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 	miner_class->started = tracker_decorator_started;
 	miner_class->stopped = tracker_decorator_stopped;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_DATA_SOURCE,
-	                                 g_param_spec_string ("data-source",
-	                                                      "Data source URN",
-	                                                      "nie:DataSource to use in this decorator",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_CLASS_NAMES,
 	                                 g_param_spec_boxed ("class-names",
@@ -1202,29 +1172,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	g_queue_init (&priv->next_elem_queue);
 	g_queue_init (&priv->item_cache);
 	priv->tasks = g_hash_table_new (NULL, NULL);
-}
-
-/**
- * tracker_decorator_get_data_source:
- * @decorator: a #TrackerDecorator.
- *
- * The unique string identifying this #TrackerDecorator that has
- * extracted the extended metadata. This is essentially an identifier
- * so it's clear WHO has extracted this extended metadata.
- *
- * Returns: a const gchar* or #NULL if an error happened.
- *
- * Since: 0.18
- **/
-const gchar *
-tracker_decorator_get_data_source (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
-
-	priv = decorator->priv;
-	return priv->data_source;
 }
 
 /**
