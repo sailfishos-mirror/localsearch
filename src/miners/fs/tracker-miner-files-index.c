@@ -32,10 +32,9 @@ static const gchar introspection_xml[] =
   "  <interface name='org.freedesktop.Tracker3.Miner.Files.Index'>"
   "    <method name='IndexFile'>"
   "      <arg type='s' name='file_uri' direction='in' />"
+  "      <arg type='as' name='graphs' direction='in' />"
   "    </method>"
-  "    <method name='IndexFileForProcess'>"
-  "      <arg type='s' name='file_uri' direction='in' />"
-  "    </method>"
+  "    <property name='Graphs' type='as' access='read' />"
   "  </interface>"
   "</node>";
 
@@ -45,13 +44,6 @@ static const gchar introspection_xml[] =
  * locations.
  */
 #undef REQUIRE_LOCATION_IN_CONFIG
-
-typedef struct {
-	TrackerDBusRequest *request;
-	GDBusMethodInvocation *invocation;
-	TrackerSparqlConnection *connection;
-	TrackerMinerFiles *miner_files;
-} MimeTypesData;
 
 typedef struct {
 	TrackerMinerFiles *files_miner;
@@ -213,10 +205,11 @@ handle_method_call_index_file (TrackerMinerFilesIndex *miner,
 	gboolean do_checks = FALSE;
 	GError *internal_error;
 	const gchar *file_uri;
+	const gchar * const *graphs;
 
 	priv = TRACKER_MINER_FILES_INDEX_GET_PRIVATE (miner);
 
-	g_variant_get (parameters, "(&s)", &file_uri);
+	g_variant_get (parameters, "(&s^a&s)", &file_uri, &graphs);
 
 	tracker_gdbus_async_return_if_fail (file_uri != NULL, invocation);
 
@@ -329,8 +322,6 @@ handle_method_call (GDBusConnection       *connection,
 	tracker_gdbus_async_return_if_fail (TRACKER_IS_MINER_FILES_INDEX (miner), invocation);
 
 	if (g_strcmp0 (method_name, "IndexFile") == 0) {
-		handle_method_call_index_file (miner, invocation, parameters, FALSE);
-	} else if (g_strcmp0 (method_name, "IndexFileForProcess") == 0) {
 		handle_method_call_index_file (miner, invocation, parameters, TRUE);
 	} else {
 		g_assert_not_reached ();
