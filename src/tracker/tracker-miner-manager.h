@@ -140,18 +140,6 @@ void                 tracker_miner_manager_index_file_async    (TrackerMinerMana
 gboolean             tracker_miner_manager_index_file_finish   (TrackerMinerManager  *manager,
                                                                 GAsyncResult         *result,
                                                                 GError              **error);
-gboolean             tracker_miner_manager_index_file_for_process        (TrackerMinerManager  *manager,
-                                                                          GFile                *file,
-                                                                          GCancellable         *cancellable,
-                                                                          GError              **error);
-void                 tracker_miner_manager_index_file_for_process_async  (TrackerMinerManager  *manager,
-                                                                          GFile                *file,
-                                                                          GCancellable         *cancellable,
-                                                                          GAsyncReadyCallback   callback,
-                                                                          gpointer              user_data);
-gboolean             tracker_miner_manager_index_file_for_process_finish (TrackerMinerManager  *manager,
-                                                                          GAsyncResult         *result,
-                                                                          GError              **error);
 
 G_END_DECLS
 
