@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-03-05 21:59+0000\n"
-"PO-Revision-Date: 2020-03-06 17:32+0200\n"
+"POT-Creation-Date: 2020-06-21 09:40+0000\n"
+"PO-Revision-Date: 2020-06-21 12:48+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.03.70\n"
+"X-Generator: Lokalize 20.07.70\n"
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:1
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:1
@@ -152,7 +152,7 @@ msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
 "Встановіть значення «true», щоб увімкнути індексування змонтованих "
-"директорій на знімних пристроях."
+"каталогів на знімних пристроях."
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:21
 msgid "Index optical discs"
@@ -188,7 +188,7 @@ msgstr ""
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:27
 msgid "Directories to index recursively"
-msgstr "Директорії для рекурсивного індексування"
+msgstr "Каталоги для рекурсивного індексування"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:28
 msgid ""
@@ -206,7 +206,7 @@ msgstr ""
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:31
 msgid "Directories to index non-recursively"
-msgstr "Директорії, індексовані нерекурсивно"
+msgstr "Каталоги для нерекурсивного індексування"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:32
 msgid ""
@@ -216,7 +216,7 @@ msgid ""
 "\n"
 "See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgstr ""
-"Перелік каталогів, індексованих без урахування вкладених директорій. "
+"Перелік каталогів, індексованих без урахування вкладених каталогів. "
 "Спеціальні значення: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;"
 "MUSIC, &amp;PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS.\n"
 "\n"
@@ -232,20 +232,20 @@ msgstr "Перелік ігнорованих файлових шаблонів"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:37
 msgid "Ignored directories"
-msgstr "Ігноровані директорії"
+msgstr "Ігноровані каталоги"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:38
 msgid "List of directories to avoid"
-msgstr "Перелік ігнорованих директорій"
+msgstr "Перелік ігнорованих каталогів"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
 msgid "Ignored directories with content"
-msgstr "Ігноровані директорії з вмістом"
+msgstr "Ігноровані каталоги з вмістом"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-msgid "Avoid any directory containing a file blacklisted here"
-msgstr ""
-"Не обробляти директорії, що містять файли з вказаного тут «чорного» списку"
+#| msgid "Avoid any directory containing a file blacklisted here"
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr "Не обробляти каталоги, що містять файли з вказаного тут списку"
 
 #: ../src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
@@ -581,6 +581,5 @@ msgstr "Не вимикати після 30 секунд простоюванн�
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: ../src/tracker-writeback/tracker-main.c:98
-#| msgid "— start the tracker indexer"
 msgid "— start the tracker writeback service"
 msgstr "— запустити службу зворотного запису tracker"
