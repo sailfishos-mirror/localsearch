@@ -50,6 +50,13 @@ enum {
 	PROP_FILES_MINER
 };
 
+enum {
+	CLOSE,
+	N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = { 0 };
+
 #define TRACKER_MINER_FILES_INDEX_GET_PRIVATE(o) (tracker_miner_files_index_get_instance_private (TRACKER_MINER_FILES_INDEX (o)))
 
 static void     index_finalize            (GObject              *object);
@@ -95,6 +102,13 @@ tracker_miner_files_index_class_init (TrackerMinerFilesIndexClass *klass)
 	object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = index_finalize;
+
+	signals[CLOSE] =
+		g_signal_new ("close",
+		              G_OBJECT_CLASS_TYPE (object_class),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL, NULL,
+		              G_TYPE_NONE, 0);
 }
 
 static void
@@ -185,6 +199,9 @@ peer_listener_unwatch_file (TrackerMinerFilesPeerListener *listener,
 	}
 
 	update_indexed_files (index);
+
+	if (priv->indexed_files->len == 0)
+		g_signal_emit (index, signals[CLOSE], 0);
 }
 
 static void
