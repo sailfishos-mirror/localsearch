@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-05-21 21:10+0000\n"
-"PO-Revision-Date: 2020-05-24 15:24+0200\n"
+"POT-Creation-Date: 2020-06-21 10:24+0000\n"
+"PO-Revision-Date: 2020-06-21 12:27+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -265,7 +265,7 @@ msgid "Ignored directories with content"
 msgstr "Ignorowane katalogi z zawartością"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
-msgid "Avoid any directory containing a file blacklisted here"
+msgid "Avoid any directory containing a file blocklisted here"
 msgstr ""
 "Unikanie katalogów zawierających plik umieszczony na tej liście blokowania"
 
@@ -382,86 +382,86 @@ msgstr "Działa dla podanej ontologii domeny"
 msgid "Displays version information"
 msgstr "Wyświetla informacje o wersji"
 
-#: src/miners/fs/tracker-main.c:550
+#: src/miners/fs/tracker-main.c:553
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Obiekt danych „%s” obecnie istnieje"
 
-#: src/miners/fs/tracker-main.c:551
+#: src/miners/fs/tracker-main.c:554
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Obiekt danych „%s” obecnie nie istnieje"
 
-#: src/miners/fs/tracker-main.c:566
+#: src/miners/fs/tracker-main.c:569
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Katalog nadaje się do przeszukiwania (na podstawie reguł)"
 
-#: src/miners/fs/tracker-main.c:567
+#: src/miners/fs/tracker-main.c:570
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Katalog NIE nadaje się do przeszukiwania (na podstawie reguł)"
 
-#: src/miners/fs/tracker-main.c:587
+#: src/miners/fs/tracker-main.c:590
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Katalog nadaje się do przeszukiwania (na podstawie zawartości)"
 
-#: src/miners/fs/tracker-main.c:588
+#: src/miners/fs/tracker-main.c:591
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Katalog NIE nadaje się do przeszukiwania (na podstawie zawartości)"
 
-#: src/miners/fs/tracker-main.c:635
+#: src/miners/fs/tracker-main.c:638
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Katalog nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:636
+#: src/miners/fs/tracker-main.c:639
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Katalog NIE nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:640
+#: src/miners/fs/tracker-main.c:643
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Plik nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:641
+#: src/miners/fs/tracker-main.c:644
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Plik NIE nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:648
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "Plik lub katalog nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:646
+#: src/miners/fs/tracker-main.c:649
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Plik lub katalog NIE nadaje się do monitorowania (na podstawie konfiguracji)"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:664
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Plik nadaje się do przeszukiwania (na podstawie reguł)"
 
-#: src/miners/fs/tracker-main.c:662
+#: src/miners/fs/tracker-main.c:665
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Plik NIE nadaje się do przeszukiwania (na podstawie reguł)"
 
-#: src/miners/fs/tracker-main.c:671
+#: src/miners/fs/tracker-main.c:674
 msgid "Would be indexed"
 msgstr "Będzie indeksowane"
 
-#: src/miners/fs/tracker-main.c:672 src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "Yes"
 msgstr "Tak"
 
-#: src/miners/fs/tracker-main.c:672 src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "No"
 msgstr "Nie"
 
-#: src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:676
 msgid "Would be monitored"
 msgstr "Będzie monitorowane"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:813
+#: src/miners/fs/tracker-main.c:816
 msgid "— start the tracker indexer"
 msgstr "— uruchamia program indeksujący Tracker"
 
@@ -494,7 +494,7 @@ msgstr "Nie można nawiązać połączenia z programem Tracker"
 #: src/miners/rss/tracker-main.c:177 src/tracker/tracker-daemon.c:454
 #: src/tracker/tracker-daemon.c:512 src/tracker/tracker-daemon.c:547
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:978
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
 #: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
 #: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
@@ -508,7 +508,7 @@ msgstr "Nie można nawiązać połączenia z programem Tracker"
 msgid "No error given"
 msgstr "Nie podano błędu"
 
-#: src/miners/rss/tracker-main.c:204
+#: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "Nie można dodać kanału"
 
@@ -701,7 +701,7 @@ msgid "unknown time left"
 msgstr "pozostał nieznany czas"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:770
+#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:769
 msgid "PAUSED"
 msgstr "WSTRZYMANE"
 
@@ -729,8 +729,8 @@ msgstr "Nie można wstrzymać przeszukiwania: %s"
 msgid "Cookie is %d"
 msgstr "Ciasteczko to %d"
 
-#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:728
-#: src/tracker/tracker-daemon.c:842
+#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
 msgstr "Naciśnięcie klawiszy Ctrl+C zatrzymuje"
 
@@ -786,7 +786,7 @@ msgid "No miners are running"
 msgstr "Brak uruchomionych przeszukiwań"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:780
+#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:779
 msgid "Miners"
 msgstr "Przeszukiwania"
 
@@ -806,47 +806,47 @@ msgstr "Brak wstrzymanych przeszukiwań"
 msgid "Could not get SPARQL connection"
 msgstr "Nie można uzyskać połączenia SPARQL"
 
-#: src/tracker/tracker-daemon.c:726
+#: src/tracker/tracker-daemon.c:725
 msgid "Now listening for resource updates to the database"
 msgstr "Nasłuchiwanie aktualizacji zasobów w bazie danych"
 
-#: src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:726
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "Wszystkie właściwości nie:plainTextContent są pomijane"
 
-#: src/tracker/tracker-daemon.c:741
+#: src/tracker/tracker-daemon.c:740
 msgid "Common statuses include"
 msgstr "Wspólne stany obejmują"
 
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:436
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:436
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "Nie można uzyskać stanu, nie można utworzyć menedżera, %s"
 
-#: src/tracker/tracker-daemon.c:788
+#: src/tracker/tracker-daemon.c:787
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr ""
 "Nie można uzyskać wyświetlanej nazwy dla programu do przeszukiwania „%s”"
 
-#: src/tracker/tracker-daemon.c:879
+#: src/tracker/tracker-daemon.c:878
 msgid "You can not use miner pause and resume switches together"
 msgstr ""
 "Nie można razem używać przełączników wstrzymania i wznowienia przeszukiwania"
 
-#: src/tracker/tracker-daemon.c:885
+#: src/tracker/tracker-daemon.c:884
 msgid "You must provide the miner for pause or resume commands"
 msgstr "Należy podać polecenia wstrzymania lub wznowienia dla przeszukiwania"
 
-#: src/tracker/tracker-daemon.c:891
+#: src/tracker/tracker-daemon.c:890
 msgid "You must provide a pause or resume command for the miner"
 msgstr "Należy podać polecenie wstrzymania lub wznowienia dla przeszukiwania"
 
-#: src/tracker/tracker-daemon.c:925
+#: src/tracker/tracker-daemon.c:924
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Nie można razem używać parametrów --kill i --terminate"
 
-#: src/tracker/tracker-daemon.c:936 src/tracker/tracker-process.c:303
+#: src/tracker/tracker-daemon.c:935 src/tracker/tracker-process.c:303
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
@@ -854,32 +854,32 @@ msgstr[0] "Odnaleziono %d PID…"
 msgstr[1] "Odnaleziono %d PID-y…"
 msgstr[2] "Odnaleziono %d PID-ów…"
 
-#: src/tracker/tracker-daemon.c:946
+#: src/tracker/tracker-daemon.c:945
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "Odnaleziono identyfikator procesu %d dla „%s”"
 
-#: src/tracker/tracker-daemon.c:972
+#: src/tracker/tracker-daemon.c:971
 msgid "Starting miners…"
 msgstr "Uruchamianie przeszukiwań…"
 
-#: src/tracker/tracker-daemon.c:977
+#: src/tracker/tracker-daemon.c:976
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "Nie można uruchomić przeszukiwań, nie można utworzyć menedżera, %s"
 
-#: src/tracker/tracker-daemon.c:1002
+#: src/tracker/tracker-daemon.c:1001
 msgid "perhaps a disabled plugin?"
 msgstr "być może wyłączona wtyczka?"
 
-#: src/tracker/tracker-daemon.c:1052
+#: src/tracker/tracker-daemon.c:1051
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "Jeśli nie podano żadnych parametrów, to wyświetlony zostanie stan "
 "przeszukiwań danych"
 
-#: src/tracker/tracker-daemon.c:1057 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:263
+#: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
+#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -1047,7 +1047,7 @@ msgstr ""
 msgid "Deleting…"
 msgstr "Usuwanie…"
 
-#: src/tracker/tracker-reset.c:116
+#: src/tracker/tracker-reset.c:115
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
