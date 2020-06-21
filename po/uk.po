@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-04-24 19:58+0000\n"
-"PO-Revision-Date: 2020-04-25 10:51+0300\n"
+"POT-Creation-Date: 2020-06-21 10:24+0000\n"
+"PO-Revision-Date: 2020-06-21 20:05+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -152,29 +152,21 @@ msgid "Set to false to completely disable any file monitoring"
 msgstr "Встановіть значення «false», щоб повністю вимкнути стеження за файлами"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
-msgid "Enable writeback"
-msgstr "Увімкнути зворотній запис"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
-msgid "Set to false to completely disable any file writeback"
-msgstr "Встановіть у false, щоб повністю вимкнути зворотній запис файлів"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index removable devices"
 msgstr "Індексувати знімні пристрої"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
-"Встановіть значення «true», щоб увімкнути індексування змонтованих "
-"каталогів на знімних пристроях."
+"Встановіть значення «true», щоб увімкнути індексування змонтованих каталогів "
+"на знімних пристроях."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:84
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index optical discs"
 msgstr "Індексувати оптичні диски"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:85
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
 msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
@@ -183,56 +175,44 @@ msgstr ""
 "оптичних носіїв (якщо знімні пристрої не індексуються, оптичні диски також "
 "не будуть індексуватися)"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
 msgid "Index when running on battery"
 msgstr "Індексувати при роботі від батареї"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Set to true to index while running on battery"
 msgstr ""
 "Встановіть значення «true», щоб дозволити індексування при роботі від батареї"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
 msgid "Perform initial indexing when running on battery"
 msgstr "Виконати початкове індексування при роботі від батареї"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
 msgid "Set to true to index while running on battery for the first time only"
 msgstr ""
 "Встановіть у значення «true», щоб індексувати при роботі від батареї лише "
 "першого разу"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:105
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 msgid "Directories to index recursively"
 msgstr "Каталоги для рекурсивного індексування"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:106
-#| msgid ""
-#| "List of directories to index recursively, Special values include: &amp;"
-#| "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
-#| "PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS.\n"
-#| "\n"
-#| "See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
 msgid ""
 "List of directories to index recursively, Special values include: &DESKTOP, "
 "&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
 "&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgstr ""
-"Перелік каталогів, індексованих рекурсивно. Спеціальні значення: DESKTOP,"
-" DOCUMENTS, DOWNLOAD, MUSIC, PICTURES, PUBLIC_SHARE, TEMPLATES, VIDEOS. Див."
-" /etc/xdg/user-dirs.defaults та $HOME/.config/user-dirs.default"
+"Перелік каталогів, індексованих рекурсивно. Спеціальні значення: DESKTOP, "
+"DOCUMENTS, DOWNLOAD, MUSIC, PICTURES, PUBLIC_SHARE, TEMPLATES, VIDEOS. Див. /"
+"etc/xdg/user-dirs.defaults та $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:117
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
 msgid "Directories to index non-recursively"
 msgstr "Каталоги, індексовані нерекурсивно"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:118
-#| msgid ""
-#| "List of directories to index without inspecting subfolders, Special "
-#| "values include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, "
-#| "&amp;PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS.\n"
-#| "\n"
-#| "See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
@@ -240,15 +220,15 @@ msgid ""
 "dirs.default"
 msgstr ""
 "Перелік каталогів, індексованих без урахування вкладених каталогів. "
-"Спеціальні значення: DESKTOP, DOCUMENTS, DOWNLOAD, MUSIC, PICTURES,"
-" PUBLIC_SHARE, TEMPLATES, VIDEOS. Див. /etc/xdg/user-dirs.defaults та"
-" $HOME/.config/user-dirs.default"
+"Спеціальні значення: DESKTOP, DOCUMENTS, DOWNLOAD, MUSIC, PICTURES, "
+"PUBLIC_SHARE, TEMPLATES, VIDEOS. Див. /etc/xdg/user-dirs.defaults та $HOME/."
+"config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:129
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
 msgid "Index applications installed on the system"
 msgstr "Індексувати програми, які встановлено у системі"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:130
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -256,30 +236,30 @@ msgstr ""
 "Якщо позначено цей пункт, видобувач даних з файлової системи шукатиме файли ."
 "desktop у стандартній системі XDG і каталогах даних користувача."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
 msgid "Ignored files"
 msgstr "Ігноровані файли"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "List of file patterns to avoid"
 msgstr "Перелік ігнорованих файлових шаблонів"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
 msgid "Ignored directories"
 msgstr "Ігноровані каталоги"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "List of directories to avoid"
 msgstr "Перелік ігнорованих каталогів"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:150
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
 msgid "Ignored directories with content"
 msgstr "Ігноровані каталоги з вмістом"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:151
-msgid "Avoid any directory containing a file blacklisted here"
-msgstr ""
-"Не обробляти каталоги, що містять файли з вказаного тут «чорного» списку"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#| msgid "Avoid any directory containing a file blacklisted here"
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr "Не обробляти каталоги, що містять файли з вказаного тут списку"
 
 #: src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
@@ -365,114 +345,114 @@ msgstr ""
 "Запит на призупинку додатку і причина відповідають наявному запиту на "
 "призупинку"
 
-#: src/miners/fs/tracker-main.c:72
+#: src/miners/fs/tracker-main.c:71
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Початковий час сну у секундах, 0->1000 (типово=15)"
 
-#: src/miners/fs/tracker-main.c:77
+#: src/miners/fs/tracker-main.c:76
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Виконується, поки індексуються усі налаштовані місця, а потім закінчується"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:80
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Перевіряє, чи може індексуватися ФАЙЛ на основі налаштувань"
 
-#: src/miners/fs/tracker-main.c:82 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:81 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
 #: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/miners/fs/tracker-main.c:85 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:84 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Працює для вказаної онтології домену"
 
-#: src/miners/fs/tracker-main.c:89 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:88 src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Показує інформацію про версію"
 
-#: src/miners/fs/tracker-main.c:549
+#: src/miners/fs/tracker-main.c:553
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Об’єкт даних «%s» на дану мить існує"
 
-#: src/miners/fs/tracker-main.c:550
+#: src/miners/fs/tracker-main.c:554
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Об’єкт даних «%s» на дану мить не існує"
 
-#: src/miners/fs/tracker-main.c:565
+#: src/miners/fs/tracker-main.c:569
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Каталог може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:566
+#: src/miners/fs/tracker-main.c:570
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Каталог НЕ може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:586
+#: src/miners/fs/tracker-main.c:590
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Каталог може бути проіндексований (засновано на вмісті)"
 
-#: src/miners/fs/tracker-main.c:587
+#: src/miners/fs/tracker-main.c:591
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Каталог НЕ може бути проіндексований (засновано на вмісті)"
 
-#: src/miners/fs/tracker-main.c:634
+#: src/miners/fs/tracker-main.c:638
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Каталог може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:635
+#: src/miners/fs/tracker-main.c:639
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Каталог є непридатним для стеження (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:643
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Файл може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:640
+#: src/miners/fs/tracker-main.c:644
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Файл НЕ може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:644
+#: src/miners/fs/tracker-main.c:648
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr "Файл або каталог можуть відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:649
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr "Файл або каталог НЕ можуть відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:660
+#: src/miners/fs/tracker-main.c:664
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Файл може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:665
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Файл НЕ може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:674
 msgid "Would be indexed"
 msgstr "Буде індексуватися"
 
-#: src/miners/fs/tracker-main.c:671 src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "Yes"
 msgstr "Так"
 
-#: src/miners/fs/tracker-main.c:671 src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "No"
 msgstr "Ні"
 
-#: src/miners/fs/tracker-main.c:672
+#: src/miners/fs/tracker-main.c:676
 msgid "Would be monitored"
 msgstr "Буде відстежуватися"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:811
+#: src/miners/fs/tracker-main.c:816
 msgid "— start the tracker indexer"
 msgstr "— запустити індексатор tracker"
 
@@ -505,7 +485,7 @@ msgstr "Не вдалося встановити з’єднання з Tracker"
 #: src/miners/rss/tracker-main.c:177 src/tracker/tracker-daemon.c:454
 #: src/tracker/tracker-daemon.c:512 src/tracker/tracker-daemon.c:547
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:978
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
 #: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
 #: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
@@ -519,15 +499,15 @@ msgstr "Не вдалося встановити з’єднання з Tracker"
 msgid "No error given"
 msgstr "Повідомлення про помилку не вказано"
 
-#: src/miners/rss/tracker-main.c:204
+#: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "Не вдалося додати стрічку"
 
-#: src/tracker-extract/tracker-extract.c:683
+#: src/tracker-extract/tracker-extract.c:666
 msgid "Metadata extraction failed"
 msgstr "Витягти метадані не вдалося"
 
-#: src/tracker-extract/tracker-extract.c:763
+#: src/tracker-extract/tracker-extract.c:728
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Для цього файлу не вдалося знайти відповідний модуль метаданих або модуль "
@@ -561,18 +541,18 @@ msgstr "Формат виведення результатів: «sparql», «tu
 msgid "FORMAT"
 msgstr "ФОРМАТ"
 
-#: src/tracker-extract/tracker-main.c:207
+#: src/tracker-extract/tracker-main.c:211
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Непідтримуваний формат перетворення на послідовну форму «%s»\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:294
+#: src/tracker-extract/tracker-main.c:301
 msgid "— Extract file meta data"
 msgstr "— Видобути з файла метадані"
 
-#: src/tracker-extract/tracker-main.c:309
+#: src/tracker-extract/tracker-main.c:316
 msgid "Filename and mime type must be provided together"
 msgstr "Ім’я файлу і тип MIME повинні бути вказані одночасно"
 
@@ -625,7 +605,6 @@ msgstr ""
 "додаванні ресурсів або файлів)"
 
 #: src/tracker/tracker-daemon.c:119
-#| msgid "List common statuses for miners and the store"
 msgid "List common statuses for miners"
 msgstr "Показати список загальних станів засобів видобування даних"
 
@@ -696,7 +675,6 @@ msgid "Use SIGTERM to stop all miners"
 msgstr "Скористатися SIGTERM для припинення роботи усіх засобів видобування"
 
 #: src/tracker/tracker-daemon.c:161
-#| msgid "Starting miners…"
 msgid "Starts miners"
 msgstr "Запустити засоби видобування"
 
@@ -716,7 +694,7 @@ msgid "unknown time left"
 msgstr "час, що залишився невідомий"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:770
+#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:769
 msgid "PAUSED"
 msgstr "ПРИЗУПИНЕНО"
 
@@ -744,8 +722,8 @@ msgstr "Не вдалося призупинити роботу індексат
 msgid "Cookie is %d"
 msgstr "Cookie is %d"
 
-#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:728
-#: src/tracker/tracker-daemon.c:842
+#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
 msgstr "Натисніть Ctrl+C, щоб припинити"
 
@@ -804,7 +782,7 @@ msgid "No miners are running"
 msgstr "Запущені індексатори відсутні"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:780
+#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:779
 msgid "Miners"
 msgstr "Індексатори"
 
@@ -824,46 +802,46 @@ msgstr "Призупинені індексатори відсутні"
 msgid "Could not get SPARQL connection"
 msgstr "Не вдалося отримати з'єднання SPARQL"
 
-#: src/tracker/tracker-daemon.c:726
+#: src/tracker/tracker-daemon.c:725
 msgid "Now listening for resource updates to the database"
 msgstr "Тепер очікуємо на оновлення бази даних ресурсами"
 
-#: src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:726
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "Усі властивості nie:plainTextContent пропущено"
 
-#: src/tracker/tracker-daemon.c:741
+#: src/tracker/tracker-daemon.c:740
 msgid "Common statuses include"
 msgstr "Спільні статуси"
 
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:436
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:436
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr ""
 "Не вдалося отримати інформацію про стан, не вдалося створити диспетчер, %s"
 
-#: src/tracker/tracker-daemon.c:788
+#: src/tracker/tracker-daemon.c:787
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr "Не вдалося отримати показану назву для засобу видобування даних «%s»"
 
-#: src/tracker/tracker-daemon.c:879
+#: src/tracker/tracker-daemon.c:878
 msgid "You can not use miner pause and resume switches together"
 msgstr "Не можна одночасно використовувати перемикачі призупинки і відновлення"
 
-#: src/tracker/tracker-daemon.c:885
+#: src/tracker/tracker-daemon.c:884
 msgid "You must provide the miner for pause or resume commands"
 msgstr "Потрібно вказати індексатор для команд призупинки або відновлення"
 
-#: src/tracker/tracker-daemon.c:891
+#: src/tracker/tracker-daemon.c:890
 msgid "You must provide a pause or resume command for the miner"
 msgstr "Потрібно вказати команду призупинки або відновлення для індексатора"
 
-#: src/tracker/tracker-daemon.c:925
+#: src/tracker/tracker-daemon.c:924
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Не можна одночасно використовувати аргументи --kill і --terminate"
 
-#: src/tracker/tracker-daemon.c:936 src/tracker/tracker-process.c:303
+#: src/tracker/tracker-daemon.c:935 src/tracker/tracker-process.c:303
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
@@ -872,34 +850,31 @@ msgstr[1] "Знайдено %d ідентифікатори процесів…"
 msgstr[2] "Знайдено %d ідентифікаторів процесів…"
 msgstr[3] "Знайдено один ідентифікатор процесу…"
 
-#: src/tracker/tracker-daemon.c:946
+#: src/tracker/tracker-daemon.c:945
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "Знайдено процес ID %d для «%s»"
 
-#: src/tracker/tracker-daemon.c:972
+#: src/tracker/tracker-daemon.c:971
 msgid "Starting miners…"
 msgstr "Запуск індексаторів…"
 
-#: src/tracker/tracker-daemon.c:977
+#: src/tracker/tracker-daemon.c:976
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "Не вдалося запустити індексатор, не вдалося створити диспетчер, %s"
 
-#: src/tracker/tracker-daemon.c:1002
+#: src/tracker/tracker-daemon.c:1001
 msgid "perhaps a disabled plugin?"
 msgstr "можливо вимкнено модуль?"
 
-#: src/tracker/tracker-daemon.c:1052
-#| msgid ""
-#| "If no arguments are given, the status of the store and data miners is "
-#| "shown"
+#: src/tracker/tracker-daemon.c:1051
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "Якщо аргументів не надано, буде показано стан засобів видобування даних"
 
-#: src/tracker/tracker-daemon.c:1057 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:263
+#: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
+#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -1064,7 +1039,7 @@ msgstr "Витерти індексовані дані щодо файла. Пр
 msgid "Deleting…"
 msgstr "Вилучення…"
 
-#: src/tracker/tracker-reset.c:116
+#: src/tracker/tracker-reset.c:115
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
@@ -1594,6 +1569,12 @@ msgstr "Не вимикати після 30 секунд простоюванн�
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— запустити службу зворотного запису tracker"
+
+#~ msgid "Enable writeback"
+#~ msgstr "Увімкнути зворотній запис"
+
+#~ msgid "Set to false to completely disable any file writeback"
+#~ msgstr "Встановіть у false, щоб повністю вимкнути зворотній запис файлів"
 
 #~ msgid "Log verbosity"
 #~ msgstr "Рівень детальності журналу"
