@@ -4,14 +4,14 @@
 # This file is distributed under the same license as the tracker package.
 # Gintautas Miliauskas <gintas@akl.lt>, 2008.
 # Žygimantas Beručka <zygis@gnome.org>, 2009, 2010, 2013.
-# Aurimas Černius <aurisc4@gmail.com>, 2013-2019.
+# Aurimas Černius <aurisc4@gmail.com>, 2013-2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: HEAD\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-21 09:40+0000\n"
-"PO-Revision-Date: 2019-02-09 23:09+0200\n"
+"POT-Creation-Date: 2020-06-21 09:47+0000\n"
+"PO-Revision-Date: 2020-06-21 12:50+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -19,8 +19,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && (n"
-"%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Gtranslator 3.30.1\n"
+"%100<10 || n%100>=20) ? 1 : 2)\n"
+"X-Generator: Gtranslator 3.36.0\n"
 "X-Project-Style: gnome\n"
 
 #: ../data/org.freedesktop.Tracker.Extract.gschema.xml.h:1
@@ -243,7 +243,6 @@ msgid "Ignored directories with content"
 msgstr "Nepaisomi katalogai su turiniu"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-#, fuzzy
 #| msgid "Avoid any directory containing a file blacklisted here"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Vengti bet kokių katalogų, turinčių čia nurodytą failą"
