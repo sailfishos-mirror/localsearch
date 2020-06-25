@@ -8,10 +8,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-04-24 19:58+0000\n"
-"PO-Revision-Date: 2020-05-03 13:45+0300\n"
-"Last-Translator: Florentina Mușat <florentina.musat.28 [at] gmail [dot] "
-"com>\n"
+"POT-Creation-Date: 2020-06-22 19:54+0000\n"
+"PO-Revision-Date: 2020-06-25 12:14+0300\n"
+"Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
 "MIME-Version: 1.0\n"
@@ -19,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Poedit 2.3\n"
+"X-Generator: Poedit 2.3.1\n"
 "X-Launchpad-Export-Date: 2009-10-03 17:40+0000\n"
 "X-Project-Style: gnome\n"
 
@@ -32,10 +31,20 @@ msgid "Maximum number of UTF-8 bytes to extract."
 msgstr "Numărul maxim de octeți UTF-8 de extras."
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:30
+msgid "Text file allowlist"
+msgstr "Listă de permisiune de fișier text"
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+msgid "Filename patterns for plain text documents that should be indexed"
+msgstr ""
+"Modele de nume de fișier pentru documentele în text simplu care ar trebui să "
+"fie indexate"
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:37
 msgid "Wait for FS miner to be done before extracting"
 msgstr "Așteaptă ca minerul FS să termine înainte de a extrage"
 
-#: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
 "crawling before extracting meta-data. This option is useful on constrained "
@@ -155,29 +164,21 @@ msgstr ""
 "Stabiliți ca fals pentru a dezactiva complet orice monitorizare a fișierelor"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
-msgid "Enable writeback"
-msgstr "Permite scrierea înapoi"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
-msgid "Set to false to completely disable any file writeback"
-msgstr "Stabiliți ca fals pentru a dezactiva complet orice scriere înapoi"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index removable devices"
 msgstr "Include dispozitivele de stocare detașabile"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
 "Stabiliți ca adevărat pentru a permite indexarea dosarelor montate pentru "
 "dispozitivele detașabile."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:84
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index optical discs"
 msgstr "Indexează discurile optice"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:85
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
 msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
@@ -186,29 +187,29 @@ msgstr ""
 "general a mediilor optice (dacă dispozitivele detașabile nu sunt indexate, "
 "nu vor fi nici discurile optice)"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
 msgid "Index when running on battery"
 msgstr "Indexează când se rulează pe baterie"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Set to true to index while running on battery"
 msgstr "Stabiliți ca fals pentru a indexa în timp ce se rulează de pe baterie"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
 msgid "Perform initial indexing when running on battery"
 msgstr "Execută indexarea inițială când rulează prima dată de pe baterie"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
 msgid "Set to true to index while running on battery for the first time only"
 msgstr ""
 "Stabiliți ca adevărat pentru a indexa în timp ce se rulează pe baterie doar "
 "pentru prima dată"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:105
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 msgid "Directories to index recursively"
 msgstr "Dosare de indexat recursiv"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:106
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
 msgid ""
 "List of directories to index recursively, Special values include: &DESKTOP, "
 "&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
@@ -219,11 +220,11 @@ msgstr ""
 "&VIDEOS. Vedeți /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs."
 "default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:117
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
 msgid "Directories to index non-recursively"
 msgstr "Dosare de indexat ne-recursiv"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:118
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
@@ -235,11 +236,11 @@ msgstr ""
 "&TEMPLATES, &VIDEOS. Vedeți /etc/xdg/user-dirs.defaults și $HOME/.config/"
 "user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:129
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
 msgid "Index applications installed on the system"
 msgstr "Indexează aplicațiile instalate pe sistem"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:130
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -248,29 +249,29 @@ msgstr ""
 "după fișiere .desktop în sistemul standard XDG și directoarele de date ale "
 "utilizatorului."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
 msgid "Ignored files"
 msgstr "Fișiere ignorate"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "List of file patterns to avoid"
 msgstr "Lista modelelor de evitat"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
 msgid "Ignored directories"
 msgstr "Dosare ignorate"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "List of directories to avoid"
 msgstr "Lista dosarelor de evitat"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:150
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
 msgid "Ignored directories with content"
 msgstr "Au fost ignorate dosarele cu conținut"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:151
-msgid "Avoid any directory containing a file blacklisted here"
-msgstr "Evită orice dosar ce conține un fișier interzis aici"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr "Evită orice director care conține un fișier blocat la listare aici"
 
 #: src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
@@ -352,118 +353,118 @@ msgstr ""
 "Suspendarea aplicației și motivul se potrivesc cu o cerere de suspendare "
 "existentă"
 
-#: src/miners/fs/tracker-main.c:72
+#: src/miners/fs/tracker-main.c:71
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Timp inițial de așteptare, 0->1000 (implicit=15)"
 
-#: src/miners/fs/tracker-main.c:77
+#: src/miners/fs/tracker-main.c:76
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Rulează până când toate locațiile configurate sunt indexate iar apoi se "
 "închide"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:80
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Verifică dacă FIȘIER este eligibil pentru a fi minerit conform configurației"
 
-#: src/miners/fs/tracker-main.c:82 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:81 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
 #: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FIȘIER"
 
-#: src/miners/fs/tracker-main.c:85 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:84 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Rulează pentru o ontologie de domeniu specifică"
 
-#: src/miners/fs/tracker-main.c:89 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:88 src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Afișează informații despre versiune"
 
-#: src/miners/fs/tracker-main.c:549
+#: src/miners/fs/tracker-main.c:553
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Obiectul de date „%s” există deja"
 
-#: src/miners/fs/tracker-main.c:550
+#: src/miners/fs/tracker-main.c:554
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Obiectul de date „%s” nu există în mod curent"
 
-#: src/miners/fs/tracker-main.c:565
+#: src/miners/fs/tracker-main.c:569
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Dosarul este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:566
+#: src/miners/fs/tracker-main.c:570
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:586
+#: src/miners/fs/tracker-main.c:590
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Dosarul este eligibil pentru minerit (conform conținutului)"
 
-#: src/miners/fs/tracker-main.c:587
+#: src/miners/fs/tracker-main.c:591
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform conținutului)"
 
-#: src/miners/fs/tracker-main.c:634
+#: src/miners/fs/tracker-main.c:638
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Dosarul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:635
+#: src/miners/fs/tracker-main.c:639
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:643
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Fișierul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:640
+#: src/miners/fs/tracker-main.c:644
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Fișierul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:644
+#: src/miners/fs/tracker-main.c:648
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "Fișierul sau dosarul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:649
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Fișierul sau dosarul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:660
+#: src/miners/fs/tracker-main.c:664
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Fișierul este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:665
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Fișierul NU este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:674
 msgid "Would be indexed"
 msgstr "Ar fi indexat"
 
-#: src/miners/fs/tracker-main.c:671 src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "Yes"
 msgstr "Da"
 
-#: src/miners/fs/tracker-main.c:671 src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
 msgid "No"
 msgstr "Nu"
 
-#: src/miners/fs/tracker-main.c:672
+#: src/miners/fs/tracker-main.c:676
 msgid "Would be monitored"
 msgstr "Ar fi monitorizat"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:811
+#: src/miners/fs/tracker-main.c:816
 msgid "— start the tracker indexer"
 msgstr "— pornește indexatorul de tracker"
 
@@ -496,7 +497,7 @@ msgstr "Nu s-a putut stabili o conexiune la Tracker"
 #: src/miners/rss/tracker-main.c:177 src/tracker/tracker-daemon.c:454
 #: src/tracker/tracker-daemon.c:512 src/tracker/tracker-daemon.c:547
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:978
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
 #: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
 #: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
@@ -510,15 +511,15 @@ msgstr "Nu s-a putut stabili o conexiune la Tracker"
 msgid "No error given"
 msgstr "Nu s-a primit nicio"
 
-#: src/miners/rss/tracker-main.c:204
+#: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "Nu s-a putut adăuga fluxul"
 
-#: src/tracker-extract/tracker-extract.c:683
+#: src/tracker-extract/tracker-extract.c:694
 msgid "Metadata extraction failed"
 msgstr "Extragerea de metadate a eșuat"
 
-#: src/tracker-extract/tracker-extract.c:763
+#: src/tracker-extract/tracker-extract.c:756
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nu s-au găsit module de metadate sau extractor pentru a gestiona acest fișier"
@@ -553,18 +554,18 @@ msgstr "Formatul rezultatelor de ieșire: „sparql”, „turtle” sau „json
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/tracker-extract/tracker-main.c:207
+#: src/tracker-extract/tracker-main.c:211
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Format de serializare nesuportat „%s”\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:294
+#: src/tracker-extract/tracker-main.c:301
 msgid "— Extract file meta data"
 msgstr "— Extrage metadate de fișier"
 
-#: src/tracker-extract/tracker-main.c:309
+#: src/tracker-extract/tracker-main.c:316
 msgid "Filename and mime type must be provided together"
 msgstr "Numele fișierului și tipul MIME trebuie specificate împreună"
 
@@ -706,7 +707,7 @@ msgid "unknown time left"
 msgstr "timp rămas necunoscut"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:770
+#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:769
 msgid "PAUSED"
 msgstr "SUSPENDAT"
 
@@ -735,8 +736,8 @@ msgstr "Nu s-a putut suspenda minerul de date: „%s”"
 msgid "Cookie is %d"
 msgstr "Cookie este %d"
 
-#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:728
-#: src/tracker/tracker-daemon.c:842
+#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
 msgstr "Apăsați Ctrl+C pentru a stopa"
 
@@ -792,7 +793,7 @@ msgid "No miners are running"
 msgstr "Nu rulează niciun miner"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:780
+#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:779
 msgid "Miners"
 msgstr "Mineri"
 
@@ -812,46 +813,46 @@ msgstr "Niciun miner nu este întrerupt"
 msgid "Could not get SPARQL connection"
 msgstr "Nu s-a putut obține o conexiune SPARQL"
 
-#: src/tracker/tracker-daemon.c:726
+#: src/tracker/tracker-daemon.c:725
 msgid "Now listening for resource updates to the database"
 msgstr "Se ascultă după actualizări de resurse la baza de date"
 
-#: src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:726
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "Toate proprietățile nie:plainTextContent sunt omise"
 
-#: src/tracker/tracker-daemon.c:741
+#: src/tracker/tracker-daemon.c:740
 msgid "Common statuses include"
 msgstr "Stările comune includ"
 
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:436
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:436
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr ""
 "Nu s-au putut obține informații de stare, managerul nu a putut fi creat, %s"
 
-#: src/tracker/tracker-daemon.c:788
+#: src/tracker/tracker-daemon.c:787
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr "Nu s-a putut obține numele de afișaj pentru minerul „%s”"
 
-#: src/tracker/tracker-daemon.c:879
+#: src/tracker/tracker-daemon.c:878
 msgid "You can not use miner pause and resume switches together"
 msgstr "Nu puteți să folosiți pauză miner și să reluați switch-uri împreună"
 
-#: src/tracker/tracker-daemon.c:885
+#: src/tracker/tracker-daemon.c:884
 msgid "You must provide the miner for pause or resume commands"
 msgstr "Trebuie să furnizați minerul pentru comenzile întrerupe sau reia"
 
-#: src/tracker/tracker-daemon.c:891
+#: src/tracker/tracker-daemon.c:890
 msgid "You must provide a pause or resume command for the miner"
 msgstr "Trebuie să furnizați o comandă de întrerupere sau reluare pentru miner"
 
-#: src/tracker/tracker-daemon.c:925
+#: src/tracker/tracker-daemon.c:924
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Nu puteți folosi --kill și --terminate împreună"
 
-#: src/tracker/tracker-daemon.c:936 src/tracker/tracker-process.c:303
+#: src/tracker/tracker-daemon.c:935 src/tracker/tracker-process.c:303
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
@@ -859,30 +860,30 @@ msgstr[0] "S-a găsit %d PID…"
 msgstr[1] "S-au găsit %d PID-uri…"
 msgstr[2] "S-au găsit %d de PID-uri…"
 
-#: src/tracker/tracker-daemon.c:946
+#: src/tracker/tracker-daemon.c:945
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "S-a găsit ID-ul de proces %d pentru „%s”"
 
-#: src/tracker/tracker-daemon.c:972
+#: src/tracker/tracker-daemon.c:971
 msgid "Starting miners…"
 msgstr "Se pornesc minerii de date…"
 
-#: src/tracker/tracker-daemon.c:977
+#: src/tracker/tracker-daemon.c:976
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "Nu s-au putut porni minerii, managerul nu a putut fi creat, %s"
 
-#: src/tracker/tracker-daemon.c:1002
+#: src/tracker/tracker-daemon.c:1001
 msgid "perhaps a disabled plugin?"
 msgstr "posibil un modul de extensie dezactivat?"
 
-#: src/tracker/tracker-daemon.c:1052
+#: src/tracker/tracker-daemon.c:1051
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Dacă nu sunt date argumente, starea minerilor de date este arătată"
 
-#: src/tracker/tracker-daemon.c:1057 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:263
+#: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
+#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -1050,7 +1051,7 @@ msgstr ""
 msgid "Deleting…"
 msgstr "Se șterge…"
 
-#: src/tracker/tracker-reset.c:116
+#: src/tracker/tracker-reset.c:115
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
@@ -1584,6 +1585,12 @@ msgstr "Dezactivează oprirea după 30 de secunde de inactivitate"
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— pornește serviciul de scriere înapoi de tracker"
+
+#~ msgid "Enable writeback"
+#~ msgstr "Permite scrierea înapoi"
+
+#~ msgid "Set to false to completely disable any file writeback"
+#~ msgstr "Stabiliți ca fals pentru a dezactiva complet orice scriere înapoi"
 
 #~ msgid "File System"
 #~ msgstr "Sistem de fișiere"
