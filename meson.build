@@ -1,5 +1,5 @@
 project('tracker-miners', 'c',
-        version: '2.99.1',
+        version: '2.99.2',
         meson_version: '>=0.51')
 
 gnome = import('gnome')

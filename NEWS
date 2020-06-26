@@ -1,3 +1,22 @@
+NEW in 2.99.2 - 2020-06-26
+==========================
+
+  * Constraint the indexed text formats to txt/markdown, a new
+    setting allows handling other formats
+  * Add rules for game ROM formats
+  * Support automatic re-extraction on extractor changes
+  * Vorbis and flac specific extractors were dropped, those are
+    handled by gstreamer
+  * Improve usage of nie:dataSource, now there is one per indexed
+    folder, no longer used by tracker-extract
+  * Fixes to album/disc IRI generation
+  * Writeback handling is rewritten, now performed via an explicit
+    DBus call.
+  * Add support for musicbrainz and acoustid fingerprint
+  * Depend on glib 2.62
+  * Set a deadline of 30 seconds for extraction tasks
+  * Many build, leak and performance fixes
+
 NEW in 2.99.1 - 2020-05-03
 ==========================
 
