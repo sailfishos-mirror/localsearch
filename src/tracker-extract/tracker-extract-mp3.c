@@ -2867,8 +2867,8 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	}
 
 	if (md.mb_recording_id) {
-		g_autofree char *mb_recording_uri;
-		g_autoptr(TrackerResource) mb_recording;
+		g_autofree char *mb_recording_uri = NULL;
+		g_autoptr(TrackerResource) mb_recording = NULL;
 
 		mb_recording_uri = g_strdup_printf("https://musicbrainz.org/recording/%s", md.mb_recording_id);
 		mb_recording = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Recording",
@@ -2878,8 +2878,8 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	}
 
 	if (md.mb_track_id) {
-		g_autofree char *mb_track_uri;
-		g_autoptr(TrackerResource) mb_track;
+		g_autofree char *mb_track_uri = NULL;
+		g_autoptr(TrackerResource) mb_track = NULL;
 
 		mb_track_uri = g_strdup_printf("https://musicbrainz.org/track/%s", md.mb_track_id);
 		mb_track = tracker_extract_new_external_reference("https://musicbrainz.org/doc/Track",
