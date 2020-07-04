@@ -2136,9 +2136,8 @@ process_file_cb (GObject      *object,
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
 
-	if (!is_directory &&
-	    tracker_miner_fs_get_urn (TRACKER_MINER_FS (data->miner), file)) {
-		/* Update: delete all information elements for the given data object
+	if (!is_directory) {
+		/* In case of update: delete all information elements for the given data object
 		 * and delete extractorHash, so we ensure the file is extracted again.
 		 */
 		delete_properties_sparql =
