@@ -2083,20 +2083,6 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 	}
 }
 
-static gboolean
-filter_event (TrackerMinerFS          *fs,
-              TrackerMinerFSEventType  type,
-              GFile                   *file,
-              GFile                   *source_file)
-{
-	TrackerMinerFSClass *klass = TRACKER_MINER_FS_GET_CLASS (fs);
-
-	if (!klass->filter_event)
-		return FALSE;
-
-	return klass->filter_event (fs, type, file, source_file);
-}
-
 static void
 file_notifier_file_created (TrackerFileNotifier  *notifier,
                             GFile                *file,
@@ -2104,9 +2090,6 @@ file_notifier_file_created (TrackerFileNotifier  *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
-
-	if (filter_event (fs, TRACKER_MINER_FS_EVENT_CREATED, file, NULL))
-		return;
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED, file);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
@@ -2119,9 +2102,6 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
-
-	if (filter_event (fs, TRACKER_MINER_FS_EVENT_DELETED, file, NULL))
-		return;
 
 	if (tracker_file_notifier_get_file_type (notifier, file) == G_FILE_TYPE_DIRECTORY) {
 		/* Cancel all pending tasks on files inside the path given by file */
@@ -2143,10 +2123,6 @@ file_notifier_file_updated (TrackerFileNotifier  *notifier,
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	if (!attributes_only &&
-	    filter_event (fs, TRACKER_MINER_FS_EVENT_UPDATED, file, NULL))
-		return;
-
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file);
 	event->attributes_update = attributes_only;
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
@@ -2160,9 +2136,6 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
-
-	if (filter_event (fs, TRACKER_MINER_FS_EVENT_MOVED, dest, source))
-		return;
 
 	event = queue_event_moved_new (source, dest);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, source));

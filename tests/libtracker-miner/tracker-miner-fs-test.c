@@ -154,18 +154,6 @@ test_miner_move_file (TrackerMinerFS *miner,
 	return sparql;
 }
 
-static gboolean
-test_miner_filter_event (TrackerMinerFS          *miner,
-                         TrackerMinerFSEventType  type,
-                         GFile                   *file,
-                         GFile                   *source_file)
-{
-	TestMiner *m = (TestMiner *) miner;
-
-	m->n_events++;
-	return FALSE;
-}
-
 static void
 test_miner_finished (TrackerMinerFS *miner,
                      gdouble         elapsed,
@@ -187,7 +175,6 @@ test_miner_class_init (TestMinerClass *klass)
 	fs_class->remove_file = test_miner_remove_file;
 	fs_class->remove_children = test_miner_remove_children;
 	fs_class->move_file = test_miner_move_file;
-	fs_class->filter_event = test_miner_filter_event;
 
 	fs_class->finished = test_miner_finished;
 }
