@@ -1956,7 +1956,7 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			root_urn = tracker_miner_fs_query_urn (TRACKER_MINER_FS (mf), root);
+			root_urn = tracker_miner_fs_get_folder_urn (TRACKER_MINER_FS (mf), root);
 
 		if (root_urn)
 			tracker_resource_set_uri (resource, "nie:dataSource", root_urn);
@@ -1995,7 +1995,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	gchar *uri;
 
 	/* Preserve URN for nfo:Folders */
-	urn = tracker_miner_fs_get_urn (TRACKER_MINER_FS (miner), file);
+	urn = tracker_miner_fs_get_folder_urn (TRACKER_MINER_FS (miner), file);
 
 	resource = tracker_resource_new (urn);
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
@@ -2094,7 +2094,7 @@ process_file_cb (GObject      *object,
 	TrackerResource *resource, *folder_resource = NULL;
 	ProcessFileData *data;
 	const gchar *mime_type, *graph;
-	gchar *parent_urn;
+	const gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL, *mount_point_sparql;
 	GFileInfo *file_info;
 	guint64 time_;
@@ -2164,13 +2164,11 @@ process_file_cb (GObject      *object,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_miner_fs_query_urn (TRACKER_MINER_FS (data->miner), parent);
+	parent_urn = tracker_miner_fs_get_folder_urn (TRACKER_MINER_FS (data->miner), parent);
 	g_object_unref (parent);
 
-	if (parent_urn) {
+	if (parent_urn)
 		tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_urn);
-		g_free (parent_urn);
-	}
 
 	tracker_resource_set_string (resource, "nfo:fileName",
 	                             g_file_info_get_display_name (file_info));
@@ -2462,7 +2460,7 @@ miner_files_move_file (TrackerMinerFS *fs,
 	/* Get new parent information */
 	new_parent = g_file_get_parent (file);
 	if (new_parent)
-		new_parent_iri = tracker_miner_fs_query_urn (fs, new_parent);
+		new_parent_iri = tracker_miner_fs_get_folder_urn (fs, new_parent);
 	if (new_parent_iri)
 		container_clause = g_strdup_printf ("; nfo:belongsToContainer <%s>", new_parent_iri);
 

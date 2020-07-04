@@ -1224,14 +1224,12 @@ sparql_buffer_task_finished_cb (GObject      *object,
 static UpdateProcessingTaskContext *
 update_processing_task_context_new (TrackerMiner         *miner,
                                     gint                  priority,
-                                    const gchar          *urn,
                                     GCancellable         *cancellable)
 {
 	UpdateProcessingTaskContext *ctxt;
 
 	ctxt = g_slice_new0 (UpdateProcessingTaskContext);
 	ctxt->miner = miner;
-	ctxt->urn = g_strdup (urn);
 	ctxt->priority = priority;
 
 	if (cancellable) {
@@ -1244,8 +1242,6 @@ update_processing_task_context_new (TrackerMiner         *miner,
 static void
 update_processing_task_context_free (UpdateProcessingTaskContext *ctxt)
 {
-	g_free (ctxt->urn);
-
 	if (ctxt->cancellable) {
 		g_object_unref (ctxt->cancellable);
 	}
@@ -1282,14 +1278,7 @@ on_signal_gtask_complete (GObject      *source,
 	} else {
 		fs->priv->total_files_notified++;
 
-		if (ctxt->urn) {
-			/* The SPARQL builder will already contain the necessary
-			 * DELETE statements for the properties being updated */
-			TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Updating item '%s' with urn '%s'",
-			                                          uri, ctxt->urn));
-		} else {
-			TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Creating new item '%s'", uri));
-		}
+		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Creating/updating item '%s'", uri));
 
 		sparql_task = tracker_sparql_task_new_take_sparql_str (file, sparql);
 	}
@@ -1354,7 +1343,6 @@ item_add_or_update (TrackerMinerFS *fs,
 	GCancellable *cancellable;
 	gboolean processing;
 	TrackerTask *task;
-	const gchar *urn;
 	gchar *uri;
 	GTask *gtask;
 
@@ -1363,14 +1351,10 @@ item_add_or_update (TrackerMinerFS *fs,
 	cancellable = g_cancellable_new ();
 	g_object_ref (file);
 
-	urn = tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
-	                                          file, FALSE);
-
 	/* Create task and add it to the pool as a WAIT task (we need to extract
 	 * the file metadata and such) */
 	ctxt = update_processing_task_context_new (TRACKER_MINER (fs),
 	                                           priority,
-	                                           urn,
 	                                           cancellable);
 	task = tracker_task_new (file, ctxt,
 	                         (GDestroyNotify) update_processing_task_context_free);
@@ -2507,66 +2491,7 @@ tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
 }
 
 /**
- * tracker_miner_fs_get_urn:
- * @fs: a #TrackerMinerFS
- * @file: a #GFile obtained in #TrackerMinerFS::process-file
- *
- * If the item exists in the store, this function retrieves
- * the URN for a #GFile being currently processed.
-
- * If @file is not being currently processed by @fs, or doesn't
- * exist in the store yet, %NULL will be returned.
- *
- * Returns: (transfer none) (nullable): The URN containing the data associated to @file,
- *          or %NULL.
- *
- * Since: 0.8
- **/
-const gchar *
-tracker_miner_fs_get_urn (TrackerMinerFS *fs,
-                          GFile          *file)
-{
-	TrackerTask *task;
-
-	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
-	g_return_val_if_fail (G_IS_FILE (file), NULL);
-
-	/* Check if found in currently processed data */
-	task = tracker_task_pool_find (fs->priv->task_pool, file);
-
-	if (!task) {
-		gchar *uri;
-
-		uri = g_file_get_uri (file);
-
-		g_critical ("File '%s' is not being currently processed, "
-		            "so the URN cannot be retrieved.", uri);
-		g_free (uri);
-
-		return NULL;
-	} else {
-		UpdateProcessingTaskContext *ctxt;
-
-		/* We are only storing the URN in the created/updated tasks */
-		ctxt = tracker_task_get_data (task);
-
-		if (!ctxt) {
-			gchar *uri;
-
-			uri = g_file_get_uri (file);
-			g_critical ("File '%s' is being processed, but not as a "
-			            "CREATED/UPDATED task, so cannot get URN",
-			            uri);
-			g_free (uri);
-			return NULL;
-		}
-
-		return ctxt->urn;
-	}
-}
-
-/**
- * tracker_miner_fs_query_urn:
+ * tracker_miner_fs_get_folder_urn:
  * @fs: a #TrackerMinerFS
  * @file: a #GFile
  *
@@ -2575,19 +2500,19 @@ tracker_miner_fs_get_urn (TrackerMinerFS *fs,
 
  * If @file doesn't exist in the store yet, %NULL will be returned.
  *
- * Returns: (transfer full): A newly allocated string with the URN containing the data associated
+ * Returns: The URN containing the data associated
  *          to @file, or %NULL.
  *
  * Since: 0.10
  **/
-gchar *
-tracker_miner_fs_query_urn (TrackerMinerFS *fs,
-                            GFile          *file)
+const gchar *
+tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
+				 GFile          *file)
 {
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	return g_strdup (tracker_file_notifier_get_file_iri (fs->priv->file_notifier, file, TRUE));
+	return tracker_file_notifier_get_file_iri (fs->priv->file_notifier, file, TRUE);
 }
 
 /**
