@@ -417,9 +417,6 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (buffer))) {
 		tracker_sparql_buffer_flush (buffer, "SPARQL buffer limit reached");
-	} else if (priv->tasks->len > tracker_task_pool_get_limit (TRACKER_TASK_POOL (buffer)) / 2) {
-		/* We've filled half of the buffer, flush it as we receive more tasks */
-		tracker_sparql_buffer_flush (buffer, "SPARQL buffer half-full");
 	}
 }
 
