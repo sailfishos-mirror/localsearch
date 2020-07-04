@@ -1250,6 +1250,18 @@ update_processing_task_context_free (UpdateProcessingTaskContext *ctxt)
 }
 
 static void
+cache_parent_folder_urn (TrackerMinerFS *fs,
+			 GFile          *file)
+{
+	GFile *parent;
+
+	parent = g_file_get_parent (file);
+	tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
+					    parent, TRUE);
+	g_object_unref (parent);
+}
+
+static void
 on_signal_gtask_complete (GObject      *source,
 			  GAsyncResult *res,
 			  gpointer      user_data)
@@ -1510,6 +1522,10 @@ item_move (TrackerMinerFS *fs,
 	if (!recursive &&
 	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
 		item_remove (fs, source_file, TRUE, source_task_sparql);
+
+	/* Cache URN for source/dest folders */
+	cache_parent_folder_urn (fs, source_file);
+	cache_parent_folder_urn (fs, dest_file);
 
 	g_signal_emit (fs, signals[MOVE_FILE], 0, dest_file, source_file, recursive, &sparql);
 
@@ -2059,10 +2075,6 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 							       (GDestroyNotify) queue_event_free);
 		}
 
-		/* Ensure IRI is cached */
-		tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
-						    event->file, TRUE);
-
 		trace_eq_event (event);
 
 		link = tracker_priority_queue_add (fs->priv->items, event, priority);
@@ -2389,9 +2401,6 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 		if (check_parents && !check_file_parents (fs, file)) {
 			return;
 		}
-
-		tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
-		                                    file, TRUE);
 
 		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file);
 		trace_eq_event (event);

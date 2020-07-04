@@ -1085,6 +1085,12 @@ monitor_item_updated_cb (TrackerMonitor *monitor,
 	/* Fetch the interned copy */
 	canonical = tracker_file_system_get_file (priv->file_system,
 	                                          file, file_type, NULL);
+
+	if (is_directory) {
+		/* Ensure the folder iri is cached */
+		tracker_file_notifier_get_file_iri (notifier, canonical, TRUE);
+	}
+
 	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE);
 
 	if (!is_directory) {
