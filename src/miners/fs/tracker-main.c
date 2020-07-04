@@ -64,6 +64,7 @@ static gboolean version;
 static guint miners_timeout_id = 0;
 static gboolean do_crawling = FALSE;
 static gchar *domain_ontology_name = NULL;
+static gboolean dry_run = FALSE;
 
 static GOptionEntry entries[] = {
 	{ "initial-sleep", 's', 0,
@@ -82,6 +83,10 @@ static GOptionEntry entries[] = {
 	{ "domain-ontology", 'd', 0,
 	  G_OPTION_ARG_STRING, &domain_ontology_name,
 	  N_("Runs for a specific domain ontology"),
+	  NULL },
+	{ "dry-run", 'r', 0,
+	  G_OPTION_ARG_NONE, &dry_run,
+	  N_("Avoids changes in the filesystem"),
 	  NULL },
 	{ "version", 'V', 0,
 	  G_OPTION_ARG_NONE, &version,
@@ -426,7 +431,7 @@ miner_finished_cb (TrackerMinerFS *fs,
 	        total_directories_found,
 	        total_files_found);
 
-	if (do_crawling) {
+	if (do_crawling && !dry_run) {
 		tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs),
 							 TRUE);
 	}
@@ -754,16 +759,17 @@ setup_connection_and_endpoint (TrackerDomainOntology    *domain,
                                TrackerEndpointDBus     **endpoint,
                                GError                  **error)
 {
-	GFile *store, *ontology;
+	GFile *store = NULL, *ontology;
 
-	store = get_cache_dir (domain);
+	if (!dry_run)
+		store = get_cache_dir (domain);
 	ontology = tracker_domain_ontology_get_ontology (domain);
 	*sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
 	                                              store,
 	                                              ontology,
 	                                              NULL,
 	                                              error);
-	g_object_unref (store);
+	g_clear_object (&store);
 
 	if (!*sparql_conn)
 		return FALSE;
@@ -966,10 +972,11 @@ main (gint argc, gchar *argv[])
 	 * event of a crash, this is changed back on shutdown if
 	 * everything appears to be fine.
 	 */
-	tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), TRUE);
+	if (!dry_run) {
+		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), TRUE);
+		tracker_miner_files_set_mtime_checking (TRACKER_MINER_FILES (miner_files), do_mtime_checking);
+	}
 
-	/* Configure files miner */
-	tracker_miner_files_set_mtime_checking (TRACKER_MINER_FILES (miner_files), do_mtime_checking);
 	g_signal_connect (miner_files, "finished",
 			  G_CALLBACK (miner_finished_cb),
 			  NULL);
@@ -984,7 +991,7 @@ main (gint argc, gchar *argv[])
 
 	g_debug ("Shutdown started");
 
-	if (miners_timeout_id == 0 && !miner_needs_check (miner_files)) {
+	if (!dry_run && miners_timeout_id == 0 && !miner_needs_check (miner_files)) {
 		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), FALSE);
 		save_current_locale (domain_ontology);
 	}
