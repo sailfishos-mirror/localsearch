@@ -1455,7 +1455,6 @@ item_move (TrackerMinerFS *fs,
 {
 	gchar     *uri, *source_uri, *sparql;
 	GFileInfo *file_info;
-	const gchar *source_iri;
 	gboolean source_exists;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean recursive;
@@ -1470,9 +1469,8 @@ item_move (TrackerMinerFS *fs,
 	                               NULL, NULL);
 
 	/* Get 'source' ID */
-	source_iri = tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
-	                                                 source_file, TRUE);
-	source_exists = (source_iri != NULL);
+	source_exists = tracker_file_notifier_query_file_exists (fs->priv->file_notifier,
+								 source_file);
 
 	if (!file_info) {
 		gboolean retval;
