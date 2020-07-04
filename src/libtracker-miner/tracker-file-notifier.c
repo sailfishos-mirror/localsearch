@@ -704,8 +704,10 @@ sparql_urn_ensure_statement (TrackerFileNotifier  *notifier,
 		tracker_sparql_connection_query_statement (priv->connection,
 		                                           "SELECT ?ie "
 		                                           "{"
-		                                           "  ~file a nfo:FileDataObject ;"
-		                                           "        nie:interpretedAs ?ie ."
+		                                           "  GRAPH tracker:FileSystem {"
+		                                           "    ~file a nfo:FileDataObject ;"
+		                                           "          nie:interpretedAs ?ie ."
+							   "  }"
 		                                           "}",
 		                                           priv->cancellable,
 		                                           error);
