@@ -1843,7 +1843,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		if (!parent ||
 		    tracker_indexing_tree_file_is_root (fs->priv->indexing_tree, file) ||
 		    !tracker_indexing_tree_get_root (fs->priv->indexing_tree, file, NULL) ||
-		    tracker_file_notifier_get_file_iri (fs->priv->file_notifier, parent, TRUE)) {
+		    tracker_file_notifier_get_file_iri (fs->priv->file_notifier, parent, FALSE)) {
 			keep_processing = item_add_or_update (fs, file, priority, attributes_update);
 		} else {
 			gchar *uri;
@@ -2521,7 +2521,7 @@ tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	return tracker_file_notifier_get_file_iri (fs->priv->file_notifier, file, TRUE);
+	return tracker_file_notifier_get_file_iri (fs->priv->file_notifier, file, FALSE);
 }
 
 /**
