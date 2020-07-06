@@ -61,7 +61,8 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
             for tf in monitored_files:
                 url = self.uri(tf)
                 self.tracker.ensure_resource(fixtures.DOCUMENTS_GRAPH,
-                                             f"a nfo:Document ; nie:isStoredAs <{url}>")
+                                             f"a nfo:Document ; nie:isStoredAs <{url}>",
+                                             timeout=cfg.AWAIT_TIMEOUT)
         except Exception:
             cfg.remove_monitored_test_dir(self.workdir)
             raise
