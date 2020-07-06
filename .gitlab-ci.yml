@@ -23,6 +23,7 @@ stages:
     # We can build and test tracker-miners against tracker just by building
     # tracker as a submodule.
     - su tracker -c '.gitlab-ci/checkout-tracker.sh'
+    - echo "Building tracker.git commit $(git rev-parse HEAD)"
     - su tracker -c 'mkdir build'
     - su tracker -c 'cd build; meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true'
     - su tracker -c 'cd build; ninja'
