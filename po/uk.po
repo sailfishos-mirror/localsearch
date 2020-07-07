@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-22 19:54+0000\n"
-"PO-Revision-Date: 2020-06-23 09:45+0300\n"
+"POT-Creation-Date: 2020-07-06 09:36+0000\n"
+"PO-Revision-Date: 2020-07-07 07:45+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -352,114 +352,119 @@ msgstr ""
 "Запит на призупинку додатку і причина відповідають наявному запиту на "
 "призупинку"
 
-#: src/miners/fs/tracker-main.c:71
+#: src/miners/fs/tracker-main.c:75
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Початковий час сну у секундах, 0->1000 (типово=15)"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:80
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Виконується, поки індексуються усі налаштовані місця, а потім закінчується"
 
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:84
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Перевіряє, чи може індексуватися ФАЙЛ на основі налаштувань"
 
-#: src/miners/fs/tracker-main.c:81 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:85 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
 #: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/miners/fs/tracker-main.c:84 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:88 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Працює для вказаної онтології домену"
 
-#: src/miners/fs/tracker-main.c:88 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:92
+#| msgid "Crawls and processes files on the file system"
+msgid "Avoids changes in the filesystem"
+msgstr "Уникає внесення змін до файлової системи"
+
+#: src/miners/fs/tracker-main.c:96 src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Показує інформацію про версію"
 
-#: src/miners/fs/tracker-main.c:553
+#: src/miners/fs/tracker-main.c:585
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Об’єкт даних «%s» на дану мить існує"
 
-#: src/miners/fs/tracker-main.c:554
+#: src/miners/fs/tracker-main.c:586
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Об’єкт даних «%s» на дану мить не існує"
 
-#: src/miners/fs/tracker-main.c:569
+#: src/miners/fs/tracker-main.c:601
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Каталог може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:570
+#: src/miners/fs/tracker-main.c:602
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Каталог НЕ може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:590
+#: src/miners/fs/tracker-main.c:622
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Каталог може бути проіндексований (засновано на вмісті)"
 
-#: src/miners/fs/tracker-main.c:591
+#: src/miners/fs/tracker-main.c:623
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Каталог НЕ може бути проіндексований (засновано на вмісті)"
 
-#: src/miners/fs/tracker-main.c:638
+#: src/miners/fs/tracker-main.c:670
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Каталог може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:671
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Каталог є непридатним для стеження (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:643
+#: src/miners/fs/tracker-main.c:675
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Файл може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:644
+#: src/miners/fs/tracker-main.c:676
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Файл НЕ може відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:648
+#: src/miners/fs/tracker-main.c:680
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr "Файл або каталог можуть відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:649
+#: src/miners/fs/tracker-main.c:681
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr "Файл або каталог НЕ можуть відстежуватися (засновано на налаштуванні)"
 
-#: src/miners/fs/tracker-main.c:664
+#: src/miners/fs/tracker-main.c:696
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Файл може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:665
+#: src/miners/fs/tracker-main.c:697
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Файл НЕ може бути проіндексований (засновано на правилах)"
 
-#: src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:706
 msgid "Would be indexed"
 msgstr "Буде індексуватися"
 
-#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
+#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
 msgid "Yes"
 msgstr "Так"
 
-#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:677
+#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
 msgid "No"
 msgstr "Ні"
 
-#: src/miners/fs/tracker-main.c:676
+#: src/miners/fs/tracker-main.c:708
 msgid "Would be monitored"
 msgstr "Буде відстежуватися"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:816
+#: src/miners/fs/tracker-main.c:849
 msgid "— start the tracker indexer"
 msgstr "— запустити індексатор tracker"
 
@@ -1609,9 +1614,6 @@ msgstr "— запустити службу зворотного запису tr
 
 #~ msgid "Tracker File System Miner"
 #~ msgstr "Індексатор файлової системи"
-
-#~ msgid "Crawls and processes files on the file system"
-#~ msgstr "Перебирає та обробляє файли у файловій системі"
 
 #~ msgid "RSS/ATOM Feeds"
 #~ msgstr "Стрічки RSS/ATOM"
