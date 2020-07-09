@@ -351,7 +351,8 @@ void
 tracker_miner_files_peer_listener_add_watch (TrackerMinerFilesPeerListener *listener,
                                              const gchar                   *dbus_name,
                                              GFile                         *file,
-                                             const gchar * const           *graphs)
+                                             const gchar * const           *graphs,
+                                             TrackerIndexLocationFlags      flags)
 {
 	TrackerMinerFilesPeerListenerPrivate *priv;
 	PeerFilesData *peer_data;

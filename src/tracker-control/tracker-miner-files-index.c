@@ -20,6 +20,8 @@
 #include "config-miners.h"
 
 #include <libtracker-miners-common/tracker-dbus.h>
+#include <libtracker-miners-common/tracker-enums.h>
+#include <libtracker-miners-common/tracker-miners-enum-types.h>
 #include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-miner/tracker-miner.h>
 
@@ -129,6 +131,32 @@ index_finalize (GObject *object)
 	g_strfreev (priv->graphs);
 }
 
+static TrackerIndexLocationFlags
+parse_index_location_flags (const gchar * const *flags_strv)
+{
+	TrackerIndexLocationFlags flags = 0;
+	GFlagsClass *type_class;
+	GFlagsValue *value;
+
+	type_class = g_type_class_ref (TRACKER_TYPE_INDEX_LOCATION_FLAGS);
+
+	while (*flags_strv) {
+		const gchar *flag_string = *flags_strv;
+
+		value = g_flags_get_value_by_nick (type_class, flag_string);
+
+		if (value != NULL) {
+			flags |= value->value;
+		}
+
+		flags_strv ++;
+	}
+
+	g_type_class_unref (type_class);
+
+	return flags;
+}
+
 static void
 update_indexed_files (TrackerMinerFilesIndex *index)
 {
@@ -136,19 +164,21 @@ update_indexed_files (TrackerMinerFilesIndex *index)
 
 	priv = TRACKER_MINER_FILES_INDEX_GET_PRIVATE (index);
 
-	tracker_dbus_miner_files_proxy_set_indexed_files (priv->proxy_skeleton,
-	                                                  (const gchar * const *) priv->indexed_files->data);
+	tracker_dbus_miner_files_proxy_set_indexed_locations (priv->proxy_skeleton,
+	                                                      (const gchar * const *) priv->indexed_files->data);
 }
 
 static void
-tracker_miner_files_index_handle_index_file (TrackerDBusMinerFilesIndex *skeleton,
-                                             GDBusMethodInvocation      *invocation,
-                                             const gchar                *file_uri,
-                                             const gchar * const        *graphs,
-                                             TrackerMinerFilesIndex     *index)
+tracker_miner_files_index_handle_index_location (TrackerDBusMinerFilesIndex *skeleton,
+                                                 GDBusMethodInvocation      *invocation,
+                                                 const gchar                *file_uri,
+                                                 const gchar * const        *graphs,
+                                                 const gchar * const        *flags,
+                                                 TrackerMinerFilesIndex     *index)
 {
 	TrackerMinerFilesIndexPrivate *priv;
 	TrackerDBusRequest *request;
+	TrackerIndexLocationFlags index_flags;
 	GFile *file;
 
 	priv = TRACKER_MINER_FILES_INDEX_GET_PRIVATE (index);
@@ -165,9 +195,11 @@ tracker_miner_files_index_handle_index_file (TrackerDBusMinerFilesIndex *skeleto
 		update_indexed_files (index);
 	}
 
+	index_flags = parse_index_location_flags (flags);
+
 	tracker_miner_files_peer_listener_add_watch (priv->peer_listener,
 	                                             g_dbus_method_invocation_get_sender (invocation),
-	                                             file, graphs);
+	                                             file, graphs, index_flags);
 
 	tracker_dbus_request_end (request, NULL);
 	g_dbus_method_invocation_return_value (invocation, NULL);
@@ -236,8 +268,8 @@ tracker_miner_files_index_init (TrackerMinerFilesIndex *object)
 	priv->proxy_skeleton = tracker_dbus_miner_files_proxy_skeleton_new ();
 
 	priv->skeleton = tracker_dbus_miner_files_index_skeleton_new ();
-	g_signal_connect (priv->skeleton, "handle-index-file",
-	                  G_CALLBACK (tracker_miner_files_index_handle_index_file),
+	g_signal_connect (priv->skeleton, "handle-index-location",
+	                  G_CALLBACK (tracker_miner_files_index_handle_index_location),
 	                  object);
 	priv->indexed_files = g_array_new (TRUE, TRUE, sizeof (gchar *));
 	g_array_set_clear_func (priv->indexed_files, string_clear);

@@ -822,7 +822,7 @@ update_indexed_files_from_proxy (TrackerMinerFiles *miner,
 	GVariant *v;
 	gint i;
 
-	v = g_dbus_proxy_get_cached_property (proxy, "IndexedFiles");
+	v = g_dbus_proxy_get_cached_property (proxy, "IndexedLocations");
 	if (v)
 		indexed_uris = g_variant_get_strv (v, NULL);
 

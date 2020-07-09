@@ -24,6 +24,7 @@
 
 #include <glib-object.h>
 #include <gio/gio.h>
+#include <libtracker-miners-common/tracker-enums.h>
 
 #define TRACKER_TYPE_MINER_FILES_PEER_LISTENER            (tracker_miner_files_peer_listener_get_type ())
 #define TRACKER_MINER_FILES_PEER_LISTENER(object)         (G_TYPE_CHECK_INSTANCE_CAST ((object), TRACKER_TYPE_MINER_FILES_PEER_LISTENER, TrackerMinerFilesPeerListener))
@@ -51,7 +52,8 @@ TrackerMinerFilesPeerListener *
 void     tracker_miner_files_peer_listener_add_watch    (TrackerMinerFilesPeerListener *listener,
                                                          const gchar                   *dbus_name,
                                                          GFile                         *file,
-                                                         const gchar * const           *graphs);
+                                                         const gchar * const           *graphs,
+                                                         TrackerIndexLocationFlags      flags);
 void     tracker_miner_files_peer_listener_remove_watch (TrackerMinerFilesPeerListener *listener,
                                                          const gchar                   *dbus_name,
                                                          GFile                         *file);
