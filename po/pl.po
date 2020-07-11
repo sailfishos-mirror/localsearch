@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-06-21 11:45+0200\n"
-"PO-Revision-Date: 2020-06-21 11:47+0200\n"
+"POT-Creation-Date: 2020-07-11 21:05+0200\n"
+"PO-Revision-Date: 2020-07-11 21:07+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -246,7 +246,7 @@ msgid "Ignored directories with content"
 msgstr "Ignorowane katalogi z zawartością"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-msgid "Avoid any directory containing a file blocklisted here"
+msgid "Avoid any directory containing a file blacklisted here"
 msgstr ""
 "Unikanie katalogów zawierających plik umieszczony na tej liście blokowania"
 
@@ -507,11 +507,11 @@ msgstr "Rozpakowywanie"
 msgid "Metadata extractor"
 msgstr "Rozpakowywanie metadanych"
 
-#: ../src/tracker-extract/tracker-extract.c:683
+#: ../src/tracker-extract/tracker-extract.c:711
 msgid "Metadata extraction failed"
 msgstr "Rozpakowanie metadanych się nie powiodło"
 
-#: ../src/tracker-extract/tracker-extract.c:763
+#: ../src/tracker-extract/tracker-extract.c:791
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nie odnaleziono modułów rozpakowujących lub metadanych do obsłużenia tego "
