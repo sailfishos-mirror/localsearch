@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-07-06 09:36+0000\n"
-"PO-Revision-Date: 2020-07-07 07:45+0300\n"
+"POT-Creation-Date: 2020-07-13 11:18+0000\n"
+"PO-Revision-Date: 2020-07-13 17:18+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -367,8 +367,8 @@ msgstr "Перевіряє, чи може індексуватися ФАЙЛ н
 
 #: src/miners/fs/tracker-main.c:85 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
-#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
-#: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
+#: src/tracker/tracker-index.c:47 src/tracker/tracker-index.c:48
+#: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ФАЙЛ"
 
@@ -378,7 +378,6 @@ msgid "Runs for a specific domain ontology"
 msgstr "Працює для вказаної онтології домену"
 
 #: src/miners/fs/tracker-main.c:92
-#| msgid "Crawls and processes files on the file system"
 msgid "Avoids changes in the filesystem"
 msgstr "Уникає внесення змін до файлової системи"
 
@@ -488,9 +487,9 @@ msgstr "Використовувати назву (потрібно викори
 msgid "— start the feeds indexer"
 msgstr "— запустити індексатор стрічок"
 
-#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-index.c:196
-#: src/tracker/tracker-search.c:1523 src/tracker/tracker-status.c:86
-#: src/tracker/tracker-status.c:362 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-search.c:1523
+#: src/tracker/tracker-status.c:86 src/tracker/tracker-status.c:362
+#: src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "Не вдалося встановити з’єднання з Tracker"
 
@@ -499,9 +498,7 @@ msgstr "Не вдалося встановити з’єднання з Tracker"
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
-#: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
-#: src/tracker/tracker-index.c:337 src/tracker/tracker-process.c:80
+#: src/tracker/tracker-index.c:63 src/tracker/tracker-process.c:80
 #: src/tracker/tracker-process.c:206 src/tracker/tracker-process.c:329
 #: src/tracker/tracker-process.c:346 src/tracker/tracker-search.c:1524
 #: src/tracker/tracker-status.c:87 src/tracker/tracker-status.c:278
@@ -533,7 +530,7 @@ msgstr "Файл для витягнення метаданих"
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Тип MIME для файлу (у випадку відсутності, він буде визначений)"
 
-#: src/tracker-extract/tracker-main.c:86 src/tracker/tracker-index.c:57
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
@@ -754,7 +751,7 @@ msgstr "Спроба відновити роботу індексатора %s �
 msgid "Could not resume miner: %s"
 msgstr "Не вдалося відновити роботу індексатора: %s"
 
-#: src/tracker/tracker-daemon.c:529 src/tracker/tracker-index.c:230
+#: src/tracker/tracker-daemon.c:529
 msgid "Done"
 msgstr "Виконано"
 
@@ -886,7 +883,7 @@ msgstr ""
 "Якщо аргументів не надано, буде показано стан засобів видобування даних"
 
 #: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:262
+#: src/tracker/tracker-index.c:117 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -904,101 +901,26 @@ msgstr "Не вдалося створити проксі D-Bus до tracker-sto
 msgid "Could not run tracker-extract: "
 msgstr "Не вдалося запустити tracker-extract: "
 
-#: src/tracker/tracker-index.c:56
-msgid ""
-"Tell miners to reindex files which match the mime type supplied (for new "
-"extractors), use -m MIME1 -m MIME2"
-msgstr ""
-"Переіндексувати файли, які відповідають вказаному типу MIME (для нових "
-"компонентів витягнення), використовуйте -m MIME1 -m MIME2"
-
-#: src/tracker/tracker-index.c:59
-msgid "Tell miners to (re)index a given file"
-msgstr "Переіндексувати вказаний файл"
+#: src/tracker/tracker-index.c:44
+msgid "Does nothing, provided for compatibility with Tracker 2.0"
+msgstr "Не призводить до виконання дій, залишено для сумісності із Tracker 2.0"
 
 #: src/tracker/tracker-index.c:62
-msgid "Backup current index / database to the file provided"
-msgstr ""
-"Створити резервну копію поточного покажчика або бази даних у вказаному файлі"
-
-#: src/tracker/tracker-index.c:65
-msgid "Restore a database from a previous backup (see --backup)"
-msgstr "Відновити базу даних з попередньої резервної копії (див. --backup)"
-
-#: src/tracker/tracker-index.c:68
-msgid "Import a dataset from the provided file (in Turtle format)"
-msgstr "Імпортувати набір даних з наданого файла (у форматі Turtle)"
-
-#: src/tracker/tracker-index.c:122
-#, c-format
-msgid "Could not reindex mimetypes, manager could not be created, %s"
-msgstr ""
-"Не вдалося переіндексувати типи MIME, не вдалося створити диспетчер, %s"
-
-#: src/tracker/tracker-index.c:132
-msgid "Could not reindex mimetypes"
-msgstr "Не вдалося вдруге індексувати типи MIME"
-
-#: src/tracker/tracker-index.c:138
-msgid "Reindexing mime types was successful"
-msgstr "Повторне індексування типів MIME успішно завершено"
-
-#: src/tracker/tracker-index.c:154
 #, c-format
 msgid "Could not (re)index file, manager could not be created, %s"
 msgstr "Не вдалося (пере)індексувати файл, не вдалося створити диспетчер, %s"
 
-#: src/tracker/tracker-index.c:169
+#: src/tracker/tracker-index.c:77
 msgid "Could not (re)index file"
 msgstr "Не вдалося індексувати (вдруге) файл"
 
-#: src/tracker/tracker-index.c:175
+#: src/tracker/tracker-index.c:83
 msgid "(Re)indexing file was successful"
 msgstr "(Повторне) індексування файлу успішно завершено"
 
-#: src/tracker/tracker-index.c:208
-msgid "Importing Turtle file"
-msgstr "Імпортування файлу у форматі Turtle"
-
-#: src/tracker/tracker-index.c:223
-msgid "Unable to import Turtle file"
-msgstr "Не вдалося імпортувати файл у форматі Turtle"
-
-#: src/tracker/tracker-index.c:259
-msgid "Backing up database"
-msgstr "Резервне копіювання бази даних"
-
-#: src/tracker/tracker-index.c:279 src/tracker/tracker-index.c:336
-msgid "Could not backup database"
-msgstr "Не вдалося створити резервну копію бази даних"
-
-#: src/tracker/tracker-index.c:316
-msgid "Restoring database from backup"
-msgstr "Відновлення бази даних з резервної копії"
-
-#: src/tracker/tracker-index.c:451
-msgid ""
-"Only one action (--backup, --restore, --index-file or --import) can be used "
-"at a time"
-msgstr ""
-"Можна одночасно вказувати одну дію (--backup, --restore, --index-file або --"
-"import)"
-
-#: src/tracker/tracker-index.c:453
-msgid "Missing one or more files which are required"
-msgstr "Не вистачає одного або декількох файлів, який потрібен для роботи"
-
-#: src/tracker/tracker-index.c:455
-msgid "Only one file can be used with --backup and --restore"
-msgstr "З --backup і --restore можна вказувати лише один файл"
-
-#: src/tracker/tracker-index.c:457
-msgid ""
-"Actions (--backup, --restore, --index-file and --import) can not be used "
-"with --reindex-mime-type"
-msgstr ""
-"Дії (--backup, --restore, --index-file і --import) не можна використовувати "
-"разом із --reindex-mime-type"
+#: src/tracker/tracker-index.c:126
+msgid "Please specify one or more locations to index."
+msgstr "Будь ласка, вкажіть одне або декілька місць для індексування."
 
 #: src/tracker/tracker-process.c:79
 msgid "Could not open /proc"
@@ -1581,6 +1503,72 @@ msgstr "Не вимикати після 30 секунд простоюванн�
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— запустити службу зворотного запису tracker"
+
+#~ msgid ""
+#~ "Tell miners to reindex files which match the mime type supplied (for new "
+#~ "extractors), use -m MIME1 -m MIME2"
+#~ msgstr ""
+#~ "Переіндексувати файли, які відповідають вказаному типу MIME (для нових "
+#~ "компонентів витягнення), використовуйте -m MIME1 -m MIME2"
+
+#~ msgid "Tell miners to (re)index a given file"
+#~ msgstr "Переіндексувати вказаний файл"
+
+#~ msgid "Backup current index / database to the file provided"
+#~ msgstr ""
+#~ "Створити резервну копію поточного покажчика або бази даних у вказаному "
+#~ "файлі"
+
+#~ msgid "Restore a database from a previous backup (see --backup)"
+#~ msgstr "Відновити базу даних з попередньої резервної копії (див. --backup)"
+
+#~ msgid "Import a dataset from the provided file (in Turtle format)"
+#~ msgstr "Імпортувати набір даних з наданого файла (у форматі Turtle)"
+
+#~ msgid "Could not reindex mimetypes, manager could not be created, %s"
+#~ msgstr ""
+#~ "Не вдалося переіндексувати типи MIME, не вдалося створити диспетчер, %s"
+
+#~ msgid "Could not reindex mimetypes"
+#~ msgstr "Не вдалося вдруге індексувати типи MIME"
+
+#~ msgid "Reindexing mime types was successful"
+#~ msgstr "Повторне індексування типів MIME успішно завершено"
+
+#~ msgid "Importing Turtle file"
+#~ msgstr "Імпортування файлу у форматі Turtle"
+
+#~ msgid "Unable to import Turtle file"
+#~ msgstr "Не вдалося імпортувати файл у форматі Turtle"
+
+#~ msgid "Backing up database"
+#~ msgstr "Резервне копіювання бази даних"
+
+#~ msgid "Could not backup database"
+#~ msgstr "Не вдалося створити резервну копію бази даних"
+
+#~ msgid "Restoring database from backup"
+#~ msgstr "Відновлення бази даних з резервної копії"
+
+#~ msgid ""
+#~ "Only one action (--backup, --restore, --index-file or --import) can be "
+#~ "used at a time"
+#~ msgstr ""
+#~ "Можна одночасно вказувати одну дію (--backup, --restore, --index-file або "
+#~ "--import)"
+
+#~ msgid "Missing one or more files which are required"
+#~ msgstr "Не вистачає одного або декількох файлів, який потрібен для роботи"
+
+#~ msgid "Only one file can be used with --backup and --restore"
+#~ msgstr "З --backup і --restore можна вказувати лише один файл"
+
+#~ msgid ""
+#~ "Actions (--backup, --restore, --index-file and --import) can not be used "
+#~ "with --reindex-mime-type"
+#~ msgstr ""
+#~ "Дії (--backup, --restore, --index-file і --import) не можна "
+#~ "використовувати разом із --reindex-mime-type"
 
 #~ msgid "Enable writeback"
 #~ msgstr "Увімкнути зворотній запис"
