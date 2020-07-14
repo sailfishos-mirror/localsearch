@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-07-06 09:36+0000\n"
-"PO-Revision-Date: 2020-07-06 16:30+0300\n"
+"POT-Creation-Date: 2020-07-13 11:18+0000\n"
+"PO-Revision-Date: 2020-07-14 17:53+0300\n"
 "Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -370,8 +370,8 @@ msgstr ""
 
 #: src/miners/fs/tracker-main.c:85 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
-#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
-#: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
+#: src/tracker/tracker-index.c:47 src/tracker/tracker-index.c:48
+#: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FIȘIER"
 
@@ -492,9 +492,9 @@ msgstr "Titlu de utilizat (trebuie folosit cu --add-feed)"
 msgid "— start the feeds indexer"
 msgstr "— pornește indexatorul de fluxuri"
 
-#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-index.c:196
-#: src/tracker/tracker-search.c:1523 src/tracker/tracker-status.c:86
-#: src/tracker/tracker-status.c:362 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-search.c:1523
+#: src/tracker/tracker-status.c:86 src/tracker/tracker-status.c:362
+#: src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "Nu s-a putut stabili o conexiune la Tracker"
 
@@ -503,9 +503,7 @@ msgstr "Nu s-a putut stabili o conexiune la Tracker"
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
-#: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
-#: src/tracker/tracker-index.c:337 src/tracker/tracker-process.c:80
+#: src/tracker/tracker-index.c:63 src/tracker/tracker-process.c:80
 #: src/tracker/tracker-process.c:206 src/tracker/tracker-process.c:329
 #: src/tracker/tracker-process.c:346 src/tracker/tracker-search.c:1524
 #: src/tracker/tracker-status.c:87 src/tracker/tracker-status.c:278
@@ -536,7 +534,7 @@ msgstr "Fișiere cărora li se vor extrage metadatele"
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Tip MIME al fișierului (dacă nu este specificat, va fi ghicit)"
 
-#: src/tracker-extract/tracker-main.c:86 src/tracker/tracker-index.c:57
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
@@ -761,7 +759,7 @@ msgstr "Se încearcă repornirea minerului de date %s cu cookie %d"
 msgid "Could not resume miner: %s"
 msgstr "Nu s-a putut reporni minerul de date: „%s”"
 
-#: src/tracker/tracker-daemon.c:529 src/tracker/tracker-index.c:230
+#: src/tracker/tracker-daemon.c:529
 msgid "Done"
 msgstr "Terminat"
 
@@ -887,7 +885,7 @@ msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Dacă nu sunt date argumente, starea minerilor de date este arătată"
 
 #: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:262
+#: src/tracker/tracker-index.c:117 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -905,102 +903,26 @@ msgstr "Nu s-a putut crea proxy-ul D-Bus la tracker-store"
 msgid "Could not run tracker-extract: "
 msgstr "Nu s-a putut rula tracker-extract: "
 
-#: src/tracker/tracker-index.c:56
-msgid ""
-"Tell miners to reindex files which match the mime type supplied (for new "
-"extractors), use -m MIME1 -m MIME2"
-msgstr ""
-"Spune minerilor să reindexeze fișierele ce se potrivesc cu tipul mime "
-"furnizat (pentru extractori noi), utilizați -m MIME1 -m MIME2"
-
-#: src/tracker/tracker-index.c:59
-msgid "Tell miners to (re)index a given file"
-msgstr "Spune minerilor să (re)indexeze un fișier dat"
+#: src/tracker/tracker-index.c:44
+msgid "Does nothing, provided for compatibility with Tracker 2.0"
+msgstr "Nu face nimic, furnizat pentru compatibilitate cu Tracker 2.0"
 
 #: src/tracker/tracker-index.c:62
-msgid "Backup current index / database to the file provided"
-msgstr "Copiază indexul curent / baza de date în fișierul furnizat"
-
-#: src/tracker/tracker-index.c:65
-msgid "Restore a database from a previous backup (see --backup)"
-msgstr ""
-"Restaurează o bază de date dintr-o copie de rezervă anterioară (vedeți --"
-"backup)"
-
-#: src/tracker/tracker-index.c:68
-msgid "Import a dataset from the provided file (in Turtle format)"
-msgstr "Importă un set de date de la fișierul furnizat (în format Turtle)"
-
-#: src/tracker/tracker-index.c:122
-#, c-format
-msgid "Could not reindex mimetypes, manager could not be created, %s"
-msgstr ""
-"Nu s-au putut reindexa tipurile mime, managerul nu a putut fi creat, %s"
-
-#: src/tracker/tracker-index.c:132
-msgid "Could not reindex mimetypes"
-msgstr "Nu s-au putut reindexa tipurile mime"
-
-#: src/tracker/tracker-index.c:138
-msgid "Reindexing mime types was successful"
-msgstr "Reindexarea tipurilor mime a fost cu succes"
-
-#: src/tracker/tracker-index.c:154
 #, c-format
 msgid "Could not (re)index file, manager could not be created, %s"
 msgstr "Nu s-a putut (re)indexa fișierul, managerul nu a putut fi creat, %s"
 
-#: src/tracker/tracker-index.c:169
+#: src/tracker/tracker-index.c:77
 msgid "Could not (re)index file"
 msgstr "Nu s-a putut (re)indexa fișierul"
 
-#: src/tracker/tracker-index.c:175
+#: src/tracker/tracker-index.c:83
 msgid "(Re)indexing file was successful"
 msgstr "(Re)indexarea fișierului a fost cu succes"
 
-#: src/tracker/tracker-index.c:208
-msgid "Importing Turtle file"
-msgstr "Se importă fișiere Turtle"
-
-#: src/tracker/tracker-index.c:223
-msgid "Unable to import Turtle file"
-msgstr "Nu s-au putut importa fișierele Turtle"
-
-#: src/tracker/tracker-index.c:259
-msgid "Backing up database"
-msgstr "Se face o copie de rezervă a bazei de date"
-
-#: src/tracker/tracker-index.c:279 src/tracker/tracker-index.c:336
-msgid "Could not backup database"
-msgstr "Nu s-a putut face o copie de rezervă a bazei de date"
-
-#: src/tracker/tracker-index.c:316
-msgid "Restoring database from backup"
-msgstr "Se restaurează baza de date din copia de rezervă"
-
-#: src/tracker/tracker-index.c:451
-msgid ""
-"Only one action (--backup, --restore, --index-file or --import) can be used "
-"at a time"
-msgstr ""
-"Doar o acțiune (--backup, --restore, --index-file sau --import) poate fi "
-"utilizată la un moment dat"
-
-#: src/tracker/tracker-index.c:453
-msgid "Missing one or more files which are required"
-msgstr "Lipsesc unul sau mai multe fișiere care sunt necesare"
-
-#: src/tracker/tracker-index.c:455
-msgid "Only one file can be used with --backup and --restore"
-msgstr "Doar un fișier poate fi utilizat cu --backup și --restore"
-
-#: src/tracker/tracker-index.c:457
-msgid ""
-"Actions (--backup, --restore, --index-file and --import) can not be used "
-"with --reindex-mime-type"
-msgstr ""
-"Acțiunile (--backup, --restore, --index-file și --import) nu pot fi "
-"utilizate cu --reindex-mime-type"
+#: src/tracker/tracker-index.c:126
+msgid "Please specify one or more locations to index."
+msgstr "Specificați una sau mai multe locații pentru indexare."
 
 #: src/tracker/tracker-process.c:79
 msgid "Could not open /proc"
@@ -1589,6 +1511,72 @@ msgstr "Dezactivează oprirea după 30 de secunde de inactivitate"
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— pornește serviciul de scriere înapoi de tracker"
+
+#~ msgid ""
+#~ "Tell miners to reindex files which match the mime type supplied (for new "
+#~ "extractors), use -m MIME1 -m MIME2"
+#~ msgstr ""
+#~ "Spune minerilor să reindexeze fișierele ce se potrivesc cu tipul mime "
+#~ "furnizat (pentru extractori noi), utilizați -m MIME1 -m MIME2"
+
+#~ msgid "Tell miners to (re)index a given file"
+#~ msgstr "Spune minerilor să (re)indexeze un fișier dat"
+
+#~ msgid "Backup current index / database to the file provided"
+#~ msgstr "Copiază indexul curent / baza de date în fișierul furnizat"
+
+#~ msgid "Restore a database from a previous backup (see --backup)"
+#~ msgstr ""
+#~ "Restaurează o bază de date dintr-o copie de rezervă anterioară (vedeți --"
+#~ "backup)"
+
+#~ msgid "Import a dataset from the provided file (in Turtle format)"
+#~ msgstr "Importă un set de date de la fișierul furnizat (în format Turtle)"
+
+#~ msgid "Could not reindex mimetypes, manager could not be created, %s"
+#~ msgstr ""
+#~ "Nu s-au putut reindexa tipurile mime, managerul nu a putut fi creat, %s"
+
+#~ msgid "Could not reindex mimetypes"
+#~ msgstr "Nu s-au putut reindexa tipurile mime"
+
+#~ msgid "Reindexing mime types was successful"
+#~ msgstr "Reindexarea tipurilor mime a fost cu succes"
+
+#~ msgid "Importing Turtle file"
+#~ msgstr "Se importă fișiere Turtle"
+
+#~ msgid "Unable to import Turtle file"
+#~ msgstr "Nu s-au putut importa fișierele Turtle"
+
+#~ msgid "Backing up database"
+#~ msgstr "Se face o copie de rezervă a bazei de date"
+
+#~ msgid "Could not backup database"
+#~ msgstr "Nu s-a putut face o copie de rezervă a bazei de date"
+
+#~ msgid "Restoring database from backup"
+#~ msgstr "Se restaurează baza de date din copia de rezervă"
+
+#~ msgid ""
+#~ "Only one action (--backup, --restore, --index-file or --import) can be "
+#~ "used at a time"
+#~ msgstr ""
+#~ "Doar o acțiune (--backup, --restore, --index-file sau --import) poate fi "
+#~ "utilizată la un moment dat"
+
+#~ msgid "Missing one or more files which are required"
+#~ msgstr "Lipsesc unul sau mai multe fișiere care sunt necesare"
+
+#~ msgid "Only one file can be used with --backup and --restore"
+#~ msgstr "Doar un fișier poate fi utilizat cu --backup și --restore"
+
+#~ msgid ""
+#~ "Actions (--backup, --restore, --index-file and --import) can not be used "
+#~ "with --reindex-mime-type"
+#~ msgstr ""
+#~ "Acțiunile (--backup, --restore, --index-file și --import) nu pot fi "
+#~ "utilizate cu --reindex-mime-type"
 
 #~ msgid "Enable writeback"
 #~ msgstr "Permite scrierea înapoi"
