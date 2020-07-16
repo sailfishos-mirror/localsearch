@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2020-07-13 11:18+0000\n"
-"PO-Revision-Date: 2020-07-14 17:53+0300\n"
+"PO-Revision-Date: 2020-07-16 14:14+0300\n"
 "Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -922,7 +922,7 @@ msgstr "(Re)indexarea fișierului a fost cu succes"
 
 #: src/tracker/tracker-index.c:126
 msgid "Please specify one or more locations to index."
-msgstr "Specificați una sau mai multe locații pentru indexare."
+msgstr "Specificați una sau mai multe locații de indexat."
 
 #: src/tracker/tracker-process.c:79
 msgid "Could not open /proc"
