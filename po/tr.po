@@ -6,14 +6,14 @@
 # Kaan Özdinçer <kaanozdincer@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014, 2015.
 # Çağatay Yiğit Şahin <cyigitsahin@outlook.com>, 2017.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2018-2019.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2018, 2019, 2020.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-30 07:48+0000\n"
-"PO-Revision-Date: 2020-07-09 11:21+0300\n"
+"POT-Creation-Date: 2020-07-17 22:04+0000\n"
+"PO-Revision-Date: 2020-07-18 22:51+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -82,7 +82,7 @@ msgstr "İlk uyku"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:4
 msgid "Initial sleep time, in seconds."
-msgstr "İlk uyku süresi, saniye cinsinden."
+msgstr "İlk uyku süresi, saniye türünden."
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:7
 msgid "Throttle"
@@ -100,7 +100,7 @@ msgstr "Düşük disk alanı sınırı"
 msgid ""
 "Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
-"İndekslemenin duraklatılacağı, yüzde cinsinden disk alanı eşiği, kapatmak "
+"İndekslemenin duraklatılacağı, yüzde türünden disk alanı eşiği, kapatmak "
 "için -1 kullanın."
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:11
@@ -126,7 +126,7 @@ msgid ""
 "Threshold in days after which files from removables devices will be removed "
 "from database if not mounted. 0 means never, maximum is 365."
 msgstr ""
-"Gün cinsinden eşik, kaldırılabilir aygıtlardan dosyalar veritabanından "
+"Gün türünden eşik, kaldırılabilir aygıtlardan dosyalar veritabanından "
 "silinecektir, eğer bağlı değilse. 0 hiçbir zaman demektir ve 365 azami "
 "sayıdır."
 
@@ -248,8 +248,8 @@ msgid "Ignored directories with content"
 msgstr "İçeriğiyle yoksayılmış dizinler"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-msgid "Avoid any directory containing a file blocklisted here"
-msgstr "Engel listesine alınan dosyayı bulunduran herhangi bir dizini dışla"
+msgid "Avoid any directory containing a file blacklisted here"
+msgstr "Engel listesine alınan dosyayı bulunduran dizinleri dışla"
 
 #: ../src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
@@ -326,7 +326,7 @@ msgstr ""
 
 #: ../src/miners/fs/tracker-main.c:78
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-msgstr "Saniye cinsinden başlangıç uyuma süresi, 0->1000 (varsayılan=15)"
+msgstr "Saniye türünden başlangıç uyuma süresi, 0->1000 (varsayılan=15)"
 
 #: ../src/miners/fs/tracker-main.c:83
 msgid "Runs until all configured locations are indexed and then exits"
