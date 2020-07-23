@@ -329,8 +329,8 @@ msgstr[1] " %2.2d hores"
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
-msgstr[0] "%2.2d minut"
-msgstr[1] "%2.2d minuts"
+msgstr[0] " %2.2d minut"
+msgstr[1] " %2.2d minuts"
 
 #: src/libtracker-miners-common/tracker-utils.c:147
 #, c-format
@@ -563,7 +563,7 @@ msgstr "MÒDUL"
 
 #: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:39
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
-msgstr "Format dels resultats de sortida : «SPARQL», «turtle» o «json-ld»"
+msgstr "Format dels resultats de sortida: «sparql», «turtle» o «json-ld»"
 
 #: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:40
 msgid "FORMAT"
@@ -1313,7 +1313,7 @@ msgid ""
 "results are output to terminal"
 msgstr ""
 "Recull informació de depuració útil per a la investigació i proveïment "
-"d'informació del problema, els resultats surten a un terminal."
+"d'informació del problema, els resultats surten a un terminal"
 
 #: src/tracker/tracker-status.c:98
 msgid "Could not get Tracker statistics"
