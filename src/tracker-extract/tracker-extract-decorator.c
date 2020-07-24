@@ -609,18 +609,21 @@ decorator_ignore_file (GFile    *file,
 	                          NULL, &error);
 	if (!info) {
 		g_warning ("Could not get mimetype: %s", error->message);
-		g_error_free (error);
-		return;
-	}
+		g_clear_error (&error);
 
-	mimetype = g_file_info_get_attribute_string (info,
-	                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
-	hash = tracker_extract_module_manager_get_hash (mimetype);
-	g_object_unref (info);
+		/* Use a zero hash value to mark that we tried to process the file and got nowhere */
+		hash = "00000000";
+	} else {
+		mimetype = g_file_info_get_attribute_string (info,
+		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
+		hash = tracker_extract_module_manager_get_hash (mimetype);
+		g_object_unref (info);
+	}
 
 	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
 	query = g_strdup_printf ("INSERT DATA { GRAPH tracker:FileSystem {"
-	                         "  <%s> tracker:extractorHash \"%s\" ;"
+	                         "  <%s> a nfo:FileDataObject ; "
+	                         "      tracker:extractorHash \"%s\" ."
 	                         "}}",
 	                         uri, hash);
 
