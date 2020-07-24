@@ -20,6 +20,7 @@
 Tests failure cases of tracker-extract.
 """
 
+import pathlib
 import os
 import shutil
 import unittest as ut
@@ -37,6 +38,12 @@ TRACKER_EXTRACT_FAILURE_DATA_SOURCE = 'tracker:extractor-failure-data-source'
 
 
 class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
+    def create_test_file(self, path):
+        testfile = pathlib.Path(self.workdir).joinpath(path)
+        testfile.parent.mkdir(parents=True, exist_ok=True)
+        testfile.write_text("Hello, I'm a test file.")
+        return testfile
+
     def test_reextraction(self):
         """Tests whether known files are still re-extracted on user request."""
         miner_fs = self.miner_fs
@@ -73,6 +80,45 @@ class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
             self.assertEqual(title_result[0][0], VALID_FILE_TITLE)
         finally:
             os.remove(file_path)
+
+    def await_failsafe_marker_inserted(self, graph, path, timeout=cfg.AWAIT_TIMEOUT):
+        url = path.as_uri()
+        expected = [
+            f'a rdfs:Resource. <{url}> tracker:extractorHash ?hash'
+        ]
+
+        return self.tracker.await_insert(graph, '; '.join(expected), timeout=timeout)
+
+    def test_extract_failure(self):
+        """
+        Tests a file which extractor will fail to process.
+        """
+
+        # This file will be processed by the mp3 or gstreamer extractor due to
+        # its extension, but it's not a valid MP3.
+        testfile = self.create_test_file('test-not-monitored/invalid.mp3')
+
+        # The extractor hash should be recorded against the file, so it won't
+        # try to process it again.
+        with self.await_failsafe_marker_inserted(fixtures.FILESYSTEM_GRAPH, testfile):
+            self.miner_fs.index_file(testfile.as_uri())
+
+    def test_extract_missing_file(self):
+        """
+        Tests there are no problems if the file to be extract is missing.
+        """
+        # The extractor should record the file in the store as a failure.
+        missing_file = pathlib.Path('/missing-file')
+        assert not missing_file.exists()
+
+        with self.await_failsafe_marker_inserted(fixtures.FILESYSTEM_GRAPH, missing_file):
+            missing_file_url = missing_file.as_uri()
+            self.miner_fs.get_sparql_connection().update(
+                "INSERT DATA { "
+                "    GRAPH tracker:Documents { "
+                f"        <{missing_file_url}> a nfo:Document , nfo:FileDataObject . "
+                "    } "
+                "}", None)
 
 
 if __name__ == '__main__':
