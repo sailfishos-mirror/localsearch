@@ -17,6 +17,7 @@
         "nfo:sampleRate": "22050",
         "nfo:averageBitrate": "32000",
         "nmm:performer": {
+            "@id": "urn:artist:AbBaby",
             "@type": "nmm:Artist",
             "nmm:artistName": "AbBaby",
             "tracker:hasExternalReference": [
