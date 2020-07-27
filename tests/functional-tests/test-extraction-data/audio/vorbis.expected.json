@@ -13,9 +13,9 @@
         "nfo:sampleRate": 22050,
         "nfo:duration": "15",
         "nmm:performer": {
-            "@id": "urn:artist:AbBaby",
+            "@id": "urn:artist:a%20vorbis%20performer",
             "@type": "nmm:Artist",
-            "nmm:artistName": "AbBaby",
+            "nmm:artistName": "a vorbis performer",
             "tracker:hasExternalReference": [
                 {
                     "@id": "https://musicbrainz.org/artist/234561",
