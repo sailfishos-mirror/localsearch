@@ -81,8 +81,8 @@ typedef struct {
 	gchar *copyright;
 	gchar *encoded_by;
 	guint32 length;
-	gchar *performer1;
-	gchar *performer2;
+	gchar *artist1;
+	gchar *artist2;
 	gchar *composer;
 	gchar *publisher;
 	gchar *recording_time;
@@ -169,8 +169,8 @@ typedef struct {
 	size_t id3v2_size;
 
 	const gchar *title;
-	const gchar *performer_name;
-	TrackerResource *performer;
+	const gchar *artist_name;
+	TrackerResource *artist;
 	const gchar *album_artist_name;
 	const gchar *lyricist_name;
 	TrackerResource *lyricist;
@@ -564,8 +564,8 @@ id3v2tag_free (id3v2tag *tags)
 	g_free (tags->comment);
 	g_free (tags->content_type);
 	g_free (tags->copyright);
-	g_free (tags->performer1);
-	g_free (tags->performer2);
+	g_free (tags->artist1);
+	g_free (tags->artist2);
 	g_free (tags->composer);
 	g_free (tags->publisher);
 	g_free (tags->recording_time);
@@ -1649,10 +1649,10 @@ get_id3v24_tags (id3v24frame           frame,
 			g_free (word);
 			break;
 		case ID3V24_TPE1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V24_TPE2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V24_TPUB:
 			tag->publisher = word;
@@ -1844,10 +1844,10 @@ get_id3v23_tags (id3v24frame           frame,
 			g_free (word);
 			break;
 		case ID3V24_TPE1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V24_TPE2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V24_TPUB:
 			tag->publisher = word;
@@ -1982,10 +1982,10 @@ get_id3v20_tags (id3v2frame            frame,
 			tag->publisher = word;
 			break;
 		case ID3V2_TP1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V2_TP2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V2_TRK: {
 			gchar **parts;
@@ -2648,14 +2648,14 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	                                           md.id3v23.composer,
 	                                           md.id3v22.composer);
 
-	md.performer_name = tracker_coalesce_strip (4, md.id3v24.performer1,
-	                                            md.id3v23.performer1,
-	                                            md.id3v22.performer1,
+	md.artist_name = tracker_coalesce_strip (4, md.id3v24.artist1,
+	                                            md.id3v23.artist1,
+	                                            md.id3v22.artist1,
 	                                            md.id3v1.artist);
 
-	md.album_artist_name = tracker_coalesce_strip (3, md.id3v24.performer2,
-	                                               md.id3v23.performer2,
-	                                               md.id3v22.performer2);
+	md.album_artist_name = tracker_coalesce_strip (3, md.id3v24.artist2,
+	                                               md.id3v23.artist2,
+	                                               md.id3v22.artist2);
 
 	md.album_name = tracker_coalesce_strip (4, md.id3v24.album,
 	                                        md.id3v23.album,
@@ -2750,8 +2750,8 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		md.set_count = md.id3v22.set_count;
 	}
 
-	if (md.performer_name) {
-		md.performer = tracker_extract_new_artist (md.performer_name);
+	if (md.artist_name) {
+		md.artist = tracker_extract_new_artist (md.artist_name);
 	}
 
 	if (md.composer_name) {
@@ -2817,13 +2817,13 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		g_object_unref (md.lyricist);
 	}
 
-	if (md.performer) {
-		tracker_resource_set_relation (main_resource, "nmm:performer", md.performer);
+	if (md.artist) {
+		tracker_resource_set_relation (main_resource, "nmm:artist", md.artist);
 		if (md.mb_artist_id) {
 			g_autofree char *mb_artist_uri = g_strdup_printf("https://musicbrainz.org/artist/%s", md.mb_artist_id);
 			g_autoptr(TrackerResource) mb_artist = tracker_extract_new_external_reference(
 			    "https://musicbrainz.org/doc/Artist", md.mb_artist_id, mb_artist_uri);
-			tracker_resource_add_relation (md.performer, "tracker:hasExternalReference", mb_artist);
+			tracker_resource_add_relation (md.artist, "tracker:hasExternalReference", mb_artist);
 		}
 	}
 
@@ -2907,7 +2907,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 	/* Get mp3 stream info */
 	parsed = mp3_parse (buffer, buffer_size, audio_offset, uri, main_resource, &md);
-	g_clear_object (&md.performer);
+	g_clear_object (&md.artist);
 
 	id3v2tag_free (&md.id3v22);
 	id3v2tag_free (&md.id3v23);

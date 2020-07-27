@@ -14,7 +14,7 @@
         "nfo:channels": "2",
         "nfo:sampleRate": "44100",
         "nfo:averageBitrate": "256000",
-        "nmm:performer": {
+        "nmm:artist": {
             "@id": "urn:artist:Anna%20Abreu",
             "@type": "nmm:Artist",
             "nmm:artistName": "Anna Abreu",
