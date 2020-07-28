@@ -6,7 +6,21 @@
     },
     "metadata": {
         "@type": "nmm:MusicPiece",
+        "nfo:codec": "MPEG",
+        "nfo:sampleRate" : "16000",
         "nie:title": "song3",
+        "nmm:trackNumber": "2",
+        "nmm:musicAlbum" : {
+            "@id" : "urn:album:albumi",
+            "@type" : "nmm:MusicAlbum",
+            "nie:title" : "albumi"
+        },
+        "nmm:musicAlbumDisc" : {
+            "@id" : "urn:album-disc:albumi:Disc1",
+            "@type" : "nmm:MusicAlbumDisc",
+            "nmm:setNumber" : 1,
+            "nmm:albumDiscAlbum" : "urn:album:albumi"
+        },
         "nmm:performer" : [
             {
                 "@id" : "urn:artist:drummer",
