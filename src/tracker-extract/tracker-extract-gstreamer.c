@@ -457,28 +457,31 @@ extractor_apply_general_metadata (MetadataExtractor     *extractor,
                                   GstTagList            *tag_list,
                                   const gchar           *file_url,
                                   TrackerResource       *resource,
+                                  TrackerResource      **p_artist,
                                   TrackerResource      **p_performer,
                                   TrackerResource      **p_composer)
 {
-	const gchar *performer_name = NULL;
-	gchar *performer_temp = NULL;
-	gchar *artist_temp = NULL;
+	gchar *artist_name = NULL;
+	gchar *performer_name = NULL;
 	gchar *composer_name = NULL;
 	gchar *genre = NULL;
 	gchar *title = NULL;
 	gchar *title_guaranteed = NULL;
 
+	*p_artist = NULL;
 	*p_composer = NULL;
 	*p_performer = NULL;
 
-	gst_tag_list_get_string (tag_list, GST_TAG_PERFORMER, &performer_temp);
-	gst_tag_list_get_string (tag_list, GST_TAG_ARTIST, &artist_temp);
+	gst_tag_list_get_string (tag_list, GST_TAG_PERFORMER, &performer_name);
+	gst_tag_list_get_string (tag_list, GST_TAG_ARTIST, &artist_name);
 	gst_tag_list_get_string (tag_list, GST_TAG_COMPOSER, &composer_name);
-
-	performer_name = tracker_coalesce_strip (2, performer_temp, artist_temp);
 
 	if (performer_name != NULL) {
 		*p_performer = intern_artist (extractor, performer_name);
+	}
+
+	if (artist_name != NULL) {
+		*p_artist = intern_artist (extractor, artist_name);
 	}
 
 	if (composer_name != NULL) {
@@ -512,8 +515,8 @@ extractor_apply_general_metadata (MetadataExtractor     *extractor,
 	set_property_from_gst_tag (resource, "nie:generator", tag_list, GST_TAG_ENCODER);
 
 	g_free (title_guaranteed);
-	g_free (performer_temp);
-	g_free (artist_temp);
+	g_free (performer_name);
+	g_free (artist_name);
 	g_free (composer_name);
 	g_free (genre);
 	g_free (title);
@@ -616,6 +619,7 @@ static void
 extractor_apply_audio_metadata (MetadataExtractor     *extractor,
                                 GstTagList            *tag_list,
                                 TrackerResource       *audio,
+                                TrackerResource       *artist,
                                 TrackerResource       *performer,
                                 TrackerResource       *composer,
                                 TrackerResource       *album_disc)
@@ -674,10 +678,10 @@ extractor_apply_audio_metadata (MetadataExtractor     *extractor,
 		}
 	#endif
 
-	if (performer) {
+	if (artist) {
 		gchar *mb_artist_id = NULL;
 
-		tracker_resource_set_relation (audio, "nmm:performer", performer);
+		tracker_resource_set_relation (audio, "nmm:artist", artist);
 
 		gst_tag_list_get_string (tag_list, GST_TAG_MUSICBRAINZ_ARTISTID, &mb_artist_id);
 		if (mb_artist_id) {
@@ -686,9 +690,13 @@ extractor_apply_audio_metadata (MetadataExtractor     *extractor,
 			                                                                    mb_artist_id,
 			                                                                    mb_artist_uri);
 
-			tracker_resource_add_take_relation (performer, "tracker:hasExternalReference", mb_artist);
+			tracker_resource_add_take_relation (artist, "tracker:hasExternalReference", mb_artist);
 			g_free (mb_artist_id);
 		}
+	}
+
+	if (performer) {
+		tracker_resource_set_relation (audio, "nmm:performer", performer);
 	}
 
 	if (composer) {
@@ -729,7 +737,9 @@ extract_track (TrackerResource      *track,
                const gchar          *file_url,
                TrackerResource      *album_disc)
 {
-	TrackerResource *track_performer = NULL, *track_composer = NULL;
+	TrackerResource *track_artist = NULL;
+	TrackerResource *track_performer = NULL;
+	TrackerResource *track_composer = NULL;
 
 	tracker_resource_add_uri (track, "rdf:type", "nmm:MusicPiece");
 	tracker_resource_add_uri (track, "rdf:type", "nfo:Audio");
@@ -738,12 +748,14 @@ extract_track (TrackerResource      *track,
 	                                  toc_entry->tag_list,
 	                                  file_url,
 	                                  track,
+	                                  &track_artist,
 	                                  &track_performer,
 	                                  &track_composer);
 
 	extractor_apply_audio_metadata (extractor,
 	                                toc_entry->tag_list,
 	                                track,
+	                                track_artist,
 	                                track_performer,
 	                                track_composer,
 	                                album_disc);
@@ -889,13 +901,14 @@ extract_metadata (MetadataExtractor      *extractor,
 		GList *node;
 		TrackerResource *equipment;
 		TrackerResource *geolocation, *address;
-		TrackerResource *performer = NULL, *composer = NULL;
+		TrackerResource *artist = NULL, *performer = NULL, *composer = NULL;
 		TrackerResource *album_disc;
 
 		extractor_apply_general_metadata (extractor,
 		                                  extractor->tagcache,
 		                                  file_url,
 		                                  resource,
+		                                  &artist,
 		                                  &performer,
 		                                  &composer);
 
@@ -958,6 +971,7 @@ extract_metadata (MetadataExtractor      *extractor,
 				extractor_apply_audio_metadata (extractor,
 				                                extractor->tagcache,
 				                                resource,
+				                                artist,
 				                                performer,
 				                                composer,
 				                                album_disc);

@@ -16,7 +16,8 @@
         "nfo:duration": "15",
         "nfo:sampleRate": "22050",
         "nfo:averageBitrate": "32000",
-        "nmm:performer": {
+        "nmm:artist": {
+            "@id": "urn:artist:AbBaby",
             "@type": "nmm:Artist",
             "nmm:artistName": "AbBaby",
             "tracker:hasExternalReference": [
@@ -28,6 +29,18 @@
                 }
             ]
         },
+        "nmm:performer": [
+            {
+                "@id": "urn:artist:guitarist",
+                "@type": "nmm:Artist",
+                "nmm:artistName": "guitarist"
+            },
+            {
+                "@id": "urn:artist:pianist",
+                "@type": "nmm:Artist",
+                "nmm:artistName": "pianist"
+            }
+        ],
         "nmm:musicAlbum": {
             "@id": "urn:album:SinCos:2008-01-01",
             "@type": "nmm:MusicAlbum",

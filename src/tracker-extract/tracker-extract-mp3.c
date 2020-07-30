@@ -81,8 +81,9 @@ typedef struct {
 	gchar *copyright;
 	gchar *encoded_by;
 	guint32 length;
-	gchar *performer1;
-	gchar *performer2;
+	gchar *artist1;
+	gchar *artist2;
+	gchar **performers;
 	gchar *composer;
 	gchar *publisher;
 	gchar *recording_time;
@@ -127,6 +128,7 @@ typedef enum {
 	ID3V24_UNKNOWN,
 	ID3V24_APIC,
 	ID3V24_COMM,
+	ID3V24_IPLS,
 	ID3V24_TALB,
 	ID3V24_TCOM,
 	ID3V24_TCON,
@@ -139,6 +141,7 @@ typedef enum {
 	ID3V24_TIT2,
 	ID3V24_TIT3,
 	ID3V24_TLEN,
+	ID3V24_TMCL,
 	ID3V24_TOLY,
 	ID3V24_TPE1,
 	ID3V24_TPE2,
@@ -169,7 +172,9 @@ typedef struct {
 	size_t id3v2_size;
 
 	const gchar *title;
-	const gchar *performer_name;
+	const gchar *artist_name;
+	TrackerResource *artist;
+	gchar **performers_names;
 	TrackerResource *performer;
 	const gchar *album_artist_name;
 	const gchar *lyricist_name;
@@ -227,6 +232,7 @@ static const struct {
 } id3v24_frames[] = {
 	{ "APIC", ID3V24_APIC },
 	{ "COMM", ID3V24_COMM },
+	{ "IPLS", ID3V24_IPLS },
 	{ "TALB", ID3V24_TALB },
 	{ "TCOM", ID3V24_TCOM },
 	{ "TCON", ID3V24_TCON },
@@ -239,6 +245,7 @@ static const struct {
 	{ "TIT2", ID3V24_TIT2 },
 	{ "TIT3", ID3V24_TIT3 },
 	{ "TLEN", ID3V24_TLEN },
+	{ "TMCL", ID3V24_TMCL },
 	{ "TOLY", ID3V24_TOLY },
 	{ "TPE1", ID3V24_TPE1 },
 	{ "TPE2", ID3V24_TPE2 },
@@ -564,8 +571,9 @@ id3v2tag_free (id3v2tag *tags)
 	g_free (tags->comment);
 	g_free (tags->content_type);
 	g_free (tags->copyright);
-	g_free (tags->performer1);
-	g_free (tags->performer2);
+	g_free (tags->artist1);
+	g_free (tags->artist2);
+	g_strfreev (tags->performers);
 	g_free (tags->composer);
 	g_free (tags->publisher);
 	g_free (tags->recording_time);
@@ -1409,6 +1417,56 @@ id3_get_ufid_type (const gchar *name)
 }
 
 static void
+extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
+{
+	gchar text_encode;
+	guint offset = 0;
+	GSList *performers;
+	gint n_performers = 0;
+
+	text_encode = data[pos];
+	pos += 1;
+	performers = NULL;
+
+	while (pos + offset < csize) {
+		const gchar *text_instrument;
+		const gchar *text_performer;
+		gint text_instrument_len;
+		gint text_performer_len;
+		gchar *performer = NULL;
+
+		text_instrument = &data[pos];
+		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - 1);
+		offset = text_instrument_len + id3v2_nul_size (text_encode);
+		text_performer = &data[pos + offset];
+
+		if (version == 2.4f) {
+			performer = id3v24_text_to_utf8 (text_encode, text_performer, csize - offset, info);
+		} else {
+			performer = id3v2_text_to_utf8 (text_encode, text_performer, csize - offset, info);
+		}
+
+		performers = g_slist_prepend (performers, g_strstrip (g_strdup (performer)));
+		n_performers += 1;
+
+		text_performer_len = id3v2_strlen (text_encode, text_performer, csize - offset);
+		pos += text_instrument_len + text_performer_len + 2*id3v2_nul_size (text_encode);
+	}
+
+	if (performers) {
+		GSList *list;
+
+		tag->performers = g_new (gchar *, n_performers + 1);
+		tag->performers[n_performers] = NULL;
+		for (list = performers; list != NULL; list = list->next) {
+			tag->performers[--n_performers] = list->data;
+		}
+
+		g_slist_free (performers);
+	}
+}
+
+static void
 extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
 {
 	gchar *description = NULL;
@@ -1567,6 +1625,11 @@ get_id3v24_tags (id3v24frame           frame,
 		break;
 	}
 
+	case ID3V24_TMCL: {
+		extract_performers_tags (tag, data, pos, csize, info, 2.4f);
+		break;
+	}
+
 	case ID3V24_TXXX: {
 		extract_txxx_tags (tag, data, pos, csize, info, 2.4f);
 		break;
@@ -1649,10 +1712,10 @@ get_id3v24_tags (id3v24frame           frame,
 			g_free (word);
 			break;
 		case ID3V24_TPE1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V24_TPE2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V24_TPUB:
 			tag->publisher = word;
@@ -1768,6 +1831,11 @@ get_id3v23_tags (id3v24frame           frame,
 		break;
 	}
 
+	case ID3V24_IPLS: {
+		extract_performers_tags (tag, data, pos, csize, info, 2.3f);
+		break;
+	}
+
 	case ID3V24_TXXX: {
 		extract_txxx_tags (tag, data, pos, csize, info, 2.3f);
 		break;
@@ -1844,10 +1912,10 @@ get_id3v23_tags (id3v24frame           frame,
 			g_free (word);
 			break;
 		case ID3V24_TPE1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V24_TPE2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V24_TPUB:
 			tag->publisher = word;
@@ -1982,10 +2050,10 @@ get_id3v20_tags (id3v2frame            frame,
 			tag->publisher = word;
 			break;
 		case ID3V2_TP1:
-			tag->performer1 = word;
+			tag->artist1 = word;
 			break;
 		case ID3V2_TP2:
-			tag->performer2 = word;
+			tag->artist2 = word;
 			break;
 		case ID3V2_TRK: {
 			gchar **parts;
@@ -2648,14 +2716,20 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	                                           md.id3v23.composer,
 	                                           md.id3v22.composer);
 
-	md.performer_name = tracker_coalesce_strip (4, md.id3v24.performer1,
-	                                            md.id3v23.performer1,
-	                                            md.id3v22.performer1,
+	md.artist_name = tracker_coalesce_strip (4, md.id3v24.artist1,
+	                                            md.id3v23.artist1,
+	                                            md.id3v22.artist1,
 	                                            md.id3v1.artist);
 
-	md.album_artist_name = tracker_coalesce_strip (3, md.id3v24.performer2,
-	                                               md.id3v23.performer2,
-	                                               md.id3v22.performer2);
+	if (md.id3v24.performers) {
+		md.performers_names = g_strdupv (md.id3v24.performers);
+	} else if (md.id3v23.performers) {
+		md.performers_names = g_strdupv (md.id3v23.performers);
+	}
+
+	md.album_artist_name = tracker_coalesce_strip (3, md.id3v24.artist2,
+	                                               md.id3v23.artist2,
+	                                               md.id3v22.artist2);
 
 	md.album_name = tracker_coalesce_strip (4, md.id3v24.album,
 	                                        md.id3v23.album,
@@ -2750,8 +2824,23 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		md.set_count = md.id3v22.set_count;
 	}
 
-	if (md.performer_name) {
-		md.performer = tracker_extract_new_artist (md.performer_name);
+	if (md.artist_name) {
+		md.artist = tracker_extract_new_artist (md.artist_name);
+	}
+
+	if (md.performers_names) {
+		gint i = 0;
+		gchar *performer_name = md.performers_names[i];
+
+		while (performer_name != NULL) {
+			md.performer = tracker_extract_new_artist (performer_name);
+			tracker_resource_add_relation (main_resource, "nmm:performer", md.performer);
+			g_object_unref (md.performer);
+
+			performer_name = md.performers_names[++i];
+		}
+
+		g_strfreev (md.performers_names);
 	}
 
 	if (md.composer_name) {
@@ -2817,13 +2906,13 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		g_object_unref (md.lyricist);
 	}
 
-	if (md.performer) {
-		tracker_resource_set_relation (main_resource, "nmm:performer", md.performer);
+	if (md.artist) {
+		tracker_resource_set_relation (main_resource, "nmm:artist", md.artist);
 		if (md.mb_artist_id) {
 			g_autofree char *mb_artist_uri = g_strdup_printf("https://musicbrainz.org/artist/%s", md.mb_artist_id);
 			g_autoptr(TrackerResource) mb_artist = tracker_extract_new_external_reference(
 			    "https://musicbrainz.org/doc/Artist", md.mb_artist_id, mb_artist_uri);
-			tracker_resource_add_relation (md.performer, "tracker:hasExternalReference", mb_artist);
+			tracker_resource_add_relation (md.artist, "tracker:hasExternalReference", mb_artist);
 		}
 	}
 
@@ -2907,7 +2996,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 	/* Get mp3 stream info */
 	parsed = mp3_parse (buffer, buffer_size, audio_offset, uri, main_resource, &md);
-	g_clear_object (&md.performer);
+	g_clear_object (&md.artist);
 
 	id3v2tag_free (&md.id3v22);
 	id3v2tag_free (&md.id3v23);
