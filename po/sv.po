@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-21 09:50+0000\n"
-"PO-Revision-Date: 2020-06-21 18:04+0200\n"
+"POT-Creation-Date: 2020-07-19 03:03+0000\n"
+"PO-Revision-Date: 2020-07-30 12:17+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -240,7 +240,7 @@ msgid "Ignored directories with content"
 msgstr "Ignorerade kataloger med innehåll"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-msgid "Avoid any directory containing a file blocklisted here"
+msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Undvik kataloger som innehåller en fil i blockeringslistan här"
 
 #: ../src/libtracker-miners-common/tracker-utils.c:90
@@ -497,11 +497,11 @@ msgstr "Extraherare"
 msgid "Metadata extractor"
 msgstr "Metadataextraherare"
 
-#: ../src/tracker-extract/tracker-extract.c:683
+#: ../src/tracker-extract/tracker-extract.c:711
 msgid "Metadata extraction failed"
 msgstr "Misslyckades med extrahering av metadata"
 
-#: ../src/tracker-extract/tracker-extract.c:763
+#: ../src/tracker-extract/tracker-extract.c:791
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Fann inga metadata- eller extraherarmoduler som kan hantera denna fil"
 
