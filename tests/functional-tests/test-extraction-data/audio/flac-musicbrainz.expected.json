@@ -63,7 +63,7 @@
         "nmm:performer": {
             "@id": "urn:artist:i%20am%20performer1",
             "@type": "nmm:Artist",
-            "nmm:artistName": "i am performer1",
+            "nmm:artistName": "i am performer1"
         },
         "tracker:hasExternalReference": [
             {
