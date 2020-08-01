@@ -70,6 +70,7 @@ typedef struct {
 	GFile *file;
 	gboolean is_directory;
 	GFileMonitorEvent event_type;
+	guint source_id;
 } CachedEvent;
 
 enum {
@@ -195,6 +196,9 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 static void
 cached_event_free (CachedEvent *event)
 {
+	if (event->source_id != 0)
+		g_source_remove (event->source_id);
+
 	g_object_unref (event->file);
 	g_free (event);
 }
@@ -664,6 +668,34 @@ cache_event (TrackerMonitor    *monitor,
 	}
 }
 
+static gboolean
+flush_event_idle_cb (gpointer user_data)
+{
+	CachedEvent *event = user_data;
+	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (event->monitor);
+
+	event->source_id = 0;
+	emit_signal_for_event (event->monitor, event->event_type,
+	                       event->is_directory, event->file, NULL);
+	g_hash_table_remove (priv->cached_events, event->file);
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+flush_event_later (TrackerMonitor *monitor,
+                   GFile          *file)
+{
+	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (monitor);
+	CachedEvent *event;
+
+	event = g_hash_table_lookup (priv->cached_events, file);
+	if (!event)
+		return;
+
+	event->source_id = g_idle_add (flush_event_idle_cb, event);
+}
+
 static void
 monitor_event_cb (GFileMonitor      *file_monitor,
                   GFile             *file,
@@ -715,6 +747,20 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		                         monitor_event_to_string (event_type),
 		                         file_uri,
 		                         other_file_uri));
+
+		if (is_directory &&
+		    (event_type == G_FILE_MONITOR_EVENT_RENAMED ||
+		     event_type == G_FILE_MONITOR_EVENT_MOVED_OUT) &&
+		    prev_event &&
+		    prev_event->event_type == G_FILE_MONITOR_EVENT_DELETED) {
+			/* If a directory is moved, there is also an EVENT_DELETED
+			 * coming from the GFileMonitor on the folder itself (as the
+			 * folder being monitored no longer exists). We may receive
+			 * this event before this one, we should ensure it's cleared
+			 * out.
+			 */
+			g_hash_table_remove (priv->cached_events, file);
+		}
 	}
 
 	switch (event_type) {
@@ -738,7 +784,9 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		/* In any case, cached events are stale */
 		g_hash_table_remove (priv->cached_events, file);
 
-		/* Fall through */
+		cache_event (monitor, file, event_type, is_directory);
+		flush_event_later (monitor, file);
+		break;
 	case G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED:
 		emit_signal_for_event (monitor, event_type,
 		                       is_directory, file, NULL);
