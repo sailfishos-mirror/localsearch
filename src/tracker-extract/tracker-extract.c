@@ -285,7 +285,6 @@ get_file_metadata (TrackerExtractTask  *task,
 {
 	TrackerExtractInfo *info;
 	GFile *file;
-	gchar *mime_used = NULL;
 
 	*info_out = NULL;
 
@@ -293,10 +292,7 @@ get_file_metadata (TrackerExtractTask  *task,
 	info = tracker_extract_info_new (file, task->mimetype, task->graph);
 	g_object_unref (file);
 
-	if (task->mimetype && *task->mimetype) {
-		/* We know the mime */
-		mime_used = g_strdup (task->mimetype);
-	} else {
+	if (!task->mimetype || !*task->mimetype) {
 		tracker_extract_info_unref (info);
 		return FALSE;
 	}
@@ -304,17 +300,13 @@ get_file_metadata (TrackerExtractTask  *task,
 	/* Now we have sanity checked everything, actually get the
 	 * data we need from the extractors.
 	 */
-	if (mime_used) {
-		if (task->func) {
-			g_debug ("Using %s...",
-				 task->module ?
-				 g_module_name (task->module) :
-				 "Dummy extraction");
+	if (task->func) {
+		g_debug ("Using %s...",
+			 task->module ?
+			 g_module_name (task->module) :
+			 "Dummy extraction");
 
-			task->success = (task->func) (info);
-		}
-
-		g_free (mime_used);
+		task->success = (task->func) (info);
 	}
 
 	if (!task->success) {
