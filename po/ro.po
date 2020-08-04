@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-07-13 11:18+0000\n"
-"PO-Revision-Date: 2020-07-16 14:14+0300\n"
+"POT-Creation-Date: 2020-08-01 14:31+0000\n"
+"PO-Revision-Date: 2020-08-04 14:22+0300\n"
 "Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : (n==0 || (n%100 > 0 && n%100 < "
 "20)) ? 1 : 2);\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 2.4\n"
 "X-Launchpad-Export-Date: 2009-10-03 17:40+0000\n"
 "X-Project-Style: gnome\n"
 
@@ -353,122 +353,123 @@ msgstr ""
 "Suspendarea aplicației și motivul se potrivesc cu o cerere de suspendare "
 "existentă"
 
-#: src/miners/fs/tracker-main.c:75
+#: src/miners/fs/tracker-main.c:76
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Timp inițial de așteptare, 0->1000 (implicit=15)"
 
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:81
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Rulează până când toate locațiile configurate sunt indexate iar apoi se "
 "închide"
 
-#: src/miners/fs/tracker-main.c:84
+#: src/miners/fs/tracker-main.c:85
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Verifică dacă FIȘIER este eligibil pentru a fi minerit conform configurației"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:47 src/tracker/tracker-index.c:48
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FIȘIER"
 
-#: src/miners/fs/tracker-main.c:88 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Rulează pentru o ontologie de domeniu specifică"
 
-#: src/miners/fs/tracker-main.c:92
+#: src/miners/fs/tracker-main.c:93
 msgid "Avoids changes in the filesystem"
 msgstr "Evită modificările în sistemul de fișiere"
 
-#: src/miners/fs/tracker-main.c:96 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Afișează informații despre versiune"
 
-#: src/miners/fs/tracker-main.c:585
+#: src/miners/fs/tracker-main.c:586
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Obiectul de date „%s” există deja"
 
-#: src/miners/fs/tracker-main.c:586
+#: src/miners/fs/tracker-main.c:587
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Obiectul de date „%s” nu există în mod curent"
 
-#: src/miners/fs/tracker-main.c:601
+#: src/miners/fs/tracker-main.c:602
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "Dosarul este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:602
+#: src/miners/fs/tracker-main.c:603
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:622
+#: src/miners/fs/tracker-main.c:623
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "Dosarul este eligibil pentru minerit (conform conținutului)"
 
-#: src/miners/fs/tracker-main.c:623
+#: src/miners/fs/tracker-main.c:624
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform conținutului)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:671
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "Dosarul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:671
+#: src/miners/fs/tracker-main.c:672
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "Dosarul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:675
+#: src/miners/fs/tracker-main.c:676
 msgid "File is eligible to be monitored (based on config)"
 msgstr "Fișierul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:676
+#: src/miners/fs/tracker-main.c:677
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "Fișierul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:680
+#: src/miners/fs/tracker-main.c:681
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "Fișierul sau dosarul este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:681
+#: src/miners/fs/tracker-main.c:682
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "Fișierul sau dosarul NU este eligibil pentru minerit (conform configurației)"
 
-#: src/miners/fs/tracker-main.c:696
+#: src/miners/fs/tracker-main.c:697
 msgid "File is eligible to be mined (based on rules)"
 msgstr "Fișierul este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:697
+#: src/miners/fs/tracker-main.c:698
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "Fișierul NU este eligibil pentru minerit (conform regulilor)"
 
-#: src/miners/fs/tracker-main.c:706
+#: src/miners/fs/tracker-main.c:707
 msgid "Would be indexed"
 msgstr "Ar fi indexat"
 
-#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "Yes"
 msgstr "Da"
 
-#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "No"
 msgstr "Nu"
 
-#: src/miners/fs/tracker-main.c:708
+#: src/miners/fs/tracker-main.c:709
 msgid "Would be monitored"
 msgstr "Ar fi monitorizat"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:849
+#: src/miners/fs/tracker-main.c:959
 msgid "— start the tracker indexer"
 msgstr "— pornește indexatorul de tracker"
 
@@ -516,6 +517,13 @@ msgstr "Nu s-a primit nicio"
 #: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "Nu s-a putut adăuga fluxul"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-control/tracker-main.c:135
+msgid "— start the tracker index proxy"
+msgstr "— pornește proxy-ul de index de urmăritor"
 
 #: src/tracker-extract/tracker-extract.c:694
 msgid "Metadata extraction failed"
