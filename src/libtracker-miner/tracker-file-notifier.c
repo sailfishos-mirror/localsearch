@@ -520,7 +520,7 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		TrackerDirectoryFlags flags;
 
 		directory = g_queue_pop_head (priv->current_index_root->pending_dirs);
-		priv->current_index_root->current_dir = directory;
+		g_set_object (&priv->current_index_root->current_dir, directory);
 
 		tracker_indexing_tree_get_root (priv->indexing_tree,
 		                                directory, &flags);
@@ -541,6 +541,7 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		if (tracker_crawler_start (priv->crawler,
 		                           directory,
 		                           priv->current_index_root->flags)) {
+			g_object_unref (directory);
 			return TRUE;
 		}
 
