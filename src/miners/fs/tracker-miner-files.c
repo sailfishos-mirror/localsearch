@@ -2035,7 +2035,8 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 			tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
 			tracker_resource_set_boolean (resource, "tracker:available", TRUE);
-			tracker_resource_set_relation (resource, "nie:rootElementOf", resource);
+			tracker_resource_set_uri (resource, "nie:rootElementOf",
+			                          tracker_resource_get_identifier (resource));
 
 			miner_files_add_mount_info (miner, resource, file);
 		}
