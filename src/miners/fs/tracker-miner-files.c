@@ -2248,6 +2248,7 @@ process_file_cb (GObject      *object,
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
 		graph_file_str = tracker_resource_print_sparql_update (graph_file,
 								       NULL, graph);
+		g_object_unref (graph_file);
 	}
 
 	sparql_str = g_strdup_printf ("%s %s %s %s %s",
@@ -2259,6 +2260,7 @@ process_file_cb (GObject      *object,
 	g_free (ie_update_str);
 	g_free (delete_properties_sparql);
 	g_free (mount_point_sparql);
+	g_free (graph_file_str);
 
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
 	                                sparql_str, NULL);
