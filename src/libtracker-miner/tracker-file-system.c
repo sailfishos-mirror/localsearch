@@ -544,6 +544,9 @@ tracker_file_system_get_file (TrackerFileSystem *file_system,
 	node = NULL;
 	lookup_data = g_object_get_qdata (G_OBJECT (file), quark_file_node);
 
+	if (file_type != G_FILE_TYPE_DIRECTORY)
+		file_type = G_FILE_TYPE_REGULAR;
+
 	/* If file is interned somewhere else, get a separate copy of the
 	 * file for this filesystem.
 	 */
