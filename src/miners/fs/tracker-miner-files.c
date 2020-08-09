@@ -799,20 +799,17 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	GString *queries;
 	gchar *uri;
 
-	queries = g_string_new (NULL);
+	queries = g_string_new ("WITH " DEFAULT_GRAPH " ");
 	uri = g_file_get_uri (mount_point);
 
 	if (mounted) {
 		g_debug ("Mount point state (MOUNTED) being set in DB for mount_point '%s'",
 		         uri);
 
-		g_string_append_printf (queries,
-		                        "DELETE { ?u tracker:unmountDate ?d } "
-		                        "WHERE { <%s> a nfo:FileDataObject ; "
-		                        "             nie:interpretedAs/"
-		                        "             nie:rootElementOf ?u"
-		                        "}",
-		                        uri);
+		g_string_append (queries,
+				 "DELETE { ?u tracker:unmountDate ?date ;"
+				 "            tracker:available ?avail } "
+				 "INSERT { ?u tracker:available true } ");
 	} else {
 		gchar *now;
 
@@ -822,18 +819,23 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		now = tracker_date_to_string (time (NULL));
 
 		g_string_append_printf (queries,
-		                        "DELETE { ?u tracker:unmountDate ?unknown1 ;"
-		                        "            tracker:available ?unknown2 } "
-		                        "INSERT { ?u tracker:unmountDate \"%s\" } "
-		                        "WHERE { <%s> a nfo:FileDataObject ; "
-		                        "             nie:interpretedAs/"
-		                        "             nie:rootElementOf ?u"
-		                        "}",
-		                        now, uri);
+		                        "DELETE { ?u tracker:unmountDate ?date ;"
+		                        "            tracker:available ?avail } "
+		                        "INSERT { ?u tracker:unmountDate \"%s\" ; "
+					"            tracker:available false } ",
+		                        now);
 
 		g_free (now);
 	}
 
+	g_string_append_printf (queries,
+				"WHERE { <%s> a nfo:FileDataObject ; "
+				"             nie:interpretedAs/"
+				"             nie:rootElementOf ?u . "
+				"        ?u tracker:available ?avail . "
+				"        OPTIONAL { ?u tracker:unmountDate ?date } "
+				"}",
+				uri);
 	g_free (uri);
 
 	if (accumulator) {
