@@ -98,6 +98,7 @@ typedef struct {
 	gint priority;
 	GCancellable *cancellable;
 	TrackerMiner *miner;
+	TrackerTask *task;
 } UpdateProcessingTaskContext;
 
 struct _TrackerMinerFSPrivate {
@@ -1233,6 +1234,8 @@ update_processing_task_context_new (TrackerMiner         *miner,
 static void
 update_processing_task_context_free (UpdateProcessingTaskContext *ctxt)
 {
+	g_clear_pointer (&ctxt->task, tracker_task_unref);
+
 	if (ctxt->cancellable) {
 		g_object_unref (ctxt->cancellable);
 	}
@@ -1267,11 +1270,10 @@ on_signal_gtask_complete (GObject      *source,
 	sparql = g_task_propagate_pointer (G_TASK (res), &error);
 	g_object_unref (res);
 
-	task = tracker_task_pool_find (fs->priv->task_pool, file);
-	g_assert (task != NULL);
-
 	ctxt = g_task_get_task_data (G_TASK (res));
 	uri = g_file_get_uri (file);
+	task = ctxt->task;
+	g_assert (task != NULL);
 
 	if (error) {
 		g_message ("Could not process '%s': %s", uri, error->message);
@@ -1362,6 +1364,7 @@ item_add_or_update (TrackerMinerFS *fs,
 
 	task = tracker_task_new (file, g_object_ref (gtask), g_object_unref);
 
+	ctxt->task = tracker_task_ref (task);
 	tracker_task_pool_add (priv->task_pool, task);
 	tracker_task_unref (task);
 

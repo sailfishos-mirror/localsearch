@@ -107,7 +107,7 @@ static void
 test_task_pool_find (void)
 {
         TrackerTaskPool *pool;
-        TrackerTask *task;
+        gboolean task;
         GFile *goal;
 
         pool = tracker_task_pool_new (3);
@@ -134,7 +134,7 @@ test_task_pool_find (void)
 
         goal = g_file_new_for_path ("/dev/thisDoesntExists");
         task = tracker_task_pool_find (pool, goal);
-        g_assert (task == NULL);
+        g_assert (task == FALSE);
         g_object_unref (goal);
 
         g_object_unref (pool);

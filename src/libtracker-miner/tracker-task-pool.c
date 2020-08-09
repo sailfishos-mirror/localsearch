@@ -282,17 +282,17 @@ tracker_task_pool_foreach (TrackerTaskPool *pool,
 	}
 }
 
-TrackerTask *
+gboolean
 tracker_task_pool_find (TrackerTaskPool *pool,
                         GFile           *file)
 {
 	TrackerTaskPoolPrivate *priv;
 
-	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), NULL);
-	g_return_val_if_fail (G_IS_FILE (file), NULL);
+	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), FALSE);
+	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	return g_hash_table_lookup (priv->tasks, file);
+	return g_hash_table_contains (priv->tasks, file);
 }
 
 /* Task */
