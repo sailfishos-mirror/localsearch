@@ -37,10 +37,11 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
 
     def create_extra_audio_content(self, file_urn, url, title):
         sparql = "WITH <%s> INSERT { \
+                    <%s> a nfo:FileDataObject . \
                     <%s> a nmm:MusicPiece ; \
                          nie:title \"%s\" ; \
                          nie:isStoredAs <%s> . \
-                  } " % (fixtures.AUDIO_GRAPH, file_urn, title, url)
+                  } " % (fixtures.AUDIO_GRAPH, url, file_urn, title, url)
 
         with self.tracker.await_insert(fixtures.AUDIO_GRAPH,
                                        f'a nmm:MusicPiece; nie:title "{title}"',
