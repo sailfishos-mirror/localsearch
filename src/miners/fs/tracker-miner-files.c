@@ -98,8 +98,6 @@ struct TrackerMinerFilesPrivate {
 
 	GDBusConnection *connection;
 
-	GQuark quark_mount_point_uuid;
-
 	guint force_recheck_id;
 
 	gboolean mtime_check;
@@ -348,7 +346,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	                  mf);
 
 	priv->mtime_check = TRUE;
-	priv->quark_mount_point_uuid = g_quark_from_static_string ("tracker-mount-point-uuid");
 
 	rdf_types = tracker_extract_module_manager_get_all_rdf_types ();
 	rdf_types_str = g_strjoinv (",", rdf_types);
@@ -2066,51 +2063,6 @@ process_file_data_free (ProcessFileData *data)
 	g_slice_free (ProcessFileData, data);
 }
 
-static gchar *
-update_mount_point_sparql (ProcessFileData *data)
-{
-	const gchar *uuid;
-
-	uuid = g_object_get_qdata (G_OBJECT (data->file),
-	                           data->miner->private->quark_mount_point_uuid);
-
-	/* File represents a mount point */
-	if (G_UNLIKELY (uuid)) {
-		GString *queries;
-		gchar *removable_device_urn, *uri;
-
-		removable_device_urn = g_strdup_printf (TRACKER_PREFIX_DATASOURCE_URN "%s", uuid);
-		uri = g_file_get_uri (G_FILE (data->file));
-		queries = g_string_new ("");
-
-		g_string_append_printf (queries,
-		                        "DELETE { "
-		                        "  <%s> tracker:mountPoint ?unknown "
-		                        "} WHERE { "
-		                        "  <%s> a tracker:IndexedFolder; "
-		                        "       tracker:mountPoint ?unknown "
-		                        "} ",
-		                        removable_device_urn, removable_device_urn);
-
-		g_string_append_printf (queries,
-		                        "INSERT { "
-		                        "  <%s> a tracker:IndexedFolder; "
-		                        "       tracker:mountPoint ?u "
-		                        "} WHERE { "
-		                        "  ?u a nfo:FileDataObject; "
-		                        "     nie:url \"%s\" "
-		                        "} ",
-		                        removable_device_urn, uri);
-
-		g_free (removable_device_urn);
-		g_free (uri);
-
-		return g_string_free (queries, FALSE);
-	}
-
-	return NULL;
-}
-
 static void
 process_file_cb (GObject      *object,
                  GAsyncResult *result,
@@ -2121,7 +2073,7 @@ process_file_cb (GObject      *object,
 	ProcessFileData *data;
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
-	gchar *delete_properties_sparql = NULL, *mount_point_sparql;
+	gchar *delete_properties_sparql = NULL;
 	GFileInfo *file_info;
 	guint64 time_;
 	GFile *file, *parent;
@@ -2226,7 +2178,6 @@ process_file_cb (GObject      *object,
 
 	miner_files_add_to_datasource (data->miner, file, resource, folder_resource);
 
-	mount_point_sparql = update_mount_point_sparql (data);
 	sparql_update_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
 
 	if (folder_resource) {
@@ -2251,15 +2202,13 @@ process_file_cb (GObject      *object,
 		g_object_unref (graph_file);
 	}
 
-	sparql_str = g_strdup_printf ("%s %s %s %s %s",
+	sparql_str = g_strdup_printf ("%s %s %s %s",
 	                              delete_properties_sparql ? delete_properties_sparql : "",
 	                              sparql_update_str,
 	                              ie_update_str ? ie_update_str : "",
-				      graph_file_str ? graph_file_str : "",
-	                              mount_point_sparql ? mount_point_sparql : "");
+				      graph_file_str ? graph_file_str : "");
 	g_free (ie_update_str);
 	g_free (delete_properties_sparql);
-	g_free (mount_point_sparql);
 	g_free (graph_file_str);
 
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
@@ -2923,11 +2872,6 @@ miner_files_add_removable_or_optical_directory (TrackerMinerFiles *mf,
 	if (tracker_config_get_enable_monitors (mf->private->config)) {
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 	}
-
-	g_object_set_qdata_full (G_OBJECT (mount_point_file),
-	                         mf->private->quark_mount_point_uuid,
-	                         g_strdup (uuid),
-	                         (GDestroyNotify) g_free);
 
 	g_debug ("  Adding removable/optical: '%s'", mount_path);
 	tracker_indexing_tree_add (indexing_tree,
