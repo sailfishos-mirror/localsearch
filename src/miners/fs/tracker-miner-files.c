@@ -811,9 +811,9 @@ set_up_mount_point (TrackerMinerFiles *miner,
 
 		g_string_append_printf (queries,
 		                        "DELETE { ?u tracker:unmountDate ?d } "
-		                        "WHERE { <%s> a nfo:FileDataObject/"
-		                        "               nie:interpretedAs/"
-		                        "               nie:rootElementOf ?u"
+		                        "WHERE { <%s> a nfo:FileDataObject ; "
+		                        "             nie:interpretedAs/"
+		                        "             nie:rootElementOf ?u"
 		                        "}",
 		                        uri);
 	} else {
@@ -828,9 +828,9 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		                        "DELETE { ?u tracker:unmountDate ?unknown1 ;"
 		                        "            tracker:available ?unknown2 } "
 		                        "INSERT { ?u tracker:unmountDate \"%s\" } "
-		                        "WHERE { <%s> a nfo:FileDataObject/"
-		                        "               nie:interpretedAs/"
-		                        "               nie:rootElementOf ?u"
+		                        "WHERE { <%s> a nfo:FileDataObject ; "
+		                        "             nie:interpretedAs/"
+		                        "             nie:rootElementOf ?u"
 		                        "}",
 		                        now, uri);
 
