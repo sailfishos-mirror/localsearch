@@ -37,7 +37,7 @@ test_task_pool_limit_set (void)
         g_object_unref (pool);
 }
 
-static void
+static TrackerTask *
 add_task (TrackerTaskPool *pool,
           const gchar     *filename,
           gint             expected_size,
@@ -51,19 +51,15 @@ add_task (TrackerTaskPool *pool,
         g_assert_cmpint (tracker_task_pool_get_size (pool), ==, expected_size);
         g_assert (tracker_task_pool_limit_reached (pool) == hit_limit);
 
-        g_object_unref (tracker_task_get_file (task));
-        tracker_task_unref (task);
+        return task;
 }
 
 static void
 remove_task (TrackerTaskPool *pool,
-             const gchar     *filename,
+             TrackerTask     *task,
              gint             expected_size,
              gboolean         hit_limit)
 {
-        TrackerTask *task;
-
-        task = tracker_task_new (g_file_new_for_path (filename), NULL, NULL);
         tracker_task_pool_remove (pool, task);
 
         g_assert_cmpint (tracker_task_pool_get_size (pool), ==, expected_size);
@@ -77,28 +73,31 @@ static void
 test_task_pool_add_remove (void)
 {
         TrackerTaskPool *pool;
+        TrackerTask *a, *b, *c, *d, *nonexistent;
 
         pool = tracker_task_pool_new (3);
 
         /* Additions ... */
-        add_task (pool, "/dev/null", 1, FALSE);
-        add_task (pool, "/dev/null2", 2, FALSE);
-        add_task (pool, "/dev/null3", 3, TRUE);
+        a = add_task (pool, "/dev/null", 1, FALSE);
+        b = add_task (pool, "/dev/null2", 2, FALSE);
+        c = add_task (pool, "/dev/null3", 3, TRUE);
 
         /* We can go over the limit */
-        add_task (pool, "/dev/null4", 4, TRUE);
+        d = add_task (pool, "/dev/null4", 4, TRUE);
 
         /* Remove something that doesn't exist */
-        remove_task (pool, "/dev/null/imNotInThePool", 4, TRUE);
+        nonexistent = tracker_task_new (g_file_new_for_path ("/dev/null/imNotInThePool"), NULL, NULL);
+        remove_task (pool, nonexistent, 4, TRUE);
 
         /* Removals ... (in different order)*/
-        remove_task (pool, "/dev/null4", 3, TRUE);
-        remove_task (pool, "/dev/null2", 2, FALSE);
-        remove_task (pool, "/dev/null3", 1, FALSE);
-        remove_task (pool, "/dev/null", 0, FALSE);
+        remove_task (pool, d, 3, TRUE);
+        remove_task (pool, c, 2, FALSE);
+        remove_task (pool, b, 1, FALSE);
+        remove_task (pool, a, 0, FALSE);
 
         /* Remove in empty queue */
-        remove_task (pool, "/dev/null/random", 0, FALSE);
+        nonexistent = tracker_task_new (g_file_new_for_path ("/dev/null/random"), NULL, NULL);
+        remove_task (pool, nonexistent, 0, FALSE);
 
         g_object_unref (pool);
 }
