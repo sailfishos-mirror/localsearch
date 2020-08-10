@@ -285,7 +285,6 @@ get_file_metadata (TrackerExtractTask  *task,
 {
 	TrackerExtractInfo *info;
 	GFile *file;
-	gchar *mime_used = NULL;
 
 	*info_out = NULL;
 
@@ -293,10 +292,7 @@ get_file_metadata (TrackerExtractTask  *task,
 	info = tracker_extract_info_new (file, task->mimetype, task->graph);
 	g_object_unref (file);
 
-	if (task->mimetype && *task->mimetype) {
-		/* We know the mime */
-		mime_used = g_strdup (task->mimetype);
-	} else {
+	if (!task->mimetype || !*task->mimetype) {
 		tracker_extract_info_unref (info);
 		return FALSE;
 	}
@@ -304,17 +300,18 @@ get_file_metadata (TrackerExtractTask  *task,
 	/* Now we have sanity checked everything, actually get the
 	 * data we need from the extractors.
 	 */
-	if (mime_used) {
-		if (task->func) {
-			g_debug ("Using %s...",
-				 task->module ?
-				 g_module_name (task->module) :
-				 "Dummy extraction");
+	if (task->func && task->module) {
+		g_debug ("Using %s...",
+		         g_module_name (task->module));
 
-			task->success = (task->func) (info);
-		}
+		task->success = (task->func) (info);
+	} else {
+		TrackerResource *resource;
 
-		g_free (mime_used);
+		/* Dummy extractor */
+		resource = tracker_resource_new (NULL);
+		tracker_extract_info_set_resource (info, resource);
+		task->success = TRUE;
 	}
 
 	if (!task->success) {
@@ -572,26 +569,16 @@ dispatch_task_cb (TrackerExtractTask *task)
 	priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
 
 	if (!task->mimetype) {
-		error = g_error_new (tracker_extract_error_quark (),
-		                     TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
-		                     "No mimetype for '%s'", task->file);
+		g_task_return_new_error (G_TASK (task->res),
+		                         tracker_extract_error_quark (),
+		                         TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
+		                         "No mimetype for '%s'", task->file);
+		extract_task_free (task);
+		return FALSE;
 	} else {
 		task->module = tracker_extract_module_manager_get_module (task->mimetype,
 		                                                          NULL,
 		                                                          &task->func);
-		if (!task->module) {
-			error = g_error_new (tracker_extract_error_quark (),
-			                     TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
-			                     "No mimetype extractor handlers for uri:'%s' and mime:'%s'",
-			                     task->file, task->mimetype);
-		}
-	}
-
-	if (error) {
-		g_task_return_error (G_TASK (task->res), error);
-		extract_task_free (task);
-
-		return FALSE;
 	}
 
 	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
