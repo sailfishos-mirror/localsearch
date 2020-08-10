@@ -70,7 +70,7 @@ void     tracker_task_pool_foreach       (TrackerTaskPool *pool,
                                           GFunc            func,
                                           gpointer         user_data);
 
-TrackerTask * tracker_task_pool_find     (TrackerTaskPool *pool,
+gboolean tracker_task_pool_find          (TrackerTaskPool *pool,
                                           GFile           *file);
 
 /* Task */

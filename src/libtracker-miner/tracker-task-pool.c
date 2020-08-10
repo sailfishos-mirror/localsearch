@@ -33,7 +33,8 @@ typedef struct _TrackerTaskPoolPrivate TrackerTaskPoolPrivate;
 
 struct _TrackerTaskPoolPrivate
 {
-	GHashTable *tasks;
+	GPtrArray *tasks;
+	GHashTable *tasks_by_file;
 	guint limit;
 };
 
@@ -53,7 +54,8 @@ tracker_task_pool_finalize (GObject *object)
 	TrackerTaskPoolPrivate *priv;
 
 	priv = tracker_task_pool_get_instance_private (TRACKER_TASK_POOL (object));
-	g_hash_table_unref (priv->tasks);
+	g_ptr_array_unref (priv->tasks);
+	g_hash_table_unref (priv->tasks_by_file);
 
 	G_OBJECT_CLASS (tracker_task_pool_parent_class)->finalize (object);
 }
@@ -141,10 +143,13 @@ tracker_task_pool_init (TrackerTaskPool *pool)
 	TrackerTaskPoolPrivate *priv;
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	priv->tasks = g_hash_table_new_full (g_file_hash,
-	                                     (GEqualFunc) file_equal,
-	                                     NULL,
-	                                     (GDestroyNotify) tracker_task_unref);
+	priv->tasks =
+		g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_task_unref);
+	priv->tasks_by_file =
+		g_hash_table_new_full (g_file_hash,
+		                       (GEqualFunc) file_equal,
+		                       NULL,
+		                       (GDestroyNotify) g_list_free);
 	priv->limit = 0;
 }
 
@@ -195,7 +200,7 @@ tracker_task_pool_get_size (TrackerTaskPool *pool)
 	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), 0);
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	return g_hash_table_size (priv->tasks);
+	return priv->tasks->len;
 }
 
 gboolean
@@ -206,7 +211,7 @@ tracker_task_pool_limit_reached (TrackerTaskPool *pool)
 	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), FALSE);
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	return (g_hash_table_size (priv->tasks) >= priv->limit);
+	return (priv->tasks->len >= priv->limit);
 }
 
 void
@@ -214,6 +219,7 @@ tracker_task_pool_add (TrackerTaskPool *pool,
                        TrackerTask     *task)
 {
 	TrackerTaskPoolPrivate *priv;
+	GList *other_tasks;
 	GFile *file;
 
 	g_return_if_fail (TRACKER_IS_TASK_POOL (pool));
@@ -222,19 +228,14 @@ tracker_task_pool_add (TrackerTaskPool *pool,
 
 	file = tracker_task_get_file (task);
 
-	if (g_hash_table_contains (priv->tasks, file)) {
-		/* This is bad! We use the task's associated GFile as the key for the
-		 * hash table, so if there's already a value we are about to overwrite
-		 * it. This suggests there's a bug in the tracker-miner-fs.c code.
-		 */
-		g_warning ("Multiple update tasks for file %s", g_file_get_uri (file));
-	};
+	g_ptr_array_add (priv->tasks, tracker_task_ref (task));
 
-	g_hash_table_insert (priv->tasks,
-	                     tracker_task_get_file (task),
-	                     tracker_task_ref (task));
+	other_tasks = g_hash_table_lookup (priv->tasks_by_file, file);
+	g_hash_table_steal (priv->tasks_by_file, file);
+	other_tasks = g_list_prepend (other_tasks, task);
+	g_hash_table_insert (priv->tasks_by_file, file, other_tasks);
 
-	if (g_hash_table_size (priv->tasks) == priv->limit) {
+	if (priv->tasks->len == priv->limit) {
 		g_object_notify (G_OBJECT (pool), "limit-reached");
 	}
 }
@@ -244,14 +245,25 @@ tracker_task_pool_remove (TrackerTaskPool *pool,
                           TrackerTask     *task)
 {
 	TrackerTaskPoolPrivate *priv;
+	GList *other_tasks;
+	GFile *file;
 
 	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), FALSE);
 
 	priv = tracker_task_pool_get_instance_private (pool);
 
-	if (g_hash_table_remove (priv->tasks,
-	                         tracker_task_get_file (task))) {
-		if (g_hash_table_size (priv->tasks) == priv->limit - 1) {
+	file = tracker_task_get_file (task);
+	other_tasks = g_hash_table_lookup (priv->tasks_by_file, file);
+	g_hash_table_steal (priv->tasks_by_file, file);
+	other_tasks = g_list_remove (other_tasks, task);
+
+	if (other_tasks)
+		g_hash_table_insert (priv->tasks_by_file, file, other_tasks);
+	else
+		g_hash_table_remove (priv->tasks_by_file, file);
+
+	if (g_ptr_array_remove_fast (priv->tasks, task)) {
+		if (priv->tasks->len == priv->limit - 1) {
 			/* We've gone below the threshold again */
 			g_object_notify (G_OBJECT (pool), "limit-reached");
 		}
@@ -268,31 +280,31 @@ tracker_task_pool_foreach (TrackerTaskPool *pool,
                            gpointer         user_data)
 {
 	TrackerTaskPoolPrivate *priv;
-	GHashTableIter iter;
 	TrackerTask *task;
+	guint i;
 
 	g_return_if_fail (TRACKER_IS_TASK_POOL (pool));
 	g_return_if_fail (func != NULL);
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	g_hash_table_iter_init (&iter, priv->tasks);
 
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &task)) {
+	for (i = 0; i < priv->tasks->len; i++) {
+		task = g_ptr_array_index (priv->tasks, i);
 		(func) (task, user_data);
 	}
 }
 
-TrackerTask *
+gboolean
 tracker_task_pool_find (TrackerTaskPool *pool,
                         GFile           *file)
 {
 	TrackerTaskPoolPrivate *priv;
 
-	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), NULL);
-	g_return_val_if_fail (G_IS_FILE (file), NULL);
+	g_return_val_if_fail (TRACKER_IS_TASK_POOL (pool), FALSE);
+	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
 	priv = tracker_task_pool_get_instance_private (pool);
-	return g_hash_table_lookup (priv->tasks, file);
+	return g_hash_table_contains (priv->tasks_by_file, file);
 }
 
 /* Task */

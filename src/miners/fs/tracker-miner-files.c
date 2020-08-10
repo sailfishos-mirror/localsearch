@@ -2432,7 +2432,8 @@ create_delete_sparql (GFile    *file,
 	                       "       nie:url ?u . "
 	                       "  }"
 	                       "  GRAPH ?g {"
-	                       "    ?ie nie:isStoredAs ?f . "
+	                       "    ?f a rdfs:Resource . "
+	                       "    OPTIONAL { ?ie nie:isStoredAs ?f } . "
 	                       "  }"
 	                       "  FILTER (");
 
