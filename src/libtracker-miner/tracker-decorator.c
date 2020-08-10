@@ -21,6 +21,8 @@
 
 #include <string.h>
 
+#include <libtracker-miners-common/tracker-debug.h>
+
 #include "tracker-decorator.h"
 #include "tracker-priority-queue.h"
 #include "tracker-decorator-private.h"
@@ -685,7 +687,7 @@ ensure_remaining_items_query (TrackerDecorator *decorator)
 }
 
 static void
-decorator_query_remaining_items_cb (GObject      *object,
+decorator_count_remaining_items_cb (GObject      *object,
                                     GAsyncResult *result,
                                     gpointer      user_data)
 {
@@ -710,7 +712,7 @@ decorator_query_remaining_items_cb (GObject      *object,
 		tracker_sparql_cursor_get_integer (cursor, 0);
 	g_object_unref (cursor);
 
-	g_debug ("Found %" G_GSIZE_FORMAT " items to extract", priv->n_remaining_items);
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Found %" G_GSIZE_FORMAT " items to extract", priv->n_remaining_items));
 
 	if (priv->n_remaining_items > 0)
 		decorator_cache_next_items (decorator);
@@ -719,7 +721,7 @@ decorator_query_remaining_items_cb (GObject      *object,
 }
 
 static void
-decorator_query_remaining_items (TrackerDecorator *decorator)
+decorator_count_remaining_items (TrackerDecorator *decorator)
 {
 	gchar *clauses[] = { "COUNT(?urn)", NULL };
 	TrackerDecoratorPrivate *priv;
@@ -734,7 +736,7 @@ decorator_query_remaining_items (TrackerDecorator *decorator)
 		                                   "offset", 0);
 		tracker_sparql_statement_execute_async (priv->item_count_query,
 		                                        priv->cancellable,
-		                                        decorator_query_remaining_items_cb,
+		                                        decorator_count_remaining_items_cb,
 		                                        decorator);
 	} else {
 		decorator_notify_empty (decorator);
@@ -836,7 +838,8 @@ decorator_cache_next_items (TrackerDecorator *decorator)
         priv->querying = TRUE;
 
 	if (priv->n_remaining_items == 0) {
-		decorator_query_remaining_items (decorator);
+		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
+		decorator_count_remaining_items (decorator);
 	} else {
 		TrackerSparqlStatement *statement;
 		gint offset;
@@ -847,6 +850,7 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 		if (priv->commit_buffer)
 			offset += priv->commit_buffer->len;
 
+		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Querying items which still need processing"));
 		statement = ensure_remaining_items_query (decorator);
 		tracker_sparql_statement_bind_int (statement, "offset", offset);
 		tracker_sparql_statement_execute_async (statement,
@@ -1012,6 +1016,7 @@ tracker_decorator_paused (TrackerMiner *miner)
 {
 	TrackerDecoratorPrivate *priv;
 
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Paused"));
 	decorator_cancel_active_tasks (TRACKER_DECORATOR (miner));
 	priv = TRACKER_DECORATOR (miner)->priv;
 	g_timer_stop (priv->timer);
@@ -1022,6 +1027,7 @@ tracker_decorator_resumed (TrackerMiner *miner)
 {
 	TrackerDecoratorPrivate *priv;
 
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Resumed"));
 	decorator_cache_next_items (TRACKER_DECORATOR (miner));
 	priv = TRACKER_DECORATOR (miner)->priv;
 	g_timer_continue (priv->timer);
@@ -1032,6 +1038,7 @@ tracker_decorator_stopped (TrackerMiner *miner)
 {
 	TrackerDecoratorPrivate *priv;
 
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Stopped"));
 	decorator_cancel_active_tasks (TRACKER_DECORATOR (miner));
 	priv = TRACKER_DECORATOR (miner)->priv;
 	g_timer_stop (priv->timer);
@@ -1046,6 +1053,7 @@ tracker_decorator_started (TrackerMiner *miner)
 	decorator = TRACKER_DECORATOR (miner);
 	priv = decorator->priv;
 
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Started"));
 	g_timer_start (priv->timer);
 	decorator_rebuild_cache (decorator);
 }
@@ -1207,6 +1215,7 @@ tracker_decorator_prepend_id (TrackerDecorator *decorator,
 	g_array_append_val (priv->prepended_ids, id);
 
 	/* The resource was explicitly requested, remove it from blocklists */
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Removing id %i from blocklist", id));
 	decorator_blocklist_remove (decorator, id);
 }
 
@@ -1240,6 +1249,7 @@ tracker_decorator_delete_id (TrackerDecorator *decorator,
 	}
 
 	/* Blocklist the item so it's not processed in the future */
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Added id %i to blocklist", id));
 	decorator_blocklist_add (decorator, id);
 }
 
@@ -1252,7 +1262,7 @@ tracker_decorator_delete_id (TrackerDecorator *decorator,
  *
  * Processes the next resource in the queue to have extended metadata
  * extracted. If the item in the queue has been completed already, it
- * signals it's completion instead.
+ * signals its completion instead.
  *
  * This function will give a #GError if the miner is paused at the
  * time it is called.
@@ -1285,6 +1295,7 @@ tracker_decorator_next (TrackerDecorator    *decorator,
 		return;
 	}
 
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Queued task %s", g_task_get_name (task)));
 	g_queue_push_tail (&priv->next_elem_queue, task);
 	decorator_pair_tasks (decorator);
 }
@@ -1421,6 +1432,7 @@ void
 tracker_decorator_info_complete (TrackerDecoratorInfo *info,
                                  gchar                *sparql)
 {
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s completed successfully", info->url));
 	g_task_return_pointer (info->task, sparql, g_free);
 }
 
@@ -1438,6 +1450,7 @@ void
 tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
                                        GError               *error)
 {
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s failed: %s", info->url, error->message));
 	g_task_return_error (info->task, error);
 }
 
