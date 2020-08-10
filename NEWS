@@ -1,3 +1,20 @@
+NEW in 2.99.3 - 2020-08-10
+==========================
+
+  * Support musicbrainz tags in gstreamer module
+  * Support acoustid tag writeback
+  * Handle nmm:artist and nmm:performer
+  * DBus API changes
+  * Fixes for race conditions
+  * Performance improvements
+  * Extractor watchdog fixes with domain ontologies
+  * CLI improvements
+  * Test fixes
+  * Use background slice
+  * Add base tests for CLI
+  * Better debugging traces
+  * Fix extraction of files with dummy extractors
+
 NEW in 2.99.2 - 2020-06-26
 ==========================
 
