@@ -520,7 +520,7 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		TrackerDirectoryFlags flags;
 
 		directory = g_queue_pop_head (priv->current_index_root->pending_dirs);
-		priv->current_index_root->current_dir = directory;
+		g_set_object (&priv->current_index_root->current_dir, directory);
 
 		tracker_indexing_tree_get_root (priv->indexing_tree,
 		                                directory, &flags);
@@ -541,6 +541,7 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		if (tracker_crawler_start (priv->crawler,
 		                           directory,
 		                           priv->current_index_root->flags)) {
+			g_object_unref (directory);
 			return TRUE;
 		}
 
@@ -556,25 +557,18 @@ finish_current_directory (TrackerFileNotifier *notifier,
                           gboolean             interrupted)
 {
 	TrackerFileNotifierPrivate *priv;
-	GFile *directory;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	directory = priv->current_index_root->current_dir;
-	priv->current_index_root->current_dir = NULL;
-	priv->current_index_root->current_dir_content_filtered = FALSE;
 
-	if (directory) {
-		/* If crawling was interrupted, we take all collected info as invalid.
-		 * Otherwise we dispose regular files here, only directories are
-		 * cached once crawling has completed.
-		 */
-		tracker_file_system_forget_files (priv->file_system,
-						  directory,
-						  interrupted ?
-						  G_FILE_TYPE_UNKNOWN :
-						  G_FILE_TYPE_REGULAR);
-		g_object_unref (directory);
-	}
+	/* If crawling was interrupted, we take all collected info as invalid.
+	 * Otherwise we dispose regular files here, only directories are
+	 * cached once crawling has completed.
+	 */
+	tracker_file_system_forget_files (priv->file_system,
+	                                  priv->current_index_root->root,
+	                                  interrupted ?
+	                                  G_FILE_TYPE_UNKNOWN :
+	                                  G_FILE_TYPE_REGULAR);
 
 	if (interrupted || !crawl_directory_in_current_root (notifier)) {
 		/* No more directories left to be crawled in the current

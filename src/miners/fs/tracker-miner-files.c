@@ -2035,7 +2035,8 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 			tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
 			tracker_resource_set_boolean (resource, "tracker:available", TRUE);
-			tracker_resource_set_relation (resource, "nie:rootElementOf", resource);
+			tracker_resource_set_uri (resource, "nie:rootElementOf",
+			                          tracker_resource_get_identifier (resource));
 
 			miner_files_add_mount_info (miner, resource, file);
 		}
@@ -2247,6 +2248,7 @@ process_file_cb (GObject      *object,
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
 		graph_file_str = tracker_resource_print_sparql_update (graph_file,
 								       NULL, graph);
+		g_object_unref (graph_file);
 	}
 
 	sparql_str = g_strdup_printf ("%s %s %s %s %s",
@@ -2258,6 +2260,7 @@ process_file_cb (GObject      *object,
 	g_free (ie_update_str);
 	g_free (delete_properties_sparql);
 	g_free (mount_point_sparql);
+	g_free (graph_file_str);
 
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
 	                                sparql_str, NULL);
