@@ -20,9 +20,11 @@ Test `tracker` commandline tool
 """
 
 import pathlib
+import os
 
 import configuration
 import fixtures
+import shutil
 
 class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_search(self):
@@ -33,19 +35,21 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         # in the meantime we manually wait for it to finish.
 
         file1 = datadir.joinpath('text/Document 1.txt')
-        file2 = datadir.joinpath('text/Document 2.txt')
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
 
-        with self.await_document_inserted(file1):
-            with self.await_document_inserted(file2):
-                output = self.run_cli(
-                    ['tracker3', 'index', '--file', str(datadir)])
+        file2 = datadir.joinpath('text/Document 2.txt')
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file2)))
+        with self.await_document_inserted(target2):
+            shutil.copy(file2, self.indexed_dir)
 
         # FIXME: the --all should NOT be needed.
         # See: https://gitlab.gnome.org/GNOME/tracker-miners/-/issues/116
         output = self.run_cli(
             ['tracker3', 'search', '--all', 'banana'])
-        self.assertIn(file1.as_uri(), output)
-        self.assertNotIn(file2.as_uri(), output)
+        self.assertIn(target1.as_uri(), output)
+        self.assertNotIn(target2.as_uri(), output)
 
 
 if __name__ == '__main__':
