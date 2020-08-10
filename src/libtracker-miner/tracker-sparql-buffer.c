@@ -517,23 +517,34 @@ tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
 	return task;
 }
 
+static gboolean
+task_has_file (TrackerTask *task,
+               GFile       *file)
+{
+	GFile *task_file;
+
+	task_file = tracker_task_get_file (task);
+
+	return g_file_equal (task_file, file);
+}
+
 TrackerSparqlBufferState
 tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
                                  GFile               *file)
 {
 	TrackerSparqlBufferPrivate *priv;
-	TrackerTask *task;
 
 	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), TRACKER_BUFFER_STATE_UNKNOWN);
 	g_return_val_if_fail (G_IS_FILE (file), TRACKER_BUFFER_STATE_UNKNOWN);
 
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
 
-	task = tracker_task_pool_find (TRACKER_TASK_POOL (buffer), file);
-	if (!task)
+	if (!tracker_task_pool_find (TRACKER_TASK_POOL (buffer), file))
 		return TRACKER_BUFFER_STATE_UNKNOWN;
 
-	if (priv->tasks && g_ptr_array_find (priv->tasks, task, NULL))
+	if (priv->tasks &&
+	    g_ptr_array_find_with_equal_func (priv->tasks, file,
+	                                      (GEqualFunc) task_has_file, NULL))
 		return TRACKER_BUFFER_STATE_QUEUED;
 
 	return TRACKER_BUFFER_STATE_FLUSHING;
