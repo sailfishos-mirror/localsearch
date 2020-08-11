@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-07-23 21:33+0000\n"
-"PO-Revision-Date: 2020-07-29 10:56+0200\n"
+"POT-Creation-Date: 2020-08-01 14:31+0000\n"
+"PO-Revision-Date: 2020-08-11 12:21+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -348,126 +348,126 @@ msgstr ""
 "La aplicación de pausa y la razón ya coinciden con una solicitud de pausa "
 "existente"
 
-#: src/miners/fs/tracker-main.c:75
+#: src/miners/fs/tracker-main.c:76
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Tiempo de reposo inicial en segundos, 0->1000 (predeterminado=15)"
 
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:81
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Se ejecuta hasta que todas las ubicaciones configuradas se indexan, y sale"
 
-#: src/miners/fs/tracker-main.c:84
+#: src/miners/fs/tracker-main.c:85
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Comprueba si el ARCHIVO es elegible para ser escrutado según la configuración"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:47 src/tracker/tracker-index.c:48
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ARCHIVO"
 
-#: src/miners/fs/tracker-main.c:88 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Se ejecuta en una ontología de dominio específica"
 
-#: src/miners/fs/tracker-main.c:92
-#| msgid "Crawls and processes files on the file system"
+#: src/miners/fs/tracker-main.c:93
 msgid "Avoids changes in the filesystem"
 msgstr "Evita cambios en el sistema de archivos"
 
-#: src/miners/fs/tracker-main.c:96 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Muestra información de la versión"
 
-#: src/miners/fs/tracker-main.c:585
+#: src/miners/fs/tracker-main.c:586
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "El objeto de datos «%s» ya existe"
 
-#: src/miners/fs/tracker-main.c:586
+#: src/miners/fs/tracker-main.c:587
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "El objeto de datos «%s» no existe actualmente"
 
-#: src/miners/fs/tracker-main.c:601
+#: src/miners/fs/tracker-main.c:602
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr "La carpeta es elegible para ser escrutada (según las reglas)"
 
-#: src/miners/fs/tracker-main.c:602
+#: src/miners/fs/tracker-main.c:603
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr "La carpeta NO es elegible para ser escrutada (según las reglas)"
 
-#: src/miners/fs/tracker-main.c:622
+#: src/miners/fs/tracker-main.c:623
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr "La carpeta es elegible para ser escrutada (según el contenido)"
 
-#: src/miners/fs/tracker-main.c:623
+#: src/miners/fs/tracker-main.c:624
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr "La carpeta NO es elegible para ser escrutada (según el contenido)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:671
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "La carpeta es elegible para ser monitorizada (según la configuración)"
 
-#: src/miners/fs/tracker-main.c:671
+#: src/miners/fs/tracker-main.c:672
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "La carpeta NO es elegible para ser monitorizada (según la configuración)"
 
-#: src/miners/fs/tracker-main.c:675
+#: src/miners/fs/tracker-main.c:676
 msgid "File is eligible to be monitored (based on config)"
 msgstr "El archivo es elegible para ser monitorizado (según la configuración)"
 
-#: src/miners/fs/tracker-main.c:676
+#: src/miners/fs/tracker-main.c:677
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr ""
 "El archivo NO es elegible para ser monitoririzado (según la configuración)"
 
-#: src/miners/fs/tracker-main.c:680
+#: src/miners/fs/tracker-main.c:681
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "El archivo o carpeta es elegible para ser monitorizada (según la "
 "configuración)"
 
-#: src/miners/fs/tracker-main.c:681
+#: src/miners/fs/tracker-main.c:682
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "El archivo o carpeta NO es elegible para ser monitorizada (según la "
 "configuración)"
 
-#: src/miners/fs/tracker-main.c:696
+#: src/miners/fs/tracker-main.c:697
 msgid "File is eligible to be mined (based on rules)"
 msgstr "El archivo es elegible para ser escrutado (según las reglas)"
 
-#: src/miners/fs/tracker-main.c:697
+#: src/miners/fs/tracker-main.c:698
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "El archivo NO es elegible para ser escrutado (según las reglas)"
 
-#: src/miners/fs/tracker-main.c:706
+#: src/miners/fs/tracker-main.c:707
 msgid "Would be indexed"
 msgstr "Se indexará"
 
-#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "Yes"
 msgstr "Sí"
 
-#: src/miners/fs/tracker-main.c:707 src/miners/fs/tracker-main.c:709
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "No"
 msgstr "No"
 
-#: src/miners/fs/tracker-main.c:708
+#: src/miners/fs/tracker-main.c:709
 msgid "Would be monitored"
 msgstr "Se monitorizará"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:849
+#: src/miners/fs/tracker-main.c:959
 msgid "— start the tracker indexer"
 msgstr "- iniciar el indexador de tracker"
 
@@ -515,6 +515,14 @@ msgstr "No se proporcionó ningún error"
 #: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "No se pudo añadir el proveedor"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-control/tracker-main.c:135
+#| msgid "— start the tracker indexer"
+msgid "— start the tracker index proxy"
+msgstr "- iniciar el proxy del indexador de tracker"
 
 #: src/tracker-extract/tracker-extract.c:694
 msgid "Metadata extraction failed"
