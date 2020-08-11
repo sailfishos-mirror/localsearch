@@ -97,6 +97,8 @@ Boston, MA  02110-1301, USA.
 
     <key name="index-recursive-directories" type="as">
       <summary>Directories to index recursively</summary>
+      <!-- Translators: Do NOT translate the directories names in capital. Those
+      are keys used by Tracker. -->
       <description>
 	List of directories to index recursively, Special values include:
 	&amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES,
@@ -109,6 +111,8 @@ Boston, MA  02110-1301, USA.
 
     <key name="index-single-directories" type="as">
       <summary>Directories to index non-recursively</summary>
+      <!-- Translators: Do NOT translate the directories names in capital. Those
+      are keys used by Tracker. -->
       <description>
 	List of directories to index without inspecting subfolders, Special values include:
 	&amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES,
