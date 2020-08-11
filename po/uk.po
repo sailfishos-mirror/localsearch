@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-01 14:31+0000\n"
-"PO-Revision-Date: 2020-08-01 18:33+0300\n"
+"POT-Creation-Date: 2020-08-11 13:32+0000\n"
+"PO-Revision-Date: 2020-08-11 18:59+0300\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -206,37 +206,54 @@ msgstr ""
 msgid "Directories to index recursively"
 msgstr "Каталоги для рекурсивного індексування"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+#| msgid ""
+#| "List of directories to index recursively, Special values include: "
+#| "&DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
+#| "&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
+#| "user-dirs.default"
 msgid ""
-"List of directories to index recursively, Special values include: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
-"Перелік каталогів, індексованих рекурсивно. Спеціальні значення: DESKTOP, "
-"DOCUMENTS, DOWNLOAD, MUSIC, PICTURES, PUBLIC_SHARE, TEMPLATES, VIDEOS. Див. /"
+"Перелік каталогів, індексованих рекурсивно. Спеціальні значення: &DESKTOP, "
+"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, &VIDEOS."
+" Див. /"
 "etc/xdg/user-dirs.defaults та $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
 msgstr "Каталоги, індексовані нерекурсивно"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+#| msgid ""
+#| "List of directories to index without inspecting subfolders, Special "
+#| "values include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
+#| "&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and "
+#| "$HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
-"include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
-"dirs.default"
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Перелік каталогів, індексованих без урахування вкладених каталогів. "
-"Спеціальні значення: DESKTOP, DOCUMENTS, DOWNLOAD, MUSIC, PICTURES, "
-"PUBLIC_SHARE, TEMPLATES, VIDEOS. Див. /etc/xdg/user-dirs.defaults та $HOME/."
+"Спеціальні значення: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
+"&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. Див. /etc/xdg/user-dirs.defaults та"
+" $HOME/."
 "config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Index applications installed on the system"
 msgstr "Індексувати програми, які встановлено у системі"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -244,27 +261,27 @@ msgstr ""
 "Якщо позначено цей пункт, видобувач даних з файлової системи шукатиме файли ."
 "desktop у стандартній системі XDG і каталогах даних користувача."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Ігноровані файли"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
 msgstr "Перелік ігнорованих файлових шаблонів"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
 msgstr "Ігноровані каталоги"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
 msgid "List of directories to avoid"
 msgstr "Перелік ігнорованих каталогів"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
 msgid "Ignored directories with content"
 msgstr "Ігноровані каталоги з вмістом"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Не обробляти каталоги, що містять файли з вказаного тут списку"
 
@@ -517,15 +534,14 @@ msgstr "Не вдалося додати стрічку"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-control/tracker-main.c:135
-#| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
 msgstr "— запустити проксі індексатора tracker"
 
-#: src/tracker-extract/tracker-extract.c:694
+#: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
 msgstr "Витягти метадані не вдалося"
 
-#: src/tracker-extract/tracker-extract.c:756
+#: src/tracker-extract/tracker-extract.c:743
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Для цього файлу не вдалося знайти відповідний модуль метаданих або модуль "
