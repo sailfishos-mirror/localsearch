@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-21 09:40+0000\n"
-"PO-Revision-Date: 2020-07-10 09:11+0200\n"
+"POT-Creation-Date: 2020-07-30 10:19+0000\n"
+"PO-Revision-Date: 2020-08-12 09:29+0200\n"
 "Last-Translator: Milo Casagrande <milo@milo.name>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "Language: it\n"
@@ -245,10 +245,10 @@ msgstr "Elenco di directory da ignorare"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:39
 msgid "Ignored directories with content"
-msgstr "Directory con contenuti da ignorare"
+msgstr "Directory ignorate con contenuti"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-msgid "Avoid any directory containing a file blocklisted here"
+msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Ignora qualsiasi directory che contiene un file elencato qui"
 
 # non sono sicuro sia <tempo>, potrebbe anche essere <ora>
@@ -507,11 +507,11 @@ msgstr "Estrattore"
 msgid "Metadata extractor"
 msgstr "Estrattore di metadati"
 
-#: ../src/tracker-extract/tracker-extract.c:683
+#: ../src/tracker-extract/tracker-extract.c:711
 msgid "Metadata extraction failed"
 msgstr "Estrazione dei metadati non riuscita"
 
-#: ../src/tracker-extract/tracker-extract.c:763
+#: ../src/tracker-extract/tracker-extract.c:791
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Non è stato trovato alcun modulo per metadati o di estrazione per gestire "
