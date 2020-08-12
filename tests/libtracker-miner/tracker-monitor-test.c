@@ -62,7 +62,7 @@ require_events (TrackerMonitorTestFixture *fixture,
 {
 	gboolean created;
 
-	g_assert (G_IS_FILE (file));
+	g_assert_true (G_IS_FILE (file));
 
 	created = g_hash_table_insert (fixture->require_events, g_object_ref (file), GUINT_TO_POINTER (event_mask));
 
@@ -78,7 +78,7 @@ prohibit_events (TrackerMonitorTestFixture *fixture,
 {
 	gboolean created;
 
-	g_assert (G_IS_FILE (file));
+	g_assert_true (G_IS_FILE (file));
 
 	created = g_hash_table_insert (fixture->prohibit_events, g_object_ref (file), GUINT_TO_POINTER (event_mask));
 
@@ -254,9 +254,9 @@ test_monitor_events_created_cb (TrackerMonitor *monitor,
 	gchar *path;
 	TrackerMonitorTestFixture *fixture = user_data;
 
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	path = g_file_get_path (file);
-	g_assert (path != NULL);
+	g_assert_true (path != NULL);
 
 	g_debug ("***** '%s' (%s) (CREATED)",
 	         path,
@@ -279,9 +279,9 @@ test_monitor_events_updated_cb (TrackerMonitor *monitor,
 	TrackerMonitorTestFixture *fixture = user_data;
 	gchar *path;
 
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	path = g_file_get_path (file);
-	g_assert (path != NULL);
+	g_assert_true (path != NULL);
 
 	g_debug ("***** '%s' (%s) (UPDATED)",
 	         path,
@@ -304,9 +304,9 @@ test_monitor_events_attribute_updated_cb (TrackerMonitor *monitor,
 	TrackerMonitorTestFixture *fixture = user_data;
 	gchar *path;
 
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	path = g_file_get_path (file);
-	g_assert (path != NULL);
+	g_assert_true (path != NULL);
 
 	g_debug ("***** '%s' (%s) (ATRIBUTE UPDATED)",
 	         path,
@@ -329,9 +329,9 @@ test_monitor_events_deleted_cb (TrackerMonitor *monitor,
 	TrackerMonitorTestFixture *fixture = user_data;
 	gchar *path;
 
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	path = g_file_get_path (file);
-	g_assert (path != NULL);
+	g_assert_true (path != NULL);
 
 	g_debug ("***** '%s' (%s) (DELETED)",
 	         path,
@@ -357,7 +357,7 @@ test_monitor_events_moved_cb (TrackerMonitor *monitor,
 	gchar *path;
 	gchar *other_path;
 
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	path = g_file_get_path (other_file);
 	other_path = g_file_get_path (other_file);
 
@@ -404,7 +404,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 
 	/* Create and setup the tracker monitor */
 	fixture->monitor = tracker_monitor_new ();
-	g_assert (fixture->monitor != NULL);
+	g_assert_true (fixture->monitor != NULL);
 
 	g_signal_connect (fixture->monitor, "item-created",
 	                  G_CALLBACK (test_monitor_events_created_cb),
@@ -430,7 +430,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 
 	fixture->monitored_directory = basename;
 	fixture->monitored_directory_file = g_file_new_for_path (fixture->monitored_directory);
-	g_assert (fixture->monitored_directory_file != NULL);
+	g_assert_true (fixture->monitored_directory_file != NULL);
 	g_assert_cmpint (tracker_monitor_add (fixture->monitor, fixture->monitored_directory_file), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_get_count (fixture->monitor), ==, 1);
 
@@ -439,7 +439,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 
 	/* Create new main loop */
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
-	g_assert (fixture->main_loop != NULL);
+	g_assert_true (fixture->main_loop != NULL);
 }
 
 static void
@@ -454,7 +454,7 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 	g_assert_cmpint (tracker_monitor_get_count (fixture->monitor), ==, 0);
 
 	/* Destroy monitor */
-	g_assert (fixture->monitor != NULL);
+	g_assert_true (fixture->monitor != NULL);
 	g_object_unref (fixture->monitor);
 
 	/* Remove the hash_tables of events */
@@ -463,13 +463,13 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 	g_hash_table_destroy (fixture->prohibit_events);
 
 	/* Remove base test directories */
-	g_assert (fixture->monitored_directory_file != NULL);
-	g_assert (fixture->monitored_directory != NULL);
+	g_assert_true (fixture->monitored_directory_file != NULL);
+	g_assert_true (fixture->monitored_directory != NULL);
 	g_assert_cmpint (g_file_delete (fixture->monitored_directory_file, NULL, NULL), ==, TRUE);
 	g_object_unref (fixture->monitored_directory_file);
 	g_free (fixture->monitored_directory);
 
-	g_assert (fixture->not_monitored_directory != NULL);
+	g_assert_true (fixture->not_monitored_directory != NULL);
 	g_free (fixture->not_monitored_directory);
 }
 
@@ -483,7 +483,7 @@ create_directory (const gchar  *parent,
 
 	path = g_build_path (G_DIR_SEPARATOR_S, parent, directory_name, NULL);
 	dirfile = g_file_new_for_path (path);
-	g_assert (dirfile != NULL);
+	g_assert_true (dirfile != NULL);
 	g_assert_cmpint (g_file_make_directory_with_parents (dirfile, NULL, NULL), ==, TRUE);
 	if (outfile) {
 		*outfile = dirfile;
@@ -503,14 +503,14 @@ set_file_contents (const gchar  *directory,
 	size_t length;
 	gchar *file_path;
 
-	g_assert (directory != NULL);
-	g_assert (filename != NULL);
-	g_assert (contents != NULL);
+	g_assert_true (directory != NULL);
+	g_assert_true (filename != NULL);
+	g_assert_true (contents != NULL);
 
 	file_path = g_build_filename (directory, filename, NULL);
 
 	file = g_fopen (file_path, "wb");
-	g_assert (file != NULL);
+	g_assert_true (file != NULL);
 	length = strlen (contents);
 	g_assert_cmpint (fwrite (contents, 1, length, file), >=, length);
 	g_assert_cmpint (fflush (file), ==, 0);
@@ -529,8 +529,8 @@ set_file_permissions (const gchar  *directory,
 {
 	gchar *file_path;
 
-	g_assert (directory != NULL);
-	g_assert (filename != NULL);
+	g_assert_true (directory != NULL);
+	g_assert_true (filename != NULL);
 
 	file_path = g_build_filename (directory, filename, NULL);
 	g_assert_cmpint (g_chmod (file_path, permissions), ==, 0);
@@ -575,7 +575,7 @@ test_monitor_file_event_created (TrackerMonitorTestFixture *fixture,
 
 	/* Create file to test with */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &test_file);
-	g_assert (test_file != NULL);
+	g_assert_true (test_file != NULL);
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (test_file),
 	                     GUINT_TO_POINTER (MONITOR_SIGNAL_NONE));
@@ -607,7 +607,7 @@ test_monitor_file_event_updated (TrackerMonitorTestFixture *fixture,
 
 	/* Now, trigger update of the already created file */
 	set_file_contents (fixture->monitored_directory, "created.txt", "barrrr", &test_file);
-	g_assert (test_file != NULL);
+	g_assert_true (test_file != NULL);
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (test_file),
 	                     GUINT_TO_POINTER (MONITOR_SIGNAL_NONE));
@@ -633,7 +633,7 @@ test_monitor_file_event_attribute_updated (TrackerMonitorTestFixture *fixture,
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &test_file);
-	g_assert (test_file != NULL);
+	g_assert_true (test_file != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -668,7 +668,7 @@ test_monitor_file_event_deleted (TrackerMonitorTestFixture *fixture,
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &test_file);
-	g_assert (test_file != NULL);
+	g_assert_true (test_file != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -700,7 +700,7 @@ test_monitor_file_event_moved_to_monitored (TrackerMonitorTestFixture *fixture,
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &source_file);
-	g_assert (source_file != NULL);
+	g_assert_true (source_file != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -709,7 +709,7 @@ test_monitor_file_event_moved_to_monitored (TrackerMonitorTestFixture *fixture,
 	source_path = g_file_get_path (source_file);
 	dest_path = g_build_filename (fixture->monitored_directory, "renamed.txt", NULL);
 	dest_file = g_file_new_for_path (dest_path);
-	g_assert (dest_file != NULL);
+	g_assert_true (dest_file != NULL);
 
 	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
 
@@ -747,7 +747,7 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &source_file);
-	g_assert (source_file != NULL);
+	g_assert_true (source_file != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -756,7 +756,7 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 	source_path = g_file_get_path (source_file);
 	dest_path = g_build_filename (fixture->not_monitored_directory, "out.txt", NULL);
 	dest_file = g_file_new_for_path (dest_path);
-	g_assert (dest_file != NULL);
+	g_assert_true (dest_file != NULL);
 
 	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
 
@@ -793,7 +793,7 @@ test_monitor_file_event_moved_from_not_monitored (TrackerMonitorTestFixture *fix
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->not_monitored_directory, "created.txt", "foo", &source_file);
-	g_assert (source_file != NULL);
+	g_assert_true (source_file != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -802,7 +802,7 @@ test_monitor_file_event_moved_from_not_monitored (TrackerMonitorTestFixture *fix
 	source_path = g_file_get_path (source_file);
 	dest_path = g_build_filename (fixture->monitored_directory, "in.txt", NULL);
 	dest_file = g_file_new_for_path (dest_path);
-	g_assert (dest_file != NULL);
+	g_assert_true (dest_file != NULL);
 
 	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
 
@@ -841,7 +841,7 @@ test_monitor_directory_event_created (TrackerMonitorTestFixture *fixture,
 
 	/* Create directory to test with */
 	create_directory (fixture->monitored_directory, "directory", &test_dir);
-	g_assert (test_dir != NULL);
+	g_assert_true (test_dir != NULL);
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (test_dir),
 	                     GUINT_TO_POINTER (MONITOR_SIGNAL_NONE));
@@ -870,7 +870,7 @@ test_monitor_directory_event_deleted (TrackerMonitorTestFixture *fixture,
 	 * before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Set to monitor the new dir also */
 	g_assert_cmpint (tracker_monitor_add (fixture->monitor, source_dir), ==, TRUE);
@@ -913,7 +913,7 @@ test_monitor_directory_event_moved_to_monitored (TrackerMonitorTestFixture *fixt
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Add some file to the new dir */
 	set_file_contents (source_path, "file.txt", "whatever", &file_in_source_dir);
@@ -931,7 +931,7 @@ test_monitor_directory_event_moved_to_monitored (TrackerMonitorTestFixture *fixt
 	                                      "file.txt",
 	                                      NULL);
 	file_in_dest_dir = g_file_new_for_path (file_in_dest_dir_path);
-	g_assert (file_in_dest_dir != NULL);
+	g_assert_true (file_in_dest_dir != NULL);
 
 	/* Now, rename the directory */
 	dest_dir = g_file_get_parent (file_in_dest_dir);
@@ -997,7 +997,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_create (TrackerMonito
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -1015,7 +1015,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_create (TrackerMonito
 	                                      "file.txt",
 	                                      NULL);
 	file_in_dest_dir = g_file_new_for_path (file_in_dest_dir_path);
-	g_assert (file_in_dest_dir != NULL);
+	g_assert_true (file_in_dest_dir != NULL);
 
 	/* Now, rename the directory */
 	dest_dir = g_file_get_parent (file_in_dest_dir);
@@ -1082,7 +1082,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonito
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Add some file to the new dir */
 	set_file_contents (source_path, "file.txt", "whatever", &file_in_source_dir);
@@ -1100,7 +1100,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonito
 	                                      "file.txt",
 	                                      NULL);
 	file_in_dest_dir = g_file_new_for_path (file_in_dest_dir_path);
-	g_assert (file_in_dest_dir != NULL);
+	g_assert_true (file_in_dest_dir != NULL);
 
 	/* Update file contents */
 	set_file_contents (source_path, "file.txt", "hohoho", &file_in_source_dir);
@@ -1164,7 +1164,7 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Set to monitor the new dir also */
 	g_assert_cmpint (tracker_monitor_add (fixture->monitor, source_dir), ==, TRUE);
@@ -1216,7 +1216,7 @@ test_monitor_directory_event_moved_from_not_monitored (TrackerMonitorTestFixture
 	 * before setting up the environment */
 	create_directory (fixture->not_monitored_directory, "foo", &source_dir);
 	source_path = g_file_get_path (source_dir);
-	g_assert (source_dir != NULL);
+	g_assert_true (source_dir != NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -1270,14 +1270,14 @@ test_monitor_basic (void)
 	g_assert_cmpint (g_mkdir_with_parents (path_for_monitor, 00755), ==, 0);
 
 	file_for_monitor = g_file_new_for_path (path_for_monitor);
-	g_assert (G_IS_FILE (file_for_monitor));
+	g_assert_true (G_IS_FILE (file_for_monitor));
 
 	file_for_tmp = g_file_new_for_path (g_get_tmp_dir ());
-	g_assert (G_IS_FILE (file_for_tmp));
+	g_assert_true (G_IS_FILE (file_for_tmp));
 
 	/* Create a monitor */
 	monitor = tracker_monitor_new ();
-	g_assert (monitor != NULL);
+	g_assert_true (monitor != NULL);
 
 	/* Test general API with monitors enabled */
 	tracker_monitor_set_enabled (monitor, TRUE);
@@ -1322,13 +1322,13 @@ test_monitor_basic (void)
 
 	/* Cleanup */
 	g_assert_cmpint (g_rmdir (path_for_monitor), ==, 0);
-	g_assert (file_for_tmp != NULL);
+	g_assert_true (file_for_tmp != NULL);
 	g_object_unref (file_for_tmp);
-	g_assert (file_for_monitor != NULL);
+	g_assert_true (file_for_monitor != NULL);
 	g_object_unref (file_for_monitor);
-	g_assert (path_for_monitor != NULL);
+	g_assert_true (path_for_monitor != NULL);
 	g_free (path_for_monitor);
-	g_assert (monitor != NULL);
+	g_assert_true (monitor != NULL);
 	g_object_unref (monitor);
 }
 

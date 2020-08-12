@@ -61,22 +61,22 @@ test_file_system_insertions (TestCommonContext *fixture,
 
 	file = g_file_new_for_uri ("file:///aaa/");
 	canonical = tracker_file_system_peek_file (fixture->file_system, file);
-	g_assert (canonical == NULL);
+	g_assert_true (canonical == NULL);
 
 	canonical = tracker_file_system_get_file (fixture->file_system, file,
 						  G_FILE_TYPE_DIRECTORY, NULL);
 	g_object_unref (file);
 
-	g_assert (canonical != NULL);
+	g_assert_true (canonical != NULL);
 
 	file = g_file_new_for_uri ("file:///aaa/");
 	other = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_DIRECTORY, NULL);
-	g_assert (canonical == other);
+	g_assert_true (canonical == other);
 
 	other = tracker_file_system_peek_file (fixture->file_system, file);
 	g_object_unref (file);
-	g_assert (other != NULL);
+	g_assert_true (other != NULL);
 }
 
 static void
@@ -93,14 +93,14 @@ test_file_system_children (TestCommonContext *fixture,
 	file = g_file_new_for_uri ("file:///aaa/bbb");
 	child = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_REGULAR, parent);
-	g_assert (child != NULL);
+	g_assert_true (child != NULL);
 	g_object_unref (file);
 
 	file = g_file_new_for_uri ("file:///aaa/bbb");
 	other = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_REGULAR, NULL);
-	g_assert (other != NULL);
-	g_assert (child == other);
+	g_assert_true (other != NULL);
+	g_assert_true (child == other);
 
 	g_object_unref (file);
 }
@@ -119,14 +119,14 @@ test_file_system_indirect_children (TestCommonContext *fixture,
 	file = g_file_new_for_uri ("file:///aaa/bbb/ccc");
 	child = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_REGULAR, parent);
-	g_assert (child != NULL);
+	g_assert_true (child != NULL);
 	g_object_unref (file);
 
 	file = g_file_new_for_uri ("file:///aaa/bbb/ccc");
 	other = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_REGULAR, NULL);
-	g_assert (other != NULL);
-	g_assert (child == other);
+	g_assert_true (other != NULL);
+	g_assert_true (child == other);
 
 	/* FIXME: check missing parent in between */
 
@@ -147,19 +147,19 @@ test_file_system_reparenting (TestCommonContext *fixture,
 	file = g_file_new_for_uri ("file:///aaa/bbb/ccc");
 	grandchild = tracker_file_system_get_file (fixture->file_system, file,
 						   G_FILE_TYPE_REGULAR, parent);
-	g_assert (grandchild != NULL);
+	g_assert_true (grandchild != NULL);
 	g_object_unref (file);
 
 	file = g_file_new_for_uri ("file:///aaa/bbb");
 	child = tracker_file_system_get_file (fixture->file_system, file,
 					      G_FILE_TYPE_REGULAR, parent);
-	g_assert (child != NULL);
+	g_assert_true (child != NULL);
 	g_object_unref (file);
 
 	file = g_file_new_for_uri ("file:///aaa/bbb/ccc");
 	other = tracker_file_system_peek_file (fixture->file_system, file);
-	g_assert (other != NULL);
-	g_assert (grandchild == other);
+	g_assert_true (other != NULL);
+	g_assert_true (grandchild == other);
 	g_object_unref (file);
 
 	/* Delete child in between */
@@ -168,14 +168,14 @@ test_file_system_reparenting (TestCommonContext *fixture,
 	/* Check that child doesn't exist anymore */
 	file = g_file_new_for_uri ("file:///aaa/bbb");
 	child = tracker_file_system_peek_file (fixture->file_system, file);
-	g_assert (child == NULL);
+	g_assert_true (child == NULL);
 	g_object_unref (file);
 
 	/* Check that grand child still exists */
 	file = g_file_new_for_uri ("file:///aaa/bbb/ccc");
 	other = tracker_file_system_peek_file (fixture->file_system, file);
-	g_assert (other != NULL);
-	g_assert (grandchild == other);
+	g_assert_true (other != NULL);
+	g_assert_true (grandchild == other);
 	g_object_unref (file);
 }
 
@@ -209,26 +209,26 @@ test_file_system_properties (TestCommonContext *fixture,
 	/* Check second property and remove it */
 	ret_value = tracker_file_system_get_property (fixture->file_system,
 						      file, property2_quark);
-	g_assert (ret_value == value);
+	g_assert_true (ret_value == value);
 
 	tracker_file_system_unset_property (fixture->file_system,
 					    file, property2_quark);
 
 	ret_value = tracker_file_system_get_property (fixture->file_system,
 						      file, property2_quark);
-	g_assert (ret_value == NULL);
+	g_assert_true (ret_value == NULL);
 
 	/* Check first property and remove it */
 	ret_value = tracker_file_system_get_property (fixture->file_system,
 						      file, property1_quark);
-	g_assert (ret_value == value);
+	g_assert_true (ret_value == value);
 
 	tracker_file_system_unset_property (fixture->file_system,
 					    file, property1_quark);
 
 	ret_value = tracker_file_system_get_property (fixture->file_system,
 						      file, property1_quark);
-	g_assert (ret_value == NULL);
+	g_assert_true (ret_value == NULL);
 }
 
 gint

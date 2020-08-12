@@ -41,7 +41,7 @@ test_priority_queue_emptiness (void)
         
         one = tracker_priority_queue_new ();
 
-        g_assert (tracker_priority_queue_is_empty (one));
+        g_assert_true (tracker_priority_queue_is_empty (one));
         g_assert_cmpint (tracker_priority_queue_get_length (one), ==, 0);
 
         tracker_priority_queue_unref (one);
@@ -77,7 +77,7 @@ test_priority_queue_insertion_pop (void)
                 g_free (text);
         }
 
-        g_assert (tracker_priority_queue_is_empty (queue));        
+        g_assert_true (tracker_priority_queue_is_empty (queue));
         tracker_priority_queue_unref (queue);
 }
 
@@ -91,7 +91,7 @@ test_priority_queue_peek (void)
         queue = tracker_priority_queue_new ();
 
         result = tracker_priority_queue_peek (queue, &priority);
-        g_assert (result == NULL);
+        g_assert_true (result == NULL);
 
         tracker_priority_queue_add (queue, g_strdup ("Low prio"), 10);
         tracker_priority_queue_add (queue, g_strdup ("High prio"), 1);
@@ -217,8 +217,8 @@ test_priority_queue_branches (void)
         g_assert_cmpint (tracker_priority_queue_get_length (queue), ==, 3);
 
         /* Removal with multiple elements in same priority*/
-        g_assert (tracker_priority_queue_foreach_remove (queue, g_str_equal, "z", g_free));
-        g_assert (tracker_priority_queue_foreach_remove (queue, g_str_equal, "x", g_free));
+        g_assert_true (tracker_priority_queue_foreach_remove (queue, g_str_equal, "z", g_free));
+        g_assert_true (tracker_priority_queue_foreach_remove (queue, g_str_equal, "x", g_free));
         
 
         /* Pop those elements */
@@ -229,7 +229,7 @@ test_priority_queue_branches (void)
         g_assert_cmpint (tracker_priority_queue_get_length (queue), ==, 0);
         /* Pop on empty queue */
         result = tracker_priority_queue_pop (queue, &priority);
-        g_assert (result == NULL);
+        g_assert_true (result == NULL);
 
         tracker_priority_queue_unref (queue);
 }

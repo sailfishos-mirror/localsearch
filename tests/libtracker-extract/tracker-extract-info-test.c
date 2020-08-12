@@ -32,7 +32,7 @@ test_extract_info_setters (void)
         info = tracker_extract_info_new (file, "imaginary/mime", NULL);
         info_ref = tracker_extract_info_ref (info);
 
-        g_assert (g_file_equal (file, tracker_extract_info_get_file (info)));
+        g_assert_true (g_file_equal (file, tracker_extract_info_get_file (info)));
 
         g_assert_cmpstr (tracker_extract_info_get_mimetype (info), ==, "imaginary/mime");
 

@@ -123,7 +123,7 @@ dbus_g_proxy_call (DBusGProxy *proxy,
 
 		arg_type = va_arg (args, GType);
 
-		g_assert (arg_type == G_TYPE_STRV);
+		g_assert_true (arg_type == G_TYPE_STRV);
 		g_value_init (&value, arg_type);
 		g_value_set_boxed (&value, running_services);
 		G_VALUE_LCOPY (&value,
@@ -155,10 +155,10 @@ dbus_g_proxy_call (DBusGProxy *proxy,
 		g_value_unset (&value);
 
 		arg_type = va_arg (args, GType);
-		g_assert (arg_type == G_TYPE_INVALID);
+		g_assert_true (arg_type == G_TYPE_INVALID);
 
 		arg_type = va_arg (args, GType);
-		g_assert (arg_type == G_TYPE_BOOLEAN);
+		g_assert_true (arg_type == G_TYPE_BOOLEAN);
 		g_value_init (&value, arg_type);
 		g_value_set_boolean (&value, active);
 		G_VALUE_LCOPY (&value,
@@ -181,7 +181,7 @@ dbus_g_proxy_call (DBusGProxy *proxy,
 		TrackerMinerMock *miner = (TrackerMinerMock *)proxy;
 
 		arg_type = va_arg (args, GType);
-		g_assert (arg_type == G_TYPE_STRV);
+		g_assert_true (arg_type == G_TYPE_STRV);
 		g_value_init (&value, arg_type);
 		apps = tracker_miner_mock_get_apps (miner, &amount);
 		if (apps == NULL || amount == 0) {
@@ -195,7 +195,7 @@ dbus_g_proxy_call (DBusGProxy *proxy,
 		g_value_unset (&value);
 
 		arg_type = va_arg (args, GType);
-		g_assert (arg_type == G_TYPE_STRV);
+		g_assert_true (arg_type == G_TYPE_STRV);
 		g_value_init (&value, arg_type);
 		reasons = tracker_miner_mock_get_reasons (miner, &amount);
 		if (reasons == NULL || amount == 0) {

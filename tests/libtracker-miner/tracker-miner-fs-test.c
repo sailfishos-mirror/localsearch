@@ -1603,14 +1603,14 @@ test_event_queue_create_and_delete (TrackerMinerFSTestFixture *fixture,
 
 	CREATE_UPDATE_FILE (fixture, "recursive/a");
 	fixture_iterate_filter (fixture, 1);
-	g_assert (tracker_miner_fs_has_items_to_process (fixture->miner) == TRUE);
+	g_assert_true (tracker_miner_fs_has_items_to_process (fixture->miner) == TRUE);
 
 	DELETE_FILE (fixture, "recursive/a");
 	fixture_iterate_filter (fixture, 1);
 
 	tracker_miner_resume (TRACKER_MINER (fixture->miner));
 	fixture_iterate (fixture);
-	g_assert (tracker_miner_fs_has_items_to_process (fixture->miner) == FALSE);
+	g_assert_true (tracker_miner_fs_has_items_to_process (fixture->miner) == FALSE);
 }
 
 static void

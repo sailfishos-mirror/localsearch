@@ -59,11 +59,11 @@ typedef struct {
 } TestCommonContext;
 
 #define ASSERT_INDEXABLE(fixture, id)	  \
-	g_assert (tracker_indexing_tree_file_is_indexable (fixture->tree, \
+	g_assert_true (tracker_indexing_tree_file_is_indexable (fixture->tree, \
 	                                                   fixture->test_dir[id], \
 	                                                   G_FILE_TYPE_DIRECTORY) == TRUE)
 #define ASSERT_NOT_INDEXABLE(fixture, id)	  \
-	g_assert (tracker_indexing_tree_file_is_indexable (fixture->tree, \
+	g_assert_true (tracker_indexing_tree_file_is_indexable (fixture->tree, \
 	                                                   fixture->test_dir[id], \
 	                                                   G_FILE_TYPE_DIRECTORY) == FALSE)
 

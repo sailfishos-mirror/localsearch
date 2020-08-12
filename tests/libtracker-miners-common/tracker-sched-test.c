@@ -44,9 +44,9 @@ scheduler_is (gint scheduler)
 static void
 test_sched_set_and_get (void)
 {
-        g_assert (tracker_sched_idle ());
+        g_assert_true (tracker_sched_idle ());
 #ifdef __linux__
-        g_assert (scheduler_is (SCHED_IDLE));
+        g_assert_true (scheduler_is (SCHED_IDLE));
 #endif
 }
 
