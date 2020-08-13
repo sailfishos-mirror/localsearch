@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-01 14:31+0000\n"
-"PO-Revision-Date: 2020-08-11 12:21+0200\n"
+"POT-Creation-Date: 2020-08-11 13:32+0000\n"
+"PO-Revision-Date: 2020-08-13 10:40+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -208,38 +208,53 @@ msgstr ""
 msgid "Directories to index recursively"
 msgstr "Carpetas que indexar recursivamente"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+#| msgid ""
+#| "List of directories to index recursively, Special values include: "
+#| "&DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
+#| "&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
+#| "user-dirs.default"
 msgid ""
-"List of directories to index recursively, Special values include: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Lista de carpetas que indexar recursivamente. Los valores especiales "
 "incluyen &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
 "&TEMPLATES, &VIDEOS. Consulte /etc/xdg/user-dirs.defaults y $HOME/.config/"
 "user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
 msgstr "Carpetas que indexar no recursivamente"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+#| msgid ""
+#| "List of directories to index without inspecting subfolders, Special "
+#| "values include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
+#| "&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and "
+#| "$HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
-"include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
-"dirs.default"
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Lista de las carpetas que indexar sin inspeccionar las subcarpetas. Los "
 "valores especiales incluyen &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, "
 "&PICTURES, &PUBLIC_SHARE, &TEMPLATES, &VIDEOS. Consulte /etc/xdg/user-dirs."
 "defaults y $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Index applications installed on the system"
 msgstr "Indexar aplicaciones instaladas en el sistema"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -248,27 +263,27 @@ msgstr ""
 "archivos .desktop en el sistema XDG estándar y en las carpetas de datos del "
 "usuario."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Archivos ignorados"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
 msgstr "Lista de patrones de archivo que evitar"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
 msgstr "Carpetas ignoradas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
 msgid "List of directories to avoid"
 msgstr "Lista de carpetas que evitar"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
 msgid "Ignored directories with content"
 msgstr "Carpetas con contenido ignoradas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Evitar cualquier carpeta que contenga un archivo en esta lista negra"
 
@@ -520,15 +535,14 @@ msgstr "No se pudo añadir el proveedor"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-control/tracker-main.c:135
-#| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
 msgstr "- iniciar el proxy del indexador de tracker"
 
-#: src/tracker-extract/tracker-extract.c:694
+#: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
 msgstr "Falló la extracción de metadatos"
 
-#: src/tracker-extract/tracker-extract.c:756
+#: src/tracker-extract/tracker-extract.c:743
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "No se han encontrado metadatos o módulos del extractor para manejar este "
