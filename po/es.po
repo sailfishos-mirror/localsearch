@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-06-28 00:16+0000\n"
-"PO-Revision-Date: 2020-06-30 09:26+0200\n"
+"POT-Creation-Date: 2020-08-12 07:31+0000\n"
+"PO-Revision-Date: 2020-08-14 11:09+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -245,8 +245,8 @@ msgid "Ignored directories with content"
 msgstr "Carpetas con contenido ignoradas"
 
 #: ../data/org.freedesktop.Tracker.Miner.Files.gschema.xml.h:40
-#| msgid "Avoid any directory containing a file blacklisted here"
-msgid "Avoid any directory containing a file blocklisted here"
+#| msgid "Avoid any directory containing a file blocklisted here"
+msgid "Avoid any directory containing a file blacklisted here"
 msgstr "Evitar cualquier carpeta que contenga un archivo en esta lista negra"
 
 #: ../src/libtracker-miners-common/tracker-utils.c:90
