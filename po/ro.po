@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-01 14:31+0000\n"
-"PO-Revision-Date: 2020-08-04 14:22+0300\n"
+"POT-Creation-Date: 2020-08-14 09:41+0000\n"
+"PO-Revision-Date: 2020-08-14 15:20+0300\n"
 "Last-Translator: Florentina Mușat <florentina.musat.28@gmail.com>\n"
 "Language-Team: Romanian Gnome Team <gnomero-list@lists.sourceforge.net>\n"
 "Language: ro\n"
@@ -209,38 +209,43 @@ msgstr ""
 msgid "Directories to index recursively"
 msgstr "Dosare de indexat recursiv"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid ""
-"List of directories to index recursively, Special values include: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
-"Lista dosarelor de indexat recursiv, Valorile speciale includ: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. Vedeți /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs."
-"default"
+"Lista dosarelor de indexat recursiv, Valorile speciale includ: „&DESKTOP”, "
+"„&DOCUMENTS”, „&DOWNLOAD”, „&MUSIC”, „&PICTURES”, „&PUBLIC_SHARE”, "
+"„&TEMPLATES”, „&VIDEOS”. Vedeți /etc/xdg/user-dirs.defaults și $HOME/.config/"
+"user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
 msgstr "Dosare de indexat ne-recursiv"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
-"include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
-"dirs.default"
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Lista dosarelor de indexat fără a inspecta subdosarele, Valorile speciale "
-"includ: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. Vedeți /etc/xdg/user-dirs.defaults și $HOME/.config/"
-"user-dirs.default"
+"includ: „&DESKTOP”, „&DOCUMENTS”, „&DOWNLOAD”, „&MUSIC”, „&PICTURES”, "
+"„&PUBLIC_SHARE”, „&TEMPLATES”, „&VIDEOS”. Vedeți /etc/xdg/user-dirs.defaults "
+"și $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Index applications installed on the system"
 msgstr "Indexează aplicațiile instalate pe sistem"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -249,27 +254,27 @@ msgstr ""
 "după fișiere .desktop în sistemul standard XDG și directoarele de date ale "
 "utilizatorului."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Fișiere ignorate"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
 msgstr "Lista modelelor de evitat"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
 msgstr "Dosare ignorate"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
 msgid "List of directories to avoid"
 msgstr "Lista dosarelor de evitat"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
 msgid "Ignored directories with content"
 msgstr "Au fost ignorate dosarele cu conținut"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Evită orice director care conține un fișier blocat la listare aici"
 
@@ -525,11 +530,11 @@ msgstr "Nu s-a putut adăuga fluxul"
 msgid "— start the tracker index proxy"
 msgstr "— pornește proxy-ul de index de urmăritor"
 
-#: src/tracker-extract/tracker-extract.c:694
+#: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
 msgstr "Extragerea de metadate a eșuat"
 
-#: src/tracker-extract/tracker-extract.c:756
+#: src/tracker-extract/tracker-extract.c:743
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nu s-au găsit module de metadate sau extractor pentru a gestiona acest fișier"
