@@ -2816,20 +2816,24 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles  *miner,
 	 * which was last unmounted before the given date */
 	g_string_append_printf (queries,
 	                        "DELETE { "
-	                        "  ?f a rdfs:Resource . "
+				"  GRAPH " DEFAULT_GRAPH " {"
+	                        "    ?f a rdfs:Resource . "
+				"  }"
 	                        "  GRAPH ?g {"
 	                        "    ?ie a rdfs:Resource "
 	                        "  }"
 	                        "} WHERE { "
-	                        "  ?v a tracker:IndexedFolder ; "
-	                        "     tracker:isRemovable true ; "
-	                        "     tracker:available false ; "
-	                        "     tracker:unmountDate ?d . "
-	                        "  ?f nie:dataSource ?v . "
+				"  GRAPH " DEFAULT_GRAPH " {"
+	                        "    ?v a tracker:IndexedFolder ; "
+	                        "       tracker:isRemovable true ; "
+	                        "       tracker:available false ; "
+	                        "       tracker:unmountDate ?d . "
+	                        "    ?f nie:dataSource ?v . "
+	                        "    FILTER ( ?d < \"%s\"^^xsd:dateTime) "
+				"  }"
 	                        "  GRAPH ?g {"
 	                        "    ?ie nie:isStoredAs ?f "
 	                        "  }"
-	                        "  FILTER ( ?d < \"%s\") "
 	                        "}",
 	                        date);
 
