@@ -889,6 +889,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor;
 	GSList *mounts, *l;
+	GFile *file;
 
 	g_debug ("Initializing mount points...");
 
@@ -910,8 +911,8 @@ init_mount_points (TrackerMinerFiles *miner_files)
 
 	priv = TRACKER_MINER_FILES_GET_PRIVATE (miner);
 
-	volumes = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                 (GDestroyNotify) g_free,
+	volumes = g_hash_table_new_full (g_file_hash, (GEqualFunc) g_file_equal,
+	                                 (GDestroyNotify) g_object_unref,
 	                                 NULL);
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
@@ -930,22 +931,22 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			state |= VOLUME_MOUNTED;
 		}
 
-		g_hash_table_replace (volumes, g_strdup (urn), GINT_TO_POINTER (state));
+		file = g_file_new_for_uri (urn);
+		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 	}
 
 	g_object_unref (cursor);
 
 	/* Then, get all currently mounted non-REMOVABLE volumes, according to GIO */
-	mounts = tracker_storage_get_device_uuids (priv->storage, 0, TRUE);
+	mounts = tracker_storage_get_device_roots (priv->storage, 0, TRUE);
 	for (l = mounts; l; l = l->next) {
-		gchar *path;
 		gint state;
 
-		path = g_strdup (l->data);
-		state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, path));
+		file = g_file_new_for_path (l->data);
+		state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, file));
 		state |= VOLUME_MOUNTED;
 
-		g_hash_table_replace (volumes, path, GINT_TO_POINTER (state));
+		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 	}
 
 	g_slist_foreach (mounts, (GFunc) g_free, NULL);
@@ -955,15 +956,14 @@ init_mount_points (TrackerMinerFiles *miner_files)
 	if (priv->index_removable_devices) {
 		mounts = tracker_storage_get_device_roots (priv->storage, TRACKER_STORAGE_REMOVABLE, FALSE);
 		for (l = mounts; l; l = l->next) {
-			gchar *path;
 			gint state;
 
-			path = g_strdup (l->data);
+			file = g_file_new_for_path (l->data);
 
-			state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, path));
+			state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, file));
 			state |= VOLUME_MOUNTED;
 
-			g_hash_table_replace (volumes, path, GINT_TO_POINTER (state));
+			g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 		}
 
 		g_slist_foreach (mounts, (GFunc) g_free, NULL);
@@ -975,9 +975,9 @@ init_mount_points (TrackerMinerFiles *miner_files)
 
 	/* Finally, set up volumes based on the composed info */
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		const gchar *mount_point = key;
+		GFile *file = key;
 		gint state = GPOINTER_TO_INT (value);
-		GFile *file = g_file_new_for_path (mount_point);
+		gchar *mount_point = g_file_get_uri (file);
 
 		if ((state & VOLUME_MOUNTED) &&
 		    !(state & VOLUME_MOUNTED_IN_STORE)) {
@@ -1026,7 +1026,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			 * mount points, as they are not mounted right now. */
 		}
 
-		g_object_unref (file);
+		g_free (mount_point);
 	}
 
 	if (accumulator->str[0] != '\0') {
