@@ -75,9 +75,6 @@ struct _TrackerDecoratorPrivate {
 
 	GStrv priority_graphs;
 
-	/* Arrays of tracker IDs */
-	GArray *prepended_ids;
-
 	GHashTable *tasks; /* Associative array of GTasks */
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
 	GArray *commit_buffer; /* Array of SparqlUpdate */
@@ -956,7 +953,6 @@ tracker_decorator_finalize (GObject *object)
 
 	g_strfreev (priv->class_names);
 	g_hash_table_destroy (priv->tasks);
-	g_array_unref (priv->prepended_ids);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
 	g_timer_destroy (priv->timer);
@@ -1085,7 +1081,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	TrackerDecoratorPrivate *priv;
 
 	decorator->priv = priv = tracker_decorator_get_instance_private (decorator);
-	priv->prepended_ids = g_array_new (FALSE, FALSE, sizeof (gint));
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
@@ -1140,61 +1135,6 @@ tracker_decorator_get_n_items (TrackerDecorator *decorator)
 	priv = decorator->priv;
 
 	return priv->n_remaining_items;
-}
-
-/**
- * tracker_decorator_prepend_id:
- * @decorator: a #TrackerDecorator.
- * @id: the ID of the resource ID.
- * @class_name_id: the ID of the resource's class.
- *
- * Adds resource needing extended metadata extraction to the queue.
- * @id is the same IDs emitted by tracker-store when the database is updated for
- * consistency. For details, see the GraphUpdated signal.
- *
- * Since: 0.18
- **/
-void
-tracker_decorator_prepend_id (TrackerDecorator *decorator,
-                              gint              id,
-                              gint              class_name_id)
-{
-	TrackerDecoratorPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_DECORATOR (decorator));
-
-	priv = decorator->priv;
-	g_array_append_val (priv->prepended_ids, id);
-}
-
-/**
- * tracker_decorator_delete_id:
- * @decorator: a #TrackerDecorator.
- * @id: an ID.
- *
- * Deletes resource needing extended metadata extraction from the
- * queue. @id is the same IDs emitted by tracker-store when the database is
- * updated for consistency. For details, see the GraphUpdated signal.
- *
- * Since: 0.18
- **/
-void
-tracker_decorator_delete_id (TrackerDecorator *decorator,
-                             gint              id)
-{
-	TrackerDecoratorPrivate *priv;
-	guint i;
-
-	g_return_if_fail (TRACKER_IS_DECORATOR (decorator));
-
-	priv = decorator->priv;
-
-	for (i = 0; i < priv->prepended_ids->len; i++) {
-		if (id == g_array_index (priv->prepended_ids, gint, i)) {
-			g_array_remove_index (priv->prepended_ids, i);
-			break;
-		}
-	}
 }
 
 /**
