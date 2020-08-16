@@ -17,6 +17,7 @@ tracker_miners_common_sources = [
   'tracker-ioprio.c',
   'tracker-language.c',
   'tracker-sched.c',
+  'tracker-term-utils.c',
   'tracker-type-utils.c',
   'tracker-utils.c',
   'tracker-locale.c',

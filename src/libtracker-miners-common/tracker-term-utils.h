@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014, Lanedo <martyn@lanedo.com>
+ * Copyright (C) 2020, Red Hat Inc.
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -15,24 +15,25 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA.
+ *
+ * Author: Carlos Garnacho <carlosg@gnome.org>
  */
 
-#ifndef __TRACKER_COLOR_H__
-#define __TRACKER_COLOR_H__
+#ifndef __TRACKER_TERM_UTILS_H__
+#define __TRACKER_TERM_UTILS_H__
 
-#define TITLE_BEGIN   "\033[32m"   /* Green */
-#define TITLE_END     "\033[0m"
+#include <glib.h>
 
-#define SNIPPET_BEGIN "\033[1;31m" /* Red */
-#define SNIPPET_END   "\033[0m"
+typedef enum {
+	TRACKER_ELLIPSIZE_START,
+	TRACKER_ELLIPSIZE_END,
+} TrackerEllipsizeMode;
 
-#define WARN_BEGIN    "\033[33m"   /* Yellow */
-#define WARN_END      "\033[0m"
+gchar * tracker_term_ellipsize (const gchar          *str,
+                                gint                  max_len,
+                                TrackerEllipsizeMode  mode);
 
-#define CRIT_BEGIN "\033[1;31m" /* Red */
-#define CRIT_END   "\033[0m"
+void tracker_term_dimensions (guint *columns,
+                              guint *lines);
 
-#define BOLD_BEGIN "\033[0;1;39m"
-#define BOLD_END   "\033[0m"
-
-#endif /* __TRACKER_COLOR_H__ */
+#endif /* __TRACKER_TERM_UTILS_H__ */

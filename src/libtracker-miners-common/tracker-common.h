@@ -40,6 +40,7 @@
 #include "tracker-language.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
+#include "tracker-term-utils.h"
 #include "tracker-type-utils.h"
 #include "tracker-utils.h"
 #include "tracker-locale.h"

@@ -32,7 +32,14 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
 
+#include "tracker-term-utils.h"
 #include "tracker-miner-manager.h"
+#include "tracker-color.h"
+
+#define GROUP "Report"
+#define KEY_URI "Uri"
+#define KEY_MESSAGE "Message"
+#define KEY_SPARQL "Sparql"
 
 #define STATUS_OPTIONS_ENABLED()	  \
 	(show_stat || \
@@ -473,6 +480,126 @@ are_miners_finished (gint *max_remaining_time)
 	return finished;
 }
 
+static gint
+sort_by_date (gconstpointer a,
+              gconstpointer b)
+{
+	GFileInfo *info_a = (GFileInfo *) a, *info_b = (GFileInfo *) b;
+	gint64 time_a, time_b;
+
+	time_a = g_file_info_get_attribute_uint64 (info_a, G_FILE_ATTRIBUTE_TIME_CREATED);
+	time_b = g_file_info_get_attribute_uint64 (info_b, G_FILE_ATTRIBUTE_TIME_CREATED);
+
+	if (time_a < time_b)
+		return -1;
+	else if (time_a > time_b)
+		return 1;
+	return 0;
+}
+
+static GList *
+get_error_keyfiles (void)
+{
+	GFile *file;
+	GFileEnumerator *enumerator;
+	GList *infos = NULL, *keyfiles = NULL, *l;
+	gchar *path;
+
+	path = g_build_filename (g_get_user_cache_dir (),
+	                         "tracker3",
+	                         "files",
+	                         "errors",
+	                         NULL);
+	file = g_file_new_for_path (path);
+	g_free (path);
+
+	enumerator = g_file_enumerate_children (file,
+	                                        G_FILE_ATTRIBUTE_STANDARD_NAME ","
+	                                        G_FILE_ATTRIBUTE_TIME_CHANGED,
+	                                        G_FILE_QUERY_INFO_NONE,
+	                                        NULL,
+	                                        NULL);
+	while (TRUE) {
+		GFileInfo *info;
+
+		if (!g_file_enumerator_iterate (enumerator, &info, NULL, NULL, NULL))
+			break;
+		if (!info)
+			break;
+
+		infos = g_list_prepend (infos, g_object_ref (info));
+	}
+
+	infos = g_list_sort (infos, sort_by_date);
+
+	for (l = infos; l; l = l->next) {
+		GKeyFile *keyfile;
+		GFile *child;
+
+		child = g_file_get_child (file, g_file_info_get_name (l->data));
+		path = g_file_get_path (child);
+		keyfile = g_key_file_new ();
+		g_key_file_load_from_file (keyfile,
+		                           path, 0,
+		                           NULL);
+
+		keyfiles = g_list_prepend (keyfiles, keyfile);
+		g_object_unref (child);
+	}
+
+	g_object_unref (enumerator);
+	g_list_free_full (infos, g_object_unref);
+
+	return keyfiles;
+}
+
+static gint
+print_errors (GList *keyfiles)
+{
+	gint cols, col_len[2];
+	gchar *col_header1, *col_header2;
+	GList *l;
+
+	tracker_term_dimensions (&cols, NULL);
+	col_len[0] = cols / 2;
+	col_len[1] = cols / 2 - 1;
+
+	col_header1 = tracker_term_ellipsize (_("Path"), col_len[0], TRACKER_ELLIPSIZE_END);
+	col_header2 = tracker_term_ellipsize (_("Message"), col_len[1], TRACKER_ELLIPSIZE_END);
+
+	g_print (BOLD_BEGIN "%-*s %-*s" BOLD_END "\n",
+	         col_len[0], col_header1,
+	         col_len[1], col_header2);
+	g_free (col_header1);
+	g_free (col_header2);
+
+	for (l = keyfiles; l; l = l->next) {
+		GKeyFile *keyfile = l->data;
+		gchar *uri, *message, *path, *str1, *str2;
+		GFile *file;
+
+		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+		file = g_file_new_for_uri (uri);
+		path = g_file_get_path (file);
+		message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+		g_object_unref (file);
+
+		str1 = tracker_term_ellipsize (path, col_len[0], TRACKER_ELLIPSIZE_START);
+		str2 = tracker_term_ellipsize (message, col_len[1], TRACKER_ELLIPSIZE_END);
+
+		g_print ("%-*s %-*s\n",
+		         col_len[0], str1,
+		         col_len[1], str2);
+		g_free (uri);
+		g_free (path);
+		g_free (message);
+		g_free (str1);
+		g_free (str2);
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static int
 get_no_args (void)
 {
@@ -482,6 +609,7 @@ get_no_args (void)
 	gdouble remaining;
 	gint remaining_time;
 	gint files, folders;
+	GList *keyfiles;
 
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
@@ -531,7 +659,68 @@ get_no_args (void)
 		g_print ("%s\n", _("All data miners are idle, indexing complete"));
 	}
 
-	g_print ("\n\n");
+	keyfiles = get_error_keyfiles ();
+
+	if (keyfiles) {
+		g_print (g_dngettext (NULL,
+		                      "%d recorded failure",
+		                      "%d recorded failures",
+		                      g_list_length (keyfiles)),
+		         g_list_length (keyfiles));
+
+		g_print ("\n\n");
+		print_errors (keyfiles);
+		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+show_errors (gchar **terms)
+{
+	GList *keyfiles, *l;
+	GKeyFile *keyfile;
+	guint i;
+	gboolean found = FALSE;
+
+	keyfiles = get_error_keyfiles ();
+
+	for (i = 0; terms[i] != NULL; i++) {
+		for (l = keyfiles; l; l = l->next) {
+			GFile *file;
+			gchar *uri, *path;
+
+			keyfile = l->data;
+			uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+			file = g_file_new_for_uri (uri);
+			path = g_file_get_path (file);
+
+			if (strstr (path, terms[i])) {
+				gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+				gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+
+				found = TRUE;
+				g_print (BOLD_BEGIN "URI:" BOLD_END " %s\n", uri);
+
+				if (message)
+					g_print (BOLD_BEGIN "%s:" BOLD_END " %s\n", _("Message"), message);
+				if (sparql)
+					g_print (BOLD_BEGIN "SPARQL:" BOLD_END " %s\n", sparql);
+				g_print ("\n");
+
+				g_free (sparql);
+				g_free (message);
+			}
+
+			g_object_unref (file);
+			g_free (uri);
+			g_free (path);
+		}
+	}
+
+	if (!found)
+		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("No reports found"));
 
 	return EXIT_SUCCESS;
 }
@@ -577,6 +766,9 @@ main (int argc, const char **argv)
 	if (status_options_enabled ()) {
 		return status_run ();
 	}
+
+	if (terms)
+		return show_errors (terms);
 
 	return status_run_default ();
 }
