@@ -40,6 +40,8 @@ struct _ExtractData {
 	TrackerDecorator *decorator;
 	TrackerDecoratorInfo *decorator_info;
 	GFile *file;
+	GCancellable *cancellable;
+	gulong signal_id;
 };
 
 struct _TrackerExtractDecoratorPrivate {
@@ -162,6 +164,10 @@ get_metadata_cb (TrackerExtract *extract,
 	tracker_extract_persistence_remove_file (priv->persistence, data->file);
 	g_hash_table_remove (priv->recovery_files, tracker_decorator_info_get_url (data->decorator_info));
 
+	if (data->cancellable && data->signal_id != 0) {
+		g_cancellable_disconnect (data->cancellable, data->signal_id);
+	}
+
 	if (error) {
 		decorator_ignore_file (data->file, data->decorator);
 		tracker_decorator_info_complete_error (data->decorator_info, error);
@@ -208,6 +214,7 @@ get_metadata_cb (TrackerExtract *extract,
 
 	tracker_decorator_info_unref (data->decorator_info);
 	g_object_unref (data->file);
+	g_object_unref (data->cancellable);
 	g_free (data);
 }
 
@@ -229,6 +236,28 @@ decorator_get_recovery_file (TrackerExtractDecorator *decorator,
 	}
 
 	return file;
+}
+
+static void
+task_cancellable_cancelled_cb (GCancellable *cancellable,
+                               ExtractData  *data)
+{
+	TrackerExtractDecoratorPrivate *priv;
+	gchar *uri;
+
+	/* Delete persistence file on cancellation, we don't want to interpret
+	 * this as a failed operation.
+	 */
+	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (data->decorator));
+	tracker_extract_persistence_remove_file (priv->persistence, data->file);
+	uri = g_file_get_uri (data->file);
+
+	g_message ("Cancelled task for '%s' was currently being "
+	           "processed, _exit()ing immediately",
+	           uri);
+	g_free (uri);
+
+	_exit (0);
 }
 
 static void
@@ -280,6 +309,14 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	g_message ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
 
 	tracker_extract_persistence_add_file (priv->persistence, data->file);
+
+	g_set_object (&data->cancellable, g_task_get_cancellable (task));
+
+	if (data->cancellable) {
+		data->signal_id = g_cancellable_connect (data->cancellable,
+		                                         G_CALLBACK (task_cancellable_cancelled_cb),
+		                                         data, NULL);
+	}
 
 	tracker_extract_file (priv->extractor,
 	                      tracker_decorator_info_get_url (info),
