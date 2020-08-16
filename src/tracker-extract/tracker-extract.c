@@ -331,8 +331,6 @@ task_deadline_cb (gpointer user_data)
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
 
-	if (task->cancellable)
-		g_cancellable_cancel (task->cancellable);
 	_exit (0);
 }
 

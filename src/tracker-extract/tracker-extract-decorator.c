@@ -438,6 +438,8 @@ decorator_ignore_file (GFile    *file,
 		return;
 	}
 
+	tracker_error_report (file, "Crash/hang handling file", NULL);
+
 	mimetype = g_file_info_get_attribute_string (info,
 	                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
 	hash = tracker_extract_module_manager_get_hash (mimetype);

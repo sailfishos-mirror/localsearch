@@ -498,6 +498,16 @@ tracker_sparql_task_new_with_sparql_str (GFile       *file,
 	                         (GDestroyNotify) sparql_task_data_free);
 }
 
+const gchar *
+tracker_sparql_task_get_sparql (TrackerTask *task)
+{
+	SparqlTaskData *task_data;
+
+	task_data = tracker_task_get_data (task);
+
+	return task_data->str;
+}
+
 TrackerTask *
 tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
                                    GAsyncResult         *res,

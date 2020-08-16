@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include <libtracker-miners-common/tracker-debug.h>
+#include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-decorator.h"
 #include "tracker-priority-queue.h"
@@ -60,7 +60,7 @@ struct _TrackerDecoratorInfo {
 
 struct _SparqlUpdate {
 	gchar *sparql;
-	gint id;
+	gchar *url;
 };
 
 struct _TrackerDecoratorPrivate {
@@ -242,52 +242,6 @@ decorator_update_state (TrackerDecorator *decorator,
 }
 
 static void
-item_warn (TrackerSparqlConnection *conn,
-           gint                     id,
-           const gchar             *sparql,
-           const GError            *error)
-{
-	TrackerSparqlCursor *cursor;
-	const gchar *elem;
-	gchar *query;
-
-	query = g_strdup_printf ("SELECT COALESCE (nie:url (?u), ?u) {"
-	                         "  ?u a rdfs:Resource. "
-	                         "  FILTER (tracker:id (?u) = %d)"
-	                         "}", id);
-
-	cursor = tracker_sparql_connection_query (conn, query, NULL, NULL);
-	g_free (query);
-
-	g_debug ("--8<------------------------------");
-	g_debug ("The information relevant for a bug report is between "
-	         "the dotted lines");
-
-	if (cursor &&
-	    tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		elem = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		g_warning ("Could not insert metadata for item \"%s\": %s",
-		           elem, error->message);
-	} else {
-		g_warning ("Could not insert metadata for item with ID %d: %s",
-		           id, error->message);
-	}
-
-	g_warning ("If the error above is recurrent for the same item/ID, "
-	           "consider running \"%s\" in the terminal with the "
-	           "G_MESSAGES_DEBUG=Tracker environment variable, and filing a "
-	           "bug with the additional information", g_get_prgname ());
-
-	g_debug ("Sparql was:\n%s", sparql);
-	g_debug ("NOTE: The information above may contain data you "
-	         "consider sensitive. Feel free to edit it out, but please "
-	         "keep it as unmodified as you possibly can.");
-	g_debug ("------------------------------>8--");
-
-	g_clear_object (&cursor);
-}
-
-static void
 retry_synchronously (TrackerDecorator *decorator,
                      GArray           *commit_buffer)
 {
@@ -307,8 +261,30 @@ retry_synchronously (TrackerDecorator *decorator,
 		                                  &error);
 
 		if (error) {
-			item_warn (sparql_conn, update->id, update->sparql, error);
+			GFile *file = g_file_new_for_uri (update->url);
+
+			tracker_error_report (file, error->message, update->sparql);
+			g_error_free (error);
+			g_object_unref (file);
 		}
+	}
+}
+
+static void
+tag_success (TrackerDecorator *decorator,
+             GArray           *commit_buffer)
+{
+	guint i;
+
+	for (i = 0; i < commit_buffer->len; i++) {
+		SparqlUpdate *update;
+		GFile *file;
+
+		update = &g_array_index (commit_buffer, SparqlUpdate, i);
+
+		file = g_file_new_for_uri (update->url);
+		tracker_error_report_delete (file);
+		g_object_unref (file);
 	}
 }
 
@@ -330,6 +306,8 @@ decorator_commit_cb (GObject      *object,
 	if (!tracker_sparql_connection_update_array_finish (conn, result, NULL)) {
 		g_debug ("SPARQL error detected in batch, retrying one by one");
 		retry_synchronously (decorator, priv->commit_buffer);
+	} else {
+		tag_success (decorator, priv->commit_buffer);
 	}
 
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
@@ -341,6 +319,7 @@ decorator_commit_cb (GObject      *object,
 static void
 sparql_update_clear (SparqlUpdate *update)
 {
+	g_free (update->url);
 	g_free (update->sparql);
 }
 
@@ -506,7 +485,7 @@ decorator_task_done (GObject      *object,
 
 		/* Add resulting sparql to buffer and check whether flushing */
 		update.sparql = sparql;
-		update.id = info->id;
+		update.url = g_strdup (info->url);
 
 		if (!priv->sparql_buffer)
 			priv->sparql_buffer = sparql_buffer_new ();

@@ -1024,6 +1024,12 @@ main (gint argc, gchar *argv[])
 	                      no_daemon ? "No" : "Yes",
 	                      no_daemon ? "(forced by command line)" : ""));
 
+	if (!dry_run) {
+		GFile *store = get_cache_dir (domain_ontology);
+		tracker_error_report_init (store);
+		g_object_unref (store);
+	}
+
 	if (!setup_connection_and_endpoint (domain_ontology,
 	                                    connection,
 	                                    &sparql_conn,
