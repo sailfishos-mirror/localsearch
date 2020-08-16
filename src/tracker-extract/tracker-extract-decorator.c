@@ -234,7 +234,7 @@ task_cancellable_cancelled_cb (GCancellable *cancellable,
 	           uri);
 	g_free (uri);
 
-	_exit (0);
+	_exit (EXIT_FAILURE);
 }
 
 static void
