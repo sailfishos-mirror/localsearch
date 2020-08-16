@@ -401,19 +401,6 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 }
 
 static void
-decorator_retry_file (GFile    *file,
-                      gpointer  user_data)
-{
-	TrackerExtractDecorator *decorator = user_data;
-	TrackerExtractDecoratorPrivate *priv = tracker_extract_decorator_get_instance_private (decorator);
-	gchar *path;
-
-	path = g_file_get_uri (file);
-	g_hash_table_insert (priv->recovery_files, path, g_object_ref (file));
-	tracker_decorator_fs_prepend_file (TRACKER_DECORATOR_FS (decorator), file);
-}
-
-static void
 decorator_ignore_file (GFile    *file,
                        gpointer  user_data)
 {
@@ -425,7 +412,7 @@ decorator_ignore_file (GFile    *file,
 	GFileInfo *info;
 
 	uri = g_file_get_uri (file);
-	g_message ("Extraction on file '%s' has been attempted too many times, ignoring", uri);
+	g_message ("Extraction on file '%s' failed in previous execution, ignoring", uri);
 
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -539,8 +526,7 @@ tracker_extract_decorator_initable_init (GInitable     *initable,
 		ret = FALSE;
 	}
 
-	priv->persistence = tracker_extract_persistence_initialize (decorator_retry_file,
-	                                                            decorator_ignore_file,
+	priv->persistence = tracker_extract_persistence_initialize (decorator_ignore_file,
 	                                                            decorator);
 out:
 	g_clear_object (&conn);
