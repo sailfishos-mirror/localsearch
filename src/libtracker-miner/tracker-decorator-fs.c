@@ -75,170 +75,17 @@ tracker_decorator_fs_class_init (TrackerDecoratorFSClass *klass)
 }
 
 static void
-process_files_cb (GObject      *object,
-                  GAsyncResult *result,
-                  gpointer      user_data)
+mount_points_changed_cb (GVolumeMonitor *monitor,
+                         GMount         *mount,
+                         gpointer        user_data)
 {
-	TrackerSparqlConnection *conn;
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
+	GDrive *drive = g_mount_get_drive (mount);
 
-	conn = TRACKER_SPARQL_CONNECTION (object);
-	cursor = tracker_sparql_connection_query_finish (conn, result, &error);
-
-        if (error) {
-                g_critical ("Could not check files on mount point for missing metadata: %s", error->message);
-                g_error_free (error);
-		return;
+	if (drive) {
+		if (g_drive_is_media_removable (drive))
+			_tracker_decorator_invalidate_cache (user_data);
+		g_object_unref (drive);
 	}
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		gint id = tracker_sparql_cursor_get_integer (cursor, 0);
-		gint class_name_id = tracker_sparql_cursor_get_integer (cursor, 1);
-		tracker_decorator_prepend_id (TRACKER_DECORATOR (user_data), id, class_name_id);
-	}
-
-	g_object_unref (cursor);
-}
-
-static void
-remove_files_cb (GObject *object,
-                 GAsyncResult *result,
-                 gpointer      user_data)
-{
-	TrackerSparqlConnection *conn;
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-
-	conn = TRACKER_SPARQL_CONNECTION (object);
-	cursor = tracker_sparql_connection_query_finish (conn, result, &error);
-
-        if (error) {
-                g_critical ("Could not remove files on mount point with missing metadata: %s", error->message);
-                g_error_free (error);
-		return;
-	}
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		gint id = tracker_sparql_cursor_get_integer (cursor, 0);
-		tracker_decorator_delete_id (TRACKER_DECORATOR (user_data), id);
-	}
-
-	g_object_unref (cursor);
-}
-
-static void
-_tracker_decorator_query_append_rdf_type_filter (TrackerDecorator *decorator,
-                                                 GString          *query)
-{
-       const gchar **class_names;
-       gint i = 0;
-
-       class_names = tracker_decorator_get_class_names (decorator);
-
-       if (!class_names || !*class_names)
-               return;
-
-       g_string_append (query, "&& ?type IN (");
-
-       while (class_names[i]) {
-               if (i != 0)
-                       g_string_append (query, ",");
-
-               g_string_append (query, class_names[i]);
-               i++;
-       }
-
-       g_string_append (query, ") ");
-}
-
-static void
-check_files (TrackerDecorator    *decorator,
-             const gchar         *mount_point_urn,
-             gboolean             available,
-             GAsyncReadyCallback  callback)
-{
-	TrackerSparqlConnection *sparql_conn;
-	GString *query;
-
-	query = g_string_new ("SELECT tracker:id(?urn) tracker:id(?type) { ?urn ");
-
-	if (mount_point_urn) {
-		g_string_append_printf (query,
-		                        " nie:dataSource <%s> ;",
-		                        mount_point_urn);
-	}
-
-	g_string_append (query, " a nfo:FileDataObject ;"
-	                        " a ?type .");
-	g_string_append (query,
-			 "FILTER (! EXISTS { ?urn tracker:extractorHash ?h } ");
-
-	_tracker_decorator_query_append_rdf_type_filter (decorator, query);
-
-	if (available)
-		g_string_append (query, "&& BOUND(tracker:available(nie:dataSource(?urn)))");
-
-	g_string_append (query, ")}");
-
-	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	tracker_sparql_connection_query_async (sparql_conn, query->str,
-	                                       NULL, callback, decorator);
-	g_string_free (query, TRUE);
-}
-
-static inline gchar *
-mount_point_get_uuid (GMount *mount)
-{
-	GVolume *volume;
-	gchar *uuid = NULL;
-
-	volume = g_mount_get_volume (mount);
-	if (volume) {
-		uuid = g_volume_get_identifier (volume, G_VOLUME_IDENTIFIER_KIND_UUID);
-		if (!uuid) {
-			gchar *mount_name;
-
-			mount_name = g_mount_get_name (mount);
-			uuid = g_compute_checksum_for_string (G_CHECKSUM_MD5, mount_name, -1);
-			g_free (mount_name);
-		}
-
-		g_object_unref (volume);
-	}
-
-	return uuid;
-}
-
-static void
-mount_point_added_cb (GVolumeMonitor *monitor,
-                      GMount         *mount,
-                      gpointer        user_data)
-{
-	gchar *uuid;
-	gchar *urn;
-
-	uuid = mount_point_get_uuid (mount);
-	urn = g_strdup_printf (TRACKER_PREFIX_DATASOURCE_URN "%s", uuid);
-	check_files (user_data, urn, TRUE, process_files_cb);
-	g_free (urn);
-	g_free (uuid);
-}
-
-static void
-mount_point_removed_cb (GVolumeMonitor *monitor,
-                        GMount         *mount,
-                        gpointer        user_data)
-{
-	gchar *uuid;
-	gchar *urn;
-
-	uuid = mount_point_get_uuid (mount);
-	urn = g_strdup_printf (TRACKER_PREFIX_DATASOURCE_URN "%s", uuid);
-	_tracker_decorator_invalidate_cache (user_data);
-	check_files (user_data, urn, FALSE, remove_files_cb);
-	g_free (urn);
-	g_free (uuid);
 }
 
 static gboolean
@@ -252,11 +99,11 @@ tracker_decorator_fs_iface_init (GInitable     *initable,
 
 	priv->volume_monitor = g_volume_monitor_get ();
 	g_signal_connect_object (priv->volume_monitor, "mount-added",
-	                         G_CALLBACK (mount_point_added_cb), initable, 0);
+	                         G_CALLBACK (mount_points_changed_cb), initable, 0);
 	g_signal_connect_object (priv->volume_monitor, "mount-pre-unmount",
-	                         G_CALLBACK (mount_point_removed_cb), initable, 0);
+	                         G_CALLBACK (mount_points_changed_cb), initable, 0);
 	g_signal_connect_object (priv->volume_monitor, "mount-removed",
-	                         G_CALLBACK (mount_point_removed_cb), initable, 0);
+	                         G_CALLBACK (mount_points_changed_cb), initable, 0);
 
 	return parent_initable_iface->init (initable, cancellable, error);
 }
