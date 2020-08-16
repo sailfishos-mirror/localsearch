@@ -288,6 +288,31 @@ item_warn (TrackerSparqlConnection *conn,
 }
 
 static void
+retry_synchronously (TrackerDecorator *decorator,
+                     GArray           *commit_buffer)
+{
+	TrackerSparqlConnection *sparql_conn;
+	guint i;
+
+	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
+
+	for (i = 0; i < commit_buffer->len; i++) {
+		SparqlUpdate *update;
+		GError *error = NULL;
+
+		update = &g_array_index (commit_buffer, SparqlUpdate, i);
+		tracker_sparql_connection_update (sparql_conn,
+		                                  update->sparql,
+		                                  NULL,
+		                                  &error);
+
+		if (error) {
+			item_warn (sparql_conn, update->id, update->sparql, error);
+		}
+	}
+}
+
+static void
 decorator_commit_cb (GObject      *object,
                      GAsyncResult *result,
                      gpointer      user_data)
@@ -295,8 +320,6 @@ decorator_commit_cb (GObject      *object,
 	TrackerSparqlConnection *conn;
 	TrackerDecoratorPrivate *priv;
 	TrackerDecorator *decorator;
-	GError *error = NULL;
-	guint i;
 
 	decorator = user_data;
 	priv = decorator->priv;
@@ -304,15 +327,9 @@ decorator_commit_cb (GObject      *object,
 
 	priv->n_updates--;
 
-	if (!tracker_sparql_connection_update_array_finish (conn, result, &error)) {
-		g_warning ("There was an error pushing metadata: %s\n", error->message);
-
-		for (i = 0; i < priv->commit_buffer->len; i++) {
-			SparqlUpdate *update;
-
-			update = &g_array_index (priv->commit_buffer, SparqlUpdate, i);
-			item_warn (conn, update->id, update->sparql, error);
-		}
+	if (!tracker_sparql_connection_update_array_finish (conn, result, NULL)) {
+		g_debug ("SPARQL error detected in batch, retrying one by one");
+		retry_synchronously (decorator, priv->commit_buffer);
 	}
 
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
