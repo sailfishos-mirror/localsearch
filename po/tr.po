@@ -12,8 +12,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-01 14:31+0000\n"
-"PO-Revision-Date: 2020-08-09 11:16+0300\n"
+"POT-Creation-Date: 2020-08-16 10:07+0000\n"
+"PO-Revision-Date: 2020-08-17 02:28+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -209,38 +209,43 @@ msgstr ""
 msgid "Directories to index recursively"
 msgstr "Özyinelemeli olarak dizine eklenecek klasörler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid ""
-"List of directories to index recursively, Special values include: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Özyinelemeli olarak dizinlenecek dizinlerin listesi. Özel değerler "
-"şunlardır: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
-"&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. Şunlara bakın: /etc/xdg/user-dirs."
+"şunlardır: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. Şunlara bakın: /etc/xdg/user-dirs."
 "defaults ve $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
 msgstr "Özyinelemesiz olarak dizine eklenecek klasörler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
-"include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
-"dirs.default"
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "Alt dizinlerine girilmeden dizinlenecek dizinlerin listesi, Özel değerler "
-"şunlardır: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
-"&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. Şunlara bakın: /etc/xdg/user-dirs."
+"şunlardır: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. Şunlara bakın: /etc/xdg/user-dirs."
 "defaults ve $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Index applications installed on the system"
 msgstr "Sistemde kurulu uygulamaları dizinle"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
@@ -248,27 +253,27 @@ msgstr ""
 "Bu seçenek etkinleştirilirse; dosya sistemi madencisi, standart XDG sistem "
 "ve kullanıcı veri dizinlerinde .desktop dosyalarına bakacak."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Yok sayılan dosyalar"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
 msgstr "Kaçınılacak dosya örüntülerinin listesi"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
 msgstr "Yok sayılan dizinler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
 msgid "List of directories to avoid"
 msgstr "Kaçınılacak dizinlerin listesi"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
 msgid "Ignored directories with content"
 msgstr "İçeriğiyle yok sayılmış dizinler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Engel listesine alınan dosyayı bulunduran dizinleri dışla"
 
@@ -509,11 +514,11 @@ msgstr "Beseleme eklenemedi"
 msgid "— start the tracker index proxy"
 msgstr "— tracker dizin vekilini çalıştır"
 
-#: src/tracker-extract/tracker-extract.c:694
+#: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
 msgstr "Üst veri ayıklama başarısız"
 
-#: src/tracker-extract/tracker-extract.c:756
+#: src/tracker-extract/tracker-extract.c:743
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Bu dosyayı işleyecek üst veri veya ayıklayıcı modül bulunamadı"
 
