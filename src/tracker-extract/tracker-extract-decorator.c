@@ -50,7 +50,6 @@ struct _TrackerExtractDecoratorPrivate {
 	guint n_extracting_files;
 
 	TrackerExtractPersistence *persistence;
-	GHashTable *recovery_files;
 	GDBusProxy *index_proxy;
 };
 
@@ -119,7 +118,6 @@ tracker_extract_decorator_finalize (GObject *object)
 	if (priv->timer)
 		g_timer_destroy (priv->timer);
 
-	g_hash_table_unref (priv->recovery_files);
 	g_clear_object (&priv->index_proxy);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
@@ -162,7 +160,6 @@ get_metadata_cb (TrackerExtract *extract,
 	info = tracker_extract_file_finish (extract, result, &error);
 
 	tracker_extract_persistence_remove_file (priv->persistence, data->file);
-	g_hash_table_remove (priv->recovery_files, tracker_decorator_info_get_url (data->decorator_info));
 
 	if (data->cancellable && data->signal_id != 0) {
 		g_cancellable_disconnect (data->cancellable, data->signal_id);
@@ -216,26 +213,6 @@ get_metadata_cb (TrackerExtract *extract,
 	g_object_unref (data->file);
 	g_object_unref (data->cancellable);
 	g_free (data);
-}
-
-static GFile *
-decorator_get_recovery_file (TrackerExtractDecorator *decorator,
-                             TrackerDecoratorInfo    *info)
-{
-	TrackerExtractDecoratorPrivate *priv;
-	GFile *file;
-
-	priv = tracker_extract_decorator_get_instance_private (decorator);
-	file = g_hash_table_lookup (priv->recovery_files,
-	                            tracker_decorator_info_get_url (info));
-
-	if (file) {
-		g_object_ref (file);
-	} else {
-		file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
-	}
-
-	return file;
 }
 
 static void
@@ -303,7 +280,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	data = g_new0 (ExtractData, 1);
 	data->decorator = decorator;
 	data->decorator_info = info;
-	data->file = decorator_get_recovery_file (TRACKER_EXTRACT_DECORATOR (decorator), info);
+	data->file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
 	task = tracker_decorator_info_get_task (info);
 
 	g_message ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
@@ -487,12 +464,6 @@ decorator_ignore_file (GFile    *file,
 static void
 tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
-	TrackerExtractDecoratorPrivate *priv;
-
-	priv = tracker_extract_decorator_get_instance_private (decorator);
-	priv->recovery_files = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                              (GDestroyNotify) g_free,
-	                                              (GDestroyNotify) g_object_unref);
 }
 
 static void
