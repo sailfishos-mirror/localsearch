@@ -77,7 +77,6 @@ struct _TrackerDecoratorPrivate {
 
 	/* Arrays of tracker IDs */
 	GArray *prepended_ids;
-	GSequence *blocklist_items;
 
 	GHashTable *tasks; /* Associative array of GTasks */
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
@@ -208,46 +207,6 @@ G_DEFINE_BOXED_TYPE (TrackerDecoratorInfo,
                      tracker_decorator_info_ref,
                      tracker_decorator_info_unref)
 
-static gint
-sequence_compare_func (gconstpointer data1,
-                       gconstpointer data2,
-                       gpointer      user_data)
-{
-	return GPOINTER_TO_INT (data1) - GPOINTER_TO_INT (data2);
-}
-
-static void
-decorator_blocklist_add (TrackerDecorator *decorator,
-                         gint              id)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GSequenceIter *iter;
-
-	iter = g_sequence_search (priv->blocklist_items,
-	                          GINT_TO_POINTER (id),
-	                          sequence_compare_func,
-	                          NULL);
-
-	if (g_sequence_iter_is_end (iter) ||
-	    g_sequence_get (g_sequence_iter_prev (iter)) != GINT_TO_POINTER (id))
-		g_sequence_insert_before (iter, GINT_TO_POINTER (id));
-}
-
-static void
-decorator_blocklist_remove (TrackerDecorator *decorator,
-                            gint              id)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GSequenceIter *iter;
-
-	iter = g_sequence_lookup (priv->blocklist_items,
-	                          GINT_TO_POINTER (id),
-	                          sequence_compare_func,
-	                          NULL);
-	if (iter)
-		g_sequence_remove (iter);
-}
-
 static void
 decorator_update_state (TrackerDecorator *decorator,
                         const gchar      *message,
@@ -355,7 +314,6 @@ decorator_commit_cb (GObject      *object,
 			SparqlUpdate *update;
 
 			update = &g_array_index (priv->commit_buffer, SparqlUpdate, i);
-			decorator_blocklist_add (decorator, update->id);
 			item_warn (conn, update->id, update->sparql, error);
 		}
 	}
@@ -524,9 +482,6 @@ decorator_task_done (GObject      *object,
 	sparql = g_task_propagate_pointer (G_TASK (result), &error);
 
 	if (!sparql) {
-		/* Blocklist item */
-		decorator_blocklist_add (decorator, info->id);
-
 		if (error) {
 			g_warning ("Task for '%s' finished with error: %s\n",
 			           info->url, error->message);
@@ -930,7 +885,6 @@ notifier_events_cb (TrackerDecorator *decorator,
 			break;
 		case TRACKER_NOTIFIER_EVENT_DELETE:
 			decorator_item_cache_remove (decorator, id);
-			decorator_blocklist_remove (decorator, id);
 			break;
 		}
 	}
@@ -1005,7 +959,6 @@ tracker_decorator_finalize (GObject *object)
 	g_array_unref (priv->prepended_ids);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
-	g_sequence_free (priv->blocklist_items);
 	g_timer_destroy (priv->timer);
 
 	G_OBJECT_CLASS (tracker_decorator_parent_class)->finalize (object);
@@ -1132,7 +1085,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	TrackerDecoratorPrivate *priv;
 
 	decorator->priv = priv = tracker_decorator_get_instance_private (decorator);
-	priv->blocklist_items = g_sequence_new (NULL);
 	priv->prepended_ids = g_array_new (FALSE, FALSE, sizeof (gint));
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
@@ -1213,10 +1165,6 @@ tracker_decorator_prepend_id (TrackerDecorator *decorator,
 
 	priv = decorator->priv;
 	g_array_append_val (priv->prepended_ids, id);
-
-	/* The resource was explicitly requested, remove it from blocklists */
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Removing id %i from blocklist", id));
-	decorator_blocklist_remove (decorator, id);
 }
 
 /**
@@ -1247,10 +1195,6 @@ tracker_decorator_delete_id (TrackerDecorator *decorator,
 			break;
 		}
 	}
-
-	/* Blocklist the item so it's not processed in the future */
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Added id %i to blocklist", id));
-	decorator_blocklist_add (decorator, id);
 }
 
 /**
