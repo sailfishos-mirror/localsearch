@@ -270,6 +270,13 @@ on_decorator_finished (TrackerDecorator *decorator,
 {
 	if (shutdown_timeout_id != 0)
 		return;
+
+	/* For debugging convenience, avoid the shutdown timeout if running
+	 * on a terminal.
+	 */
+	if (tracker_term_is_tty ())
+		return;
+
 	shutdown_timeout_id = g_timeout_add_seconds (10, shutdown_timeout_cb,
 	                                             main_loop);
 }
