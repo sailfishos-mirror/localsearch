@@ -96,6 +96,8 @@ status_stat (void)
 		return EXIT_FAILURE;
 	}
 
+	tracker_term_pipe_to_pager ();
+
 	cursor = statistics_query (connection, &error);
 
 	g_object_unref (connection);
@@ -161,6 +163,8 @@ status_stat (void)
 
 		g_object_unref (cursor);
 	}
+
+	tracker_term_pager_close ();
 
 	return EXIT_SUCCESS;
 }
@@ -611,6 +615,8 @@ get_no_args (void)
 	gint files, folders;
 	GList *keyfiles;
 
+	tracker_term_pipe_to_pager ();
+
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
 		return EXIT_FAILURE;
@@ -673,6 +679,8 @@ get_no_args (void)
 		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
 	}
 
+	tracker_term_pager_close ();
+
 	return EXIT_SUCCESS;
 }
 
@@ -683,6 +691,8 @@ show_errors (gchar **terms)
 	GKeyFile *keyfile;
 	guint i;
 	gboolean found = FALSE;
+
+	tracker_term_pipe_to_pager ();
 
 	keyfiles = get_error_keyfiles ();
 
@@ -721,6 +731,8 @@ show_errors (gchar **terms)
 
 	if (!found)
 		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("No reports found"));
+
+	tracker_term_pager_close ();
 
 	return EXIT_SUCCESS;
 }

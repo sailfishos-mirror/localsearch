@@ -21,11 +21,18 @@
 
 #include "tracker-term-utils.h"
 
+#include <gio/gio.h>
+#include <glib-unix.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <stdio.h>
 
 static guint n_columns = 0;
 static guint n_rows = 0;
+static GSubprocess *pager = NULL;
+static gint stdout_fd = 0;
+static guint signal_handler_id = 0;
 
 gchar *
 tracker_term_ellipsize (const gchar          *str,
@@ -86,4 +93,95 @@ tracker_term_dimensions (guint *columns,
 		*columns = n_columns;
 	if (rows)
 		*rows = n_rows;
+}
+
+gboolean
+tracker_term_is_tty (void)
+{
+	return isatty (STDOUT_FILENO) > 0;
+}
+
+static gboolean
+ignore_signal_cb (gpointer user_data)
+{
+	return G_SOURCE_CONTINUE;
+}
+
+static gchar *
+best_pager (void)
+{
+	guint i;
+	gchar *command;
+	const gchar *pagers[] = {
+		"pager",
+		"less",
+		"most",
+		"more",
+	};
+
+	for (i = 0; i < G_N_ELEMENTS (pagers); i++) {
+		command = g_find_program_in_path (pagers[i]);
+		if (command)
+			return command;
+	}
+
+	return NULL;
+}
+
+gboolean
+tracker_term_pipe_to_pager (void)
+{
+	GSubprocessLauncher *launcher;
+	gchar *pager_command;
+	gint fds[2];
+
+	if (!tracker_term_is_tty ())
+		return FALSE;
+
+	if (pipe2 (fds, O_CLOEXEC) < 0)
+		return FALSE;
+
+	pager_command = best_pager ();
+	if (!pager_command)
+		return FALSE;
+
+	/* Ensure this is cached before we redirect to the pager */
+	tracker_term_dimensions (NULL, NULL);
+
+	launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
+	g_subprocess_launcher_take_stdin_fd (launcher, fds[0]);
+	g_subprocess_launcher_setenv (launcher, "LESS", "FRSXMK", TRUE);
+
+	pager = g_subprocess_launcher_spawn (launcher, NULL, pager_command, NULL);
+	g_free (pager_command);
+
+	stdout_fd = dup (STDOUT_FILENO);
+	close (fds[0]);
+
+	if (dup2(fds[1], STDOUT_FILENO) < 0)
+	        return FALSE;
+
+	close (fds[1]);
+	signal_handler_id = g_unix_signal_add (SIGINT, ignore_signal_cb, NULL);
+
+	return TRUE;
+}
+
+gboolean
+tracker_term_pager_close (void)
+{
+	if (!pager)
+		return FALSE;
+
+	fflush (stdout);
+
+	/* Restore stdout */
+	dup2 (stdout_fd, STDOUT_FILENO);
+	close (stdout_fd);
+
+	g_subprocess_send_signal (pager, SIGCONT);
+	g_subprocess_wait (pager, NULL, NULL);
+	g_source_remove (signal_handler_id);
+
+	return TRUE;
 }

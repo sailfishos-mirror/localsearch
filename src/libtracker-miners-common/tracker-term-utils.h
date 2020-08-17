@@ -23,6 +23,7 @@
 #define __TRACKER_TERM_UTILS_H__
 
 #include <glib.h>
+#include <gio/gio.h>
 
 typedef enum {
 	TRACKER_ELLIPSIZE_START,
@@ -35,5 +36,10 @@ gchar * tracker_term_ellipsize (const gchar          *str,
 
 void tracker_term_dimensions (guint *columns,
                               guint *lines);
+
+gboolean tracker_term_is_tty (void);
+
+gboolean tracker_term_pipe_to_pager (void);
+gboolean tracker_term_pager_close (void);
 
 #endif /* __TRACKER_TERM_UTILS_H__ */
