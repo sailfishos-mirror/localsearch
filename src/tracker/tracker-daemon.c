@@ -957,9 +957,9 @@ daemon_run (void)
 		gint retval = 0;
 
 		if (kill_miners)
-			retval = tracker_process_stop (TRACKER_PROCESS_TYPE_NONE, TRACKER_PROCESS_TYPE_MINERS);
+			retval = tracker_process_stop (SIGKILL);
 		else if (terminate_miners)
-			retval = tracker_process_stop (TRACKER_PROCESS_TYPE_MINERS, TRACKER_PROCESS_TYPE_NONE);
+			retval = tracker_process_stop (SIGTERM);
 
 		return retval;
 	}

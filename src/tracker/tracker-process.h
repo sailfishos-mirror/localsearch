@@ -29,15 +29,9 @@ typedef struct {
 	pid_t pid;
 } TrackerProcessData;
 
-typedef enum {
-	TRACKER_PROCESS_TYPE_NONE,
-	TRACKER_PROCESS_TYPE_MINERS
-} TrackerProcessTypes;
-
 void     tracker_process_data_free       (TrackerProcessData *pd);
 
 GSList * tracker_process_find_all        (void);
-gint     tracker_process_stop            (TrackerProcessTypes    daemons_to_term,
-                                          TrackerProcessTypes    daemons_to_kill);
+gint     tracker_process_stop            (gint signal_id);
 
 #endif /* __TRACKER_PROCESS_H__ */

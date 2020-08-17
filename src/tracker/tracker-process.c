@@ -141,16 +141,10 @@ tracker_process_find_all (void)
 }
 
 gint
-tracker_process_stop (TrackerProcessTypes daemons_to_term,
-                      TrackerProcessTypes daemons_to_kill)
+tracker_process_stop (gint signal_id)
 {
 	GSList *pids, *l;
 	gchar *str;
-
-	if (daemons_to_kill == TRACKER_PROCESS_TYPE_NONE &&
-	    daemons_to_term == TRACKER_PROCESS_TYPE_NONE) {
-		return 0;
-	}
 
 	pids = tracker_process_find_all ();
 
@@ -170,41 +164,19 @@ tracker_process_stop (TrackerProcessTypes daemons_to_term,
 		pd = l->data;
 		basename = pd->cmd;
 		pid = pd->pid;
-		
-		if (daemons_to_term == TRACKER_PROCESS_TYPE_MINERS) {
-			if (!strstr (basename, "tracker-miner"))
-				continue;
 
-			if (kill (pid, SIGTERM) == -1) {
-				const gchar *errstr = g_strerror (errno);
-						
-				str = g_strdup_printf (_("Could not terminate process %d — “%s”"), pid, basename);
-				g_printerr ("  %s: %s\n",
-				            str,
-				            errstr ? errstr : _("No error given"));
-				g_free (str);
-			} else {
-				str = g_strdup_printf (_("Terminated process %d — “%s”"), pid, basename);
-				g_print ("  %s\n", str);
-				g_free (str);
-			}
-		} else if (daemons_to_kill == TRACKER_PROCESS_TYPE_MINERS) {
-			if (!strstr (basename, "tracker-miner"))
-				continue;
+		if (kill (pid, signal_id) == -1) {
+			const gchar *errstr = g_strerror (errno);
 
-			if (kill (pid, SIGKILL) == -1) {
-				const gchar *errstr = g_strerror (errno);
-
-				str = g_strdup_printf (_("Could not kill process %d — “%s”"), pid, basename);
-				g_printerr ("  %s: %s\n",
-				            str,
-				            errstr ? errstr : _("No error given"));
-				g_free (str);
-			} else {
-				str = g_strdup_printf (_("Killed process %d — “%s”"), pid, basename);
-				g_print ("  %s\n", str);
-				g_free (str);
-			}
+			str = g_strdup_printf (_("Could not kill process %d — “%s”"), pid, basename);
+			g_printerr ("  %s: %s\n",
+			            str,
+			            errstr ? errstr : _("No error given"));
+			g_free (str);
+		} else {
+			str = g_strdup_printf (_("Killed process %d — “%s”"), pid, basename);
+			g_print ("  %s\n", str);
+			g_free (str);
 		}
 	}
 

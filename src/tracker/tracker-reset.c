@@ -191,7 +191,7 @@ reset_run (void)
 	/* KILL processes first... */
 	if (files || rss) {
 		/* FIXME: we might selectively kill affected miners */
-		tracker_process_stop (TRACKER_PROCESS_TYPE_NONE, TRACKER_PROCESS_TYPE_MINERS);
+		tracker_process_stop (SIGKILL);
 	}
 
 	if (files) {
