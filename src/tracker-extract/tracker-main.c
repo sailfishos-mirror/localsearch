@@ -61,6 +61,7 @@
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
 #define DBUS_NAME_SUFFIX "Tracker3.Miner.Extract"
+#define MINER_FS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Extract"
 
 static GMainLoop *main_loop;
@@ -303,7 +304,7 @@ main (int argc, char *argv[])
 	TrackerMinerProxy *proxy;
 	TrackerSparqlConnection *sparql_connection;
 	TrackerDomainOntology *domain_ontology;
-	gchar *domain_name, *dbus_name;
+	gchar *dbus_name, *miner_dbus_name;
 	GFile *cache_dir;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
@@ -390,8 +391,9 @@ main (int argc, char *argv[])
 
 	tracker_module_manager_load_modules ();
 
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, "Tracker3.Miner.Files");
-	sparql_connection = tracker_sparql_connection_bus_new (dbus_name,
+	miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
+	                                                      MINER_FS_NAME_SUFFIX);
+	sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name,
 	                                                       NULL, NULL, &error);
 
 	if (error) {
@@ -443,19 +445,11 @@ main (int argc, char *argv[])
 	/* Main loop */
 	main_loop = g_main_loop_new (NULL, FALSE);
 
-	if (domain_ontology && domain_ontology_name) {
-		/* If we are running for a specific domain, we tie the lifetime of this
-		 * process to the domain. For example, if the domain name is
-		 * org.example.MyApp then this tracker-extract process will exit as
-		 * soon as org.example.MyApp exits.
-		 */
-		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
-		g_bus_watch_name_on_connection (connection, domain_name,
-		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
-		                                NULL, on_domain_vanished,
-		                                main_loop, NULL);
-		g_free (domain_name);
-	}
+	g_bus_watch_name_on_connection (connection, miner_dbus_name,
+	                                G_BUS_NAME_WATCHER_FLAGS_NONE,
+	                                NULL, on_domain_vanished,
+	                                main_loop, NULL);
+	g_free (miner_dbus_name);
 
 	g_signal_connect (decorator, "finished",
 	                  G_CALLBACK (on_decorator_finished),
