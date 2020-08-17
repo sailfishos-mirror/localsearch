@@ -206,12 +206,14 @@ get_file_and_folder_count (int *files,
 
 	if (files) {
 		const gchar query[] =
-			"\nSELECT COUNT(?file) "
-			"\nWHERE { "
-			"\n  ?file a nfo:FileDataObject ;"
-			"\n        nie:dataSource/tracker:available true ."
-			"\n  FILTER (?file != nfo:Folder) "
-			"\n}";
+			"SELECT COUNT(?file) "
+			"WHERE { "
+			"  GRAPH tracker:FileSystem {"
+			"    ?file a nfo:FileDataObject ;"
+			"          nie:dataSource/tracker:available true ."
+			"    FILTER (! EXISTS { ?file nie:interpretedAs/rdf:type nfo:Folder }) "
+			"  }"
+			"}";
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
@@ -233,11 +235,13 @@ get_file_and_folder_count (int *files,
 
 	if (folders) {
 		const gchar query[] =
-			"\nSELECT COUNT(?folders)"
-			"\nWHERE { "
-			"\n  ?folders a nfo:Folder ;"
-			"\n           nie:dataSource/tracker:available true ."
-			"\n}";
+			"SELECT COUNT(?folders)"
+			"WHERE { "
+			"  GRAPH tracker:FileSystem {"
+			"    ?folders a nfo:Folder ;"
+			"             nie:isStoredAs/nie:dataSource/tracker:available true ."
+			"  }"
+			"}";
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
