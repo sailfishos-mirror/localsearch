@@ -52,6 +52,8 @@ extract_files (char *output_format)
 	char *tracker_extract_path;
 	GError *error = NULL;
 
+	tracker_term_pipe_to_pager ();
+
 	tracker_extract_path = g_build_filename(LIBEXECDIR, "tracker-extract-3", NULL);
 
 	for (p = filenames; *p; p++) {
@@ -70,6 +72,8 @@ extract_files (char *output_format)
 			return EXIT_FAILURE;
 		}
 	}
+
+	tracker_term_pager_close ();
 
 	g_free (tracker_extract_path);
 	return EXIT_SUCCESS;
