@@ -65,224 +65,79 @@ tracker_process_data_free (TrackerProcessData *pd)
 	g_slice_free (TrackerProcessData, pd);
 }
 
-GSList *
-tracker_process_get_pids (void)
+static gchar *
+find_command (pid_t pid)
 {
-	GError *error = NULL;
-	GDir *dir;
-	GSList *pids = NULL;
-	const gchar *name;
+	gchar *proc_path, path[PATH_MAX];
 
-	dir = g_dir_open ("/proc", 0, &error);
-	if (error) {
-		g_printerr ("%s: %s\n",
-		            _("Could not open /proc"),
-		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
-		return NULL;
-	}
+	proc_path = g_strdup_printf ("/proc/%d/exe", pid);
+	readlink (proc_path, path, PATH_MAX);
 
-	while ((name = g_dir_read_name (dir)) != NULL) {
-		gchar c;
-		gboolean is_pid = TRUE;
-
-		for (c = *name; c && c != ':' && is_pid; c++) {
-			is_pid &= g_ascii_isdigit (c);
-		}
-
-		if (!is_pid) {
-			continue;
-		}
-
-		pids = g_slist_prepend (pids, g_strdup (name));
-	}
-
-	g_dir_close (dir);
-
-	return g_slist_reverse (pids);
+	return g_path_get_basename (path);
 }
 
-guint32
-tracker_process_get_uid_for_pid (const gchar  *pid_as_string,
-                                 gchar       **filename)
+static pid_t
+get_pid_for_service (GDBusConnection *connection,
+                     const gchar     *name)
 {
-	GFile *f;
-	GFileInfo *info;
-	GError *error = NULL;
-	gchar *fn;
-	gchar *proc_dir_name;
-	guint uid;
+	GDBusMessage *message, *reply;
+	GVariant *variant;
+	guint32 process_id;
 
-	proc_dir_name = g_build_filename ("/proc", pid_as_string, NULL);
+	message = g_dbus_message_new_method_call ("org.freedesktop.DBus",
+	                                          "/org/freedesktop/DBus",
+	                                          "org.freedesktop.DBus",
+	                                          "GetConnectionUnixProcessID");
+	g_dbus_message_set_body (message,
+	                         g_variant_new ("(s)", name));
+	reply = g_dbus_connection_send_message_with_reply_sync (connection,
+	                                                        message,
+	                                                        G_DBUS_SEND_MESSAGE_FLAGS_NONE,
+	                                                        -1,
+	                                                        NULL,
+	                                                        NULL,
+	                                                        NULL);
+	g_object_unref (message);
 
-#ifdef __sun /* Solaris */
-	fn = g_build_filename (proc_dir_name, "psinfo", NULL);
-#else
-	fn = g_build_filename (proc_dir_name, "cmdline", NULL);
-#endif
+	if (!reply)
+		return -1;
 
-	f = g_file_new_for_path (proc_dir_name);
-	info = g_file_query_info (f,
-	                          G_FILE_ATTRIBUTE_UNIX_UID,
-	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                          NULL,
-	                          &error);
-
-	if (error) {
-		g_printerr ("%s '%s', %s", _("Could not stat() file"), proc_dir_name, error->message);
-		g_error_free (error);
-		uid = 0;
-	} else {
-		uid = g_file_info_get_attribute_uint32 (info, G_FILE_ATTRIBUTE_UNIX_UID);
-		g_object_unref (info);
+	if (g_dbus_message_get_error_name (reply)) {
+		g_object_unref (reply);
+		return -1;
 	}
 
-	g_free (proc_dir_name);
+	variant = g_dbus_message_get_body (reply);
+	g_variant_get (variant, "(u)", &process_id);
+	g_object_unref (reply);
 
-	if (filename) {
-		*filename = fn;
-	} else {
-		g_free (fn);
-	}
-
-	g_object_unref (f);
-
-	return uid;
+	return (pid_t) process_id;
 }
 
 GSList *
 tracker_process_find_all (void)
 {
-#ifndef __OpenBSD__
-	GSList *pids, *l;
-	GSList *found_pids = NULL;
-	guint32 own_pid;
-	guint32 own_uid;
-	gchar *own_pid_str;
+	GDBusConnection *connection;
+	pid_t miner_fs, miner_rss;
+	GSList *processes = NULL;
+	TrackerProcessData *data;
 
-	/* Unless we are stopping processes or listing processes,
-	 * don't iterate them.
-	 */
-	pids = tracker_process_get_pids ();
-
-	/* Establish own uid/pid */
-	own_pid = (guint32) getpid ();
-	own_pid_str = g_strdup_printf ("%d", own_pid);
-	own_uid = tracker_process_get_uid_for_pid (own_pid_str, NULL);
-	g_free (own_pid_str);
-
-	for (l = pids; l; l = l->next) {
-		GError *error = NULL;
-		gchar *filename;
-#ifdef __sun /* Solaris */
-		psinfo_t psinfo = { 0 };
-#endif
-		gchar *contents = NULL;
-		gchar **strv;
-		guint uid;
-		pid_t pid;
-
-		uid = tracker_process_get_uid_for_pid (l->data, &filename);
-
-		/* Stat the file and make sure current user == file owner */
-		if (uid != own_uid) {
-			continue;
-		}
-
-		pid = atoi (l->data);
-
-		/* Don't return our own PID */
-		if (pid == own_pid) {
-			continue;
-		}
-
-		/* Get contents to determine basename */
-		if (!g_file_get_contents (filename, &contents, NULL, &error)) {
-			gchar *str;
-
-			str = g_strdup_printf (_("Could not open “%s”"), filename);
-			g_printerr ("%s: %s\n",
-			            str,
-			            error ? error->message : _("No error given"));
-			g_free (str);
-			g_clear_error (&error);
-			g_free (contents);
-			g_free (filename);
-
-			continue;
-		}
-#ifdef __sun /* Solaris */
-		memcpy (&psinfo, contents, sizeof (psinfo));
-
-		/* won't work with paths containing spaces :( */
-		strv = g_strsplit (psinfo.pr_psargs, " ", 2);
-#else
-		strv = g_strsplit (contents, "^@", 2);
-#endif
-		if (strv && strv[0]) {
-			gchar *basename;
-
-			basename = g_path_get_basename (strv[0]);
-
-			if (g_str_has_prefix (basename, "tracker")) {
-				found_pids = g_slist_prepend (found_pids, process_data_new (basename, pid));
-			} else {
-				g_free (basename);
-			}
-		}
-
-		g_strfreev (strv);
-		g_free (contents);
-		g_free (filename);
+	connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
+	miner_fs = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.Files");
+	if (miner_fs > 0) {
+		data = process_data_new (find_command (miner_fs), miner_fs);
+		processes = g_slist_prepend (processes, data);
 	}
 
-	g_slist_foreach (pids, (GFunc) g_free, NULL);
-	g_slist_free (pids);
-
-	return g_slist_reverse (found_pids);
-#else /* ! __OpenBSD__ */
-	GSList *found_pids = NULL;
-	gchar **strv;
-	gchar *basename;
-	pid_t pid;
-	gint i, nproc;
-	gchar buf[_POSIX2_LINE_MAX];
-	struct kinfo_proc *plist, *kp;
-	kvm_t *kd;
-
-	if ((kd = kvm_openfiles (NULL, NULL, NULL, KVM_NO_FILES, buf)) == NULL)
-		return NULL;
-
-	if ((plist = kvm_getprocs (kd, KERN_PROC_ALL, 0, sizeof (*plist), &nproc)) == NULL)
-		return NULL;
-
-	for (i = 0, kp = plist; i < nproc; i++, kp++) {
-		if ((kp->p_flag & P_SYSTEM) != 0)
-			continue;
-		if ((strv = kvm_getargv (kd, kp, 0)) == NULL)
-			continue;
-
-		pid = kp->p_pid;
-
-		/* Don't return our own PID */
-		if (pid == getpid ())
-			continue;
-
-		/* Don't return PID we don't own */
-		if (kp->p_uid != getuid ())
-			continue;
-
-		basename = g_path_get_basename (strv[0]);
-
-		if (g_str_has_prefix (basename, "tracker")) {
-			found_pids = g_slist_prepend (found_pids, process_data_new (basename, pid));
-		} else {
-			g_free (basename);
-		}
+	miner_rss = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.RSS");
+	if (miner_rss > 0) {
+		data = process_data_new (find_command (miner_rss), miner_rss);
+		processes = g_slist_prepend (processes, data);
 	}
 
-	return g_slist_reverse (found_pids);
-#endif
+	g_object_unref (connection);
+
+	return processes;
 }
 
 gint

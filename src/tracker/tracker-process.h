@@ -34,10 +34,6 @@ typedef enum {
 	TRACKER_PROCESS_TYPE_MINERS
 } TrackerProcessTypes;
 
-GSList * tracker_process_get_pids        (void);
-guint32  tracker_process_get_uid_for_pid (const gchar  *pid_as_string,
-                                          gchar       **filename);
-
 void     tracker_process_data_free       (TrackerProcessData *pd);
 
 GSList * tracker_process_find_all        (void);
