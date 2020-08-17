@@ -1526,6 +1526,8 @@ search_run (void)
 		return EXIT_FAILURE;
 	}
 
+	tracker_term_pipe_to_pager ();
+
 	if (limit <= 0) {
 		/* Default to 10 for snippets because more is not
 		 * useful on the screen. The categories are those not
@@ -1546,6 +1548,7 @@ search_run (void)
 
 		success = get_files (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1555,6 +1558,7 @@ search_run (void)
 
 		success = get_folders (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1564,6 +1568,7 @@ search_run (void)
 
 		success = get_music_albums (connection, terms, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1573,6 +1578,7 @@ search_run (void)
 
 		success = get_music_artists (connection, terms, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1582,6 +1588,7 @@ search_run (void)
 
 		success = get_music_files (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1591,6 +1598,7 @@ search_run (void)
 
 		success = get_feeds (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1600,6 +1608,7 @@ search_run (void)
 
 		success = get_image_files (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1609,6 +1618,7 @@ search_run (void)
 
 		success = get_video_files (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1618,6 +1628,7 @@ search_run (void)
 
 		success = get_document_files (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1627,6 +1638,7 @@ search_run (void)
 
 		success = get_emails (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1636,6 +1648,7 @@ search_run (void)
 
 		success = get_contacts (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1645,6 +1658,7 @@ search_run (void)
 
 		success = get_software (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1654,6 +1668,7 @@ search_run (void)
 
 		success = get_software_categories (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1663,6 +1678,7 @@ search_run (void)
 
 		success = get_bookmarks (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
@@ -1672,6 +1688,7 @@ search_run (void)
 
 		success = get_all_by_search (connection, terms, all, offset, limit, or_operator, detailed);
 		g_object_unref (connection);
+		tracker_term_pager_close ();
 
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
