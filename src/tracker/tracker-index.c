@@ -32,7 +32,9 @@
 #include <locale.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-miners-common/tracker-common.h>
 
+#include "tracker-color.h"
 #include "tracker-dbus.h"
 #include "tracker-miner-manager.h"
 
@@ -48,6 +50,45 @@ static GOptionEntry entries[] = {
 	  N_("FILE") },
 	{ NULL }
 };
+
+const struct {
+	const gchar *symbol;
+	GUserDirectory user_dir;
+} special_dirs[] = {
+	{ "&DESKTOP",      G_USER_DIRECTORY_DESKTOP },
+	{ "&DOCUMENTS",    G_USER_DIRECTORY_DOCUMENTS },
+	{ "&DOWNLOAD",     G_USER_DIRECTORY_DOWNLOAD },
+	{ "&MUSIC",        G_USER_DIRECTORY_MUSIC },
+	{ "&PICTURES",     G_USER_DIRECTORY_PICTURES },
+	{ "&PUBLIC_SHARE", G_USER_DIRECTORY_PUBLIC_SHARE },
+	{ "&TEMPLATES",    G_USER_DIRECTORY_TEMPLATES },
+	{ "&VIDEOS",       G_USER_DIRECTORY_VIDEOS }
+};
+
+static const gchar *
+alias_to_path (const gchar *alias)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (special_dirs); i++) {
+		if (g_strcmp0 (special_dirs[i].symbol, alias) == 0)
+			return g_get_user_special_dir (special_dirs[i].user_dir);
+	}
+
+	return NULL;
+}
+
+static const gchar *
+envvar_to_path (const gchar *envvar)
+{
+	const gchar *path;
+
+	path = g_getenv (&envvar[1]);
+	if (g_file_test (path, G_FILE_TEST_EXISTS))
+		return path;
+
+	return NULL;
+}
 
 static gint
 index_or_reindex_file (void)
@@ -95,6 +136,69 @@ index_run (void)
 	return index_or_reindex_file ();
 }
 
+static void
+print_list (GStrv    list,
+            gint     len,
+            gboolean recursive)
+{
+	guint i;
+
+	for (i = 0; list[i]; i++) {
+		const gchar *path;
+		gchar *str;
+
+		if (list[i][0] == '&')
+			path = alias_to_path (list[i]);
+		else if (list[i][0] == '$')
+			path = envvar_to_path (list[i]);
+		else if (list[i][0] == '/')
+			path = list[i];
+		else
+			continue;
+
+		str = tracker_term_ellipsize (path, len, TRACKER_ELLIPSIZE_START);
+		g_print ("%-*s " BOLD_BEGIN "%s" BOLD_END "\n",
+		         len, str,
+		         recursive ? "*" : "-");
+		g_free (str);
+	}
+}
+
+static int
+list_index_roots (void)
+{
+	GSettings *settings;
+	GStrv recursive, non_recursive;
+	gint cols, col_len[2];
+	gchar *col_header1, *col_header2;
+
+	settings = g_settings_new ("org.freedesktop.Tracker3.Miner.Files");
+	recursive = g_settings_get_strv (settings, "index-recursive-directories");
+	non_recursive = g_settings_get_strv (settings, "index-single-directories");
+
+	tracker_term_dimensions (&cols, NULL);
+	col_len[0] = cols * 3 / 4;
+	col_len[1] = cols / 4 - 1;
+
+	col_header1 = tracker_term_ellipsize (_("Path"), col_len[0], TRACKER_ELLIPSIZE_END);
+	col_header2 = tracker_term_ellipsize (_("Recursive"), col_len[1], TRACKER_ELLIPSIZE_END);
+
+	g_print (BOLD_BEGIN "%-*s %-*s" BOLD_END "\n",
+	         col_len[0], col_header1,
+	         col_len[1], col_header2);
+	g_free (col_header1);
+	g_free (col_header2);
+
+	print_list (recursive, col_len[0], TRUE);
+	print_list (non_recursive, col_len[0], FALSE);
+
+	g_strfreev (recursive);
+	g_strfreev (non_recursive);
+	g_object_unref (settings);
+
+	return EXIT_SUCCESS;
+}
+
 int
 main (int argc, const char **argv)
 {
@@ -122,13 +226,12 @@ main (int argc, const char **argv)
 
 	g_option_context_free (context);
 
-	if (!filenames || g_strv_length (filenames) < 1) {
-		failed = _("Please specify one or more locations to index.");
-	} else {
-		failed = NULL;
+	if (!filenames) {
+		return list_index_roots ();
 	}
 
-	if (failed) {
+	if (g_strv_length (filenames) < 1) {
+		failed = _("Please specify one or more locations to index.");
 		g_printerr ("%s\n", failed);
 		return EXIT_FAILURE;
 	}
