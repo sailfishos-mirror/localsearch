@@ -51,24 +51,18 @@ static gboolean music_files;
 static gboolean image_files;
 static gboolean video_files;
 static gboolean document_files;
-static gboolean emails;
-static gboolean contacts;
 static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
-static gboolean bookmarks;
 
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
-	 bookmarks || \
 	 feeds || \
 	 software || \
 	 software_categories || \
 	 image_files || \
 	 video_files || \
 	 document_files || \
-	 emails || \
-	 contacts || \
 	 files || \
 	 folders || \
 	 (terms && g_strv_length (terms) > 0))
@@ -107,14 +101,6 @@ static GOptionEntry entries[] = {
 	  N_("Search for document files"),
 	  NULL
 	},
-	{ "emails", 'e', 0, G_OPTION_ARG_NONE, &emails,
-	  N_("Search for emails"),
-	  NULL
-	},
-	{ "contacts", 'c', 0, G_OPTION_ARG_NONE, &contacts,
-	  N_("Search for contacts"),
-	  NULL
-	},
 	{ "software", 0, 0, G_OPTION_ARG_NONE, &software,
 	  N_("Search for software (--all has no effect on this)"),
 	  NULL
@@ -125,10 +111,6 @@ static GOptionEntry entries[] = {
 	},
 	{ "feeds", 0, 0, G_OPTION_ARG_NONE, &feeds,
 	  N_("Search for feeds (--all has no effect on this)"),
-	  NULL
-	},
-	{ "bookmarks", 'b', 0, G_OPTION_ARG_NONE, &bookmarks,
-	  N_("Search for bookmarks (--all has no effect on this)"),
 	  NULL
 	},
 
@@ -262,217 +244,6 @@ print_snippet (const gchar *snippet)
 	}
 
 	g_print ("\n");
-}
-
-static gboolean
-get_contacts_results (TrackerSparqlConnection *connection,
-                      const gchar             *query,
-                      gint                     search_limit,
-                      gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No contacts were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Contacts"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  '%s%s%s', %s (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         tracker_sparql_cursor_get_string (cursor, 2, NULL));
-			} else {
-				g_print ("  '%s%s%s', %s\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			}
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		if (count >= search_limit) {
-			show_limit_warning ();
-		}
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_contacts (TrackerSparqlConnection *connection,
-              GStrv                    search_terms,
-              gboolean                 show_all,
-              gint                     search_offset,
-              gint                     search_limit,
-              gboolean                 use_or_operator,
-              gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	gboolean success;
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT tracker:coalesce(nco:fullname(?contact), fn:concat(nco:nameFamily(?contact), \" \", nco:nameGiven(?contact)),\"%s\") tracker:coalesce(nco:hasEmailAddress(?contact), \"%s\") ?contact "
-		                         "WHERE { "
-		                         "  ?contact a nco:Contact ;"
-		                         "  fts:match \"%s\" ."
-		                         "} "
-		                         "ORDER BY ASC(nco:fullname(?contact)) ASC(nco:hasEmailAddress(?contact)) "
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-                                         _("No name"),
-                                         _("No E-mail address"),
-		                         fts,
-		                         search_offset,
-		                         search_limit);
-	} else {
-		query = g_strdup_printf ("SELECT tracker:coalesce(nco:fullname(?contact), fn:concat(nco:nameFamily(?contact), \" \", nco:nameGiven(?contact)), \"%s\") tracker:coalesce(nco:hasEmailAddress(?contact), \"%s\") ?contact "
-		                         "WHERE { "
-		                         "  ?contact a nco:Contact ."
-		                         "} "
-		                         "ORDER BY ASC(nco:fullname(?contact)) ASC(nco:hasEmailAddress(?contact)) "
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-                                         _("No name"),
-                                         _("No E-mail address"),
-		                         search_offset,
-		                         search_limit);
-	}
-
-	success = get_contacts_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-
-	return success;
-}
-
-static gboolean
-get_emails_results (TrackerSparqlConnection *connection,
-                    const gchar             *query,
-                    gint                     search_limit,
-                    gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No emails were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Emails"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s\n"
-			         "  %s, %s\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-			         tracker_sparql_cursor_get_string (cursor, 2, NULL));
-
-			print_snippet (tracker_sparql_cursor_get_string (cursor, 3, NULL));
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		if (count >= search_limit) {
-			show_limit_warning ();
-		}
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_emails (TrackerSparqlConnection *connection,
-            GStrv                    search_terms,
-            gboolean                 show_all,
-            gint                     search_offset,
-            gint                     search_limit,
-            gboolean                 use_or_operator,
-            gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	gboolean success;
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT nie:isStoredAs(?email) nmo:receivedDate(?email) nmo:messageSubject(?email) fts:snippet(?email, \"%s\", \"%s\") "
-		                         "WHERE { "
-		                         "  ?email a nmo:Email ;"
-		                         "  fts:match \"%s\" ."
-		                         "} "
-		                         "ORDER BY ASC(nmo:messageSubject(?email)) ASC(nmo:receivedDate(?email))"
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         search_offset,
-		                         search_limit);
-	} else {
-		query = g_strdup_printf ("SELECT nie:isStoredAs(?email) nmo:receivedDate(?email) nmo:messageSubject(?email) "
-		                         "WHERE { "
-		                         "  ?email a nmo:Email ."
-		                         "} "
-		                         "ORDER BY ASC(nmo:messageSubject(?email)) ASC(nmo:receivedDate(?email))"
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-		                         search_offset,
-		                         search_limit);
-	}
-
-	success = get_emails_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-
-	return success;
 }
 
 static gboolean
@@ -919,90 +690,6 @@ get_music_albums (TrackerSparqlConnection *connection,
 				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
 				         disable_color ? "" : TITLE_END);
 			}
-			count++;
-		}
-
-		g_print ("\n");
-
-		if (count >= search_limit) {
-			show_limit_warning ();
-		}
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_bookmarks (TrackerSparqlConnection *connection,
-               GStrv                    search_terms,
-               gint                     search_offset,
-               gint                     search_limit,
-               gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT nie:title(?urn) nie:isStoredAs(?bookmark) "
-		                         "WHERE {"
-		                         "  ?urn a nfo:Bookmark ;"
-		                         "       nfo:bookmarks ?bookmark ."
-		                         "  ?urn fts:match \"%s\" . "
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?urn)) "
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-		                         fts,
-		                         search_offset,
-		                         search_limit);
-	} else {
-		query = g_strdup_printf ("SELECT nie:title(?urn) nie:isStoredAs(?bookmark) "
-		                         "WHERE {"
-		                         "  ?urn a nfo:Bookmark ;"
-		                         "       nfo:bookmarks ?bookmark ."
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?urn)) "
-		                         "OFFSET %d "
-		                         "LIMIT %d",
-		                         search_offset,
-		                         search_limit);
-	}
-
-	g_free (fts);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No bookmarks were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Bookmarks"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-
 			count++;
 		}
 
@@ -1534,9 +1221,8 @@ search_run (void)
 		 * using snippets yet.
 		 */
 		if (disable_snippets || !terms ||
-		    (files || folders || contacts || emails ||
-		     music_albums || music_artists || bookmarks ||
-		     feeds)) {
+		    (files || folders ||
+		     music_albums || music_artists || feeds)) {
 			limit = 512;
 		} else {
 			limit = 10;
@@ -1633,26 +1319,6 @@ search_run (void)
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
-	if (emails) {
-		gboolean success;
-
-		success = get_emails (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (contacts) {
-		gboolean success;
-
-		success = get_contacts (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
 	if (software) {
 		gboolean success;
 
@@ -1667,16 +1333,6 @@ search_run (void)
 		gboolean success;
 
 		success = get_software_categories (connection, terms, offset, limit, or_operator);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (bookmarks) {
-		gboolean success;
-
-		success = get_bookmarks (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 
