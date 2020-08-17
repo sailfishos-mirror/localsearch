@@ -42,11 +42,9 @@
 #define KEY_SPARQL "Sparql"
 
 #define STATUS_OPTIONS_ENABLED()	  \
-	(show_stat || \
-	 collect_debug_info)
+	(show_stat)
 
 static gboolean show_stat;
-static gboolean collect_debug_info;
 static gchar **terms;
 
 static GOptionEntry entries[] = {
@@ -54,9 +52,6 @@ static GOptionEntry entries[] = {
 	  N_("Show statistics for current index / data set"),
 	  NULL
 	},
-	{ "collect-debug-info", 0, 0, G_OPTION_ARG_NONE, &collect_debug_info,
-	  N_("Collect debug information useful for problem reporting and investigation, results are output to terminal"),
-	  NULL },
 	{ G_OPTION_REMAINING, 0, 0,
 	  G_OPTION_ARG_STRING_ARRAY, &terms,
 	  N_("search terms"),
@@ -170,177 +165,10 @@ status_stat (void)
 }
 
 static int
-collect_debug (void)
-{
-	/* What to collect?
-	 * This is based on information usually requested from maintainers to users.
-	 *
-	 * 1. Package details, e.g. version.
-	 * 2. Disk size, space left, type (SSD/etc)
-	 * 3. Size of dataset (tracker-stats), size of databases
-	 * 4. Statistics about data (tracker-stats)
-	 */
-
-	GDir *d;
-	gchar *data_dir;
-	gchar *str;
-
-	data_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", NULL);
-
-	/* 1. Package details, e.g. version. */
-	g_print ("[Package Details]\n");
-	g_print ("%s: " PACKAGE_VERSION "\n", _("Version"));
-	g_print ("\n\n");
-
-	/* 2. Disk size, space left, type (SSD/etc) */
-	guint64 remaining_bytes;
-	gdouble remaining;
-
-	g_print ("[%s]\n", _("Disk Information"));
-
-	remaining_bytes = tracker_file_system_get_remaining_space (data_dir);
-	str = g_format_size (remaining_bytes);
-
-	remaining = tracker_file_system_get_remaining_space_percentage (data_dir);
-	g_print ("%s: %s (%3.2lf%%)\n",
-	         _("Remaining space on database partition"),
-	         str,
-	         remaining);
-	g_free (str);
-	g_print ("\n\n");
-
-	/* 3. Size of dataset (tracker-stats), size of databases */
-	g_print ("[%s]\n", _("Data Set"));
-
-	for (d = g_dir_open (data_dir, 0, NULL); d != NULL;) {
-		const gchar *f;
-		gchar *path;
-		goffset size;
-
-		f = g_dir_read_name (d);
-		if (!f) {
-			break;
-		}
-
-		if (g_str_has_suffix (f, ".txt")) {
-			continue;
-		}
-
-		path = g_build_filename (data_dir, f, NULL);
-		size = tracker_file_get_size (path);
-		str = g_format_size (size);
-
-		g_print ("%s\n%s\n\n", path, str);
-		g_free (str);
-		g_free (path);
-	}
-	g_dir_close (d);
-	g_print ("\n");
-
-	g_print ("[%s]\n", _("States"));
-
-	for (d = g_dir_open (data_dir, 0, NULL); d != NULL;) {
-		const gchar *f;
-		gchar *path;
-		gchar *content = NULL;
-
-		f = g_dir_read_name (d);
-		if (!f) {
-			break;
-		}
-
-		if (!g_str_has_suffix (f, ".txt")) {
-			continue;
-		}
-
-		path = g_build_filename (data_dir, f, NULL);
-		if (g_file_get_contents (path, &content, NULL, NULL)) {
-			/* Special case last-index.txt which is time() dump to file */
-			if (g_str_has_suffix (path, "last-crawl.txt")) {
-				guint64 then, now;
-
-				now = (guint64) time (NULL);
-				then = g_ascii_strtoull (content, NULL, 10);
-				str = tracker_seconds_to_string (now - then, FALSE);
-
-				g_print ("%s\n%s (%s)\n\n", path, content, str);
-			} else {
-				g_print ("%s\n%s\n\n", path, content);
-			}
-			g_free (content);
-		}
-		g_free (path);
-	}
-	g_dir_close (d);
-	g_print ("\n");
-
-	/* 5. Statistics about data (tracker-stats) */
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
-
-	g_print ("[%s]\n", _("Data Statistics"));
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
-	                                                NULL, NULL, &error);
-
-	if (!connection) {
-		g_print ("** %s, %s **\n",
-		         _("No connection available"),
-		         error ? error->message : _("No error given"));
-		g_clear_error (&error);
-	} else {
-		TrackerSparqlCursor *cursor;
-
-		cursor = statistics_query (connection, &error);
-
-		if (error) {
-			g_print ("** %s, %s **\n",
-			         _("Could not get statistics"),
-			         error ? error->message : _("No error given"));
-			g_error_free (error);
-		} else {
-			if (!cursor) {
-				g_print ("** %s **\n",
-				         _("No statistics were available"));
-			} else {
-				gint count = 0;
-
-				while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-					g_print ("%s: %s\n",
-					         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-					         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-					count++;
-				}
-
-				if (count == 0) {
-					g_print ("%s\n",
-					         _("Database is currently empty"));
-				}
-
-				g_object_unref (cursor);
-			}
-		}
-	}
-
-	g_object_unref (connection);
-	g_print ("\n\n");
-
-	g_print ("\n");
-
-	g_free (data_dir);
-
-	return EXIT_SUCCESS;
-}
-
-static int
 status_run (void)
 {
 	if (show_stat) {
 		return status_stat ();
-	}
-
-	if (collect_debug_info) {
-		return collect_debug ();
 	}
 
 	/* All known options have their own exit points */
