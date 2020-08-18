@@ -98,8 +98,6 @@ struct TrackerMinerFilesPrivate {
 
 	GDBusConnection *connection;
 
-	GQuark quark_mount_point_uuid;
-
 	guint force_recheck_id;
 
 	gboolean mtime_check;
@@ -348,7 +346,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	                  mf);
 
 	priv->mtime_check = TRUE;
-	priv->quark_mount_point_uuid = g_quark_from_static_string ("tracker-mount-point-uuid");
 
 	rdf_types = tracker_extract_module_manager_get_all_rdf_types ();
 	rdf_types_str = g_strjoinv (",", rdf_types);
@@ -802,20 +799,17 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	GString *queries;
 	gchar *uri;
 
-	queries = g_string_new (NULL);
+	queries = g_string_new ("WITH " DEFAULT_GRAPH " ");
 	uri = g_file_get_uri (mount_point);
 
 	if (mounted) {
 		g_debug ("Mount point state (MOUNTED) being set in DB for mount_point '%s'",
 		         uri);
 
-		g_string_append_printf (queries,
-		                        "DELETE { ?u tracker:unmountDate ?d } "
-		                        "WHERE { <%s> a nfo:FileDataObject/"
-		                        "               nie:interpretedAs/"
-		                        "               nie:rootElementOf ?u"
-		                        "}",
-		                        uri);
+		g_string_append (queries,
+				 "DELETE { ?u tracker:unmountDate ?date ;"
+				 "            tracker:available ?avail } "
+				 "INSERT { ?u tracker:available true } ");
 	} else {
 		gchar *now;
 
@@ -825,18 +819,23 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		now = tracker_date_to_string (time (NULL));
 
 		g_string_append_printf (queries,
-		                        "DELETE { ?u tracker:unmountDate ?unknown1 ;"
-		                        "            tracker:available ?unknown2 } "
-		                        "INSERT { ?u tracker:unmountDate \"%s\" } "
-		                        "WHERE { <%s> a nfo:FileDataObject/"
-		                        "               nie:interpretedAs/"
-		                        "               nie:rootElementOf ?u"
-		                        "}",
-		                        now, uri);
+		                        "DELETE { ?u tracker:unmountDate ?date ;"
+		                        "            tracker:available ?avail } "
+		                        "INSERT { ?u tracker:unmountDate \"%s\" ; "
+					"            tracker:available false } ",
+		                        now);
 
 		g_free (now);
 	}
 
+	g_string_append_printf (queries,
+				"WHERE { <%s> a nfo:FileDataObject ; "
+				"             nie:interpretedAs/"
+				"             nie:rootElementOf ?u . "
+				"        ?u tracker:available ?avail . "
+				"        OPTIONAL { ?u tracker:unmountDate ?date } "
+				"}",
+				uri);
 	g_free (uri);
 
 	if (accumulator) {
@@ -890,6 +889,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor;
 	GSList *mounts, *l;
+	GFile *file;
 
 	g_debug ("Initializing mount points...");
 
@@ -911,8 +911,8 @@ init_mount_points (TrackerMinerFiles *miner_files)
 
 	priv = TRACKER_MINER_FILES_GET_PRIVATE (miner);
 
-	volumes = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                 (GDestroyNotify) g_free,
+	volumes = g_hash_table_new_full (g_file_hash, (GEqualFunc) g_file_equal,
+	                                 (GDestroyNotify) g_object_unref,
 	                                 NULL);
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
@@ -931,22 +931,22 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			state |= VOLUME_MOUNTED;
 		}
 
-		g_hash_table_replace (volumes, g_strdup (urn), GINT_TO_POINTER (state));
+		file = g_file_new_for_uri (urn);
+		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 	}
 
 	g_object_unref (cursor);
 
 	/* Then, get all currently mounted non-REMOVABLE volumes, according to GIO */
-	mounts = tracker_storage_get_device_uuids (priv->storage, 0, TRUE);
+	mounts = tracker_storage_get_device_roots (priv->storage, 0, TRUE);
 	for (l = mounts; l; l = l->next) {
-		gchar *path;
 		gint state;
 
-		path = g_strdup (l->data);
-		state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, path));
+		file = g_file_new_for_path (l->data);
+		state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, file));
 		state |= VOLUME_MOUNTED;
 
-		g_hash_table_replace (volumes, path, GINT_TO_POINTER (state));
+		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 	}
 
 	g_slist_foreach (mounts, (GFunc) g_free, NULL);
@@ -956,15 +956,14 @@ init_mount_points (TrackerMinerFiles *miner_files)
 	if (priv->index_removable_devices) {
 		mounts = tracker_storage_get_device_roots (priv->storage, TRACKER_STORAGE_REMOVABLE, FALSE);
 		for (l = mounts; l; l = l->next) {
-			gchar *path;
 			gint state;
 
-			path = g_strdup (l->data);
+			file = g_file_new_for_path (l->data);
 
-			state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, path));
+			state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, file));
 			state |= VOLUME_MOUNTED;
 
-			g_hash_table_replace (volumes, path, GINT_TO_POINTER (state));
+			g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 		}
 
 		g_slist_foreach (mounts, (GFunc) g_free, NULL);
@@ -976,9 +975,9 @@ init_mount_points (TrackerMinerFiles *miner_files)
 
 	/* Finally, set up volumes based on the composed info */
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		const gchar *mount_point = key;
+		GFile *file = key;
 		gint state = GPOINTER_TO_INT (value);
-		GFile *file = g_file_new_for_path (mount_point);
+		gchar *mount_point = g_file_get_uri (file);
 
 		if ((state & VOLUME_MOUNTED) &&
 		    !(state & VOLUME_MOUNTED_IN_STORE)) {
@@ -1027,7 +1026,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			 * mount points, as they are not mounted right now. */
 		}
 
-		g_object_unref (file);
+		g_free (mount_point);
 	}
 
 	if (accumulator->str[0] != '\0') {
@@ -2066,51 +2065,6 @@ process_file_data_free (ProcessFileData *data)
 	g_slice_free (ProcessFileData, data);
 }
 
-static gchar *
-update_mount_point_sparql (ProcessFileData *data)
-{
-	const gchar *uuid;
-
-	uuid = g_object_get_qdata (G_OBJECT (data->file),
-	                           data->miner->private->quark_mount_point_uuid);
-
-	/* File represents a mount point */
-	if (G_UNLIKELY (uuid)) {
-		GString *queries;
-		gchar *removable_device_urn, *uri;
-
-		removable_device_urn = g_strdup_printf (TRACKER_PREFIX_DATASOURCE_URN "%s", uuid);
-		uri = g_file_get_uri (G_FILE (data->file));
-		queries = g_string_new ("");
-
-		g_string_append_printf (queries,
-		                        "DELETE { "
-		                        "  <%s> tracker:mountPoint ?unknown "
-		                        "} WHERE { "
-		                        "  <%s> a tracker:IndexedFolder; "
-		                        "       tracker:mountPoint ?unknown "
-		                        "} ",
-		                        removable_device_urn, removable_device_urn);
-
-		g_string_append_printf (queries,
-		                        "INSERT { "
-		                        "  <%s> a tracker:IndexedFolder; "
-		                        "       tracker:mountPoint ?u "
-		                        "} WHERE { "
-		                        "  ?u a nfo:FileDataObject; "
-		                        "     nie:url \"%s\" "
-		                        "} ",
-		                        removable_device_urn, uri);
-
-		g_free (removable_device_urn);
-		g_free (uri);
-
-		return g_string_free (queries, FALSE);
-	}
-
-	return NULL;
-}
-
 static void
 process_file_cb (GObject      *object,
                  GAsyncResult *result,
@@ -2121,7 +2075,7 @@ process_file_cb (GObject      *object,
 	ProcessFileData *data;
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
-	gchar *delete_properties_sparql = NULL, *mount_point_sparql;
+	gchar *delete_properties_sparql = NULL;
 	GFileInfo *file_info;
 	guint64 time_;
 	GFile *file, *parent;
@@ -2226,7 +2180,6 @@ process_file_cb (GObject      *object,
 
 	miner_files_add_to_datasource (data->miner, file, resource, folder_resource);
 
-	mount_point_sparql = update_mount_point_sparql (data);
 	sparql_update_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
 
 	if (folder_resource) {
@@ -2251,15 +2204,13 @@ process_file_cb (GObject      *object,
 		g_object_unref (graph_file);
 	}
 
-	sparql_str = g_strdup_printf ("%s %s %s %s %s",
+	sparql_str = g_strdup_printf ("%s %s %s %s",
 	                              delete_properties_sparql ? delete_properties_sparql : "",
 	                              sparql_update_str,
 	                              ie_update_str ? ie_update_str : "",
-				      graph_file_str ? graph_file_str : "",
-	                              mount_point_sparql ? mount_point_sparql : "");
+				      graph_file_str ? graph_file_str : "");
 	g_free (ie_update_str);
 	g_free (delete_properties_sparql);
-	g_free (mount_point_sparql);
 	g_free (graph_file_str);
 
 	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
@@ -2865,20 +2816,24 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles  *miner,
 	 * which was last unmounted before the given date */
 	g_string_append_printf (queries,
 	                        "DELETE { "
-	                        "  ?f a rdfs:Resource . "
+				"  GRAPH " DEFAULT_GRAPH " {"
+	                        "    ?f a rdfs:Resource . "
+				"  }"
 	                        "  GRAPH ?g {"
 	                        "    ?ie a rdfs:Resource "
 	                        "  }"
 	                        "} WHERE { "
-	                        "  ?v a tracker:IndexedFolder ; "
-	                        "     tracker:isRemovable true ; "
-	                        "     tracker:available false ; "
-	                        "     tracker:unmountDate ?d . "
-	                        "  ?f nie:dataSource ?v . "
+				"  GRAPH " DEFAULT_GRAPH " {"
+	                        "    ?v a tracker:IndexedFolder ; "
+	                        "       tracker:isRemovable true ; "
+	                        "       tracker:available false ; "
+	                        "       tracker:unmountDate ?d . "
+	                        "    ?f nie:dataSource ?v . "
+	                        "    FILTER ( ?d < \"%s\"^^xsd:dateTime) "
+				"  }"
 	                        "  GRAPH ?g {"
 	                        "    ?ie nie:isStoredAs ?f "
 	                        "  }"
-	                        "  FILTER ( ?d < \"%s\") "
 	                        "}",
 	                        date);
 
@@ -2923,11 +2878,6 @@ miner_files_add_removable_or_optical_directory (TrackerMinerFiles *mf,
 	if (tracker_config_get_enable_monitors (mf->private->config)) {
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 	}
-
-	g_object_set_qdata_full (G_OBJECT (mount_point_file),
-	                         mf->private->quark_mount_point_uuid,
-	                         g_strdup (uuid),
-	                         (GDestroyNotify) g_free);
 
 	g_debug ("  Adding removable/optical: '%s'", mount_path);
 	tracker_indexing_tree_add (indexing_tree,
