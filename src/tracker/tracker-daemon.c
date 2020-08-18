@@ -180,14 +180,8 @@ signal_handler (gpointer user_data)
 	case SIGINT:
 		in_loop = TRUE;
 		g_main_loop_quit (main_loop);
-
-		/* Fall through */
+		break;
 	default:
-		if (g_strsignal (signo)) {
-			g_message ("Received signal:%d->'%s'",
-			           signo,
-			           g_strsignal (signo));
-		}
 		break;
 	}
 
@@ -492,6 +486,9 @@ miner_pause (const gchar *miner,
 		g_object_unref (main_loop);
 	}
 
+	/* Carriage return, so we paper over the ^C */
+	g_print ("\r");
+
 	g_object_unref (manager);
 
 	return EXIT_SUCCESS;
@@ -731,6 +728,9 @@ daemon_run (void)
 		g_main_loop_unref (main_loop);
 		g_object_unref (notifier);
 
+		/* Carriage return, so we paper over the ^C */
+		g_print ("\r");
+
 		return EXIT_SUCCESS;
 	}
 
@@ -861,6 +861,9 @@ daemon_run (void)
 		main_loop = g_main_loop_new (NULL, FALSE);
 		g_main_loop_run (main_loop);
 		g_main_loop_unref (main_loop);
+
+		/* Carriage return, so we paper over the ^C */
+		g_print ("\r");
 
 		g_hash_table_unref (miners_progress);
 		g_hash_table_unref (miners_status);
