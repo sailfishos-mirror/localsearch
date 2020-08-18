@@ -2,9 +2,3 @@
 Name=org.freedesktop.Tracker3.Miner.Extract
 Exec=@libexecdir@/tracker-extract-3
 SystemdService=tracker-extract-3.service
-
-# Miner details needed for tracker-control
-Path=/org/freedesktop/Tracker3/Miner/Extract
-NameSuffix=Miner.Extract
-DisplayName=Extractor
-Comment=Metadata extractor
