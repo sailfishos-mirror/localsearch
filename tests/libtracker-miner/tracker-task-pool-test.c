@@ -33,7 +33,7 @@ test_task_pool_limit_set (void)
         tracker_task_pool_set_limit (pool, 3);
         g_assert_cmpint (tracker_task_pool_get_limit(pool), ==, 3);
 
-        g_assert (tracker_task_pool_limit_reached (pool) == FALSE);
+        g_assert_true (tracker_task_pool_limit_reached (pool) == FALSE);
         g_object_unref (pool);
 }
 
@@ -49,7 +49,7 @@ add_task (TrackerTaskPool *pool,
         tracker_task_pool_add (pool, task);
 
         g_assert_cmpint (tracker_task_pool_get_size (pool), ==, expected_size);
-        g_assert (tracker_task_pool_limit_reached (pool) == hit_limit);
+        g_assert_true (tracker_task_pool_limit_reached (pool) == hit_limit);
 
         return task;
 }
@@ -63,7 +63,7 @@ remove_task (TrackerTaskPool *pool,
         tracker_task_pool_remove (pool, task);
 
         g_assert_cmpint (tracker_task_pool_get_size (pool), ==, expected_size);
-        g_assert (hit_limit == tracker_task_pool_limit_reached (pool));
+        g_assert_true (hit_limit == tracker_task_pool_limit_reached (pool));
 
         g_object_unref (tracker_task_get_file (task));
         tracker_task_unref (task);
@@ -118,22 +118,22 @@ test_task_pool_find (void)
         /* Search first, last, in the middle... */
         goal = g_file_new_for_path ("/dev/null2");
         task = tracker_task_pool_find (pool, goal);
-        g_assert (task);
+        g_assert_true (task);
         g_object_unref (goal);
 
         goal = g_file_new_for_path ("/dev/null");
         task = tracker_task_pool_find (pool, goal);
-        g_assert (task);
+        g_assert_true (task);
         g_object_unref (goal);
 
         goal = g_file_new_for_path ("/dev/null3");
         task = tracker_task_pool_find (pool, goal);
-        g_assert (task);
+        g_assert_true (task);
         g_object_unref (goal);
 
         goal = g_file_new_for_path ("/dev/thisDoesntExists");
         task = tracker_task_pool_find (pool, goal);
-        g_assert (task == FALSE);
+        g_assert_true (task == FALSE);
         g_object_unref (goal);
 
         g_object_unref (pool);

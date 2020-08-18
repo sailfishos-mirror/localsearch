@@ -29,7 +29,7 @@ test_exif_parse (void)
         gsize  length;
 
 
-        g_assert (g_file_get_contents (TOP_SRCDIR "/tests/libtracker-extract/exif-img.jpg", &blob, &length, NULL));
+        g_assert_true (g_file_get_contents (TOP_SRCDIR "/tests/libtracker-extract/exif-img.jpg", &blob, &length, NULL));
 
         exif = tracker_exif_new ((guchar *)blob, length, "test://file");
 
@@ -40,7 +40,7 @@ test_exif_parse (void)
 
         g_assert_cmpstr (exif->document_name, ==, "test-documentname");
         //g_assert_cmpstr (exif->time, ==, "test-documentname");
-        g_assert (exif->time_original);
+        g_assert_true (exif->time_original);
         g_assert_cmpstr (exif->artist, ==, "EXIFspec"); // -Exif:Artist
         g_assert_cmpstr (exif->user_comment, ==, "libexif demonstration image");
         g_assert_cmpstr (exif->description, ==, "Justfortest"); //-Exif:ImageDescription
@@ -76,7 +76,7 @@ test_exif_parse_empty (void)
         gchar *blob;
         gsize  length;
 
-        g_assert (g_file_get_contents (TOP_SRCDIR "/tests/libtracker-extract/exif-free-img.jpg", &blob, &length, NULL));
+        g_assert_true (g_file_get_contents (TOP_SRCDIR "/tests/libtracker-extract/exif-free-img.jpg", &blob, &length, NULL));
 
         exif = tracker_exif_new ((guchar *)blob, length, "test://file");
 

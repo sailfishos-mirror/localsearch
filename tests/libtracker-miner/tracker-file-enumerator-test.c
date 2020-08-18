@@ -69,7 +69,7 @@ test_enumerator_and_provider (void)
 	}
 
 	g_assert_no_error (error);
-	g_assert (count > 0);
+	g_assert_true (count > 0);
 
 	g_object_unref (enumerator);
 	g_object_unref (data_provider);

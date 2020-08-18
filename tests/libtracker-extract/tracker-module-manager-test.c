@@ -44,7 +44,7 @@ init_module_manager (void) {
 	g_setenv ("TRACKER_EXTRACTOR_RULES_DIR", test_rules_dir, TRUE);
 
 	success = tracker_extract_module_manager_init ();
-	g_assert (success);
+	g_assert_true (success);
 }
 
 static void
