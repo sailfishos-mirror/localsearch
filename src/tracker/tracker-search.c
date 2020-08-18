@@ -323,7 +323,7 @@ get_document_files (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?document nie:dataSource/tracker:available true .";
+	show_all_str = show_all ? "" : "?document nie:isStoredAs/nie:dataSource/tracker:available true .";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -377,7 +377,7 @@ get_video_files (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?video nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?video nie:isStoredAs/nie:dataSource/tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -431,7 +431,7 @@ get_image_files (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?image nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?image nie:isStoredAs/nie:dataSource/tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -485,7 +485,7 @@ get_music_files (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?song nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?song nie:isStoredAs/nie:dataSource/tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -967,7 +967,7 @@ get_files (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?u nie:isStoredAs/nie:dataSource/tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1021,7 +1021,7 @@ get_folders (TrackerSparqlConnection *connection,
 	const gchar *show_all_str;
 	gboolean success;
 
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?u nie:isStoredAs/nie:dataSource/tracker:available true . ";
 	fts = get_fts_string (search_terms, use_or_operator);
 
 	if (fts) {
@@ -1079,7 +1079,7 @@ get_all_by_search (TrackerSparqlConnection *connection,
 		return FALSE;
 	}
 
-	show_all_str = show_all ? "" : "?s nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?s nie:isStoredAs/nie:dataSource/tracker:available true . ";
 
 	if (details) {
 		query = g_strdup_printf ("SELECT tracker:coalesce (nie:isStoredAs (?s), ?s) nie:mimeType (?s) ?type fts:snippet(?s, \"%s\", \"%s\") "
