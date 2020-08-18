@@ -10,7 +10,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker tracker-0.12\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-05-26 16:45+0000\n"
+"POT-Creation-Date: 2020-08-16 10:07+0000\n"
 "PO-Revision-Date: 2020-06-10 18:45+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
@@ -29,10 +29,18 @@ msgid "Maximum number of UTF-8 bytes to extract."
 msgstr "展開する UTF-8 のバイト数 (最大値) です。"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:30
-msgid "Wait for FS miner to be done before extracting"
+msgid "Text file allowlist"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+msgid "Filename patterns for plain text documents that should be indexed"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:37
+msgid "Wait for FS miner to be done before extracting"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
 "crawling before extracting meta-data. This option is useful on constrained "
@@ -192,11 +200,20 @@ msgstr ""
 msgid "Directories to index recursively"
 msgstr "再帰的にインデックス化するディレクトリ"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:100
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+#, fuzzy
+#| msgid ""
+#| "List of directories to index recursively, Special values include: "
+#| "&DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
+#| "&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
+#| "user-dirs.default"
 msgid ""
-"List of directories to index recursively, Special values include: &DESKTOP, "
-"&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "子も同時にインデックス化するディレクトリを要素とするリストです (ここで指定で"
 "きる特殊なディレクトリ: &DESKTOP、&DOCUMENTS、&DOWNLOAD、&MUSIC、&PICTURES、"
@@ -205,16 +222,24 @@ msgstr ""
 "詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
 "してください。"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:111
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
 msgstr "再帰的にインデックス化しないディレクトリ"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:112
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+#, fuzzy
+#| msgid ""
+#| "List of directories to index without inspecting subfolders, Special "
+#| "values include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
+#| "&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and "
+#| "$HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
-"include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-"&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
-"dirs.default"
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 "子はインデックス化しないディレクトリを要素とするリストです (ここで指定できる"
 "特殊なディレクトリ: &DESKTOP、&DOCUMENTS、&DOWNLOAD、&MUSIC、&PICTURES、"
@@ -223,38 +248,40 @@ msgstr ""
 "詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
 "してください。"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Index applications installed on the system"
 msgstr ""
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:124
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
 "If this option is enabled, the filesystem miner will look for .desktop files "
 "in the standard XDG system and user data directories."
 msgstr ""
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:132
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "インデックス化しないファイル"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
 msgstr "インデックス化しないファイルのパターンを要素とするリストです。"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:138
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
 msgstr "インデックス化しないディレクトリ"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
 msgid "List of directories to avoid"
 msgstr "インデックス化しないディレクトリのパターンを要素とするリストです。"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:144
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
 msgid "Ignored directories with content"
 msgstr "インデックス化しないディレクトリにあるファイル"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:145
-msgid "Avoid any directory containing a file blacklisted here"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+#, fuzzy
+#| msgid "Avoid any directory containing a file blacklisted here"
+msgid "Avoid any directory containing a file blocklisted here"
 msgstr "ここで指定したファイルを格納するディレクトリはインデックス化しません。"
 
 #: src/libtracker-miners-common/tracker-utils.c:90
@@ -328,121 +355,128 @@ msgid "Pause application and reason match an already existing pause request"
 msgstr ""
 "一時停止中のアプリとその理由は既に一時停止している既存の要求と一致します"
 
-#: src/miners/fs/tracker-main.c:71
+#: src/miners/fs/tracker-main.c:76
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr ""
 "起動後のスリープ時間 (単位は秒) を 0〜1000 の値で指定する (デフォルトは 15)"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:81
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "対象となるすべての場所のインデックスを生成して終了する"
 
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:85
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "FILE が設定内容に基づいて収集するのに適したものかどうかをチェックする"
 
-#: src/miners/fs/tracker-main.c:81 src/tracker-extract/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
-#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:71
-#: src/tracker/tracker-index.c:72 src/tracker/tracker-reset.c:56
+#: src/tracker/tracker-index.c:47 src/tracker/tracker-index.c:48
+#: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ファイル"
 
-#: src/miners/fs/tracker-main.c:84 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr ""
 
-#: src/miners/fs/tracker-main.c:88 src/tracker-extract/tracker-main.c:100
+#: src/miners/fs/tracker-main.c:93
+#, fuzzy
+#| msgid "Crawls and processes files on the file system"
+msgid "Avoids changes in the filesystem"
+msgstr "ファイルシステム上のファイルを追跡して情報を回収します"
+
+#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:100
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "バージョン情報を表示する"
 
-#: src/miners/fs/tracker-main.c:550
+#: src/miners/fs/tracker-main.c:586
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "現在、“%s”というデータオブジェクトは存在しています"
 
-#: src/miners/fs/tracker-main.c:551
+#: src/miners/fs/tracker-main.c:587
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "現在、“%s”というデータオブジェクトは存在していません"
 
-#: src/miners/fs/tracker-main.c:566
+#: src/miners/fs/tracker-main.c:602
 msgid "Directory is eligible to be mined (based on rules)"
 msgstr ""
 "このフォルダーは収集に適したものです (設定にあるルールに基づいています)"
 
-#: src/miners/fs/tracker-main.c:567
+#: src/miners/fs/tracker-main.c:603
 msgid "Directory is NOT eligible to be mined (based on rules)"
 msgstr ""
 "このフォルダーは収集に適したものではありません (設定にあるルールに基づいてい"
 "ません)"
 
-#: src/miners/fs/tracker-main.c:587
+#: src/miners/fs/tracker-main.c:623
 msgid "Directory is eligible to be mined (based on contents)"
 msgstr ""
 "このフォルダーは収集に適したものです (設定にある情報の内容に基づいています)"
 
-#: src/miners/fs/tracker-main.c:588
+#: src/miners/fs/tracker-main.c:624
 msgid "Directory is NOT eligible to be mined (based on contents)"
 msgstr ""
 "このフォルダーは収集に適していません (設定にある情報の内容に基づいていません)"
 
-#: src/miners/fs/tracker-main.c:635
+#: src/miners/fs/tracker-main.c:671
 msgid "Directory is eligible to be monitored (based on config)"
 msgstr "このフォルダーは監視に適したものです (設定に基づいています)"
 
-#: src/miners/fs/tracker-main.c:636
+#: src/miners/fs/tracker-main.c:672
 msgid "Directory is NOT eligible to be monitored (based on config)"
 msgstr "このフォルダーは監視に適していません (設定に基づいていません)"
 
-#: src/miners/fs/tracker-main.c:640
+#: src/miners/fs/tracker-main.c:676
 msgid "File is eligible to be monitored (based on config)"
 msgstr "このファイルは監視に適したものです (設定に基づいています)"
 
-#: src/miners/fs/tracker-main.c:641
+#: src/miners/fs/tracker-main.c:677
 msgid "File is NOT eligible to be monitored (based on config)"
 msgstr "このファイルは監視に適していません (設定に基づいていません)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:681
 msgid "File or Directory is eligible to be monitored (based on config)"
 msgstr ""
 "このファイルまたはフォルダーは監視に適したものです (設定に基づいています)"
 
-#: src/miners/fs/tracker-main.c:646
+#: src/miners/fs/tracker-main.c:682
 msgid "File or Directory is NOT eligible to be monitored (based on config)"
 msgstr ""
 "このファイルまたはフォルダーは監視に適していません (設定に基づいていません)"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:697
 msgid "File is eligible to be mined (based on rules)"
 msgstr "このファイルは収集に適したものです (設定にあるルールに基づいています)"
 
-#: src/miners/fs/tracker-main.c:662
+#: src/miners/fs/tracker-main.c:698
 msgid "File is NOT eligible to be mined (based on rules)"
 msgstr "このファイルは収集に適していません(設定にあるルールに基づいていません)"
 
-#: src/miners/fs/tracker-main.c:671
+#: src/miners/fs/tracker-main.c:707
 msgid "Would be indexed"
 msgstr "インデックスの生成"
 
-#: src/miners/fs/tracker-main.c:672 src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "Yes"
 msgstr "はい"
 
-#: src/miners/fs/tracker-main.c:672 src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:708 src/miners/fs/tracker-main.c:710
 msgid "No"
 msgstr "いいえ"
 
-#: src/miners/fs/tracker-main.c:673
+#: src/miners/fs/tracker-main.c:709
 msgid "Would be monitored"
 msgstr "メタデータの収集"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:813
+#: src/miners/fs/tracker-main.c:959
 msgid "— start the tracker indexer"
 msgstr "— Tracker 用のインデックス生成デーモン"
 
@@ -466,20 +500,18 @@ msgstr "タイトルを指定する (--add-feed も同時に指定すること)"
 msgid "— start the feeds indexer"
 msgstr "— 配信元のインデックス生成デーモン"
 
-#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-index.c:196
-#: src/tracker/tracker-search.c:1523 src/tracker/tracker-status.c:86
-#: src/tracker/tracker-status.c:362 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:176 src/tracker/tracker-search.c:1523
+#: src/tracker/tracker-status.c:86 src/tracker/tracker-status.c:362
+#: src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "Tracker への接続を確立できませんでした"
 
 #: src/miners/rss/tracker-main.c:177 src/tracker/tracker-daemon.c:454
 #: src/tracker/tracker-daemon.c:512 src/tracker/tracker-daemon.c:547
 #: src/tracker/tracker-daemon.c:616 src/tracker/tracker-daemon.c:715
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:978
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:977
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-index.c:123 src/tracker/tracker-index.c:155
-#: src/tracker/tracker-index.c:197 src/tracker/tracker-index.c:280
-#: src/tracker/tracker-index.c:337 src/tracker/tracker-process.c:80
+#: src/tracker/tracker-index.c:63 src/tracker/tracker-process.c:80
 #: src/tracker/tracker-process.c:206 src/tracker/tracker-process.c:329
 #: src/tracker/tracker-process.c:346 src/tracker/tracker-search.c:1524
 #: src/tracker/tracker-status.c:87 src/tracker/tracker-status.c:278
@@ -489,15 +521,24 @@ msgstr "Tracker への接続を確立できませんでした"
 msgid "No error given"
 msgstr "エラーはありません"
 
-#: src/miners/rss/tracker-main.c:204
+#: src/miners/rss/tracker-main.c:203
 msgid "Could not add feed"
 msgstr "配信元を追加できませんでした"
 
-#: src/tracker-extract/tracker-extract.c:666
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-control/tracker-main.c:135
+#, fuzzy
+#| msgid "— start the tracker indexer"
+msgid "— start the tracker index proxy"
+msgstr "— Tracker 用のインデックス生成デーモン"
+
+#: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
 msgstr ""
 
-#: src/tracker-extract/tracker-extract.c:728
+#: src/tracker-extract/tracker-extract.c:743
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 
@@ -511,7 +552,7 @@ msgstr ""
 "ファイルの MIME 型を指定する (このオプションを指定しない場合は自動検出を試み"
 "る)"
 
-#: src/tracker-extract/tracker-main.c:86 src/tracker/tracker-index.c:57
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
@@ -684,7 +725,7 @@ msgid "unknown time left"
 msgstr "残り時間は不明です"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:770
+#: src/tracker/tracker-daemon.c:297 src/tracker/tracker-daemon.c:769
 msgid "PAUSED"
 msgstr "PAUSED"
 
@@ -713,8 +754,8 @@ msgstr "収集デーモンを一時停止できませんでした: %s"
 msgid "Cookie is %d"
 msgstr "クッキーは %d です"
 
-#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:728
-#: src/tracker/tracker-daemon.c:842
+#: src/tracker/tracker-daemon.c:487 src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
 msgstr "[Ctrl]+C を押下すると停止します"
 
@@ -733,7 +774,7 @@ msgstr "'%s' (クッキーは %d) を再開中です"
 msgid "Could not resume miner: %s"
 msgstr "収集デーモンを再開できませんでした: %s"
 
-#: src/tracker/tracker-daemon.c:529 src/tracker/tracker-index.c:230
+#: src/tracker/tracker-daemon.c:529
 msgid "Done"
 msgstr "完了"
 
@@ -765,7 +806,7 @@ msgid "No miners are running"
 msgstr "収集デーモンは起動されていません"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:780
+#: src/tracker/tracker-daemon.c:665 src/tracker/tracker-daemon.c:779
 msgid "Miners"
 msgstr "収集デーモン"
 
@@ -785,75 +826,75 @@ msgstr "一時停止した収集デーモンはありません"
 msgid "Could not get SPARQL connection"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:726
+#: src/tracker/tracker-daemon.c:725
 msgid "Now listening for resource updates to the database"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:727
+#: src/tracker/tracker-daemon.c:726
 msgid "All nie:plainTextContent properties are omitted"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:741
+#: src/tracker/tracker-daemon.c:740
 msgid "Common statuses include"
 msgstr "共通な状態"
 
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:436
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:436
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr ""
 "収集デーモンから状態を取得できません (マネージャーを生成できませんでした): %s"
 
-#: src/tracker/tracker-daemon.c:788
+#: src/tracker/tracker-daemon.c:787
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:879
+#: src/tracker/tracker-daemon.c:878
 msgid "You can not use miner pause and resume switches together"
 msgstr "一時停止と再開のオプションを一緒に指定することはできません"
 
-#: src/tracker/tracker-daemon.c:885
+#: src/tracker/tracker-daemon.c:884
 msgid "You must provide the miner for pause or resume commands"
 msgstr "一時停止または再開する収集デーモンを指定してください"
 
-#: src/tracker/tracker-daemon.c:891
+#: src/tracker/tracker-daemon.c:890
 msgid "You must provide a pause or resume command for the miner"
 msgstr "収集デーモンに対して一時停止または再開のオプションを指定してください"
 
-#: src/tracker/tracker-daemon.c:925
+#: src/tracker/tracker-daemon.c:924
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "--kill オプションと一緒に --terminate オプションは指定できません"
 
-#: src/tracker/tracker-daemon.c:936 src/tracker/tracker-process.c:303
+#: src/tracker/tracker-daemon.c:935 src/tracker/tracker-process.c:303
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
 msgstr[0] ""
 
-#: src/tracker/tracker-daemon.c:946
+#: src/tracker/tracker-daemon.c:945
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "“%2$s”プロセス (PID:%1$d) が起動中です"
 
-#: src/tracker/tracker-daemon.c:972
+#: src/tracker/tracker-daemon.c:971
 msgid "Starting miners…"
 msgstr "収集デーモンの起動中…"
 
-#: src/tracker/tracker-daemon.c:977
+#: src/tracker/tracker-daemon.c:976
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "収集デーモンを起動できません (マネージャーを生成できませんでした): %s"
 
-#: src/tracker/tracker-daemon.c:1002
+#: src/tracker/tracker-daemon.c:1001
 msgid "perhaps a disabled plugin?"
 msgstr "プラグインが無効になっているかも？"
 
-#: src/tracker/tracker-daemon.c:1052
+#: src/tracker/tracker-daemon.c:1051
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:1057 src/tracker/tracker-extract.c:124
-#: src/tracker/tracker-index.c:426 src/tracker/tracker-reset.c:263
+#: src/tracker/tracker-daemon.c:1056 src/tracker/tracker-extract.c:124
+#: src/tracker/tracker-index.c:117 src/tracker/tracker-reset.c:262
 #: src/tracker/tracker-search.c:1727 src/tracker/tracker-status.c:569
 #: src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -871,97 +912,26 @@ msgstr ""
 msgid "Could not run tracker-extract: "
 msgstr ""
 
-#: src/tracker/tracker-index.c:56
-msgid ""
-"Tell miners to reindex files which match the mime type supplied (for new "
-"extractors), use -m MIME1 -m MIME2"
+#: src/tracker/tracker-index.c:44
+msgid "Does nothing, provided for compatibility with Tracker 2.0"
 msgstr ""
-"MIME 型を持つファイルのインデックスを再生成する (-m MIME1 -m MIME2 で複数指定"
-"可)"
-
-#: src/tracker/tracker-index.c:59
-msgid "Tell miners to (re)index a given file"
-msgstr "指定したファイルのインデックスを再生成する"
 
 #: src/tracker/tracker-index.c:62
-msgid "Backup current index / database to the file provided"
-msgstr ""
-
-#: src/tracker/tracker-index.c:65
-msgid "Restore a database from a previous backup (see --backup)"
-msgstr ""
-
-#: src/tracker/tracker-index.c:68
-msgid "Import a dataset from the provided file (in Turtle format)"
-msgstr ""
-
-#: src/tracker/tracker-index.c:122
-#, c-format
-msgid "Could not reindex mimetypes, manager could not be created, %s"
-msgstr ""
-"MIME 型のインデックスを生成できません (マネージャーを生成できませんでした): "
-"%s"
-
-#: src/tracker/tracker-index.c:132
-msgid "Could not reindex mimetypes"
-msgstr "MIME 型のインデックスを生成できませんでした"
-
-#: src/tracker/tracker-index.c:138
-msgid "Reindexing mime types was successful"
-msgstr "MIME 型のインデックスを再生成しました"
-
-#: src/tracker/tracker-index.c:154
 #, c-format
 msgid "Could not (re)index file, manager could not be created, %s"
 msgstr ""
 "インデックスを (再) 生成できません (マネージャーを生成できませんでした): %s"
 
-#: src/tracker/tracker-index.c:169
+#: src/tracker/tracker-index.c:77
 msgid "Could not (re)index file"
 msgstr "インデックスを再生成できませんでした"
 
-#: src/tracker/tracker-index.c:175
+#: src/tracker/tracker-index.c:83
 msgid "(Re)indexing file was successful"
 msgstr "インデックスの再生成が完了しました"
 
-#: src/tracker/tracker-index.c:208
-msgid "Importing Turtle file"
-msgstr "Turtle 形式のファイルのインポート中"
-
-#: src/tracker/tracker-index.c:223
-msgid "Unable to import Turtle file"
-msgstr "Turtle 形式のファイルをインポートできませんでした"
-
-#: src/tracker/tracker-index.c:259
-msgid "Backing up database"
-msgstr "データベースのバックアップ中"
-
-#: src/tracker/tracker-index.c:279 src/tracker/tracker-index.c:336
-msgid "Could not backup database"
-msgstr ""
-
-#: src/tracker/tracker-index.c:316
-msgid "Restoring database from backup"
-msgstr "データベースのリストア中"
-
-#: src/tracker/tracker-index.c:451
-msgid ""
-"Only one action (--backup, --restore, --index-file or --import) can be used "
-"at a time"
-msgstr ""
-
-#: src/tracker/tracker-index.c:453
-msgid "Missing one or more files which are required"
-msgstr ""
-
-#: src/tracker/tracker-index.c:455
-msgid "Only one file can be used with --backup and --restore"
-msgstr ""
-
-#: src/tracker/tracker-index.c:457
-msgid ""
-"Actions (--backup, --restore, --index-file and --import) can not be used "
-"with --reindex-mime-type"
+#: src/tracker/tracker-index.c:126
+msgid "Please specify one or more locations to index."
 msgstr ""
 
 #: src/tracker/tracker-process.c:79
@@ -1015,7 +985,7 @@ msgstr ""
 msgid "Deleting…"
 msgstr "削除中…"
 
-#: src/tracker/tracker-reset.c:116
+#: src/tracker/tracker-reset.c:115
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
@@ -1547,6 +1517,39 @@ msgstr "30秒後に終了する機能を無効にする"
 msgid "— start the tracker writeback service"
 msgstr "— Tracker のライトバックサービスを起動する"
 
+#~ msgid ""
+#~ "Tell miners to reindex files which match the mime type supplied (for new "
+#~ "extractors), use -m MIME1 -m MIME2"
+#~ msgstr ""
+#~ "MIME 型を持つファイルのインデックスを再生成する (-m MIME1 -m MIME2 で複数"
+#~ "指定可)"
+
+#~ msgid "Tell miners to (re)index a given file"
+#~ msgstr "指定したファイルのインデックスを再生成する"
+
+#~ msgid "Could not reindex mimetypes, manager could not be created, %s"
+#~ msgstr ""
+#~ "MIME 型のインデックスを生成できません (マネージャーを生成できませんでし"
+#~ "た): %s"
+
+#~ msgid "Could not reindex mimetypes"
+#~ msgstr "MIME 型のインデックスを生成できませんでした"
+
+#~ msgid "Reindexing mime types was successful"
+#~ msgstr "MIME 型のインデックスを再生成しました"
+
+#~ msgid "Importing Turtle file"
+#~ msgstr "Turtle 形式のファイルのインポート中"
+
+#~ msgid "Unable to import Turtle file"
+#~ msgstr "Turtle 形式のファイルをインポートできませんでした"
+
+#~ msgid "Backing up database"
+#~ msgstr "データベースのバックアップ中"
+
+#~ msgid "Restoring database from backup"
+#~ msgstr "データベースのリストア中"
+
 #~ msgid "Log verbosity"
 #~ msgstr "冗長にするログの種類"
 
@@ -1582,9 +1585,6 @@ msgstr "— Tracker のライトバックサービスを起動する"
 
 #~ msgid "Tracker File System Miner"
 #~ msgstr "Tracker ファイルシステム採集器"
-
-#~ msgid "Crawls and processes files on the file system"
-#~ msgstr "ファイルシステム上のファイルを追跡して情報を回収します"
 
 #~ msgid "RSS/ATOM Feeds"
 #~ msgstr "RSS/ATOM 配信元"
@@ -2561,7 +2561,6 @@ msgstr "— Tracker のライトバックサービスを起動する"
 
 #~ msgid "Processes images and albums on Flickr"
 #~ msgstr "Flickr にある画像やアルバムを処理します"
-
 
 #~ msgid "Tag one or more files"
 #~ msgstr "１個以上のファイルにタグを付与します"
