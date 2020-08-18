@@ -8,19 +8,18 @@ tracker-index - Index content using the Tracker filesystem miner
 == SYNOPSIS
 
 ....
-tracker index <path> [[path] ...]
+tracker index
+tracker index --add [--recursive] <dir> [[dir] ...]
+tracker index --remove <path> [[dir] ...]
 ....
 
 == DESCRIPTION
 
 This command causes the Tracker filesystem miner to process the given
-files or directories.
+directories. These changes are persistent across future restarts.
 
-Usually you should configure the miner to automatically index your
-content, because it will monitor the content locations for changes and
-ensure that the index is kept up to date. Content that is added using
-`tracker index` will not be monitored for changes by default, so you can
-end up with stale data in your search results if you use this command.
+If invoked without arguments, the currently indexed locations will be
+listed.
 
 == SEE ALSO
 
