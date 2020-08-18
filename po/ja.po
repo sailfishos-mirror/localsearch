@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: tracker tracker-0.12\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2020-08-16 10:07+0000\n"
-"PO-Revision-Date: 2020-06-10 18:45+0900\n"
+"PO-Revision-Date: 2020-08-18 18:40+0900\n"
 "Last-Translator: sicklylife <translation@sicklylife.jp>\n"
 "Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
 "Language: ja\n"
@@ -203,12 +203,6 @@ msgstr "再帰的にインデックス化するディレクトリ"
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
-#, fuzzy
-#| msgid ""
-#| "List of directories to index recursively, Special values include: "
-#| "&DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, "
-#| "&TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
-#| "user-dirs.default"
 msgid ""
 "List of directories to index recursively, Special values include: "
 "‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -216,8 +210,9 @@ msgid ""
 "and $HOME/.config/user-dirs.default"
 msgstr ""
 "子も同時にインデックス化するディレクトリを要素とするリストです (ここで指定で"
-"きる特殊なディレクトリ: &DESKTOP、&DOCUMENTS、&DOWNLOAD、&MUSIC、&PICTURES、"
-"&PUBLIC_SHARE、&TEMPLATES、&VIDEOS)。\n"
+"きる特殊なディレクトリ: ‘&DESKTOP’、‘&DOCUMENTS’、‘&DOWNLOAD’、"
+"‘&MUSIC’、‘&PICTURES’、‘&PUBLIC_SHARE’、‘&TEMPLATES’、‘&VIDEOS’)。"
+"\n"
 "\n"
 "詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
 "してください。"
@@ -229,12 +224,6 @@ msgstr "再帰的にインデックス化しないディレクトリ"
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
-#, fuzzy
-#| msgid ""
-#| "List of directories to index without inspecting subfolders, Special "
-#| "values include: &DESKTOP, &DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, "
-#| "&PUBLIC_SHARE, &TEMPLATES, &VIDEOS. See /etc/xdg/user-dirs.defaults and "
-#| "$HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -242,8 +231,8 @@ msgid ""
 "and $HOME/.config/user-dirs.default"
 msgstr ""
 "子はインデックス化しないディレクトリを要素とするリストです (ここで指定できる"
-"特殊なディレクトリ: &DESKTOP、&DOCUMENTS、&DOWNLOAD、&MUSIC、&PICTURES、"
-"&PUBLIC_SHARE、&TEMPLATES、&VIDEOS)。\n"
+"特殊なディレクトリ: ‘&DESKTOP’、‘&DOCUMENTS’、‘&DOWNLOAD’、‘&MUSIC’"
+"、‘&PICTURES’、‘&PUBLIC_SHARE’、‘&TEMPLATES’、‘&VIDEOS’)。\n"
 "\n"
 "詳細は /etc/xdg/user-dirs.defaults や $HOME/.config/user-dirs.default を参照"
 "してください。"
@@ -279,8 +268,6 @@ msgid "Ignored directories with content"
 msgstr "インデックス化しないディレクトリにあるファイル"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
-#, fuzzy
-#| msgid "Avoid any directory containing a file blacklisted here"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "ここで指定したファイルを格納するディレクトリはインデックス化しません。"
 
@@ -381,10 +368,8 @@ msgid "Runs for a specific domain ontology"
 msgstr ""
 
 #: src/miners/fs/tracker-main.c:93
-#, fuzzy
-#| msgid "Crawls and processes files on the file system"
 msgid "Avoids changes in the filesystem"
-msgstr "ファイルシステム上のファイルを追跡して情報を回収します"
+msgstr ""
 
 #: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:100
@@ -529,10 +514,8 @@ msgstr "配信元を追加できませんでした"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-control/tracker-main.c:135
-#, fuzzy
-#| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
-msgstr "— Tracker 用のインデックス生成デーモン"
+msgstr ""
 
 #: src/tracker-extract/tracker-extract.c:681
 msgid "Metadata extraction failed"
@@ -636,10 +619,8 @@ msgid ""
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:119
-#, fuzzy
-#| msgid "List common statuses for miners and the store"
 msgid "List common statuses for miners"
-msgstr "収集および保存デーモンに共通な状態を一覧表示する"
+msgstr "収集デーモンの状態を一覧表示する"
 
 #: src/tracker/tracker-daemon.c:124
 msgid "Pause a miner (you must use this with --miner)"
@@ -1195,7 +1176,7 @@ msgstr "ソフトウェアのカテゴリ"
 
 #: src/tracker/tracker-search.c:1445
 msgid "No results were found matching your query"
-msgstr "検索条件を満足する結果はありませんでした"
+msgstr "検索条件に一致するものは見つかりませんでした"
 
 #: src/tracker/tracker-search.c:1449
 msgid "Results"
@@ -1281,18 +1262,14 @@ msgid "Data Statistics"
 msgstr "データの統計情報"
 
 #: src/tracker/tracker-status.c:277
-#, fuzzy
-#| msgid "No statistics available"
 msgid "No connection available"
-msgstr "統計情報は無効です"
+msgstr ""
 
 #: src/tracker/tracker-status.c:287
 msgid "Could not get statistics"
 msgstr "統計情報を取得できませんでした"
 
 #: src/tracker/tracker-status.c:293
-#, fuzzy
-#| msgid "No statistics available"
 msgid "No statistics were available"
 msgstr "統計情報は無効です"
 
@@ -1400,16 +1377,12 @@ msgid "No files have been tagged"
 msgstr ""
 
 #: src/tracker/tracker-tag.c:424
-#, fuzzy
-#| msgid "Could not get files related to tag"
 msgid "Could not get files for matching tags"
-msgstr "タグに関連づけられたファイルを取得できませんでした"
+msgstr "タグが一致するファイルを取得できませんでした"
 
 #: src/tracker/tracker-tag.c:433
-#, fuzzy
-#| msgid "No results were found matching your query"
 msgid "No files were found matching ALL of those tags"
-msgstr "検索条件を満足する結果はありませんでした"
+msgstr "すべてのタグに一致するファイルは見つかりませんでした"
 
 #: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:927
 msgid "Could not get all tags"
@@ -1484,12 +1457,9 @@ msgid "The --list option is required for --show-files"
 msgstr "--show-files オプションには --list オプションが必要です"
 
 #: src/tracker/tracker-tag.c:1095
-#, fuzzy
-#| msgid "The --description option can only be used with --add"
 msgid ""
-"The --and-operator option can only be used with --list and tag label "
-"arguments"
-msgstr "--description オプションは --add オプションとのみ指定できます"
+"The --and-operator option can only be used with --list and tag label arguments"
+msgstr ""
 
 #: src/tracker/tracker-tag.c:1097
 msgid "Add and delete actions can not be used together"
