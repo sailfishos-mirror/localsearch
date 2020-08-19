@@ -91,16 +91,18 @@ setup_connection_and_endpoint (TrackerDomainOntology    *domain,
                                TrackerEndpointDBus     **endpoint,
                                GError                  **error)
 {
-	GFile *cache, *store;
+	GFile *cache, *store, *ontology;
 
 	cache = tracker_domain_ontology_get_cache (domain);
 	store = g_file_get_child (cache, "rss");
+	ontology = tracker_sparql_get_ontology_nepomuk ();
 	*sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
 	                                              store,
-	                                              NULL,
+	                                              ontology,
 	                                              NULL,
 	                                              error);
 	g_object_unref (store);
+	g_object_unref (ontology);
 
 	if (!*sparql_conn)
 		return FALSE;

@@ -30,7 +30,6 @@ namespace Tracker {
 	public abstract class DecoratorFS : Tracker.Decorator, GLib.Initable {
 		[CCode (has_construct_function = false)]
 		protected DecoratorFS ();
-		public int prepend_file (GLib.File file);
 	}
 	[CCode (cheader_filename = "libtracker-miner/tracker-miner.h", ref_function = "tracker_decorator_info_ref", type_id = "tracker_decorator_info_get_type ()", unref_function = "tracker_decorator_info_unref")]
 	[Compact]

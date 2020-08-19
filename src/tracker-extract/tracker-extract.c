@@ -89,7 +89,6 @@ typedef struct {
 	TrackerExtractMetadataFunc func;
 	GModule *module;
 
-	guint signal_id;
 	guint timeout_id;
 	guint success : 1;
 } TrackerExtractTask;
@@ -324,29 +323,6 @@ get_file_metadata (TrackerExtractTask  *task,
 	return task->success;
 }
 
-/* This function is called on the thread calling g_cancellable_cancel() */
-static void
-task_cancellable_cancelled_cb (GCancellable       *cancellable,
-                               TrackerExtractTask *task)
-{
-	TrackerExtractPrivate *priv;
-	TrackerExtract *extract;
-
-	extract = task->extract;
-	priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
-
-	g_mutex_lock (&priv->task_mutex);
-
-	if (g_list_find (priv->running_tasks, task)) {
-		g_message ("Cancelled task for '%s' was currently being "
-		           "processed, _exit()ing immediately",
-		           task->file);
-		_exit (0);
-	}
-
-	g_mutex_unlock (&priv->task_mutex);
-}
-
 static gboolean
 task_deadline_cb (gpointer user_data)
 {
@@ -355,9 +331,7 @@ task_deadline_cb (gpointer user_data)
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
 
-	if (task->cancellable)
-		g_cancellable_cancel (task->cancellable);
-	_exit (0);
+	_exit (EXIT_FAILURE);
 }
 
 static TrackerExtractTask *
@@ -414,22 +388,12 @@ extract_task_new (TrackerExtract *extract,
 			g_source_attach (source, g_task_get_context (G_TASK (task->res)));
 	}
 
-	if (task->cancellable) {
-		task->signal_id = g_cancellable_connect (cancellable,
-		                                         G_CALLBACK (task_cancellable_cancelled_cb),
-		                                         task, NULL);
-	}
-
 	return task;
 }
 
 static void
 extract_task_free (TrackerExtractTask *task)
 {
-	if (task->cancellable && task->signal_id != 0) {
-		g_cancellable_disconnect (task->cancellable, task->signal_id);
-	}
-
 	notify_task_finish (task, task->success);
 
 	if (task->timeout_id)

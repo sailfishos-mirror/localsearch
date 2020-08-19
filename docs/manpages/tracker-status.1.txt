@@ -9,20 +9,21 @@ tracker-status - Provide status and statistics on the data indexed
 
 ....
 tracker status
+tracker status [[expression1]...]
 tracker status --stat [-a] [[expression1]...]
-tracker status --collect-debug-info
 ....
 
 == DESCRIPTION
 
-Display the status of the current index and data set.
+Display the status of the current index and data set. A summary of
+recorded failures during file metadata indexing is also displayed.
+
+Providing a search expression will list the full details of the
+recorded failures matching the filename.
 
 With the *--stat* option, displays statistics about the RDF classes and
 how many of each exist for data set that has been indexed. For example,
 "10 Folders".
-
-This command also provides a way to collect information for debug
-purposes using the *--collect-debug-info* option.
 
 == OPTIONS
 
@@ -44,17 +45,6 @@ possible classes matching _expression_, see *tracker sparql -c*.
 
 This option is implied if search terms are provided to filter ALL
 possible statistics.
-
-*--collect-debug-info*::
-  Useful when debugging problems to diagnose the state of Tracker on
-  your system. The data is output to stdout. Useful if bugs are filed
-  against the project itself.
-
-Data collected includes Tracker version in use, disk space available,
-size of the databases on the disk, the configuration in use, states of
-the index (e.g. last filesystem crawl, data set locale, etc.) and
-finally statistics about the data in the database (e.g. how many
-"nfo:FileDataObject" resources exist).
 
 == SEE ALSO
 

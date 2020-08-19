@@ -32,4 +32,7 @@
 #define CRIT_BEGIN "\033[1;31m" /* Red */
 #define CRIT_END   "\033[0m"
 
+#define BOLD_BEGIN "\033[0;1;39m"
+#define BOLD_END   "\033[0m"
+
 #endif /* __TRACKER_COLOR_H__ */

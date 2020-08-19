@@ -21,7 +21,7 @@
 
 #include <string.h>
 
-#include <libtracker-miners-common/tracker-debug.h>
+#include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-decorator.h"
 #include "tracker-priority-queue.h"
@@ -60,7 +60,7 @@ struct _TrackerDecoratorInfo {
 
 struct _SparqlUpdate {
 	gchar *sparql;
-	gint id;
+	gchar *url;
 };
 
 struct _TrackerDecoratorPrivate {
@@ -74,10 +74,6 @@ struct _TrackerDecoratorPrivate {
 	GQueue item_cache; /* Queue of TrackerDecoratorInfo */
 
 	GStrv priority_graphs;
-
-	/* Arrays of tracker IDs */
-	GArray *prepended_ids;
-	GSequence *blocklist_items;
 
 	GHashTable *tasks; /* Associative array of GTasks */
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
@@ -208,46 +204,6 @@ G_DEFINE_BOXED_TYPE (TrackerDecoratorInfo,
                      tracker_decorator_info_ref,
                      tracker_decorator_info_unref)
 
-static gint
-sequence_compare_func (gconstpointer data1,
-                       gconstpointer data2,
-                       gpointer      user_data)
-{
-	return GPOINTER_TO_INT (data1) - GPOINTER_TO_INT (data2);
-}
-
-static void
-decorator_blocklist_add (TrackerDecorator *decorator,
-                         gint              id)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GSequenceIter *iter;
-
-	iter = g_sequence_search (priv->blocklist_items,
-	                          GINT_TO_POINTER (id),
-	                          sequence_compare_func,
-	                          NULL);
-
-	if (g_sequence_iter_is_end (iter) ||
-	    g_sequence_get (g_sequence_iter_prev (iter)) != GINT_TO_POINTER (id))
-		g_sequence_insert_before (iter, GINT_TO_POINTER (id));
-}
-
-static void
-decorator_blocklist_remove (TrackerDecorator *decorator,
-                            gint              id)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GSequenceIter *iter;
-
-	iter = g_sequence_lookup (priv->blocklist_items,
-	                          GINT_TO_POINTER (id),
-	                          sequence_compare_func,
-	                          NULL);
-	if (iter)
-		g_sequence_remove (iter);
-}
-
 static void
 decorator_update_state (TrackerDecorator *decorator,
                         const gchar      *message,
@@ -286,49 +242,50 @@ decorator_update_state (TrackerDecorator *decorator,
 }
 
 static void
-item_warn (TrackerSparqlConnection *conn,
-           gint                     id,
-           const gchar             *sparql,
-           const GError            *error)
+retry_synchronously (TrackerDecorator *decorator,
+                     GArray           *commit_buffer)
 {
-	TrackerSparqlCursor *cursor;
-	const gchar *elem;
-	gchar *query;
+	TrackerSparqlConnection *sparql_conn;
+	guint i;
 
-	query = g_strdup_printf ("SELECT COALESCE (nie:url (?u), ?u) {"
-	                         "  ?u a rdfs:Resource. "
-	                         "  FILTER (tracker:id (?u) = %d)"
-	                         "}", id);
+	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
 
-	cursor = tracker_sparql_connection_query (conn, query, NULL, NULL);
-	g_free (query);
+	for (i = 0; i < commit_buffer->len; i++) {
+		SparqlUpdate *update;
+		GError *error = NULL;
 
-	g_debug ("--8<------------------------------");
-	g_debug ("The information relevant for a bug report is between "
-	         "the dotted lines");
+		update = &g_array_index (commit_buffer, SparqlUpdate, i);
+		tracker_sparql_connection_update (sparql_conn,
+		                                  update->sparql,
+		                                  NULL,
+		                                  &error);
 
-	if (cursor &&
-	    tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		elem = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		g_warning ("Could not insert metadata for item \"%s\": %s",
-		           elem, error->message);
-	} else {
-		g_warning ("Could not insert metadata for item with ID %d: %s",
-		           id, error->message);
+		if (error) {
+			GFile *file = g_file_new_for_uri (update->url);
+
+			tracker_error_report (file, error->message, update->sparql);
+			g_error_free (error);
+			g_object_unref (file);
+		}
 	}
+}
 
-	g_warning ("If the error above is recurrent for the same item/ID, "
-	           "consider running \"%s\" in the terminal with the "
-	           "G_MESSAGES_DEBUG=Tracker environment variable, and filing a "
-	           "bug with the additional information", g_get_prgname ());
+static void
+tag_success (TrackerDecorator *decorator,
+             GArray           *commit_buffer)
+{
+	guint i;
 
-	g_debug ("Sparql was:\n%s", sparql);
-	g_debug ("NOTE: The information above may contain data you "
-	         "consider sensitive. Feel free to edit it out, but please "
-	         "keep it as unmodified as you possibly can.");
-	g_debug ("------------------------------>8--");
+	for (i = 0; i < commit_buffer->len; i++) {
+		SparqlUpdate *update;
+		GFile *file;
 
-	g_clear_object (&cursor);
+		update = &g_array_index (commit_buffer, SparqlUpdate, i);
+
+		file = g_file_new_for_uri (update->url);
+		tracker_error_report_delete (file);
+		g_object_unref (file);
+	}
 }
 
 static void
@@ -339,8 +296,6 @@ decorator_commit_cb (GObject      *object,
 	TrackerSparqlConnection *conn;
 	TrackerDecoratorPrivate *priv;
 	TrackerDecorator *decorator;
-	GError *error = NULL;
-	guint i;
 
 	decorator = user_data;
 	priv = decorator->priv;
@@ -348,16 +303,11 @@ decorator_commit_cb (GObject      *object,
 
 	priv->n_updates--;
 
-	if (!tracker_sparql_connection_update_array_finish (conn, result, &error)) {
-		g_warning ("There was an error pushing metadata: %s\n", error->message);
-
-		for (i = 0; i < priv->commit_buffer->len; i++) {
-			SparqlUpdate *update;
-
-			update = &g_array_index (priv->commit_buffer, SparqlUpdate, i);
-			decorator_blocklist_add (decorator, update->id);
-			item_warn (conn, update->id, update->sparql, error);
-		}
+	if (!tracker_sparql_connection_update_array_finish (conn, result, NULL)) {
+		g_debug ("SPARQL error detected in batch, retrying one by one");
+		retry_synchronously (decorator, priv->commit_buffer);
+	} else {
+		tag_success (decorator, priv->commit_buffer);
 	}
 
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
@@ -369,6 +319,7 @@ decorator_commit_cb (GObject      *object,
 static void
 sparql_update_clear (SparqlUpdate *update)
 {
+	g_free (update->url);
 	g_free (update->sparql);
 }
 
@@ -524,9 +475,6 @@ decorator_task_done (GObject      *object,
 	sparql = g_task_propagate_pointer (G_TASK (result), &error);
 
 	if (!sparql) {
-		/* Blocklist item */
-		decorator_blocklist_add (decorator, info->id);
-
 		if (error) {
 			g_warning ("Task for '%s' finished with error: %s\n",
 			           info->url, error->message);
@@ -537,7 +485,7 @@ decorator_task_done (GObject      *object,
 
 		/* Add resulting sparql to buffer and check whether flushing */
 		update.sparql = sparql;
-		update.id = info->id;
+		update.url = g_strdup (info->url);
 
 		if (!priv->sparql_buffer)
 			priv->sparql_buffer = sparql_buffer_new ();
@@ -930,7 +878,6 @@ notifier_events_cb (TrackerDecorator *decorator,
 			break;
 		case TRACKER_NOTIFIER_EVENT_DELETE:
 			decorator_item_cache_remove (decorator, id);
-			decorator_blocklist_remove (decorator, id);
 			break;
 		}
 	}
@@ -1002,10 +949,8 @@ tracker_decorator_finalize (GObject *object)
 
 	g_strfreev (priv->class_names);
 	g_hash_table_destroy (priv->tasks);
-	g_array_unref (priv->prepended_ids);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
-	g_sequence_free (priv->blocklist_items);
 	g_timer_destroy (priv->timer);
 
 	G_OBJECT_CLASS (tracker_decorator_parent_class)->finalize (object);
@@ -1132,8 +1077,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	TrackerDecoratorPrivate *priv;
 
 	decorator->priv = priv = tracker_decorator_get_instance_private (decorator);
-	priv->blocklist_items = g_sequence_new (NULL);
-	priv->prepended_ids = g_array_new (FALSE, FALSE, sizeof (gint));
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
@@ -1188,69 +1131,6 @@ tracker_decorator_get_n_items (TrackerDecorator *decorator)
 	priv = decorator->priv;
 
 	return priv->n_remaining_items;
-}
-
-/**
- * tracker_decorator_prepend_id:
- * @decorator: a #TrackerDecorator.
- * @id: the ID of the resource ID.
- * @class_name_id: the ID of the resource's class.
- *
- * Adds resource needing extended metadata extraction to the queue.
- * @id is the same IDs emitted by tracker-store when the database is updated for
- * consistency. For details, see the GraphUpdated signal.
- *
- * Since: 0.18
- **/
-void
-tracker_decorator_prepend_id (TrackerDecorator *decorator,
-                              gint              id,
-                              gint              class_name_id)
-{
-	TrackerDecoratorPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_DECORATOR (decorator));
-
-	priv = decorator->priv;
-	g_array_append_val (priv->prepended_ids, id);
-
-	/* The resource was explicitly requested, remove it from blocklists */
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Removing id %i from blocklist", id));
-	decorator_blocklist_remove (decorator, id);
-}
-
-/**
- * tracker_decorator_delete_id:
- * @decorator: a #TrackerDecorator.
- * @id: an ID.
- *
- * Deletes resource needing extended metadata extraction from the
- * queue. @id is the same IDs emitted by tracker-store when the database is
- * updated for consistency. For details, see the GraphUpdated signal.
- *
- * Since: 0.18
- **/
-void
-tracker_decorator_delete_id (TrackerDecorator *decorator,
-                             gint              id)
-{
-	TrackerDecoratorPrivate *priv;
-	guint i;
-
-	g_return_if_fail (TRACKER_IS_DECORATOR (decorator));
-
-	priv = decorator->priv;
-
-	for (i = 0; i < priv->prepended_ids->len; i++) {
-		if (id == g_array_index (priv->prepended_ids, gint, i)) {
-			g_array_remove_index (priv->prepended_ids, i);
-			break;
-		}
-	}
-
-	/* Blocklist the item so it's not processed in the future */
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Added id %i to blocklist", id));
-	decorator_blocklist_add (decorator, id);
 }
 
 /**

@@ -32,59 +32,240 @@
 #include <locale.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-miners-common/tracker-common.h>
 
+#include "tracker-color.h"
 #include "tracker-dbus.h"
-#include "tracker-miner-manager.h"
 
-static gboolean file_arg;
+static gboolean opt_add;
+static gboolean opt_remove;
+static gboolean opt_recursive;
 static gchar **filenames;
 
+#define INDEX_OPTIONS_ENABLED()	  \
+	(opt_add || opt_remove || opt_recursive)
+
 static GOptionEntry entries[] = {
-	{ "file", 'f', 0, G_OPTION_ARG_NONE, &file_arg,
-	 N_("Does nothing, provided for compatibility with Tracker 2.0"),
-	 NULL },
+	{ "add", 'a', 0, G_OPTION_ARG_NONE, &opt_add,
+	  /* TRANSLATORS: FILE is a commandline argument, named like that */
+	  N_("Adds FILE as an indexed location"),
+	  NULL },
+	{ "remove", 'd', 0, G_OPTION_ARG_NONE, &opt_remove,
+	  /* TRANSLATORS: FILE is a commandline argument, named like that */
+	  N_("Removes FILE from indexed locations"),
+	  NULL },
+	{ "recursive", 'r', 0, G_OPTION_ARG_NONE, &opt_recursive,
+	  /* TRANSLATORS: FILE is a commandline argument, named like that */
+	  N_("Makes indexing recursive"),
+	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
 	  N_("FILE") },
 	{ NULL }
 };
 
-static gint
-index_or_reindex_file (void)
-{
-	TrackerMinerManager *manager;
-	GError *error = NULL;
-	gchar **p;
+const struct {
+	const gchar *symbol;
+	GUserDirectory user_dir;
+} special_dirs[] = {
+	{ "&DESKTOP",      G_USER_DIRECTORY_DESKTOP },
+	{ "&DOCUMENTS",    G_USER_DIRECTORY_DOCUMENTS },
+	{ "&DOWNLOAD",     G_USER_DIRECTORY_DOWNLOAD },
+	{ "&MUSIC",        G_USER_DIRECTORY_MUSIC },
+	{ "&PICTURES",     G_USER_DIRECTORY_PICTURES },
+	{ "&PUBLIC_SHARE", G_USER_DIRECTORY_PUBLIC_SHARE },
+	{ "&TEMPLATES",    G_USER_DIRECTORY_TEMPLATES },
+	{ "&VIDEOS",       G_USER_DIRECTORY_VIDEOS }
+};
 
-	/* Auto-start the miners here if we need to */
-	manager = tracker_miner_manager_new_full (TRUE, &error);
-	if (!manager) {
-		g_printerr (_("Could not (re)index file, manager could not be created, %s"),
-		            error ? error->message : _("No error given"));
-		g_printerr ("\n");
-		g_clear_error (&error);
-		return EXIT_FAILURE;
+static const gchar *
+alias_to_path (const gchar *alias)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (special_dirs); i++) {
+		if (g_strcmp0 (special_dirs[i].symbol, alias) == 0)
+			return g_get_user_special_dir (special_dirs[i].user_dir);
 	}
 
-	for (p = filenames; *p; p++) {
+	return NULL;
+}
+
+static const gchar *
+path_to_alias (const gchar *path)
+{
+	guint i;
+
+	for (i = 0; i < G_N_ELEMENTS (special_dirs); i++) {
+		if (g_strcmp0 (path,
+		               g_get_user_special_dir (special_dirs[i].user_dir)) == 0)
+			return special_dirs[i].symbol;
+	}
+
+	return NULL;
+}
+
+static const gchar *
+envvar_to_path (const gchar *envvar)
+{
+	const gchar *path;
+
+	path = g_getenv (&envvar[1]);
+	if (g_file_test (path, G_FILE_TEST_EXISTS))
+		return path;
+
+	return NULL;
+}
+
+static GStrv
+strv_add (GStrv        strv,
+          const gchar *elem)
+{
+	GArray *array;
+	gchar *str;
+
+	array = g_array_new (TRUE, TRUE, sizeof (char *));
+	g_array_append_vals (array, strv, g_strv_length (strv));
+	g_free (strv);
+
+	str = g_strdup (elem);
+	g_array_append_val (array, str);
+
+	return (GStrv) g_array_free (array, FALSE);
+}
+
+static GStrv
+strv_remove (GStrv        strv,
+             const gchar *elem)
+{
+	GArray *array;
+	guint i;
+
+	array = g_array_new (TRUE, TRUE, sizeof (char *));
+	g_array_append_vals (array, strv, g_strv_length (strv));
+
+	for (i = 0; i < array->len; i++) {
+		gchar *str = g_array_index (array, gchar *, i);
+
+		if (g_strcmp0 (str, elem) != 0)
+			continue;
+
+		g_array_remove_index (array, i);
+		g_free (str);
+	}
+
+	g_free (strv);
+
+	return (GStrv) g_array_free (array, FALSE);
+}
+
+static int
+index_add (void)
+{
+	gboolean handled = FALSE;
+	const gchar *setting_path;
+	GSettings *settings;
+	GStrv dirs;
+	guint i;
+
+	settings = g_settings_new ("org.freedesktop.Tracker3.Miner.Files");
+
+	if (opt_recursive)
+		setting_path = "index-recursive-directories";
+	else
+		setting_path = "index-single-directories";
+
+	for (i = 0; filenames[i]; i++) {
 		GFile *file;
+		gchar *path;
+		const gchar *alias;
 
-		file = g_file_new_for_commandline_arg (*p);
-		tracker_miner_manager_index_location (manager, file, NULL, TRACKER_INDEX_LOCATION_FLAGS_NONE, NULL, &error);
+		dirs = g_settings_get_strv (settings, setting_path);
 
-		if (error) {
-			g_printerr ("%s: %s\n",
-			            _("Could not (re)index file"),
-			            error->message);
-			g_error_free (error);
-			return EXIT_FAILURE;
+		file = g_file_new_for_commandline_arg (filenames[i]);
+		path = g_file_get_path (file);
+		alias = path_to_alias (path);
+
+		if (g_strv_contains ((const gchar * const *) dirs, path) ||
+		    (alias && g_strv_contains ((const gchar * const *) dirs, alias))) {
+			g_strfreev (dirs);
+			handled = TRUE;
+			continue;
 		}
 
-		g_print ("%s\n", _("(Re)indexing file was successful"));
+		if (!g_file_test (path, G_FILE_TEST_IS_DIR)) {
+			g_printerr (_("“%s” is not a directory"),
+			            path);
+			g_printerr ("\n");
+			g_strfreev (dirs);
+			continue;
+		}
+
+		handled = TRUE;
+		dirs = strv_add (dirs, path);
+		g_settings_set_strv (settings, setting_path,
+		                     (const gchar * const *) dirs);
+
 		g_object_unref (file);
+		g_strfreev (dirs);
+		g_free (path);
 	}
 
-	g_object_unref (manager);
+	g_settings_sync ();
+	g_object_unref (settings);
+
+	return handled ? EXIT_SUCCESS : EXIT_FAILURE;
+}
+
+static void
+index_remove_setting (GSettings   *settings,
+                      const gchar *setting_path,
+                      const gchar *path)
+{
+	GStrv dirs;
+	const gchar *alias;
+
+	dirs = g_settings_get_strv (settings, setting_path);
+	alias = path_to_alias (path);
+
+	if (g_strv_contains ((const gchar * const *) dirs, path))
+		dirs = strv_remove (dirs, path);
+	if (alias && g_strv_contains ((const gchar * const *) dirs, alias))
+		dirs = strv_remove (dirs, path_to_alias (path));
+
+	g_settings_set_strv (settings, setting_path,
+	                     (const gchar * const *) dirs);
+	g_strfreev (dirs);
+}
+
+static int
+index_remove (void)
+{
+	GSettings *settings;
+	guint i;
+
+	settings = g_settings_new ("org.freedesktop.Tracker3.Miner.Files");
+
+	for (i = 0; filenames[i]; i++) {
+		GFile *file;
+		gchar *path;
+
+		file = g_file_new_for_commandline_arg (filenames[i]);
+		path = g_file_get_path (file);
+
+		index_remove_setting (settings,
+		                      "index-recursive-directories",
+		                      path);
+		index_remove_setting (settings,
+		                      "index-single-directories",
+		                      path);
+
+		g_object_unref (file);
+		g_free (path);
+	}
+
+	g_settings_sync ();
+	g_object_unref (settings);
 
 	return EXIT_SUCCESS;
 }
@@ -92,7 +273,94 @@ index_or_reindex_file (void)
 static int
 index_run (void)
 {
-	return index_or_reindex_file ();
+	if (!opt_add && !opt_remove) {
+		/* TRANSLATORS: These are commandline options */
+		g_printerr ("%s\n", _("Either --add or --remove must be provided"));
+		return EXIT_FAILURE;
+	} else if (opt_add && opt_remove) {
+		/* TRANSLATORS: These are commandline options */
+		g_printerr ("%s\n", _("--add and --remove are mutually exclusive"));
+		return EXIT_FAILURE;
+	}
+
+	if (opt_add) {
+		return index_add ();
+	}
+
+	if (opt_recursive) {
+		/* TRANSLATORS: These are commandline options */
+		g_printerr ("%s\n", _("--recursive requires --add"));
+		return EXIT_FAILURE;
+	}
+
+	if (opt_remove) {
+		return index_remove ();
+	}
+
+	return EXIT_FAILURE;
+}
+
+static void
+print_list (GStrv    list,
+            gint     len,
+            gboolean recursive)
+{
+	guint i;
+
+	for (i = 0; list[i]; i++) {
+		const gchar *path;
+		gchar *str;
+
+		if (list[i][0] == '&')
+			path = alias_to_path (list[i]);
+		else if (list[i][0] == '$')
+			path = envvar_to_path (list[i]);
+		else if (list[i][0] == '/')
+			path = list[i];
+		else
+			continue;
+
+		str = tracker_term_ellipsize (path, len, TRACKER_ELLIPSIZE_START);
+		g_print ("%-*s " BOLD_BEGIN "%s" BOLD_END "\n",
+		         len, str,
+		         recursive ? "*" : "-");
+		g_free (str);
+	}
+}
+
+static int
+list_index_roots (void)
+{
+	GSettings *settings;
+	GStrv recursive, non_recursive;
+	gint cols, col_len[2];
+	gchar *col_header1, *col_header2;
+
+	settings = g_settings_new ("org.freedesktop.Tracker3.Miner.Files");
+	recursive = g_settings_get_strv (settings, "index-recursive-directories");
+	non_recursive = g_settings_get_strv (settings, "index-single-directories");
+
+	tracker_term_dimensions (&cols, NULL);
+	col_len[0] = cols * 3 / 4;
+	col_len[1] = cols / 4 - 1;
+
+	col_header1 = tracker_term_ellipsize (_("Path"), col_len[0], TRACKER_ELLIPSIZE_END);
+	col_header2 = tracker_term_ellipsize (_("Recursive"), col_len[1], TRACKER_ELLIPSIZE_END);
+
+	g_print (BOLD_BEGIN "%-*s %-*s" BOLD_END "\n",
+	         col_len[0], col_header1,
+	         col_len[1], col_header2);
+	g_free (col_header1);
+	g_free (col_header2);
+
+	print_list (recursive, col_len[0], TRUE);
+	print_list (non_recursive, col_len[0], FALSE);
+
+	g_strfreev (recursive);
+	g_strfreev (non_recursive);
+	g_object_unref (settings);
+
+	return EXIT_SUCCESS;
 }
 
 int
@@ -122,19 +390,14 @@ main (int argc, const char **argv)
 
 	g_option_context_free (context);
 
+	if (!filenames && !INDEX_OPTIONS_ENABLED ()) {
+		return list_index_roots ();
+	}
+
 	if (!filenames || g_strv_length (filenames) < 1) {
 		failed = _("Please specify one or more locations to index.");
-	} else {
-		failed = NULL;
-	}
-
-	if (failed) {
 		g_printerr ("%s\n", failed);
 		return EXIT_FAILURE;
-	}
-
-	if (file_arg) {
-		g_message ("The --file arg is no longer needed.");
 	}
 
 	return index_run ();

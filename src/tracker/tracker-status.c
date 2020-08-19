@@ -32,14 +32,19 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
 
+#include "tracker-term-utils.h"
 #include "tracker-miner-manager.h"
+#include "tracker-color.h"
+
+#define GROUP "Report"
+#define KEY_URI "Uri"
+#define KEY_MESSAGE "Message"
+#define KEY_SPARQL "Sparql"
 
 #define STATUS_OPTIONS_ENABLED()	  \
-	(show_stat || \
-	 collect_debug_info)
+	(show_stat)
 
 static gboolean show_stat;
-static gboolean collect_debug_info;
 static gchar **terms;
 
 static GOptionEntry entries[] = {
@@ -47,9 +52,6 @@ static GOptionEntry entries[] = {
 	  N_("Show statistics for current index / data set"),
 	  NULL
 	},
-	{ "collect-debug-info", 0, 0, G_OPTION_ARG_NONE, &collect_debug_info,
-	  N_("Collect debug information useful for problem reporting and investigation, results are output to terminal"),
-	  NULL },
 	{ G_OPTION_REMAINING, 0, 0,
 	  G_OPTION_ARG_STRING_ARRAY, &terms,
 	  N_("search terms"),
@@ -88,6 +90,8 @@ status_stat (void)
 		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
+
+	tracker_term_pipe_to_pager ();
 
 	cursor = statistics_query (connection, &error);
 
@@ -155,168 +159,7 @@ status_stat (void)
 		g_object_unref (cursor);
 	}
 
-	return EXIT_SUCCESS;
-}
-
-static int
-collect_debug (void)
-{
-	/* What to collect?
-	 * This is based on information usually requested from maintainers to users.
-	 *
-	 * 1. Package details, e.g. version.
-	 * 2. Disk size, space left, type (SSD/etc)
-	 * 3. Size of dataset (tracker-stats), size of databases
-	 * 4. Statistics about data (tracker-stats)
-	 */
-
-	GDir *d;
-	gchar *data_dir;
-	gchar *str;
-
-	data_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", NULL);
-
-	/* 1. Package details, e.g. version. */
-	g_print ("[Package Details]\n");
-	g_print ("%s: " PACKAGE_VERSION "\n", _("Version"));
-	g_print ("\n\n");
-
-	/* 2. Disk size, space left, type (SSD/etc) */
-	guint64 remaining_bytes;
-	gdouble remaining;
-
-	g_print ("[%s]\n", _("Disk Information"));
-
-	remaining_bytes = tracker_file_system_get_remaining_space (data_dir);
-	str = g_format_size (remaining_bytes);
-
-	remaining = tracker_file_system_get_remaining_space_percentage (data_dir);
-	g_print ("%s: %s (%3.2lf%%)\n",
-	         _("Remaining space on database partition"),
-	         str,
-	         remaining);
-	g_free (str);
-	g_print ("\n\n");
-
-	/* 3. Size of dataset (tracker-stats), size of databases */
-	g_print ("[%s]\n", _("Data Set"));
-
-	for (d = g_dir_open (data_dir, 0, NULL); d != NULL;) {
-		const gchar *f;
-		gchar *path;
-		goffset size;
-
-		f = g_dir_read_name (d);
-		if (!f) {
-			break;
-		}
-
-		if (g_str_has_suffix (f, ".txt")) {
-			continue;
-		}
-
-		path = g_build_filename (data_dir, f, NULL);
-		size = tracker_file_get_size (path);
-		str = g_format_size (size);
-
-		g_print ("%s\n%s\n\n", path, str);
-		g_free (str);
-		g_free (path);
-	}
-	g_dir_close (d);
-	g_print ("\n");
-
-	g_print ("[%s]\n", _("States"));
-
-	for (d = g_dir_open (data_dir, 0, NULL); d != NULL;) {
-		const gchar *f;
-		gchar *path;
-		gchar *content = NULL;
-
-		f = g_dir_read_name (d);
-		if (!f) {
-			break;
-		}
-
-		if (!g_str_has_suffix (f, ".txt")) {
-			continue;
-		}
-
-		path = g_build_filename (data_dir, f, NULL);
-		if (g_file_get_contents (path, &content, NULL, NULL)) {
-			/* Special case last-index.txt which is time() dump to file */
-			if (g_str_has_suffix (path, "last-crawl.txt")) {
-				guint64 then, now;
-
-				now = (guint64) time (NULL);
-				then = g_ascii_strtoull (content, NULL, 10);
-				str = tracker_seconds_to_string (now - then, FALSE);
-
-				g_print ("%s\n%s (%s)\n\n", path, content, str);
-			} else {
-				g_print ("%s\n%s\n\n", path, content);
-			}
-			g_free (content);
-		}
-		g_free (path);
-	}
-	g_dir_close (d);
-	g_print ("\n");
-
-	/* 5. Statistics about data (tracker-stats) */
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
-
-	g_print ("[%s]\n", _("Data Statistics"));
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
-	                                                NULL, NULL, &error);
-
-	if (!connection) {
-		g_print ("** %s, %s **\n",
-		         _("No connection available"),
-		         error ? error->message : _("No error given"));
-		g_clear_error (&error);
-	} else {
-		TrackerSparqlCursor *cursor;
-
-		cursor = statistics_query (connection, &error);
-
-		if (error) {
-			g_print ("** %s, %s **\n",
-			         _("Could not get statistics"),
-			         error ? error->message : _("No error given"));
-			g_error_free (error);
-		} else {
-			if (!cursor) {
-				g_print ("** %s **\n",
-				         _("No statistics were available"));
-			} else {
-				gint count = 0;
-
-				while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-					g_print ("%s: %s\n",
-					         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-					         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-					count++;
-				}
-
-				if (count == 0) {
-					g_print ("%s\n",
-					         _("Database is currently empty"));
-				}
-
-				g_object_unref (cursor);
-			}
-		}
-	}
-
-	g_object_unref (connection);
-	g_print ("\n\n");
-
-	g_print ("\n");
-
-	g_free (data_dir);
+	tracker_term_pager_close ();
 
 	return EXIT_SUCCESS;
 }
@@ -326,10 +169,6 @@ status_run (void)
 {
 	if (show_stat) {
 		return status_stat ();
-	}
-
-	if (collect_debug_info) {
-		return collect_debug ();
 	}
 
 	/* All known options have their own exit points */
@@ -367,12 +206,14 @@ get_file_and_folder_count (int *files,
 
 	if (files) {
 		const gchar query[] =
-			"\nSELECT COUNT(?file) "
-			"\nWHERE { "
-			"\n  ?file a nfo:FileDataObject ;"
-			"\n        nie:dataSource/tracker:available true ."
-			"\n  FILTER (?file != nfo:Folder) "
-			"\n}";
+			"SELECT COUNT(?file) "
+			"WHERE { "
+			"  GRAPH tracker:FileSystem {"
+			"    ?file a nfo:FileDataObject ;"
+			"          nie:dataSource/tracker:available true ."
+			"    FILTER (! EXISTS { ?file nie:interpretedAs/rdf:type nfo:Folder }) "
+			"  }"
+			"}";
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
@@ -394,11 +235,13 @@ get_file_and_folder_count (int *files,
 
 	if (folders) {
 		const gchar query[] =
-			"\nSELECT COUNT(?folders)"
-			"\nWHERE { "
-			"\n  ?folders a nfo:Folder ;"
-			"\n           nie:dataSource/tracker:available true ."
-			"\n}";
+			"SELECT COUNT(?folders)"
+			"WHERE { "
+			"  GRAPH tracker:FileSystem {"
+			"    ?folders a nfo:Folder ;"
+			"             nie:isStoredAs/nie:dataSource/tracker:available true ."
+			"  }"
+			"}";
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
@@ -473,6 +316,126 @@ are_miners_finished (gint *max_remaining_time)
 	return finished;
 }
 
+static gint
+sort_by_date (gconstpointer a,
+              gconstpointer b)
+{
+	GFileInfo *info_a = (GFileInfo *) a, *info_b = (GFileInfo *) b;
+	gint64 time_a, time_b;
+
+	time_a = g_file_info_get_attribute_uint64 (info_a, G_FILE_ATTRIBUTE_TIME_CREATED);
+	time_b = g_file_info_get_attribute_uint64 (info_b, G_FILE_ATTRIBUTE_TIME_CREATED);
+
+	if (time_a < time_b)
+		return -1;
+	else if (time_a > time_b)
+		return 1;
+	return 0;
+}
+
+static GList *
+get_error_keyfiles (void)
+{
+	GFile *file;
+	GFileEnumerator *enumerator;
+	GList *infos = NULL, *keyfiles = NULL, *l;
+	gchar *path;
+
+	path = g_build_filename (g_get_user_cache_dir (),
+	                         "tracker3",
+	                         "files",
+	                         "errors",
+	                         NULL);
+	file = g_file_new_for_path (path);
+	g_free (path);
+
+	enumerator = g_file_enumerate_children (file,
+	                                        G_FILE_ATTRIBUTE_STANDARD_NAME ","
+	                                        G_FILE_ATTRIBUTE_TIME_CHANGED,
+	                                        G_FILE_QUERY_INFO_NONE,
+	                                        NULL,
+	                                        NULL);
+	while (TRUE) {
+		GFileInfo *info;
+
+		if (!g_file_enumerator_iterate (enumerator, &info, NULL, NULL, NULL))
+			break;
+		if (!info)
+			break;
+
+		infos = g_list_prepend (infos, g_object_ref (info));
+	}
+
+	infos = g_list_sort (infos, sort_by_date);
+
+	for (l = infos; l; l = l->next) {
+		GKeyFile *keyfile;
+		GFile *child;
+
+		child = g_file_get_child (file, g_file_info_get_name (l->data));
+		path = g_file_get_path (child);
+		keyfile = g_key_file_new ();
+		g_key_file_load_from_file (keyfile,
+		                           path, 0,
+		                           NULL);
+
+		keyfiles = g_list_prepend (keyfiles, keyfile);
+		g_object_unref (child);
+	}
+
+	g_object_unref (enumerator);
+	g_list_free_full (infos, g_object_unref);
+
+	return keyfiles;
+}
+
+static gint
+print_errors (GList *keyfiles)
+{
+	gint cols, col_len[2];
+	gchar *col_header1, *col_header2;
+	GList *l;
+
+	tracker_term_dimensions (&cols, NULL);
+	col_len[0] = cols / 2;
+	col_len[1] = cols / 2 - 1;
+
+	col_header1 = tracker_term_ellipsize (_("Path"), col_len[0], TRACKER_ELLIPSIZE_END);
+	col_header2 = tracker_term_ellipsize (_("Message"), col_len[1], TRACKER_ELLIPSIZE_END);
+
+	g_print (BOLD_BEGIN "%-*s %-*s" BOLD_END "\n",
+	         col_len[0], col_header1,
+	         col_len[1], col_header2);
+	g_free (col_header1);
+	g_free (col_header2);
+
+	for (l = keyfiles; l; l = l->next) {
+		GKeyFile *keyfile = l->data;
+		gchar *uri, *message, *path, *str1, *str2;
+		GFile *file;
+
+		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+		file = g_file_new_for_uri (uri);
+		path = g_file_get_path (file);
+		message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+		g_object_unref (file);
+
+		str1 = tracker_term_ellipsize (path, col_len[0], TRACKER_ELLIPSIZE_START);
+		str2 = tracker_term_ellipsize (message, col_len[1], TRACKER_ELLIPSIZE_END);
+
+		g_print ("%-*s %-*s\n",
+		         col_len[0], str1,
+		         col_len[1], str2);
+		g_free (uri);
+		g_free (path);
+		g_free (message);
+		g_free (str1);
+		g_free (str2);
+	}
+
+	return EXIT_SUCCESS;
+}
+
 static int
 get_no_args (void)
 {
@@ -482,6 +445,9 @@ get_no_args (void)
 	gdouble remaining;
 	gint remaining_time;
 	gint files, folders;
+	GList *keyfiles;
+
+	tracker_term_pipe_to_pager ();
 
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
@@ -531,7 +497,74 @@ get_no_args (void)
 		g_print ("%s\n", _("All data miners are idle, indexing complete"));
 	}
 
-	g_print ("\n\n");
+	keyfiles = get_error_keyfiles ();
+
+	if (keyfiles) {
+		g_print (g_dngettext (NULL,
+		                      "%d recorded failure",
+		                      "%d recorded failures",
+		                      g_list_length (keyfiles)),
+		         g_list_length (keyfiles));
+
+		g_print ("\n\n");
+		print_errors (keyfiles);
+		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
+	}
+
+	tracker_term_pager_close ();
+
+	return EXIT_SUCCESS;
+}
+
+static int
+show_errors (gchar **terms)
+{
+	GList *keyfiles, *l;
+	GKeyFile *keyfile;
+	guint i;
+	gboolean found = FALSE;
+
+	tracker_term_pipe_to_pager ();
+
+	keyfiles = get_error_keyfiles ();
+
+	for (i = 0; terms[i] != NULL; i++) {
+		for (l = keyfiles; l; l = l->next) {
+			GFile *file;
+			gchar *uri, *path;
+
+			keyfile = l->data;
+			uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+			file = g_file_new_for_uri (uri);
+			path = g_file_get_path (file);
+
+			if (strstr (path, terms[i])) {
+				gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+				gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+
+				found = TRUE;
+				g_print (BOLD_BEGIN "URI:" BOLD_END " %s\n", uri);
+
+				if (message)
+					g_print (BOLD_BEGIN "%s:" BOLD_END " %s\n", _("Message"), message);
+				if (sparql)
+					g_print (BOLD_BEGIN "SPARQL:" BOLD_END " %s\n", sparql);
+				g_print ("\n");
+
+				g_free (sparql);
+				g_free (message);
+			}
+
+			g_object_unref (file);
+			g_free (uri);
+			g_free (path);
+		}
+	}
+
+	if (!found)
+		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("No reports found"));
+
+	tracker_term_pager_close ();
 
 	return EXIT_SUCCESS;
 }
@@ -577,6 +610,9 @@ main (int argc, const char **argv)
 	if (status_options_enabled ()) {
 		return status_run ();
 	}
+
+	if (terms)
+		return show_errors (terms);
 
 	return status_run_default ();
 }

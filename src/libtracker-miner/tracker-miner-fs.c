@@ -1180,15 +1180,17 @@ sparql_buffer_task_finished_cb (GObject      *object,
 
 	task = tracker_sparql_buffer_push_finish (TRACKER_SPARQL_BUFFER (object),
 	                                          result, &error);
+	task_file = tracker_task_get_file (task);
 
 	if (error) {
-		g_critical ("Could not execute sparql: %s", error->message);
+		g_warning ("Could not execute sparql: %s", error->message);
+		tracker_error_report (task_file, error->message,
+		                      tracker_sparql_task_get_sparql (task));
 		priv->total_files_notified_error++;
 		g_error_free (error);
 	}
 
-	task_file = tracker_task_get_file (task);
-
+	tracker_error_report_delete (task_file);
 	recursive = GPOINTER_TO_INT (g_object_steal_qdata (G_OBJECT (task_file),
 	                                                     priv->quark_recursive_removal));
 	tracker_file_notifier_invalidate_file_iri (priv->file_notifier, task_file, recursive);

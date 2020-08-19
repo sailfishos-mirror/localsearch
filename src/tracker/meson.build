@@ -2,6 +2,7 @@ modules = [
     'daemon',
     'extract',
     'index',
+    'info',
     'reset',
     'search',
     'status',

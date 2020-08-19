@@ -84,6 +84,7 @@ TrackerTask *        tracker_sparql_task_new_take_sparql_str (GFile             
                                                               gchar                *sparql_str);
 TrackerTask *        tracker_sparql_task_new_with_sparql_str (GFile                *file,
                                                               const gchar          *sparql_str);
+const gchar *        tracker_sparql_task_get_sparql          (TrackerTask *task);
 
 G_END_DECLS
 

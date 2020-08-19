@@ -40,6 +40,8 @@ struct _ExtractData {
 	TrackerDecorator *decorator;
 	TrackerDecoratorInfo *decorator_info;
 	GFile *file;
+	GCancellable *cancellable;
+	gulong signal_id;
 };
 
 struct _TrackerExtractDecoratorPrivate {
@@ -48,7 +50,6 @@ struct _TrackerExtractDecoratorPrivate {
 	guint n_extracting_files;
 
 	TrackerExtractPersistence *persistence;
-	GHashTable *recovery_files;
 	GDBusProxy *index_proxy;
 };
 
@@ -117,7 +118,6 @@ tracker_extract_decorator_finalize (GObject *object)
 	if (priv->timer)
 		g_timer_destroy (priv->timer);
 
-	g_hash_table_unref (priv->recovery_files);
 	g_clear_object (&priv->index_proxy);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
@@ -160,7 +160,10 @@ get_metadata_cb (TrackerExtract *extract,
 	info = tracker_extract_file_finish (extract, result, &error);
 
 	tracker_extract_persistence_remove_file (priv->persistence, data->file);
-	g_hash_table_remove (priv->recovery_files, tracker_decorator_info_get_url (data->decorator_info));
+
+	if (data->cancellable && data->signal_id != 0) {
+		g_cancellable_disconnect (data->cancellable, data->signal_id);
+	}
 
 	if (error) {
 		decorator_ignore_file (data->file, data->decorator);
@@ -208,27 +211,30 @@ get_metadata_cb (TrackerExtract *extract,
 
 	tracker_decorator_info_unref (data->decorator_info);
 	g_object_unref (data->file);
+	g_object_unref (data->cancellable);
 	g_free (data);
 }
 
-static GFile *
-decorator_get_recovery_file (TrackerExtractDecorator *decorator,
-                             TrackerDecoratorInfo    *info)
+static void
+task_cancellable_cancelled_cb (GCancellable *cancellable,
+                               ExtractData  *data)
 {
 	TrackerExtractDecoratorPrivate *priv;
-	GFile *file;
+	gchar *uri;
 
-	priv = tracker_extract_decorator_get_instance_private (decorator);
-	file = g_hash_table_lookup (priv->recovery_files,
-	                            tracker_decorator_info_get_url (info));
+	/* Delete persistence file on cancellation, we don't want to interpret
+	 * this as a failed operation.
+	 */
+	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (data->decorator));
+	tracker_extract_persistence_remove_file (priv->persistence, data->file);
+	uri = g_file_get_uri (data->file);
 
-	if (file) {
-		g_object_ref (file);
-	} else {
-		file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
-	}
+	g_message ("Cancelled task for '%s' was currently being "
+	           "processed, _exit()ing immediately",
+	           uri);
+	g_free (uri);
 
-	return file;
+	_exit (EXIT_FAILURE);
 }
 
 static void
@@ -274,12 +280,20 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	data = g_new0 (ExtractData, 1);
 	data->decorator = decorator;
 	data->decorator_info = info;
-	data->file = decorator_get_recovery_file (TRACKER_EXTRACT_DECORATOR (decorator), info);
+	data->file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
 	task = tracker_decorator_info_get_task (info);
 
 	g_message ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
 
 	tracker_extract_persistence_add_file (priv->persistence, data->file);
+
+	g_set_object (&data->cancellable, g_task_get_cancellable (task));
+
+	if (data->cancellable) {
+		data->signal_id = g_cancellable_connect (data->cancellable,
+		                                         G_CALLBACK (task_cancellable_cancelled_cb),
+		                                         data, NULL);
+	}
 
 	tracker_extract_file (priv->extractor,
 	                      tracker_decorator_info_get_url (info),
@@ -401,19 +415,6 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 }
 
 static void
-decorator_retry_file (GFile    *file,
-                      gpointer  user_data)
-{
-	TrackerExtractDecorator *decorator = user_data;
-	TrackerExtractDecoratorPrivate *priv = tracker_extract_decorator_get_instance_private (decorator);
-	gchar *path;
-
-	path = g_file_get_uri (file);
-	g_hash_table_insert (priv->recovery_files, path, g_object_ref (file));
-	tracker_decorator_fs_prepend_file (TRACKER_DECORATOR_FS (decorator), file);
-}
-
-static void
 decorator_ignore_file (GFile    *file,
                        gpointer  user_data)
 {
@@ -425,7 +426,7 @@ decorator_ignore_file (GFile    *file,
 	GFileInfo *info;
 
 	uri = g_file_get_uri (file);
-	g_message ("Extraction on file '%s' has been attempted too many times, ignoring", uri);
+	g_message ("Extraction on file '%s' failed in previous execution, ignoring", uri);
 
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
@@ -436,6 +437,8 @@ decorator_ignore_file (GFile    *file,
 		g_error_free (error);
 		return;
 	}
+
+	tracker_error_report (file, "Crash/hang handling file", NULL);
 
 	mimetype = g_file_info_get_attribute_string (info,
 	                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
@@ -463,12 +466,6 @@ decorator_ignore_file (GFile    *file,
 static void
 tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
-	TrackerExtractDecoratorPrivate *priv;
-
-	priv = tracker_extract_decorator_get_instance_private (decorator);
-	priv->recovery_files = g_hash_table_new_full (g_str_hash, g_str_equal,
-	                                              (GDestroyNotify) g_free,
-	                                              (GDestroyNotify) g_object_unref);
 }
 
 static void
@@ -539,8 +536,7 @@ tracker_extract_decorator_initable_init (GInitable     *initable,
 		ret = FALSE;
 	}
 
-	priv->persistence = tracker_extract_persistence_initialize (decorator_retry_file,
-	                                                            decorator_ignore_file,
+	priv->persistence = tracker_extract_persistence_initialize (decorator_ignore_file,
 	                                                            decorator);
 out:
 	g_clear_object (&conn);

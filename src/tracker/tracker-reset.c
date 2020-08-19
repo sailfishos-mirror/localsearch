@@ -132,7 +132,7 @@ error:
 }
 
 static void
-delete_databases (GFile *dir)
+delete_location_content (GFile *dir)
 {
 	GFileEnumerator *enumerator;
 	GError *error = NULL;
@@ -150,26 +150,18 @@ delete_databases (GFile *dir)
 	}
 
 	while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-		const gchar *name;
 		GFile *child;
 
-		name = g_file_info_get_name (info);
+		child = g_file_enumerator_get_child (enumerator, info);
 
-		/* Delete sqlite files in the location */
-		if (g_str_has_suffix (name, ".db") ||
-		    g_str_has_suffix (name, ".db-wal") ||
-		    g_str_has_suffix (name, ".db-shm")) {
-			child = g_file_enumerator_get_child (enumerator, info);
-
-			if (!g_file_delete (child, NULL, &error)) {
-				g_critical ("Failed to delete '%s': %s",
-				            g_file_info_get_name (info),
-				            error->message);
-				g_error_free (error);
-			}
-
-			g_object_unref (child);
+		if (!g_file_delete (child, NULL, &error)) {
+			g_critical ("Failed to delete '%s': %s",
+			            g_file_info_get_name (info),
+			            error->message);
+			g_error_free (error);
 		}
+
+		g_object_unref (child);
 	}
 
 	g_object_unref (enumerator);
@@ -191,17 +183,23 @@ reset_run (void)
 	/* KILL processes first... */
 	if (files || rss) {
 		/* FIXME: we might selectively kill affected miners */
-		tracker_process_stop (TRACKER_PROCESS_TYPE_NONE, TRACKER_PROCESS_TYPE_MINERS);
+		tracker_process_stop (SIGKILL);
 	}
 
 	if (files) {
-		GFile *cache_location;
+		GFile *location;
 		gchar *dir;
 
+		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
+		location = g_file_new_for_path (dir);
+		delete_location_content (location);
+		g_object_unref (location);
+		g_free (dir);
+
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
-		cache_location = g_file_new_for_path (dir);
-		delete_databases (cache_location);
-		g_object_unref (cache_location);
+		location = g_file_new_for_path (dir);
+		delete_location_content (location);
+		g_object_unref (location);
 		g_free (dir);
 	}
 
@@ -211,7 +209,7 @@ reset_run (void)
 
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "rss", NULL);
 		cache_location = g_file_new_for_path (dir);
-		delete_databases (cache_location);
+		delete_location_content (cache_location);
 		g_object_unref (cache_location);
 		g_free (dir);
 	}

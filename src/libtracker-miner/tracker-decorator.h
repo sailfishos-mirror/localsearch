@@ -99,12 +99,6 @@ GQuark        tracker_decorator_error_quark       (void);
 const gchar** tracker_decorator_get_class_names   (TrackerDecorator     *decorator);
 guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorator);
 
-void          tracker_decorator_prepend_id        (TrackerDecorator     *decorator,
-                                                   gint                  id,
-                                                   gint                  class_name_id);
-void          tracker_decorator_delete_id         (TrackerDecorator     *decorator,
-                                                   gint                  id);
-
 void          tracker_decorator_next              (TrackerDecorator     *decorator,
                                                    GCancellable         *cancellable,
                                                    GAsyncReadyCallback   callback,
