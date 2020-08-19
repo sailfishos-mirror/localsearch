@@ -32,8 +32,6 @@
 
 #include <libtracker-sparql/tracker-sparql.h>
 
-#include "tracker-sparql.h"
-
 #define INFO_OPTIONS_ENABLED() \
 	(filenames && g_strv_length (filenames) > 0);
 
