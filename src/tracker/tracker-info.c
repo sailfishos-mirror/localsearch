@@ -42,6 +42,7 @@ static gboolean full_namespaces;
 static gboolean plain_text_content;
 static gboolean resource_is_iri;
 static gboolean turtle;
+static gboolean eligible;
 static gchar *url_property;
 
 static GOptionEntry entries[] = {
@@ -71,6 +72,9 @@ static GOptionEntry entries[] = {
 	  N_("RDF property to treat as URL (eg. “nie:url”)"),
 	  NULL,
 	},
+	{ "eligible", 'e', 0, G_OPTION_ARG_NONE, &eligible,
+	  N_("Checks if FILE is eligible for being mined based on configuration"),
+	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
 	  N_("FILE")},
@@ -485,6 +489,37 @@ info_run (void)
 }
 
 static int
+info_run_eligible (void)
+{
+	char **p;
+	char *tracker_miner_fs_path;
+	GError *error = NULL;
+
+	tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "tracker-miner-fs-3", NULL);
+
+	for (p = filenames; *p; p++) {
+		char *argv[] = {tracker_miner_fs_path,
+		                "--eligible", *p, NULL };
+
+		g_spawn_sync(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, NULL, NULL, &error);
+
+		if (error) {
+			g_printerr ("%s: %s\n",
+			            _("Could not run tracker-extract: "),
+			            error->message);
+			g_error_free (error);
+			g_free (tracker_miner_fs_path);
+			return EXIT_FAILURE;
+		}
+	}
+
+	g_free (tracker_miner_fs_path);
+
+	return EXIT_SUCCESS;
+}
+
+
+static int
 info_run_default (void)
 {
 	GOptionContext *context;
@@ -527,6 +562,9 @@ main (int argc, const char **argv)
 	g_option_context_free (context);
 
 	if (info_options_enabled ()) {
+		if (eligible)
+			return info_run_eligible ();
+
 		return info_run ();
 	}
 
