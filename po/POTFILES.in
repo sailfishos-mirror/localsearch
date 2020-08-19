@@ -18,6 +18,7 @@ src/tracker/tracker-daemon.c
 src/tracker/tracker-dbus.c
 src/tracker/tracker-extract.c
 src/tracker/tracker-index.c
+src/tracker/tracker-info.c
 src/tracker/tracker-process.c
 src/tracker/tracker-reset.c
 src/tracker/tracker-search.c
