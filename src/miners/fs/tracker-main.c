@@ -510,23 +510,24 @@ graphs_created_cb (GObject      *source,
 	miner_maybe_start (miner);
 }
 
-static void
+static gint
 check_eligible (void)
 {
+	TrackerSparqlConnection *sparql_conn;
+	TrackerMiner *miner_files;
+	TrackerIndexingTree *indexing_tree;
+	TrackerDomainOntology *domain_ontology;
 	TrackerConfig *config;
+	GFile *ontology;
 	GFile *file;
 	GFileInfo *info;
 	GError *error = NULL;
 	gchar *path;
 	guint log_handler_id;
 	gboolean exists = TRUE;
+	gboolean indexable;
+	gboolean parents_indexable = TRUE;
 	gboolean is_dir;
-	gboolean print_dir_check;
-	gboolean print_dir_check_with_content;
-	gboolean print_file_check;
-	gboolean print_monitor_check;
-	gboolean would_index = TRUE;
-	gboolean would_notice = TRUE;
 
 	/* Set log handler for library messages */
 	log_handler_id = g_log_set_handler (NULL,
@@ -535,6 +536,7 @@ check_eligible (void)
 	                                    NULL);
 
 	g_log_set_default_handler (dummy_log_handler, NULL);
+
 
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
@@ -563,25 +565,6 @@ check_eligible (void)
 	config = tracker_config_new ();
 	path = g_file_get_path (file);
 
-	if (exists) {
-		if (is_dir) {
-			print_dir_check = TRUE;
-			print_dir_check_with_content = TRUE;
-			print_file_check = FALSE;
-			print_monitor_check = TRUE;
-		} else {
-			print_dir_check = FALSE;
-			print_dir_check_with_content = FALSE;
-			print_file_check = TRUE;
-			print_monitor_check = TRUE;
-		}
-	} else {
-		print_dir_check = TRUE;
-		print_dir_check_with_content = FALSE;
-		print_file_check = TRUE;
-		print_monitor_check = TRUE;
-	}
-
 	g_print (exists ?
 	         _("Data object “%s” currently exists") :
 	         _("Data object “%s” currently does not exist"),
@@ -589,125 +572,108 @@ check_eligible (void)
 
 	g_print ("\n");
 
-	if (print_dir_check) {
-		gboolean check;
+	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
+	ontology = tracker_domain_ontology_get_ontology (domain_ontology);
+	sparql_conn = tracker_sparql_connection_new (0,
+	                                              NULL,
+	                                              ontology,
+	                                              NULL,
+	                                              NULL);
+	if (!sparql_conn)
+		return EXIT_FAILURE;
 
-		check = tracker_miner_files_check_directory (file,
-		                                             tracker_config_get_index_recursive_directories (config),
-			                                     tracker_config_get_index_single_directories (config),
-			                                     tracker_config_get_ignored_directory_paths (config),
-			                                     tracker_config_get_ignored_directory_patterns (config));
-		g_print ("  %s\n",
-		         check ?
-		         _("Directory is eligible to be mined (based on rules)") :
-		         _("Directory is NOT eligible to be mined (based on rules)"));
+	/* Create new TrackerMinerFiles object */
+	config = tracker_config_new ();
+	miner_files = tracker_miner_files_new (sparql_conn, config,
+	                                       domain_ontology_name, NULL);
+	g_object_unref (config);
 
-		would_index &= check;
+	if (!miner_files) {
+		g_object_unref (sparql_conn);
+		return EXIT_FAILURE;
 	}
 
-	if (print_dir_check_with_content) {
-		GList *children;
-		gboolean check;
+	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files));
 
-		children = get_dir_children_as_gfiles (path);
+	indexable = tracker_indexing_tree_file_is_indexable (indexing_tree, file,
+	                                                     is_dir ?
+	                                                     G_FILE_TYPE_DIRECTORY :
+	                                                     G_FILE_TYPE_REGULAR);
 
-		check = tracker_miner_files_check_directory_contents (file,
-			                                              children,
-			                                              tracker_config_get_ignored_directories_with_content (config));
+	if (!indexable) {
+		if (is_dir &&
+		    tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, file)) {
+			g_print ("  %s\n", _("Directory is NOT eligible to be indexed (based on filters)"));
 
-		g_list_foreach (children, (GFunc) g_object_unref, NULL);
-		g_list_free (children);
-
-		g_print ("  %s\n",
-		         check ?
-		         _("Directory is eligible to be mined (based on contents)") :
-		         _("Directory is NOT eligible to be mined (based on contents)"));
-
-		would_index &= check;
-	}
-
-	if (print_monitor_check) {
-		gboolean check = TRUE;
-
-		check &= tracker_config_get_enable_monitors (config);
-
-		if (check) {
-			GSList *dirs_to_check, *l;
-			gboolean is_covered_single;
-			gboolean is_covered_recursive;
-
-			is_covered_single = FALSE;
-			dirs_to_check = tracker_config_get_index_single_directories (config);
-
-			for (l = dirs_to_check; l && !is_covered_single; l = l->next) {
-				GFile *dir;
-				GFile *parent;
-
-				parent = g_file_get_parent (file);
-				dir = g_file_new_for_path (l->data);
-				is_covered_single = g_file_equal (parent, dir) || g_file_equal (file, dir);
-
-				g_object_unref (dir);
-				g_object_unref (parent);
-			}
-
-			is_covered_recursive = FALSE;
-			dirs_to_check = tracker_config_get_index_recursive_directories (config);
-
-			for (l = dirs_to_check; l && !is_covered_recursive; l = l->next) {
-				GFile *dir;
-
-				dir = g_file_new_for_path (l->data);
-				is_covered_recursive = g_file_has_prefix (file, dir) || g_file_equal (file, dir);
-				g_object_unref (dir);
-			}
-
-			check &= is_covered_single || is_covered_recursive;
-		}
-
-		if (exists && is_dir) {
-			g_print ("  %s\n",
-			         check ?
-			         _("Directory is eligible to be monitored (based on config)") :
-			         _("Directory is NOT eligible to be monitored (based on config)"));
-		} else if (exists && !is_dir) {
-			g_print ("  %s\n",
-			         check ?
-			         _("File is eligible to be monitored (based on config)") :
-			         _("File is NOT eligible to be monitored (based on config)"));
+		} else if (!is_dir &&
+		           tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_FILE, file)) {
+			g_print ("  %s\n", _("File is NOT eligible to be indexed (based on filters)"));
+		} else if (tracker_file_is_hidden (file) &&
+		           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+			g_print ("  %s\n", _("File is NOT eligible to be indexed (hidden file)"));
 		} else {
-			g_print ("  %s\n",
-			         check ?
-			         _("File or Directory is eligible to be monitored (based on config)") :
-			         _("File or Directory is NOT eligible to be monitored (based on config)"));
+			g_print ("  %s\n", _("File is NOT eligible to be indexed (not an indexed folder)"));
+		}
+	}
+
+	if (indexable) {
+		GFile *root, *parent;
+		GList *files = NULL, *l;
+
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+		parent = file;
+
+		/* Still, a parent folder might be filtered out, figure it out */
+		while (parent && !g_file_equal (parent, root)) {
+			parent = g_file_get_parent (parent);
+			files = g_list_prepend (files, parent);
 		}
 
-		would_notice &= check;
+		for (l = files; l; l = l->next) {
+			gchar *dir_path;
+
+			dir_path = g_file_get_path (l->data);
+
+			if (is_dir &&
+			    tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, l->data)) {
+				g_print (_("Parent directory “%s” is NOT eligible to be indexed (based on filters)"),
+				         dir_path);
+				g_print ("\n");
+				parents_indexable = FALSE;
+			} else if (tracker_file_is_hidden (l->data) &&
+			           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+				g_print (_("Parent directory “%s” is NOT eligible to be indexed (hidden file)"),
+				         dir_path);
+				g_print ("\n");
+				parents_indexable = FALSE;
+			} else {
+				GList *children = get_dir_children_as_gfiles (dir_path);
+
+				if (!tracker_indexing_tree_parent_is_indexable (indexing_tree, l->data, children)) {
+					g_print (_("Parent directory “%s” is NOT eligible to be indexed (based on content filters)"),
+					         dir_path);
+					g_print ("\n");
+					parents_indexable = FALSE;
+				}
+
+				g_list_free_full (children, g_object_unref);
+			}
+
+			g_free (dir_path);
+
+			if (!parents_indexable)
+				break;
+		}
+
+		g_list_free_full (files, g_object_unref);
 	}
 
-	if (print_file_check) {
-		gboolean check;
-
-		check = tracker_miner_files_check_file (file,
-		                                        tracker_config_get_ignored_file_paths (config),
-		                                        tracker_config_get_ignored_file_patterns (config));
-
+	if (indexable && parents_indexable) {
 		g_print ("  %s\n",
-		         check ?
-		         _("File is eligible to be mined (based on rules)") :
-		         _("File is NOT eligible to be mined (based on rules)"));
-
-		would_index &= check;
+		         is_dir ?
+		         _("Directory is eligible to be indexed") :
+		         _("File is eligible to be indexed"));
 	}
-
-	g_print ("\n"
-	         "%s: %s\n"
-	         "%s: %s\n"
-	         "\n",
-	         _("Would be indexed"),
-	         would_index ? _("Yes") : _("No"),
-	         _("Would be monitored"),
-	         would_notice ? _("Yes") : _("No"));
 
 	if (log_handler_id != 0) {
 		/* Unset log handler */
@@ -717,6 +683,10 @@ check_eligible (void)
 	g_free (path);
 	g_object_unref (config);
 	g_object_unref (file);
+	g_object_unref (miner_files);
+	tracker_domain_ontology_unref (domain_ontology);
+
+	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static gboolean
@@ -974,8 +944,7 @@ main (gint argc, gchar *argv[])
 	}
 
 	if (eligible) {
-		check_eligible ();
-		return EXIT_SUCCESS;
+		return check_eligible ();
 	}
 
 	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
