@@ -47,15 +47,12 @@ static gchar **filenames;
 
 static GOptionEntry entries[] = {
 	{ "add", 'a', 0, G_OPTION_ARG_NONE, &opt_add,
-	  /* TRANSLATORS: FILE is a commandline argument, named like that */
 	  N_("Adds FILE as an indexed location"),
 	  NULL },
 	{ "remove", 'd', 0, G_OPTION_ARG_NONE, &opt_remove,
-	  /* TRANSLATORS: FILE is a commandline argument, named like that */
 	  N_("Removes FILE from indexed locations"),
 	  NULL },
 	{ "recursive", 'r', 0, G_OPTION_ARG_NONE, &opt_recursive,
-	  /* TRANSLATORS: FILE is a commandline argument, named like that */
 	  N_("Makes indexing recursive"),
 	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
