@@ -160,32 +160,30 @@ static int
 index_add (void)
 {
 	gboolean handled = FALSE;
-	const gchar *setting_path;
 	GSettings *settings;
-	GStrv dirs;
 	guint i;
 
 	settings = g_settings_new ("org.freedesktop.Tracker3.Miner.Files");
-
-	if (opt_recursive)
-		setting_path = "index-recursive-directories";
-	else
-		setting_path = "index-single-directories";
 
 	for (i = 0; filenames[i]; i++) {
 		GFile *file;
 		gchar *path;
 		const gchar *alias;
+		GStrv dirs, rec_dirs;
 
-		dirs = g_settings_get_strv (settings, setting_path);
+		dirs = g_settings_get_strv (settings, "index-single-directories");
+		rec_dirs = g_settings_get_strv (settings, "index-recursive-directories");
 
 		file = g_file_new_for_commandline_arg (filenames[i]);
 		path = g_file_get_path (file);
 		alias = path_to_alias (path);
 
 		if (g_strv_contains ((const gchar * const *) dirs, path) ||
-		    (alias && g_strv_contains ((const gchar * const *) dirs, alias))) {
+		    (alias && g_strv_contains ((const gchar * const *) dirs, alias)) ||
+		    g_strv_contains ((const gchar * const *) rec_dirs, path) ||
+		    (alias && g_strv_contains ((const gchar * const *) rec_dirs, alias))) {
 			g_strfreev (dirs);
+			g_strfreev (rec_dirs);
 			handled = TRUE;
 			continue;
 		}
@@ -195,16 +193,25 @@ index_add (void)
 			            path);
 			g_printerr ("\n");
 			g_strfreev (dirs);
+			g_strfreev (rec_dirs);
 			continue;
 		}
 
 		handled = TRUE;
-		dirs = strv_add (dirs, path);
-		g_settings_set_strv (settings, setting_path,
-		                     (const gchar * const *) dirs);
+
+		if (opt_recursive) {
+			rec_dirs = strv_add (rec_dirs, path);
+			g_settings_set_strv (settings, "index-recursive-directories",
+					     (const gchar * const *) rec_dirs);
+		} else {
+			dirs = strv_add (dirs, path);
+			g_settings_set_strv (settings, "index-single-directories",
+					     (const gchar * const *) dirs);
+		}
 
 		g_object_unref (file);
 		g_strfreev (dirs);
+		g_strfreev (rec_dirs);
 		g_free (path);
 	}
 
