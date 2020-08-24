@@ -1,3 +1,24 @@
+NEW in 2.99.4 - 2020-08-24
+==========================
+
+  * CLI modernization
+    - Integration with pager
+    - "tracker3 index" makes persistent configuration changes
+    - "tracker3 info --eligible $file" tells whether a file would
+      be indexed, or why not.
+    - "tracker3 reset" resets better
+    - "tracker3 daemon" terminates processes better
+    - "tracker3 search" fixes
+    - Erase ^C after monitoring subcommands
+    - "tracker3 status" shows reports about files that failed
+      indexing/metadata extraction
+  * Fixes to removable mount handling
+  * Use curly quotes consistently in setting description strings
+  * Better use of asserts in tests
+  * Update seccomp rules to work with modern glib
+
+Translations: en_GB, es, eu, fr, gl, ja, pl, pt_BR, ro, sl, tr, uk
+
 NEW in 2.99.3 - 2020-08-10
 ==========================
 
