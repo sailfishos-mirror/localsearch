@@ -974,24 +974,23 @@ main (gint argc, gchar *argv[])
 
 	main_loop = g_main_loop_new (NULL, FALSE);
 
-	if (domain_ontology && domain_ontology_name) {
-		/* If we are running for a specific domain, we tie the lifetime of this
-		 * process to the domain. For example, if the domain name is
-		 * org.example.MyApp then this tracker-miner-fs process will exit as
-		 * soon as org.example.MyApp exits.
-		 */
+	if (no_daemon) {
+		g_message ("tracker-miner-fs-3 running in --no-daemon mode.");
+	} else if (domain_ontology && domain_ontology_name) {
 		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
+
+		g_message ("tracker-miner-fs-3 running in --domain-ontology mode as "
+		           "%s." DBUS_NAME_SUFFIX ". The service will exit when %s "
+		           "disappears from the bus.", domain_name, domain_name);
+
 		g_bus_watch_name_on_connection (connection, domain_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
 		                                NULL, on_domain_vanished,
 		                                main_loop, NULL);
 		g_free (domain_name);
+	} else {
+		g_message ("tracker-miner-fs-3 running as org.freedesktop." DBUS_NAME_SUFFIX);
 	}
-
-	TRACKER_NOTE (CONFIG, g_message ("Checking if we're running as a daemon:"));
-	TRACKER_NOTE (CONFIG, g_message ("  %s %s",
-	                      no_daemon ? "No" : "Yes",
-	                      no_daemon ? "(forced by command line)" : ""));
 
 	if (!dry_run) {
 		GFile *store = get_cache_dir (domain_ontology);

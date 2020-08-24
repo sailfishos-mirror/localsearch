@@ -432,6 +432,9 @@ main (int argc, char *argv[])
 	/* Request DBus name */
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
 
+	g_message ("tracker-extract-3 running as %s. The service will exit when %s "
+	           "disappears from the bus.", dbus_name, miner_dbus_name);
+
 	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
 		g_critical ("Could not request DBus name '%s': %s",
 		            dbus_name, error->message);
