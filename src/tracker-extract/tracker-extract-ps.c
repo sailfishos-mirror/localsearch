@@ -186,7 +186,7 @@ static TrackerResource *
 extract_ps_gz (const gchar *uri)
 {
 	g_autoptr(GFile) file = NULL;
-	g_autoptr(GInputStream) stream, cstream = NULL;
+	g_autoptr(GInputStream) stream = NULL, cstream = NULL;
 	g_autoptr(GConverter) converter = NULL;
 	g_autoptr(GError) error = NULL;
 

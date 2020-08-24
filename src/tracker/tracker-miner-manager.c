@@ -1591,7 +1591,7 @@ tracker_miner_manager_index_location_async (TrackerMinerManager        *manager,
                                             gpointer                    user_data)
 {
 	IndexLocationTaskData *data;
-	g_autoptr (GTask) task;
+	g_autoptr (GTask) task = NULL;
 
 	data = index_location_task_data_new (location, graphs, flags);
 	task = g_task_new (manager, cancellable, callback, user_data);
