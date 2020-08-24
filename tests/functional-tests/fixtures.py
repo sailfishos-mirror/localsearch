@@ -59,13 +59,12 @@ def tracker_test_main():
         # Output all logs to stderr
         logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
     else:
-        # Output some messages from D-Bus daemon to stderr by default. In practice,
-        # only errors and warnings should be output here unless the environment
-        # contains G_MESSAGES_DEBUG= and/or TRACKER_VERBOSITY=1 or more.
+        # Output only messages from Tracker daemons under test. See
+        # tracker.git/utils/trackertestutils/dbusdaemon.py.
         handler_stderr = logging.StreamHandler(stream=sys.stderr)
-        handler_stderr.addFilter(logging.Filter('trackertestutils.dbusdaemon.stderr'))
+        handler_stderr.addFilter(logging.Filter('sandbox-session-bus.stderr'))
         handler_stdout = logging.StreamHandler(stream=sys.stderr)
-        handler_stdout.addFilter(logging.Filter('trackertestutils.dbusdaemon.stdout'))
+        handler_stdout.addFilter(logging.Filter('sandbox-session-bus.stdout'))
         logging.basicConfig(level=logging.INFO,
                             handlers=[handler_stderr, handler_stdout],
                             format='%(message)s')
