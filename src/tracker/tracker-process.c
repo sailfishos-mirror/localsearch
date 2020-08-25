@@ -69,9 +69,21 @@ static gchar *
 find_command (pid_t pid)
 {
 	gchar *proc_path, path[PATH_MAX];
+	ssize_t len;
 
 	proc_path = g_strdup_printf ("/proc/%d/exe", pid);
-	readlink (proc_path, path, PATH_MAX);
+	len = readlink (proc_path, path, PATH_MAX);
+
+	if (len < 0)
+		return NULL;
+
+	path[len] = '\0';
+
+	/* Trim the " (deleted)" suffix, if the miner happened to be reinstalled */
+	if (g_str_has_suffix (path, " (deleted)")) {
+		len -= strlen (" (deleted)");
+		path[len] = '\0';
+	}
 
 	return g_path_get_basename (path);
 }
@@ -121,18 +133,25 @@ tracker_process_find_all (void)
 	pid_t miner_fs, miner_rss;
 	GSList *processes = NULL;
 	TrackerProcessData *data;
+	gchar *command;
 
 	connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
 	miner_fs = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.Files");
 	if (miner_fs > 0) {
-		data = process_data_new (find_command (miner_fs), miner_fs);
-		processes = g_slist_prepend (processes, data);
+		command = find_command (miner_fs);
+		if (command) {
+			data = process_data_new (command, miner_fs);
+			processes = g_slist_prepend (processes, data);
+		}
 	}
 
 	miner_rss = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.RSS");
 	if (miner_rss > 0) {
-		data = process_data_new (find_command (miner_rss), miner_rss);
-		processes = g_slist_prepend (processes, data);
+		command = find_command (miner_rss);
+		if (command) {
+			data = process_data_new (command, miner_rss);
+			processes = g_slist_prepend (processes, data);
+		}
 	}
 
 	g_object_unref (connection);
