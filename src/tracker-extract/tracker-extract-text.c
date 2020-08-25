@@ -108,6 +108,9 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	text_allowlist_patterns = tracker_config_get_text_allowlist_patterns (config);
 	file = tracker_extract_info_get_file (info);
 
+	metadata = tracker_resource_new (NULL);
+	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PlainTextDocument");
+
 	if (allow_file (text_allowlist_patterns, file)) {
 		content = get_file_content (tracker_extract_info_get_file (info),
 		                            tracker_config_get_max_bytes (config),
@@ -120,19 +123,16 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 			return FALSE;
 		}
 
-		metadata = tracker_resource_new (NULL);
-		tracker_resource_add_uri (metadata, "rdf:type", "nfo:PlainTextDocument");
-
 		if (content) {
 			tracker_resource_set_string (metadata, "nie:plainTextContent", content);
 			g_free (content);
 		} else {
 			tracker_resource_set_string (metadata, "nie:plainTextContent", "");
 		}
-
-		tracker_extract_info_set_resource (info, metadata);
-		g_object_unref (metadata);
 	}
+
+	tracker_extract_info_set_resource (info, metadata);
+	g_object_unref (metadata);
 
 	return TRUE;
 }

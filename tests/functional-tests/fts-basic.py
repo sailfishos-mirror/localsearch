@@ -27,6 +27,7 @@ Monitor a directory, copy/move/remove/update text files and check that
 the text contents are updated accordingly in the indexes.
 """
 
+import pathlib
 import unittest as ut
 
 # Must import this for logging.
@@ -99,6 +100,31 @@ class MinerFTSBasicTest(fixtures.TrackerMinerFTSTest):
         self.set_text(TEXT)
         results = self.search_word("123123")
         self.assertEqual(len(results), 0)
+
+
+class MinerFTSWAllowlistTest(fixtures.TrackerMinerFTSTest):
+    """
+    Test that only an allowlisted set of plaintext files get FTS indexed.
+
+    We can create performance problems by indexing big trees of sourcecode,
+    video game data, etc., so we use an extension-based allowlist to limit
+    what gets FTS indexed.
+    """
+    def test_no_extension_file(self):
+        self.testfile = "test-monitored/miner-fts-test-no-extension"
+
+        path = pathlib.Path(self.path(self.testfile))
+        url = self.uri(self.testfile)
+        expected = f'a nfo:Document; nie:isStoredAs <{url}>'
+        with self.tracker.await_insert(fixtures.DOCUMENTS_GRAPH, expected, timeout=cfg.AWAIT_TIMEOUT):
+            path.write_text("Definitely do not index this file.")
+
+        # No results for full text search.
+        results = self.search_word("Definitely")
+        self.assertEqual(len(results), 0)
+
+        # However, there should be an nfo:PlainTextDocument resource as normal.
+        self.assertEqual(1, self.tracker.count_instances("nfo:PlainTextDocument"))
 
 
 if __name__ == "__main__":
