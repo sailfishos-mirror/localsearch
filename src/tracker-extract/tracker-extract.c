@@ -63,9 +63,6 @@ typedef struct {
 	 */
 	GMutex task_mutex;
 
-	/* Thread pool for multi-threaded extractors */
-	GThreadPool *thread_pool;
-
 	/* module -> async queue hashtable
 	 * for single-threaded extractors
 	 */
@@ -124,8 +121,6 @@ tracker_extract_init (TrackerExtract *object)
 
 	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 	priv->single_thread_extractors = g_hash_table_new (NULL, NULL);
-	priv->thread_pool = g_thread_pool_new ((GFunc) get_metadata,
-	                                       NULL, 10, TRUE, NULL);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
@@ -147,7 +142,6 @@ tracker_extract_finalize (GObject *object)
 	/* FIXME: Shutdown modules? */
 
 	g_hash_table_destroy (priv->single_thread_extractors);
-	g_thread_pool_free (priv->thread_pool, TRUE, FALSE);
 
 	log_statistics (object);
 
