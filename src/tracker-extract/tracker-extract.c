@@ -50,6 +50,7 @@ G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 extern gboolean debug;
 
 typedef struct {
+	GTimer *elapsed;
 	gint extracted_count;
 	gint failed_count;
 } StatisticsData;
@@ -63,9 +64,6 @@ typedef struct {
 	 */
 	GMutex task_mutex;
 
-	/* Thread pool for multi-threaded extractors */
-	GThreadPool *thread_pool;
-
 	/* module -> async queue hashtable
 	 * for single-threaded extractors
 	 */
@@ -74,6 +72,7 @@ typedef struct {
 	gboolean disable_shutdown;
 
 	gchar *force_module;
+	GTimer *total_elapsed;
 
 	gint unhandled_count;
 } TrackerExtractPrivate;
@@ -114,6 +113,7 @@ tracker_extract_class_init (TrackerExtractClass *klass)
 static void
 statistics_data_free (StatisticsData *data)
 {
+	g_timer_destroy (data->elapsed);
 	g_slice_free (StatisticsData, data);
 }
 
@@ -124,11 +124,11 @@ tracker_extract_init (TrackerExtract *object)
 
 	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 	priv->single_thread_extractors = g_hash_table_new (NULL, NULL);
-	priv->thread_pool = g_thread_pool_new ((GFunc) get_metadata,
-	                                       NULL, 10, TRUE, NULL);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		priv->total_elapsed = g_timer_new ();
+		g_timer_stop (priv->total_elapsed);
 		priv->statistics_data = g_hash_table_new_full (NULL, NULL, NULL,
 		                                               (GDestroyNotify) statistics_data_free);
 	}
@@ -147,13 +147,12 @@ tracker_extract_finalize (GObject *object)
 	/* FIXME: Shutdown modules? */
 
 	g_hash_table_destroy (priv->single_thread_extractors);
-	g_thread_pool_free (priv->thread_pool, TRUE, FALSE);
-
-	log_statistics (object);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		log_statistics (object);
 		g_hash_table_destroy (priv->statistics_data);
+		g_timer_destroy (priv->total_elapsed);
 	}
 #endif
 
@@ -170,6 +169,7 @@ log_statistics (GObject *object)
 		TrackerExtractPrivate *priv;
 		GHashTableIter iter;
 		gpointer key, value;
+		gdouble total_elapsed;
 
 		priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 
@@ -179,6 +179,7 @@ log_statistics (GObject *object)
 		g_message ("Statistics:");
 
 		g_hash_table_iter_init (&iter, priv->statistics_data);
+		total_elapsed = g_timer_elapsed (priv->total_elapsed, NULL);
 
 		while (g_hash_table_iter_next (&iter, &key, &value)) {
 			GModule *module = key;
@@ -190,10 +191,12 @@ log_statistics (GObject *object)
 				name = g_module_name (module);
 				name_without_path = strrchr (name, G_DIR_SEPARATOR) + 1;
 
-				g_message ("    Module:'%s', extracted:%d, failures:%d",
+				g_message ("    Module:'%s', extracted:%d, failures:%d, elapsed: %.2fs (%.2f%% of total)",
 				           name_without_path,
 				           data->extracted_count,
-				           data->failed_count);
+				           data->failed_count,
+					   g_timer_elapsed (data->elapsed, NULL),
+					   (g_timer_elapsed (data->elapsed, NULL) / total_elapsed) * 100);
 			}
 		}
 
@@ -254,14 +257,6 @@ notify_task_finish (TrackerExtractTask *task,
 		if (task->module) {
 			stats_data = g_hash_table_lookup (priv->statistics_data,
 			                                  task->module);
-
-			if (!stats_data) {
-				stats_data = g_slice_new0 (StatisticsData);
-				g_hash_table_insert (priv->statistics_data,
-				                     task->module,
-				                     stats_data);
-			}
-
 			stats_data->extracted_count++;
 
 			if (!success) {
@@ -274,6 +269,9 @@ notify_task_finish (TrackerExtractTask *task,
 #endif
 
 	priv->running_tasks = g_list_remove (priv->running_tasks, task);
+
+	if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
+		g_timer_stop (priv->total_elapsed);
 
 	g_mutex_unlock (&priv->task_mutex);
 }
@@ -463,6 +461,7 @@ filter_module (TrackerExtract *extract,
 static gboolean
 get_metadata (TrackerExtractTask *task)
 {
+	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
 	TrackerExtractInfo *info;
 
 #ifdef THREAD_ENABLE_TRACE
@@ -475,6 +474,24 @@ get_metadata (TrackerExtractTask *task)
 		extract_task_free (task);
 		return FALSE;
 	}
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		StatisticsData *stats_data;
+
+		stats_data = g_hash_table_lookup (priv->statistics_data,
+						  task->module);
+		if (!stats_data) {
+			stats_data = g_slice_new0 (StatisticsData);
+			stats_data->elapsed = g_timer_new ();
+			g_hash_table_insert (priv->statistics_data,
+					     task->module,
+					     stats_data);
+		} else {
+			g_timer_continue (stats_data->elapsed);
+		}
+	}
+#endif
 
 	if (!filter_module (task->extract, task->module) &&
 	    get_file_metadata (task, &info)) {
@@ -489,6 +506,16 @@ get_metadata (TrackerExtractTask *task)
 		                         task->file, task->mimetype);
 		extract_task_free (task);
 	}
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		StatisticsData *stats_data;
+
+		stats_data = g_hash_table_lookup (priv->statistics_data,
+						  task->module);
+		g_timer_stop (stats_data->elapsed);
+	}
+#endif
 
 	return FALSE;
 }
@@ -616,6 +643,8 @@ tracker_extract_file (TrackerExtract      *extract,
 
 		g_mutex_lock (&priv->task_mutex);
 		priv->running_tasks = g_list_prepend (priv->running_tasks, task);
+		if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
+			g_timer_continue (priv->total_elapsed);
 		g_mutex_unlock (&priv->task_mutex);
 
 		g_idle_add ((GSourceFunc) dispatch_task_cb, task);
