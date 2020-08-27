@@ -265,13 +265,13 @@ notify_task_finish (TrackerExtractTask *task,
 		} else {
 			priv->unhandled_count++;
 		}
+
+		if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
+			g_timer_stop (priv->total_elapsed);
 	}
 #endif
 
 	priv->running_tasks = g_list_remove (priv->running_tasks, task);
-
-	if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
-		g_timer_stop (priv->total_elapsed);
 
 	g_mutex_unlock (&priv->task_mutex);
 }
@@ -643,8 +643,14 @@ tracker_extract_file (TrackerExtract      *extract,
 
 		g_mutex_lock (&priv->task_mutex);
 		priv->running_tasks = g_list_prepend (priv->running_tasks, task);
-		if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
-			g_timer_continue (priv->total_elapsed);
+
+#ifdef G_ENABLE_DEBUG
+		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+			if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
+				g_timer_continue (priv->total_elapsed);
+		}
+#endif
+
 		g_mutex_unlock (&priv->task_mutex);
 
 		g_idle_add ((GSourceFunc) dispatch_task_cb, task);
