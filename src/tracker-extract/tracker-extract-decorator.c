@@ -229,9 +229,9 @@ task_cancellable_cancelled_cb (GCancellable *cancellable,
 	tracker_extract_persistence_remove_file (priv->persistence, data->file);
 	uri = g_file_get_uri (data->file);
 
-	g_message ("Cancelled task for '%s' was currently being "
-	           "processed, _exit()ing immediately",
-	           uri);
+	g_debug ("Cancelled task for '%s' was currently being "
+		 "processed, _exit()ing immediately",
+		 uri);
 	g_free (uri);
 
 	_exit (EXIT_FAILURE);
@@ -258,10 +258,10 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 		    error->domain == tracker_decorator_error_quark ()) {
 			switch (error->code) {
 			case TRACKER_DECORATOR_ERROR_EMPTY:
-				g_message ("There are no further items to extract");
+				g_debug ("There are no further items to extract");
 				break;
 			case TRACKER_DECORATOR_ERROR_PAUSED:
-				g_message ("Next item is on hold because miner is paused");
+				g_debug ("Next item is on hold because miner is paused");
 			}
 		} else if (error) {
 			g_warning ("Next item could not be processed, %s", error->message);
@@ -283,7 +283,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	data->file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
 	task = tracker_decorator_info_get_task (info);
 
-	g_message ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
+	g_debug ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
 
 	tracker_extract_persistence_add_file (priv->persistence, data->file);
 
@@ -331,7 +331,7 @@ tracker_extract_decorator_paused (TrackerMiner *miner)
 	TrackerExtractDecoratorPrivate *priv;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (miner));
-	g_message ("Decorator paused");
+	g_debug ("Decorator paused");
 
 	if (priv->timer)
 		g_timer_stop (priv->timer);
@@ -343,8 +343,8 @@ tracker_extract_decorator_resumed (TrackerMiner *miner)
 	TrackerExtractDecoratorPrivate *priv;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (miner));
-	g_message ("Decorator resumed, processing remaining %d items",
-	           tracker_decorator_get_n_items (TRACKER_DECORATOR (miner)));
+	g_debug ("Decorator resumed, processing remaining %d items",
+		 tracker_decorator_get_n_items (TRACKER_DECORATOR (miner)));
 
 	if (priv->timer)
 		g_timer_continue (priv->timer);
@@ -426,7 +426,7 @@ decorator_ignore_file (GFile    *file,
 	GFileInfo *info;
 
 	uri = g_file_get_uri (file);
-	g_message ("Extraction on file '%s' failed in previous execution, ignoring", uri);
+	g_debug ("Extraction on file '%s' failed in previous execution, ignoring", uri);
 
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
