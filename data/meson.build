@@ -48,3 +48,10 @@ install_data('default.rule',
     install_dir: join_paths(get_option('datadir'), tracker_versioned_name, 'domain-ontologies'))
 
 tracker_miners_uninstalled_domain_rule = meson.current_source_dir() / 'default.rule'
+
+if get_option('domain_prefix') != 'org.freedesktop'
+  configure_file(input: 'org.freedesktop.domain.rule.in',
+                 output: get_option('domain_prefix') + '.domain.rule',
+                 configuration: conf,
+                 install_dir: join_paths(get_option('datadir'), 'tracker@0@'.format(tracker_api_major), 'domain-ontologies'))
+endif

@@ -40,10 +40,17 @@ executable('tracker-miner-fs-control-@0@'.format(tracker_api_major),
 )
 
 # This file allows starting the service with D-Bus autoactivation.
+tmp_conf = configuration_data()
+tmp_conf.merge_from(conf)
+if get_option('domain_prefix') == 'org.freedesktop'
+  tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=tracker-miner-fs-control-3.service')
+else
+  tmp_conf.set ('SYSTEMD_SERVICE', '')
+endif
 dbus_service_file = configure_file(
     input: 'org.freedesktop.Tracker3.Miner.Files.Control.service.in',
-    output: 'org.freedesktop.Tracker3.Miner.Files.Control.service',
-    configuration: conf,
+    output: get_option('domain_prefix') + '.Tracker3.Miner.Files.Control.service',
+    configuration: tmp_conf,
     install: true,
     install_dir: dbus_services_dir,
 )

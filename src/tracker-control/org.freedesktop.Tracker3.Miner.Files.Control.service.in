@@ -1,4 +1,4 @@
 [D-BUS Service]
-Name=org.freedesktop.Tracker3.Miner.Files.Control
+Name=@DOMAIN_PREFIX@.Tracker3.Miner.Files.Control
 Exec=@libexecdir@/tracker-miner-fs-control-3
-SystemdService=tracker-miner-fs-control-3.service
+@SYSTEMD_SERVICE@

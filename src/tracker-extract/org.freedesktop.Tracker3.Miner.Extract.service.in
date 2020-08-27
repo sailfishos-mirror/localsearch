@@ -1,4 +1,8 @@
 [D-BUS Service]
-Name=org.freedesktop.Tracker3.Miner.Extract
-Exec=@libexecdir@/tracker-extract-3
-SystemdService=tracker-extract-3.service
+Name=@DOMAIN_PREFIX@.Tracker3.Miner.Extract
+Exec=@libexecdir@/tracker-extract-3 @DOMAIN_ONTOLOGY_OPTIONS@
+@SYSTEMD_SERVICE@
+
+# Miner details needed for tracker-control
+Path=/org/freedesktop/Tracker3/Miner/Extract
+NameSuffix=Miner.Extract
