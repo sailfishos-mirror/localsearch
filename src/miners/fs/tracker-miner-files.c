@@ -2205,7 +2205,7 @@ process_file_cb (GObject      *object,
 
 		time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
 		time_str = tracker_date_to_string (time_);
-		tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
+		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
 		g_free (time_str);
 
 		graph_file_str = tracker_resource_print_sparql_update (graph_file,
