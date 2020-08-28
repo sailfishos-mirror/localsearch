@@ -4,13 +4,31 @@ schemas = {
   'org.freedesktop.Tracker.Miner.Files.gschema.xml': 'org.freedesktop.Tracker@0@.Miner.Files.gschema.xml'.format(tracker_api_major),
 }
 
+dir_conf = configuration_data()
+
+dirs = {
+  'default_index_recursive_dirs': 'INDEX_RECURSIVE_DIRS',
+  'default_index_single_dirs': 'INDEX_SINGLE_DIRS'
+}
+foreach opt_name, variable : dirs
+  array = []
+  foreach dir : get_option(opt_name)
+    # See https://github.com/mesonbuild/meson/issues/4007
+    escaped_dir = '&amp;'.join(dir.split('&'))
+    array += [ '\'' + escaped_dir + '\'' ]
+  endforeach
+  # Remove the trailing comma
+  str = ', '.join(array)
+  dir_conf.set(variable, str)
+endforeach
+
 schemas_file_deps = []
 foreach source, dest : schemas
     configure_file(
         input: source,
         output: dest,
-        copy: true,
         install: true,
+        configuration: dir_conf,
         install_dir: gsettings_schema_dir)
     schemas_file_deps += source
 endforeach
@@ -48,3 +66,10 @@ install_data('default.rule',
     install_dir: join_paths(get_option('datadir'), tracker_versioned_name, 'domain-ontologies'))
 
 tracker_miners_uninstalled_domain_rule = meson.current_source_dir() / 'default.rule'
+
+if get_option('domain_prefix') != 'org.freedesktop'
+  configure_file(input: 'org.freedesktop.domain.rule.in',
+                 output: get_option('domain_prefix') + '.domain.rule',
+                 configuration: conf,
+                 install_dir: join_paths(get_option('datadir'), 'tracker@0@'.format(tracker_api_major), 'domain-ontologies'))
+endif

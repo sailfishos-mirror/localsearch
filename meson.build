@@ -345,6 +345,21 @@ conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
 conf.set('HAVE_LIBSECCOMP', libseccomp.found())
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
+conf.set('DOMAIN_PREFIX', get_option('domain_prefix'))
+if get_option('domain_prefix') != 'org.freedesktop'
+  rule_file = get_option('domain_prefix') + '.domain.rule'
+  domain_rule_path = get_option('prefix') / get_option('datadir') / 'tracker@0@'.format(tracker_api_major) / 'domain-ontologies' / rule_file
+  conf.set('DOMAIN_ONTOLOGY_OPTIONS', '--domain-ontology ' + domain_rule_path)
+  conf.set('MINER_FILES_INITIAL_SLEEP', '--initial-sleep 0')
+  if get_option('miner_fs_cache_location') == ''
+    conf.set('MINER_FS_CACHE_LOCATION', '$XDG_CACHE_HOME/' + get_option('domain_prefix') + '/miner/files')
+  else
+    conf.set('MINER_FS_CACHE_LOCATION', get_option('miner_fs_cache_location'))
+  endif
+else
+  conf.set('DOMAIN_ONTOLOGY_OPTIONS', '')
+  conf.set('MINER_FILES_INITIAL_SLEEP', '')
+endif
 
 conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))
 conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#include <fcntl.h>'))
@@ -451,6 +466,7 @@ summary = [
   '    Prefix:                                 ' + get_option('prefix'),
   '    Source code location:                   ' + meson.source_root(),
   '    Compiler:                               ' + cc.get_id(),
+  '    Domain prefix:                          ' + get_option('domain_prefix'),
   '\nFeature Support:',
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),

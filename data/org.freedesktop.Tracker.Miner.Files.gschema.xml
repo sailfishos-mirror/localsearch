@@ -106,7 +106,7 @@ Boston, MA  02110-1301, USA.
 
 	See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default
       </description>
-      <default>[ '&amp;DESKTOP', '&amp;DOCUMENTS', '&amp;MUSIC', '&amp;PICTURES', '&amp;VIDEOS' ]</default>
+      <default>[ @INDEX_RECURSIVE_DIRS@ ]</default>
     </key>
 
     <key name="index-single-directories" type="as">
@@ -120,7 +120,7 @@ Boston, MA  02110-1301, USA.
 
 	See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default
       </description>
-      <default>[ '$HOME', '&amp;DOWNLOAD' ]</default>
+      <default>[ @INDEX_SINGLE_DIRS@ ]</default>
     </key>
 
     <key name="index-applications" type="b">
