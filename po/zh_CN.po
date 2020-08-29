@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-25 20:43+0000\n"
-"PO-Revision-Date: 2020-08-25 21:36-0400\n"
+"POT-Creation-Date: 2020-08-26 01:37+0000\n"
+"PO-Revision-Date: 2020-08-29 10:05-0400\n"
 "Last-Translator: Dingzhong Chen <wsxy162@gmail.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -913,7 +913,7 @@ msgstr "将结果输出为 Turtle 格式 的 RDF 文件"
 
 #: src/tracker/tracker-info.c:70
 msgid "RDF property to treat as URL (eg. “nie:url”)"
-msgstr ""
+msgstr "要当作 URL 的 RDF 属性（例如，“nie:url”）"
 
 #: src/tracker/tracker-info.c:151
 msgid "Unable to retrieve namespace prefixes"
