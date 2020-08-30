@@ -444,6 +444,17 @@ cleanup_cb (gpointer user_data)
 	return G_SOURCE_REMOVE;
 }
 
+#if GLIB_CHECK_VERSION (2, 64, 0)
+static void
+on_low_memory (GMemoryMonitor            *monitor,
+               GMemoryMonitorWarningLevel level,
+               gpointer                   user_data)
+{
+	if (level > G_MEMORY_MONITOR_WARNING_LEVEL_LOW)
+		malloc_trim (0);
+}
+#endif
+
 static void
 miner_started_cb (TrackerMinerFS *fs)
 {
@@ -930,6 +941,9 @@ main (gint argc, gchar *argv[])
 	TrackerEndpointDBus *endpoint;
 	TrackerDomainOntology *domain_ontology;
 	GCancellable *cancellable;
+#if GLIB_CHECK_VERSION (2, 64, 0)
+	GMemoryMonitor *memory_monitor;
+#endif
 	gchar *domain_name, *dbus_name;
 
 	main_loop = NULL;
@@ -1115,9 +1129,17 @@ main (gint argc, gchar *argv[])
 		tracker_miner_files_set_mtime_checking (TRACKER_MINER_FILES (miner_files), do_mtime_checking);
 	}
 
+	g_signal_connect (miner_files, "started",
+			  G_CALLBACK (miner_started_cb),
+			  NULL);
 	g_signal_connect (miner_files, "finished",
 			  G_CALLBACK (miner_finished_cb),
 			  NULL);
+
+#if GLIB_CHECK_VERSION (2, 64, 0)
+	memory_monitor = g_memory_monitor_dup_default ();
+	g_signal_connect (memory_monitor, "low-memory-warning", on_low_memory, NULL);
+#endif
 
 	/* Preempt creation of graphs */
 	tracker_sparql_connection_update_async (tracker_miner_get_connection (miner_files),
@@ -1160,6 +1182,11 @@ main (gint argc, gchar *argv[])
 
 	tracker_sparql_connection_close (sparql_conn);
 	g_object_unref (sparql_conn);
+
+#if GLIB_CHECK_VERSION (2, 64, 0)
+	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);
+	g_object_unref (memory_monitor);
+#endif
 
 	g_print ("\nOK\n\n");
 
