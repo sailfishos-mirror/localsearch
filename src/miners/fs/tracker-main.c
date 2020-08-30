@@ -57,6 +57,7 @@
 static GMainLoop *main_loop;
 static GDBusProxy *index_proxy;
 static GPtrArray *proxy_folders;
+static guint cleanup_id;
 
 static gint initial_sleep = -1;
 static gboolean no_daemon;
@@ -432,6 +433,26 @@ miner_start (TrackerMiner  *miner,
 	                                           miner);
 }
 
+static gboolean
+cleanup_cb (gpointer user_data)
+{
+	/* Reclaim as much memory as possible */
+	malloc_trim (0);
+
+	cleanup_id = 0;
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+miner_started_cb (TrackerMinerFS *fs)
+{
+	if (cleanup_id) {
+		g_source_remove (cleanup_id);
+		cleanup_id = 0;
+	}
+}
+
 static void
 miner_finished_cb (TrackerMinerFS *fs,
                    gdouble         seconds_elapsed,
@@ -450,6 +471,8 @@ miner_finished_cb (TrackerMinerFS *fs,
 		tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs),
 							 TRUE);
 	}
+
+	cleanup_id = g_timeout_add_seconds (30, cleanup_cb, NULL);
 
 	/* We're not sticking around for file updates, so stop
 	 * the mainloop and exit.
