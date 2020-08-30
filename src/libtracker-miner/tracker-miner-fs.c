@@ -1364,7 +1364,7 @@ item_add_or_update (TrackerMinerFS *fs,
 	g_task_set_task_data (gtask, ctxt,
 	                      (GDestroyNotify) update_processing_task_context_free);
 
-	task = tracker_task_new (file, g_object_ref (gtask), g_object_unref);
+	task = tracker_task_new (file, gtask, NULL);
 
 	ctxt->task = tracker_task_ref (task);
 	tracker_task_pool_add (priv->task_pool, task);
