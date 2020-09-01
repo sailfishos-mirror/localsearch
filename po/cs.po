@@ -436,7 +436,7 @@ msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr ""
-"Rodičovská složka NENÍ způsobilá k indexování (vyplynulo z filtru obsahu)"
+"Rodičovská složka „%s“ NENÍ způsobilá k indexování (vyplynulo z filtru obsahu)"
 
 #: src/miners/fs/tracker-main.c:674
 msgid "Directory is eligible to be indexed"
