@@ -27,9 +27,13 @@ dbus_service_file = configure_file(
 desktop_file = configure_file(
     input: 'tracker-miner-rss.desktop.in',
     output: 'tracker-miner-rss-@0@.desktop'.format(tracker_api_major),
-    configuration: conf,
-    install: true,
-    install_dir: xdg_autostart_dir)
+    configuration: conf)
+
+if get_option('autostart')
+  install_data(desktop_file,
+      install: true,
+      install_dir: join_paths(get_option('sysconfdir'), 'xdg/autostart'))
+endif
 
 if get_option('systemd_user_services')
   # This file allows starting the service as a systemd user service.
