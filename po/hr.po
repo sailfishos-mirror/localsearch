@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2020-09-02 20:27+0000\n"
-"PO-Revision-Date: 2020-09-03 19:13+0200\n"
+"PO-Revision-Date: 2020-09-03 19:20+0200\n"
 "Last-Translator: gogo <trebelnik2@gmail.com>\n"
 "Language-Team: Croatian <hr@li.org>\n"
 "Language: hr\n"
@@ -1122,7 +1122,7 @@ msgid ""
 "NOTE: Limit was reached, there are more items in the database not listed here"
 msgstr ""
 "NAPOMENA: Ograničenje je dostignuto, postoji više stavki u bazi podataka "
-"koji nisu prikazani ovdje"
+"koji nisu prikazane ovdje"
 
 #: src/tracker/tracker-search.c:262 src/tracker/tracker-search.c:576
 #: src/tracker/tracker-search.c:665 src/tracker/tracker-search.c:753
