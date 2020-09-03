@@ -34,7 +34,7 @@
 #include "tracker-config.h"
 
 #define CONFIG_SCHEMA "org.freedesktop.Tracker3.Miner.Files"
-#define CONFIG_PATH   "/org/freedesktop/tracker/miner/files/"
+#define CONFIG_PATH   "/org/freedesktop/tracker3/miner/files/"
 
 /* Default values */
 #define DEFAULT_INITIAL_SLEEP                    15       /* 0->1000 */

@@ -18,7 +18,7 @@ Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA  02110-1301, USA.
 -->
 <schemalist>
-  <schema id="org.freedesktop.Tracker3.Extract" path="/org/freedesktop/tracker/extract/" gettext-domain="tracker-miners">
+  <schema id="org.freedesktop.Tracker3.Extract" path="/org/freedesktop/tracker3/extract/" gettext-domain="tracker-miners">
     <key name="max-bytes" type="i">
       <summary>Max bytes to extract</summary>
       <description>Maximum number of UTF-8 bytes to extract.</description>
