@@ -11,7 +11,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-25 20:43+0000\n"
+"POT-Creation-Date: 2020-08-27 14:13+0000\n"
 "PO-Revision-Date: 2020-07-07 16:50+0200\n"
 "Last-Translator: Francesc Famadas <kiski97@gmail.com>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
@@ -61,8 +61,8 @@ msgstr "Habilita l'stemmer"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:25
 msgid ""
-"Simplify the words to their root to provide more results. E.g. “shelves” and"
-" “shelf” to “shel”"
+"Simplify the words to their root to provide more results. E.g. “shelves” and "
+"“shelf” to “shel”"
 msgstr ""
 "Simplifica les paraules a la seva arrel per proporcionar més resultats. Per "
 "exemple: «prestatgeria» i «prestatge» a «prestat»"
@@ -93,8 +93,8 @@ msgstr "Ignora les paraules buides"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:43
 msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common"
-" words like “the”, “yes”, “no”, etc."
+"If enabled, the words listed in the stop-words list are ignored. E.g. common "
+"words like “the”, “yes”, “no”, etc."
 msgstr ""
 "Si s'habilita, les paraules llistades a la llista de paraules buides "
 "s'ignoraran. Per exemple, paraules comunes com ara «el», «sí», «no», etc."
@@ -121,8 +121,7 @@ msgstr "Límit d'espai de disc mínim"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
 msgid ""
-"Disk space threshold in percent at which to pause indexing, or -1 to "
-"disable."
+"Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
 "Llindar d'espai de disc, en percentatge, en el qual s'atura la indexació, o "
 "-1 per desactivar-ho."
@@ -137,10 +136,9 @@ msgid ""
 "database. 0 forces crawling anytime, -1 forces it only after unclean "
 "shutdowns, and -2 disables it entirely."
 msgstr ""
-"Interval, en dies, per comprovar si el sistema de fitxers està actualitzat a"
-" la base de dades. El 0 força la indexació en qualsevol moment, el -1 la "
-"força només després d'aturades incorrectes i el -2 la desactiva "
-"completament."
+"Interval, en dies, per comprovar si el sistema de fitxers està actualitzat a "
+"la base de dades. El 0 força la indexació en qualsevol moment, el -1 la "
+"força només després d'aturades incorrectes i el -2 la desactiva completament."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
 msgid "Removable devices’ data permanence threshold"
@@ -185,8 +183,8 @@ msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
 msgstr ""
-"Establiu «true» (cert) per activar la indexació de CD's, DVD's i dispositius"
-" òptics en general (si els dispositius extraïbles no s'indexen, tampoc "
+"Establiu «true» (cert) per activar la indexació de CD's, DVD's i dispositius "
+"òptics en general (si els dispositius extraïbles no s'indexen, tampoc "
 "s'indexaran els discs òptics)"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
@@ -223,8 +221,8 @@ msgid ""
 msgstr ""
 "Llista de directoris a indexar de forma recursiva, els valors especials "
 "inclouen: «&DOCUMENTS», «&DOWNLOAD», «&MUSIC», «&PICTURES», «&PUBLIC_SHARE», "
-"«&TEMPLATES», «&VIDEOS». Vegeu /etc/xdg/user-dirs.defaults i $HOME/.config/user-"
-"dirs.default"
+"«&TEMPLATES», «&VIDEOS». Vegeu /etc/xdg/user-dirs.defaults i $HOME/.config/"
+"user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
@@ -250,8 +248,8 @@ msgstr "Indexa les aplicacions instal·lades al sistema"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files"
-" in the standard XDG system and user data directories."
+"If this option is enabled, the filesystem miner will look for .desktop files "
+"in the standard XDG system and user data directories."
 msgstr ""
 "Si aquesta opció està activada, l'extractor de dades del sistema de fitxers "
 "cercarà fitxers .desktop al sistema XDG estàndard i als directoris de dades "
@@ -280,8 +278,7 @@ msgstr "Directoris amb contingut a ignorar"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr ""
-"Evita qualsevol directori que contingui un fitxer d'aquesta llista de "
-"blocats"
+"Evita qualsevol directori que contingui un fitxer d'aquesta llista de blocats"
 
 #: src/libtracker-miners-common/tracker-utils.c:90
 msgid "unknown time"
@@ -360,8 +357,7 @@ msgstr "Ja existeix una petició de pausa de la mateixa aplicació i motiu"
 
 #: src/miners/fs/tracker-main.c:76
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-msgstr ""
-"Temps d'espera inicial (en segons), entre 0 i 1000 (predeterminat =15)"
+msgstr "Temps d'espera inicial (en segons), entre 0 i 1000 (predeterminat =15)"
 
 #: src/miners/fs/tracker-main.c:81
 msgid "Runs until all configured locations are indexed and then exits"
@@ -431,12 +427,10 @@ msgstr "El directori pare «%s» no és apte per a ser indexat (basat en filtres
 #: src/miners/fs/tracker-main.c:645
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr ""
-"El directori pare «%s» no és apte per a ser indexat (fitxer amagat)"
+msgstr "El directori pare «%s» no és apte per a ser indexat (fitxer amagat)"
 
 #: src/miners/fs/tracker-main.c:653
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on contents)"
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
@@ -448,10 +442,14 @@ msgstr ""
 msgid "Directory is eligible to be indexed"
 msgstr "El directori no és apte per ser indexat"
 
+#: src/miners/fs/tracker-main.c:675
+msgid "File is eligible to be indexed"
+msgstr "El fitxer no és apte per ser indexat"
+
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#: src/miners/fs/tracker-main.c:675 src/miners/fs/tracker-main.c:929
-#| msgid "File is eligible to be mined (based on rules)"
+#.
+#: src/miners/fs/tracker-main.c:929
 msgid "— start the tracker indexer"
 msgstr "— inicia l'indexador del Tracker"
 
@@ -470,6 +468,7 @@ msgstr "Títol a utilitzar (s'ha d'utilitzar amb «--add-feed»)"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
 #: src/miners/rss/tracker-main.c:145
 msgid "— start the feeds indexer"
 msgstr "— inicia l'indexador de canals"
@@ -498,15 +497,16 @@ msgstr "No s'ha pogut afegir el canal"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
 #: src/tracker-control/tracker-main.c:135
 msgid "— start the tracker index proxy"
 msgstr "— inicia el servidor intermediari de l'índex del Tracker"
 
-#: src/tracker-extract/tracker-extract.c:674
+#: src/tracker-extract/tracker-extract.c:680
 msgid "Metadata extraction failed"
 msgstr "Ha fallat l'extractor de metadades"
 
-#: src/tracker-extract/tracker-extract.c:736
+#: src/tracker-extract/tracker-extract.c:742
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "No s'han trobat mòduls de metadades o extractors per gestionar aquest fitxer"
@@ -623,8 +623,7 @@ msgid ""
 "use this with --miner)"
 msgstr ""
 "Fes una pausa a un extractor de dades mentre el procés de crida estigui "
-"actiu o fins que es reprengui (heu d'utilitzar-ho conjuntament amb "
-"«--miner»)"
+"actiu o fins que es reprengui (heu d'utilitzar-ho conjuntament amb «--miner»)"
 
 #: src/tracker/tracker-daemon.c:132
 msgid "Resume a miner (you must use this with --miner)"
@@ -735,8 +734,8 @@ msgstr "Premeu Ctrl+C per aturar"
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
 msgstr ""
-"No s'ha pogut reprendre l'extractor de dades, no s'ha pogut crear el gestor,"
-" %s"
+"No s'ha pogut reprendre l'extractor de dades, no s'ha pogut crear el gestor, "
+"%s"
 
 #: src/tracker/tracker-daemon.c:515
 #, c-format
@@ -807,8 +806,7 @@ msgstr "No s'ha pogut obtenir una connexió SPARQL"
 
 #: src/tracker/tracker-daemon.c:722
 msgid "Now listening for resource updates to the database"
-msgstr ""
-"S'està seguint si hi ha actualitzacions de recursos a la base de dades"
+msgstr "S'està seguint si hi ha actualitzacions de recursos a la base de dades"
 
 #: src/tracker/tracker-daemon.c:723
 msgid "All nie:plainTextContent properties are omitted"
@@ -842,8 +840,8 @@ msgstr ""
 #: src/tracker/tracker-daemon.c:893
 msgid "You must provide a pause or resume command for the miner"
 msgstr ""
-"Heu de proporcionar l'ordre de fer una pausa o de reprendre a l'extractor de"
-" dades"
+"Heu de proporcionar l'ordre de fer una pausa o de reprendre a l'extractor de "
+"dades"
 
 #: src/tracker/tracker-daemon.c:927
 msgid "You can not use the --kill and --terminate arguments together"
@@ -960,6 +958,7 @@ msgstr "Mostra el contingut del text pla si està disponible per als recursos"
 #. * of the URI. While URI supports only ASCI encoding, IRI
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
+#.
 #: src/tracker/tracker-info.c:62
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
@@ -1099,8 +1098,8 @@ msgstr "Utilitza «o» en comptes de «i» (predeterminat) per cercar termes"
 
 #: src/tracker/tracker-search.c:131
 msgid ""
-"Show URNs for results (doesn’t apply to --music-albums, --music-artists, "
-"--feeds, --software, --software-categories)"
+"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
+"feeds, --software, --software-categories)"
 msgstr ""
 "Mostra els URN's dels resultats (no s'aplica a «--music-albums», «--music-"
 "artists», «--feeds», «--software», «--software-categories»)"
@@ -1138,8 +1137,7 @@ msgstr "EXPRESSIÓ"
 
 #: src/tracker/tracker-search.c:173 src/tracker/tracker-tag.c:101
 msgid ""
-"NOTE: Limit was reached, there are more items in the database not listed "
-"here"
+"NOTE: Limit was reached, there are more items in the database not listed here"
 msgstr ""
 "NOTA: s'ha arribat al límit, la base de dades conté més elements que no "
 "estan llistats aquí"
@@ -1230,18 +1228,21 @@ msgstr "Estadístiques:"
 #. *   Files:
 #. *     None
 #. *
+#.
 #. To translators: This is to say there are no
 #. * resources found associated with this tag, e.g.:
 #. *
 #. *   Tags (shown by name):
 #. *     None
 #. *
+#.
 #. To translators: This is to say there are no
 #. * tags found for a particular file, e.g.:
 #. *
 #. *   /path/to/some/file:
 #. *     None
 #. *
+#.
 #: src/tracker/tracker-status.c:153 src/tracker/tracker-tag.c:321
 #: src/tracker/tracker-tag.c:453 src/tracker/tracker-tag.c:575
 #: src/tracker/tracker-tag.c:953
@@ -1456,8 +1457,8 @@ msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
-"L'opció «--and-operator» només es pot utilitzar juntament amb «--list» i amb"
-" arguments d'etiqueta"
+"L'opció «--and-operator» només es pot utilitzar juntament amb «--list» i amb "
+"arguments d'etiqueta"
 
 #: src/tracker/tracker-tag.c:1097
 msgid "Add and delete actions can not be used together"
@@ -1469,8 +1470,7 @@ msgstr "L'opció «--description» només es pot utilitzar juntament amb «--add
 
 #: src/tracker-writeback/tracker-main.c:52
 msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
-"(default=0)"
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
 msgstr ""
 "Registre, 0 = només errors, 1 = mínim, 2 = detallat i 3 = depuració "
 "(predeterminat=0)"
@@ -1481,6 +1481,7 @@ msgstr "Inhabilita l'aturada després de 30 segons d'inactivitat"
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— inicia el servei d'escriptura del Tracker"
@@ -1499,7 +1500,8 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 #~ "No es pot fer el seguiment del directori (basant-se en les configuracions)"
 
 #~ msgid "File is eligible to be monitored (based on config)"
-#~ msgstr "Es pot fer el seguiment del fitxer (basant-se en les configuracions)"
+#~ msgstr ""
+#~ "Es pot fer el seguiment del fitxer (basant-se en les configuracions)"
 
 #~ msgid "File is NOT eligible to be monitored (based on config)"
 #~ msgstr ""
@@ -1532,7 +1534,8 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 
 #~ msgid "Could not (re)index file, manager could not be created, %s"
 #~ msgstr ""
-#~ "No s'ha pogut (tornar a)indexar el fitxer, no s'ha pogut crear el gestor, %s"
+#~ "No s'ha pogut (tornar a)indexar el fitxer, no s'ha pogut crear el gestor, "
+#~ "%s"
 
 #~ msgid "Could not (re)index file"
 #~ msgstr "No s'ha pogut (tornar a)indexar el fitxer"
@@ -1640,7 +1643,8 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 
 #~ msgid "Restore a database from a previous backup (see --backup)"
 #~ msgstr ""
-#~ "Restaura una base de dades d'una còpia de seguretat prèvia (vegeu --backup)"
+#~ "Restaura una base de dades d'una còpia de seguretat prèvia (vegeu --"
+#~ "backup)"
 
 #~ msgid "Import a dataset from the provided file (in Turtle format)"
 #~ msgstr ""
@@ -1673,11 +1677,11 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 #~ msgstr "S'està restaurant la base de dades des de la còpia de seguretat"
 
 #~ msgid ""
-#~ "Only one action (--backup, --restore, --index-file or --import) can be used "
-#~ "at a time"
+#~ "Only one action (--backup, --restore, --index-file or --import) can be "
+#~ "used at a time"
 #~ msgstr ""
-#~ "Només es pot utilitzar una acció alhora (--backup, --restore, --index-file o"
-#~ " --import)"
+#~ "Només es pot utilitzar una acció alhora (--backup, --restore, --index-"
+#~ "file o --import)"
 
 #~ msgid "Missing one or more files which are required"
 #~ msgstr "Manquen un o més fitxers que són necessaris"
@@ -1706,17 +1710,17 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 #~ "application will be executed by the CPU next. Each application has an "
 #~ "associated scheduling policy and priority."
 #~ msgstr ""
-#~ "El planificador és el component principal que decideix quina serà la següent"
-#~ " aplicació que s'executarà a la CPU. Cada aplicació té associada una "
-#~ "política i prioritat de planificació."
+#~ "El planificador és el component principal que decideix quina serà la "
+#~ "següent aplicació que s'executarà a la CPU. Cada aplicació té associada "
+#~ "una política i prioritat de planificació."
 
 #~ msgid "Enable writeback"
 #~ msgstr "Habilita la reescriptura"
 
 #~ msgid "Set to false to completely disable any file writeback"
 #~ msgstr ""
-#~ "Establiu a «false» (fals) per desactivar completament qualsevol reescriptura"
-#~ " de fitxer"
+#~ "Establiu a «false» (fals) per desactivar completament qualsevol "
+#~ "reescriptura de fitxer"
 
 #~ msgid "File system data miner"
 #~ msgstr "Extractor de dades de fitxers del sistema"
@@ -1743,8 +1747,8 @@ msgstr "— inicia el servei d'escriptura del Tracker"
 #~ msgstr "Extractor de metadades"
 
 #~ msgid ""
-#~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default ="
-#~ " 0)"
+#~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
+#~ "(default = 0)"
 #~ msgstr ""
 #~ "Registre, 0 = només errors, 1 = mínim, 2 = detallat i 3 = depuració "
 #~ "(predeterminat = 0)"
