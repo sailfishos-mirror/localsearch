@@ -290,6 +290,9 @@ tracker_read_text_from_stream (GInputStream *stream,
 			break;
 		}
 
+		if (!s)
+			s = g_string_new (NULL);
+
 		/* Process read bytes, and halt loop if needed */
 		if (!process_chunk (buf,
 		                    n_bytes_read,
