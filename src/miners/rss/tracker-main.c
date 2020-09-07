@@ -296,7 +296,7 @@ main (int argc, char **argv)
 	g_object_unref (miner);
 	g_object_unref (connection);
 	g_object_unref (proxy);
-	tracker_domain_ontology_unref (domain_ontology);
+	g_clear_pointer (&domain_ontology, tracker_domain_ontology_unref);
 
 	return EXIT_SUCCESS;
 }
