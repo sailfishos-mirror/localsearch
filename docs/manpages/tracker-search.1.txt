@@ -1,17 +1,17 @@
-tracker-search(1)
-=================
+tracker3-search(1)
+==================
 
 == NAME
 
-tracker-search - Search for content by type or across all types
+tracker3-search - Search for content by type or across all types
 
 == SYNOPSIS
 
-*tracker search* [_options_...] [[_expression1_] ...]
+*tracker3 search* [_options_...] [[_expression1_] ...]
 
 == DESCRIPTION
 
-*tracker search* searches all indexed content for _expression_. The
+*tracker3 search* searches all indexed content for _expression_. The
 resource in which _expression_ matches must exist (see *--all* for more
 information). All results are returned in ascending order. In all cases,
 if no _expression_ is given for an argument (like *--folders* for
@@ -94,4 +94,4 @@ _expression_::
 
 == SEE ALSO
 
-*tracker-stats*(1), *tracker-tag*(1), *tracker-info*(1).
+*tracker3-status*(1), *tracker3-tag*(1), *tracker3-info*(1).

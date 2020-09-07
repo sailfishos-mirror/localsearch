@@ -1,17 +1,17 @@
-tracker-tag(1)
-==============
+tracker3-tag(1)
+===============
 
 == NAME
 
-tracker-tag - Add, remove and list tags.
+tracker3-tag - Add, remove and list tags.
 
 == SYNOPSIS
 
 ....
-tracker tag FILE1 [FILE2 ...] [-l <limit>] [-o <offset>] [-r]
-tracker tag -t [[TAG1] [TAG2] ...] [-s] [-r]
-tracker tag -a <TAG> [-e <description>] 
-tracker tag -d <TAG>
+tracker3 tag FILE1 [FILE2 ...] [-l <limit>] [-o <offset>] [-r]
+tracker3 tag -t [[TAG1] [TAG2] ...] [-s] [-r]
+tracker3 tag -a <TAG> [-e <description>] 
+tracker3 tag -d <TAG>
 ....
 
 == DESCRIPTION
@@ -36,7 +36,7 @@ are listed (OR condition). For example, this will match any tags named
 either _foo_, _bar_ or _baz_:
 
 ....
-$ tracker-tag -t foo bar baz
+$ tracker3-tag -t foo bar baz
 ....
 
 *-s, --show-files*::
@@ -63,7 +63,7 @@ $ tracker-tag -t foo bar baz
   example:
 
 ....
-$ tracker-tag -s -t sliff sloff
+$ tracker3-tag -s -t sliff sloff
 ....
 
 Should show files in the database that have both the _sliff_ and _sloff_
@@ -71,4 +71,4 @@ tags.
 
 == SEE ALSO
 
-*tracker-sparql*(1), *tracker-search*(1), *tracker-info*(1).
+*tracker3-sparql*(1), *tracker3-search*(1), *tracker3-info*(1).

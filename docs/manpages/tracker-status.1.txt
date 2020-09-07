@@ -1,16 +1,16 @@
-tracker-status(1)
-=================
+tracker3-status(1)
+==================
 
 == NAME
 
-tracker-status - Provide status and statistics on the data indexed
+tracker3-status - Provide status and statistics on the data indexed
 
 == SYNOPSIS
 
 ....
-tracker status
-tracker status [[expression1]...]
-tracker status --stat [-a] [[expression1]...]
+tracker3 status
+tracker3 status [[expression1]...]
+tracker3 status --stat [-a] [[expression1]...]
 ....
 
 == DESCRIPTION
@@ -36,7 +36,7 @@ If one or more _expression_ arguments is given, the statistics returned
 are filtered to only show information those RDF types matching
 _expression_ (case folded and matching accented variants). The RDF
 classes are detailed by the Nepomuk otology specification. A list of
-possible classes matching _expression_, see *tracker sparql -c*.
+possible classes matching _expression_, see *tracker3 sparql -c*.
 
 *-a, --all*::
   Display statistics about ALL RDF classes that exist in the database.
@@ -48,7 +48,7 @@ possible statistics.
 
 == SEE ALSO
 
-*tracker-daemon*(1), *tracker-sparql*(1), *tracker-info*(1).
+*tracker3-daemon*(1), *tracker3-sparql*(1), *tracker3-info*(1).
 
 - *http://nepomuk.semanticdesktop.org/*
 - *http://www.w3.org/TR/rdf-sparql-query/*
