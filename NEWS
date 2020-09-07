@@ -1,3 +1,12 @@
+NEW in 2.3.5 - 2020-09-07
+=========================
+  * Disable miners autostart by default. This is a measure to make Tracker 2.x
+    get as much out of the way as possible with Tracker 3.x available. This
+    default can be undone with -Dautostart=true.
+  * Whitelist statx syscall, used in recent glib.
+
+Translations: lt
+
 NEW in 2.3.4 - 2020-08-24
 =========================
    * Block image/ktx files in 90-gstreamer-image-generic.rule
