@@ -794,7 +794,7 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 				file = tracker_resource_get_first_relation (image, "nie:isStoredAs");
 
 			if (file)
-				artwork_url = tracker_resource_get_first_string (image, "nie:url");
+				artwork_url = tracker_resource_get_first_string (file, "nie:url");
 
 			if (artwork_url) {
 				g_value_init (&val, G_TYPE_STRING);
