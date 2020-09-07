@@ -1,13 +1,13 @@
-tracker-reset(1)
-================
+tracker3-reset(1)
+=================
 
 == NAME
 
-tracker-reset - Reset the index and configuration
+tracker3-reset - Reset the index and configuration
 
 == SYNOPSIS
 
-*tracker reset* [--filesystem | --rss] [--file _FILE_]
+*tracker3 reset* [--filesystem | --rss] [--file _FILE_]
 
 == DESCRIPTION
 
@@ -25,10 +25,10 @@ hard reset option. This behaves as if Tracker was just installed.
 
 == OPTIONS
 
-*--filesystem*::
+*-s, --filesystem*::
   Removes data stored by tracker-miner-fs(1). The miner will automatically
   recreate its cache from the filesystem when it restarts.
-*--rss::
+*-r, --rss*::
   Removes data stored by tracker-miner-rss(1).
 *-f, --file _FILE_*::
   Resets all indexed information about _FILE_, works recursively for
@@ -38,4 +38,4 @@ hard reset option. This behaves as if Tracker was just installed.
 
 == SEE ALSO
 
-*tracker-daemon*(1). *tracker-miner-fs*(1), *tracker-miner-rss*(1).
+*tracker3-daemon*(1). *tracker-miner-fs-3*(1), *tracker-miner-rss-3*(1).

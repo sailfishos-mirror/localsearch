@@ -1,9 +1,9 @@
-tracker-writeback(1)
-====================
+tracker-writeback-3(1)
+======================
 
 == NAME
 
-tracker-writeback - Used to write metadata set in Tracker back to
+tracker-writeback-3 - Used to write metadata set in Tracker back to
 physical files.
 
 == SYNOPSIS
@@ -37,4 +37,4 @@ tracker-miner-fs configuration.
 
 == SEE ALSO
 
-*tracker-miner-fs*(1). *tracker-extract*(1).
+*tracker-miner-fs-3*(1). *tracker3-extract*(1).
