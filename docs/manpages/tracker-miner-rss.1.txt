@@ -1,13 +1,13 @@
-tracker-miner-rss(1)
-====================
+tracker-miner-rss-3(1)
+======================
 
 == NAME
 
-tracker-miner-rss - Used to populate Tracker with RSS feed data.
+tracker-miner-rss-3 - Used to populate Tracker with RSS feed data.
 
 == SYNOPSIS
 
-*tracker-miner-rss* [_OPTION_...]
+*tracker-miner-rss-3* [_OPTION_...]
 
 == DESCRIPTION
 
@@ -48,4 +48,4 @@ You can use *tracker-search --feeds* to get the latest feed information.
 
 == SEE ALSO
 
-*tracker-info*(1), *tracker-search*(1).
+*tracker3-info*(1), *tracker3-search*(1).
