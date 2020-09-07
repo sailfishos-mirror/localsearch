@@ -1,3 +1,14 @@
+NEW in 2.99.5 - 2020-09-07
+==========================
+
+  * Always create content resource for text files
+  * Calculate per extract module timings in TRACKER_DEBUG=statistics
+  * Add mtime information to graph-specific nfo:FileDataObjects
+  * Add option to set the D-Bus domain at build time
+  * Ensure memory is released on inactivity or memory pressure
+
+Translations: ca, cs, da, de, fr, fur, gl, hr, id, lt, sl, sv, zh_CN
+
 NEW in 2.99.4 - 2020-08-24
 ==========================
 
