@@ -248,7 +248,7 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 		if (g_strcmp0 (prop, "nie:keyword") == 0) {
 			GList *keywords, *k;
-			GString *keyword_str = NULL;
+			GString *keyword_str = g_string_new (NULL);
 
 			keywords = tracker_resource_get_values (resource, prop);
 
@@ -260,10 +260,10 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 				if (G_VALUE_HOLDS_STRING (value)) {
 					const gchar *str = g_value_get_string (value);
 
-					if (!keywords)
-						keyword_str = g_string_new (str);
-					else
-						g_string_append_printf (keyword_str, ", %s", str);
+					if (keyword_str->len > 0)
+						g_string_append_c (keyword_str, ',');
+
+					g_string_append_printf (keyword_str, "%s", str);
 				}
 			}
 
