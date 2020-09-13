@@ -41,7 +41,7 @@ tracker_extract_persistence_init (TrackerExtractPersistence *persistence)
 
 	priv = tracker_extract_persistence_get_instance_private (persistence);
 
-	dirname = g_strdup_printf ("tracker-extract-files.%d", getuid ());
+	dirname = g_strdup_printf ("tracker-extract-3-files.%d", getuid ());
 	tmp_path = g_build_filename (g_get_tmp_dir (), dirname, NULL);
 	g_free (dirname);
 
