@@ -63,8 +63,9 @@ static GInitableIface *parent_initable_iface;
 static void decorator_get_next_file (TrackerDecorator *decorator);
 static void tracker_extract_decorator_initable_iface_init (GInitableIface *iface);
 
-static void decorator_ignore_file (GFile    *file,
-                                   gpointer  user_data);
+static void decorator_ignore_file (GFile                   *file,
+                                   TrackerExtractDecorator *decorator,
+                                   const gchar             *error_message);
 
 G_DEFINE_TYPE_WITH_CODE (TrackerExtractDecorator, tracker_extract_decorator,
                         TRACKER_TYPE_DECORATOR_FS,
@@ -166,7 +167,9 @@ get_metadata_cb (TrackerExtract *extract,
 	}
 
 	if (error) {
-		decorator_ignore_file (data->file, data->decorator);
+		decorator_ignore_file (data->file,
+		                       TRACKER_EXTRACT_DECORATOR (data->decorator),
+		                       error->message);
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
 		gchar *resource_sparql, *sparql;
@@ -415,10 +418,10 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 }
 
 static void
-decorator_ignore_file (GFile    *file,
-                       gpointer  user_data)
+decorator_ignore_file (GFile                   *file,
+                       TrackerExtractDecorator *decorator,
+                       const gchar             *error_message)
 {
-	TrackerExtractDecorator *decorator = user_data;
 	TrackerSparqlConnection *conn;
 	GError *error = NULL;
 	gchar *uri, *query;
@@ -434,7 +437,7 @@ decorator_ignore_file (GFile    *file,
 	                          NULL, &error);
 
 	if (info) {
-		tracker_error_report (file, "Crash/hang handling file", NULL);
+		tracker_error_report (file, error_message, NULL);
 
 		mimetype = g_file_info_get_attribute_string (info,
 		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
@@ -474,6 +477,15 @@ decorator_ignore_file (GFile    *file,
 
 	g_free (query);
 	g_free (uri);
+}
+
+static void
+persistence_ignore_file (GFile    *file,
+                         gpointer  user_data)
+{
+	TrackerExtractDecorator *decorator = user_data;
+
+	decorator_ignore_file (file, decorator, "Crash/hang handling file");
 }
 
 static void
@@ -549,7 +561,7 @@ tracker_extract_decorator_initable_init (GInitable     *initable,
 		ret = FALSE;
 	}
 
-	priv->persistence = tracker_extract_persistence_initialize (decorator_ignore_file,
+	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
 	                                                            decorator);
 out:
 	g_clear_object (&conn);
