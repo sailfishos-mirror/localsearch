@@ -2467,6 +2467,7 @@ miner_files_move_file (TrackerMinerFS *fs,
 		g_free (new_parent_id);
 	}
 
+	/* Update nie:isStoredAs in the nie:InformationElement */
 	g_string_append_printf (sparql,
 	                        "DELETE { "
 	                        "  GRAPH ?g {"
@@ -2480,7 +2481,10 @@ miner_files_move_file (TrackerMinerFS *fs,
 	                        "  GRAPH ?g {"
 	                        "    ?ie nie:isStoredAs <%s> "
 	                        "  }"
-	                        "}; "
+	                        "}; ",
+	                        source_uri, uri, source_uri);
+	/* Update tracker:FileSystem nfo:FileDataObject information */
+	g_string_append_printf (sparql,
 	                        "WITH " DEFAULT_GRAPH " "
 	                        "DELETE { "
 	                        "  <%s> a rdfs:Resource . "
@@ -2494,10 +2498,26 @@ miner_files_move_file (TrackerMinerFS *fs,
 	                        "  <%s> ?p ?o ; "
 	                        "  FILTER (?p != nfo:fileName && ?p != nie:url && ?p != nfo:belongsToContainer) . "
 	                        "} ",
-	                        source_uri, uri, source_uri,
 	                        source_uri,
 	                        uri, display_name, uri, container_clause,
 	                        source_uri);
+	/* Update nfo:FileDataObject in data graphs */
+	g_string_append_printf (sparql,
+	                        "DELETE { "
+	                        "  GRAPH ?g {"
+	                        "    <%s> a rdfs:Resource "
+	                        "  }"
+	                        "} INSERT {"
+	                        "  GRAPH ?g {"
+	                        "    <%s> a nfo:FileDataObject ; "
+	                        "         ?p ?o "
+	                        "  }"
+	                        "} WHERE {"
+	                        "  GRAPH ?g {"
+	                        "    <%s> ?p ?o "
+	                        "  }"
+	                        "}",
+	                        source_uri, uri, source_uri);
 	g_free (container_clause);
 
 	if (recursive) {
