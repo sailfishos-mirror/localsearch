@@ -2467,6 +2467,7 @@ miner_files_move_file (TrackerMinerFS *fs,
 		g_free (new_parent_id);
 	}
 
+	/* Update nie:isStoredAs in the nie:InformationElement */
 	g_string_append_printf (sparql,
 	                        "DELETE { "
 	                        "  GRAPH ?g {"
@@ -2480,7 +2481,10 @@ miner_files_move_file (TrackerMinerFS *fs,
 	                        "  GRAPH ?g {"
 	                        "    ?ie nie:isStoredAs <%s> "
 	                        "  }"
-	                        "}; "
+	                        "}; ",
+	                        source_uri, uri, source_uri);
+	/* Update tracker:FileSystem nfo:FileDataObject information */
+	g_string_append_printf (sparql,
 	                        "WITH " DEFAULT_GRAPH " "
 	                        "DELETE { "
 	                        "  <%s> a rdfs:Resource . "
@@ -2494,40 +2498,84 @@ miner_files_move_file (TrackerMinerFS *fs,
 	                        "  <%s> ?p ?o ; "
 	                        "  FILTER (?p != nfo:fileName && ?p != nie:url && ?p != nfo:belongsToContainer) . "
 	                        "} ",
-	                        source_uri, uri, source_uri,
 	                        source_uri,
 	                        uri, display_name, uri, container_clause,
 	                        source_uri);
+	/* Update nfo:FileDataObject in data graphs */
+	g_string_append_printf (sparql,
+	                        "DELETE { "
+	                        "  GRAPH ?g {"
+	                        "    <%s> a rdfs:Resource "
+	                        "  }"
+	                        "} INSERT {"
+	                        "  GRAPH ?g {"
+	                        "    <%s> a nfo:FileDataObject ; "
+	                        "         ?p ?o "
+	                        "  }"
+	                        "} WHERE {"
+	                        "  GRAPH ?g {"
+	                        "    <%s> ?p ?o "
+	                        "  }"
+	                        "}",
+	                        source_uri, uri, source_uri);
 	g_free (container_clause);
 
 	if (recursive) {
+		/* Update nie:isStoredAs in the nie:InformationElement */
 		g_string_append_printf (sparql,
-		                        " DELETE { "
-		                        "  ?u a rdfs:Resource . "
-		                        "  ?ie1 nie:isStoredAs ?u "
+		                        "DELETE { "
 		                        "  GRAPH ?g {"
-		                        "    ?ie2 nie:isStoredAs ?u "
+		                        "    ?ie nie:isStoredAs ?f "
 		                        "  }"
+		                        "} INSERT {"
+		                        "  GRAPH ?g {"
+		                        "    ?ie nie:isStoredAs ?new_url "
+		                        "  }"
+		                        "} WHERE {"
+		                        "  GRAPH ?g {"
+		                        "    ?f a nfo:FileDataObject ."
+		                        "    ?ie nie:isStoredAs ?f ."
+		                        "    BIND (CONCAT (\"%s/\", SUBSTR (STR (?f), STRLEN (\"%s/\") + 1)) AS ?new_url) ."
+		                        "    FILTER (STRSTARTS (STR (?f), \"%s/\")) . "
+		                        "  }"
+		                        "}; ",
+		                        uri, source_uri, source_uri);
+		/* Update tracker:FileSystem nfo:FileDataObject information */
+		g_string_append_printf (sparql,
+		                        "WITH " DEFAULT_GRAPH " "
+		                        "DELETE { "
+		                        "  ?f a rdfs:Resource . "
 		                        "} INSERT { "
 		                        "  ?new_url a nfo:FileDataObject ; "
-		                        "           nie:url ?new_url ; "
-		                        "           ?p ?o ."
-		                        "  ?ie1 nie:isStoredAs ?new_url . "
-		                        "  GRAPH ?g {"
-		                        "    ?ie2 nie:isStoredAs ?new_url . "
-		                        "  }"
+		                        "       nie:url ?new_url ; "
+		                        "       ?p ?o . "
 		                        "} WHERE { "
-		                        "  ?u a rdfs:Resource; "
-		                        "     nie:url ?url ; "
+		                        "  ?f a nfo:FileDataObject ;"
 		                        "     ?p ?o . "
-		                        "  OPTIONAL { ?u nie:interpretedAs ?ie1 } "
-		                        "  OPTIONAL { GRAPH ?g {"
-		                        "    ?u nie:interpretedAs ?ie2 "
-		                        "  }}"
-		                        "  BIND (CONCAT (\"%s/\", SUBSTR (?url, STRLEN (\"%s/\") + 1)) AS ?new_url) ."
-		                        "  FILTER (STRSTARTS (?url, \"%s/\")) . "
+		                        "  BIND (CONCAT (\"%s/\", SUBSTR (STR (?f), STRLEN (\"%s/\") + 1)) AS ?new_url) ."
+		                        "  FILTER (STRSTARTS (STR (?f), \"%s/\")) . "
 		                        "  FILTER (?p != nie:url) . "
 		                        "} ",
+		                        uri, source_uri, source_uri);
+		/* Update nfo:FileDataObject in data graphs */
+		g_string_append_printf (sparql,
+		                        "DELETE { "
+		                        "  GRAPH ?g {"
+		                        "    ?f a rdfs:Resource "
+		                        "  }"
+		                        "} INSERT {"
+		                        "  GRAPH ?g {"
+		                        "    ?new_url a nfo:FileDataObject ; "
+		                        "             ?p ?o ."
+		                        "  }"
+		                        "} WHERE {"
+		                        "  GRAPH ?g {"
+		                        "    ?f a nfo:FileDataObject ;"
+		                        "       ?p ?o ."
+		                        "    BIND (CONCAT (\"%s/\", SUBSTR (STR (?f), STRLEN (\"%s/\") + 1)) AS ?new_url) ."
+		                        "    FILTER (STRSTARTS (STR (?f), \"%s/\")) . "
+		                        "  }"
+		                        "}",
 		                        uri, source_uri, source_uri);
 	}
 
