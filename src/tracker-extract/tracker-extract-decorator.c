@@ -432,25 +432,38 @@ decorator_ignore_file (GFile    *file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                          NULL, &error);
-	if (!info) {
-		g_warning ("Could not get mimetype: %s", error->message);
-		g_error_free (error);
-		return;
+
+	if (info) {
+		tracker_error_report (file, "Crash/hang handling file", NULL);
+
+		mimetype = g_file_info_get_attribute_string (info,
+		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
+		hash = tracker_extract_module_manager_get_hash (mimetype);
+		g_object_unref (info);
+
+		query = g_strdup_printf ("INSERT DATA { GRAPH tracker:FileSystem {"
+		                         "  <%s> tracker:extractorHash \"%s\" ;"
+		                         "}}",
+		                         uri, hash);
+	} else {
+		g_debug ("Could not get mimetype: %s", error->message);
+
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+			tracker_error_report_delete (file);
+		else
+			tracker_error_report (file, error->message, NULL);
+
+		g_clear_error (&error);
+		query = g_strdup_printf ("DELETE {"
+		                         "  GRAPH ?g { <%s> a rdfs:Resource }"
+		                         "} WHERE {"
+		                         "  GRAPH ?g { <%s> a nfo:FileDataObject }"
+		                         "  FILTER (?g != tracker:FileSystem)"
+		                         "}",
+		                         uri, uri);
 	}
 
-	tracker_error_report (file, "Crash/hang handling file", NULL);
-
-	mimetype = g_file_info_get_attribute_string (info,
-	                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
-	hash = tracker_extract_module_manager_get_hash (mimetype);
-	g_object_unref (info);
-
 	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	query = g_strdup_printf ("INSERT DATA { GRAPH tracker:FileSystem {"
-	                         "  <%s> tracker:extractorHash \"%s\" ;"
-	                         "}}",
-	                         uri, hash);
-
 	tracker_sparql_connection_update (conn, query, NULL, &error);
 
 	if (error) {
