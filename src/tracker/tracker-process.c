@@ -68,7 +68,7 @@ tracker_process_data_free (TrackerProcessData *pd)
 static gchar *
 find_command (pid_t pid)
 {
-	gchar *proc_path, path[PATH_MAX];
+	gchar *proc_path, path[PATH_MAX + 1];
 	ssize_t len;
 
 	proc_path = g_strdup_printf ("/proc/%d/exe", pid);

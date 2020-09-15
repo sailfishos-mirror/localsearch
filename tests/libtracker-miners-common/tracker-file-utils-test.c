@@ -292,7 +292,7 @@ test_file_utils_open_close ()
         tracker_file_close (f, FALSE);
 
         f = tracker_file_open ("./file-does-NOT-exist");
-        g_assert_true (!f);
+        g_assert_null (f);
 }
 
 static void
@@ -399,7 +399,7 @@ test_file_exists_and_writable ()
         /* Doesn't exist and cannot be created */
         g_assert_true (!tracker_path_has_write_access_or_was_created ("/var/log/tracker-test"));
 
-        g_remove (path);
+        g_assert_cmpint (g_remove (path), ==, 0);
 }
 
 static void

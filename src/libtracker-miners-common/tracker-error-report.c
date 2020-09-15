@@ -22,6 +22,7 @@
 #include "tracker-error-report.h"
 
 #include <glib/gstdio.h>
+#include <errno.h>
 
 #define GROUP "Report"
 #define KEY_URI "Uri"
@@ -96,7 +97,12 @@ tracker_error_report_delete (GFile *file)
 
 	uri = g_file_get_uri (file);
 	report_path = get_report_file (uri);
-	g_remove (report_path);
+	if (g_remove (report_path) < 0) {
+		if (errno != ENOENT) {
+			g_warning ("Error removing path '%s': %m",
+			           report_path);
+		}
+	}
 
 	g_free (report_path);
 	g_free (uri);

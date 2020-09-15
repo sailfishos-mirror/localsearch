@@ -1013,7 +1013,7 @@ main (gint argc, gchar *argv[])
 
 	if (no_daemon) {
 		g_message ("tracker-miner-fs-3 running in --no-daemon mode.");
-	} else if (domain_ontology && domain_ontology_name) {
+	} else if (domain_ontology_name) {
 		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
 
 		g_message ("tracker-miner-fs-3 running in --domain-ontology mode as "

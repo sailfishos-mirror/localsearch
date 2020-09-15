@@ -273,7 +273,7 @@ main (int argc, char **argv)
 
 	loop = g_main_loop_new (NULL, FALSE);
 
-	if (domain_ontology && domain_ontology_name) {
+	if (domain_ontology_name) {
 		/* If we are running for a specific domain, we tie the lifetime of this
 		 * process to the domain. For example, if the domain name is
 		 * org.example.MyApp then this tracker-miner-rss process will exit as
@@ -296,7 +296,7 @@ main (int argc, char **argv)
 	g_object_unref (miner);
 	g_object_unref (connection);
 	g_object_unref (proxy);
-	tracker_domain_ontology_unref (domain_ontology);
+	g_clear_pointer (&domain_ontology, tracker_domain_ontology_unref);
 
 	return EXIT_SUCCESS;
 }
