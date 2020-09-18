@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-19 20:33+0000\n"
-"PO-Revision-Date: 2020-08-20 23:32+0200\n"
+"POT-Creation-Date: 2020-09-15 14:26+0000\n"
+"PO-Revision-Date: 2020-09-18 12:58+0200\n"
 "Last-Translator: Thibault Martin <mail@thibaultmart.in>\n"
 "Language-Team: GNOME French Team <gnomefr@traduc.org>\n"
 "Language: fr\n"
@@ -365,89 +365,89 @@ msgstr ""
 "L’application et la raison de mise en veille correspondent à une demande de "
 "mise en pause existante"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:77
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr ""
 "Temps de sommeil initial en secondes, de 0 à 1000 (valeur par défaut = 15)"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:82
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Fonctionne jusqu’à ce que tous les emplacements configurés soient indexés, "
 "puis quitte"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker/tracker-info.c:74
+#: src/miners/fs/tracker-main.c:86 src/tracker/tracker-info.c:74
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Vérifie si FICHIER est susceptible d’être extrait en fonction de la "
 "configuration"
 
-#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:83
+#: src/miners/fs/tracker-main.c:87 src/tracker-extract/tracker-main.c:83
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
-#: src/tracker/tracker-index.c:62 src/tracker/tracker-index.c:63
+#: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:77 src/tracker/tracker-info.c:78
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FICHIER"
 
-#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:90 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "Fonctionne pour une ontologie de domaine spécifique"
 
-#: src/miners/fs/tracker-main.c:93
+#: src/miners/fs/tracker-main.c:94
 msgid "Avoids changes in the filesystem"
 msgstr "Éviter les changements dans le système de fichiers"
 
-#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/miners/fs/tracker-main.c:98 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:101
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Affiche les informations de version"
 
-#: src/miners/fs/tracker-main.c:569
+#: src/miners/fs/tracker-main.c:603
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "L’objet de donnée « %s » existe déjà"
 
-#: src/miners/fs/tracker-main.c:570
+#: src/miners/fs/tracker-main.c:604
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "L’objet de donnée « %s » n’existe pas encore"
 
-#: src/miners/fs/tracker-main.c:606
+#: src/miners/fs/tracker-main.c:640
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Le répertoire n’est PAS susceptible d’être indexé (en fonction des règles)"
 
-#: src/miners/fs/tracker-main.c:610
+#: src/miners/fs/tracker-main.c:644
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Le fichier n’est PAS susceptible d’être indexé (en fonction des règles)"
 
-#: src/miners/fs/tracker-main.c:613
+#: src/miners/fs/tracker-main.c:647
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Le fichier n’est PAS susceptible d’être indexé (fichier caché)"
 
-#: src/miners/fs/tracker-main.c:615
+#: src/miners/fs/tracker-main.c:649
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Le fichier n’est PAS susceptible d’être indexé (dossier non indexé)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:673
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Le répertoire parent « %s » n’est PAS susceptible d’être indexé (en fonction "
 "des règles)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:679
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Le répertoire parent « %s » n’est PAS susceptible d’être indexé (fichier "
 "caché)"
 
-#: src/miners/fs/tracker-main.c:653
+#: src/miners/fs/tracker-main.c:687
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -456,18 +456,18 @@ msgstr ""
 "Le répertoire parent « %s » n’est PAS susceptible d’être indexé (en fonction "
 "du contenu)"
 
-#: src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:708
 msgid "Directory is eligible to be indexed"
 msgstr "Le répertoire est susceptible d’être indexé"
 
-#: src/miners/fs/tracker-main.c:675
+#: src/miners/fs/tracker-main.c:709
 msgid "File is eligible to be indexed"
 msgstr "Le fichier est susceptible d’être indexé"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:929
+#: src/miners/fs/tracker-main.c:966
 msgid "— start the tracker indexer"
 msgstr "— démarre l’indexeur de tracker"
 
@@ -502,7 +502,7 @@ msgstr "Impossible d’établir une connexion vers Tracker"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:362 src/tracker/tracker-process.c:174
+#: src/tracker/tracker-info.c:362 src/tracker/tracker-process.c:193
 #: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:89
 #: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:251
 #: src/tracker/tracker-status.c:280 src/tracker/tracker-tag.c:976
@@ -520,11 +520,11 @@ msgstr "Impossible d’ajouter le flux"
 msgid "— start the tracker index proxy"
 msgstr "— démarre le proxy de tracker"
 
-#: src/tracker-extract/tracker-extract.c:645
+#: src/tracker-extract/tracker-extract.c:680
 msgid "Metadata extraction failed"
 msgstr "Échec de l’extraction des métadonnées"
 
-#: src/tracker-extract/tracker-extract.c:707
+#: src/tracker-extract/tracker-extract.c:742
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Aucun module d’extraction ne gère ce fichier ou les métadonnées sont absentes"
@@ -867,7 +867,7 @@ msgid "You can not use the --kill and --terminate arguments together"
 msgstr ""
 "Vous ne pouvez pas utiliser les arguments --kill et --terminate simultanément"
 
-#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:152
+#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:171
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
@@ -901,7 +901,7 @@ msgstr ""
 "affiché"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:385 src/tracker/tracker-info.c:554
+#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:554
 #: src/tracker/tracker-reset.c:260 src/tracker/tracker-search.c:1400
 #: src/tracker/tracker-status.c:602 src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
@@ -928,53 +928,50 @@ msgstr "Impossible d’exécuter tracker-extract"
 #
 # Chemins :
 # src/tracker/tracker-index.c:51
-#. TRANSLATORS: FILE is a commandline argument, named like that
-#: src/tracker/tracker-index.c:51
+#: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
 msgstr "Ajoute FICHIER aux emplacements indexés"
 
-#. TRANSLATORS: FILE is a commandline argument, named like that
-#: src/tracker/tracker-index.c:55
+#: src/tracker/tracker-index.c:53
 msgid "Removes FILE from indexed locations"
 msgstr "Supprime FICHIER des emplacements indexés"
 
-#. TRANSLATORS: FILE is a commandline argument, named like that
-#: src/tracker/tracker-index.c:59
+#: src/tracker/tracker-index.c:56
 msgid "Makes indexing recursive"
 msgstr "Rend l’indexation récursive"
 
-#: src/tracker/tracker-index.c:197
+#: src/tracker/tracker-index.c:194
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "« %s » n’est pas un répertoire"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:278
+#: src/tracker/tracker-index.c:275
 msgid "Either --add or --remove must be provided"
 msgstr ""
 "Une option parmi « --add » (ajouter) ou « --remove » (supprimer) doit être "
 "fournie"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:282
+#: src/tracker/tracker-index.c:279
 msgid "--add and --remove are mutually exclusive"
 msgstr ""
 "« --add » (ajouter) et « --remove » (supprimer) sont mutuellement exclusives"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:292
+#: src/tracker/tracker-index.c:289
 msgid "--recursive requires --add"
 msgstr "« --recursive » (récursif) requiert « --add » (ajouter)"
 
-#: src/tracker/tracker-index.c:347 src/tracker/tracker-status.c:403
+#: src/tracker/tracker-index.c:344 src/tracker/tracker-status.c:403
 msgid "Path"
 msgstr "Chemin"
 
-#: src/tracker/tracker-index.c:348
+#: src/tracker/tracker-index.c:345
 msgid "Recursive"
 msgstr "Récursif"
 
-#: src/tracker/tracker-index.c:398
+#: src/tracker/tracker-index.c:395
 msgid "Please specify one or more locations to index."
 msgstr "Précisez un ou plusieurs endroits à indexer."
 
@@ -982,7 +979,7 @@ msgstr "Précisez un ou plusieurs endroits à indexer."
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Afficher l’espace des noms complets (ne pas utiliser nie:title, mais plutôt "
-"des URL complets)"
+"des URL complètes)"
 
 #: src/tracker/tracker-info.c:52
 msgid "Show plain text content if available for resources"
@@ -1008,7 +1005,7 @@ msgstr "Afficher les résultats comme RDF au format Turtle"
 
 #: src/tracker/tracker-info.c:70
 msgid "RDF property to treat as URL (eg. “nie:url”)"
-msgstr "Propriété RDF à traiter comme un URL (par ex. « nie:url »)"
+msgstr "Propriété RDF à traiter comme une URL (par ex. « nie:url »)"
 
 #: src/tracker/tracker-info.c:151
 msgid "Unable to retrieve namespace prefixes"
@@ -1024,26 +1021,26 @@ msgstr "Demande d’informations pour l’entité"
 
 #: src/tracker/tracker-info.c:410
 msgid "Unable to retrieve URN for URI"
-msgstr "Impossible de récupérer l’URN pour cet URI"
+msgstr "Impossible de récupérer l’URN pour cette URI"
 
 #: src/tracker/tracker-info.c:420 src/tracker/tracker-info.c:454
 msgid "Unable to retrieve data for URI"
-msgstr "Impossible de récupérer les données pour cet URI"
+msgstr "Impossible de récupérer les données pour cette URI"
 
 #: src/tracker/tracker-info.c:463
 msgid "No metadata available for that URI"
-msgstr "Aucune métadonnée disponible pour cet URI"
+msgstr "Aucune métadonnée disponible pour cette URI"
 
 #: src/tracker/tracker-info.c:468 src/tracker/tracker-search.c:1136
 msgid "Results"
 msgstr "Résultats"
 
-#: src/tracker/tracker-process.c:171
+#: src/tracker/tracker-process.c:190
 #, c-format
 msgid "Could not kill process %d — “%s”"
 msgstr "Impossible de tuer le processus %d — « %s »"
 
-#: src/tracker/tracker-process.c:177
+#: src/tracker/tracker-process.c:196
 #, c-format
 msgid "Killed process %d — “%s”"
 msgstr "Processus %d — « %s » tué"
