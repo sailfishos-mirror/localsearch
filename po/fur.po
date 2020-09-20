@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-25 20:43+0000\n"
-"PO-Revision-Date: 2020-08-28 12:32+0200\n"
+"POT-Creation-Date: 2020-09-15 14:26+0000\n"
+"PO-Revision-Date: 2020-09-20 07:34+0200\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <f.t.public@gmail.com>\n"
 "Language: fur\n"
@@ -33,7 +33,7 @@ msgstr "File di test de liste-permetûts"
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:31
 msgid "Filename patterns for plain text documents that should be indexed"
 msgstr ""
-"Modei di nons di file pai documents di test sempliçs che a scugnin jessi "
+"Modei di nons di files pai documents di test sempliçs che a scugnin jessi "
 "metûts te tabele"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:37
@@ -49,7 +49,7 @@ msgid ""
 msgstr ""
 "Se VÊR, tracker-extract al spietarà che tracker-miner-fs al finissi prime di "
 "estrai i meta-dâts. Cheste opzion e je utile sui sistemis limitâts dulà che "
-"al è impuartant listâ i file in maniere veloce e al è pussibil spietâ il "
+"al è impuartant listâ i files in maniere veloce e al è pussibil spietâ il "
 "recupar dai meta-dâts."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
@@ -146,8 +146,8 @@ msgid ""
 "Threshold in days after which files from removables devices will be removed "
 "from database if not mounted. 0 means never, maximum is 365."
 msgstr ""
-"Limit in dîs daspò i cuai i file di dispositîfs estraibii no plui montâts a "
-"vegnin gjavâts de base di dâts. 0 al indiche mai, il massim al è 365."
+"Limit in dîs daspò di chei i files di dispositîfs estraibii no plui montâts "
+"a vignaran gjavâts de base di dâts. 0 al indiche mai, il massim al è 365."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
 msgid "Enable monitors"
@@ -155,7 +155,7 @@ msgstr "Abilite il monitorâ"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
 msgid "Set to false to completely disable any file monitoring"
-msgstr "Met a FALS par disabilitâ il monitorizâ dai file"
+msgstr "Met a FALS par disabilitâ il monitorizâ dai files"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
 msgid "Index removable devices"
@@ -250,11 +250,11 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
-msgstr "File ignorâts"
+msgstr "Files ignorâts"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
 msgid "List of file patterns to avoid"
-msgstr "Liste di modei di file di ignorâ"
+msgstr "Liste di modei di files di ignorâ"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
 msgid "Ignored directories"
@@ -348,22 +348,22 @@ msgid "Pause application and reason match an already existing pause request"
 msgstr ""
 "La aplicazion in pause e la sô reson a corispuindin a une domande esistente"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:77
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Pause iniziâl in seconts, 0→100 (predefinît=15)"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:82
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Reste in esecuzion fintremai che dutis lis posizions configuradis no sedin "
 "metudis te tabele, daspò jes"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker/tracker-info.c:74
+#: src/miners/fs/tracker-main.c:86 src/tracker/tracker-info.c:74
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
-"Verifiche che al sedi pussibil estrai dâts da FILE in base ae configurazion"
+"Verifiche che al sedi pussibil estrai dâts di FILE in base ae configurazion"
 
-#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:83
+#: src/miners/fs/tracker-main.c:87 src/tracker-extract/tracker-main.c:83
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:77 src/tracker/tracker-info.c:78
@@ -371,77 +371,77 @@ msgstr ""
 msgid "FILE"
 msgstr "FILE"
 
-#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:90 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "Eseguìs par une specifiche ontologjie di domini"
 
-#: src/miners/fs/tracker-main.c:93
+#: src/miners/fs/tracker-main.c:94
 msgid "Avoids changes in the filesystem"
 msgstr "Al evite lis modifichis tal filesystem"
 
-#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/miners/fs/tracker-main.c:98 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:101
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Mostre informazions su la version"
 
-#: src/miners/fs/tracker-main.c:569
+#: src/miners/fs/tracker-main.c:603
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "L'ogjet dâts «%s» al esist za"
 
-#: src/miners/fs/tracker-main.c:570
+#: src/miners/fs/tracker-main.c:604
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "L'ogjet dâts «%s» al moment nol esist"
 
-#: src/miners/fs/tracker-main.c:606
+#: src/miners/fs/tracker-main.c:640
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Nol è pussibil meti in tabele la cartele (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:610
+#: src/miners/fs/tracker-main.c:644
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Nol è pussibil meti in tabele il file (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:613
+#: src/miners/fs/tracker-main.c:647
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Nol è pussibil meti in tabele il file (file platât)"
 
-#: src/miners/fs/tracker-main.c:615
+#: src/miners/fs/tracker-main.c:649
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Nol è pussibil meti in tabele il file (cartele no metude in tabele)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:673
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Nol è pussibil meti in tabele la cartele superiôr “%s” (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:679
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Nol è pussibil meti in tabele la cartele superiôr “%s” (file platât)"
 
-#: src/miners/fs/tracker-main.c:653
+#: src/miners/fs/tracker-main.c:687
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "Nol è pussibil meti in tabele la cartele superiôr “%s”"
 
-#: src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:708
 msgid "Directory is eligible to be indexed"
 msgstr "Al è pussibil meti in tabele la cartele"
 
-#: src/miners/fs/tracker-main.c:675
+#: src/miners/fs/tracker-main.c:709
 msgid "File is eligible to be indexed"
 msgstr "Al è pussibil meti in tabele il file"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:929
+#: src/miners/fs/tracker-main.c:966
 msgid "— start the tracker indexer"
 msgstr "— fâs partî indicizadôr di tracker"
 
@@ -494,11 +494,11 @@ msgstr "Impussibil zontâ il feed"
 msgid "— start the tracker index proxy"
 msgstr "— fâs partî il proxy de tabele dal tracker"
 
-#: src/tracker-extract/tracker-extract.c:674
+#: src/tracker-extract/tracker-extract.c:680
 msgid "Metadata extraction failed"
 msgstr "Estrazion dai meta-dâts falide"
 
-#: src/tracker-extract/tracker-extract.c:736
+#: src/tracker-extract/tracker-extract.c:742
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nol è stât cjatât nissun modul par meta-dâts o di estrazion par gjestî chest "
@@ -510,7 +510,7 @@ msgstr "File di dulà tirâ fûr i metadâts"
 
 #: src/tracker-extract/tracker-main.c:86
 msgid "MIME type for file (if not provided, this will be guessed)"
-msgstr "Gjenar di MIME pal file (se no furnît al ven intuît)"
+msgstr "Gjenar di MIME pal file (se no indicât al ven intuît)"
 
 #: src/tracker-extract/tracker-main.c:87
 msgid "MIME"
@@ -543,11 +543,11 @@ msgstr "Formât «%s» di serializazion no supuartât\n"
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
 #: src/tracker-extract/tracker-main.c:319
 msgid "— Extract file meta data"
-msgstr "— Al tire fûr i meta-dâts dai file"
+msgstr "— Al tire fûr i meta-dâts dai files"
 
 #: src/tracker-extract/tracker-main.c:334
 msgid "Filename and mime type must be provided together"
-msgstr "Il non file e il gjenar di mime a scugnin jessi furnîts adun"
+msgstr "Il non file e il gjenar di mime a scugnin jessi indicâts adun"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -594,8 +594,8 @@ msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
-"Ten di voli i cambiaments ae base di dâts in timp reâl (come risorsis o file "
-"zontâts)"
+"Ten di voli i cambiaments ae base di dâts in timp reâl (come risorsis o "
+"files zontâts)"
 
 #: src/tracker/tracker-daemon.c:119
 msgid "List common statuses for miners"
@@ -631,7 +631,7 @@ msgid ""
 "Applications)"
 msgstr ""
 "Estratôr di doprâ cun --resume o --pause (al è pussibil doprâ sufìs come "
-"\"File\" o \"Aplicazions\")"
+"\"Files\" o \"Aplicazions\")"
 
 #: src/tracker/tracker-daemon.c:137
 msgid "MINER"
@@ -944,7 +944,7 @@ msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
 "(e.g. <file:///path/to/some/file.txt>)"
 msgstr ""
-"Al puest di cirî un non di file, dopre i argoments FILE come dai IRI (p.e. "
+"Al puest di cirî un non di file, dopre i argoments FILE come dai IRIs (p.e. "
 "<file:///percors/a/cualchi/file.txt>)"
 
 #: src/tracker/tracker-info.c:66
@@ -1017,12 +1017,12 @@ msgstr "Daûr a eliminâ…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
-"I dâts metûts te tabele par chest file a son stâts eliminâts e a vegnaran "
-"tornâts a meti te tabele di gnûf."
+"I dâts metûts te tabele par chest file a son stâts eliminâts e si tornarà a "
+"metiju te tabele di gnûf."
 
 #: src/tracker/tracker-search.c:73
 msgid "Search for files"
-msgstr "Cîr file"
+msgstr "Cîr files"
 
 #: src/tracker/tracker-search.c:77
 msgid "Search for folders"
@@ -1030,7 +1030,7 @@ msgstr "Cîr cartelis"
 
 #: src/tracker/tracker-search.c:81
 msgid "Search for music files"
-msgstr "Cîr file musicâi"
+msgstr "Cîr files musicâi"
 
 #: src/tracker/tracker-search.c:85
 msgid "Search for music albums (--all has no effect on this)"
@@ -1042,15 +1042,15 @@ msgstr "Cîr artiscj musicâi (--all nol fâs nissun efiet chi)"
 
 #: src/tracker/tracker-search.c:93
 msgid "Search for image files"
-msgstr "Cîr file inmagjin"
+msgstr "Cîr files imagjin"
 
 #: src/tracker/tracker-search.c:97
 msgid "Search for video files"
-msgstr "Cîr file Video"
+msgstr "Cîr files di videos"
 
 #: src/tracker/tracker-search.c:101
 msgid "Search for document files"
-msgstr "Cîr file di document"
+msgstr "Cîr files di document"
 
 #: src/tracker/tracker-search.c:105
 msgid "Search for software (--all has no effect on this)"
@@ -1134,7 +1134,7 @@ msgstr "Nol è stât cjatât nissun file"
 
 #: src/tracker/tracker-search.c:275 src/tracker/tracker-tag.c:437
 msgid "Files"
-msgstr "File"
+msgstr "Files"
 
 #: src/tracker/tracker-search.c:585
 msgid "No artists were found"
@@ -1245,7 +1245,7 @@ msgstr "Za metût te tabele"
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d file"
-msgstr[1] "%d file"
+msgstr[1] "%d files"
 
 #: src/tracker/tracker-status.c:466
 #, c-format
@@ -1296,7 +1296,7 @@ msgstr "FILTRI"
 #: src/tracker/tracker-tag.c:55
 msgid "Show files associated with each tag (this is only used with --list)"
 msgstr ""
-"Mostre i file associâts cun ognidune etichete (doprade nome cun --list)"
+"Mostre i files associâts cun ognidune etichete (doprade nome cun --list)"
 
 #: src/tracker/tracker-tag.c:59
 msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
@@ -1312,7 +1312,7 @@ msgstr "ETICHETE"
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
 msgstr ""
 "Elimine une etichete (Se FILE al è ometût, ETICHETE e je gjavade di ducj i "
-"file)"
+"files)"
 
 #: src/tracker/tracker-tag.c:67
 msgid "Description for a tag (this is only used with --add)"
@@ -1340,7 +1340,7 @@ msgstr "Impussibil otignî i URN dal file"
 
 #: src/tracker/tracker-tag.c:312
 msgid "Could not get files related to tag"
-msgstr "Impussibil otignî i file relatîfs ae etichete"
+msgstr "Impussibil otignî i files relatîfs ae etichete"
 
 #: src/tracker/tracker-tag.c:379
 msgid "Could not get all tags in the database"
@@ -1352,7 +1352,7 @@ msgstr "Nissun file al è stât etichetât"
 
 #: src/tracker/tracker-tag.c:424
 msgid "Could not get files for matching tags"
-msgstr "Impussibil otignî i file che a corispuindin a lis etichetis"
+msgstr "Impussibil otignî i files che a corispuindin aes etichetis"
 
 #: src/tracker/tracker-tag.c:433
 msgid "No files were found matching ALL of those tags"
@@ -1376,7 +1376,7 @@ msgstr "Nissun file al è stât modificât"
 
 #: src/tracker/tracker-tag.c:649 src/tracker/tracker-tag.c:657
 msgid "Files do not exist or aren’t indexed"
-msgstr "I file no esistin o no son metûts te tabele"
+msgstr "I files no esistin o no son metûts te tabele"
 
 #: src/tracker/tracker-tag.c:707
 msgid "Could not add tag"
@@ -1388,7 +1388,7 @@ msgstr "Zonte de etichete riessude"
 
 #: src/tracker/tracker-tag.c:752
 msgid "Could not add tag to files"
-msgstr "Impussibil zontâ la etichete ai file"
+msgstr "Impussibil zontâ la etichete ai files"
 
 #: src/tracker/tracker-tag.c:762
 msgid "Tagged"
@@ -1408,7 +1408,7 @@ msgstr "No je stade cjatade nissune etichete cun chel non"
 
 #: src/tracker/tracker-tag.c:837
 msgid "None of the files had this tag set"
-msgstr "Nissun dai file al veve impuestât cheste etichete"
+msgstr "Nissun dai files al veve stabilide cheste etichete"
 
 #: src/tracker/tracker-tag.c:883
 msgid "Could not remove tag"
