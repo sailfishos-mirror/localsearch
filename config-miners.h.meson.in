@@ -50,6 +50,9 @@
 /* Define if we have libseccomp */
 #mesondefine HAVE_LIBSECCOMP
 
+/* Define if we have malloc_trim() */
+#mesondefine HAVE_MALLOC_TRIM
+
 /* Define if we have NetworkManager for network status detection */
 #mesondefine HAVE_NETWORK_MANAGER
 

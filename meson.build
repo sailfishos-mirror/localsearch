@@ -327,6 +327,8 @@ endif
 
 conf = configuration_data()
 
+have_malloc_trim = meson.get_compiler('c').has_function('malloc_trim')
+
 # Config that goes in config.h
 conf.set('GUARANTEE_METADATA', get_option('guarantee_metadata') == true)
 conf.set('USING_UNZIPPSFILES', get_option('unzip_ps_gz_files') == true)
@@ -343,6 +345,7 @@ conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
 conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
 conf.set('HAVE_LIBSECCOMP', libseccomp.found())
+conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
 conf.set('DOMAIN_PREFIX', get_option('domain_prefix'))
@@ -470,6 +473,7 @@ summary = [
   '\nFeature Support:',
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),
+  '    Releasing heap memory with malloc_trim: ' + have_malloc_trim.to_string(),
   '\nData Miners / Writebacks:',
   '    FS (File System):                       ' + have_tracker_miner_fs.to_string(),
   '    RSS:                                    ' + have_tracker_miner_rss.to_string(),
