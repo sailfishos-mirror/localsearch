@@ -1138,7 +1138,7 @@ main (gint argc, gchar *argv[])
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	memory_monitor = g_memory_monitor_dup_default ();
-	g_signal_connect (memory_monitor, "low-memory-warning", on_low_memory, NULL);
+	g_signal_connect (memory_monitor, "low-memory-warning", G_CALLBACK (on_low_memory), NULL);
 #endif
 
 	/* Preempt creation of graphs */
