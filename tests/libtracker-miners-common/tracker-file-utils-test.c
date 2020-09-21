@@ -365,17 +365,6 @@ test_file_system_get_remaining_space_percentage ()
 }
 
 static void
-test_file_system_has_enough_space ()
-{
-        /* Hopefully we will always have 1 byte free... */
-        g_assert_true (tracker_file_system_has_enough_space ("/home", 1, FALSE));
-        g_assert_true (tracker_file_system_has_enough_space ("/home", 1, TRUE));
-
-        /* gulong goes only up to 4Gb. Cannot ask for unreasonable amount of space */
-        //g_assert_true (!tracker_file_system_has_enough_space ("/home", G_MAXULONG, FALSE));
-}
-
-static void
 test_file_exists_and_writable ()
 {
         const gchar *path = "./test-dir-remove-afterwards";
@@ -466,8 +455,6 @@ main (int argc, char **argv)
                          test_file_system_get_remaining_space);
         g_test_add_func ("/libtracker-common/file-utils/get_remaining_space_percentage",
                          test_file_system_get_remaining_space_percentage);
-        g_test_add_func ("/libtracker-common/file-utils/has_enough_space",
-                         test_file_system_has_enough_space);
         g_test_add_func ("/libtracker-common/file-utils/has_write_access_or_was_created",
                          test_file_exists_and_writable);
         g_test_add_func ("/libtracker-common/file-utils/is_hidden",
