@@ -31,7 +31,7 @@ if get_option('tracker_core') == 'system'
   # installed locations.
   tracker_uninstalled_cli_dir = join_paths (tracker_sparql.get_pkgconfig_variable('exec_prefix'), 'bin')
   tracker_uninstalled_nepomuk_ontologies_dir = join_paths(tracker_sparql.get_pkgconfig_variable('ontologies_dir'), 'nepomuk')
-  tracker_uninstalled_stop_words_dir = join_paths(tracker_sparql.get_pkgconfig_variable('datadir'), 'tracker', 'stop-words')
+  tracker_uninstalled_stop_words_dir = join_paths(tracker_sparql.get_pkgconfig_variable('tracker_datadir'), 'stop-words')
   tracker_uninstalled_testutils_dir = tracker_testutils.get_pkgconfig_variable('python_path')
   tracker_ontologies_dir = tracker_sparql.get_pkgconfig_variable('ontologies_dir')
 
