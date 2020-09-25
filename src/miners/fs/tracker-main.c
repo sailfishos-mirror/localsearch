@@ -26,6 +26,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef HAVE_MALLOC_TRIM
+#include <malloc.h>
+#endif
+
 #include <glib.h>
 #include <glib-unix.h>
 #include <glib-object.h>
@@ -433,11 +437,28 @@ miner_start (TrackerMiner  *miner,
 	                                           miner);
 }
 
+#ifdef HAVE_MALLOC_TRIM
+
+static void
+release_heap_memory (void)
+{
+	malloc_trim (0);
+}
+
+#else
+
+static void
+release_heap_memory (void)
+{
+	g_debug ("release_heap_memory(): Doing nothing as malloc_trim() is not available on this platform.");
+}
+
+#endif
+
 static gboolean
 cleanup_cb (gpointer user_data)
 {
-	/* Reclaim as much memory as possible */
-	malloc_trim (0);
+	release_heap_memory ();
 
 	cleanup_id = 0;
 
@@ -451,7 +472,7 @@ on_low_memory (GMemoryMonitor            *monitor,
                gpointer                   user_data)
 {
 	if (level > G_MEMORY_MONITOR_WARNING_LEVEL_LOW)
-		malloc_trim (0);
+		release_heap_memory ();
 }
 #endif
 
