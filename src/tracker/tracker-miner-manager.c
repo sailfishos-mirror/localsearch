@@ -701,9 +701,25 @@ tracker_miner_manager_get_running (TrackerMinerManager *manager)
 
 	g_variant_get (v, "(as)", &iter);
 	while (g_variant_iter_loop (iter, "&s", &str)) {
+		gboolean available = FALSE;
+		GList *l;
+
 		if (!g_str_has_prefix (str, prefix)) {
 			continue;
 		}
+
+		/* Skip unlisted miners */
+		for (l = priv->miners; l; l = l->next) {
+			MinerData *data = l->data;
+
+			if (g_strcmp0 (data->dbus_name, str) == 0) {
+				available = TRUE;
+				break;
+			}
+		}
+
+		if (!available)
+			continue;
 
 		list = g_slist_prepend (list, g_strdup (str));
 	}
