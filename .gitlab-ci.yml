@@ -63,6 +63,24 @@ test-ubuntu-rolling:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/ubuntu:rolling
   <<: *test
 
+coverage-analysis:
+  stage: analysis
+  image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
+  allow_failure: true
+  script:
+    - dnf install -y gcovr
+    - su tracker -c '.gitlab-ci/checkout-tracker.sh'
+    - su tracker -c 'mkdir -p coverage-build/coveragereport'
+    - su tracker -c 'cd coverage-build; meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true'
+    - su tracker -c 'cd coverage-build; ninja'
+    - su tracker -c 'cd coverage-build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
+    - su tracker -c 'cd coverage-build; gcovr --html-details --print-summary --root=.. --exclude=subprojects --exclude=../subprojects --exclude=../tests --output coveragereport/index.html'
+  coverage: '/^lines: (\d+\.\d+\%)/'
+  artifacts:
+    when: always
+    paths:
+    - coverage-build/coveragereport
+
 coverity:
   stage: analysis
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest
