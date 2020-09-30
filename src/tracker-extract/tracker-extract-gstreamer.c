@@ -633,6 +633,7 @@ ensure_file_resource (TrackerResource *resource,
 static void
 extractor_apply_audio_metadata (MetadataExtractor     *extractor,
                                 GstTagList            *tag_list,
+                                const gchar           *file_url,
                                 TrackerResource       *audio,
                                 TrackerResource       *artist,
                                 TrackerResource       *performer,
@@ -683,12 +684,13 @@ extractor_apply_audio_metadata (MetadataExtractor     *extractor,
 		have_acoustid_fingerprint = gst_tag_list_copy_value (&acoustid_fingerprint, tag_list, GST_TAG_ACOUSTID_FINGERPRINT);
 		if (have_acoustid_fingerprint) {
 			TrackerResource *hash_resource = tracker_resource_new (NULL);
+			TrackerResource *file_resource = ensure_file_resource (audio, file_url);
 
 			tracker_resource_set_uri (hash_resource, "rdf:type", "nfo:FileHash");
 			tracker_resource_set_gvalue (hash_resource, "nfo:hashValue", &acoustid_fingerprint);
 			tracker_resource_set_string (hash_resource, "nfo:hashAlgorithm", "chromaprint");
 
-			tracker_resource_add_take_relation (audio, "nfo:hasHash", hash_resource);
+			tracker_resource_add_take_relation (file_resource, "nfo:hasHash", hash_resource);
 			g_value_unset (&acoustid_fingerprint);
 		}
 	#endif
@@ -769,6 +771,7 @@ extract_track (TrackerResource      *track,
 
 	extractor_apply_audio_metadata (extractor,
 	                                toc_entry->tag_list,
+	                                file_url,
 	                                track,
 	                                track_artist,
 	                                track_performer,
@@ -983,6 +986,7 @@ extract_metadata (MetadataExtractor      *extractor,
 			} else {
 				extractor_apply_audio_metadata (extractor,
 				                                extractor->tagcache,
+				                                file_url,
 				                                resource,
 				                                artist,
 				                                performer,
