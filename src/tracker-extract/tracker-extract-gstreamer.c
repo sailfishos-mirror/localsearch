@@ -615,6 +615,21 @@ extractor_get_equipment (MetadataExtractor    *extractor,
 	return equipment;
 }
 
+static TrackerResource *
+ensure_file_resource (TrackerResource *resource,
+                      const gchar     *file_url)
+{
+	TrackerResource *file_resource;
+
+	file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
+	if (!file_resource) {
+		file_resource = tracker_resource_new (file_url);
+		tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
+	}
+
+	return file_resource;
+}
+
 static void
 extractor_apply_audio_metadata (MetadataExtractor     *extractor,
                                 GstTagList            *tag_list,
@@ -948,7 +963,7 @@ extract_metadata (MetadataExtractor      *extractor,
 			if (extractor->toc && g_list_length (extractor->toc->entry_list) > 1) {
 				TrackerResource *file_resource;
 
-				file_resource = tracker_resource_new (file_url);
+				file_resource = ensure_file_resource (resource, file_url);
 
 				for (node = extractor->toc->entry_list; node; node = node->next) {
 					TrackerResource *track;
@@ -965,8 +980,6 @@ extract_metadata (MetadataExtractor      *extractor,
 					tracker_resource_set_relation (track, "nie:isStoredAs", file_resource);
 					tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 				}
-
-				g_object_unref (file_resource);
 			} else {
 				extractor_apply_audio_metadata (extractor,
 				                                extractor->tagcache,
@@ -1004,8 +1017,7 @@ extract_metadata (MetadataExtractor      *extractor,
 
 			tracker_resource_set_string (hash_resource, "nfo:hashAlgorithm", "gibest");
 
-			file_resource = tracker_resource_new (file_url);
-			tracker_resource_add_take_relation (resource, "nie:isStoredAs", file_resource);
+			file_resource = ensure_file_resource (resource, file_url);
 
 			tracker_resource_set_relation (file_resource, "nfo:hasHash", hash_resource);
 
