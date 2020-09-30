@@ -2145,7 +2145,7 @@ parse_id3v24 (const gchar           *data,
 
 	/* We don't handle experimental cases */
 	if (experimental) {
-		g_message ("[v24] Experimental MP3s are not extracted, doing nothing");
+		g_debug ("[v24] Experimental MP3s are not extracted, doing nothing");
 		return;
 	}
 
@@ -2161,7 +2161,7 @@ parse_id3v24 (const gchar           *data,
 	 * bytes, so we check that there is some content AFTER the
 	 * headers. */
 	if (tsize > size - header_size) {
-		g_message ("[v24] Expected MP3 tag size and header size to be within file size boundaries");
+		g_debug ("[v24] Expected MP3 tag size and header size to be within file size boundaries");
 		return;
 	}
 
@@ -2183,7 +2183,7 @@ parse_id3v24 (const gchar           *data,
 		 * the headers, in other words the padding.
 		 */
 		if (ext_header_size > size - header_size - tsize) {
-			g_message ("[v24] Expected MP3 tag size and extended header size to be within file size boundaries");
+			g_debug ("[v24] Expected MP3 tag size and extended header size to be within file size boundaries");
 			return;
 		}
 
@@ -2204,10 +2204,10 @@ parse_id3v24 (const gchar           *data,
 		 *   Flags          $xx xx
 		 */
 		if (pos + frame_size > tsize + header_size) {
-			g_message ("[v24] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
-			           frame_size,
-			           tsize + header_size,
-			           pos);
+			g_debug ("[v24] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
+			         frame_size,
+			         tsize + header_size,
+			         pos);
 			break;
 		}
 
@@ -2349,7 +2349,7 @@ parse_id3v23 (const gchar          *data,
 
 	/* We don't handle experimental cases */
 	if (experimental) {
-		g_message ("[v23] Experimental MP3s are not extracted, doing nothing");
+		g_debug ("[v23] Experimental MP3s are not extracted, doing nothing");
 		return;
 	}
 
@@ -2365,7 +2365,7 @@ parse_id3v23 (const gchar          *data,
 	 * bytes, so we check that there is some content AFTER the
 	 * headers. */
 	if (tsize > size - header_size) {
-		g_message ("[v23] Expected MP3 tag size and header size to be within file size boundaries");
+		g_debug ("[v23] Expected MP3 tag size and header size to be within file size boundaries");
 		return;
 	}
 
@@ -2387,7 +2387,7 @@ parse_id3v23 (const gchar          *data,
 		 * the headers, in other words the padding.
 		 */
 		if (ext_header_size > size - header_size - tsize) {
-			g_message ("[v23] Expected MP3 tag size and extended header size to be within file size boundaries");
+			g_debug ("[v23] Expected MP3 tag size and extended header size to be within file size boundaries");
 			return;
 		}
 
@@ -2408,10 +2408,10 @@ parse_id3v23 (const gchar          *data,
 		 *   Flags          $xx xx
 		 */
 		if (pos + frame_size > tsize + header_size) {
-			g_message ("[v23] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
-			           frame_size,
-			           tsize + header_size,
-			           pos);
+			g_debug ("[v23] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
+			         frame_size,
+			         tsize + header_size,
+			         pos);
 			break;
 		}
 
@@ -2528,7 +2528,7 @@ parse_id3v20 (const gchar          *data,
 	tsize = extract_uint32_7bit (&data[6]);
 
 	if (tsize > size - header_size)  {
-		g_message ("[v20] Expected MP3 tag size and header size to be within file size boundaries");
+		g_debug ("[v20] Expected MP3 tag size and header size to be within file size boundaries");
 		return;
 	}
 
@@ -2542,10 +2542,10 @@ parse_id3v20 (const gchar          *data,
 		g_assert (pos <= size - frame_size);
 
 		if (pos + frame_size > tsize + header_size)  {
-			g_message ("[v20] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
-			           frame_size,
-			           tsize + header_size,
-			           pos);
+			g_debug ("[v20] Expected MP3 frame size (%d) to be within tag size (%d) boundaries, position = %d",
+			         frame_size,
+			         tsize + header_size,
+			         pos);
 			break;
 		}
 

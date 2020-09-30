@@ -75,9 +75,9 @@ gif_error (const gchar *action, int err)
 {
 	const char *str = GifErrorString (err);
 	if (str != NULL) {
-		g_message ("%s, error: '%s'", action, str);
+		g_debug ("%s, error: '%s'", action, str);
 	} else {
-		g_message ("%s, undefined error %d", action, err);
+		g_debug ("%s, undefined error %d", action, err);
 	}
 }
 #else /* GIFLIB_MAJOR >= 5 */
@@ -86,9 +86,9 @@ static inline void print_gif_error()
 #if defined(GIFLIB_MAJOR) && defined(GIFLIB_MINOR) && ((GIFLIB_MAJOR == 4 && GIFLIB_MINOR >= 2) || GIFLIB_MAJOR > 4)
 	const char *str = GifErrorString ();
 	if (str != NULL) {
-		g_message ("GIF, error: '%s'", str);
+		g_debug ("GIF, error: '%s'", str);
 	} else {
-		g_message ("GIF, undefined error");
+		g_debug ("GIF, undefined error");
 	}
 #else
 	PrintGifError();

@@ -140,7 +140,7 @@ mdvi_init_context (const char *file)
 	}
 
 	if ((arg = fuget1 (p)) != DVI_ID) {
-		g_message ("Unsupported DVI format (version %u)", arg);
+		g_debug ("Unsupported DVI format (version %u)", arg);
 		goto error;
 	}
 

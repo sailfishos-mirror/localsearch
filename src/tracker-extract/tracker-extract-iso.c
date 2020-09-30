@@ -65,8 +65,8 @@ tracker_extract_get_metadata (TrackerExtractInfo *info_)
 	if (error != NULL) {
 		if (error->code != OSINFO_MEDIA_ERROR_NOT_BOOTABLE) {
 			g_object_unref (metadata);
-			g_message ("Could not extract iso info from '%s': %s",
-				   filename, error->message);
+			g_debug ("Could not extract iso info from '%s': %s",
+			         filename, error->message);
 			g_free (filename);
 			g_error_free (error);
 			return FALSE;

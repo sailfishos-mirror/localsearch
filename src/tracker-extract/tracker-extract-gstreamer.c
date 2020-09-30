@@ -1171,8 +1171,8 @@ discoverer_init_and_run (MetadataExtractor *extractor,
 	if (error) {
 		if (gst_discoverer_info_get_result(info) == GST_DISCOVERER_MISSING_PLUGINS) {
 			required_plugins_message = get_discoverer_required_plugins_message (info);
-			g_message ("Missing a GStreamer plugin for %s. %s", uri,
-			           required_plugins_message);
+			g_debug ("Missing a GStreamer plugin for %s. %s", uri,
+			         required_plugins_message);
 			g_free (required_plugins_message);
 		} else if (error->domain != GST_STREAM_ERROR ||
 		           (error->code != GST_STREAM_ERROR_TYPE_NOT_FOUND &&
