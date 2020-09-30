@@ -101,6 +101,7 @@ enum {
 enum {
 	ITEMS_AVAILABLE,
 	FINISHED,
+	ERROR,
 	LAST_SIGNAL
 };
 
@@ -261,11 +262,9 @@ retry_synchronously (TrackerDecorator *decorator,
 		                                  &error);
 
 		if (error) {
-			GFile *file = g_file_new_for_uri (update->url);
-
-			tracker_error_report (file, error->message, update->sparql);
+			g_signal_emit (decorator, signals[ERROR], 0,
+			               update->url, error->message, update->sparql);
 			g_error_free (error);
-			g_object_unref (file);
 		}
 	}
 }
@@ -1069,6 +1068,17 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 		              G_STRUCT_OFFSET (TrackerDecoratorClass, finished),
 		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 0);
+
+	signals[ERROR] =
+		g_signal_new ("error",
+		              G_OBJECT_CLASS_TYPE (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              G_STRUCT_OFFSET (TrackerDecoratorClass, error),
+		              NULL, NULL, NULL,
+		              G_TYPE_NONE, 3,
+		              G_TYPE_STRING,
+		              G_TYPE_STRING,
+		              G_TYPE_STRING);
 }
 
 static void

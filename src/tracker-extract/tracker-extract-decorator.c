@@ -391,6 +391,19 @@ tracker_extract_decorator_finished (TrackerDecorator *decorator)
 }
 
 static void
+tracker_extract_decorator_error (TrackerDecorator *decorator,
+                                 const gchar      *url,
+                                 const gchar      *error_message,
+                                 const gchar      *sparql)
+{
+	GFile *file;
+
+	file = g_file_new_for_uri (url);
+	decorator_ignore_file (file, TRACKER_EXTRACT_DECORATOR (decorator), error_message, sparql);
+	g_object_unref (file);
+}
+
+static void
 tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 {
 	TrackerDecoratorClass *decorator_class = TRACKER_DECORATOR_CLASS (klass);
@@ -406,6 +419,7 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 
 	decorator_class->items_available = tracker_extract_decorator_items_available;
 	decorator_class->finished = tracker_extract_decorator_finished;
+	decorator_class->error = tracker_extract_decorator_error;
 
 	g_object_class_install_property (object_class,
 	                                 PROP_EXTRACTOR,

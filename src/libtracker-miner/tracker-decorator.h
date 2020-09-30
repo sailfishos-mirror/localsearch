@@ -67,7 +67,10 @@ struct _TrackerDecoratorClass {
 
 	void (* items_available) (TrackerDecorator *decorator);
 	void (* finished)        (TrackerDecorator *decorator);
-
+	void (* error)           (TrackerDecorator *decorator,
+	                          const gchar      *url,
+	                          const gchar      *error_message,
+	                          const gchar      *sparql);
 	/* <Private> */
 	gpointer padding[10];
 };
