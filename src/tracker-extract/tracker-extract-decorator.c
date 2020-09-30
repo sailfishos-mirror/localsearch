@@ -65,7 +65,8 @@ static void tracker_extract_decorator_initable_iface_init (GInitableIface *iface
 
 static void decorator_ignore_file (GFile                   *file,
                                    TrackerExtractDecorator *decorator,
-                                   const gchar             *error_message);
+                                   const gchar             *error_message,
+                                   const gchar             *extra_info);
 
 G_DEFINE_TYPE_WITH_CODE (TrackerExtractDecorator, tracker_extract_decorator,
                         TRACKER_TYPE_DECORATOR_FS,
@@ -169,7 +170,7 @@ get_metadata_cb (TrackerExtract *extract,
 	if (error) {
 		decorator_ignore_file (data->file,
 		                       TRACKER_EXTRACT_DECORATOR (data->decorator),
-		                       error->message);
+		                       error->message, NULL);
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
 		gchar *resource_sparql, *sparql;
@@ -420,7 +421,8 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 static void
 decorator_ignore_file (GFile                   *file,
                        TrackerExtractDecorator *decorator,
-                       const gchar             *error_message)
+                       const gchar             *error_message,
+                       const gchar             *extra_info)
 {
 	TrackerSparqlConnection *conn;
 	GError *error = NULL;
@@ -437,7 +439,7 @@ decorator_ignore_file (GFile                   *file,
 	                          NULL, &error);
 
 	if (info) {
-		tracker_error_report (file, error_message, NULL);
+		tracker_error_report (file, error_message, extra_info);
 
 		mimetype = g_file_info_get_attribute_string (info,
 		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
@@ -485,7 +487,7 @@ persistence_ignore_file (GFile    *file,
 {
 	TrackerExtractDecorator *decorator = user_data;
 
-	decorator_ignore_file (file, decorator, "Crash/hang handling file");
+	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
 }
 
 static void
