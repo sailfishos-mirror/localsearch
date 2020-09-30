@@ -305,6 +305,22 @@ on_extractor_lost (TrackerExtractWatchdog *watchdog,
 }
 
 static void
+on_extractor_status (TrackerExtractWatchdog *watchdog,
+                     const gchar            *status,
+                     gdouble                 progress,
+                     gint                    remaining,
+                     TrackerMinerFiles      *mf)
+{
+	if (!tracker_miner_is_paused (TRACKER_MINER (mf))) {
+		g_object_set (mf,
+		              "status", status,
+		              "progress", progress,
+		              "remaining-time", remaining,
+		              NULL);
+	}
+}
+
+static void
 tracker_miner_files_init (TrackerMinerFiles *mf)
 {
 	TrackerMinerFilesPrivate *priv;
@@ -646,6 +662,8 @@ miner_files_initable_init (GInitable     *initable,
 	mf->private->extract_watchdog = tracker_extract_watchdog_new (domain_name);
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
+	g_signal_connect (mf->private->extract_watchdog, "status",
+	                  G_CALLBACK (on_extractor_status), mf);
 	g_free (domain_name);
 
 	return TRUE;
