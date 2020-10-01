@@ -226,7 +226,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *extract_info)
 	} else if (g_ascii_strcasecmp (mime_used, "application/vnd.oasis.opendocument.graphics") == 0) {
 		file_type = FILE_TYPE_ODG;
 	} else {
-		g_message ("Mime type was not recognised:'%s'", mime_used);
+		g_debug ("Mime type was not recognised:'%s'", mime_used);
 		file_type = FILE_TYPE_INVALID;
 	}
 
@@ -485,7 +485,7 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 		return;
 
 	case FILE_TYPE_INVALID:
-		g_message ("Open Office Document type: %d invalid", data->file_type);
+		g_debug ("Open Office Document type: %d invalid", data->file_type);
 		push_tag (ODT_TAG_TYPE_UNKNOWN);
 		return;
 	}

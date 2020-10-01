@@ -118,7 +118,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		if (error != NULL) {
 			/* An error occurred, perhaps the file was deleted. */
-			g_message ("Error extracting content: %s", error->message);
+			g_debug ("Error extracting content: %s", error->message);
 			g_error_free (error);
 			return FALSE;
 		}

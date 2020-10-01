@@ -143,8 +143,11 @@ delete_location_content (GFile *dir)
 	                                        G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                                        NULL, &error);
 	if (error) {
-		g_critical ("Location does not have a Tracker DB: %s",
-		            error->message);
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
+			g_critical ("Location does not have a Tracker DB: %s",
+			            error->message);
+		}
+
 		g_error_free (error);
 		return;
 	}

@@ -252,7 +252,7 @@ msoffice_xml_content_parse_start (GMarkupParseContext  *context,
 		break;
 
 	case FILE_TYPE_INVALID:
-		g_message ("Microsoft document type:%d invalid", info->file_type);
+		g_debug ("Microsoft document type:%d invalid", info->file_type);
 		break;
 	}
 }
@@ -679,9 +679,9 @@ msoffice_xml_content_types_parse_start (GMarkupParseContext  *context,
 
 	/* Both part_name and content_type MUST be NON-NULL */
 	if (!part_name || !content_type) {
-		g_message ("Invalid file (part_name:%s, content_type:%s)",
-		           part_name ? part_name : "none",
-		           content_type ? content_type : "none");
+		g_debug ("Invalid file (part_name:%s, content_type:%s)",
+		         part_name ? part_name : "none",
+		         content_type ? content_type : "none");
 		return;
 	}
 
@@ -694,8 +694,8 @@ msoffice_xml_content_types_parse_start (GMarkupParseContext  *context,
 
 	/* If the file type is unknown, skip trying to extract content */
 	if (info->file_type == FILE_TYPE_INVALID) {
-		g_message ("Invalid file type, not extracting content from '%s'",
-		           part_name + 1);
+		g_debug ("Invalid file type, not extracting content from '%s'",
+		         part_name + 1);
 		return;
 	}
 
@@ -762,7 +762,7 @@ msoffice_xml_get_file_type (const gchar *uri)
 		/* MsOffice Excel document */
 		file_type = FILE_TYPE_XLSX;
 	} else {
-		g_message ("Mime type was not recognised:'%s'", mime_used);
+		g_debug ("Mime type was not recognised:'%s'", mime_used);
 		file_type = FILE_TYPE_INVALID;
 	}
 

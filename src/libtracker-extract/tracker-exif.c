@@ -351,19 +351,19 @@ get_gps_coordinate (ExifData *exif,
 			exif_entry_get_value (entry, buf, sizeof (buf) - 1);
 
 			if (buf[0] == '\0') {
-				g_message ("EXIF GPS coordinate information is non-existent but EXIF tag '%s' was found, "
-				           "possible broken EXIF data?",
-				           exif_tag_get_name (tag));
+				g_debug ("EXIF GPS coordinate information is non-existent but EXIF tag '%s' was found, "
+				         "possible broken EXIF data?",
+				         exif_tag_get_name (tag));
 			} else {
-				g_message ("EXIF GPS coordinate information is partial, "
-				           "got EXIF tag '%s' with value '%s', "
-				           "expected with degrees, minutes and seconds",
-				           exif_tag_get_name (tag),
-				           buf);
+				g_debug ("EXIF GPS coordinate information is partial, "
+				         "got EXIF tag '%s' with value '%s', "
+				         "expected with degrees, minutes and seconds",
+				         exif_tag_get_name (tag),
+				         buf);
 			}
 
-			g_message ("EXIF GPS coordinate information could not be extracted with tag '%s'",
-			           exif_tag_get_name (tag));
+			g_debug ("EXIF GPS coordinate information could not be extracted with tag '%s'",
+			         exif_tag_get_name (tag));
 		}
 	}
 

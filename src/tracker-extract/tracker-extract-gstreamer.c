@@ -615,9 +615,25 @@ extractor_get_equipment (MetadataExtractor    *extractor,
 	return equipment;
 }
 
+static TrackerResource *
+ensure_file_resource (TrackerResource *resource,
+                      const gchar     *file_url)
+{
+	TrackerResource *file_resource;
+
+	file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
+	if (!file_resource) {
+		file_resource = tracker_resource_new (file_url);
+		tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
+	}
+
+	return file_resource;
+}
+
 static void
 extractor_apply_audio_metadata (MetadataExtractor     *extractor,
                                 GstTagList            *tag_list,
+                                const gchar           *file_url,
                                 TrackerResource       *audio,
                                 TrackerResource       *artist,
                                 TrackerResource       *performer,
@@ -668,12 +684,13 @@ extractor_apply_audio_metadata (MetadataExtractor     *extractor,
 		have_acoustid_fingerprint = gst_tag_list_copy_value (&acoustid_fingerprint, tag_list, GST_TAG_ACOUSTID_FINGERPRINT);
 		if (have_acoustid_fingerprint) {
 			TrackerResource *hash_resource = tracker_resource_new (NULL);
+			TrackerResource *file_resource = ensure_file_resource (audio, file_url);
 
 			tracker_resource_set_uri (hash_resource, "rdf:type", "nfo:FileHash");
 			tracker_resource_set_gvalue (hash_resource, "nfo:hashValue", &acoustid_fingerprint);
 			tracker_resource_set_string (hash_resource, "nfo:hashAlgorithm", "chromaprint");
 
-			tracker_resource_add_take_relation (audio, "nfo:hasHash", hash_resource);
+			tracker_resource_add_take_relation (file_resource, "nfo:hasHash", hash_resource);
 			g_value_unset (&acoustid_fingerprint);
 		}
 	#endif
@@ -754,6 +771,7 @@ extract_track (TrackerResource      *track,
 
 	extractor_apply_audio_metadata (extractor,
 	                                toc_entry->tag_list,
+	                                file_url,
 	                                track,
 	                                track_artist,
 	                                track_performer,
@@ -948,7 +966,7 @@ extract_metadata (MetadataExtractor      *extractor,
 			if (extractor->toc && g_list_length (extractor->toc->entry_list) > 1) {
 				TrackerResource *file_resource;
 
-				file_resource = tracker_resource_new (file_url);
+				file_resource = ensure_file_resource (resource, file_url);
 
 				for (node = extractor->toc->entry_list; node; node = node->next) {
 					TrackerResource *track;
@@ -965,11 +983,10 @@ extract_metadata (MetadataExtractor      *extractor,
 					tracker_resource_set_relation (track, "nie:isStoredAs", file_resource);
 					tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 				}
-
-				g_object_unref (file_resource);
 			} else {
 				extractor_apply_audio_metadata (extractor,
 				                                extractor->tagcache,
+				                                file_url,
 				                                resource,
 				                                artist,
 				                                performer,
@@ -1004,8 +1021,7 @@ extract_metadata (MetadataExtractor      *extractor,
 
 			tracker_resource_set_string (hash_resource, "nfo:hashAlgorithm", "gibest");
 
-			file_resource = tracker_resource_new (file_url);
-			tracker_resource_add_take_relation (resource, "nie:isStoredAs", file_resource);
+			file_resource = ensure_file_resource (resource, file_url);
 
 			tracker_resource_set_relation (file_resource, "nfo:hasHash", hash_resource);
 
@@ -1171,8 +1187,8 @@ discoverer_init_and_run (MetadataExtractor *extractor,
 	if (error) {
 		if (gst_discoverer_info_get_result(info) == GST_DISCOVERER_MISSING_PLUGINS) {
 			required_plugins_message = get_discoverer_required_plugins_message (info);
-			g_message ("Missing a GStreamer plugin for %s. %s", uri,
-			           required_plugins_message);
+			g_debug ("Missing a GStreamer plugin for %s. %s", uri,
+			         required_plugins_message);
 			g_free (required_plugins_message);
 		} else if (error->domain != GST_STREAM_ERROR ||
 		           (error->code != GST_STREAM_ERROR_TYPE_NOT_FOUND &&

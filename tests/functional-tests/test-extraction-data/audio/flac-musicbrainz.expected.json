@@ -79,12 +79,14 @@
                 "tracker:referenceIdentifier": "dfgj-432-iu7"
             }
         ],
-        "nfo:hasHash": [
-            {
-                "@type": "nfo:hasHash",
-                "nfo:hashAlgorithm": "chromaprint",
-                "nfo:hashValue": "123453215"
-            }
-        ]
+        "nie:isStoredAs": {
+            "nfo:hasHash": [
+                {
+                    "@type": "nfo:hasHash",
+                    "nfo:hashAlgorithm": "chromaprint",
+                    "nfo:hashValue": "123453215"
+                }
+            ]
+        }
     }
 }

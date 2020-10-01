@@ -47,7 +47,7 @@ get_img_resolution (const GFile *file,
 
 	stream = g_file_read ((GFile *)file, NULL, &error);
 	if (error) {
-		g_message ("Could not read BMP file, %s", error->message);
+		g_debug ("Could not read BMP file, %s", error->message);
 		g_clear_error (&error);
 		return FALSE;
 	}
@@ -55,27 +55,27 @@ get_img_resolution (const GFile *file,
 	inputstream = G_INPUT_STREAM (stream);
 
 	if (!g_input_stream_read (inputstream, bfType, 2, NULL, &error)) {
-		g_message ("Could not read BMP header from stream, %s", error ? error->message : "No error given");
+		g_debug ("Could not read BMP header from stream, %s", error ? error->message : "No error given");
 		g_clear_error (&error);
 		g_object_unref (stream);
 		return FALSE;
 	}
 
 	if (bfType[0] != 'B' || bfType[1] != 'M') {
-		g_message ("Expected BMP header to read 'B' or 'M', can not continue");
+		g_debug ("Expected BMP header to read 'B' or 'M', can not continue");
 		g_object_unref (stream);
 		return FALSE;
 	}
 
 	if (!g_input_stream_skip (inputstream, 16, NULL, &error)) {
-		g_message ("Could not read 16 bytes from BMP header, %s", error ? error->message : "No error given");
+		g_debug ("Could not read 16 bytes from BMP header, %s", error ? error->message : "No error given");
 		g_clear_error (&error);
 		g_object_unref (stream);
 		return FALSE;
 	}
 
 	if (!g_input_stream_read (inputstream, &w, sizeof (uint), NULL, &error)) {
-		g_message ("Could not read width from BMP header, %s", error ? error->message : "No error given");
+		g_debug ("Could not read width from BMP header, %s", error ? error->message : "No error given");
 		g_clear_error (&error);
 		g_object_unref (stream);
 		return FALSE;

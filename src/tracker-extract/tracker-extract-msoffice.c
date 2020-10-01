@@ -1682,7 +1682,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 
 		content = extract_excel_content (infile, max_bytes, &is_encrypted);
 	} else {
-		g_message ("Mime type was not recognised:'%s'", mime_used);
+		g_debug ("Mime type was not recognised:'%s'", mime_used);
 	}
 
 	if (content) {
