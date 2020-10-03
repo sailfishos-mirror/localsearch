@@ -729,40 +729,37 @@ queue_event_coalesce (const QueueEvent  *first,
 		      const QueueEvent  *second,
 		      QueueEvent       **replacement)
 {
+	if (!g_file_equal (first->file, second->file))
+		return QUEUE_ACTION_NONE;
+
 	*replacement = NULL;
 
 	if (first->type == TRACKER_MINER_FS_EVENT_CREATED) {
-		if ((second->type == TRACKER_MINER_FS_EVENT_UPDATED ||
-		     second->type == TRACKER_MINER_FS_EVENT_CREATED) &&
-		    first->file == second->file) {
+		if (second->type == TRACKER_MINER_FS_EVENT_UPDATED ||
+		     second->type == TRACKER_MINER_FS_EVENT_CREATED) {
 			return QUEUE_ACTION_DELETE_SECOND;
-		} else if (second->type == TRACKER_MINER_FS_EVENT_MOVED &&
-			   first->file == second->file) {
+		} else if (second->type == TRACKER_MINER_FS_EVENT_MOVED) {
 			*replacement = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED,
 							second->dest_file);
 			return (QUEUE_ACTION_DELETE_FIRST |
 				QUEUE_ACTION_DELETE_SECOND);
-		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED &&
-			   first->file == second->file) {
+		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			/* We can't be sure that "create" is replacing a file
 			 * here. Preserve the second event just in case.
 			 */
 			return QUEUE_ACTION_DELETE_FIRST;
 		}
 	} else if (first->type == TRACKER_MINER_FS_EVENT_UPDATED) {
-		if (second->type == TRACKER_MINER_FS_EVENT_UPDATED &&
-		    first->file == second->file) {
+		if (second->type == TRACKER_MINER_FS_EVENT_UPDATED) {
 			if (first->attributes_update && !second->attributes_update)
 				return QUEUE_ACTION_DELETE_FIRST;
 			else
 				return QUEUE_ACTION_DELETE_SECOND;
-		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED &&
-			   first->file == second->file) {
+		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			return QUEUE_ACTION_DELETE_FIRST;
 		}
 	} else if (first->type == TRACKER_MINER_FS_EVENT_MOVED) {
-		if (second->type == TRACKER_MINER_FS_EVENT_MOVED &&
-		    first->dest_file == second->file) {
+		if (second->type == TRACKER_MINER_FS_EVENT_MOVED) {
 			if (first->file != second->dest_file) {
 				*replacement = queue_event_moved_new (first->file,
 								      second->dest_file);
@@ -770,8 +767,7 @@ queue_event_coalesce (const QueueEvent  *first,
 
 			return (QUEUE_ACTION_DELETE_FIRST |
 				QUEUE_ACTION_DELETE_SECOND);
-		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED &&
-			   first->dest_file == second->file) {
+		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			*replacement = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED,
 							first->file);
 			return (QUEUE_ACTION_DELETE_FIRST |
