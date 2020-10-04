@@ -62,9 +62,6 @@ gboolean      tracker_miner_files_check_directory          (GFile             *f
                                                             GSList            *index_single_directories,
                                                             GSList            *ignored_directory_paths,
                                                             GSList            *ignored_directory_patterns);
-gboolean      tracker_miner_files_check_directory_contents (GFile             *parent,
-                                                            GList             *children,
-                                                            GSList            *ignored_content);
 gboolean      tracker_miner_files_monitor_directory        (GFile             *file,
                                                             gboolean           enable_monitors,
                                                             GSList            *directories_to_check);

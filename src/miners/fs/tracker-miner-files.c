@@ -2754,44 +2754,6 @@ done:
 }
 
 gboolean
-tracker_miner_files_check_directory_contents (GFile  *parent,
-                                              GList  *children,
-                                              GSList *ignored_content)
-{
-	GSList *l;
-
-	if (!ignored_content) {
-		return TRUE;
-	}
-
-	while (children) {
-		gchar *basename;
-
-		basename = g_file_get_basename (children->data);
-
-		for (l = ignored_content; l; l = l->next) {
-			if (g_strcmp0 (basename, l->data) == 0) {
-				gchar *parent_uri;
-
-				parent_uri = g_file_get_uri (parent);
-				/* g_debug ("Directory '%s' ignored since it contains a file named '%s'", */
-				/*          parent_uri, basename); */
-
-				g_free (parent_uri);
-				g_free (basename);
-
-				return FALSE;
-			}
-		}
-
-		children = children->next;
-		g_free (basename);
-	}
-
-	return TRUE;
-}
-
-gboolean
 tracker_miner_files_monitor_directory (GFile    *file,
                                        gboolean  enable_monitors,
                                        GSList   *directories_to_check)
