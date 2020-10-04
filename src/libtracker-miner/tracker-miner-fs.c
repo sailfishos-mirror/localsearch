@@ -125,9 +125,6 @@ struct _TrackerMinerFSPrivate {
 	TrackerSparqlStatement *urn_query;
 	TrackerLRU *urn_lru;
 
-	/* File properties */
-	GQuark quark_recursive_removal;
-
 	/* Properties */
 	gdouble throttle;
 
@@ -571,8 +568,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	priv->task_pool = tracker_task_pool_new (DEFAULT_WAIT_POOL_LIMIT);
 	g_signal_connect (priv->task_pool, "notify::limit-reached",
 	                  G_CALLBACK (task_pool_limit_reached_notify_cb), object);
-
-	priv->quark_recursive_removal = g_quark_from_static_string ("tracker-recursive-removal");
 
 	priv->roots_to_notify = g_hash_table_new_full (g_file_hash,
 	                                               (GEqualFunc) g_file_equal,
@@ -1216,7 +1211,6 @@ sparql_buffer_task_finished_cb (GObject      *object,
 	TrackerMinerFSPrivate *priv;
 	TrackerTask *task;
 	GFile *task_file;
-	gboolean recursive;
 	GError *error = NULL;
 
 	fs = user_data;
@@ -1235,9 +1229,6 @@ sparql_buffer_task_finished_cb (GObject      *object,
 	}
 
 	tracker_error_report_delete (task_file);
-	recursive = GPOINTER_TO_INT (g_object_steal_qdata (G_OBJECT (task_file),
-	                                                     priv->quark_recursive_removal));
-	tracker_file_notifier_invalidate_file_iri (priv->file_notifier, task_file, recursive);
 
 	if (item_queue_is_blocked_by_file (fs, task_file)) {
 		g_object_unref (priv->item_queue_blocker);
@@ -1445,10 +1436,6 @@ item_remove (TrackerMinerFS *fs,
 
 	TRACKER_NOTE (MINER_FS_EVENTS,
 	              g_message ("Removing item: '%s' (Deleted from filesystem or no longer monitored)", uri));
-
-	g_object_set_qdata (G_OBJECT (file),
-	                    fs->priv->quark_recursive_removal,
-	                    GINT_TO_POINTER (TRUE));
 
 	tracker_lru_remove_foreach (fs->priv->urn_lru,
 	                            (GEqualFunc) g_file_has_parent,
