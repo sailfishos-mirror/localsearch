@@ -2078,25 +2078,3 @@ tracker_file_notifier_invalidate_file_iri (TrackerFileNotifier *notifier,
 	                              -1,
 	                              priv->file_system);
 }
-
-GFileType
-tracker_file_notifier_get_file_type (TrackerFileNotifier *notifier,
-                                     GFile               *file)
-{
-	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
-
-	g_return_val_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier), G_FILE_TYPE_UNKNOWN);
-	g_return_val_if_fail (G_IS_FILE (file), G_FILE_TYPE_UNKNOWN);
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file,
-	                                          G_FILE_TYPE_REGULAR,
-	                                          NULL);
-	if (!canonical) {
-		return G_FILE_TYPE_UNKNOWN;
-	}
-
-	return tracker_file_system_get_file_type (priv->file_system, canonical);
-}
