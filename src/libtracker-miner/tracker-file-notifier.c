@@ -82,7 +82,6 @@ typedef struct {
 	TrackerDataProvider *data_provider;
 
 	TrackerSparqlStatement *content_query;
-	TrackerSparqlStatement *urn_query;
 
 	GTimer *timer;
 
@@ -678,31 +677,6 @@ sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
 		                                           priv->cancellable,
 		                                           error);
 	return priv->content_query;
-}
-
-static TrackerSparqlStatement *
-sparql_urn_ensure_statement (TrackerFileNotifier  *notifier,
-                             GError              **error)
-{
-	TrackerFileNotifierPrivate *priv;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-
-	if (priv->urn_query)
-		return priv->urn_query;
-
-	priv->urn_query =
-		tracker_sparql_connection_query_statement (priv->connection,
-		                                           "SELECT ?ie "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "    ~file a nfo:FileDataObject ;"
-		                                           "          nie:interpretedAs ?ie ."
-							   "  }"
-		                                           "}",
-		                                           priv->cancellable,
-		                                           error);
-	return priv->urn_query;
 }
 
 static void
@@ -1483,7 +1457,6 @@ tracker_file_notifier_finalize (GObject *object)
 	}
 
 	g_clear_object (&priv->content_query);
-	g_clear_object (&priv->urn_query);
 
 	g_object_unref (priv->crawler);
 	g_object_unref (priv->monitor);
@@ -1822,129 +1795,4 @@ tracker_file_notifier_is_active (TrackerFileNotifier *notifier)
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	return priv->pending_index_roots || priv->current_index_root;
-}
-
-const gchar *
-tracker_file_notifier_get_file_iri (TrackerFileNotifier *notifier,
-                                    GFile               *file,
-                                    gboolean             force)
-{
-	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
-	gchar *iri = NULL;
-	gboolean found;
-
-	g_return_val_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier), NULL);
-	g_return_val_if_fail (G_IS_FILE (file), NULL);
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-
-	if (G_UNLIKELY (priv->connection == NULL)) {
-		return NULL;
-	}
-
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file,
-	                                          G_FILE_TYPE_REGULAR,
-	                                          NULL);
-	if (!canonical) {
-		return NULL;
-	}
-
-	found = tracker_file_system_get_property_full (priv->file_system,
-	                                               canonical,
-	                                               quark_property_iri,
-	                                               (gpointer *) &iri);
-
-	if (found && !iri) {
-		/* NULL here mean the file iri was "invalidated", the file
-		 * was inserted by a previous event, so it has an unknown iri,
-		 * and further updates are keeping the file object alive.
-		 *
-		 * When these updates are processed, they'll need fetching the
-		 * file IRI again, so we force here extraction for these cases.
-		 */
-		force = TRUE;
-	}
-
-	if (!iri && force) {
-		TrackerSparqlCursor *cursor;
-		TrackerSparqlStatement *statement;
-		const gchar *str;
-		gchar *uri;
-
-		/* Fetch data for this file synchronously */
-		statement = sparql_urn_ensure_statement (notifier, NULL);
-		if (!statement)
-			return NULL;
-
-		uri = g_file_get_uri (file);
-		tracker_sparql_statement_bind_string (statement, "file", uri);
-		g_free (uri);
-
-		cursor = tracker_sparql_statement_execute (statement, NULL, NULL);
-		if (!cursor)
-			return NULL;
-
-		if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_object_unref (cursor);
-			return NULL;
-		}
-
-		str = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		iri = g_strdup (str);
-		tracker_file_system_set_property (priv->file_system, canonical,
-		                                  quark_property_iri, iri);
-		g_object_unref (cursor);
-	}
-
-	return iri;
-}
-
-static gboolean
-file_notifier_invalidate_file_iri_foreach (GFile    *file,
-                                           gpointer  user_data)
-{
-	TrackerFileSystem *file_system = user_data;
-
-	tracker_file_system_set_property (file_system,
-	                                  file,
-	                                  quark_property_iri,
-	                                  NULL);
-
-	return FALSE;
-}
-
-void
-tracker_file_notifier_invalidate_file_iri (TrackerFileNotifier *notifier,
-                                           GFile               *file,
-                                           gboolean             recursive)
-{
-	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
-
-	g_return_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier));
-	g_return_if_fail (G_IS_FILE (file));
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	canonical = tracker_file_system_peek_file (priv->file_system, file);
-	if (!canonical) {
-		return;
-	}
-
-	if (!recursive) {
-		/* Set a NULL iri, so we make sure to look it up afterwards */
-		tracker_file_system_set_property (priv->file_system,
-		                                  canonical,
-		                                  quark_property_iri,
-		                                  NULL);
-		return;
-	}
-
-	tracker_file_system_traverse (priv->file_system,
-	                              canonical,
-	                              G_PRE_ORDER,
-	                              file_notifier_invalidate_file_iri_foreach,
-	                              -1,
-	                              priv->file_system);
 }

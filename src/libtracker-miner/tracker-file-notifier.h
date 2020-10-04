@@ -85,14 +85,6 @@ gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notif
 void          tracker_file_notifier_stop         (TrackerFileNotifier     *notifier);
 gboolean      tracker_file_notifier_is_active    (TrackerFileNotifier     *notifier);
 
-const gchar * tracker_file_notifier_get_file_iri (TrackerFileNotifier     *notifier,
-                                                  GFile                   *file,
-                                                  gboolean                 force);
-
-void          tracker_file_notifier_invalidate_file_iri (TrackerFileNotifier *notifier,
-                                                         GFile               *file,
-                                                         gboolean             recursive);
-
 G_END_DECLS
 
-#endif /* __TRACKER_FILE_SYSTEM_H__ */
+#endif /* __TRACKER_FILE_NOTIFIER_H__ */
