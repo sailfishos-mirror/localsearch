@@ -88,6 +88,7 @@
 typedef struct {
 	guint16 type;
 	guint attributes_update : 1;
+	guint is_dir : 1;
 	GFile *file;
 	GFile *dest_file;
 } QueueEvent;
@@ -676,13 +677,15 @@ queue_event_new (TrackerMinerFSEventType  type,
 }
 
 static QueueEvent *
-queue_event_moved_new (GFile *source,
-                       GFile *dest)
+queue_event_moved_new (GFile    *source,
+                       GFile    *dest,
+                       gboolean  is_dir)
 {
 	QueueEvent *event;
 
 	event = g_new0 (QueueEvent, 1);
 	event->type = TRACKER_MINER_FS_EVENT_MOVED;
+	event->is_dir = !!is_dir;
 	g_set_object (&event->dest_file, dest);
 	g_set_object (&event->file, source);
 
@@ -766,7 +769,8 @@ queue_event_coalesce (const QueueEvent  *first,
 		if (second->type == TRACKER_MINER_FS_EVENT_MOVED) {
 			if (first->file != second->dest_file) {
 				*replacement = queue_event_moved_new (first->file,
-								      second->dest_file);
+				                                      second->dest_file,
+				                                      first->is_dir);
 			}
 
 			return (QUEUE_ACTION_DELETE_FIRST |
@@ -1438,33 +1442,15 @@ item_move (TrackerMinerFS *fs,
            GFile          *dest_file,
            GFile          *source_file,
            GString        *dest_task_sparql,
-           GString        *source_task_sparql)
+           GString        *source_task_sparql,
+           gboolean        is_dir)
 {
 	gchar     *uri, *source_uri, *sparql;
-	GFileInfo *file_info;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean recursive;
 
 	uri = g_file_get_uri (dest_file);
 	source_uri = g_file_get_uri (source_file);
-
-	/* FIXME: Should check the _NO_STAT on TrackerDirectoryFlags first! */
-	file_info = g_file_query_info (dest_file,
-	                               G_FILE_ATTRIBUTE_STANDARD_TYPE,
-	                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                               NULL, NULL);
-
-	if (!file_info) {
-		gboolean retval;
-
-		/* Destination file has gone away, ignore dest file and remove source if any */
-		retval = item_remove (fs, source_file, FALSE, source_task_sparql);
-
-		g_free (source_uri);
-		g_free (uri);
-
-		return retval;
-	}
 
 	TRACKER_NOTE (MINER_FS_EVENTS,
 	              g_message ("Moving item from '%s' to '%s'",
@@ -1474,7 +1460,7 @@ item_move (TrackerMinerFS *fs,
 	tracker_indexing_tree_get_root (fs->priv->indexing_tree, dest_file, &flags);
 	recursive = ((source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
 	             (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
-	             g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY);
+	             is_dir);
 
 	/* Delete destination item from store if any */
 	item_remove (fs, dest_file, FALSE, dest_task_sparql);
@@ -1501,7 +1487,6 @@ item_move (TrackerMinerFS *fs,
 	g_free (sparql);
 	g_free (uri);
 	g_free (source_uri);
-	g_object_unref (file_info);
 
 	return TRUE;
 }
@@ -1541,7 +1526,8 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
                           GFile                   **source_file,
                           TrackerMinerFSEventType  *type,
                           gint                     *priority_out,
-                          gboolean                 *attributes_update)
+                          gboolean                 *attributes_update,
+                          gboolean                 *is_dir)
 {
 	QueueEvent *event;
 	gint priority;
@@ -1650,6 +1636,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	static gint64 time_last = 0;
 	gboolean keep_processing = TRUE;
 	gboolean attributes_update = FALSE;
+	gboolean is_dir = FALSE;
 	TrackerMinerFSEventType type;
 	gint priority = 0;
 	GString *task_sparql = NULL;
@@ -1665,7 +1652,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		return FALSE;
 	}
 
-	if (!item_queue_get_next_file (fs, &file, &source_file, &type, &priority, &attributes_update)) {
+	if (!item_queue_get_next_file (fs, &file, &source_file, &type, &priority, &attributes_update, &is_dir)) {
 		/* We should flush the processing pool buffer here, because
 		 * if there was a previous task on the same file we want to
 		 * process now, we want it to get finished before we can go
@@ -1791,7 +1778,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	case TRACKER_MINER_FS_EVENT_MOVED:
 		task_sparql = g_string_new ("");
 		source_task_sparql = g_string_new ("");
-		keep_processing = item_move (fs, file, source_file, task_sparql, source_task_sparql);
+		keep_processing = item_move (fs, file, source_file, task_sparql, source_task_sparql, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_DELETED:
 		task_sparql = g_string_new ("");
@@ -2075,7 +2062,7 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	event = queue_event_moved_new (source, dest);
+	event = queue_event_moved_new (source, dest, is_dir);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, source));
 }
 
