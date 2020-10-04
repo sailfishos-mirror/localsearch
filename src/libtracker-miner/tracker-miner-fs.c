@@ -1442,7 +1442,6 @@ item_move (TrackerMinerFS *fs,
 {
 	gchar     *uri, *source_uri, *sparql;
 	GFileInfo *file_info;
-	gboolean source_exists;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean recursive;
 
@@ -1455,41 +1454,14 @@ item_move (TrackerMinerFS *fs,
 	                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                               NULL, NULL);
 
-	/* Get 'source' ID */
-	source_exists = tracker_file_notifier_query_file_exists (fs->priv->file_notifier,
-								 source_file);
-
 	if (!file_info) {
 		gboolean retval;
 
-		if (source_exists) {
-			/* Destination file has gone away, ignore dest file and remove source if any */
-			retval = item_remove (fs, source_file, FALSE, source_task_sparql);
-		} else {
-			/* Destination file went away, and source wasn't indexed either */
-			retval = TRUE;
-		}
+		/* Destination file has gone away, ignore dest file and remove source if any */
+		retval = item_remove (fs, source_file, FALSE, source_task_sparql);
 
 		g_free (source_uri);
 		g_free (uri);
-
-		return retval;
-	} else if (!source_exists) {
-		gboolean retval;
-
-		/* The source file might not be indexed yet (eg. temporary save
-		 * files that are immediately renamed to the definitive path).
-		 * Deal with those as newly added items.
-		 */
-		TRACKER_NOTE (MINER_FS_EVENTS,
-		              g_message ("Source file '%s' not yet in store, indexing '%s' "
-		                         "from scratch", source_uri, uri));
-
-		retval = item_add_or_update (fs, dest_file, G_PRIORITY_DEFAULT, FALSE);
-
-		g_free (source_uri);
-		g_free (uri);
-		g_object_unref (file_info);
 
 		return retval;
 	}

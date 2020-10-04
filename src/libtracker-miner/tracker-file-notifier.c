@@ -1262,7 +1262,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		}
 		/* else, file, do nothing */
 	} else {
-		gboolean source_stored, should_process_other;
+		gboolean should_process, should_process_other;
 		GFileType file_type;
 		GFile *check_file;
 
@@ -1277,8 +1277,9 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		/* If the (parent) directory is in
 		 * the filesystem, file is stored
 		 */
-		source_stored = (tracker_file_system_peek_file (priv->file_system,
-		                                                check_file) != NULL);
+		should_process = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
+		                                                          file,
+		                                                          file_type);
 		should_process_other = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 		                                                                other_file,
 		                                                                file_type);
@@ -1295,8 +1296,10 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		g_object_ref (file);
 		g_object_ref (other_file);
 
-		if (!source_stored) {
-			/* Destination location should be indexed as if new */
+		if (!should_process) {
+			/* The source was not an indexable file, the destination
+			 * could be though, it should be indexed as if new, then */
+
 			/* Remove monitors if any */
 			if (is_directory) {
 				tracker_monitor_remove_recursively (priv->monitor,
