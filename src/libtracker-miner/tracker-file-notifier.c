@@ -267,6 +267,7 @@ file_notifier_traverse_tree_foreach (GFile    *file,
 	GFile *current_root;
 	gchar *hash, *mimetype;
 	gboolean stop = FALSE;
+	gboolean is_dir;
 
 	notifier = user_data;
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -280,6 +281,7 @@ file_notifier_traverse_tree_foreach (GFile    *file,
 	                                           quark_property_extractor_hash);
 	mimetype = tracker_file_system_steal_property (priv->file_system, file,
 	                                               quark_property_mimetype);
+	is_dir = tracker_file_system_get_file_type (priv->file_system, file) == G_FILE_TYPE_DIRECTORY;
 
 	/* If we're crawling over a subdirectory of a root index, it's been
 	 * already notified in the crawling op that made it processed, so avoid
@@ -293,22 +295,22 @@ file_notifier_traverse_tree_foreach (GFile    *file,
 
 	if (store_mtime && !disk_mtime) {
 		/* In store but not in disk, delete */
-		g_signal_emit (notifier, signals[FILE_DELETED], 0, file);
+		g_signal_emit (notifier, signals[FILE_DELETED], 0, file, is_dir);
 		stop = TRUE;
 		goto out;
 	} else if (disk_mtime && !store_mtime) {
 		/* In disk but not in store, create */
-		g_signal_emit (notifier, signals[FILE_CREATED], 0, file);
+		g_signal_emit (notifier, signals[FILE_CREATED], 0, file, is_dir);
 	} else if (store_mtime && disk_mtime && *disk_mtime != *store_mtime) {
 		/* Mtime changed, update */
-		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE);
+		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE, is_dir);
 	} else if (mimetype) {
 		const gchar *current_hash;
 
 		current_hash = tracker_extract_module_manager_get_hash (mimetype);
 
 		if (g_strcmp0 (hash, current_hash) != 0)
-			g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE);
+			g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE, is_dir);
 	} else if (!store_mtime && !disk_mtime) {
 		/* what are we doing with such file? should happen rarely,
 		 * only with files that we've queried, but we decided not
@@ -829,7 +831,7 @@ notifier_query_root_contents (TrackerFileNotifier *notifier)
 
 	if ((flags & TRACKER_DIRECTORY_FLAG_IGNORE) != 0) {
 		if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) == 0) {
-			g_signal_emit (notifier, signals[FILE_DELETED], 0, directory);
+			g_signal_emit (notifier, signals[FILE_DELETED], 0, directory, TRUE);
 		}
 
 		/* Move on to next root */
@@ -944,7 +946,7 @@ tracker_file_notifier_ensure_parents (TrackerFileNotifier *notifier,
 		                                          NULL);
 		g_object_unref (parent);
 
-		g_signal_emit (notifier, signals[FILE_CREATED], 0, canonical);
+		g_signal_emit (notifier, signals[FILE_CREATED], 0, canonical, TRUE);
 
 		if (tracker_indexing_tree_file_is_root (priv->indexing_tree, canonical)) {
 			break;
@@ -997,7 +999,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 				g_object_unref (parent);
 
 				g_object_ref (canonical);
-				g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical);
+				g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical, TRUE);
 				file_notifier_current_root_check_remove_directory (notifier, canonical);
 				tracker_file_system_forget_files (priv->file_system, canonical,
 				                                  G_FILE_TYPE_UNKNOWN);
@@ -1045,7 +1047,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 	canonical = tracker_file_system_get_file (priv->file_system,
 	                                          file, file_type, NULL);
 
-	g_signal_emit (notifier, signals[FILE_CREATED], 0, canonical);
+	g_signal_emit (notifier, signals[FILE_CREATED], 0, canonical, is_directory);
 
 	if (!is_directory) {
 		tracker_file_system_forget_files (priv->file_system, canonical,
@@ -1084,7 +1086,7 @@ monitor_item_updated_cb (TrackerMonitor *monitor,
 		tracker_file_notifier_get_file_iri (notifier, canonical, TRUE);
 	}
 
-	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE);
+	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE, is_directory);
 
 	if (!is_directory) {
 		tracker_file_system_forget_files (priv->file_system, canonical,
@@ -1115,7 +1117,7 @@ monitor_item_attribute_updated_cb (TrackerMonitor *monitor,
 	/* Fetch the interned copy */
 	canonical = tracker_file_system_get_file (priv->file_system,
 	                                          file, file_type, NULL);
-	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, TRUE);
+	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, TRUE, is_directory);
 
 	if (!is_directory) {
 		tracker_file_system_forget_files (priv->file_system, canonical,
@@ -1197,7 +1199,7 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 	 * reference in order to prevent that.
 	 */
 	g_object_ref (canonical);
-	g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical);
+	g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical, is_directory);
 
 	file_notifier_current_root_check_remove_directory (notifier, canonical);
 
@@ -1310,7 +1312,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 
 				/* Source file was not stored, check dest file as new */
 				if (!is_directory || !dest_is_recursive) {
-					g_signal_emit (notifier, signals[FILE_CREATED], 0, other_file);
+					g_signal_emit (notifier, signals[FILE_CREATED], 0, other_file, is_directory);
 				} else if (is_directory) {
 					/* Crawl dest directory */
 					notifier_queue_root (notifier, other_file, flags, FALSE);
@@ -1324,7 +1326,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 				                                    file);
 			}
 
-			g_signal_emit (notifier, signals[FILE_DELETED], 0, file);
+			g_signal_emit (notifier, signals[FILE_DELETED], 0, file, is_directory);
 			file_notifier_current_root_check_remove_directory (notifier, file);
 		} else {
 			/* Handle move */
@@ -1352,10 +1354,10 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 				}
 			}
 
-			g_signal_emit (notifier, signals[FILE_MOVED], 0, file, other_file);
+			g_signal_emit (notifier, signals[FILE_MOVED], 0, file, other_file, is_directory);
 
 			if (extension_changed (file, other_file))
-				g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, FALSE);
+				g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, FALSE, is_directory);
 		}
 
 		tracker_file_system_forget_files (priv->file_system, file,
@@ -1448,7 +1450,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 			} else if (tracker_indexing_tree_file_is_root (indexing_tree,
 			                                               parent)) {
 				g_signal_emit (notifier, signals[FILE_CREATED],
-					       0, directory);
+				               0, directory, TRUE);
 			}
 
 			g_object_unref (parent);
@@ -1458,7 +1460,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 
 	if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) == 0) {
 		/* Directory needs to be deleted from the store too */
-		g_signal_emit (notifier, signals[FILE_DELETED], 0, directory);
+		g_signal_emit (notifier, signals[FILE_DELETED], 0, directory, TRUE);
 	}
 
 	elem = g_list_find_custom (priv->pending_index_roots, directory,
@@ -1524,7 +1526,8 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 		notifier_queue_root (notifier, canonical, flags, FALSE);
 	} else if (tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 	                                                    canonical, child_type)) {
-		g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE);
+		g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE,
+		               child_type == G_FILE_TYPE_DIRECTORY);
 	}
 }
 
@@ -1691,7 +1694,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              1, G_TYPE_FILE);
+		              2, G_TYPE_FILE, G_TYPE_BOOLEAN);
 	signals[FILE_UPDATED] =
 		g_signal_new ("file-updated",
 		              G_TYPE_FROM_CLASS (klass),
@@ -1701,7 +1704,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              2, G_TYPE_FILE, G_TYPE_BOOLEAN);
+		              3, G_TYPE_FILE, G_TYPE_BOOLEAN, G_TYPE_BOOLEAN);
 	signals[FILE_DELETED] =
 		g_signal_new ("file-deleted",
 		              G_TYPE_FROM_CLASS (klass),
@@ -1711,7 +1714,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              1, G_TYPE_FILE);
+		              2, G_TYPE_FILE, G_TYPE_BOOLEAN);
 	signals[FILE_MOVED] =
 		g_signal_new ("file-moved",
 		              G_TYPE_FROM_CLASS (klass),
@@ -1721,7 +1724,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              2, G_TYPE_FILE, G_TYPE_FILE);
+		              3, G_TYPE_FILE, G_TYPE_FILE, G_TYPE_BOOLEAN);
 	signals[DIRECTORY_STARTED] =
 		g_signal_new ("directory-started",
 		              G_TYPE_FROM_CLASS (klass),

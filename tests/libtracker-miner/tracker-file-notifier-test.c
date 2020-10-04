@@ -122,6 +122,7 @@ perform_file_operation (TestCommonContext *fixture,
 static void
 file_notifier_file_created_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
+                               gboolean             is_dir,
                                gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -143,6 +144,7 @@ static void
 file_notifier_file_updated_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
                                gboolean             attributes_only,
+                               gboolean             is_dir,
                                gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -163,6 +165,7 @@ file_notifier_file_updated_cb (TrackerFileNotifier *notifier,
 static void
 file_notifier_file_deleted_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
+                               gboolean             is_dir,
                                gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -197,6 +200,7 @@ static void
 file_notifier_file_moved_cb (TrackerFileNotifier *notifier,
                              GFile               *file,
                              GFile               *other_file,
+                             gboolean             is_dir,
                              gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;

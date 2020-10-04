@@ -207,17 +207,21 @@ static void           indexing_tree_directory_removed     (TrackerIndexingTree  
                                                            gpointer              user_data);
 static void           file_notifier_file_created          (TrackerFileNotifier  *notifier,
                                                            GFile                *file,
+                                                           gboolean              is_dir,
                                                            gpointer              user_data);
 static void           file_notifier_file_deleted          (TrackerFileNotifier  *notifier,
                                                            GFile                *file,
+                                                           gboolean              is_dir,
                                                            gpointer              user_data);
 static void           file_notifier_file_updated          (TrackerFileNotifier  *notifier,
                                                            GFile                *file,
                                                            gboolean              attributes_only,
+                                                           gboolean              is_dir,
                                                            gpointer              user_data);
 static void           file_notifier_file_moved            (TrackerFileNotifier  *notifier,
                                                            GFile                *source,
                                                            GFile                *dest,
+                                                           gboolean              is_dir,
                                                            gpointer              user_data);
 static void           file_notifier_directory_started     (TrackerFileNotifier *notifier,
                                                            GFile               *directory,
@@ -2044,6 +2048,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 static void
 file_notifier_file_created (TrackerFileNotifier  *notifier,
                             GFile                *file,
+                            gboolean              is_dir,
                             gpointer              user_data)
 {
 	TrackerMinerFS *fs = user_data;
@@ -2056,12 +2061,13 @@ file_notifier_file_created (TrackerFileNotifier  *notifier,
 static void
 file_notifier_file_deleted (TrackerFileNotifier  *notifier,
                             GFile                *file,
+                            gboolean              is_dir,
                             gpointer              user_data)
 {
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	if (tracker_file_notifier_get_file_type (notifier, file) == G_FILE_TYPE_DIRECTORY) {
+	if (is_dir) {
 		/* Cancel all pending tasks on files inside the path given by file */
 		tracker_task_pool_foreach (fs->priv->task_pool,
 					   task_pool_cancel_foreach,
@@ -2076,6 +2082,7 @@ static void
 file_notifier_file_updated (TrackerFileNotifier  *notifier,
                             GFile                *file,
                             gboolean              attributes_only,
+                            gboolean              is_dir,
                             gpointer              user_data)
 {
 	TrackerMinerFS *fs = user_data;
@@ -2090,6 +2097,7 @@ static void
 file_notifier_file_moved (TrackerFileNotifier *notifier,
                           GFile               *source,
                           GFile               *dest,
+                          gboolean             is_dir,
                           gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
