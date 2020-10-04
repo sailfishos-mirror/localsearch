@@ -29,10 +29,12 @@
 #include "tracker-task-pool.h"
 #include "tracker-sparql-buffer.h"
 #include "tracker-file-notifier.h"
+#include "tracker-lru.h"
 
 /* Default processing pool limits to be set */
 #define DEFAULT_WAIT_POOL_LIMIT 1
 #define DEFAULT_READY_POOL_LIMIT 1
+#define DEFAULT_URN_LRU_SIZE 100
 
 /* Put tasks processing at a lower priority so other events
  * (timeouts, monitor events, etc...) are guaranteed to be
@@ -118,6 +120,10 @@ struct _TrackerMinerFSPrivate {
 	TrackerTaskPool *task_pool;
 	TrackerSparqlBuffer *sparql_buffer;
 	guint sparql_buffer_limit;
+
+	/* Folder URN cache */
+	TrackerSparqlStatement *urn_query;
+	TrackerLRU *urn_lru;
 
 	/* File properties */
 	GQuark quark_recursive_removal;
@@ -572,6 +578,35 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	                                               (GEqualFunc) g_file_equal,
 	                                               g_object_unref,
 	                                               NULL);
+	priv->urn_lru = tracker_lru_new (DEFAULT_URN_LRU_SIZE,
+	                                 g_file_hash,
+	                                 (GEqualFunc) g_file_equal,
+	                                 g_object_unref,
+	                                 g_free);
+}
+
+static gboolean
+create_folder_urn_query (TrackerMinerFS  *fs,
+                         GCancellable    *cancellable,
+                         GError         **error)
+{
+	TrackerMinerFSPrivate *priv = fs->priv;
+	TrackerSparqlConnection *sparql_conn;
+
+	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (fs));
+	priv->urn_query =
+		tracker_sparql_connection_query_statement (sparql_conn,
+		                                           "SELECT ?ie "
+		                                           "{"
+		                                           "  GRAPH tracker:FileSystem {"
+		                                           "    ~file a nfo:FileDataObject ;"
+		                                           "          nie:interpretedAs ?ie ."
+		                                           "    ?ie a nfo:Folder ."
+							   "  }"
+		                                           "}",
+		                                           cancellable,
+		                                           error);
+	return priv->urn_query != NULL;
 }
 
 static gboolean
@@ -587,6 +622,9 @@ miner_fs_initable_init (GInitable     *initable,
 	}
 
 	priv = TRACKER_MINER_FS (initable)->priv;
+
+	if (!create_folder_urn_query (TRACKER_MINER_FS (initable), cancellable, error))
+		return FALSE;
 
 	g_object_get (initable, "processing-pool-ready-limit", &limit, NULL);
 	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (initable)),
@@ -813,6 +851,8 @@ fs_finalize (GObject *object)
 
 	g_timer_destroy (priv->timer);
 	g_timer_destroy (priv->extraction_timer);
+
+	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
 
 	if (priv->item_queues_handler_id) {
 		g_source_remove (priv->item_queues_handler_id);
@@ -1250,18 +1290,6 @@ update_processing_task_context_free (UpdateProcessingTaskContext *ctxt)
 }
 
 static void
-cache_parent_folder_urn (TrackerMinerFS *fs,
-			 GFile          *file)
-{
-	GFile *parent;
-
-	parent = g_file_get_parent (file);
-	tracker_file_notifier_get_file_iri (fs->priv->file_notifier,
-					    parent, TRUE);
-	g_object_unref (parent);
-}
-
-static void
 on_signal_gtask_complete (GObject      *source,
 			  GAsyncResult *res,
 			  gpointer      user_data)
@@ -1422,6 +1450,11 @@ item_remove (TrackerMinerFS *fs,
 	                    fs->priv->quark_recursive_removal,
 	                    GINT_TO_POINTER (TRUE));
 
+	tracker_lru_remove_foreach (fs->priv->urn_lru,
+	                            (GEqualFunc) g_file_has_parent,
+	                            file);
+	tracker_lru_remove (fs->priv->urn_lru, file);
+
 	/* Call the implementation to generate a SPARQL update for the removal. */
 	signal_num = only_children ? REMOVE_CHILDREN : REMOVE_FILE;
 	g_signal_emit (fs, signals[signal_num], 0, file, &sparql);
@@ -1471,10 +1504,6 @@ item_move (TrackerMinerFS *fs,
 	if (!recursive &&
 	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
 		item_remove (fs, source_file, TRUE, source_task_sparql);
-
-	/* Cache URN for source/dest folders */
-	cache_parent_folder_urn (fs, source_file);
-	cache_parent_folder_urn (fs, dest_file);
 
 	g_signal_emit (fs, signals[MOVE_FILE], 0, dest_file, source_file, recursive, &sparql);
 
@@ -2411,17 +2440,41 @@ tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
  *
  * Returns: The URN containing the data associated
  *          to @file, or %NULL.
- *
- * Since: 0.10
  **/
 const gchar *
 tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 				 GFile          *file)
 {
+	TrackerSparqlCursor *cursor;
+	const gchar *urn;
+	gchar *uri, *str;
+
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	return tracker_file_notifier_get_file_iri (fs->priv->file_notifier, file, FALSE);
+	if (tracker_lru_find (fs->priv->urn_lru, file, (gpointer*) &urn))
+		return urn;
+
+	uri = g_file_get_uri (file);
+	tracker_sparql_statement_bind_string (fs->priv->urn_query, "file", uri);
+	g_free (uri);
+
+	cursor = tracker_sparql_statement_execute (fs->priv->urn_query, NULL, NULL);
+	if (!cursor)
+		return NULL;
+
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		g_object_unref (cursor);
+		return NULL;
+	}
+
+	urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+	str = g_strdup (urn);
+	g_object_unref (cursor);
+
+	tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), str);
+
+	return str;
 }
 
 /**
