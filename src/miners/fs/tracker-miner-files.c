@@ -1022,14 +1022,9 @@ init_mount_points (TrackerMinerFiles *miner_files)
 					flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 				}
 
-				/* Add the current mount point as reported to have incorrect
-				 * state. We will force mtime checks on this mount points,
-				 * even if no-mtime-check-needed was set. */
-				if (tracker_miner_files_is_file_eligible (miner_files, file)) {
-					tracker_indexing_tree_add (indexing_tree,
-					                           file,
-					                           flags);
-				}
+				tracker_indexing_tree_add (indexing_tree,
+				                           file,
+				                           flags);
 			}
 		} else if (!(state & VOLUME_MOUNTED) &&
 		           (state & VOLUME_MOUNTED_IN_STORE)) {
