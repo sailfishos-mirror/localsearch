@@ -211,20 +211,16 @@ crawler_check_directory_cb (TrackerCrawler *crawler,
                             gpointer        user_data)
 {
 	TrackerFileNotifierPrivate *priv;
-	GFile *root, *canonical;
 
 	priv = tracker_file_notifier_get_instance_private (user_data);
 	g_assert (priv->current_index_root != NULL);
-
-	canonical = tracker_file_system_peek_file (priv->file_system, directory);
-	root = tracker_indexing_tree_get_root (priv->indexing_tree, directory, NULL);
 
 	/* If it's a config root itself, other than the one
 	 * currently processed, bypass it, it will be processed
 	 * when the time arrives.
 	 */
-	if (canonical && root == canonical &&
-	    root != priv->current_index_root->root) {
+	if (tracker_indexing_tree_file_is_root (priv->indexing_tree, directory) &&
+	    !g_file_equal (directory, priv->current_index_root->root)) {
 		return FALSE;
 	}
 
@@ -883,8 +879,9 @@ static gint
 find_directory_root (RootData *data,
                      GFile    *file)
 {
-	if (data->root == file)
+	if (g_file_equal (data->root, file))
 		return 0;
+
 	return -1;
 }
 
@@ -900,7 +897,7 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (priv->current_index_root &&
-	    priv->current_index_root->root == file)
+	    g_file_equal (priv->current_index_root->root, file))
 		return;
 
 	if (g_list_find_custom (priv->pending_index_roots, file,
@@ -1474,7 +1471,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	}
 
 	if (priv->current_index_root &&
-	    directory == priv->current_index_root->root) {
+	    g_file_equal (directory, priv->current_index_root->root)) {
 		/* Directory being currently processed */
 		tracker_crawler_stop (priv->crawler);
 		g_cancellable_cancel (priv->cancellable);
