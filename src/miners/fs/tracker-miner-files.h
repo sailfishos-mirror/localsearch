@@ -65,8 +65,6 @@ gboolean      tracker_miner_files_check_directory          (GFile             *f
 gboolean      tracker_miner_files_monitor_directory        (GFile             *file,
                                                             gboolean           enable_monitors,
                                                             GSList            *directories_to_check);
-gboolean      tracker_miner_files_is_file_eligible         (TrackerMinerFiles *miner,
-                                                            GFile             *file);
 
 /* Global functions to handle timestamp files */
 gboolean tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf);
