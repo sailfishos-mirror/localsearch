@@ -64,12 +64,6 @@ typedef struct {
 	GSList *ignored_directories;
 	GSList *ignored_directories_with_content;
 	GSList *ignored_files;
-
-	/* Convenience data */
-	GSList *ignored_directory_patterns;
-	GSList *ignored_directory_paths;
-	GSList *ignored_file_patterns;
-	GSList *ignored_file_paths;
 } TrackerConfigPrivate;
 
 static void config_set_property                         (GObject           *object,
@@ -295,9 +289,6 @@ config_set_property (GObject      *object,
 		break;
 
 		/* Indexing */
-		/* NOTE: We handle these specifically because we
-		 * create convenience data around these lists.
-		 */
 	case PROP_INDEX_RECURSIVE_DIRECTORIES: {
 		GStrv strv = g_value_get_boxed (value);
 		GSList *dirs = tracker_string_list_to_gslist (strv, -1);
@@ -430,26 +421,6 @@ config_finalize (GObject *object)
 
 	priv = tracker_config_get_instance_private (TRACKER_CONFIG (object));
 
-	g_slist_foreach (priv->ignored_file_patterns,
-	                 (GFunc) g_pattern_spec_free,
-	                 NULL);
-	g_slist_free (priv->ignored_file_patterns);
-
-	g_slist_foreach (priv->ignored_file_paths,
-	                 (GFunc) g_free,
-	                 NULL);
-	g_slist_free (priv->ignored_file_paths);
-
-	g_slist_foreach (priv->ignored_directory_patterns,
-	                 (GFunc) g_pattern_spec_free,
-	                 NULL);
-	g_slist_free (priv->ignored_directory_patterns);
-
-	g_slist_foreach (priv->ignored_directory_paths,
-	                 (GFunc) g_free,
-	                 NULL);
-	g_slist_free (priv->ignored_directory_paths);
-
 	g_slist_foreach (priv->ignored_files, (GFunc) g_free, NULL);
 	g_slist_free (priv->ignored_files);
 
@@ -501,88 +472,6 @@ dir_mapping_get (GSList   *dirs,
 	g_slist_free (filtered);
 
 	return g_slist_reverse (evaluated_dirs);
-}
-
-static void
-config_set_ignored_file_conveniences (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-	GSList *l;
-	GSList *paths = NULL;
-	GSList *patterns = NULL;
-
-	priv = tracker_config_get_instance_private (config);
-
-	g_slist_foreach (priv->ignored_file_patterns,
-	                 (GFunc) g_pattern_spec_free,
-	                 NULL);
-	g_slist_free (priv->ignored_file_patterns);
-
-	g_slist_foreach (priv->ignored_file_paths,
-	                 (GFunc) g_free,
-	                 NULL);
-	g_slist_free (priv->ignored_file_paths);
-
-	for (l = priv->ignored_files; l; l = l->next) {
-		const gchar *str = l->data;
-
-		if (!str) {
-			continue;
-		}
-
-		if (G_LIKELY (*str != G_DIR_SEPARATOR)) {
-			GPatternSpec *spec;
-
-			spec = g_pattern_spec_new (l->data);
-			patterns = g_slist_prepend (patterns, spec);
-		} else {
-			paths = g_slist_prepend (paths, g_strdup (l->data));
-		}
-	}
-
-	priv->ignored_file_patterns = g_slist_reverse (patterns);
-	priv->ignored_file_paths = g_slist_reverse (paths);
-}
-
-static void
-config_set_ignored_directory_conveniences (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-	GSList *l;
-	GSList *patterns = NULL;
-	GSList *paths = NULL;
-
-	priv = tracker_config_get_instance_private (config);
-
-	g_slist_foreach (priv->ignored_directory_patterns,
-	                 (GFunc) g_pattern_spec_free,
-	                 NULL);
-	g_slist_free (priv->ignored_directory_patterns);
-
-	g_slist_foreach (priv->ignored_directory_paths,
-	                 (GFunc) g_free,
-	                 NULL);
-	g_slist_free (priv->ignored_directory_paths);
-
-	for (l = priv->ignored_directories; l; l = l->next) {
-		const gchar *str = l->data;
-
-		if (!str) {
-			continue;
-		}
-
-		if (G_LIKELY (*str != G_DIR_SEPARATOR)) {
-			GPatternSpec *spec;
-
-			spec = g_pattern_spec_new (l->data);
-			patterns = g_slist_prepend (patterns, spec);
-		} else {
-			paths = g_slist_prepend (paths, g_strdup (l->data));
-		}
-	}
-
-	priv->ignored_directory_patterns = g_slist_reverse (patterns);
-	priv->ignored_directory_paths = g_slist_reverse (paths);
 }
 
 static void
@@ -642,9 +531,6 @@ config_constructed (GObject *object)
 	g_settings_bind (settings, "ignored-files", object, "ignored-files", G_SETTINGS_BIND_GET);
 	g_settings_bind (settings, "ignored-directories", object, "ignored-directories", G_SETTINGS_BIND_GET);
 	g_settings_bind (settings, "ignored-directories-with-content", object, "ignored-directories-with-content", G_SETTINGS_BIND_GET);
-
-	config_set_ignored_file_conveniences (TRACKER_CONFIG (object));
-	config_set_ignored_directory_conveniences (TRACKER_CONFIG (object));
 }
 
 TrackerConfig *
@@ -1030,9 +916,6 @@ config_set_ignored_directories (TrackerConfig *config,
 		return;
 	}
 
-	/* Re-set up the GPatternSpec list */
-	config_set_ignored_directory_conveniences (config);
-
 	g_object_notify (G_OBJECT (config), "ignored-directories");
 }
 
@@ -1099,60 +982,5 @@ config_set_ignored_files (TrackerConfig *config,
 		return;
 	}
 
-	/* Re-set up the GPatternSpec list */
-	config_set_ignored_file_conveniences (config);
-
 	g_object_notify (G_OBJECT (config), "ignored-files");
-}
-
-/*
- * Convenience functions
- */
-
-GSList *
-tracker_config_get_ignored_directory_patterns (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
-
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->ignored_directory_patterns;
-}
-
-GSList *
-tracker_config_get_ignored_file_patterns (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
-
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->ignored_file_patterns;
-}
-
-GSList *
-tracker_config_get_ignored_directory_paths (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
-
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->ignored_directory_paths;
-}
-
-GSList *
-tracker_config_get_ignored_file_paths (TrackerConfig *config)
-{
-	TrackerConfigPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
-
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->ignored_file_paths;
 }
