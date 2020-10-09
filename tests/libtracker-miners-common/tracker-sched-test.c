@@ -35,7 +35,13 @@ static gboolean
 scheduler_is (gint scheduler)
 {
 #ifdef __linux__
-        return (sched_getscheduler (0) == scheduler);
+        int policy;
+        struct sched_param param;
+
+        if (pthread_getschedparam (pthread_self (), &policy, &param) != 0) {
+                g_assert_not_reached ();
+        }
+        return (policy == scheduler);
 #else
         return TRUE;
 #endif
