@@ -696,11 +696,21 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 	if (resource) {
 		if (output_format == TRACKER_SERIALIZATION_FORMAT_SPARQL) {
 			char *text;
+			g_autoptr (TrackerResource) file_resource = NULL;
 
-			/* If this was going into the tracker-store we'd generate a unique ID
-			 * here, so that the data persisted across file renames.
+			/* Set up the corresponding nfo:FileDataObject resource appropriately,
+			 * so the SPARQL we generate is valid according to Nepomuk.
 			 */
-			tracker_resource_set_identifier (resource, uri);
+			file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
+
+			if (file_resource) {
+				g_object_ref (file_resource);
+			} else {
+				file_resource = tracker_resource_new (uri);
+				tracker_resource_set_relation (resource, "nie:isStoredAs", file_resource);
+			}
+
+			tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
 
 			text = tracker_resource_print_sparql_update (resource, NULL, NULL);
 
