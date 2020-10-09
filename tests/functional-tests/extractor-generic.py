@@ -42,8 +42,6 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         """
         Descfile is the description file in a relative path
         """
-        super(GenericExtractionTestCase, self).__init__(methodName)
-
         self.descfile = descfile
         try:
             with open(descfile) as f:
@@ -61,9 +59,7 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         else:
             setattr(self, methodName, self.generic_test_extraction)
 
-        # unittest framework will run the test called "self._testMethodName"
-        # So we set that variable to our new name
-        self._testMethodName = methodName
+        super(GenericExtractionTestCase, self).__init__(methodName)
 
     def __get_bugnumber(self):
         return self.spec['test'].get('Bugzilla')
