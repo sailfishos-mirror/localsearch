@@ -169,20 +169,16 @@ process_desktop_file (TrackerResource  *resource,
 
 		if (link_url) {
 			TrackerResource *website_resource;
-			gchar *link_uri;
 
-			g_strstrip (link_url);
-			link_uri = tracker_sparql_escape_uri_printf (LINK_URN_PREFIX "%s", link_url);
-
-
-			website_resource = tracker_resource_new (link_uri);
+			website_resource = tracker_resource_new (link_url);
 			tracker_resource_add_uri (website_resource, "rdf:type", "nie:DataObject");
 			tracker_resource_add_uri (website_resource, "rdf:type", "nfo:Website");
 			tracker_resource_set_string (website_resource, "nie:url", link_url);
-			tracker_resource_set_take_relation (resource, "nie:isStoredAs", website_resource);
+
+			tracker_resource_add_uri (resource, "rdf:type", "nfo:Bookmark");
+			tracker_resource_set_take_relation (resource, "nfo:bookmarks", website_resource);
 
 			g_free (link_url);
-			g_free (link_uri);
 		} else {
 			/* a Link desktop entry must have an URL */
 			gchar *uri;

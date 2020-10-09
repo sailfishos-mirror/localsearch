@@ -4,8 +4,8 @@
     },
     "metadata": {
         "nie:title" : "Wikipedia Tracker",
-        "nie:isStoredAs": {
-            "@id": "urn:link:https:%2F%2Fen.wikipedia.org%2Fwiki%2FTracker_(search_software)",
+        "nfo:bookmarks": {
+            "@id": "https://en.wikipedia.org/wiki/Tracker_(search_software)",
             "@type": [
                 "nie:DataObject",
                 "nfo:Website"
