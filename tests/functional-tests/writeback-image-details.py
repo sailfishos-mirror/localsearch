@@ -85,7 +85,7 @@ class WritebackKeepDateTest (fixtures.TrackerWritebackTest):
         self.wait_for_file_change(jpeg_path, initial_mtime)
 
         # Check the value is written in the file
-        metadata = fixtures.get_tracker_extract_jsonld_output(self.extra_env, jpeg_path, "")
+        metadata = fixtures.get_tracker_extract_output(self.extra_env, jpeg_path, output_format='json-ld')
 
         tags = metadata.get('nao:hasTag', [])
         tag_names = [tag['nao:prefLabel'] for tag in tags]

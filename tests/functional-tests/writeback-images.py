@@ -63,7 +63,7 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         self.wait_for_file_change(path, initial_mtime)
         log.debug("Got the change")
 
-        results = fixtures.get_tracker_extract_jsonld_output({}, path, mimetype)
+        results = fixtures.get_tracker_extract_output({}, path, mime_type=mimetype, output_format='json-ld')
         keyDict = expectedKey or prop
         self.assertIn(TEST_VALUE, results[keyDict])
 
@@ -87,7 +87,7 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
 
         self.wait_for_file_change(path, initial_mtime)
 
-        results = fixtures.get_tracker_extract_jsonld_output(self.extra_env, filename, mimetype)
+        results = fixtures.get_tracker_extract_output(self.extra_env, filename, mime_type=mimetype, output_format='json-ld')
         self.assertIn("testTag", results["nao:hasTag"])
 
     # JPEG test

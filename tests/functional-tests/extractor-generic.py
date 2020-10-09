@@ -23,6 +23,11 @@ metadata is extracted. Load dynamically the test information from a data
 directory (containing xxx.expected files)
 """
 
+import gi
+gi.require_version('Tracker', '3.0')
+from gi.repository import Gio
+from gi.repository import Tracker
+
 import json
 import os
 import shutil
@@ -64,6 +69,21 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
     def __get_bugnumber(self):
         return self.spec['test'].get('Bugzilla')
 
+    def validate_sparql_update(self, sparql):
+        """Create a temporary database and run the given SPARQL update.
+
+        This gives us a smoke test to detect any situation where the
+        extractor generates invalid SPARQL.
+
+        """
+        cancellable = None
+        ontology_path = Gio.File.new_for_uri(cfg.nepomuk_path())
+        db = Tracker.SparqlConnection.new(Tracker.SparqlConnectionFlags.NONE,
+                                          None, # create in-memory database,
+                                          ontology_path,
+                                          cancellable)
+        db.update(sparql, cancellable)
+
     def generic_test_extraction(self):
         abs_description = os.path.abspath(self.descfile)
 
@@ -76,8 +96,15 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         tmpdir = tempfile.mkdtemp(prefix='tracker-extract-test-')
         try:
             extra_env = cfg.test_environment(tmpdir)
-            result = fixtures.get_tracker_extract_jsonld_output(extra_env, self.file_to_extract)
-            self.__assert_extraction_ok(result)
+            jsonld = fixtures.get_tracker_extract_output(extra_env,
+                                                         self.file_to_extract,
+                                                         output_format='json-ld')
+            self.__assert_extraction_ok(jsonld)
+
+            sparql = fixtures.get_tracker_extract_output(extra_env,
+                                                         self.file_to_extract,
+                                                         output_format='sparql')
+            self.validate_sparql_update(sparql)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 

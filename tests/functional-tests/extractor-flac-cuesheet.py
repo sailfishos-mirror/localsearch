@@ -85,8 +85,8 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
             audio_path = pathlib.Path(tmpdir).joinpath('cuesheet-test.flac')
             datagenerator.create_test_flac(audio_path, duration=6*60)
 
-            result = fixtures.get_tracker_extract_jsonld_output(
-                cfg.test_environment(tmpdir), audio_path)
+            result = fixtures.get_tracker_extract_output(
+                cfg.test_environment(tmpdir), audio_path, output_format='json-ld')
 
         self.assert_extract_result_matches_spec(
             self.spec(audio_path), result, audio_path, __file__)
