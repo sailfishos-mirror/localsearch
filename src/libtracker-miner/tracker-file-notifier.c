@@ -26,16 +26,8 @@
 #include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-file-notifier.h"
-#include "tracker-file-system.h"
 #include "tracker-crawler.h"
 #include "tracker-monitor.h"
-
-static GQuark quark_property_iri = 0;
-static GQuark quark_property_store_mtime = 0;
-static GQuark quark_property_filesystem_mtime = 0;
-static GQuark quark_property_extractor_hash = 0;
-static GQuark quark_property_mimetype = 0;
-static gboolean force_check_updated = FALSE;
 
 enum {
 	PROP_0,
@@ -57,6 +49,27 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
+enum {
+	FILE_STATE_NONE,
+	FILE_STATE_CREATE,
+	FILE_STATE_UPDATE,
+	FILE_STATE_DELETE,
+};
+
+typedef struct {
+	GList *node;
+	GFile *file;
+	guint in_disk : 1;
+	guint in_store : 1;
+	guint is_dir_in_disk : 1;
+	guint is_dir_in_store : 1;
+	guint state : 2;
+	guint64 store_mtime;
+	guint64 disk_mtime;
+	gchar *extractor_hash;
+	gchar *mimetype;
+} TrackerFileData;
+
 typedef struct {
 	GFile *root;
 	GFile *current_dir;
@@ -72,7 +85,6 @@ typedef struct {
 
 typedef struct {
 	TrackerIndexingTree *indexing_tree;
-	TrackerFileSystem *file_system;
 
 	TrackerSparqlConnection *connection;
 	GCancellable *cancellable;
@@ -80,6 +92,8 @@ typedef struct {
 	TrackerCrawler *crawler;
 	TrackerMonitor *monitor;
 	TrackerDataProvider *data_provider;
+	GHashTable *cache;
+	GQueue queue;
 
 	TrackerSparqlStatement *content_query;
 
@@ -93,14 +107,6 @@ typedef struct {
 
 	guint stopped : 1;
 } TrackerFileNotifierPrivate;
-
-typedef struct {
-	TrackerFileNotifier *notifier;
-	GNode *cur_parent_node;
-
-	/* Canonical copy from priv->file_system */
-	GFile *cur_parent;
-} DirectoryCrawledData;
 
 static gboolean notifier_query_root_contents (TrackerFileNotifier *notifier);
 
@@ -256,81 +262,28 @@ crawler_check_directory_contents_cb (TrackerCrawler *crawler,
 }
 
 static gboolean
-file_notifier_traverse_tree_foreach (GFile    *file,
-                                     gpointer  user_data)
+file_notifier_notify (GFile           *file,
+                      TrackerFileData *file_data,
+                      gpointer         user_data)
 {
 	TrackerFileNotifier *notifier;
-	TrackerFileNotifierPrivate *priv;
-	guint64 *store_mtime, *disk_mtime;
-	GFile *current_root;
-	gchar *hash, *mimetype;
 	gboolean stop = FALSE;
 	gboolean is_dir;
 
 	notifier = user_data;
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	current_root = priv->current_index_root->current_dir;
+	is_dir = file_data->is_dir_in_disk;
 
-	store_mtime = tracker_file_system_steal_property (priv->file_system, file,
-	                                                  quark_property_store_mtime);
-	disk_mtime = tracker_file_system_steal_property (priv->file_system, file,
-	                                                 quark_property_filesystem_mtime);
-	hash = tracker_file_system_steal_property (priv->file_system, file,
-	                                           quark_property_extractor_hash);
-	mimetype = tracker_file_system_steal_property (priv->file_system, file,
-	                                               quark_property_mimetype);
-	is_dir = tracker_file_system_get_file_type (priv->file_system, file) == G_FILE_TYPE_DIRECTORY;
-
-	/* If we're crawling over a subdirectory of a root index, it's been
-	 * already notified in the crawling op that made it processed, so avoid
-	 * it here again.
-	 */
-	if (current_root == file &&
-	    (current_root != priv->current_index_root->root ||
-	     priv->current_index_root->ignore_root)) {
-		goto out;
-	}
-
-	if (store_mtime && !disk_mtime) {
+	if (file_data->state == FILE_STATE_DELETE) {
 		/* In store but not in disk, delete */
 		g_signal_emit (notifier, signals[FILE_DELETED], 0, file, is_dir);
 		stop = TRUE;
-		goto out;
-	} else if (disk_mtime && !store_mtime) {
+	} else if (file_data->state == FILE_STATE_CREATE) {
 		/* In disk but not in store, create */
 		g_signal_emit (notifier, signals[FILE_CREATED], 0, file, is_dir);
-	} else if (store_mtime && disk_mtime && *disk_mtime != *store_mtime) {
-		/* Mtime changed, update */
+	} else if (file_data->state == FILE_STATE_UPDATE) {
+		/* File changed, update */
 		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE, is_dir);
-	} else if (mimetype) {
-		const gchar *current_hash;
-
-		current_hash = tracker_extract_module_manager_get_hash (mimetype);
-
-		if (g_strcmp0 (hash, current_hash) != 0)
-			g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE, is_dir);
-	} else if (!store_mtime && !disk_mtime) {
-		/* what are we doing with such file? should happen rarely,
-		 * only with files that we've queried, but we decided not
-		 * to crawl (i.e. embedded root directories, that would
-		 * be processed when that root is being crawled).
-		 */
-		if (file != priv->current_index_root->root &&
-		    !tracker_indexing_tree_file_is_root (priv->indexing_tree, file)) {
-			gchar *uri;
-
-			uri = g_file_get_uri (file);
-			g_debug ("File '%s' has no disk nor store mtime",
-			         uri);
-			g_free (uri);
-		}
 	}
-
-out:
-	g_free (store_mtime);
-	g_free (disk_mtime);
-	g_free (hash);
-	g_free (mimetype);
 
 	return stop;
 }
@@ -355,31 +308,101 @@ static void
 file_notifier_traverse_tree (TrackerFileNotifier *notifier)
 {
 	TrackerFileNotifierPrivate *priv;
-	GFile *directory;
+	TrackerFileData *data;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	g_assert (priv->current_index_root != NULL);
 
-	directory = priv->current_index_root->current_dir;
+	while ((data = g_queue_pop_tail (&priv->queue)) != NULL) {
+		file_notifier_notify (data->file, data, notifier);
+		g_hash_table_remove (priv->cache, data->file);
+	}
+}
 
-	/* We want the directory and its direct contents, hence depth=2 */
-	tracker_file_system_traverse (priv->file_system,
-				      directory,
-				      G_LEVEL_ORDER,
-				      file_notifier_traverse_tree_foreach,
-				      2, notifier);
+static void
+update_state (TrackerFileData *data)
+{
+	data->state = FILE_STATE_NONE;
+
+	if (data->in_disk) {
+		if (data->in_store) {
+			if (data->store_mtime != data->disk_mtime) {
+				data->state = FILE_STATE_UPDATE;
+			} else if (data->mimetype) {
+				const gchar *current_hash;
+
+				current_hash = tracker_extract_module_manager_get_hash (data->mimetype);
+
+				if (g_strcmp0 (data->extractor_hash, current_hash) != 0) {
+					data->state = FILE_STATE_UPDATE;
+				}
+			}
+		} else {
+			data->state = FILE_STATE_CREATE;
+		}
+	} else {
+		if (data->in_store) {
+			data->state = FILE_STATE_DELETE;
+		}
+	}
+}
+
+static void
+file_data_free (TrackerFileData *file_data)
+{
+	g_object_unref (file_data->file);
+	g_slice_free (TrackerFileData, file_data);
+}
+
+static TrackerFileData *
+ensure_file_data (TrackerFileNotifier *notifier,
+                  GFile               *file)
+{
+	TrackerFileNotifierPrivate *priv;
+	TrackerFileData *file_data;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	file_data = g_hash_table_lookup (priv->cache, file);
+	if (!file_data) {
+		file_data = g_slice_new0 (TrackerFileData);
+		file_data->file = g_object_ref (file);
+		g_hash_table_insert (priv->cache, file_data->file, file_data);
+		file_data->node = g_list_alloc ();
+		file_data->node->data = file_data;
+		g_queue_push_head_link (&priv->queue, file_data->node);
+	}
+
+	return file_data;
+}
+
+static TrackerFileData *
+_insert_disk_info (TrackerFileNotifier *notifier,
+                   GFile               *file,
+                   GFileType            file_type,
+                   guint64              _time)
+{
+	TrackerFileData *file_data;
+
+	file_data = ensure_file_data (notifier, file);
+	file_data->in_disk = TRUE;
+	file_data->is_dir_in_disk = file_type == G_FILE_TYPE_DIRECTORY;
+	file_data->disk_mtime = _time;
+	update_state (file_data);
+
+	return file_data;
 }
 
 static gboolean
 file_notifier_add_node_foreach (GNode    *node,
                                 gpointer  user_data)
 {
-	DirectoryCrawledData *data = user_data;
+	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
 	GFileInfo *file_info;
-	GFile *canonical, *file;
+	GFile *file;
 
-	priv = tracker_file_notifier_get_instance_private (data->notifier);
+	priv = tracker_file_notifier_get_instance_private (notifier);
 	file = node->data;
 
 	if (G_NODE_IS_ROOT (node) &&
@@ -387,42 +410,21 @@ file_notifier_add_node_foreach (GNode    *node,
 	     priv->current_index_root->ignore_root))
 		return FALSE;
 
-	if (node->parent &&
-	    node->parent != data->cur_parent_node) {
-		data->cur_parent_node = node->parent;
-		data->cur_parent = tracker_file_system_peek_file (priv->file_system,
-		                                                  node->parent->data);
-	} else {
-		data->cur_parent_node = NULL;
-		data->cur_parent = NULL;
-	}
-
 	file_info = tracker_crawler_get_file_info (priv->crawler, file);
 
 	if (file_info) {
 		GFileType file_type;
-		guint64 time, *time_ptr;
+		guint64 _time;
 
 		file_type = g_file_info_get_file_type (file_info);
-
-		/* Intern file in filesystem */
-		canonical = tracker_file_system_get_file (priv->file_system,
-							  file, file_type,
-							  data->cur_parent);
-
-		if (priv->current_index_root->flags & TRACKER_DIRECTORY_FLAG_CHECK_MTIME) {
-			time = g_file_info_get_attribute_uint64 (file_info,
-								 G_FILE_ATTRIBUTE_TIME_MODIFIED);
-
-			time_ptr = g_new (guint64, 1);
-			*time_ptr = time;
-
-			tracker_file_system_set_property (priv->file_system, canonical,
-							  quark_property_filesystem_mtime,
-							  time_ptr);
-		}
-
+		_time = g_file_info_get_attribute_uint64 (file_info,
+		                                          G_FILE_ATTRIBUTE_TIME_MODIFIED);
 		g_object_unref (file_info);
+
+		_insert_disk_info (notifier,
+		                   file,
+		                   file_type,
+		                   _time);
 
 		if (file_type == G_FILE_TYPE_DIRECTORY &&
 		    (priv->current_index_root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
@@ -430,7 +432,7 @@ file_notifier_add_node_foreach (GNode    *node,
 			/* Queue child dirs for later processing */
 			g_assert (node->children == NULL);
 			g_queue_push_tail (priv->current_index_root->pending_dirs,
-			                   g_object_ref (canonical));
+			                   g_object_ref (file));
 		}
 	}
 
@@ -449,9 +451,8 @@ crawler_directory_crawled_cb (TrackerCrawler *crawler,
 {
 	TrackerFileNotifier *notifier;
 	TrackerFileNotifierPrivate *priv;
-	DirectoryCrawledData data = { 0 };
 
-	notifier = data.notifier = user_data;
+	notifier = user_data;
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	g_node_traverse (tree,
@@ -459,7 +460,7 @@ crawler_directory_crawled_cb (TrackerCrawler *crawler,
 	                 G_TRAVERSE_ALL,
 	                 -1,
 	                 file_notifier_add_node_foreach,
-	                 &data);
+	                 notifier);
 
 	priv->current_index_root->directories_found += directories_found;
 	priv->current_index_root->directories_ignored += directories_ignored;
@@ -467,43 +468,23 @@ crawler_directory_crawled_cb (TrackerCrawler *crawler,
 	priv->current_index_root->files_ignored += files_ignored;
 }
 
-static GFile *
+static void
 _insert_store_info (TrackerFileNotifier *notifier,
                     GFile               *file,
                     GFileType            file_type,
-                    GFile               *parent,
-                    const gchar         *iri,
                     const gchar         *extractor_hash,
                     const gchar         *mimetype,
                     guint64              _time)
 {
-	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
+	TrackerFileData *file_data;
 
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file, file_type,
-	                                          parent);
-	tracker_file_system_set_property (priv->file_system, canonical,
-	                                  quark_property_iri,
-	                                  g_strdup (iri));
-	tracker_file_system_set_property (priv->file_system, canonical,
-	                                  quark_property_store_mtime,
-	                                  g_memdup (&_time, sizeof (guint64)));
-
-	if (extractor_hash) {
-		tracker_file_system_set_property (priv->file_system, canonical,
-		                                  quark_property_extractor_hash,
-		                                  g_strdup (extractor_hash));
-	}
-
-	if (mimetype) {
-		tracker_file_system_set_property (priv->file_system, canonical,
-		                                  quark_property_mimetype,
-		                                  g_strdup (mimetype));
-	}
-
-	return canonical;
+	file_data = ensure_file_data (notifier, file);
+	file_data->in_store = TRUE;
+	file_data->is_dir_in_store = file_type == G_FILE_TYPE_DIRECTORY;
+	file_data->extractor_hash = g_strdup (extractor_hash);
+	file_data->mimetype = g_strdup (mimetype);
+	file_data->store_mtime = _time;
+	update_state (file_data);
 }
 
 static gboolean
@@ -561,15 +542,13 @@ finish_current_directory (TrackerFileNotifier *notifier,
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	/* If crawling was interrupted, we take all collected info as invalid.
-	 * Otherwise we dispose regular files here, only directories are
-	 * cached once crawling has completed.
-	 */
-	tracker_file_system_forget_files (priv->file_system,
-	                                  priv->current_index_root->root,
-	                                  interrupted ?
-	                                  G_FILE_TYPE_UNKNOWN :
-	                                  G_FILE_TYPE_REGULAR);
+	if (interrupted) {
+		g_queue_clear (&priv->queue);
+		g_hash_table_remove_all (priv->cache);
+	} else {
+		file_notifier_traverse_tree (notifier);
+	}
+
 
 	if (interrupted || !crawl_directory_in_current_root (notifier)) {
 		/* No more directories left to be crawled in the current
@@ -730,8 +709,6 @@ query_execute_cb (TrackerSparqlStatement *statement,
 		_insert_store_info (notifier,
 		                    file,
 		                    file_type,
-		                    NULL,
-		                    folder_urn,
 		                    tracker_sparql_cursor_get_string (cursor, 3, NULL),
 		                    tracker_sparql_cursor_get_string (cursor, 4, NULL),
 		                    _time);
@@ -825,8 +802,6 @@ crawler_finished_cb (TrackerCrawler *crawler,
 		return;
 	}
 
-	file_notifier_traverse_tree (notifier);
-
 	if (!crawl_directory_in_current_root (notifier))
 		finish_current_directory (notifier, FALSE);
 }
@@ -882,7 +857,6 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
 	GFileType file_type;
-	GFile *canonical;
 	gboolean indexable;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -909,20 +883,10 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 				/* New file triggered a directory content
 				 * filter, remove parent directory altogether
 				 */
-				canonical = tracker_file_system_get_file (priv->file_system,
-				                                          parent, G_FILE_TYPE_DIRECTORY,
-				                                          NULL);
-				g_object_unref (parent);
+				g_signal_emit (notifier, signals[FILE_DELETED], 0, parent, TRUE);
+				file_notifier_current_root_check_remove_directory (notifier, parent);
 
-				g_object_ref (canonical);
-				g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical, TRUE);
-				file_notifier_current_root_check_remove_directory (notifier, canonical);
-				tracker_file_system_forget_files (priv->file_system, canonical,
-				                                  G_FILE_TYPE_UNKNOWN);
-
-				tracker_monitor_remove_recursively (priv->monitor, canonical);
-
-				g_object_unref (canonical);
+				tracker_monitor_remove_recursively (priv->monitor, parent);
 				return;
 			}
 
@@ -944,11 +908,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 		                                file, &flags);
 
 		if (flags & TRACKER_DIRECTORY_FLAG_RECURSE) {
-			canonical = tracker_file_system_get_file (priv->file_system,
-			                                          file,
-			                                          file_type,
-			                                          NULL);
-			notifier_queue_root (notifier, canonical, flags, TRUE);
+			notifier_queue_root (notifier, file, flags, TRUE);
 
 			/* Fall though, we want ::file-created to be emitted
 			 * ASAP so it is ensured to be processed before any
@@ -957,16 +917,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 		}
 	}
 
-	/* Fetch the interned copy */
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file, file_type, NULL);
-
-	g_signal_emit (notifier, signals[FILE_CREATED], 0, canonical, is_directory);
-
-	if (!is_directory) {
-		tracker_file_system_forget_files (priv->file_system, canonical,
-		                                  G_FILE_TYPE_REGULAR);
-	}
+	g_signal_emit (notifier, signals[FILE_CREATED], 0, file, is_directory);
 }
 
 static void
@@ -978,7 +929,6 @@ monitor_item_updated_cb (TrackerMonitor *monitor,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
 	GFileType file_type;
-	GFile *canonical;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
@@ -989,16 +939,7 @@ monitor_item_updated_cb (TrackerMonitor *monitor,
 		return;
 	}
 
-	/* Fetch the interned copy */
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file, file_type, NULL);
-
-	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE, is_directory);
-
-	if (!is_directory) {
-		tracker_file_system_forget_files (priv->file_system, canonical,
-		                                  G_FILE_TYPE_REGULAR);
-	}
+	g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, FALSE, is_directory);
 }
 
 static void
@@ -1009,7 +950,6 @@ monitor_item_attribute_updated_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
 	GFileType file_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -1021,15 +961,7 @@ monitor_item_attribute_updated_cb (TrackerMonitor *monitor,
 		return;
 	}
 
-	/* Fetch the interned copy */
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file, file_type, NULL);
-	g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, TRUE, is_directory);
-
-	if (!is_directory) {
-		tracker_file_system_forget_files (priv->file_system, canonical,
-		                                  G_FILE_TYPE_REGULAR);
-	}
+	g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, TRUE, is_directory);
 }
 
 static void
@@ -1040,7 +972,6 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFile *canonical;
 	GFileType file_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -1077,13 +1008,9 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 			/* New file was triggering a directory content
 			 * filter, reindex parent directory altogether
 			 */
-			canonical = tracker_file_system_get_file (priv->file_system,
-			                                          parent,
-			                                          G_FILE_TYPE_DIRECTORY,
-			                                          NULL);
 			tracker_indexing_tree_get_root (priv->indexing_tree,
-							canonical, &flags);
-			notifier_queue_root (notifier, canonical, flags, FALSE);
+							parent, &flags);
+			notifier_queue_root (notifier, parent, flags, FALSE);
 			return;
 		}
 
@@ -1096,25 +1023,9 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 		return ;
 	}
 
-	/* Fetch the interned copy */
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          file, file_type, NULL);
+	g_signal_emit (notifier, signals[FILE_DELETED], 0, file, is_directory);
 
-	/* tracker_file_system_forget_files() might already have been
-	 * called on this file. In this case, the object might become
-	 * invalid when returning from g_signal_emit(). Take a
-	 * reference in order to prevent that.
-	 */
-	g_object_ref (canonical);
-	g_signal_emit (notifier, signals[FILE_DELETED], 0, canonical, is_directory);
-
-	file_notifier_current_root_check_remove_directory (notifier, canonical);
-
-	/* Remove the file from the cache (works recursively for directories) */
-	tracker_file_system_forget_files (priv->file_system,
-	                                  canonical,
-	                                  G_FILE_TYPE_UNKNOWN);
-	g_object_unref (canonical);
+	file_notifier_current_root_check_remove_directory (notifier, file);
 }
 
 static gboolean
@@ -1159,12 +1070,6 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		if (is_directory) {
 			/* Remove monitors if any */
 			tracker_monitor_remove_recursively (priv->monitor, file);
-
-			/* If should recurse, crawl other_file, as content is "new" */
-			other_file = tracker_file_system_get_file (priv->file_system,
-			                                           other_file,
-			                                           G_FILE_TYPE_DIRECTORY,
-			                                           NULL);
 			notifier_queue_root (notifier, other_file, flags, FALSE);
 		}
 		/* else, file, do nothing */
@@ -1191,13 +1096,6 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		                                                                other_file,
 		                                                                file_type);
 		g_object_unref (check_file);
-
-		file = tracker_file_system_get_file (priv->file_system,
-		                                     file, file_type,
-		                                     NULL);
-		other_file = tracker_file_system_get_file (priv->file_system,
-		                                           other_file, file_type,
-		                                           NULL);
 
 		/* Ref those so they are safe to use after signal emission */
 		g_object_ref (file);
@@ -1270,14 +1168,6 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 				g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, FALSE, is_directory);
 		}
 
-		tracker_file_system_forget_files (priv->file_system, file,
-		                                  G_FILE_TYPE_REGULAR);
-
-		if (!is_directory) {
-			tracker_file_system_forget_files (priv->file_system, other_file,
-			                                  G_FILE_TYPE_REGULAR);
-		}
-
 		g_object_unref (other_file);
 		g_object_unref (file);
 	}
@@ -1290,14 +1180,9 @@ indexing_tree_directory_added (TrackerIndexingTree *indexing_tree,
                                gpointer             user_data)
 {
 	TrackerFileNotifier *notifier = user_data;
-	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
 
-	priv = tracker_file_notifier_get_instance_private (notifier);
 	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
-
-	directory = tracker_file_system_get_file (priv->file_system, directory,
-	                                          G_FILE_TYPE_DIRECTORY, NULL);
 	notifier_queue_root (notifier, directory, flags, FALSE);
 }
 
@@ -1307,15 +1192,10 @@ indexing_tree_directory_updated (TrackerIndexingTree *indexing_tree,
                                  gpointer             user_data)
 {
 	TrackerFileNotifier *notifier = user_data;
-	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
 
-	priv = tracker_file_notifier_get_instance_private (notifier);
 	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
 	flags |= TRACKER_DIRECTORY_FLAG_CHECK_DELETED;
-
-	directory = tracker_file_system_get_file (priv->file_system, directory,
-	                                          G_FILE_TYPE_DIRECTORY, NULL);
 	notifier_queue_root (notifier, directory, flags, FALSE);
 }
 
@@ -1333,14 +1213,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 
 	/* Flags are still valid at the moment of deletion */
 	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
-	directory = tracker_file_system_peek_file (priv->file_system, directory);
-
-	if (!directory) {
-		/* If the dir has no canonical copy,
-		 * it wasn't even told to be indexed.
-		 */
-		return;
-	}
 
 	/* If the folder was being ignored, index/crawl it from scratch */
 	if (flags & TRACKER_DIRECTORY_FLAG_IGNORE) {
@@ -1398,10 +1270,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	/* Remove monitors if any */
 	/* FIXME: How do we handle this with 3rd party data_providers? */
 	tracker_monitor_remove_recursively (priv->monitor, directory);
-
-	/* Remove all files from cache */
-	tracker_file_system_forget_files (priv->file_system, directory,
-	                                  G_FILE_TYPE_UNKNOWN);
 }
 
 static void
@@ -1414,7 +1282,6 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
 	GFileType child_type;
-	GFile *canonical;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
@@ -1425,18 +1292,16 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	if (child_type == G_FILE_TYPE_UNKNOWN)
 		return;
 
-	canonical = tracker_file_system_get_file (priv->file_system,
-	                                          child, child_type, NULL);
 	tracker_indexing_tree_get_root (indexing_tree, child, &flags);
 
 	if (child_type == G_FILE_TYPE_DIRECTORY &&
 	    (flags & TRACKER_DIRECTORY_FLAG_RECURSE)) {
 		flags |= TRACKER_DIRECTORY_FLAG_CHECK_DELETED;
 
-		notifier_queue_root (notifier, canonical, flags, FALSE);
+		notifier_queue_root (notifier, child, flags, FALSE);
 	} else if (tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                                    canonical, child_type)) {
-		g_signal_emit (notifier, signals[FILE_UPDATED], 0, canonical, FALSE,
+	                                                    child, child_type)) {
+		g_signal_emit (notifier, signals[FILE_UPDATED], 0, child, FALSE,
 		               child_type == G_FILE_TYPE_DIRECTORY);
 	}
 }
@@ -1447,6 +1312,9 @@ tracker_file_notifier_finalize (GObject *object)
 	TrackerFileNotifierPrivate *priv;
 
 	priv = tracker_file_notifier_get_instance_private (TRACKER_FILE_NOTIFIER (object));
+
+	g_queue_clear (&priv->queue);
+	g_hash_table_destroy (priv->cache);
 
 	if (priv->indexing_tree) {
 		g_object_unref (priv->indexing_tree);
@@ -1465,7 +1333,6 @@ tracker_file_notifier_finalize (GObject *object)
 
 	g_object_unref (priv->crawler);
 	g_object_unref (priv->monitor);
-	g_object_unref (priv->file_system);
 	g_clear_object (&priv->connection);
 
 	g_clear_pointer (&priv->current_index_root, root_data_free);
@@ -1518,16 +1385,11 @@ static void
 tracker_file_notifier_constructed (GObject *object)
 {
 	TrackerFileNotifierPrivate *priv;
-	GFile *root;
 
 	G_OBJECT_CLASS (tracker_file_notifier_parent_class)->constructed (object);
 
 	priv = tracker_file_notifier_get_instance_private (TRACKER_FILE_NOTIFIER (object));
 	g_assert (priv->indexing_tree);
-
-	/* Initialize filesystem and register properties */
-	root = tracker_indexing_tree_get_master_root (priv->indexing_tree);
-	priv->file_system = tracker_file_system_new (root);
 
 	g_signal_connect (priv->indexing_tree, "directory-added",
 	                  G_CALLBACK (indexing_tree_directory_added), object);
@@ -1691,26 +1553,6 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
-
-	/* Initialize property quarks */
-	quark_property_iri = g_quark_from_static_string ("tracker-property-iri");
-	tracker_file_system_register_property (quark_property_iri, g_free);
-
-	quark_property_store_mtime = g_quark_from_static_string ("tracker-property-store-mtime");
-	tracker_file_system_register_property (quark_property_store_mtime,
-	                                       g_free);
-
-	quark_property_filesystem_mtime = g_quark_from_static_string ("tracker-property-filesystem-mtime");
-	tracker_file_system_register_property (quark_property_filesystem_mtime,
-	                                       g_free);
-
-	quark_property_extractor_hash = g_quark_from_static_string ("tracker-property-store-extractor-hash");
-	tracker_file_system_register_property (quark_property_extractor_hash, g_free);
-
-	quark_property_mimetype = g_quark_from_static_string ("tracker-property-store-mimetype");
-	tracker_file_system_register_property (quark_property_mimetype, g_free);
-
-	force_check_updated = g_getenv ("TRACKER_MINER_FORCE_CHECK_UPDATED") != NULL;
 }
 
 static void
@@ -1740,6 +1582,12 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 	g_signal_connect (priv->monitor, "item-moved",
 	                  G_CALLBACK (monitor_item_moved_cb),
 	                  notifier);
+
+	g_queue_init (&priv->queue);
+	priv->cache = g_hash_table_new_full (g_file_hash,
+	                                     (GEqualFunc) g_file_equal,
+	                                     NULL,
+	                                     (GDestroyNotify) file_data_free);
 }
 
 TrackerFileNotifier *
