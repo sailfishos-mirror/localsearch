@@ -522,7 +522,7 @@ tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
 	task = g_task_propagate_pointer (G_TASK (res), error);
 
 	if (!task)
-		task = g_task_get_task_data (G_TASK (res));
+		task = g_object_ref (g_task_get_task_data (G_TASK (res)));
 
 	return task;
 }
