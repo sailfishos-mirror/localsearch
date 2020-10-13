@@ -95,9 +95,6 @@ struct TrackerCrawlerPrivate {
 
 	gchar          *file_attributes;
 
-	/* Statistics */
-	GTimer         *timer;
-
 	/* Status */
 	gboolean        is_running;
 	gboolean        is_finished;
@@ -286,10 +283,6 @@ crawler_finalize (GObject *object)
 	TrackerCrawlerPrivate *priv;
 
 	priv = tracker_crawler_get_instance_private (TRACKER_CRAWLER (object));
-
-	if (priv->timer) {
-		g_timer_destroy (priv->timer);
-	}
 
 	if (priv->idle_id) {
 		g_source_remove (priv->idle_id);
@@ -1041,13 +1034,6 @@ tracker_crawler_start (TrackerCrawler        *crawler,
 
 	priv->was_started = TRUE;
 
-	/* Time the event */
-	if (priv->timer) {
-		g_timer_destroy (priv->timer);
-	}
-
-	priv->timer = g_timer_new ();
-
 	/* Set a brand new cancellable */
 	if (priv->cancellable) {
 		g_cancellable_cancel (priv->cancellable);
@@ -1064,9 +1050,6 @@ tracker_crawler_start (TrackerCrawler        *crawler,
 
 	if (!check_directory (crawler, info, file)) {
 		directory_root_info_free (info);
-
-		g_timer_destroy (priv->timer);
-		priv->timer = NULL;
 
 		priv->is_running = FALSE;
 		priv->is_finished = TRUE;
@@ -1102,11 +1085,6 @@ tracker_crawler_stop (TrackerCrawler *crawler)
 	g_cancellable_cancel (priv->cancellable);
 
 	process_func_stop (crawler);
-
-	if (priv->timer) {
-		g_timer_destroy (priv->timer);
-		priv->timer = NULL;
-	}
 
 	/* Clean up queue */
 	g_queue_foreach (priv->directories, (GFunc) directory_root_info_free, NULL);
