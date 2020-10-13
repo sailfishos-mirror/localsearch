@@ -76,10 +76,6 @@ gboolean        tracker_crawler_start        (TrackerCrawler *crawler,
                                               GFile          *file,
                                               TrackerDirectoryFlags flags);
 void            tracker_crawler_stop         (TrackerCrawler *crawler);
-void            tracker_crawler_pause        (TrackerCrawler *crawler);
-void            tracker_crawler_resume       (TrackerCrawler *crawler);
-void            tracker_crawler_set_throttle (TrackerCrawler *crawler,
-                                              gdouble         throttle);
 
 void            tracker_crawler_set_file_attributes (TrackerCrawler *crawler,
 						     const gchar    *file_attributes);

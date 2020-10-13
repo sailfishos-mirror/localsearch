@@ -93,8 +93,6 @@ struct TrackerCrawlerPrivate {
 	/* Idle handler for processing found data */
 	guint           idle_id;
 
-	gdouble         throttle;
-
 	gchar          *file_attributes;
 
 	/* Statistics */
@@ -103,7 +101,6 @@ struct TrackerCrawlerPrivate {
 	/* Status */
 	gboolean        is_running;
 	gboolean        is_finished;
-	gboolean        is_paused;
 	gboolean        was_started;
 };
 
@@ -587,13 +584,6 @@ process_next (TrackerCrawler *crawler)
 
 	priv = tracker_crawler_get_instance_private (crawler);
 
-	if (priv->is_paused) {
-		/* Stop the idle func for now until we are unpaused */
-		priv->idle_id = 0;
-
-		return FALSE;
-	}
-
 	info = g_queue_peek_head (priv->directories);
 
 	if (info) {
@@ -708,10 +698,6 @@ process_func_start (TrackerCrawler *crawler)
 	TrackerCrawlerPrivate *priv;
 
 	priv = tracker_crawler_get_instance_private (crawler);
-
-	if (priv->is_paused) {
-		return FALSE;
-	}
 
 	if (priv->is_finished) {
 		return FALSE;
@@ -1062,10 +1048,6 @@ tracker_crawler_start (TrackerCrawler        *crawler,
 
 	priv->timer = g_timer_new ();
 
-	if (priv->is_paused) {
-		g_timer_stop (priv->timer);
-	}
-
 	/* Set a brand new cancellable */
 	if (priv->cancellable) {
 		g_cancellable_cancel (priv->cancellable);
@@ -1136,76 +1118,6 @@ tracker_crawler_stop (TrackerCrawler *crawler)
 	/* We don't free the queue in case the crawler is reused, it
 	 * is only freed in finalize.
 	 */
-}
-
-void
-tracker_crawler_pause (TrackerCrawler *crawler)
-{
-	TrackerCrawlerPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
-
-	priv = tracker_crawler_get_instance_private (crawler);
-	priv->is_paused = TRUE;
-
-	if (priv->is_running) {
-		g_timer_stop (priv->timer);
-		process_func_stop (crawler);
-	}
-
-	g_message ("Crawler is paused, %s",
-	           priv->is_running ? "currently running" : "not running");
-}
-
-void
-tracker_crawler_resume (TrackerCrawler *crawler)
-{
-	TrackerCrawlerPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
-
-	priv = tracker_crawler_get_instance_private (crawler);
-
-	priv->is_paused = FALSE;
-
-	if (priv->is_running) {
-		g_timer_continue (priv->timer);
-		process_func_start (crawler);
-	}
-
-	g_message ("Crawler is resuming, %s",
-	           priv->is_running ? "currently running" : "not running");
-}
-
-void
-tracker_crawler_set_throttle (TrackerCrawler *crawler,
-                              gdouble         throttle)
-{
-	TrackerCrawlerPrivate *priv;
-
-	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
-
-	priv = tracker_crawler_get_instance_private (crawler);
-
-	throttle = CLAMP (throttle, 0, 1);
-	priv->throttle = throttle;
-
-	/* Update timeouts */
-	if (priv->idle_id != 0) {
-		guint interval, idle_id;
-
-		interval = TRACKER_CRAWLER_MAX_TIMEOUT_INTERVAL * priv->throttle;
-
-		g_source_remove (priv->idle_id);
-
-		if (interval == 0) {
-			idle_id = g_idle_add (process_func, crawler);
-		} else {
-			idle_id = g_timeout_add (interval, process_func, crawler);
-		}
-
-		priv->idle_id = idle_id;
-	}
 }
 
 /**
