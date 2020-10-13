@@ -21,13 +21,12 @@
 
 from gi.repository import GLib
 
+import configparser
 import errno
 import json
-import logging
 import os
 import shutil
 import tempfile
-import sys
 
 
 if 'TRACKER_FUNCTIONAL_TEST_CONFIG' not in os.environ:
@@ -65,6 +64,12 @@ def cli_dir():
 
 def cli_subcommands_dir():
     return config['TEST_CLI_SUBCOMMANDS_DIR']
+
+
+def nepomuk_path():
+    parser = configparser.ConfigParser()
+    parser.read(config['TEST_DOMAIN_ONTOLOGY_RULE'])
+    return parser.get('DomainOntology', 'OntologyLocation')
 
 
 # This path is used for test data for tests which expect filesystem monitoring

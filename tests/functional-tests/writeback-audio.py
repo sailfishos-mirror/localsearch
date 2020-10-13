@@ -40,7 +40,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
 
         self.wait_for_file_change(path, initial_mtime)
 
-        results = fixtures.get_tracker_extract_jsonld_output({}, path)
+        results = fixtures.get_tracker_extract_output({}, path, output_format='json-ld')
         self.assertIn(TEST_VALUE, results[prop])
 
     def test_writeback_mp3(self):

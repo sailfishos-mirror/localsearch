@@ -245,13 +245,14 @@ class TrackerMinerFTSTest (TrackerMinerTest):
         return int(result[0][0])
 
 
-def get_tracker_extract_jsonld_output(extra_env, filename, mime_type=None):
+def get_tracker_extract_output(extra_env, filename, output_format='json-ld', mime_type=None):
     """
     Runs `tracker-extract --file` to extract metadata from a file.
     """
 
     tracker_extract = os.path.join(cfg.TRACKER_EXTRACT_PATH)
-    command = [tracker_extract, '--output-format=json-ld', '--file', str(filename)]
+    command = [tracker_extract, '--output-format', output_format, '--file',
+               str(filename)]
     if mime_type is not None:
         command.extend(['--mime', mime_type])
 
@@ -285,19 +286,20 @@ def get_tracker_extract_jsonld_output(extra_env, filename, mime_type=None):
         error_output = stderr.decode('utf-8').strip()
         log.debug("Error output from tracker-extract:\n%s", error_output)
 
-    try:
-        output = stdout.decode('utf-8')
+    output = stdout.decode('utf-8')
 
-        if len(output.strip()) == 0:
-            raise RuntimeError("tracker-extract didn't return any data.\n"
-                               "Error output was: %s" % error_output)
+    if len(output.strip()) == 0:
+        raise RuntimeError("tracker-extract didn't return any data.\n"
+                            "Error output was: %s" % error_output)
 
-        data = json.loads(output)
-    except ValueError as e:
-        raise RuntimeError("tracker-extract did not return valid JSON data: %s\n"
-                           "Output was: %s" % (e, output))
-
-    return data
+    if output_format == 'json-ld':
+        try:
+            return json.loads(output)
+        except ValueError as e:
+            raise RuntimeError("tracker-extract did not return valid JSON data: %s\n"
+                               "Output was: %s" % (e, output))
+    else:
+        return output
 
 
 class TrackerExtractTestCase(ut.TestCase):
@@ -326,7 +328,7 @@ class TrackerExtractTestCase(ut.TestCase):
         """
         Checks tracker-extract json-ld output against the expected result.
 
-        Use get_tracker_extract_jsonld_output() to get the extractor output.
+        Use get_tracker_extract_output() to get the extractor output.
 
         Look in test-extraction-data/*/*.expected.json for examples of the spec
         format.
