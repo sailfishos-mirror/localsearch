@@ -74,38 +74,20 @@ crawler_directory_crawled_cb (TrackerCrawler *crawler,
 }
 
 static gboolean
-crawler_check_directory_cb (TrackerCrawler *crawler,
-			    GFile          *file,
-			    gpointer        user_data)
+check_func (TrackerCrawler           *crawler,
+            TrackerCrawlerCheckFlags  flags,
+            GFile                    *file,
+            const GList              *children,
+            gpointer                  user_data)
 {
 	CrawlerTest *test = user_data;
 
-	test->n_check_directory++;
-
-	return TRUE;
-}
-
-static gboolean
-crawler_check_file_cb (TrackerCrawler *crawler,
-		       GFile          *file,
-		       gpointer        user_data)
-{
-	CrawlerTest *test = user_data;
-
-	test->n_check_file++;
-
-	return TRUE;
-}
-
-static gboolean
-crawler_check_directory_contents_cb (TrackerCrawler *crawler,
-				     GFile          *file,
-				     GList          *contents,
-				     gpointer        user_data)
-{
-	CrawlerTest *test = user_data;
-
-	test->n_check_directory_contents++;
+	if (flags & TRACKER_CRAWLER_CHECK_FILE)
+		test->n_check_file++;
+	if (flags & TRACKER_CRAWLER_CHECK_DIRECTORY)
+		test->n_check_directory++;
+	if (flags & TRACKER_CRAWLER_CHECK_CONTENT)
+		test->n_check_directory_contents++;
 
 	return TRUE;
 }
@@ -227,16 +209,11 @@ test_crawler_crawl_n_signals_non_recursive (void)
 	test.main_loop = g_main_loop_new (NULL, FALSE);
 
 	crawler = tracker_crawler_new (NULL);
+	tracker_crawler_set_check_func (crawler, check_func, &test, NULL);
 	g_signal_connect (crawler, "finished",
 			  G_CALLBACK (crawler_finished_cb), &test);
 	g_signal_connect (crawler, "directory-crawled",
 			  G_CALLBACK (crawler_directory_crawled_cb), &test);
-	g_signal_connect (crawler, "check-directory",
-			  G_CALLBACK (crawler_check_directory_cb), &test);
-	g_signal_connect (crawler, "check-directory-contents",
-			  G_CALLBACK (crawler_check_directory_contents_cb), &test);
-	g_signal_connect (crawler, "check-file",
-			  G_CALLBACK (crawler_check_file_cb), &test);
 
 	file = g_file_new_for_path (TEST_DATA_DIR);
 

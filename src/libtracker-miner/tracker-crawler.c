@@ -95,6 +95,11 @@ struct TrackerCrawlerPrivate {
 
 	gchar          *file_attributes;
 
+	/* Check func */
+	TrackerCrawlerCheckFunc check_func;
+	gpointer check_func_data;
+	GDestroyNotify check_func_destroy;
+
 	/* Status */
 	gboolean        is_running;
 	gboolean        is_finished;
@@ -102,9 +107,6 @@ struct TrackerCrawlerPrivate {
 };
 
 enum {
-	CHECK_DIRECTORY,
-	CHECK_FILE,
-	CHECK_DIRECTORY_CONTENTS,
 	DIRECTORY_CRAWLED,
 	FINISHED,
 	LAST_SIGNAL
@@ -124,11 +126,6 @@ static void     crawler_set_property     (GObject         *object,
                                           const GValue    *value,
                                           GParamSpec      *pspec);
 static void     crawler_finalize         (GObject         *object);
-static gboolean check_defaults           (TrackerCrawler  *crawler,
-                                          GFile           *file);
-static gboolean check_contents_defaults  (TrackerCrawler  *crawler,
-                                          GFile           *file,
-                                          GList           *contents);
 static void     data_provider_data_free  (DataProviderData        *dpd);
 
 static void     data_provider_begin      (TrackerCrawler          *crawler,
@@ -148,48 +145,11 @@ static void
 tracker_crawler_class_init (TrackerCrawlerClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
-	TrackerCrawlerClass *crawler_class = TRACKER_CRAWLER_CLASS (klass);
 
 	object_class->set_property = crawler_set_property;
 	object_class->get_property = crawler_get_property;
 	object_class->finalize = crawler_finalize;
 
-	crawler_class->check_directory = check_defaults;
-	crawler_class->check_file      = check_defaults;
-	crawler_class->check_directory_contents = check_contents_defaults;
-
-	signals[CHECK_DIRECTORY] =
-		g_signal_new ("check-directory",
-		              G_TYPE_FROM_CLASS (klass),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerCrawlerClass, check_directory),
-		              tracker_accumulator_check_file,
-		              NULL,
-		              NULL,
-		              G_TYPE_BOOLEAN,
-		              1,
-		              G_TYPE_FILE);
-	signals[CHECK_FILE] =
-		g_signal_new ("check-file",
-		              G_TYPE_FROM_CLASS (klass),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerCrawlerClass, check_file),
-		              tracker_accumulator_check_file,
-		              NULL,
-		              NULL,
-		              G_TYPE_BOOLEAN,
-		              1,
-		              G_TYPE_FILE);
-	signals[CHECK_DIRECTORY_CONTENTS] =
-		g_signal_new ("check-directory-contents",
-		              G_TYPE_FROM_CLASS (klass),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerCrawlerClass, check_directory_contents),
-		              tracker_accumulator_check_file,
-		              NULL,
-		              NULL,
-		              G_TYPE_BOOLEAN,
-		              2, G_TYPE_FILE, G_TYPE_POINTER);
 	signals[DIRECTORY_CRAWLED] =
 		g_signal_new ("directory-crawled",
 		              G_TYPE_FROM_CLASS (klass),
@@ -284,6 +244,10 @@ crawler_finalize (GObject *object)
 
 	priv = tracker_crawler_get_instance_private (TRACKER_CRAWLER (object));
 
+	if (priv->check_func_data && priv->check_func_destroy) {
+		priv->check_func_destroy (priv->check_func_data);
+	}
+
 	if (priv->idle_id) {
 		g_source_remove (priv->idle_id);
 	}
@@ -303,21 +267,6 @@ crawler_finalize (GObject *object)
 	}
 
 	G_OBJECT_CLASS (tracker_crawler_parent_class)->finalize (object);
-}
-
-static gboolean
-check_defaults (TrackerCrawler *crawler,
-                GFile          *file)
-{
-	return TRUE;
-}
-
-static gboolean
-check_contents_defaults (TrackerCrawler  *crawler,
-                         GFile           *file,
-                         GList           *contents)
-{
-	return TRUE;
 }
 
 TrackerCrawler *
@@ -348,6 +297,39 @@ tracker_crawler_new (TrackerDataProvider *data_provider)
 	return crawler;
 }
 
+void
+tracker_crawler_set_check_func (TrackerCrawler          *crawler,
+                                TrackerCrawlerCheckFunc  func,
+                                gpointer                 user_data,
+                                GDestroyNotify           destroy_notify)
+{
+	TrackerCrawlerPrivate *priv;
+
+	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
+
+	priv = tracker_crawler_get_instance_private (crawler);
+	priv->check_func = func;
+	priv->check_func_data = user_data;
+	priv->check_func_destroy = destroy_notify;
+}
+
+static gboolean
+invoke_check (TrackerCrawler           *crawler,
+              TrackerCrawlerCheckFlags  flags,
+              GFile                    *file,
+              GList                    *children)
+{
+	TrackerCrawlerPrivate *priv;
+
+	priv = tracker_crawler_get_instance_private (crawler);
+
+	if (!priv->check_func)
+		return TRUE;
+
+	return priv->check_func (crawler, flags, file, children,
+	                         priv->check_func_data);
+}
+
 static gboolean
 check_file (TrackerCrawler    *crawler,
 	    DirectoryRootInfo *info,
@@ -358,7 +340,7 @@ check_file (TrackerCrawler    *crawler,
 
 	priv = tracker_crawler_get_instance_private (crawler);
 
-	g_signal_emit (crawler, signals[CHECK_FILE], 0, file, &use);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_FILE, file, NULL);
 
 	/* Crawler may have been stopped while waiting for the 'use' value,
 	 * and the DirectoryRootInfo already disposed... */
@@ -385,7 +367,7 @@ check_directory (TrackerCrawler    *crawler,
 
 	priv = tracker_crawler_get_instance_private (crawler);
 
-	g_signal_emit (crawler, signals[CHECK_DIRECTORY], 0, file, &use);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_DIRECTORY, file, NULL);
 
 	/* Crawler may have been stopped while waiting for the 'use' value,
 	 * and the DirectoryRootInfo already disposed... */
@@ -752,7 +734,7 @@ data_provider_data_process (DataProviderData *dpd)
 		children = g_list_prepend (children, child_data->child);
 	}
 
-	g_signal_emit (crawler, signals[CHECK_DIRECTORY_CONTENTS], 0, dpd->dir_file, children, &use);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_CONTENT, dpd->dir_file, children);
 	g_list_free (children);
 
 	if (!use) {

@@ -196,13 +196,12 @@ root_data_free (RootData *data)
 
 /* Crawler signal handlers */
 static gboolean
-crawler_check_file_cb (TrackerCrawler *crawler,
-                       GFile          *file,
-                       gpointer        user_data)
+check_file (TrackerFileNotifier *notifier,
+            GFile               *file)
 {
 	TrackerFileNotifierPrivate *priv;
 
-	priv = tracker_file_notifier_get_instance_private (user_data);
+	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	return tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 	                                                file,
@@ -210,13 +209,12 @@ crawler_check_file_cb (TrackerCrawler *crawler,
 }
 
 static gboolean
-crawler_check_directory_cb (TrackerCrawler *crawler,
-                            GFile          *directory,
-                            gpointer        user_data)
+check_directory (TrackerFileNotifier *notifier,
+                 GFile               *directory)
 {
 	TrackerFileNotifierPrivate *priv;
 
-	priv = tracker_file_notifier_get_instance_private (user_data);
+	priv = tracker_file_notifier_get_instance_private (notifier);
 	g_assert (priv->current_index_root != NULL);
 
 	/* If it's a config root itself, other than the one
@@ -234,15 +232,14 @@ crawler_check_directory_cb (TrackerCrawler *crawler,
 }
 
 static gboolean
-crawler_check_directory_contents_cb (TrackerCrawler *crawler,
-                                     GFile          *parent,
-                                     GList          *children,
-                                     gpointer        user_data)
+check_directory_contents (TrackerFileNotifier *notifier,
+                          GFile               *parent,
+                          const GList         *children)
 {
 	TrackerFileNotifierPrivate *priv;
 	gboolean process = TRUE;
 
-	priv = tracker_file_notifier_get_instance_private (user_data);
+	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	/* Do not let content filter apply to configured roots themselves. This
 	 * is a measure to trim undesired portions of the filesystem, and if
@@ -250,7 +247,7 @@ crawler_check_directory_contents_cb (TrackerCrawler *crawler,
 	 */
 	if (!tracker_indexing_tree_file_is_root (priv->indexing_tree, parent)) {
 		process = tracker_indexing_tree_parent_is_indexable (priv->indexing_tree,
-								     parent, children);
+		                                                     parent, (GList*) children);
 	}
 
 	if (!process) {
@@ -1381,6 +1378,33 @@ check_disable_monitor (TrackerFileNotifier *notifier)
 	g_clear_object (&cursor);
 }
 
+static gboolean
+crawler_check_func (TrackerCrawler           *crawler,
+                    TrackerCrawlerCheckFlags  flags,
+                    GFile                    *file,
+                    const GList              *children,
+                    gpointer                  user_data)
+{
+	TrackerFileNotifier *notifier = user_data;
+
+	if (flags & TRACKER_CRAWLER_CHECK_FILE) {
+		if (!check_file (notifier, file))
+			return FALSE;
+	}
+
+	if (flags & TRACKER_CRAWLER_CHECK_DIRECTORY) {
+		if (!check_directory (notifier, file))
+			return FALSE;
+	}
+
+	if (flags & TRACKER_CRAWLER_CHECK_CONTENT) {
+		if (!check_directory_contents (notifier, file, children))
+			return FALSE;
+	}
+
+	return TRUE;
+}
+
 static void
 tracker_file_notifier_constructed (GObject *object)
 {
@@ -1402,19 +1426,13 @@ tracker_file_notifier_constructed (GObject *object)
 
 	/* Set up crawler */
 	priv->crawler = tracker_crawler_new (priv->data_provider);
+	tracker_crawler_set_check_func (priv->crawler,
+	                                crawler_check_func,
+	                                object, NULL);
 	tracker_crawler_set_file_attributes (priv->crawler,
 	                                     G_FILE_ATTRIBUTE_TIME_MODIFIED ","
 	                                     G_FILE_ATTRIBUTE_STANDARD_TYPE);
 
-	g_signal_connect (priv->crawler, "check-file",
-	                  G_CALLBACK (crawler_check_file_cb),
-	                  object);
-	g_signal_connect (priv->crawler, "check-directory",
-	                  G_CALLBACK (crawler_check_directory_cb),
-	                  object);
-	g_signal_connect (priv->crawler, "check-directory-contents",
-	                  G_CALLBACK (crawler_check_directory_contents_cb),
-	                  object);
 	g_signal_connect (priv->crawler, "directory-crawled",
 	                  G_CALLBACK (crawler_directory_crawled_cb),
 	                  object);
