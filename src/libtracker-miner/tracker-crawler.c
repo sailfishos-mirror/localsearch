@@ -893,7 +893,6 @@ tracker_crawler_get (TrackerCrawler        *crawler,
 	TrackerCrawlerPrivate *priv;
 	DirectoryProcessingData *dir_data;
 	DirectoryRootInfo *info;
-	gboolean enable_stat;
 	GTask *task;
 
 	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
@@ -901,23 +900,12 @@ tracker_crawler_get (TrackerCrawler        *crawler,
 
 	priv = tracker_crawler_get_instance_private (crawler);
 
-	enable_stat = (flags & TRACKER_DIRECTORY_FLAG_NO_STAT) == 0;
-
 	info = directory_root_info_new (file, priv->file_attributes, flags);
 	task = g_task_new (crawler, cancellable, callback, user_data);
 	g_task_set_task_data (task, info,
 	                      (GDestroyNotify) directory_root_info_free);
 	info->task = task;
 	info->crawler = crawler;
-
-	if (enable_stat && !g_file_query_exists (file, NULL)) {
-		/* This shouldn't happen, unless the removal/unmount notification
-		 * didn't yet reach the TrackerFileNotifier.
-		 */
-		g_task_return_boolean (task, FALSE);
-		g_object_unref (task);
-		return;
-	}
 
 	if (!check_directory (crawler, info, file)) {
 		g_task_return_boolean (task, FALSE);
