@@ -32,6 +32,7 @@ struct CrawlerTest {
 	guint files_found;
 	guint files_ignored;
 	gboolean interrupted;
+	gboolean stopped;
 
 	/* signals statistics */
 	guint n_check_directory;
@@ -40,37 +41,37 @@ struct CrawlerTest {
 };
 
 static void
-crawler_finished_cb (TrackerCrawler *crawler,
-                     gboolean        interrupted,
-                     gpointer        user_data)
+crawler_get_cb (GObject      *source,
+                GAsyncResult *result,
+                gpointer      user_data)
 {
 	CrawlerTest *test = user_data;
+	GError *error = NULL;
+	guint directories_found, directories_ignored;
+	guint files_found, files_ignored;
+	GNode *tree;
 
-	test->interrupted = interrupted;
+	if (!tracker_crawler_get_finish (TRACKER_CRAWLER (source),
+	                                 result,
+	                                 NULL, &tree,
+	                                 &directories_found, &directories_ignored,
+	                                 &files_found, &files_ignored,
+	                                 &error)) {
+		if (error && g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			test->interrupted = TRUE;
 
-	if (test->main_loop) {
-		g_main_loop_quit (test->main_loop);
+		test->stopped = TRUE;
+	} else {
+		test->directories_found = directories_found;
+		test->directories_ignored = directories_ignored;
+		test->files_found = files_found;
+		test->files_ignored = files_ignored;
+
+		g_assert_cmpint (g_node_n_nodes (tree, G_TRAVERSE_ALL), ==, directories_found + files_found);
 	}
-}
 
-static void
-crawler_directory_crawled_cb (TrackerCrawler *crawler,
-                              GFile          *directory,
-                              GNode          *tree,
-                              guint           directories_found,
-                              guint           directories_ignored,
-                              guint           files_found,
-                              guint           files_ignored,
-                              gpointer        user_data)
-{
-	CrawlerTest *test = user_data;
-
-	test->directories_found = directories_found;
-	test->directories_ignored = directories_ignored;
-	test->files_found = files_found;
-	test->files_ignored = files_ignored;
-
-	g_assert_cmpint (g_node_n_nodes (tree, G_TRAVERSE_ALL), ==, directories_found + files_found);
+	if (test->main_loop)
+		g_main_loop_quit (test->main_loop);
 }
 
 static gboolean
@@ -97,20 +98,16 @@ test_crawler_crawl (void)
 {
 	TrackerCrawler *crawler;
 	CrawlerTest test = { 0 };
-	gboolean started;
 	GFile *file;
 
 	test.main_loop = g_main_loop_new (NULL, FALSE);
 
 	crawler = tracker_crawler_new (NULL);
-	g_signal_connect (crawler, "finished",
-			  G_CALLBACK (crawler_finished_cb), &test);
 
 	file = g_file_new_for_path (TEST_DATA_DIR);
 
-	started = tracker_crawler_start (crawler, file, TRACKER_DIRECTORY_FLAG_NONE);
-
-	g_assert_cmpint (started, ==, 1);
+	tracker_crawler_get (crawler, file, TRACKER_DIRECTORY_FLAG_NONE,
+	                     NULL, crawler_get_cb, &test);
 
 	g_main_loop_run (test.main_loop);
 
@@ -126,23 +123,26 @@ test_crawler_crawl_interrupted (void)
 {
 	TrackerCrawler *crawler;
 	CrawlerTest test = { 0 };
-	gboolean started;
+	GCancellable *cancellable;
 	GFile *file;
 
+	test.main_loop = g_main_loop_new (NULL, FALSE);
+
 	crawler = tracker_crawler_new (NULL);
-	g_signal_connect (crawler, "finished",
-			  G_CALLBACK (crawler_finished_cb), &test);
 
 	file = g_file_new_for_path (TEST_DATA_DIR);
+	cancellable = g_cancellable_new ();
 
-	started = tracker_crawler_start (crawler, file, TRACKER_DIRECTORY_FLAG_NONE);
+	tracker_crawler_get (crawler, file, TRACKER_DIRECTORY_FLAG_NONE,
+	                     cancellable, crawler_get_cb, &test);
 
-	g_assert_cmpint (started, ==, 1);
+	g_cancellable_cancel (cancellable);
 
-	tracker_crawler_stop (crawler);
+	g_main_loop_run (test.main_loop);
 
 	g_assert_cmpint (test.interrupted, ==, 1);
 
+	g_object_unref (cancellable);
 	g_object_unref (crawler);
 	g_object_unref (file);
 }
@@ -151,15 +151,20 @@ static void
 test_crawler_crawl_nonexisting (void)
 {
 	TrackerCrawler *crawler;
+	CrawlerTest test = { 0 };
 	GFile *file;
-	gboolean started;
+
+	test.main_loop = g_main_loop_new (NULL, FALSE);
 
 	crawler = tracker_crawler_new (NULL);
 	file = g_file_new_for_path (TEST_DATA_DIR "-idontexist");
 
-	started = tracker_crawler_start (crawler, file, TRACKER_DIRECTORY_FLAG_NONE);
+	tracker_crawler_get (crawler, file, TRACKER_DIRECTORY_FLAG_NONE,
+	                     NULL, crawler_get_cb, &test);
 
-	g_assert_cmpint (started, ==, 0);
+	g_main_loop_run (test.main_loop);
+
+	g_assert_cmpint (test.stopped, ==, 1);
 
 	g_object_unref (crawler);
 	g_object_unref (file);
@@ -175,14 +180,11 @@ test_crawler_crawl_non_recursive (void)
 	test.main_loop = g_main_loop_new (NULL, FALSE);
 
 	crawler = tracker_crawler_new (NULL);
-	g_signal_connect (crawler, "finished",
-			  G_CALLBACK (crawler_finished_cb), &test);
-	g_signal_connect (crawler, "directory-crawled",
-			  G_CALLBACK (crawler_directory_crawled_cb), &test);
 
 	file = g_file_new_for_path (TEST_DATA_DIR);
 
-	tracker_crawler_start (crawler, file, TRACKER_DIRECTORY_FLAG_NONE);
+	tracker_crawler_get (crawler, file, TRACKER_DIRECTORY_FLAG_NONE,
+	                     NULL, crawler_get_cb, &test);
 
 	g_main_loop_run (test.main_loop);
 
@@ -210,14 +212,11 @@ test_crawler_crawl_n_signals_non_recursive (void)
 
 	crawler = tracker_crawler_new (NULL);
 	tracker_crawler_set_check_func (crawler, check_func, &test, NULL);
-	g_signal_connect (crawler, "finished",
-			  G_CALLBACK (crawler_finished_cb), &test);
-	g_signal_connect (crawler, "directory-crawled",
-			  G_CALLBACK (crawler_directory_crawled_cb), &test);
 
 	file = g_file_new_for_path (TEST_DATA_DIR);
 
-	tracker_crawler_start (crawler, file, TRACKER_DIRECTORY_FLAG_NONE);
+	tracker_crawler_get (crawler, file, TRACKER_DIRECTORY_FLAG_NONE,
+	                     NULL, crawler_get_cb, &test);
 
 	g_main_loop_run (test.main_loop);
 

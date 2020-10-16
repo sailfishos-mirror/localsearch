@@ -63,24 +63,26 @@ struct TrackerCrawler {
 
 struct TrackerCrawlerClass {
 	GObjectClass parent;
-
-	void     (* directory_crawled)        (TrackerCrawler *crawler,
-	                                       GFile          *directory,
-	                                       GNode          *tree,
-	                                       guint           directories_found,
-	                                       guint           directories_ignored,
-	                                       guint           files_found,
-	                                       guint           files_ignored);
-	void     (* finished)                 (TrackerCrawler *crawler,
-	                                       gboolean        interrupted);
 };
 
 GType           tracker_crawler_get_type     (void);
 TrackerCrawler *tracker_crawler_new          (TrackerDataProvider *data_provider);
-gboolean        tracker_crawler_start        (TrackerCrawler *crawler,
-                                              GFile          *file,
-                                              TrackerDirectoryFlags flags);
-void            tracker_crawler_stop         (TrackerCrawler *crawler);
+
+gboolean tracker_crawler_get_finish (TrackerCrawler  *crawler,
+                                     GAsyncResult    *result,
+                                     GFile          **directory,
+                                     GNode          **tree,
+                                     guint           *directories_found,
+                                     guint           *directories_ignored,
+                                     guint           *files_found,
+                                     guint           *files_ignored,
+                                     GError         **error);
+void tracker_crawler_get (TrackerCrawler        *crawler,
+                          GFile                 *file,
+                          TrackerDirectoryFlags  flags,
+                          GCancellable          *cancellable,
+                          GAsyncReadyCallback    callback,
+                          gpointer               user_data);
 
 void            tracker_crawler_set_file_attributes (TrackerCrawler *crawler,
 						     const gchar    *file_attributes);

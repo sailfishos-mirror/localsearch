@@ -109,6 +109,9 @@ typedef struct {
 } TrackerFileNotifierPrivate;
 
 static gboolean notifier_query_root_contents (TrackerFileNotifier *notifier);
+static gboolean crawl_directory_in_current_root (TrackerFileNotifier *notifier);
+static void finish_current_directory (TrackerFileNotifier *notifier,
+                                      gboolean             interrupted);
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerFileNotifier, tracker_file_notifier, G_TYPE_OBJECT)
 
@@ -437,20 +440,42 @@ file_notifier_add_node_foreach (GNode    *node,
 }
 
 static void
-crawler_directory_crawled_cb (TrackerCrawler *crawler,
-                              GFile          *directory,
-                              GNode          *tree,
-                              guint           directories_found,
-                              guint           directories_ignored,
-                              guint           files_found,
-                              guint           files_ignored,
-                              gpointer        user_data)
+crawler_get_cb (TrackerCrawler *crawler,
+                GAsyncResult   *result,
+                gpointer        user_data)
 {
-	TrackerFileNotifier *notifier;
-	TrackerFileNotifierPrivate *priv;
+	TrackerFileNotifier *notifier = user_data;
+	TrackerFileNotifierPrivate *priv =
+		tracker_file_notifier_get_instance_private (notifier);
+	guint directories_found, directories_ignored;
+	guint files_found, files_ignored;
+	GFile *directory;
+	GNode *tree;
+	GError *error = NULL;
 
-	notifier = user_data;
-	priv = tracker_file_notifier_get_instance_private (notifier);
+	if (!tracker_crawler_get_finish (crawler,
+	                                 result,
+	                                 &directory,
+	                                 &tree,
+	                                 &directories_found,
+	                                 &directories_ignored,
+	                                 &files_found,
+	                                 &files_ignored,
+	                                 &error)) {
+		if (error &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			gchar *uri;
+
+			uri = g_file_get_uri (directory);
+			g_warning ("Got error crawling '%s': %s\n",
+			           uri, error->message);
+			g_free (uri);
+		}
+		tracker_monitor_remove (priv->monitor, directory);
+		finish_current_directory (notifier, TRUE);
+		g_clear_error (&error);
+		return;
+	}
 
 	g_node_traverse (tree,
 	                 G_PRE_ORDER,
@@ -463,6 +488,9 @@ crawler_directory_crawled_cb (TrackerCrawler *crawler,
 	priv->current_index_root->directories_ignored += directories_ignored;
 	priv->current_index_root->files_found += files_found;
 	priv->current_index_root->files_ignored += files_ignored;
+
+	if (!crawl_directory_in_current_root (notifier))
+		finish_current_directory (notifier, FALSE);
 }
 
 static void
@@ -507,25 +535,15 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
 			tracker_monitor_add (priv->monitor, directory);
 
-		/* Begin crawling the directory non-recursively.
-		 *
-		 *  - We receive ::check-file, ::check-directory and ::check-directory-contents signals
-		 *    during the crawl, which control which directories are crawled and which files are
-		 *    returned.
-		 *  - We receive ::directory-crawled each time a directory crawl completes. This provides
-		 *    the list of contents for a directory.
-		 *  - We receive ::finished when the crawler completes.
-		 *
-		 */
-		if (tracker_crawler_start (priv->crawler,
-		                           directory,
-		                           priv->current_index_root->flags)) {
-			g_object_unref (directory);
-			return TRUE;
-		}
-
-		tracker_monitor_remove (priv->monitor, directory);
+		/* Begin crawling the directory non-recursively. */
+		tracker_crawler_get (priv->crawler,
+		                     directory,
+		                     priv->current_index_root->flags,
+		                     priv->cancellable,
+		                     (GAsyncReadyCallback) crawler_get_cb,
+		                     notifier);
 		g_object_unref (directory);
+		return TRUE;
 	}
 
 	return FALSE;
@@ -612,7 +630,6 @@ file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier
 	if (priv->current_index_root &&
 	    root_data_remove_directory (priv->current_index_root, file)) {
 		g_cancellable_cancel (priv->cancellable);
-		tracker_crawler_stop (priv->crawler);
 
 		if (!crawl_directory_in_current_root (notifier)) {
 			g_clear_pointer (&priv->current_index_root, root_data_free);
@@ -780,27 +797,6 @@ notifier_query_root_contents (TrackerFileNotifier *notifier)
 	                                        (GAsyncReadyCallback) query_execute_cb,
 	                                        notifier);
 	return TRUE;
-}
-
-static void
-crawler_finished_cb (TrackerCrawler *crawler,
-                     gboolean        was_interrupted,
-                     gpointer        user_data)
-{
-	TrackerFileNotifier *notifier = user_data;
-	TrackerFileNotifierPrivate *priv;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-
-	g_assert (priv->current_index_root != NULL);
-
-	if (was_interrupted) {
-		finish_current_directory (notifier, TRUE);
-		return;
-	}
-
-	if (!crawl_directory_in_current_root (notifier))
-		finish_current_directory (notifier, FALSE);
 }
 
 static gint
@@ -1254,7 +1250,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	if (priv->current_index_root &&
 	    g_file_equal (directory, priv->current_index_root->root)) {
 		/* Directory being currently processed */
-		tracker_crawler_stop (priv->crawler);
 		g_cancellable_cancel (priv->cancellable);
 
 		/* If the crawler was already stopped (eg. we're at the querying
@@ -1432,13 +1427,6 @@ tracker_file_notifier_constructed (GObject *object)
 	tracker_crawler_set_file_attributes (priv->crawler,
 	                                     G_FILE_ATTRIBUTE_TIME_MODIFIED ","
 	                                     G_FILE_ATTRIBUTE_STANDARD_TYPE);
-
-	g_signal_connect (priv->crawler, "directory-crawled",
-	                  G_CALLBACK (crawler_directory_crawled_cb),
-	                  object);
-	g_signal_connect (priv->crawler, "finished",
-	                  G_CALLBACK (crawler_finished_cb),
-	                  object);
 
 	check_disable_monitor (TRACKER_FILE_NOTIFIER (object));
 }
@@ -1649,8 +1637,6 @@ tracker_file_notifier_stop (TrackerFileNotifier *notifier)
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (!priv->stopped) {
-		tracker_crawler_stop (priv->crawler);
-
 		g_clear_pointer (&priv->current_index_root, root_data_free);
 		g_cancellable_cancel (priv->cancellable);
 		priv->stopped = TRUE;
