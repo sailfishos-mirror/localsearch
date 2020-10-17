@@ -382,6 +382,11 @@ file_notifier_add_node_foreach (GNode    *node,
 	priv = tracker_file_notifier_get_instance_private (data->notifier);
 	file = node->data;
 
+	if (G_NODE_IS_ROOT (node) &&
+	    (file != priv->current_index_root->root ||
+	     priv->current_index_root->ignore_root))
+		return FALSE;
+
 	if (node->parent &&
 	    node->parent != data->cur_parent_node) {
 		data->cur_parent_node = node->parent;
