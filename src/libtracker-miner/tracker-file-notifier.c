@@ -419,7 +419,6 @@ file_notifier_add_node_foreach (GNode    *node,
 		file_type = g_file_info_get_file_type (file_info);
 		_time = g_file_info_get_attribute_uint64 (file_info,
 		                                          G_FILE_ATTRIBUTE_TIME_MODIFIED);
-		g_object_unref (file_info);
 
 		_insert_disk_info (notifier,
 		                   file,
