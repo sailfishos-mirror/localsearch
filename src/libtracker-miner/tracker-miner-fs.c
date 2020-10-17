@@ -653,7 +653,9 @@ miner_fs_initable_init (GInitable     *initable,
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 priv->data_provider,
-							 tracker_miner_get_connection (TRACKER_MINER (initable)));
+	                                                 tracker_miner_get_connection (TRACKER_MINER (initable)),
+	                                                 G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+	                                                 G_FILE_ATTRIBUTE_STANDARD_TYPE);
 
 	if (!priv->file_notifier) {
 		g_set_error (error,

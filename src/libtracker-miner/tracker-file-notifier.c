@@ -33,7 +33,8 @@ enum {
 	PROP_0,
 	PROP_INDEXING_TREE,
 	PROP_DATA_PROVIDER,
-	PROP_CONNECTION
+	PROP_CONNECTION,
+	PROP_FILE_ATTRIBUTES,
 };
 
 enum {
@@ -98,6 +99,7 @@ typedef struct {
 	TrackerSparqlStatement *content_query;
 
 	GTimer *timer;
+	gchar *file_attributes;
 
 	/* List of pending directory
 	 * trees to get data from
@@ -135,6 +137,9 @@ tracker_file_notifier_set_property (GObject      *object,
 	case PROP_CONNECTION:
 		priv->connection = g_value_dup_object (value);
 		break;
+	case PROP_FILE_ATTRIBUTES:
+		priv->file_attributes = g_value_dup_string (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -160,6 +165,9 @@ tracker_file_notifier_get_property (GObject    *object,
 		break;
 	case PROP_CONNECTION:
 		g_value_set_object (value, priv->connection);
+		break;
+	case PROP_FILE_ATTRIBUTES:
+		g_value_set_string (value, priv->file_attributes);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1331,6 +1339,7 @@ tracker_file_notifier_finalize (GObject *object)
 
 	g_queue_clear (&priv->queue);
 	g_hash_table_destroy (priv->cache);
+	g_free (priv->file_attributes);
 
 	if (priv->indexing_tree) {
 		g_object_unref (priv->indexing_tree);
@@ -1449,9 +1458,7 @@ tracker_file_notifier_constructed (GObject *object)
 	tracker_crawler_set_check_func (priv->crawler,
 	                                crawler_check_func,
 	                                object, NULL);
-	tracker_crawler_set_file_attributes (priv->crawler,
-	                                     G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-	                                     G_FILE_ATTRIBUTE_STANDARD_TYPE);
+	tracker_crawler_set_file_attributes (priv->crawler, priv->file_attributes);
 
 	check_disable_monitor (TRACKER_FILE_NOTIFIER (object));
 }
@@ -1584,6 +1591,15 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_FILE_ATTRIBUTES,
+	                                 g_param_spec_string ("file-attributes",
+	                                                      "File attributes",
+	                                                      "File attributes",
+	                                                      NULL,
+	                                                      G_PARAM_READWRITE |
+	                                                      G_PARAM_CONSTRUCT_ONLY |
+	                                                      G_PARAM_STATIC_STRINGS));
 }
 
 static void
@@ -1624,7 +1640,8 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 TrackerFileNotifier *
 tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
                            TrackerDataProvider     *data_provider,
-                           TrackerSparqlConnection *connection)
+                           TrackerSparqlConnection *connection,
+                           const gchar             *file_attributes)
 {
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (indexing_tree), NULL);
 
@@ -1632,6 +1649,7 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	                     "indexing-tree", indexing_tree,
 	                     "data-provider", data_provider,
 	                     "connection", connection,
+	                     "file-attributes", file_attributes,
 	                     NULL);
 }
 
