@@ -413,6 +413,7 @@ file_notifier_add_node_foreach (GNode    *node,
 	file_info = tracker_crawler_get_file_info (priv->crawler, file);
 
 	if (file_info) {
+		TrackerFileData *file_data;
 		GFileType file_type;
 		guint64 _time;
 
@@ -420,10 +421,18 @@ file_notifier_add_node_foreach (GNode    *node,
 		_time = g_file_info_get_attribute_uint64 (file_info,
 		                                          G_FILE_ATTRIBUTE_TIME_MODIFIED);
 
-		_insert_disk_info (notifier,
-		                   file,
-		                   file_type,
-		                   _time);
+		file_data = _insert_disk_info (notifier,
+		                               file,
+		                               file_type,
+		                               _time);
+
+		if (file_data->state == FILE_STATE_NONE) {
+			/* If at this point the file has no assigned event,
+			 * it didn't get changed, and can be ignored.
+			 */
+			g_queue_delete_link (&priv->queue, file_data->node);
+			g_hash_table_remove (priv->cache, file);
+		}
 
 		if (file_type == G_FILE_TYPE_DIRECTORY &&
 		    (priv->current_index_root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
