@@ -262,6 +262,7 @@ static gboolean
 invoke_check (TrackerCrawler           *crawler,
               TrackerCrawlerCheckFlags  flags,
               GFile                    *file,
+              GFileInfo                *file_info,
               GList                    *children)
 {
 	TrackerCrawlerPrivate *priv;
@@ -271,7 +272,8 @@ invoke_check (TrackerCrawler           *crawler,
 	if (!priv->check_func)
 		return TRUE;
 
-	return priv->check_func (crawler, flags, file, children,
+	return priv->check_func (crawler, flags,
+	                         file, file_info, children,
 	                         priv->check_func_data);
 }
 
@@ -280,9 +282,12 @@ check_file (TrackerCrawler    *crawler,
 	    DirectoryRootInfo *info,
             GFile             *file)
 {
+	GFileInfo *file_info;
 	gboolean use = FALSE;
 
-	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_FILE, file, NULL);
+	file_info = g_object_get_qdata (G_OBJECT (file), file_info_quark);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_FILE,
+	                    file, file_info, NULL);
 
 	info->files_found++;
 
@@ -298,9 +303,12 @@ check_directory (TrackerCrawler    *crawler,
 		 DirectoryRootInfo *info,
 		 GFile             *file)
 {
+	GFileInfo *file_info;
 	gboolean use = FALSE;
 
-	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_DIRECTORY, file, NULL);
+	file_info = g_object_get_qdata (G_OBJECT (file), file_info_quark);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_DIRECTORY,
+	                    file, file_info, NULL);
 
 	info->directories_found++;
 
@@ -599,6 +607,7 @@ data_provider_data_process (DataProviderData *dpd)
 	TrackerCrawler *crawler;
 	GSList *l;
 	GList *children = NULL;
+	GFileInfo *file_info;
 	gboolean use;
 
 	crawler = dpd->crawler;
@@ -610,7 +619,9 @@ data_provider_data_process (DataProviderData *dpd)
 		children = g_list_prepend (children, child_data->child);
 	}
 
-	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_CONTENT, dpd->dir_file, children);
+	file_info = g_object_get_qdata (G_OBJECT (dpd->dir_file), file_info_quark);
+	use = invoke_check (crawler, TRACKER_CRAWLER_CHECK_CONTENT,
+	                    dpd->dir_file, file_info, children);
 	g_list_free (children);
 
 	if (!use) {

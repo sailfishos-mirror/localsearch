@@ -54,6 +54,7 @@ typedef enum {
 typedef gboolean (*TrackerCrawlerCheckFunc) (TrackerCrawler           *crawler,
                                              TrackerCrawlerCheckFlags  flags,
                                              GFile                    *file,
+                                             GFileInfo                *file_info,
                                              const GList              *children,
                                              gpointer                  user_data);
 
