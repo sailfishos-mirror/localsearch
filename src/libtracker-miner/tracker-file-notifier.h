@@ -51,9 +51,11 @@ struct _TrackerFileNotifierClass {
 	GObjectClass parent_class;
 
 	void (* file_created) (TrackerFileNotifier *notifier,
-	                       GFile               *file);
+	                       GFile               *file,
+	                       GFileInfo           *info);
 	void (* file_updated) (TrackerFileNotifier *notifier,
 	                       GFile               *file,
+	                       GFileInfo           *info,
 	                       gboolean             attributes_only);
 	void (* file_deleted) (TrackerFileNotifier *notifier,
 	                       GFile               *file);
