@@ -929,12 +929,6 @@ tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
 
 	priv = tree->priv;
 
-	if (!tracker_indexing_tree_file_is_indexable (tree,
-	                                              parent,
-	                                              G_FILE_TYPE_DIRECTORY)) {
-		return FALSE;
-	}
-
 	while (children && !has_match) {
 		has_match = tracker_indexing_tree_file_matches_filter (tree,
 		                                                       TRACKER_FILTER_PARENT_DIRECTORY,
