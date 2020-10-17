@@ -128,6 +128,7 @@ struct _TrackerMinerFSPrivate {
 
 	/* Properties */
 	gdouble throttle;
+	gchar *file_attributes;
 
 	/* Status */
 	GTimer *timer;
@@ -186,7 +187,8 @@ enum {
 	PROP_ROOT,
 	PROP_WAIT_POOL_LIMIT,
 	PROP_READY_POOL_LIMIT,
-	PROP_DATA_PROVIDER
+	PROP_DATA_PROVIDER,
+	PROP_FILE_ATTRIBUTES,
 };
 
 static void           miner_fs_initable_iface_init        (GInitableIface       *iface);
@@ -357,6 +359,14 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      "Data provider populating data, e.g. like GFileEnumerator",
 	                                                      TRACKER_TYPE_DATA_PROVIDER,
 	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_FILE_ATTRIBUTES,
+	                                 g_param_spec_string ("file-attributes",
+	                                                      "File attributes",
+	                                                      "File attributes",
+	                                                      NULL,
+	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+
 
 	/**
 	 * TrackerMinerFS::process-file:
@@ -654,8 +664,7 @@ miner_fs_initable_init (GInitable     *initable,
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 priv->data_provider,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (initable)),
-	                                                 G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-	                                                 G_FILE_ATTRIBUTE_STANDARD_TYPE);
+	                                                 priv->file_attributes);
 
 	if (!priv->file_notifier) {
 		g_set_error (error,
@@ -966,6 +975,9 @@ fs_set_property (GObject      *object,
 	case PROP_DATA_PROVIDER:
 		fs->priv->data_provider = g_value_dup_object (value);
 		break;
+	case PROP_FILE_ATTRIBUTES:
+		fs->priv->file_attributes = g_value_dup_string (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -997,6 +1009,9 @@ fs_get_property (GObject    *object,
 		break;
 	case PROP_DATA_PROVIDER:
 		g_value_set_object (value, fs->priv->data_provider);
+		break;
+	case PROP_FILE_ATTRIBUTES:
+		g_value_set_string (value, fs->priv->file_attributes);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);

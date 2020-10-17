@@ -55,6 +55,14 @@
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
+#define FILE_ATTRIBUTES	  \
+	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
+	G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE "," \
+	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
+	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
+	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
+	G_FILE_ATTRIBUTE_TIME_ACCESS
+
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
 
 static GQuark miner_files_error_quark = 0;
@@ -2615,6 +2623,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                       "domain", domain,
 	                       "processing-pool-wait-limit", 1,
 	                       "processing-pool-ready-limit", 100,
+	                       "file-attributes", FILE_ATTRIBUTES,
 	                       NULL);
 }
 
