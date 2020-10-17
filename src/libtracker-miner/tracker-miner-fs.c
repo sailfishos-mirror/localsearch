@@ -1940,18 +1940,6 @@ item_queue_handlers_set_up (TrackerMinerFS *fs)
 		                   fs);
 }
 
-static gboolean
-should_check_file (TrackerMinerFS *fs,
-                   GFile          *file,
-                   gboolean        is_dir)
-{
-	GFileType file_type;
-
-	file_type = (is_dir) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
-	return tracker_indexing_tree_file_is_indexable (fs->priv->indexing_tree,
-	                                                file, file_type);
-}
-
 static gint
 miner_fs_get_queue_priority (TrackerMinerFS *fs,
                              GFile          *file)
@@ -2303,7 +2291,9 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 	g_return_if_fail (G_IS_FILE (file));
 
 	if (check_parents) {
-		should_process = should_check_file (fs, file, FALSE);
+		should_process =
+			tracker_indexing_tree_file_is_indexable (fs->priv->indexing_tree,
+			                                         file, NULL);
 	}
 
 	uri = g_file_get_uri (file);

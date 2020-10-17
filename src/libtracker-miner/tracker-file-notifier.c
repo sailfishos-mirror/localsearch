@@ -200,20 +200,21 @@ root_data_free (RootData *data)
 /* Crawler signal handlers */
 static gboolean
 check_file (TrackerFileNotifier *notifier,
-            GFile               *file)
+            GFile               *file,
+            GFileInfo           *info)
 {
 	TrackerFileNotifierPrivate *priv;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	return tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                                file,
-	                                                G_FILE_TYPE_REGULAR);
+	                                                file, info);
 }
 
 static gboolean
 check_directory (TrackerFileNotifier *notifier,
-                 GFile               *directory)
+                 GFile               *directory,
+                 GFileInfo           *info)
 {
 	TrackerFileNotifierPrivate *priv;
 
@@ -230,8 +231,7 @@ check_directory (TrackerFileNotifier *notifier,
 	}
 
 	return tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                                directory,
-	                                                G_FILE_TYPE_DIRECTORY);
+	                                                directory, info);
 }
 
 static gboolean
@@ -840,6 +840,19 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 		notifier_check_next_root (notifier);
 }
 
+static GFileInfo *
+create_shallow_file_info (GFile    *file,
+                          gboolean  is_directory)
+{
+	GFileInfo *file_info;
+
+	file_info = g_file_info_new ();
+	g_file_info_set_file_type (file_info,
+	                           is_directory ?
+	                           G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR);
+	return file_info;
+}
+
 /* Monitor signal handlers */
 static void
 monitor_item_created_cb (TrackerMonitor *monitor,
@@ -849,14 +862,12 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFileType file_type;
 	gboolean indexable;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
 
 	indexable = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                                     file, file_type);
+	                                                     file, NULL);
 
 	if (!is_directory) {
 		gboolean parent_indexable;
@@ -921,13 +932,11 @@ monitor_item_updated_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFileType file_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
 
 	if (!tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                              file, file_type)) {
+	                                              file, NULL)) {
 		/* File should not be indexed */
 		return;
 	}
@@ -943,13 +952,11 @@ monitor_item_attribute_updated_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFileType file_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
 
 	if (!tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                              file, file_type)) {
+	                                              file, NULL)) {
 		/* File should not be indexed */
 		return;
 	}
@@ -965,10 +972,8 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
-	GFileType file_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
 
 	/* Remove monitors if any */
 	if (is_directory &&
@@ -1011,7 +1016,7 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 	}
 
 	if (!tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                              file, file_type)) {
+	                                              file, NULL)) {
 		/* File was not indexed */
 		return ;
 	}
@@ -1068,7 +1073,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		/* else, file, do nothing */
 	} else {
 		gboolean should_process, should_process_other;
-		GFileType file_type;
+		GFileInfo *file_info;
 		GFile *check_file;
 
 		if (is_directory) {
@@ -1077,18 +1082,17 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 			check_file = g_file_get_parent (file);
 		}
 
-		file_type = (is_directory) ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR;
+		file_info = create_shallow_file_info (file, is_directory);
 
 		/* If the (parent) directory is in
 		 * the filesystem, file is stored
 		 */
 		should_process = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-		                                                          file,
-		                                                          file_type);
+		                                                          file, file_info);
 		should_process_other = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-		                                                                other_file,
-		                                                                file_type);
+		                                                                other_file, file_info);
 		g_object_unref (check_file);
+		g_object_unref (file_info);
 
 		/* Ref those so they are safe to use after signal emission */
 		g_object_ref (file);
@@ -1273,17 +1277,19 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
+	GFileInfo *child_info;
 	GFileType child_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	child_type = g_file_query_file_type (child,
-	                                     G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                                     NULL);
-
-	if (child_type == G_FILE_TYPE_UNKNOWN)
+	child_info = g_file_query_info (child,
+	                                G_FILE_ATTRIBUTE_STANDARD_TYPE,
+	                                G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                                NULL, NULL);
+	if (!child_info)
 		return;
 
+	child_type = g_file_info_get_file_type (child_info);
 	tracker_indexing_tree_get_root (indexing_tree, child, &flags);
 
 	if (child_type == G_FILE_TYPE_DIRECTORY &&
@@ -1292,7 +1298,7 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 
 		notifier_queue_root (notifier, child, flags, FALSE);
 	} else if (tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-	                                                    child, child_type)) {
+	                                                    child, child_info)) {
 		g_signal_emit (notifier, signals[FILE_UPDATED], 0, child, FALSE,
 		               child_type == G_FILE_TYPE_DIRECTORY);
 	}
@@ -1384,12 +1390,12 @@ crawler_check_func (TrackerCrawler           *crawler,
 	TrackerFileNotifier *notifier = user_data;
 
 	if (flags & TRACKER_CRAWLER_CHECK_FILE) {
-		if (!check_file (notifier, file))
+		if (!check_file (notifier, file, file_info))
 			return FALSE;
 	}
 
 	if (flags & TRACKER_CRAWLER_CHECK_DIRECTORY) {
-		if (!check_directory (notifier, file))
+		if (!check_directory (notifier, file, file_info))
 			return FALSE;
 	}
 
