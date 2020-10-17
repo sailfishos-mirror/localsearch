@@ -67,16 +67,6 @@
 
 static GQuark miner_files_error_quark = 0;
 
-typedef struct ProcessFileData ProcessFileData;
-
-struct ProcessFileData {
-	TrackerMinerFiles *miner;
-	GCancellable *cancellable;
-	GFile *file;
-	gchar *mime_type;
-	GTask *task;
-};
-
 struct TrackerMinerFilesPrivate {
 	TrackerConfig *config;
 	TrackerStorage *storage;
@@ -119,8 +109,6 @@ struct TrackerMinerFilesPrivate {
 	gboolean mount_points_initialized;
 
 	guint stale_volumes_check_id;
-
-	GList *extraction_queue;
 };
 
 enum {
@@ -195,12 +183,12 @@ static void        set_up_application_indexing          (TrackerMinerFiles    *m
 static void        index_applications_changed_cb        (GObject              *gobject,
                                                          GParamSpec           *arg1,
                                                          gpointer              user_data);
-static gboolean    miner_files_process_file             (TrackerMinerFS       *fs,
+static gchar *     miner_files_process_file             (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         GTask                *task);
-static gboolean    miner_files_process_file_attributes  (TrackerMinerFS       *fs,
+                                                         GFileInfo            *info);
+static gchar *     miner_files_process_file_attributes  (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         GTask                *task);
+                                                         GFileInfo            *info);
 static gchar *     miner_files_remove_children          (TrackerMinerFS       *fs,
                                                          GFile                *file);
 static gchar *     miner_files_remove_file              (TrackerMinerFS       *fs,
@@ -793,8 +781,6 @@ miner_files_finalize (GObject *object)
 		g_source_remove (priv->stale_volumes_check_id);
 		priv->stale_volumes_check_id = 0;
 	}
-
-	g_list_free (priv->extraction_queue);
 
 	G_OBJECT_CLASS (tracker_miner_files_parent_class)->finalize (object);
 }
@@ -2079,65 +2065,27 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
-static void
-process_file_data_free (ProcessFileData *data)
-{
-	g_object_unref (data->miner);
-	g_object_unref (data->cancellable);
-	g_object_unref (data->file);
-	g_object_unref (data->task);
-	g_free (data->mime_type);
-	g_slice_free (ProcessFileData, data);
-}
-
-static void
-process_file_cb (GObject      *object,
-                 GAsyncResult *result,
-                 gpointer      user_data)
+static gchar *
+miner_files_process_file (TrackerMinerFS *fs,
+                          GFile          *file,
+                          GFileInfo      *file_info)
 {
 	TrackerMinerFilesPrivate *priv;
 	TrackerResource *resource, *folder_resource = NULL;
-	ProcessFileData *data;
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
-	GFileInfo *file_info;
 	guint64 time_;
-	GFile *file, *parent;
+	GFile *parent;
 	gchar *uri, *sparql_str, *sparql_update_str, *time_str, *ie_update_str = NULL, *graph_file_str = NULL;
-	GError *error = NULL;
-	gboolean is_special;
 	gboolean is_directory;
 
-	data = user_data;
-	file = G_FILE (object);
-	file_info = g_file_query_info_finish (file, result, &error);
-	priv = TRACKER_MINER_FILES (data->miner)->private;
+	priv = TRACKER_MINER_FILES (fs)->private;
 
-	if (error) {
-		/* Something bad happened, notify about the error */
-		tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task, NULL, error);
-		priv->extraction_queue = g_list_remove (priv->extraction_queue, data);
-		process_file_data_free (data);
-		return;
-	}
-
-	is_special = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_SPECIAL ?
-	                TRUE : FALSE);
-	if (is_special) {
-		error = g_error_new (TRACKER_MINER_ERROR,
-		                     0,
-		                     "File is a device, socket or pipe. Refusing to index it.");
-		tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task, NULL, error);
-		priv->extraction_queue = g_list_remove (priv->extraction_queue, data);
-		process_file_data_free (data);
-		return;
-	}
-
+	priv->start_extractor = TRUE;
 	uri = g_file_get_uri (file);
 	mime_type = g_file_info_get_content_type (file_info);
 
-	data->mime_type = g_strdup (mime_type);
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
 
@@ -2169,7 +2117,7 @@ process_file_cb (GObject      *object,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = folder_urn_or_bnode (data->miner, parent, FALSE, NULL);
+	parent_urn = folder_urn_or_bnode (TRACKER_MINER_FILES (fs), parent, FALSE, NULL);
 	g_object_unref (parent);
 
 	if (parent_urn) {
@@ -2197,13 +2145,13 @@ process_file_cb (GObject      *object,
 
 	if (is_directory) {
 		folder_resource =
-			miner_files_create_folder_information_element (data->miner,
+			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
 								       file,
 								       mime_type,
 								       is_directory);
 	}
 
-	miner_files_add_to_datasource (data->miner, file, resource, folder_resource);
+	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
 
 	sparql_update_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
 
@@ -2244,136 +2192,54 @@ process_file_cb (GObject      *object,
 	g_free (delete_properties_sparql);
 	g_free (graph_file_str);
 
-	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
-	                                sparql_str, NULL);
-
-	priv->extraction_queue = g_list_remove (priv->extraction_queue, data);
-	process_file_data_free (data);
-
 	g_object_run_dispose (G_OBJECT (resource));
 	g_object_unref (resource);
-	g_object_unref (file_info);
-	g_free (sparql_str);
 	g_free (uri);
 	g_free (sparql_update_str);
+
+	return sparql_str;
+
 }
 
-static gboolean
-miner_files_process_file (TrackerMinerFS *fs,
-                          GFile          *file,
-                          GTask          *task)
-{
-	TrackerMinerFilesPrivate *priv;
-	ProcessFileData *data;
-	const gchar *attrs;
-
-	data = g_slice_new0 (ProcessFileData);
-	data->miner = TRACKER_MINER_FILES (g_object_ref (fs));
-	data->cancellable = g_object_ref (g_task_get_cancellable (task));
-	data->file = g_object_ref (file);
-	data->task = g_object_ref (task);
-
-	priv = TRACKER_MINER_FILES (fs)->private;
-	priv->extraction_queue = g_list_prepend (priv->extraction_queue, data);
-	priv->start_extractor = TRUE;
-
-	attrs = G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-		G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE ","
-		G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME ","
-		G_FILE_ATTRIBUTE_STANDARD_SIZE ","
-		G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-		G_FILE_ATTRIBUTE_TIME_ACCESS;
-
-	g_file_query_info_async (file,
-	                         attrs,
-	                         G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                         G_PRIORITY_DEFAULT,
-	                         data->cancellable,
-	                         process_file_cb,
-	                         data);
-
-	return TRUE;
-}
-
-static void
-process_file_attributes_cb (GObject      *object,
-                            GAsyncResult *result,
-                            gpointer      user_data)
+static gchar *
+miner_files_process_file_attributes (TrackerMinerFS *fs,
+                                     GFile          *file,
+                                     GFileInfo      *info)
 {
 	TrackerResource *resource;
-	ProcessFileData *data;
-	GFileInfo *file_info;
 	guint64 time_;
-	GFile *file;
 	gchar *uri, *time_str, *sparql_str;
-	GError *error = NULL;
-
-	data = user_data;
-	file = G_FILE (object);
-	file_info = g_file_query_info_finish (file, result, &error);
-
-	if (error) {
-		/* Something bad happened, notify about the error */
-		tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task, NULL, error);
-		process_file_data_free (data);
-		return;
-	}
 
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
 
+	if (!info) {
+		info = g_file_query_info (file,
+		                          G_FILE_ATTRIBUTE_TIME_MODIFIED ","
+		                          G_FILE_ATTRIBUTE_TIME_ACCESS,
+		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                          NULL, NULL);
+	}
+
 	/* Update nfo:fileLastModified */
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
+	time_ = g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_free (time_str);
 
 	/* Update nfo:fileLastAccessed */
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
+	time_ = g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
 
-	g_object_unref (file_info);
 	g_free (uri);
 
-	/* Notify about the success */
 	sparql_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
-	tracker_miner_fs_notify_finish (TRACKER_MINER_FS (data->miner), data->task,
-	                                sparql_str, NULL);
 
-	process_file_data_free (data);
 	g_object_unref (resource);
-	g_free (sparql_str);
-}
 
-static gboolean
-miner_files_process_file_attributes (TrackerMinerFS *fs,
-                                     GFile          *file,
-                                     GTask          *task)
-{
-	ProcessFileData *data;
-	const gchar *attrs;
-
-	data = g_slice_new0 (ProcessFileData);
-	data->miner = TRACKER_MINER_FILES (g_object_ref (fs));
-	data->cancellable = g_object_ref (g_task_get_cancellable (task));
-	data->file = g_object_ref (file);
-	data->task = g_object_ref (task);
-
-	/* Query only attributes that may change in an ATTRIBUTES_UPDATED event */
-	attrs = G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-		G_FILE_ATTRIBUTE_TIME_ACCESS;
-
-	g_file_query_info_async (file,
-	                         attrs,
-	                         G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                         G_PRIORITY_DEFAULT,
-	                         data->cancellable,
-	                         process_file_attributes_cb,
-	                         data);
-
-	return TRUE;
+	return sparql_str;
 }
 
 static void

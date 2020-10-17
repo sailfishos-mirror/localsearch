@@ -400,8 +400,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file),
 		              NULL, NULL,
 		              NULL,
-		              G_TYPE_BOOLEAN,
-		              2, G_TYPE_FILE, G_TYPE_TASK);
+		              G_TYPE_STRING,
+		              2, G_TYPE_FILE, G_TYPE_FILE_INFO);
 
 	/**
 	 * TrackerMinerFS::process-file-attributes:
@@ -436,8 +436,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file_attributes),
 		              NULL, NULL,
 		              NULL,
-		              G_TYPE_BOOLEAN,
-		              2, G_TYPE_FILE, G_TYPE_TASK);
+		              G_TYPE_STRING,
+		              2, G_TYPE_FILE, G_TYPE_FILE_INFO);
 
 	/**
 	 * TrackerMinerFS::finished:
@@ -1273,73 +1273,27 @@ sparql_buffer_task_finished_cb (GObject      *object,
 	tracker_task_unref (task);
 }
 
-static UpdateProcessingTaskContext *
-update_processing_task_context_new (TrackerMiner         *miner,
-                                    gint                  priority,
-                                    GCancellable         *cancellable)
-{
-	UpdateProcessingTaskContext *ctxt;
-
-	ctxt = g_slice_new0 (UpdateProcessingTaskContext);
-	ctxt->miner = miner;
-	ctxt->priority = priority;
-
-	if (cancellable) {
-		ctxt->cancellable = g_object_ref (cancellable);
-	}
-
-	return ctxt;
-}
-
 static void
-update_processing_task_context_free (UpdateProcessingTaskContext *ctxt)
+push_sparql_task (TrackerMinerFS *fs,
+                  GFile          *file,
+                  gchar          *sparql,
+                  gint            priority)
 {
-	g_clear_pointer (&ctxt->task, tracker_task_unref);
+	TrackerTask *sparql_task = NULL;
+	gchar *uri;
 
-	if (ctxt->cancellable) {
-		g_object_unref (ctxt->cancellable);
-	}
-
-	g_slice_free (UpdateProcessingTaskContext, ctxt);
-}
-
-static void
-on_signal_gtask_complete (GObject      *source,
-			  GAsyncResult *res,
-			  gpointer      user_data)
-{
-	TrackerMinerFS *fs = TRACKER_MINER_FS (source);
-	TrackerTask *task, *sparql_task = NULL;
-	UpdateProcessingTaskContext *ctxt;
-	GError *error = NULL;
-	GFile *file = user_data;
-	gchar *uri, *sparql;
-
-	sparql = g_task_propagate_pointer (G_TASK (res), &error);
-	g_object_unref (res);
-
-	ctxt = g_task_get_task_data (G_TASK (res));
 	uri = g_file_get_uri (file);
-	task = ctxt->task;
-	g_assert (task != NULL);
 
-	if (error) {
-		g_message ("Could not process '%s': %s", uri, error->message);
-		g_error_free (error);
+	fs->priv->total_files_notified++;
 
-		fs->priv->total_files_notified_error++;
-	} else {
-		fs->priv->total_files_notified++;
+	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Creating/updating item '%s'", uri));
 
-		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Creating/updating item '%s'", uri));
-
-		sparql_task = tracker_sparql_task_new_take_sparql_str (file, sparql);
-	}
+	sparql_task = tracker_sparql_task_new_take_sparql_str (file, sparql);
 
 	if (sparql_task) {
 		tracker_sparql_buffer_push (fs->priv->sparql_buffer,
 		                            sparql_task,
-		                            ctxt->priority,
+		                            priority,
 		                            sparql_buffer_task_finished_cb,
 		                            fs);
 
@@ -1367,8 +1321,6 @@ on_signal_gtask_complete (GObject      *source,
 		}
 	}
 
-	tracker_task_pool_remove (fs->priv->task_pool, task);
-
 	if (tracker_miner_fs_has_items_to_process (fs) == FALSE &&
 	    tracker_task_pool_get_size (TRACKER_TASK_POOL (fs->priv->task_pool)) == 0) {
 		/* We need to run this one more time to trigger process_stop() */
@@ -1381,69 +1333,45 @@ on_signal_gtask_complete (GObject      *source,
 static gboolean
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
+                    GFileInfo      *info,
                     gint            priority,
                     gboolean        attributes_update)
 {
-	TrackerMinerFSPrivate *priv;
-	UpdateProcessingTaskContext *ctxt;
-	GCancellable *cancellable;
-	gboolean processing;
-	TrackerTask *task;
-	gchar *uri;
-	GTask *gtask;
+	gchar *uri, *sparql;
 
-	priv = fs->priv;
-
-	cancellable = g_cancellable_new ();
 	g_object_ref (file);
 
-	/* Create task and add it to the pool as a WAIT task (we need to extract
-	 * the file metadata and such) */
-	ctxt = update_processing_task_context_new (TRACKER_MINER (fs),
-	                                           priority,
-	                                           cancellable);
-
-	/* Call ::process-file to see if we handle this resource or not */
 	uri = g_file_get_uri (file);
 
-	gtask = g_task_new (fs, ctxt->cancellable, on_signal_gtask_complete, file);
-	g_task_set_task_data (gtask, ctxt,
-	                      (GDestroyNotify) update_processing_task_context_free);
+	if (!info) {
+		info = g_file_query_info (file,
+		                          fs->priv->file_attributes,
+		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                          NULL, NULL);
+	}
 
-	task = tracker_task_new (file, gtask, NULL);
-
-	ctxt->task = tracker_task_ref (task);
-	tracker_task_pool_add (priv->task_pool, task);
-	tracker_task_unref (task);
+	if (!info)
+		return TRUE;
 
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE], 0,
-		               file, gtask,
-		               &processing);
+		               file, info,
+		               &sparql);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE_ATTRIBUTES], 0,
-		               file, gtask,
-		               &processing);
+		               file, info,
+		               &sparql);
 	}
 
-	if (!processing) {
-		GError *error;
-
-		error = g_error_new (tracker_miner_fs_error_quark (),
-				     TRACKER_MINER_FS_ERROR_INIT,
-				     "TrackerMinerFS::process-file returned FALSE");
-		g_task_return_error (gtask, error);
-	} else {
-		fs->priv->total_files_processed++;
-	}
+	fs->priv->total_files_processed++;
+	push_sparql_task (fs, file, sparql, priority);
 
 	g_free (uri);
 	g_object_unref (file);
-	g_object_unref (cancellable);
 
-	return !tracker_task_pool_limit_reached (priv->task_pool);
+	return TRUE;
 }
 
 static gboolean
@@ -1831,7 +1759,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	case TRACKER_MINER_FS_EVENT_UPDATED:
 		parent = g_file_get_parent (file);
 
-		keep_processing = item_add_or_update (fs, file, priority, attributes_update);
+		keep_processing = item_add_or_update (fs, file, info, priority, attributes_update);
 
 		if (parent) {
 			g_object_unref (parent);

@@ -28,14 +28,13 @@ G_DEFINE_TYPE (TestMiner, test_miner, TRACKER_TYPE_MINER_FS)
 	            TrackerMinerFSTestFixture, NULL, \
 	            fixture_setup, func, fixture_teardown)
 
-static gboolean
+static gchar *
 test_miner_process_file (TrackerMinerFS *miner,
                          GFile          *file,
-                         GTask          *task)
+                         GFileInfo      *info)
 {
 	TrackerResource *resource;
 	GError *error = NULL;
-	GFileInfo *info;
 	GDateTime *modification_time;
 	gchar *sparql, *str;
 	const gchar *urn;
@@ -83,12 +82,11 @@ test_miner_process_file (TrackerMinerFS *miner,
 	}
 
 	sparql = tracker_resource_print_sparql_update (resource, NULL, "Graph");
-	tracker_miner_fs_notify_finish (miner, task, sparql, NULL);
 	g_object_unref (resource);
 	g_free (sparql);
 	g_object_unref (info);
 
-	return TRUE;
+	return sparql;
 }
 
 static gchar *

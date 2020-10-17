@@ -91,18 +91,18 @@ struct _TrackerMinerFS {
 typedef struct {
 	TrackerMinerClass parent;
 
-	gboolean (* process_file)             (TrackerMinerFS       *fs,
+	gchar *  (* process_file)             (TrackerMinerFS       *fs,
 	                                       GFile                *file,
-					       GTask                *task);
+	                                       GFileInfo            *info);
 	void     (* finished)                 (TrackerMinerFS       *fs,
 	                                       gdouble               elapsed,
 	                                       gint                  directories_found,
 	                                       gint                  directories_ignored,
 	                                       gint                  files_found,
 	                                       gint                  files_ignored);
-	gboolean (* process_file_attributes)  (TrackerMinerFS       *fs,
+	gchar *  (* process_file_attributes)  (TrackerMinerFS       *fs,
 	                                       GFile                *file,
-					       GTask                *task);
+	                                       GFileInfo            *info);
 	void     (* finished_root)            (TrackerMinerFS       *fs,
 	                                       GFile                *root,
 	                                       gint                  directories_found,
