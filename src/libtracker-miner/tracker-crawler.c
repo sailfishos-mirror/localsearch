@@ -373,6 +373,7 @@ directory_processing_data_add_child (DirectoryProcessingData *data,
 
 static DirectoryRootInfo *
 directory_root_info_new (GFile                 *file,
+                         GFileInfo             *file_info,
                          gchar                 *file_attributes,
                          TrackerDirectoryFlags  flags)
 {
@@ -393,19 +394,7 @@ directory_root_info_new (GFile                 *file,
 		allow_stat = FALSE;
 	}
 
-	/* NOTE: GFileInfo is ABSOLUTELY required here, without it the
-	 * TrackerFileNotifier will think that top level roots have
-	 * been deleted because the GFileInfo GQuark does not exist.
-	 *
-	 * This is seen easily by mounting a removable device,
-	 * indexing, then removing, then re-inserting that same
-	 * device.
-	 *
-	 * The check is done later in the TrackerFileNotifier by
-	 * looking up the qdata that we set in both conditions below.
-	 */
-	if (allow_stat && file_attributes) {
-		GFileInfo *file_info;
+	if (!file_info && allow_stat && file_attributes) {
 		GFileQueryInfoFlags file_flags;
 
 		file_flags = G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS;
@@ -419,8 +408,7 @@ directory_root_info_new (GFile                 *file,
 		                         file_info_quark,
 		                         file_info,
 		                         (GDestroyNotify) g_object_unref);
-	} else {
-		GFileInfo *file_info;
+	} else if (!file_info) {
 		gchar *basename;
 
 		file_info = g_file_info_new ();
@@ -905,6 +893,7 @@ tracker_crawler_get (TrackerCrawler        *crawler,
 	TrackerCrawlerPrivate *priv;
 	DirectoryProcessingData *dir_data;
 	DirectoryRootInfo *info;
+	GFileInfo *file_info;
 	GTask *task;
 
 	g_return_if_fail (TRACKER_IS_CRAWLER (crawler));
@@ -912,14 +901,16 @@ tracker_crawler_get (TrackerCrawler        *crawler,
 
 	priv = tracker_crawler_get_instance_private (crawler);
 
-	info = directory_root_info_new (file, priv->file_attributes, flags);
+	file_info = tracker_crawler_get_file_info (crawler, file);
+
+	info = directory_root_info_new (file, file_info, priv->file_attributes, flags);
 	task = g_task_new (crawler, cancellable, callback, user_data);
 	g_task_set_task_data (task, info,
 	                      (GDestroyNotify) directory_root_info_free);
 	info->task = task;
 	info->crawler = crawler;
 
-	if (!check_directory (crawler, info, file)) {
+	if (!file_info && !check_directory (crawler, info, file)) {
 		g_task_return_boolean (task, FALSE);
 		g_object_unref (task);
 		return;
