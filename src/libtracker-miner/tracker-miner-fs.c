@@ -93,6 +93,7 @@ typedef struct {
 	guint is_dir : 1;
 	GFile *file;
 	GFile *dest_file;
+	GFileInfo *info;
 } QueueEvent;
 
 typedef struct {
@@ -696,7 +697,8 @@ miner_fs_initable_iface_init (GInitableIface *iface)
 
 static QueueEvent *
 queue_event_new (TrackerMinerFSEventType  type,
-                 GFile                   *file)
+                 GFile                   *file,
+                 GFileInfo               *info)
 {
 	QueueEvent *event;
 
@@ -705,6 +707,7 @@ queue_event_new (TrackerMinerFSEventType  type,
 	event = g_new0 (QueueEvent, 1);
 	event->type = type;
 	g_set_object (&event->file, file);
+	g_set_object (&event->info, info);
 
 	return event;
 }
@@ -761,6 +764,7 @@ queue_event_free (QueueEvent *event)
 
 	g_clear_object (&event->dest_file);
 	g_clear_object (&event->file);
+	g_clear_object (&event->info);
 	g_free (event);
 }
 
@@ -780,7 +784,8 @@ queue_event_coalesce (const QueueEvent  *first,
 			return QUEUE_ACTION_DELETE_SECOND;
 		} else if (second->type == TRACKER_MINER_FS_EVENT_MOVED) {
 			*replacement = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED,
-							second->dest_file);
+			                                second->dest_file,
+			                                NULL);
 			return (QUEUE_ACTION_DELETE_FIRST |
 				QUEUE_ACTION_DELETE_SECOND);
 		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED) {
@@ -810,7 +815,8 @@ queue_event_coalesce (const QueueEvent  *first,
 				QUEUE_ACTION_DELETE_SECOND);
 		} else if (second->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			*replacement = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED,
-							first->file);
+			                                first->file,
+			                                NULL);
 			return (QUEUE_ACTION_DELETE_FIRST |
 				QUEUE_ACTION_DELETE_SECOND);
 		}
@@ -1540,6 +1546,7 @@ static gboolean
 item_queue_get_next_file (TrackerMinerFS           *fs,
                           GFile                   **file,
                           GFile                   **source_file,
+                          GFileInfo               **info,
                           TrackerMinerFSEventType  *type,
                           gint                     *priority_out,
                           gboolean                 *attributes_update,
@@ -1583,6 +1590,7 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 		*type = event->type;
 		*priority_out = priority;
 		*attributes_update = event->attributes_update;
+		g_set_object (info, event->info);
 
 		queue_event_free (event);
 		tracker_priority_queue_pop (fs->priv->items, NULL);
@@ -1657,6 +1665,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	gint priority = 0;
 	GString *task_sparql = NULL;
 	GString *source_task_sparql = NULL;
+	GFileInfo *info = NULL;
 
 	if (fs->priv->timer_stopped) {
 		g_timer_start (fs->priv->timer);
@@ -1668,7 +1677,8 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		return FALSE;
 	}
 
-	if (!item_queue_get_next_file (fs, &file, &source_file, &type, &priority, &attributes_update, &is_dir)) {
+	if (!item_queue_get_next_file (fs, &file, &source_file, &info, &type,
+	                               &priority, &attributes_update, &is_dir)) {
 		/* We should flush the processing pool buffer here, because
 		 * if there was a previous task on the same file we want to
 		 * process now, we want it to get finished before we can go
@@ -1835,13 +1845,9 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		item_queue_handlers_set_up (fs);
 	}
 
-	if (file) {
-		g_object_unref (file);
-	}
-
-	if (source_file) {
-		g_object_unref (source_file);
-	}
+	g_clear_object (&file);
+	g_clear_object (&source_file);
+	g_clear_object (&info);
 
 	return keep_processing;
 }
@@ -2017,7 +2023,7 @@ file_notifier_file_created (TrackerFileNotifier  *notifier,
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	event = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED, file);
+	event = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED, file, info);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
 }
 
@@ -2037,7 +2043,7 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 					   file);
 	}
 
-	event = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED, file);
+	event = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED, file, NULL);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
 }
 
@@ -2051,7 +2057,7 @@ file_notifier_file_updated (TrackerFileNotifier  *notifier,
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file);
+	event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file, info);
 	event->attributes_update = attributes_only;
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
 }
@@ -2253,7 +2259,7 @@ check_file_parents (TrackerMinerFS *fs,
 	}
 
 	for (p = parents; p; p = p->next) {
-		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, p->data);
+		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, p->data, NULL);
 		miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, p->data));
 		g_object_unref (p->data);
 	}
@@ -2308,7 +2314,7 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 			return;
 		}
 
-		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file);
+		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file, NULL);
 		trace_eq_event (event);
 		miner_fs_queue_event (fs, event, priority);
 	}
