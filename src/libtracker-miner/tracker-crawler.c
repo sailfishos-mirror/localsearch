@@ -30,14 +30,6 @@
 	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
 	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN
 
-#define FILES_QUEUE_PROCESS_INTERVAL 2000
-#define FILES_QUEUE_PROCESS_MAX      5000
-
-/* This is the number of files to be called back with from GIO at a
- * time so we don't get called back for every file.
- */
-#define FILES_GROUP_SIZE             100
-
 #define MAX_SIMULTANEOUS_ITEMS       64
 
 typedef struct TrackerCrawlerPrivate  TrackerCrawlerPrivate;
