@@ -596,7 +596,8 @@ check_eligible (void)
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
 	info = g_file_query_info (file,
-	                          G_FILE_ATTRIBUTE_STANDARD_TYPE,
+	                          G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                          G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
 	                          G_FILE_QUERY_INFO_NONE,
 	                          NULL,
 	                          &error);
@@ -883,7 +884,8 @@ update_indexed_files_from_proxy (TrackerMinerFiles *miner,
 		}
 
 		file_info = g_file_query_info (file,
-		                               G_FILE_ATTRIBUTE_STANDARD_TYPE,
+		                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+		                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
 		                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                               NULL, NULL);
 

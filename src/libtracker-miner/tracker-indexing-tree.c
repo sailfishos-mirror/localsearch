@@ -892,7 +892,7 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 		}
 
 		if (tracker_indexing_tree_get_filter_hidden (tree) &&
-		    tracker_file_is_hidden (file)) {
+		    info && g_file_info_get_is_hidden (info)) {
 			return FALSE;
 		}
 

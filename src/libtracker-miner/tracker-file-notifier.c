@@ -845,11 +845,16 @@ create_shallow_file_info (GFile    *file,
                           gboolean  is_directory)
 {
 	GFileInfo *file_info;
+	gchar *basename;
 
 	file_info = g_file_info_new ();
 	g_file_info_set_file_type (file_info,
 	                           is_directory ?
 	                           G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_REGULAR);
+	basename = g_file_get_basename (file);
+	g_file_info_set_is_hidden (file_info, basename[0] == '.');
+	g_free (basename);
+
 	return file_info;
 }
 
@@ -1283,7 +1288,8 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	child_info = g_file_query_info (child,
-	                                G_FILE_ATTRIBUTE_STANDARD_TYPE,
+	                                G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                                G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
 	                                G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                                NULL, NULL);
 	if (!child_info)
