@@ -168,7 +168,7 @@ update_indexed_files (TrackerMinerFilesIndex *index)
 	                                                      (const gchar * const *) priv->indexed_files->data);
 }
 
-static void
+static gboolean
 tracker_miner_files_index_handle_index_location (TrackerDBusMinerFilesIndex *skeleton,
                                                  GDBusMethodInvocation      *invocation,
                                                  const gchar                *file_uri,
@@ -182,8 +182,6 @@ tracker_miner_files_index_handle_index_location (TrackerDBusMinerFilesIndex *ske
 	GFile *file;
 
 	priv = TRACKER_MINER_FILES_INDEX_GET_PRIVATE (index);
-
-	tracker_gdbus_async_return_if_fail (file_uri != NULL, invocation);
 
 	request = tracker_g_dbus_request_begin (invocation, "%s(uri:'%s')", __FUNCTION__, file_uri);
 
@@ -205,6 +203,8 @@ tracker_miner_files_index_handle_index_location (TrackerDBusMinerFilesIndex *ske
 	g_dbus_method_invocation_return_value (invocation, NULL);
 
 	g_object_unref (file);
+
+	return TRUE;
 }
 
 static void
