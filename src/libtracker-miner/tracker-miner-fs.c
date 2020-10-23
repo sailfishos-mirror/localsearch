@@ -2543,12 +2543,14 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 
 gchar *
 tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
-                                 GFile          *file)
+                                 GFile          *file,
+                                 gboolean        create)
 {
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	if (tracker_task_pool_find (fs->priv->task_pool, file) ||
+	if (create ||
+	    tracker_task_pool_find (fs->priv->task_pool, file) ||
 	    tracker_sparql_buffer_get_state (fs->priv->sparql_buffer, file) == TRACKER_BUFFER_STATE_QUEUED) {
 		gchar *uri, *bnode, *checksum;
 

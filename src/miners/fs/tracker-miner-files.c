@@ -1966,6 +1966,7 @@ index_applications_changed_cb (GObject    *gobject,
 static gchar *
 folder_urn_or_bnode (TrackerMinerFiles *mf,
                      GFile             *file,
+                     gboolean           new_bnode,
                      gboolean          *is_iri)
 {
 	const gchar *urn;
@@ -1980,7 +1981,7 @@ folder_urn_or_bnode (TrackerMinerFiles *mf,
 		return g_strdup (urn);
 	}
 
-	return tracker_miner_fs_get_file_bnode (TRACKER_MINER_FS (mf), file);
+	return tracker_miner_fs_get_file_bnode (TRACKER_MINER_FS (mf), file, new_bnode);
 }
 
 static void
@@ -2002,7 +2003,7 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			identifier = folder_urn_or_bnode (mf, root, NULL);
+			identifier = folder_urn_or_bnode (mf, root, FALSE, NULL);
 
 		if (identifier)
 			tracker_resource_set_uri (resource, "nie:dataSource", identifier);
@@ -2042,7 +2043,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	gchar *urn, *uri;
 
 	/* Preserve URN for nfo:Folders */
-	urn = folder_urn_or_bnode (miner, file, NULL);
+	urn = folder_urn_or_bnode (miner, file, TRUE, NULL);
 	resource = tracker_resource_new (urn);
 	g_free (urn);
 
@@ -2168,7 +2169,7 @@ process_file_cb (GObject      *object,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = folder_urn_or_bnode (data->miner, parent, NULL);
+	parent_urn = folder_urn_or_bnode (data->miner, parent, FALSE, NULL);
 	g_object_unref (parent);
 
 	if (parent_urn) {
@@ -2475,7 +2476,7 @@ miner_files_move_file (TrackerMinerFS *fs,
 		gboolean is_iri;
 
 		new_parent_id = folder_urn_or_bnode (TRACKER_MINER_FILES (fs),
-		                                     new_parent, &is_iri);
+		                                     new_parent, FALSE, &is_iri);
 
 		if (new_parent_id) {
 			container_clause =
