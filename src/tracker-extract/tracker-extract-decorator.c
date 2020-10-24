@@ -310,7 +310,6 @@ static void
 decorator_get_next_file (TrackerDecorator *decorator)
 {
 	TrackerExtractDecoratorPrivate *priv;
-	guint available_items;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
 
@@ -318,11 +317,8 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	    tracker_miner_is_paused (TRACKER_MINER (decorator)))
 		return;
 
-	available_items = tracker_decorator_get_n_items (decorator);
-	while (priv->n_extracting_files < MAX_EXTRACTING_FILES &&
-	       available_items > 0) {
+	while (priv->n_extracting_files < MAX_EXTRACTING_FILES) {
 		priv->n_extracting_files++;
-		available_items--;
 		tracker_decorator_next (decorator, NULL,
 		                        (GAsyncReadyCallback) decorator_next_item_cb,
 		                        NULL);
