@@ -67,20 +67,6 @@ gint           tracker_config_get_removable_days_threshold         (TrackerConfi
 void           tracker_config_set_initial_sleep                    (TrackerConfig *config,
                                                                     gint           value);
 
-/*
- * Convenience functions:
- */
-
-/* The _patterns() APIs return GPatternSpec pointers for basename
- * pattern matching.
- */
-GSList *       tracker_config_get_ignored_directory_patterns        (TrackerConfig *config);
-GSList *       tracker_config_get_ignored_file_patterns             (TrackerConfig *config);
-
-/* The _paths() APIs return string pointers for full paths matching */
-GSList *       tracker_config_get_ignored_directory_paths           (TrackerConfig *config);
-GSList *       tracker_config_get_ignored_file_paths                (TrackerConfig *config);
-
 G_END_DECLS
 
 #endif /* __TRACKER_MINER_FS_CONFIG_H__ */

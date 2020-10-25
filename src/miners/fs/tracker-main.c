@@ -596,7 +596,8 @@ check_eligible (void)
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
 	info = g_file_query_info (file,
-	                          G_FILE_ATTRIBUTE_STANDARD_TYPE,
+	                          G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                          G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
 	                          G_FILE_QUERY_INFO_NONE,
 	                          NULL,
 	                          &error);
@@ -611,7 +612,6 @@ check_eligible (void)
 
 	if (info) {
 		is_dir = g_file_info_get_file_type (info) == G_FILE_TYPE_DIRECTORY;
-		g_object_unref (info);
 	} else {
 		/* Assume not a dir */
 		is_dir = FALSE;
@@ -634,8 +634,10 @@ check_eligible (void)
 	                                              ontology,
 	                                              NULL,
 	                                              NULL);
-	if (!sparql_conn)
+	if (!sparql_conn) {
+		g_object_unref (info);
 		return EXIT_FAILURE;
+	}
 
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
@@ -644,16 +646,14 @@ check_eligible (void)
 	g_object_unref (config);
 
 	if (!miner_files) {
+		g_object_unref (info);
 		g_object_unref (sparql_conn);
 		return EXIT_FAILURE;
 	}
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files));
 
-	indexable = tracker_indexing_tree_file_is_indexable (indexing_tree, file,
-	                                                     is_dir ?
-	                                                     G_FILE_TYPE_DIRECTORY :
-	                                                     G_FILE_TYPE_REGULAR);
+	indexable = tracker_indexing_tree_file_is_indexable (indexing_tree, file, info);
 
 	if (!indexable) {
 		if (is_dir &&
@@ -739,6 +739,7 @@ check_eligible (void)
 	g_object_unref (config);
 	g_object_unref (file);
 	g_object_unref (miner_files);
+	g_object_unref (info);
 	tracker_domain_ontology_unref (domain_ontology);
 
 	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
@@ -883,7 +884,8 @@ update_indexed_files_from_proxy (TrackerMinerFiles *miner,
 		}
 
 		file_info = g_file_query_info (file,
-		                               G_FILE_ATTRIBUTE_STANDARD_TYPE,
+		                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+		                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
 		                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                               NULL, NULL);
 
@@ -894,8 +896,7 @@ update_indexed_files_from_proxy (TrackerMinerFiles *miner,
 
 		if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
 			if (!tracker_indexing_tree_file_is_indexable (indexing_tree,
-			                                              file,
-			                                              G_FILE_TYPE_DIRECTORY)) {
+			                                              file, file_info)) {
 				tracker_indexing_tree_add (indexing_tree,
 				                           file,
 				                           TRACKER_DIRECTORY_FLAG_RECURSE |

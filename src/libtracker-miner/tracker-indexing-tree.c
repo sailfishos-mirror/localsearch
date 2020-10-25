@@ -830,13 +830,13 @@ indexing_tree_file_is_filtered (TrackerIndexingTree *tree,
  * tracker_indexing_tree_file_is_indexable:
  * @tree: a #TrackerIndexingTree
  * @file: a #GFile
- * @file_type: a #GFileType
+ * @file_info: a #GFileInfo
  *
  * returns %TRUE if @file should be indexed according to the
  * parameters given through tracker_indexing_tree_add() and
  * tracker_indexing_tree_add_filter().
  *
- * If @file_type is #G_FILE_TYPE_UNKNOWN, file type will be queried to the
+ * If @file_info is %NULL, it will be queried to the
  * file system.
  *
  * Returns: %TRUE if @file should be indexed.
@@ -844,11 +844,12 @@ indexing_tree_file_is_filtered (TrackerIndexingTree *tree,
 gboolean
 tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
                                          GFile               *file,
-                                         GFileType            file_type)
+                                         GFileInfo           *info)
 {
 	TrackerFilterType filter;
 	TrackerDirectoryFlags config_flags;
 	GFile *config_file;
+	GFileType file_type;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
@@ -859,28 +860,21 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 		return FALSE;
 	}
 
-	/* Don't check file type if _NO_STAT is given in flags */
-	if (file_type == G_FILE_TYPE_UNKNOWN &&
-	    (config_flags & TRACKER_DIRECTORY_FLAG_NO_STAT) != 0) {
-		GFileQueryInfoFlags file_flags;
+	if (info == NULL) {
+		info = g_file_query_info (file,
+		                          G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+		                          G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
+		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                          NULL, NULL);
+	}
 
-		file_flags = G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS;
+	file_type = info ? g_file_info_get_file_type (info) : G_FILE_TYPE_UNKNOWN;
 
-		file_type = g_file_query_file_type (file, file_flags, NULL);
+	filter = (file_type == G_FILE_TYPE_DIRECTORY) ?
+		TRACKER_FILTER_DIRECTORY : TRACKER_FILTER_FILE;
 
-		filter = (file_type == G_FILE_TYPE_DIRECTORY) ?
-			TRACKER_FILTER_DIRECTORY : TRACKER_FILTER_FILE;
-
-		if (indexing_tree_file_is_filtered (tree, filter, file)) {
-			return FALSE;
-		}
-	} else if (file_type != G_FILE_TYPE_UNKNOWN) {
-		filter = (file_type == G_FILE_TYPE_DIRECTORY) ?
-			TRACKER_FILTER_DIRECTORY : TRACKER_FILTER_FILE;
-
-		if (indexing_tree_file_is_filtered (tree, filter, file)) {
-			return FALSE;
-		}
+	if (indexing_tree_file_is_filtered (tree, filter, file)) {
+		return FALSE;
 	}
 
 	/* FIXME: Shouldn't we only do this for file_type == G_FILE_TYPE_DIRECTORY ? */
@@ -898,7 +892,7 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 		}
 
 		if (tracker_indexing_tree_get_filter_hidden (tree) &&
-		    tracker_file_is_hidden (file)) {
+		    info && g_file_info_get_is_hidden (info)) {
 			return FALSE;
 		}
 
@@ -928,12 +922,6 @@ tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
 	g_return_val_if_fail (G_IS_FILE (parent), FALSE);
 
 	priv = tree->priv;
-
-	if (!tracker_indexing_tree_file_is_indexable (tree,
-	                                              parent,
-	                                              G_FILE_TYPE_DIRECTORY)) {
-		return FALSE;
-	}
 
 	while (children && !has_match) {
 		has_match = tracker_indexing_tree_file_matches_filter (tree,

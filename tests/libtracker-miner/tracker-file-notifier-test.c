@@ -122,6 +122,7 @@ perform_file_operation (TestCommonContext *fixture,
 static void
 file_notifier_file_created_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
+                               GFileInfo           *info,
                                gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -142,6 +143,7 @@ file_notifier_file_created_cb (TrackerFileNotifier *notifier,
 static void
 file_notifier_file_updated_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
+                               GFileInfo           *info,
                                gboolean             attributes_only,
                                gpointer             user_data)
 {
@@ -163,6 +165,7 @@ file_notifier_file_updated_cb (TrackerFileNotifier *notifier,
 static void
 file_notifier_file_deleted_cb (TrackerFileNotifier *notifier,
                                GFile               *file,
+                               gboolean             is_dir,
                                gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -197,6 +200,7 @@ static void
 file_notifier_file_moved_cb (TrackerFileNotifier *notifier,
                              GFile               *file,
                              GFile               *other_file,
+                             gboolean             is_dir,
                              gpointer             user_data)
 {
 	TestCommonContext *fixture = user_data;
@@ -288,7 +292,8 @@ test_common_context_setup (TestCommonContext *fixture,
 
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
 	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree, FALSE,
-						       fixture->connection);
+	                                               fixture->connection,
+	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE);
 
 	g_signal_connect (fixture->notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created_cb), fixture);
@@ -669,7 +674,6 @@ test_file_notifier_monitor_updates_non_recursive (TestCommonContext *fixture,
 		{ OPERATION_CREATE, "non-recursive/bbb", NULL }
 	};
 	FilesystemOperation expected_results2[] = {
-		{ OPERATION_CREATE, "non-recursive", NULL },
 		{ OPERATION_UPDATE, "non-recursive/bbb", NULL },
 		{ OPERATION_CREATE, "non-recursive/ccc", NULL },
 		{ OPERATION_UPDATE, "non-recursive/ccc", NULL }
@@ -718,7 +722,6 @@ test_file_notifier_monitor_updates_recursive (TestCommonContext *fixture,
 		{ OPERATION_CREATE, "recursive/bbb", NULL }
 	};
 	FilesystemOperation expected_results2[] = {
-		{ OPERATION_CREATE, "recursive", NULL },
 		{ OPERATION_CREATE, "recursive/folder", NULL },
 		{ OPERATION_CREATE, "recursive/folder/aaa", NULL },
 		{ OPERATION_UPDATE, "recursive/bbb", NULL },

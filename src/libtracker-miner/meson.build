@@ -9,7 +9,7 @@ private_sources = [
     'tracker-crawler.c',
     'tracker-file-data-provider.c',
     'tracker-file-notifier.c',
-    'tracker-file-system.c',
+    'tracker-lru.c',
     'tracker-monitor.c',
     'tracker-priority-queue.c',
     'tracker-task-pool.c',

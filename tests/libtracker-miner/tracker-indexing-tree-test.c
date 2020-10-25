@@ -60,12 +60,12 @@ typedef struct {
 
 #define ASSERT_INDEXABLE(fixture, id)	  \
 	g_assert_true (tracker_indexing_tree_file_is_indexable (fixture->tree, \
-	                                                   fixture->test_dir[id], \
-	                                                   G_FILE_TYPE_DIRECTORY) == TRUE)
+	                                                        fixture->test_dir[id], \
+	                                                        NULL) == TRUE)
 #define ASSERT_NOT_INDEXABLE(fixture, id)	  \
 	g_assert_true (tracker_indexing_tree_file_is_indexable (fixture->tree, \
-	                                                   fixture->test_dir[id], \
-	                                                   G_FILE_TYPE_DIRECTORY) == FALSE)
+	                                                        fixture->test_dir[id], \
+	                                                        NULL) == FALSE)
 
 #define test_add(path,fun)	  \
 	g_test_add (path, \

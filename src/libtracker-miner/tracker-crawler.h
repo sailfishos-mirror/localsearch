@@ -45,41 +45,45 @@ typedef struct TrackerCrawler         TrackerCrawler;
 typedef struct TrackerCrawlerClass    TrackerCrawlerClass;
 typedef struct TrackerCrawlerPrivate  TrackerCrawlerPrivate;
 
+typedef enum {
+	TRACKER_CRAWLER_CHECK_FILE      = 1 << 0,
+	TRACKER_CRAWLER_CHECK_DIRECTORY = 1 << 1,
+	TRACKER_CRAWLER_CHECK_CONTENT   = 1 << 2,
+} TrackerCrawlerCheckFlags;
+
+typedef gboolean (*TrackerCrawlerCheckFunc) (TrackerCrawler           *crawler,
+                                             TrackerCrawlerCheckFlags  flags,
+                                             GFile                    *file,
+                                             GFileInfo                *file_info,
+                                             const GList              *children,
+                                             gpointer                  user_data);
+
 struct TrackerCrawler {
 	GObject parent;
 };
 
 struct TrackerCrawlerClass {
 	GObjectClass parent;
-
-	gboolean (* check_directory)          (TrackerCrawler *crawler,
-	                                       GFile          *file);
-	gboolean (* check_file)               (TrackerCrawler *crawler,
-	                                       GFile          *file);
-	gboolean (* check_directory_contents) (TrackerCrawler *crawler,
-	                                       GFile          *file,
-	                                       GList          *contents);
-	void     (* directory_crawled)        (TrackerCrawler *crawler,
-	                                       GFile          *directory,
-	                                       GNode          *tree,
-	                                       guint           directories_found,
-	                                       guint           directories_ignored,
-	                                       guint           files_found,
-	                                       guint           files_ignored);
-	void     (* finished)                 (TrackerCrawler *crawler,
-	                                       gboolean        interrupted);
 };
 
 GType           tracker_crawler_get_type     (void);
 TrackerCrawler *tracker_crawler_new          (TrackerDataProvider *data_provider);
-gboolean        tracker_crawler_start        (TrackerCrawler *crawler,
-                                              GFile          *file,
-                                              TrackerDirectoryFlags flags);
-void            tracker_crawler_stop         (TrackerCrawler *crawler);
-void            tracker_crawler_pause        (TrackerCrawler *crawler);
-void            tracker_crawler_resume       (TrackerCrawler *crawler);
-void            tracker_crawler_set_throttle (TrackerCrawler *crawler,
-                                              gdouble         throttle);
+
+gboolean tracker_crawler_get_finish (TrackerCrawler  *crawler,
+                                     GAsyncResult    *result,
+                                     GFile          **directory,
+                                     GNode          **tree,
+                                     guint           *directories_found,
+                                     guint           *directories_ignored,
+                                     guint           *files_found,
+                                     guint           *files_ignored,
+                                     GError         **error);
+void tracker_crawler_get (TrackerCrawler        *crawler,
+                          GFile                 *file,
+                          TrackerDirectoryFlags  flags,
+                          GCancellable          *cancellable,
+                          GAsyncReadyCallback    callback,
+                          gpointer               user_data);
 
 void            tracker_crawler_set_file_attributes (TrackerCrawler *crawler,
 						     const gchar    *file_attributes);
@@ -87,6 +91,11 @@ const gchar *   tracker_crawler_get_file_attributes (TrackerCrawler *crawler);
 
 GFileInfo *     tracker_crawler_get_file_info       (TrackerCrawler *crawler,
 						     GFile          *file);
+
+void            tracker_crawler_set_check_func (TrackerCrawler          *crawler,
+                                                TrackerCrawlerCheckFunc  func,
+                                                gpointer                 user_data,
+                                                GDestroyNotify           destroy_notify);
 
 G_END_DECLS
 

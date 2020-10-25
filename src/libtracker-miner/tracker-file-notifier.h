@@ -51,9 +51,11 @@ struct _TrackerFileNotifierClass {
 	GObjectClass parent_class;
 
 	void (* file_created) (TrackerFileNotifier *notifier,
-	                       GFile               *file);
+	                       GFile               *file,
+	                       GFileInfo           *info);
 	void (* file_updated) (TrackerFileNotifier *notifier,
 	                       GFile               *file,
+	                       GFileInfo           *info,
 	                       gboolean             attributes_only);
 	void (* file_deleted) (TrackerFileNotifier *notifier,
 	                       GFile               *file);
@@ -79,25 +81,13 @@ GType         tracker_file_notifier_get_type     (void) G_GNUC_CONST;
 TrackerFileNotifier *
               tracker_file_notifier_new          (TrackerIndexingTree     *indexing_tree,
                                                   TrackerDataProvider     *data_provider,
-                                                  TrackerSparqlConnection *connection);
+                                                  TrackerSparqlConnection *connection,
+                                                  const gchar             *file_attributes);
 
 gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notifier);
 void          tracker_file_notifier_stop         (TrackerFileNotifier     *notifier);
 gboolean      tracker_file_notifier_is_active    (TrackerFileNotifier     *notifier);
 
-const gchar * tracker_file_notifier_get_file_iri (TrackerFileNotifier     *notifier,
-                                                  GFile                   *file,
-                                                  gboolean                 force);
-
-void          tracker_file_notifier_invalidate_file_iri (TrackerFileNotifier *notifier,
-                                                         GFile               *file,
-                                                         gboolean             recursive);
-gboolean      tracker_file_notifier_query_file_exists (TrackerFileNotifier *notifier,
-						       GFile               *file);
-
-GFileType     tracker_file_notifier_get_file_type (TrackerFileNotifier *notifier,
-                                                   GFile               *file);
-
 G_END_DECLS
 
-#endif /* __TRACKER_FILE_SYSTEM_H__ */
+#endif /* __TRACKER_FILE_NOTIFIER_H__ */

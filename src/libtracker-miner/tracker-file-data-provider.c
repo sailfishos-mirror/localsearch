@@ -75,8 +75,6 @@ file_data_provider_begin (TrackerDataProvider    *data_provider,
                           GError                **error)
 {
 	GFileQueryInfoFlags file_flags;
-	GFileEnumerator *fe;
-	GError *local_error = NULL;
 
 	if (g_cancellable_set_error_if_cancelled (cancellable, error)) {
 		return NULL;
@@ -94,27 +92,11 @@ file_data_provider_begin (TrackerDataProvider    *data_provider,
 
 	file_flags = G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS;
 
-	fe = g_file_enumerate_children (url,
-	                                attributes,
-	                                file_flags,
-	                                cancellable,
-	                                &local_error);
-
-	if (local_error) {
-		gchar *uri;
-
-		uri = g_file_get_uri (url);
-
-		g_warning ("Could not open directory '%s': %s",
-		           uri, local_error->message);
-
-		g_propagate_error (error, local_error);
-		g_free (uri);
-
-		return NULL;
-	}
-
-	return fe;
+	return g_file_enumerate_children (url,
+	                                  attributes,
+	                                  file_flags,
+	                                  cancellable,
+	                                  error);
 }
 
 static void
@@ -129,15 +111,6 @@ enumerate_children_cb (GObject       *source_object,
 
 	enumerator = g_file_enumerate_children_finish (url, res, &error);
 	if (error) {
-		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			gchar *uri;
-
-			uri = g_file_get_uri (url);
-			g_warning ("Could not open directory '%s': %s",
-			           uri, error->message);
-			g_free (uri);
-		}
-
 		g_task_return_error (task, error);
 	} else {
 		g_task_return_pointer (task, enumerator, (GDestroyNotify) g_object_unref);

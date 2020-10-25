@@ -1,7 +1,6 @@
 libtracker_miner_tests = [
     'crawler',
     'file-enumerator',
-    'file-system',
     'indexing-tree',
     'priority-queue',
     'task-pool',
