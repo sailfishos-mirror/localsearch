@@ -91,6 +91,8 @@ tracker_seccomp_init (void)
 	/* Basic filesystem access */
 	ALLOW_RULE (fstat);
 	ALLOW_RULE (fstat64);
+	ALLOW_RULE (fstatat64);
+	ALLOW_RULE (newfstatat);
 	ALLOW_RULE (stat);
 	ALLOW_RULE (stat64);
 	ALLOW_RULE (statfs);
