@@ -10,6 +10,7 @@ Restart=on-failure
 # Don't restart after tracker daemon -k (aka tracker-control -k)
 RestartPreventExitStatus=SIGKILL
 Slice=background.slice
+After=gnome-session.target
 
 [Install]
-WantedBy=default.target
+WantedBy=gnome-session.target
