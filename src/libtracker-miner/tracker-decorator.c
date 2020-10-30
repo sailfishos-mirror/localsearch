@@ -500,7 +500,8 @@ decorator_task_done (GObject      *object,
 
 	if (priv->n_remaining_items == 0) {
 		decorator_finish (decorator);
-		decorator_rebuild_cache (decorator);
+		if (priv->n_updates == 0)
+			decorator_rebuild_cache (decorator);
 	} else if (g_queue_is_empty (&priv->item_cache) &&
 	           g_hash_table_size (priv->tasks) == 0 &&
 	           (!priv->sparql_buffer || !priv->commit_buffer)) {
