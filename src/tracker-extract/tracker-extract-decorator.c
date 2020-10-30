@@ -251,6 +251,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	GError *error = NULL;
 	ExtractData *data;
 	GTask *task;
+	GFile *file;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
 	info = tracker_decorator_next_finish (decorator, result, &error);
@@ -281,10 +282,21 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 		return;
 	}
 
+	file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
+
+	if (!g_file_is_native (file)) {
+		g_warning ("URI '%s' is not native",
+		           tracker_decorator_info_get_url (info));
+		priv->n_extracting_files--;
+		tracker_decorator_info_unref (info);
+		decorator_get_next_file (decorator);
+		return;
+	}
+
 	data = g_new0 (ExtractData, 1);
 	data->decorator = decorator;
 	data->decorator_info = info;
-	data->file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
+	data->file = file;
 	task = tracker_decorator_info_get_task (info);
 
 	g_debug ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
