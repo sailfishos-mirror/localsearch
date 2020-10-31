@@ -1369,43 +1369,6 @@ tracker_file_notifier_finalize (GObject *object)
 	G_OBJECT_CLASS (tracker_file_notifier_parent_class)->finalize (object);
 }
 
-static void
-check_disable_monitor (TrackerFileNotifier *notifier)
-{
-	TrackerFileNotifierPrivate *priv;
-	TrackerSparqlCursor *cursor;
-	gint64 folder_count = 0;
-	GError *error = NULL;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	cursor = tracker_sparql_connection_query (priv->connection,
-	                                          "SELECT COUNT(?f) { ?f a nfo:Folder }",
-	                                          NULL, &error);
-
-	if (!error && tracker_sparql_cursor_next (cursor, NULL, &error)) {
-		folder_count = tracker_sparql_cursor_get_integer (cursor, 0);
-		tracker_sparql_cursor_close (cursor);
-	}
-
-	if (error) {
-		g_warning ("Could not get folder count: %s\n", error->message);
-		g_error_free (error);
-	} else if (folder_count > tracker_monitor_get_limit (priv->monitor)) {
-		/* If the folder count exceeds the monitor limit, there's
-		 * nothing we can do anyway to prevent possibly out of date
-		 * content. As it is the case no matter what we try, fully
-		 * embrace it instead, and disable monitors until after crawling
-		 * has been performed. This dramatically improves crawling time
-		 * as monitors are inherently expensive.
-		 */
-		g_info ("Temporarily disabling monitors until crawling is "
-		        "completed. Too many folders to monitor anyway");
-		tracker_monitor_set_enabled (priv->monitor, FALSE);
-	}
-
-	g_clear_object (&cursor);
-}
-
 static gboolean
 crawler_check_func (TrackerCrawler           *crawler,
                     TrackerCrawlerCheckFlags  flags,
@@ -1460,7 +1423,8 @@ tracker_file_notifier_constructed (GObject *object)
 	                                object, NULL);
 	tracker_crawler_set_file_attributes (priv->crawler, priv->file_attributes);
 
-	check_disable_monitor (TRACKER_FILE_NOTIFIER (object));
+	g_info ("Temporarily disabling monitors until crawling is completed.");
+	tracker_monitor_set_enabled (priv->monitor, FALSE);
 }
 
 static void
@@ -1471,8 +1435,7 @@ tracker_file_notifier_real_finished (TrackerFileNotifier *notifier)
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (!tracker_monitor_get_enabled (priv->monitor)) {
-		/* If the monitor was disabled on ::constructed (see
-		 * check_disable_monitor()), enable it back again.
+		/* Enable monitors back again.
 		 * This will lazily create all missing directory
 		 * monitors.
 		 */
