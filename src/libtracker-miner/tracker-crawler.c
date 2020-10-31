@@ -523,7 +523,7 @@ process_next (DirectoryRootInfo *info)
 			g_task_return_boolean (task, !dir_data->ignored_by_content);
 			g_object_unref (task);
 		}
-	} else if (!dir_data && info) {
+	} else {
 		/* Current directory being crawled doesn't have anything else
 		 * to process.
 		 */
