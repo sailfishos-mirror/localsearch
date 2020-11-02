@@ -1016,9 +1016,12 @@ init_mount_points (TrackerMinerFiles *miner_files)
 					flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 				}
 
-				tracker_indexing_tree_add (indexing_tree,
-				                           file,
-				                           flags);
+				if (tracker_indexing_tree_file_is_indexable (indexing_tree,
+									     file, NULL)) {
+					tracker_indexing_tree_add (indexing_tree,
+								   file,
+								   flags);
+				}
 			}
 		} else if (!(state & VOLUME_MOUNTED) &&
 		           (state & VOLUME_MOUNTED_IN_STORE)) {
