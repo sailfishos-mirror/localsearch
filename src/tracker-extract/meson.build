@@ -14,10 +14,6 @@ if get_option('abiword')
   modules += [['extract-abw', 'tracker-extract-abw.c', ['10-abw.rule'], [tracker_miners_common_dep]]]
 endif
 
-if get_option('dvi')
-  modules += [['extract-dvi', 'tracker-extract-dvi.c', ['10-dvi.rule'], [tracker_miners_common_dep]]]
-endif
-
 if libgsf.found()
   modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [libgsf, tracker_miners_common_dep]]]
   modules += [['extract-msoffice', 'tracker-extract-msoffice.c', ['10-msoffice.rule'], [libgsf, tracker_miners_common_dep]]]
