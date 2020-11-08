@@ -203,6 +203,8 @@ reset_run (void)
 		location = g_file_new_for_path (dir);
 		delete_location_content (location);
 		g_object_unref (location);
+
+		g_rmdir (dir);
 		g_free (dir);
 	}
 
@@ -214,6 +216,7 @@ reset_run (void)
 		cache_location = g_file_new_for_path (dir);
 		delete_location_content (cache_location);
 		g_object_unref (cache_location);
+		g_rmdir (dir);
 		g_free (dir);
 	}
 
