@@ -58,10 +58,6 @@ gboolean tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf);
 void     tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
                                                    gboolean           done);
 
-guint64  tracker_miner_files_get_last_crawl_done  (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_last_crawl_done  (TrackerMinerFiles *mf,
-                                                   gboolean           done);
-
 G_END_DECLS
 
 #endif /* __TRACKER_MINER_FS_FILES_H__ */

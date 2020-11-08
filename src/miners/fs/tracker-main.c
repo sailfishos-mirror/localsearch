@@ -52,8 +52,6 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define SECONDS_PER_DAY 60 * 60 * 24
-
 #define DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
 #define LOCALE_FILENAME "locale-for-miner-apps.txt"
@@ -68,7 +66,6 @@ static gboolean no_daemon;
 static gchar *eligible;
 static gboolean version;
 static guint miners_timeout_id = 0;
-static gboolean do_crawling = FALSE;
 static gchar *domain_ontology_name = NULL;
 static gboolean dry_run = FALSE;
 
@@ -327,46 +324,6 @@ initialize_priority_and_scheduling (void)
 	}
 }
 
-static gboolean
-should_crawl (TrackerMinerFiles *miner_files,
-              TrackerConfig     *config)
-{
-	gint crawling_interval;
-
-	crawling_interval = tracker_config_get_crawling_interval (config);
-
-	TRACKER_NOTE (CONFIG, g_message ("Checking whether to crawl file system based on configured crawling interval:"));
-
-	if (crawling_interval == -2) {
-		TRACKER_NOTE (CONFIG, g_message ("  Disabled"));
-		return FALSE;
-	} else if (crawling_interval == -1) {
-		TRACKER_NOTE (CONFIG, g_message ("  Maybe (depends on a clean last shutdown)"));
-		return TRUE;
-	} else if (crawling_interval == 0) {
-		TRACKER_NOTE (CONFIG, g_message ("  Forced"));
-		return TRUE;
-	} else {
-		guint64 then, now;
-
-		then = tracker_miner_files_get_last_crawl_done (miner_files);
-
-		if (then < 1) {
-			return TRUE;
-		}
-
-		now = (guint64) time (NULL);
-
-		if (now < then + (crawling_interval * SECONDS_PER_DAY)) {
-			TRACKER_NOTE (CONFIG, g_message ("  Postponed"));
-			return FALSE;
-		} else {
-			TRACKER_NOTE (CONFIG, g_message ("  (More than) %d days after last crawling, enabled", crawling_interval));
-			return TRUE;
-		}
-	}
-}
-
 static void
 miner_do_start (TrackerMiner *miner)
 {
@@ -485,11 +442,6 @@ miner_finished_cb (TrackerMinerFS *fs,
 	        seconds_elapsed,
 	        total_directories_found,
 	        total_files_found);
-
-	if (do_crawling && !dry_run) {
-		tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs),
-							 TRUE);
-	}
 
 	cleanup_id = g_timeout_add_seconds (30, cleanup_cb, NULL);
 
@@ -1101,11 +1053,6 @@ main (gint argc, gchar *argv[])
 
 	g_free (dbus_name);
 
-	/* Check if we should crawl and if we should force mtime
-	 * checking based on the config.
-	 */
-	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files), config);
-
 	g_signal_connect (miner_files, "started",
 			  G_CALLBACK (miner_started_cb),
 			  NULL);
@@ -1128,8 +1075,7 @@ main (gint argc, gchar *argv[])
 	                                        "CREATE SILENT GRAPH tracker:Video ",
 	                                        NULL, graphs_created_cb, miner_files);
 
-	if (do_crawling)
-		miner_start (miner_files, config);
+	miner_start (miner_files, config);
 
 	initialize_signal_handler ();
 

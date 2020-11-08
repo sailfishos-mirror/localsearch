@@ -50,7 +50,6 @@
 
 /* Stamp files to know crawling/indexing state */
 #define FIRST_INDEX_FILENAME          "first-index.txt"
-#define LAST_CRAWL_FILENAME           "last-crawl.txt"
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
@@ -96,6 +95,7 @@ struct TrackerMinerFilesPrivate {
 	GDBusConnection *connection;
 
 	guint force_recheck_id;
+	guint crawl_interval_id;
 
 	gboolean index_removable_devices;
 	gboolean index_optical_discs;
@@ -764,6 +764,9 @@ miner_files_finalize (GObject *object)
 		g_source_remove (priv->force_recheck_id);
 		priv->force_recheck_id = 0;
 	}
+
+	if (priv->crawl_interval_id != 0)
+		g_source_remove (priv->crawl_interval_id);
 
 	if (priv->stale_volumes_check_id) {
 		g_source_remove (priv->stale_volumes_check_id);
@@ -1704,6 +1707,33 @@ tracker_miner_files_trigger_check_delayed (TrackerMinerFiles *mf,
 	}
 }
 
+static gboolean
+crawl_interval_idle (gpointer user_data)
+{
+	TrackerMinerFiles *miner_files = user_data;
+
+	tracker_miner_files_trigger_check (miner_files);
+
+	return G_SOURCE_CONTINUE;
+}
+
+static void
+tracker_miner_files_update_crawl_interval (TrackerMinerFiles *mf)
+{
+	guint interval;
+
+	if (mf->private->crawl_interval_id != 0)
+		g_source_remove (mf->private->crawl_interval_id);
+
+	interval = tracker_config_get_crawling_interval (mf->private->config);
+
+	if (interval > 0) {
+		mf->private->crawl_interval_id =
+			g_timeout_add_seconds (interval * SECONDS_PER_DAY,
+			                       crawl_interval_idle, mf);
+	}
+}
+
 static void
 trigger_recheck_cb (GObject    *gobject,
                     GParamSpec *arg1,
@@ -2259,6 +2289,9 @@ miner_files_finished (TrackerMinerFS *fs,
 	 * anything due to e.g. race conditions in crawling/monitoring.
 	 */
 	tracker_miner_files_trigger_check_delayed (mf, 5 * 60);
+
+	/* And also schedule a long-term period */
+	tracker_miner_files_update_crawl_interval (mf);
 }
 
 static gchar *
@@ -2730,91 +2763,5 @@ tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
 		}
 	}
 
-	g_free (filename);
-}
-
-static inline gchar *
-get_last_crawl_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         LAST_CRAWL_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_last_crawl_done:
- *
- * Check when last crawl was performed.
- *
- * Returns: time_t() value when last crawl occurred, otherwise 0.
- **/
-guint64
-tracker_miner_files_get_last_crawl_done (TrackerMinerFiles *mf)
-{
-	gchar *filename;
-	gchar *content;
-	guint64 then;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
-		g_info ("  No previous timestamp, crawling forced");
-		return 0;
-	}
-
-	then = g_ascii_strtoull (content, NULL, 10);
-	g_free (content);
-
-	return then;
-}
-
-/**
- * tracker_miner_files_set_last_crawl_done:
- *
- * Set the time stamp of the last full index of files.
- **/
-void
-tracker_miner_files_set_last_crawl_done (TrackerMinerFiles *mf,
-					 gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_last_crawl_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done) {
-		GError *error = NULL;
-		gchar *content;
-		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
-		if (already_exists) {
-			g_info ("  Overwriting last crawl file:'%s'", filename);
-		} else {
-			g_info ("  Creating last crawl file:'%s'", filename);
-		}
-		/* Create/update time stamp file */
-		if (!g_file_set_contents (filename, content, -1, &error)) {
-			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  Last crawl file:'%s' updated", filename);
-		}
-
-		g_free (content);
-	} else {
-		g_info ("  Crawl not done yet, doesn't update last crawl file.");
-	}
 	g_free (filename);
 }
