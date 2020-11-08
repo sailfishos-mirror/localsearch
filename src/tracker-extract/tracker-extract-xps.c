@@ -40,8 +40,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	filename = g_file_get_path (file);
 
 	if (inner_error != NULL) {
-		g_warning ("Unable to open '%s': %s", filename, inner_error->message);
-		g_error_free (inner_error);
+		g_propagate_prefixed_error (error, inner_error, "Unable to open: ");
 		g_free (filename);
 		return FALSE;
 	}
@@ -50,8 +49,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_object_unref (xps_file);
 
 	if (inner_error != NULL) {
-		g_warning ("Unable to read '%s': %s", filename, inner_error->message);
-		g_error_free (inner_error);
+		g_propagate_prefixed_error (error, inner_error, "Unable to read: ");
 		g_free (filename);
 		return FALSE;
 	}

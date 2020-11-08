@@ -119,8 +119,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		if (inner_error != NULL) {
 			/* An error occurred, perhaps the file was deleted. */
-			g_debug ("Error extracting content: %s", inner_error->message);
-			g_error_free (inner_error);
+			g_propagate_prefixed_error (error, inner_error, "Could not open:");
 			return FALSE;
 		}
 

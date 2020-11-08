@@ -341,8 +341,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	filename = g_file_get_path (file);
 
 	if (!gexiv2_metadata_open_path (metadata, filename, &inner_error)) {
-		g_warning ("Could not open %s for reading metadata: %s", filename, inner_error->message);
-		g_error_free (inner_error);
+		g_propagate_prefixed_error (error, inner_error, "Could not open: ");
 		goto out;
 	}
 

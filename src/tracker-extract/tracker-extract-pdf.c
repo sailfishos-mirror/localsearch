@@ -360,11 +360,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			return TRUE;
 		} else {
-			g_warning ("Couldn't create PopplerDocument from uri:'%s', %s",
-			           uri,
-			           inner_error->message);
-
-			g_error_free (inner_error);
+			g_propagate_prefixed_error (error, inner_error, "Couldn't open PopplerDocument:");
 			g_free (uri);
 			close (fd);
 

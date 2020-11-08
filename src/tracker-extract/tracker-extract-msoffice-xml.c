@@ -856,9 +856,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	                              context,
 	                              &inner_error);
 	if (inner_error) {
-		g_debug ("Parsing the content-types file gave an error: '%s'",
-		         inner_error->message);
-		g_error_free (inner_error);
+		g_propagate_prefixed_error (error, inner_error, "Could not open:");
+		return FALSE;
 	}
 
 	extract_content (&info);
