@@ -37,8 +37,6 @@ G_BEGIN_DECLS
  * TrackerDirectoryFlags:
  * @TRACKER_DIRECTORY_FLAG_NONE: No flags.
  * @TRACKER_DIRECTORY_FLAG_RECURSE: Should recurse in the directory.
- * @TRACKER_DIRECTORY_FLAG_CHECK_MTIME: Should check mtimes of items
- * in the directory.
  * @TRACKER_DIRECTORY_FLAG_MONITOR: Should setup monitors in the items
  * found in the directory.
  * @TRACKER_DIRECTORY_FLAG_IGNORE: Should ignore the directory
@@ -63,13 +61,12 @@ G_BEGIN_DECLS
 typedef enum {
 	TRACKER_DIRECTORY_FLAG_NONE            = 0,
 	TRACKER_DIRECTORY_FLAG_RECURSE         = 1 << 1,
-	TRACKER_DIRECTORY_FLAG_CHECK_MTIME     = 1 << 2,
+	TRACKER_DIRECTORY_FLAG_CHECK_DELETED   = 1 << 2,
 	TRACKER_DIRECTORY_FLAG_MONITOR         = 1 << 3,
 	TRACKER_DIRECTORY_FLAG_IGNORE          = 1 << 4,
 	TRACKER_DIRECTORY_FLAG_PRESERVE        = 1 << 5,
 	TRACKER_DIRECTORY_FLAG_PRIORITY        = 1 << 6,
 	TRACKER_DIRECTORY_FLAG_NO_STAT         = 1 << 7,
-	TRACKER_DIRECTORY_FLAG_CHECK_DELETED   = 1 << 8,
 } TrackerDirectoryFlags;
 
 /**

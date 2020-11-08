@@ -689,7 +689,6 @@ update_indexed_files_from_proxy (TrackerController *controller,
 				tracker_indexing_tree_add (indexing_tree,
 				                           file,
 				                           TRACKER_DIRECTORY_FLAG_RECURSE |
-				                           TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
 				                           TRACKER_DIRECTORY_FLAG_MONITOR);
 				g_ptr_array_add (controller->control_proxy_folders,
 				                 g_object_ref (file));
