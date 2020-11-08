@@ -1660,28 +1660,32 @@ index_single_directories_cb (GObject    *gobject,
 	private->index_single_directories = tracker_gslist_copy_with_string_data (new_dirs);
 }
 
+static void
+tracker_miner_files_trigger_check (TrackerMinerFiles *mf)
+{
+	TrackerIndexingTree *tree;
+	GList *roots, *l;
+
+	g_debug ("Triggering check on all indexed directories");
+	tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
+	roots = tracker_indexing_tree_list_roots (tree);
+
+	for (l = roots; l; l = l->next)
+		tracker_indexing_tree_notify_update (tree, l->data, FALSE);
+
+	g_list_free (roots);
+}
+
 static gboolean
 miner_files_force_recheck_idle (gpointer user_data)
 {
 	TrackerMinerFiles *miner_files = user_data;
-	TrackerIndexingTree *indexing_tree;
-	GList *roots, *l;
 
 	miner_files_update_filters (miner_files);
-
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files));
-	roots = tracker_indexing_tree_list_roots (indexing_tree);
-
-	for (l = roots; l; l = l->next)	{
-		GFile *root = l->data;
-
-		tracker_indexing_tree_notify_update (indexing_tree, root, FALSE);
-	}
-
+	tracker_miner_files_trigger_check (miner_files);
 	miner_files->private->force_recheck_id = 0;
-	g_list_free (roots);
 
-	return FALSE;
+	return G_SOURCE_REMOVE;
 }
 
 static void
