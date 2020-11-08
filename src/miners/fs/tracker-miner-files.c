@@ -513,10 +513,6 @@ miner_files_initable_init (GInitable     *initable,
 			flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 		}
 
-		if (mf->private->mtime_check) {
-			flags |= TRACKER_DIRECTORY_FLAG_CHECK_MTIME;
-		}
-
 		tracker_indexing_tree_add (indexing_tree, file, flags);
 		g_object_unref (file);
 	}
@@ -566,10 +562,6 @@ miner_files_initable_init (GInitable     *initable,
 
 		if (tracker_config_get_enable_monitors (mf->private->config)) {
 			flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-		}
-
-		if (mf->private->mtime_check) {
-			flags |= TRACKER_DIRECTORY_FLAG_CHECK_MTIME;
 		}
 
 		tracker_indexing_tree_add (indexing_tree, file, flags);
@@ -1009,7 +1001,6 @@ init_mount_points (TrackerMinerFiles *miner_files)
 
 				indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
 				flags = TRACKER_DIRECTORY_FLAG_RECURSE |
-					TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
 					TRACKER_DIRECTORY_FLAG_PRESERVE;
 
 				if (tracker_config_get_enable_monitors (miner_files->private->config)) {
@@ -1166,7 +1157,6 @@ mount_point_added_cb (TrackerStorage *storage,
 
 			config_file = g_file_new_for_path (l->data);
 			flags = TRACKER_DIRECTORY_FLAG_RECURSE |
-				TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
 				TRACKER_DIRECTORY_FLAG_PRESERVE;
 
 			if (tracker_config_get_enable_monitors (miner->private->config)) {
@@ -1202,7 +1192,7 @@ mount_point_added_cb (TrackerStorage *storage,
 		     l = g_slist_next (l)) {
 			GFile *config_file;
 
-			flags = TRACKER_DIRECTORY_FLAG_CHECK_MTIME;
+			flags = TRACKER_DIRECTORY_FLAG_NONE;
 
 			if (tracker_config_get_enable_monitors (miner->private->config)) {
 				flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
@@ -1601,10 +1591,6 @@ update_directories_from_new_config (TrackerMinerFS *mf,
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 	}
 
-	if (priv->mtime_check) {
-		flags |= TRACKER_DIRECTORY_FLAG_CHECK_MTIME;
-	}
-
 	/* Second add directories which are new */
 	for (sl = new_dirs; sl; sl = sl->next) {
 		const gchar *path;
@@ -1882,8 +1868,7 @@ miner_files_add_application_dir (TrackerMinerFiles   *mf,
 
 	tracker_indexing_tree_add (indexing_tree, file,
 				   TRACKER_DIRECTORY_FLAG_RECURSE |
-				   TRACKER_DIRECTORY_FLAG_MONITOR |
-				   TRACKER_DIRECTORY_FLAG_CHECK_MTIME);
+				   TRACKER_DIRECTORY_FLAG_MONITOR);
 	g_free (path);
 
 	mf->private->application_dirs = g_slist_prepend(mf->private->application_dirs, file);
@@ -2636,7 +2621,6 @@ miner_files_add_removable_or_optical_directory (TrackerMinerFiles *mf,
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
 	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
-		TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
 		TRACKER_DIRECTORY_FLAG_PRESERVE |
 		TRACKER_DIRECTORY_FLAG_PRIORITY;
 
