@@ -329,8 +329,7 @@ initialize_priority_and_scheduling (void)
 
 static gboolean
 should_crawl (TrackerMinerFiles *miner_files,
-              TrackerConfig     *config,
-              gboolean          *forced)
+              TrackerConfig     *config)
 {
 	gint crawling_interval;
 
@@ -346,11 +345,6 @@ should_crawl (TrackerMinerFiles *miner_files,
 		return TRUE;
 	} else if (crawling_interval == 0) {
 		TRACKER_NOTE (CONFIG, g_message ("  Forced"));
-
-		if (forced) {
-			*forced = TRUE;
-		}
-
 		return TRUE;
 	} else {
 		guint64 then, now;
@@ -404,16 +398,9 @@ miner_start_idle_cb (gpointer data)
 
 static void
 miner_start (TrackerMiner  *miner,
-	     TrackerConfig *config,
-	     gboolean       do_mtime_checking)
+	     TrackerConfig *config)
 {
 	gint initial_sleep;
-
-	if (!do_mtime_checking) {
-		g_debug ("Avoiding initial sleep, no mtime check needed");
-		miner_maybe_start (miner);
-		return;
-	}
 
 	/* If requesting to run as no-daemon, start right away */
 	if (no_daemon) {
@@ -954,8 +941,6 @@ main (gint argc, gchar *argv[])
 	TrackerMiner *miner_files;
 	GOptionContext *context;
 	GError *error = NULL;
-	gboolean do_mtime_checking;
-	gboolean force_mtime_checking = FALSE;
 	TrackerMinerProxy *proxy;
 	GDBusConnection *connection;
 	TrackerSparqlConnection *sparql_conn;
@@ -1119,36 +1104,7 @@ main (gint argc, gchar *argv[])
 	/* Check if we should crawl and if we should force mtime
 	 * checking based on the config.
 	 */
-	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files),
-	                            config, &force_mtime_checking);
-
-	/* Get the last shutdown state to see if we need to perform a
-	 * full mtime check against the db or not.
-	 *
-	 * Set to TRUE here in case we crash and miss file system
-	 * events.
-	 */
-	TRACKER_NOTE (CONFIG, g_message ("Checking whether to force mtime checking during crawling (based on last clean shutdown):"));
-
-	/* Override the shutdown state decision based on the config */
-	if (force_mtime_checking) {
-		do_mtime_checking = TRUE;
-	} else {
-		do_mtime_checking = tracker_miner_files_get_need_mtime_check (TRACKER_MINER_FILES (miner_files));
-	}
-
-	TRACKER_NOTE (CONFIG, g_message ("  %s %s",
-	                      do_mtime_checking ? "Yes" : "No",
-	                      force_mtime_checking ? "(forced from config)" : ""));
-
-	/* Set the need for an mtime check to TRUE so we check in the
-	 * event of a crash, this is changed back on shutdown if
-	 * everything appears to be fine.
-	 */
-	if (!dry_run) {
-		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), TRUE);
-		tracker_miner_files_set_mtime_checking (TRACKER_MINER_FILES (miner_files), do_mtime_checking);
-	}
+	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files), config);
 
 	g_signal_connect (miner_files, "started",
 			  G_CALLBACK (miner_started_cb),
@@ -1173,7 +1129,7 @@ main (gint argc, gchar *argv[])
 	                                        NULL, graphs_created_cb, miner_files);
 
 	if (do_crawling)
-		miner_start (miner_files, config, do_mtime_checking);
+		miner_start (miner_files, config);
 
 	initialize_signal_handler ();
 
@@ -1183,7 +1139,6 @@ main (gint argc, gchar *argv[])
 	g_debug ("Shutdown started");
 
 	if (!dry_run && miners_timeout_id == 0 && !miner_needs_check (miner_files)) {
-		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), FALSE);
 		save_current_locale (domain_ontology);
 	}
 
