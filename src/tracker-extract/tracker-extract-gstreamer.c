@@ -1355,7 +1355,8 @@ tracker_extract_gstreamer (const gchar          *uri,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	GFile *file;
 	gchar *uri;

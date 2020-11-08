@@ -1615,7 +1615,8 @@ extract_summary (TrackerResource *metadata,
  * @param metadata where to store extracted data to
  */
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	TrackerConfig *config;

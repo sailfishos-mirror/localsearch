@@ -46,7 +46,8 @@ typedef struct {
 	TrackerExtractShutdownFunc shutdown_func;
 } ModuleInfo;
 
-static gboolean dummy_extract_func (TrackerExtractInfo *info);
+static gboolean dummy_extract_func (TrackerExtractInfo  *info,
+                                    GError             **error);
 
 static ModuleInfo dummy_module = {
 	NULL, dummy_extract_func, NULL, NULL
@@ -64,7 +65,8 @@ struct _TrackerMimetypeInfo {
 };
 
 static gboolean
-dummy_extract_func (TrackerExtractInfo *info)
+dummy_extract_func (TrackerExtractInfo  *info,
+                    GError             **error)
 {
 	return TRUE;
 }

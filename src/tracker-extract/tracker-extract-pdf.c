@@ -278,11 +278,12 @@ write_pdf_data (PDFData          data,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerConfig *config;
 	time_t creation_date;
-	GError *error = NULL;
+	GError *inner_error = NULL;
 	TrackerResource *metadata;
 	TrackerXmpData *xd = NULL;
 	PDFData pd = { 0 }; /* actual data */
@@ -341,10 +342,10 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	g_free (filename);
 	uri = g_file_get_uri (file);
 
-	document = poppler_document_new_from_data (contents, len, NULL, &error);
+	document = poppler_document_new_from_data (contents, len, NULL, &inner_error);
 
-	if (error) {
-		if (error->code == POPPLER_ERROR_ENCRYPTED) {
+	if (inner_error) {
+		if (inner_error->code == POPPLER_ERROR_ENCRYPTED) {
 			metadata = tracker_resource_new (NULL);
 
 			tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");
@@ -353,7 +354,7 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 			tracker_extract_info_set_resource (info, metadata);
 			g_object_unref (metadata);
 
-			g_error_free (error);
+			g_error_free (inner_error);
 			g_free (uri);
 			close (fd);
 
@@ -361,9 +362,9 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 		} else {
 			g_warning ("Couldn't create PopplerDocument from uri:'%s', %s",
 			           uri,
-			           error->message ? error->message : "no error given");
+			           inner_error->message);
 
-			g_error_free (error);
+			g_error_free (inner_error);
 			g_free (uri);
 			close (fd);
 

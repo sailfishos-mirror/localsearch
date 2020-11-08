@@ -37,8 +37,8 @@ typedef struct _TrackerMimetypeInfo TrackerMimetypeInfo;
 typedef gboolean (* TrackerExtractInitFunc)     (GError **error);
 typedef void     (* TrackerExtractShutdownFunc) (void);
 
-typedef gboolean (* TrackerExtractMetadataFunc) (TrackerExtractInfo *info);
-
+typedef gboolean (* TrackerExtractMetadataFunc) (TrackerExtractInfo  *info,
+                                                 GError             **error);
 
 gboolean  tracker_extract_module_manager_init                (void) G_GNUC_CONST;
 
