@@ -27,6 +27,7 @@
 #include <glib/gprintf.h>
 #include <gio/gio.h>
 #include <locale.h>
+#include <unistd.h>
 
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
@@ -203,6 +204,8 @@ reset_run (void)
 		location = g_file_new_for_path (dir);
 		delete_location_content (location);
 		g_object_unref (location);
+
+		rmdir (dir);
 		g_free (dir);
 	}
 
@@ -214,6 +217,7 @@ reset_run (void)
 		cache_location = g_file_new_for_path (dir);
 		delete_location_content (cache_location);
 		g_object_unref (cache_location);
+		rmdir (dir);
 		g_free (dir);
 	}
 
