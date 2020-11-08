@@ -482,8 +482,11 @@ crawler_get_cb (TrackerCrawler *crawler,
 	                                 &files_found,
 	                                 &files_ignored,
 	                                 &error)) {
+		gboolean interrupted;
+
 		if (error &&
-		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND)) {
 			gchar *uri;
 
 			uri = g_file_get_uri (directory);
@@ -491,8 +494,12 @@ crawler_get_cb (TrackerCrawler *crawler,
 			           uri, error->message);
 			g_free (uri);
 		}
+
+		interrupted = error &&
+			g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+
 		tracker_monitor_remove (priv->monitor, directory);
-		finish_current_directory (notifier, TRUE);
+		finish_current_directory (notifier, interrupted);
 		g_clear_error (&error);
 		return;
 	}
