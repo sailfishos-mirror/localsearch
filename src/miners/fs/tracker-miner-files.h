@@ -62,21 +62,6 @@ guint64  tracker_miner_files_get_last_crawl_done  (TrackerMinerFiles *mf);
 void     tracker_miner_files_set_last_crawl_done  (TrackerMinerFiles *mf,
                                                    gboolean           done);
 
-gboolean tracker_miner_files_get_need_mtime_check (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
-                                                   gboolean           needed);
-
-void     tracker_miner_files_set_mtime_checking   (TrackerMinerFiles *miner,
-                                                   gboolean           mtime_checking);
-
-void     tracker_miner_files_writeback_file       (TrackerMinerFiles *mf,
-                                                   GFile             *file,
-                                                   GStrv              rdf_types,
-                                                   GPtrArray         *results);
-void     tracker_miner_files_writeback_notify     (TrackerMinerFiles *mf,
-                                                   GFile             *file,
-                                                   const GError      *error);
-
 G_END_DECLS
 
 #endif /* __TRACKER_MINER_FS_FILES_H__ */
