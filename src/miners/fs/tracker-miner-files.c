@@ -1689,6 +1689,22 @@ miner_files_force_recheck_idle (gpointer user_data)
 }
 
 static void
+tracker_miner_files_trigger_check_delayed (TrackerMinerFiles *mf,
+                                           guint              seconds)
+{
+	if (mf->private->force_recheck_id != 0)
+		g_source_remove (mf->private->force_recheck_id);
+
+	if (seconds == 0) {
+		mf->private->force_recheck_id =
+			g_idle_add (miner_files_force_recheck_idle, mf);
+	} else {
+		mf->private->force_recheck_id =
+			g_timeout_add_seconds (seconds, miner_files_force_recheck_idle, mf);
+	}
+}
+
+static void
 trigger_recheck_cb (GObject    *gobject,
                     GParamSpec *arg1,
                     gpointer    user_data)
@@ -1697,11 +1713,8 @@ trigger_recheck_cb (GObject    *gobject,
 
 	TRACKER_NOTE (CONFIG, g_message ("Ignored content related configuration changed, checking index..."));
 
-	if (mf->private->force_recheck_id == 0) {
-		/* Set idle so multiple changes in the config lead to one recheck */
-		mf->private->force_recheck_id =
-			g_idle_add (miner_files_force_recheck_idle, mf);
-	}
+	/* Set idle so multiple changes in the config lead to one recheck */
+	tracker_miner_files_trigger_check_delayed (mf, 0);
 }
 
 static gboolean
@@ -2238,9 +2251,14 @@ miner_files_finished (TrackerMinerFS *fs,
                       gint            files_found,
                       gint            files_ignored)
 {
-	tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
+	TrackerMinerFiles *mf = TRACKER_MINER_FILES (fs);
 
-	tracker_miner_files_check_unextracted (TRACKER_MINER_FILES (fs));
+	tracker_miner_files_check_unextracted (mf);
+
+	/* Schedule a re-check in a "short" period, in case we missed
+	 * anything due to e.g. race conditions in crawling/monitoring.
+	 */
+	tracker_miner_files_trigger_check_delayed (mf, 5 * 60);
 }
 
 static gchar *
