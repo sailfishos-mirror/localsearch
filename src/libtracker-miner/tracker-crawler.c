@@ -746,9 +746,6 @@ enumerate_next_cb (GObject      *object,
 		 * b) no more items
 		 */
 		if (error) {
-			/* We don't consider cancellation an error, so we only
-			 * log errors which are not cancellations.
-			 */
 			g_task_return_error (root_info->task, error);
 			g_object_unref (root_info->task);
 			return;
