@@ -581,7 +581,9 @@ check_eligible (void)
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology_name, NULL);
+	                                       domain_ontology_name,
+	                                       FALSE,
+	                                       NULL);
 	g_object_unref (config);
 
 	if (!miner_files) {
@@ -903,6 +905,7 @@ main (gint argc, gchar *argv[])
 	GMemoryMonitor *memory_monitor;
 #endif
 	gchar *domain_name, *dbus_name;
+	gboolean first_run = TRUE;
 
 	main_loop = NULL;
 
@@ -989,6 +992,7 @@ main (gint argc, gchar *argv[])
 
 	if (!dry_run) {
 		GFile *store = get_cache_dir (domain_ontology);
+		first_run = !g_file_query_exists (store, NULL);
 		tracker_error_report_init (store);
 		g_object_unref (store);
 	}
@@ -1008,7 +1012,9 @@ main (gint argc, gchar *argv[])
 
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology_name, &error);
+	                                       domain_ontology_name,
+	                                       first_run,
+	                                       &error);
 	if (!miner_files) {
 		g_critical ("Couldn't create new Files miner: '%s'",
 		            error ? error->message : "unknown error");
