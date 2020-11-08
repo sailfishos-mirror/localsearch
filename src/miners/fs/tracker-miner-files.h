@@ -51,12 +51,8 @@ GType         tracker_miner_files_get_type                 (void) G_GNUC_CONST;
 TrackerMiner *tracker_miner_files_new                      (TrackerSparqlConnection  *connection,
                                                             TrackerConfig            *config,
                                                             const gchar              *domain,
+                                                            gboolean                  first_run,
                                                             GError                  **error);
-
-/* Global functions to handle timestamp files */
-gboolean tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-                                                   gboolean           done);
 
 G_END_DECLS
 

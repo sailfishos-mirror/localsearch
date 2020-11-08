@@ -48,9 +48,6 @@
 #define DISK_SPACE_CHECK_FREQUENCY 10
 #define SECONDS_PER_DAY 86400
 
-/* Stamp files to know crawling/indexing state */
-#define FIRST_INDEX_FILENAME          "first-index.txt"
-
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
 #define FILE_ATTRIBUTES	  \
@@ -86,6 +83,7 @@ struct TrackerMinerFilesPrivate {
 	gboolean low_battery_pause;
 
 	gboolean start_extractor;
+	gboolean first_run;
 
 #if defined(HAVE_UPOWER) || defined(HAVE_HAL)
 	TrackerPower *power;
@@ -1271,7 +1269,7 @@ check_battery_status (TrackerMinerFiles *mf)
 			if (!tracker_config_get_index_on_battery_first_time (mf->private->config)) {
 				g_message ("Running on battery, but not enabled, pausing");
 				should_pause = TRUE;
-			} else if (tracker_miner_files_get_first_index_done (mf)) {
+			} else if (mf->private->first_run) {
 				g_message ("Running on battery and first-time index "
 				           "already done, pausing");
 				should_pause = TRUE;
@@ -1336,11 +1334,6 @@ miner_finished_cb (TrackerMinerFS *fs,
                    gpointer        user_data)
 {
 	TrackerMinerFiles *mf = TRACKER_MINER_FILES (fs);
-
-	/* Create stamp file if not already there */
-	if (!tracker_miner_files_get_first_index_done (mf)) {
-		tracker_miner_files_set_first_index_done (mf, TRUE);
-	}
 
 	/* And remove the signal handler so that it's not
 	 *  called again */
@@ -2500,19 +2493,25 @@ TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerConfig            *config,
                          const gchar              *domain,
+                         gboolean                  first_run,
                          GError                  **error)
 {
-	return g_initable_new (TRACKER_TYPE_MINER_FILES,
-	                       NULL,
-	                       error,
-	                       "connection", connection,
-	                       "root", NULL,
-	                       "config", config,
-	                       "domain", domain,
-	                       "processing-pool-wait-limit", 1,
-	                       "processing-pool-ready-limit", 100,
-	                       "file-attributes", FILE_ATTRIBUTES,
-	                       NULL);
+	TrackerMinerFiles *mf;
+
+	mf = g_initable_new (TRACKER_TYPE_MINER_FILES,
+	                     NULL,
+	                     error,
+	                     "connection", connection,
+	                     "root", NULL,
+	                     "config", config,
+	                     "domain", domain,
+	                     "processing-pool-wait-limit", 1,
+	                     "processing-pool-ready-limit", 100,
+	                     "file-attributes", FILE_ATTRIBUTES,
+	                     NULL);
+	mf->private->first_run = first_run;
+
+	return TRACKER_MINER (mf);
 }
 
 static void
@@ -2666,84 +2665,4 @@ miner_files_add_removable_or_optical_directory (TrackerMinerFiles *mf,
 				   mount_point_file,
 				   flags);
 	g_object_unref (mount_point_file);
-}
-
-inline static gchar *
-get_first_index_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         FIRST_INDEX_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_first_index_done:
- *
- * Check if first full index of files was already done.
- *
- * Returns: %TRUE if a first full index have been done, %FALSE otherwise.
- **/
-gboolean
-tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf)
-{
-	gboolean exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-	g_free (filename);
-
-	return exists;
-}
-
-/**
- * tracker_miner_files_set_first_index_done:
- *
- * Set the status of the first full index of files. Should be set to
- *  %FALSE if the index was never done or if a reindex is needed. When
- *  the index is completed, should be set to %TRUE.
- **/
-void
-tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-					  gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done && !already_exists) {
-		GError *error = NULL;
-
-		/* If done, create stamp file if not already there */
-		if (!g_file_set_contents (filename, PACKAGE_VERSION, -1, &error)) {
-			g_warning ("  Could not create file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  First index file:'%s' created", filename);
-		}
-	} else if (!done && already_exists) {
-		/* If NOT done, remove stamp file */
-		g_info ("  Removing first index file:'%s'", filename);
-
-		if (g_remove (filename)) {
-			g_warning ("    Could not remove file:'%s': %m",
-			           filename);
-		}
-	}
-
-	g_free (filename);
 }
