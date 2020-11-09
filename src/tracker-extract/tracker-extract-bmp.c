@@ -113,16 +113,16 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	gint64 width = 0, height = 0;
 
 	file = tracker_extract_info_get_file (info);
-	if (!file) {
-		return FALSE;
-	}
-
 	filename = g_file_get_path (file);
 	size = tracker_file_get_size (filename);
 	g_free (filename);
 
 	if (size < 14) {
 		/* Smaller than BMP header, can't be a real BMP file */
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_INVALID_DATA,
+		             "File too small to be a BMP");
 		return FALSE;
 	}
 

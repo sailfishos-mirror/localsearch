@@ -196,17 +196,21 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	fd = tracker_file_open_fd (filename);
 
 	if (fd == -1) {
-		g_warning ("Could not open abw file '%s': %s\n",
-		           filename,
-		           g_strerror (errno));
+		g_set_error (error,
+		             G_IO_ERROR,
+		             g_io_error_from_errno (errno),
+		             "Could not open abw file: %s",
+		             g_strerror (errno));
 		g_free (filename);
 		return retval;
 	}
 
 	if (fstat (fd, &st) == -1) {
-		g_warning ("Could not fstat abw file '%s': %s\n",
-		           filename,
-		           g_strerror (errno));
+		g_set_error (error,
+		             G_IO_ERROR,
+		             g_io_error_from_errno (errno),
+		             "Could not fstat abw file: %s",
+		             g_strerror (errno));
 		close (fd);
 		g_free (filename);
 		return retval;
@@ -218,9 +222,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	} else {
 		contents = (gchar *) mmap (NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
 		if (contents == MAP_FAILED) {
-			g_warning ("Could not mmap abw file '%s': %s\n",
-			           filename,
-			           g_strerror (errno));
+			g_set_error (error,
+			             G_IO_ERROR,
+			             g_io_error_from_errno (errno),
+			             "Could not mmap abw file: %s",
+			             g_strerror (errno));
 			close (fd);
 			g_free (filename);
 			return retval;
