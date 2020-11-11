@@ -695,6 +695,9 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 	                                                          NULL,
 	                                                          &task->func);
 
+	if (!tracker_seccomp_init ())
+		g_assert_not_reached ();
+
 	if (!filter_module (object, task->module) &&
 	    get_file_metadata (task, &info, NULL)) {
 		resource = tracker_extract_info_get_resource (info);
