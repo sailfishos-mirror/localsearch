@@ -38,6 +38,10 @@
 
 #include <seccomp.h>
 
+#ifndef SYS_SECCOMP
+#define SYS_SECCOMP 1
+#endif
+
 #define ALLOW_RULE(call) G_STMT_START { \
 	int allow_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
 	if (allow_rule_syscall_number == __NR_SCMP_ERROR || \
@@ -52,10 +56,45 @@
 		goto out; \
 } G_STMT_END
 
+static void
+sigsys_handler (gint       signal,
+                siginfo_t *info,
+                gpointer   context)
+{
+	if (info->si_signo == SIGSYS &&
+	    info->si_code == SYS_SECCOMP) {
+		char *syscall_name;
+
+		syscall_name = seccomp_syscall_resolve_num_arch (SCMP_ARCH_NATIVE,
+		                                                 info->si_syscall);
+		g_printerr ("Disallowed syscall \"%s\" caught in sandbox\n", syscall_name);
+		free (syscall_name);
+	}
+}
+
+static gboolean
+initialize_sigsys_handler (void)
+{
+	struct sigaction act = { 0 };
+
+	sigemptyset (&act.sa_mask);
+	sigaddset (&act.sa_mask, SIGSYS);
+	act.sa_flags = SA_SIGINFO;
+	act.sa_sigaction = sigsys_handler;
+
+	if (sigaction (SIGSYS, &act, NULL) < 0)
+		return FALSE;
+
+	return TRUE;
+}
+
 gboolean
 tracker_seccomp_init (void)
 {
 	scmp_filter_ctx ctx;
+
+	if (!initialize_sigsys_handler ())
+		return FALSE;
 
 	ctx = seccomp_init (SCMP_ACT_TRAP);
 	if (ctx == NULL)
