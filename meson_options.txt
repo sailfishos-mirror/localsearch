@@ -15,6 +15,8 @@ option('miner_rss', type: 'boolean', value: true,
        description: 'Enable the Tracker RSS miner')
 option('writeback', type: 'boolean', value: true,
        description: 'Enable Tracker writeback feature')
+option('seccomp', type: 'boolean', value: true,
+       description: 'Enable seccomp support in Tracker metadata extractor')
 option('domain_prefix', type: 'string', value: 'org.freedesktop',
        description: 'Domain prefix to use, useful for sandboxing')
 option('miner_fs_cache_location', type: 'string', value: '',
