@@ -800,14 +800,15 @@ extract_content (MsOfficeXMLParserInfo *info)
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *extract_info)
+tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
+                              GError             **error)
 {
 	MsOfficeXMLParserInfo info = { 0 };
 	MsOfficeXMLFileType file_type;
 	TrackerResource *metadata;
 	TrackerConfig *config;
 	GMarkupParseContext *context = NULL;
-	GError *error = NULL;
+	GError *inner_error = NULL;
 	GFile *file;
 	gchar *uri;
 
@@ -853,11 +854,10 @@ tracker_extract_get_metadata (TrackerExtractInfo *extract_info)
 	tracker_gsf_parse_xml_in_zip (uri,
 	                              "[Content_Types].xml",
 	                              context,
-	                              &error);
-	if (error) {
-		g_debug ("Parsing the content-types file gave an error: '%s'",
-		         error->message);
-		g_error_free (error);
+	                              &inner_error);
+	if (inner_error) {
+		g_propagate_prefixed_error (error, inner_error, "Could not open:");
+		return FALSE;
 	}
 
 	extract_content (&info);

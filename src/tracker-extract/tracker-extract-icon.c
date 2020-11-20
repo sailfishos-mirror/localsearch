@@ -125,7 +125,8 @@ find_max_width_and_height (const gchar *uri,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	guint max_width;

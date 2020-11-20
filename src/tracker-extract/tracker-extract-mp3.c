@@ -2633,7 +2633,8 @@ parse_id3v2 (const gchar          *data,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	gchar *filename, *uri;
 	int fd;

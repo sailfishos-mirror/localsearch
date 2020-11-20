@@ -1615,7 +1615,8 @@ extract_summary (TrackerResource *metadata,
  * @param metadata where to store extracted data to
  */
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	TrackerConfig *config;
@@ -1641,8 +1642,11 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	g_free (filename);
 
 	if (!mfile) {
-		g_warning ("Can't open file from uri '%s': %s",
-		           uri, g_strerror (errno));
+		g_set_error (error,
+		             G_IO_ERROR,
+		             g_io_error_from_errno (errno),
+		             "Can't open file: %s",
+		             g_strerror (errno));
 		g_free (uri);
 		return FALSE;
 	}

@@ -638,7 +638,8 @@ guess_dlna_profile (gint          depth,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	goffset size;
@@ -660,6 +661,10 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	size = tracker_file_get_size (filename);
 
 	if (size < 64) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_INVALID_DATA,
+		             "File too small to be a PNG");
 		return FALSE;
 	}
 

@@ -287,10 +287,10 @@ unsupported_cpus = [
 
 system_supports_seccomp = host_system == 'linux'
 cpu_supports_seccomp = not unsupported_cpus.contains(host_cpu)
-seccomp_required = system_supports_seccomp and cpu_supports_seccomp
+seccomp_required = system_supports_seccomp and cpu_supports_seccomp and get_option('seccomp') and get_option('extract')
 
 if not libseccomp.found() and seccomp_required
-  error('Libseccomp is mandatory for sandboxed metadata extraction')
+  error('Libseccomp is necessary for sandboxed metadata extraction')
 endif
 
 ####################################################################
@@ -343,7 +343,7 @@ conf.set('HAVE_LIBCUE2', libcue.found() and libcue.version().version_compare('>=
 conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
 conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
-conf.set('HAVE_LIBSECCOMP', libseccomp.found())
+conf.set('HAVE_LIBSECCOMP', seccomp_required and libseccomp.found())
 conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
@@ -521,3 +521,7 @@ if have_tracker_writeback
 endif
 
 message('\n'.join(summary))
+
+if not get_option('seccomp')
+  warning('Sandboxing is disabled. Run at your own risk. Distribution is discouraged.')
+endif

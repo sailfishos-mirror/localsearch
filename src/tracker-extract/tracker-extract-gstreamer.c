@@ -1355,7 +1355,8 @@ tracker_extract_gstreamer (const gchar          *uri,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	GFile *file;
 	gchar *uri;
@@ -1385,6 +1386,11 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	} else if (g_str_has_prefix (mimetype, "image/")) {
 		main_resource = tracker_extract_gstreamer (uri, info, EXTRACT_MIME_IMAGE);
 	} else {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_INVALID_ARGUMENT,
+		             "Mimetype '%s is not supported",
+		             mimetype);
 		g_free (uri);
 		return FALSE;
 	}

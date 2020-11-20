@@ -101,10 +101,11 @@ insert_data_from_desktop_file (TrackerResource *resource,
 
 static gboolean
 process_desktop_file (TrackerResource  *resource,
-                      GFile            *file)
+                      GFile            *file,
+                      GError          **error)
 {
 	GKeyFile *key_file;
-	GError *error = NULL;
+	GError *inner_error = NULL;
 	gchar *name = NULL;
 	gchar *type;
 	GStrv cats;
@@ -112,16 +113,12 @@ process_desktop_file (TrackerResource  *resource,
 	gboolean is_software = FALSE;
 	gchar *lang;
 
-	key_file = get_desktop_key_file (file, &type, &error);
-	if (!key_file) {
+	key_file = get_desktop_key_file (file, &type, &inner_error);
+	if (inner_error) {
 		gchar *uri;
 
 		uri = g_file_get_uri (file);
-		g_warning ("Could not load desktop file '%s': %s",
-		           uri,
-		           error->message ? error->message : "no error given");
-
-		g_error_free (error);
+		g_propagate_prefixed_error (error, inner_error, "Could not load desktop file:");
 		g_free (uri);
 		return FALSE;
 	}
@@ -130,7 +127,7 @@ process_desktop_file (TrackerResource  *resource,
 		g_debug ("Desktop file is hidden");
 		g_key_file_free (key_file);
 		g_free (type);
-		return FALSE;
+		return TRUE;
 	}
 
 	/* Retrieve LANG locale setup */
@@ -181,12 +178,10 @@ process_desktop_file (TrackerResource  *resource,
 			g_free (link_url);
 		} else {
 			/* a Link desktop entry must have an URL */
-			gchar *uri;
-
-			uri = g_file_get_uri (file);
-			g_warning ("Link desktop entry '%s' does not have an url", uri);
-
-			g_free (uri);
+			g_set_error (error,
+			             G_IO_ERROR,
+			             G_IO_ERROR_INVALID_ARGUMENT,
+			             "Link desktop entry does not have an url");
 			g_free (type);
 			g_key_file_free (key_file);
 			g_strfreev (cats);
@@ -196,7 +191,11 @@ process_desktop_file (TrackerResource  *resource,
 		}
 	} else {
 		/* Invalid type, all valid types are already listed above */
-		g_warning ("Unknown desktop entry type '%s'", type);
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_INVALID_ARGUMENT,
+		             "Unknown desktop entry type '%s'",
+		             type);
 		g_free (type);
 		g_key_file_free (key_file);
 		g_strfreev (cats);
@@ -294,13 +293,14 @@ process_desktop_file (TrackerResource  *resource,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 
 	metadata = tracker_resource_new (NULL);
 
-	if (!process_desktop_file (metadata, tracker_extract_info_get_file (info))) {
+	if (!process_desktop_file (metadata, tracker_extract_info_get_file (info), error)) {
 		g_object_unref (metadata);
 		return FALSE;
 	}

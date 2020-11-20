@@ -471,7 +471,8 @@ read_metadata (GifFileType          *gifFile,
 
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	goffset size;
@@ -495,12 +496,14 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	fd = tracker_file_open_fd (filename);
 
 	if (fd == -1) {
-		g_warning ("Could not open GIF file '%s': %s\n",
-		           filename,
-		           g_strerror (errno));
+		g_set_error (error,
+		             G_IO_ERROR,
+		             g_io_error_from_errno (errno),
+		             "Could not open GIF file: %s\n",
+		             g_strerror (errno));
 		g_free (filename);
 		return FALSE;
-	}	
+	}
 
 #if GIFLIB_MAJOR < 5
 	if ((gifFile = DGifOpenFileHandle (fd)) == NULL) {

@@ -95,14 +95,15 @@ get_file_content (GFile   *file,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *info)
+tracker_extract_get_metadata (TrackerExtractInfo  *info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	TrackerConfig *config;
 	GFile *file;
 	GSList *text_allowlist_patterns;
 	gchar *content = NULL;
-	GError *error = NULL;
+	GError *inner_error = NULL;
 
 	config = tracker_main_get_config ();
 	text_allowlist_patterns = tracker_config_get_text_allowlist_patterns (config);
@@ -114,12 +115,11 @@ tracker_extract_get_metadata (TrackerExtractInfo *info)
 	if (allow_file (text_allowlist_patterns, file)) {
 		content = get_file_content (tracker_extract_info_get_file (info),
 		                            tracker_config_get_max_bytes (config),
-		                            &error);
+		                            &inner_error);
 
-		if (error != NULL) {
+		if (inner_error != NULL) {
 			/* An error occurred, perhaps the file was deleted. */
-			g_debug ("Error extracting content: %s", error->message);
-			g_error_free (error);
+			g_propagate_prefixed_error (error, inner_error, "Could not open:");
 			return FALSE;
 		}
 

@@ -278,7 +278,8 @@ notify_task_finish (TrackerExtractTask *task,
 
 static gboolean
 get_file_metadata (TrackerExtractTask  *task,
-                   TrackerExtractInfo **info_out)
+                   TrackerExtractInfo **info_out,
+                   GError             **error)
 {
 	TrackerExtractInfo *info;
 	GFile *file;
@@ -301,7 +302,7 @@ get_file_metadata (TrackerExtractTask  *task,
 		g_debug ("Using %s...",
 		         g_module_name (task->module));
 
-		task->success = (task->func) (info);
+		task->success = (task->func) (info, error);
 	} else {
 		TrackerResource *resource;
 
@@ -463,6 +464,7 @@ get_metadata (TrackerExtractTask *task)
 {
 	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
 	TrackerExtractInfo *info;
+	GError *error = NULL;
 
 #ifdef THREAD_ENABLE_TRACE
 	g_debug ("Thread:%p --> '%s': Collected metadata",
@@ -494,16 +496,21 @@ get_metadata (TrackerExtractTask *task)
 #endif
 
 	if (!filter_module (task->extract, task->module) &&
-	    get_file_metadata (task, &info)) {
+	    get_file_metadata (task, &info, &error)) {
 		g_task_return_pointer (G_TASK (task->res), info,
 		                       (GDestroyNotify) tracker_extract_info_unref);
 		extract_task_free (task);
 	} else {
-		g_task_return_new_error (G_TASK (task->res),
-		                         tracker_extract_error_quark (),
-		                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
-		                         "Could not get any metadata for uri:'%s' and mime:'%s'",
-		                         task->file, task->mimetype);
+		if (error) {
+			g_task_return_error (G_TASK (task->res), error);
+		} else {
+			g_task_return_new_error (G_TASK (task->res),
+			                         tracker_extract_error_quark (),
+			                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
+			                         "Could not get any metadata for uri:'%s' and mime:'%s'",
+			                         task->file, task->mimetype);
+		}
+
 		extract_task_free (task);
 	}
 
@@ -688,8 +695,11 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 	                                                          NULL,
 	                                                          &task->func);
 
+	if (!tracker_seccomp_init ())
+		g_assert_not_reached ();
+
 	if (!filter_module (object, task->module) &&
-	    get_file_metadata (task, &info)) {
+	    get_file_metadata (task, &info, NULL)) {
 		resource = tracker_extract_info_get_resource (info);
 	}
 

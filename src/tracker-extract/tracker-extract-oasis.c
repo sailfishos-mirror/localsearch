@@ -167,7 +167,8 @@ extract_oasis_content (const gchar     *uri,
 }
 
 G_MODULE_EXPORT gboolean
-tracker_extract_get_metadata (TrackerExtractInfo *extract_info)
+tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
+                              GError             **error)
 {
 	TrackerResource *metadata;
 	TrackerConfig *config;
