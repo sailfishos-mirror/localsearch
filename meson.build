@@ -442,10 +442,6 @@ test_c_args = tracker_c_args + [
 
 subdir('tests')
 
-subdir('po')
-
-meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
-
 run_uninstalled_conf = configuration_data()
 run_uninstalled_conf.set('tracker_sparql_uninstalled_dir', tracker_sparql_uninstalled_dir)
 run_uninstalled_conf.set('tracker_uninstalled_cli_dir', tracker_uninstalled_cli_dir)
@@ -458,10 +454,16 @@ run_uninstalled_conf.set('tracker_uninstalled_stop_words_dir', tracker_uninstall
 run_uninstalled_conf.set('tracker_uninstalled_testutils_dir', tracker_uninstalled_testutils_dir)
 run_uninstalled_conf.set('tracker_uninstalled_writeback_modules_dir', tracker_uninstalled_writeback_modules_dir)
 run_uninstalled_conf.set('uninstalled_gsettings_schema_dir', tracker_miners_uninstalled_gsettings_schema_dir)
-configure_file(
+run_uninstalled = configure_file(
   input: 'run-uninstalled.in',
   output: 'run-uninstalled',
   configuration: run_uninstalled_conf)
+
+subdir('examples')
+
+subdir('po')
+
+meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
 
 summary = [
   '\nBuild Configuration:',
