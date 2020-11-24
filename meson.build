@@ -468,6 +468,8 @@ summary = [
   '    Prefix:                                 ' + get_option('prefix'),
   '    Source code location:                   ' + meson.source_root(),
   '    Compiler:                               ' + cc.get_id(),
+  '    Debug:                                  ' + get_option('debug').to_string(),
+  '    Optimization:                           ' + get_option('optimization'),
   '    Domain prefix:                          ' + get_option('domain_prefix'),
   '\nFeature Support:',
   '    Battery/mains power detection:          ' + battery_detection_library_name,
