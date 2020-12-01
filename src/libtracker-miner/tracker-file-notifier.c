@@ -497,7 +497,10 @@ crawler_get_cb (TrackerCrawler *crawler,
 			g_free (uri);
 		}
 		tracker_monitor_remove (priv->monitor, directory);
-		finish_current_directory (notifier, interrupted);
+
+		if (interrupted || !crawl_directory_in_current_root (notifier))
+			finish_current_directory (notifier, interrupted);
+
 		g_clear_error (&error);
 		return;
 	}
