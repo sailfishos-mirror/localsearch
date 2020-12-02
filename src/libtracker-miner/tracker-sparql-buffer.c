@@ -228,10 +228,6 @@ tracker_sparql_buffer_update_array_cb (GObject      *object,
 	if (error) {
 		g_error_free (error);
 	}
-
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (buffer))) {
-		tracker_sparql_buffer_flush (buffer, "SPARQL buffer limit reached (after flush)");
-	}
 }
 
 gboolean
@@ -309,10 +305,6 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 	/* We add a reference here because we unref when removed from
 	 * the GPtrArray. */
 	g_ptr_array_add (priv->tasks, tracker_task_ref (task));
-
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (buffer))) {
-		tracker_sparql_buffer_flush (buffer, "SPARQL buffer limit reached");
-	}
 }
 
 void
