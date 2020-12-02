@@ -65,16 +65,16 @@ TrackerSparqlBuffer *tracker_sparql_buffer_new   (TrackerSparqlConnection *conne
                                                   guint                    limit);
 
 gboolean             tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
-                                                  const gchar         *reason);
-
-void                 tracker_sparql_buffer_push  (TrackerSparqlBuffer *buffer,
-                                                  TrackerTask         *task,
+                                                  const gchar         *reason,
                                                   GAsyncReadyCallback  cb,
                                                   gpointer             user_data);
 
-TrackerTask *        tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
-                                                        GAsyncResult         *res,
-                                                        GError              **error);
+GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
+                                                         GAsyncResult         *res,
+                                                         GError              **error);
+
+void                 tracker_sparql_buffer_push  (TrackerSparqlBuffer *buffer,
+                                                  TrackerTask         *task);
 
 TrackerSparqlBufferState tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
                                                           GFile               *file);

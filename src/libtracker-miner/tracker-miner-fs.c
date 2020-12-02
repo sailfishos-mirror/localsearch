@@ -1228,49 +1228,56 @@ item_queue_is_blocked_by_file (TrackerMinerFS *fs,
 }
 
 static void
-sparql_buffer_task_finished_cb (GObject      *object,
-                                GAsyncResult *result,
-                                gpointer      user_data)
+sparql_buffer_flush_cb (GObject      *object,
+                        GAsyncResult *result,
+                        gpointer      user_data)
 {
-	TrackerMinerFS *fs;
-	TrackerMinerFSPrivate *priv;
+	TrackerMinerFS *fs = user_data;
+	TrackerMinerFSPrivate *priv = fs->priv;
+	GPtrArray *tasks;
+	GError *error = NULL;
 	TrackerTask *task;
 	GFile *task_file;
-	GError *error = NULL;
+	guint i;
 
-	fs = user_data;
-	priv = fs->priv;
-
-	task = tracker_sparql_buffer_push_finish (TRACKER_SPARQL_BUFFER (object),
-	                                          result, &error);
-	task_file = tracker_task_get_file (task);
+	tasks = tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
+	                                            result, &error);
 
 	if (error) {
 		g_warning ("Could not execute sparql: %s", error->message);
-		tracker_error_report (task_file, error->message,
-		                      tracker_sparql_task_get_sparql (task));
-		priv->total_files_notified_error++;
-		g_error_free (error);
 	}
 
-	tracker_error_report_delete (task_file);
+	for (i = 0; i < tasks->len; i++) {
+		task = g_ptr_array_index (tasks, i);
+		task_file = tracker_task_get_file (task);
 
-	if (item_queue_is_blocked_by_file (fs, task_file)) {
-		g_object_unref (priv->item_queue_blocker);
-		priv->item_queue_blocker = NULL;
+		if (error) {
+			tracker_error_report (task_file, error->message,
+			                      tracker_sparql_task_get_sparql (task));
+			fs->priv->total_files_notified_error++;
+		} else {
+			tracker_error_report_delete (task_file);
+		}
+
+		if (item_queue_is_blocked_by_file (fs, task_file))
+			g_clear_object (&fs->priv->item_queue_blocker);
 	}
 
 	if (priv->item_queue_blocker != NULL) {
 		if (tracker_task_pool_get_size (TRACKER_TASK_POOL (object)) > 0) {
 			tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),
-			                             "Item queue still blocked after flush");
+			                             "Item queue still blocked after flush",
+			                             sparql_buffer_flush_cb,
+			                             fs);
 
 			/* Check if we've finished inserting for given prefixes ... */
 			notify_roots_finished (fs, TRUE);
 		}
 	} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
 		tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),
-		                             "SPARQL buffer limit reached");
+		                             "SPARQL buffer limit reached",
+		                             sparql_buffer_flush_cb,
+		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
 		notify_roots_finished (fs, TRUE);
@@ -1278,7 +1285,7 @@ sparql_buffer_task_finished_cb (GObject      *object,
 		item_queue_handlers_set_up (fs);
 	}
 
-	tracker_task_unref (task);
+	g_clear_error (&error);
 }
 
 static void
@@ -1299,18 +1306,21 @@ push_sparql_task (TrackerMinerFS *fs,
 
 	if (sparql_task) {
 		tracker_sparql_buffer_push (fs->priv->sparql_buffer,
-		                            sparql_task,
-		                            sparql_buffer_task_finished_cb,
-		                            fs);
+		                            sparql_task);
 
 		if (item_queue_is_blocked_by_file (fs, file)) {
-			tracker_sparql_buffer_flush (fs->priv->sparql_buffer, "Current file is blocking item queue");
+			tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
+			                             "Current file is blocking item queue",
+			                             sparql_buffer_flush_cb,
+			                             fs);
 
 			/* Check if we've finished inserting for given prefixes ... */
 			notify_roots_finished (fs, TRUE);
 		} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 			tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-			                             "SPARQL buffer limit reached");
+			                             "SPARQL buffer limit reached",
+			                             sparql_buffer_flush_cb,
+			                             fs);
 
 			/* Check if we've finished inserting for given prefixes ... */
 			notify_roots_finished (fs, TRUE);
@@ -1597,9 +1607,7 @@ push_task (TrackerMinerFS *fs,
 
 	task = tracker_sparql_task_new_take_sparql_str (file, sparql);
 	tracker_sparql_buffer_push (fs->priv->sparql_buffer,
-	                            task,
-	                            sparql_buffer_task_finished_cb,
-	                            fs);
+	                            task);
 	tracker_task_unref (task);
 }
 
@@ -1631,7 +1639,9 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		 * process now, we want it to get finished before we can go
 		 * on with the queues... */
 		tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-		                             "Queue handlers WAIT");
+		                             "Queue handlers WAIT",
+		                             sparql_buffer_flush_cb,
+		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
 		notify_roots_finished (fs, TRUE);
@@ -1735,7 +1745,9 @@ miner_handle_next_item (TrackerMinerFS *fs)
 			} else {
 				/* Flush any possible pending update here */
 				tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-				                             "Queue handlers NONE");
+				                             "Queue handlers NONE",
+				                             sparql_buffer_flush_cb,
+				                             fs);
 
 				/* Check if we've finished inserting for given prefixes ... */
 				notify_roots_finished (fs, TRUE);
@@ -1790,7 +1802,9 @@ miner_handle_next_item (TrackerMinerFS *fs)
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-		                             "SPARQL buffer limit reached");
+		                             "SPARQL buffer limit reached",
+		                             sparql_buffer_flush_cb,
+		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
 		notify_roots_finished (fs, TRUE);
