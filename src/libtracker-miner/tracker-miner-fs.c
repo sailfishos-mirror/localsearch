@@ -400,8 +400,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file),
 		              NULL, NULL,
 		              NULL,
-		              G_TYPE_STRING,
-		              2, G_TYPE_FILE, G_TYPE_FILE_INFO);
+		              G_TYPE_NONE,
+		              3, G_TYPE_FILE, G_TYPE_FILE_INFO, TRACKER_TYPE_SPARQL_BUFFER);
 
 	/**
 	 * TrackerMinerFS::process-file-attributes:
@@ -436,8 +436,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file_attributes),
 		              NULL, NULL,
 		              NULL,
-		              G_TYPE_STRING,
-		              2, G_TYPE_FILE, G_TYPE_FILE_INFO);
+		              G_TYPE_NONE,
+		              3, G_TYPE_FILE, G_TYPE_FILE_INFO, TRACKER_TYPE_SPARQL_BUFFER);
 
 	/**
 	 * TrackerMinerFS::finished:
@@ -531,8 +531,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, remove_file),
 		              NULL, NULL, NULL,
-		              G_TYPE_STRING,
-		              1, G_TYPE_FILE);
+		              G_TYPE_NONE,
+		              2, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER);
 
 	signals[REMOVE_CHILDREN] =
 		g_signal_new ("remove-children",
@@ -540,8 +540,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, remove_children),
 		              NULL, NULL, NULL,
-		              G_TYPE_STRING,
-		              1, G_TYPE_FILE);
+		              G_TYPE_NONE,
+		              2, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER);
 
 	signals[MOVE_FILE] =
 		g_signal_new ("move-file",
@@ -549,8 +549,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, move_file),
 		              NULL, NULL, NULL,
-		              G_TYPE_STRING,
-		              3, G_TYPE_FILE, G_TYPE_FILE, G_TYPE_BOOLEAN);
+		              G_TYPE_NONE,
+		              4, G_TYPE_FILE, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER, G_TYPE_BOOLEAN);
 
 	quark_last_queue_event = g_quark_from_static_string ("tracker-last-queue-event");
 }
@@ -1252,15 +1252,20 @@ sparql_buffer_flush_cb (GObject      *object,
 		task_file = tracker_task_get_file (task);
 
 		if (error) {
-			tracker_error_report (task_file, error->message,
-			                      tracker_sparql_task_get_sparql (task));
+			gchar *sparql;
+
+			sparql = tracker_sparql_task_get_sparql (task);
+			tracker_error_report (task_file, error->message, sparql);
 			fs->priv->total_files_notified_error++;
+			g_free (sparql);
 		} else {
 			tracker_error_report_delete (task_file);
 		}
 
 		if (item_queue_is_blocked_by_file (fs, task_file))
 			g_clear_object (&fs->priv->item_queue_blocker);
+
+		tracker_lru_remove (fs->priv->urn_lru, task_file);
 	}
 
 	if (priv->item_queue_blocker != NULL) {
@@ -1288,77 +1293,13 @@ sparql_buffer_flush_cb (GObject      *object,
 	g_clear_error (&error);
 }
 
-static void
-push_sparql_task (TrackerMinerFS *fs,
-                  GFile          *file,
-                  gchar          *sparql)
-{
-	TrackerTask *sparql_task = NULL;
-	gchar *uri;
-
-	uri = g_file_get_uri (file);
-
-	fs->priv->total_files_notified++;
-
-	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Creating/updating item '%s'", uri));
-
-	sparql_task = tracker_sparql_task_new_take_sparql_str (file, sparql);
-
-	if (sparql_task) {
-		tracker_sparql_buffer_push (fs->priv->sparql_buffer,
-		                            sparql_task);
-
-		if (item_queue_is_blocked_by_file (fs, file)) {
-			tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-			                             "Current file is blocking item queue",
-			                             sparql_buffer_flush_cb,
-			                             fs);
-
-			/* Check if we've finished inserting for given prefixes ... */
-			notify_roots_finished (fs, TRUE);
-		} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
-			tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
-			                             "SPARQL buffer limit reached",
-			                             sparql_buffer_flush_cb,
-			                             fs);
-
-			/* Check if we've finished inserting for given prefixes ... */
-			notify_roots_finished (fs, TRUE);
-		}
-
-		/* We can let go of our reference here because the
-		 * sparql buffer takes its own reference when adding
-		 * it to the task pool.
-		 */
-		tracker_task_unref (sparql_task);
-	} else {
-		if (item_queue_is_blocked_by_file (fs, file)) {
-			/* Make sure that we don't stall the item queue, although we could
-			 * expect the file to be reenqueued until the loop detector makes
-			 * us drop it since we were specifically waiting for it to complete.
-			 */
-			g_object_unref (fs->priv->item_queue_blocker);
-			fs->priv->item_queue_blocker = NULL;
-			item_queue_handlers_set_up (fs);
-		}
-	}
-
-	if (tracker_miner_fs_has_items_to_process (fs) == FALSE &&
-	    tracker_task_pool_get_size (TRACKER_TASK_POOL (fs->priv->task_pool)) == 0) {
-		/* We need to run this one more time to trigger process_stop() */
-		item_queue_handlers_set_up (fs);
-	}
-
-	g_free (uri);
-}
-
 static gboolean
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
                     GFileInfo      *info,
                     gboolean        attributes_update)
 {
-	gchar *uri, *sparql;
+	gchar *uri;
 
 	g_object_ref (file);
 
@@ -1377,17 +1318,14 @@ item_add_or_update (TrackerMinerFS *fs,
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE], 0,
-		               file, info,
-		               &sparql);
+		               file, info, fs->priv->sparql_buffer);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE_ATTRIBUTES], 0,
-		               file, info,
-		               &sparql);
+		               file, info, fs->priv->sparql_buffer);
 	}
 
 	fs->priv->total_files_processed++;
-	push_sparql_task (fs, file, sparql);
 
 	g_free (uri);
 	g_object_unref (file);
@@ -1398,10 +1336,9 @@ item_add_or_update (TrackerMinerFS *fs,
 static gboolean
 item_remove (TrackerMinerFS *fs,
              GFile          *file,
-             gboolean        only_children,
-             GString        *task_sparql)
+             gboolean        only_children)
 {
-	gchar *uri, *sparql;
+	gchar *uri;
 	guint signal_num;
 
 	uri = g_file_get_uri (file);
@@ -1416,14 +1353,7 @@ item_remove (TrackerMinerFS *fs,
 
 	/* Call the implementation to generate a SPARQL update for the removal. */
 	signal_num = only_children ? REMOVE_CHILDREN : REMOVE_FILE;
-	g_signal_emit (fs, signals[signal_num], 0, file, &sparql);
-
-	if (sparql && sparql[0] != '\0') {
-		g_string_append (task_sparql, sparql);
-		g_string_append (task_sparql, ";\n");
-	}
-
-	g_free (sparql);
+	g_signal_emit (fs, signals[signal_num], 0, file, fs->priv->sparql_buffer);
 	g_free (uri);
 
 	return TRUE;
@@ -1433,11 +1363,9 @@ static gboolean
 item_move (TrackerMinerFS *fs,
            GFile          *dest_file,
            GFile          *source_file,
-           GString        *dest_task_sparql,
-           GString        *source_task_sparql,
            gboolean        is_dir)
 {
-	gchar     *uri, *source_uri, *sparql;
+	gchar *uri, *source_uri;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean recursive;
 
@@ -1455,24 +1383,17 @@ item_move (TrackerMinerFS *fs,
 	             is_dir);
 
 	/* Delete destination item from store if any */
-	item_remove (fs, dest_file, FALSE, dest_task_sparql);
+	item_remove (fs, dest_file, FALSE);
 
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
 	if (!recursive &&
 	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
-		item_remove (fs, source_file, TRUE, source_task_sparql);
+		item_remove (fs, source_file, TRUE);
 
-	g_signal_emit (fs, signals[MOVE_FILE], 0, dest_file, source_file, recursive, &sparql);
+	g_signal_emit (fs, signals[MOVE_FILE], 0, dest_file, source_file, fs->priv->sparql_buffer, recursive);
 
-	if (sparql && sparql[0] != '\0') {
-		/* This is treated as a task on dest_file */
-		g_string_append (dest_task_sparql, sparql);
-		g_string_append (dest_task_sparql, ";\n");
-	}
-
-	g_free (sparql);
 	g_free (uri);
 	g_free (source_uri);
 
@@ -1594,37 +1515,17 @@ item_queue_get_progress (TrackerMinerFS *fs,
 	return (gdouble) (items_total - items_to_process) / items_total;
 }
 
-/* Add a task to the processing pool to update stored information on 'file'.
- *
- * This function takes ownership of the 'sparql' string.
- */
-static void
-push_task (TrackerMinerFS *fs,
-           GFile          *file,
-           gchar          *sparql)
-{
-	TrackerTask *task;
-
-	task = tracker_sparql_task_new_take_sparql_str (file, sparql);
-	tracker_sparql_buffer_push (fs->priv->sparql_buffer,
-	                            task);
-	tracker_task_unref (task);
-}
-
 static gboolean
 miner_handle_next_item (TrackerMinerFS *fs)
 {
 	GFile *file = NULL;
 	GFile *source_file = NULL;
-	GFile *parent;
 	gint64 time_now;
 	static gint64 time_last = 0;
 	gboolean keep_processing = TRUE;
 	gboolean attributes_update = FALSE;
 	gboolean is_dir = FALSE;
 	TrackerMinerFSEventType type;
-	GString *task_sparql = NULL;
-	GString *source_task_sparql = NULL;
 	GFileInfo *info = NULL;
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
@@ -1761,46 +1662,28 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	/* Handle queues */
 	switch (type) {
 	case TRACKER_MINER_FS_EVENT_MOVED:
-		task_sparql = g_string_new ("");
-		source_task_sparql = g_string_new ("");
-		keep_processing = item_move (fs, file, source_file, task_sparql, source_task_sparql, is_dir);
+		keep_processing = item_move (fs, file, source_file, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_DELETED:
-		task_sparql = g_string_new ("");
-		keep_processing = item_remove (fs, file, FALSE, task_sparql);
+		keep_processing = item_remove (fs, file, FALSE);
 		break;
 	case TRACKER_MINER_FS_EVENT_CREATED:
 	case TRACKER_MINER_FS_EVENT_UPDATED:
-		parent = g_file_get_parent (file);
-
 		keep_processing = item_add_or_update (fs, file, info, attributes_update);
-
-		if (parent) {
-			g_object_unref (parent);
-		}
-
 		break;
 	default:
 		g_assert_not_reached ();
 	}
 
-	if (source_task_sparql) {
-		if (source_task_sparql->len == 0) {
-			g_string_free (source_task_sparql, TRUE);
-		} else {
-			push_task (fs, source_file, g_string_free (source_task_sparql, FALSE));
-		}
-	}
+	if (item_queue_is_blocked_by_file (fs, file)) {
+		tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
+		                             "Current file is blocking item queue",
+		                             sparql_buffer_flush_cb,
+		                             fs);
 
-	if (task_sparql) {
-		if (task_sparql->len == 0) {
-			g_string_free (task_sparql, TRUE);
-		} else {
-			push_task (fs, file, g_string_free (task_sparql, FALSE));
-		}
-	}
-
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
+		/* Check if we've finished inserting for given prefixes ... */
+		notify_roots_finished (fs, TRUE);
+	} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
 		                             "SPARQL buffer limit reached",
 		                             sparql_buffer_flush_cb,
@@ -2409,6 +2292,7 @@ tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 		return NULL;
 
 	if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), NULL);
 		g_object_unref (cursor);
 		return NULL;
 	}

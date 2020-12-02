@@ -27,15 +27,16 @@ G_DEFINE_TYPE (TestMiner, test_miner, TRACKER_TYPE_MINER_FS)
 	            TrackerMinerFSTestFixture, NULL, \
 	            fixture_setup, func, fixture_teardown)
 
-static gchar *
-test_miner_process_file (TrackerMinerFS *miner,
-                         GFile          *file,
-                         GFileInfo      *info)
+static void
+test_miner_process_file (TrackerMinerFS      *miner,
+                         GFile               *file,
+                         GFileInfo           *info,
+                         TrackerSparqlBuffer *buffer)
 {
 	TrackerResource *resource;
 	GDateTime *modification_time;
 	TrackerIndexingTree *tree;
-	gchar *sparql, *uri, *parent_uri, *str;
+	gchar *uri, *parent_uri, *str;
 	GFile *parent;
 
 	((TestMiner *) miner)->n_process_file++;
@@ -87,16 +88,15 @@ test_miner_process_file (TrackerMinerFS *miner,
 		g_object_unref (parent);
 	}
 
-	sparql = tracker_resource_print_sparql_update (resource, NULL, "tracker:FileSystem");
+	tracker_sparql_buffer_push (buffer, file, "tracker:FileSystem", resource);
 	g_object_unref (resource);
 	g_free (uri);
-
-	return sparql;
 }
 
-static gchar *
-test_miner_remove_file (TrackerMinerFS *miner,
-                        GFile          *file)
+static void
+test_miner_remove_file (TrackerMinerFS      *miner,
+                        GFile               *file,
+                        TrackerSparqlBuffer *buffer)
 {
 	gchar *sparql, *uri;
 
@@ -110,12 +110,14 @@ test_miner_remove_file (TrackerMinerFS *miner,
 	                          "}", uri, uri);
 	g_free (uri);
 
-	return sparql;
+	tracker_sparql_buffer_push_sparql (buffer, file, sparql);
+	g_free (sparql);
 }
 
-static gchar *
-test_miner_remove_children (TrackerMinerFS *miner,
-                            GFile          *file)
+static void
+test_miner_remove_children (TrackerMinerFS      *miner,
+                            GFile               *file,
+                            TrackerSparqlBuffer *buffer)
 {
 	gchar *sparql, *uri;
 
@@ -129,24 +131,20 @@ test_miner_remove_children (TrackerMinerFS *miner,
 	                          "}", uri);
 	g_free (uri);
 
-	return sparql;
+	tracker_sparql_buffer_push_sparql (buffer, file, sparql);
+	g_free (sparql);
 }
 
-static gchar *
-test_miner_move_file (TrackerMinerFS *miner,
-                      GFile          *dest,
-                      GFile          *source,
-                      gboolean        recursive)
+static void
+test_miner_move_file (TrackerMinerFS      *miner,
+                      GFile               *dest,
+                      GFile               *source,
+                      TrackerSparqlBuffer *buffer,
+                      gboolean             recursive)
 {
-	gchar *sparql, *delete, *insert;
-
 	/* Caution: This does not deal with recursive moves */
-	delete = test_miner_remove_file (miner, source);
-	insert = test_miner_process_file (miner, dest, NULL);
-	sparql = g_strdup_printf ("%s\n%s", delete, insert);
-	sparql[strlen(sparql) - 2] = '\0';
-
-	return sparql;
+	test_miner_remove_file (miner, source, buffer);
+	test_miner_process_file (miner, dest, NULL, buffer);
 }
 
 static void
