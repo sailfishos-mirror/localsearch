@@ -1278,8 +1278,7 @@ sparql_buffer_task_finished_cb (GObject      *object,
 static void
 push_sparql_task (TrackerMinerFS *fs,
                   GFile          *file,
-                  gchar          *sparql,
-                  gint            priority)
+                  gchar          *sparql)
 {
 	TrackerTask *sparql_task = NULL;
 	gchar *uri;
@@ -1295,7 +1294,6 @@ push_sparql_task (TrackerMinerFS *fs,
 	if (sparql_task) {
 		tracker_sparql_buffer_push (fs->priv->sparql_buffer,
 		                            sparql_task,
-		                            priority,
 		                            sparql_buffer_task_finished_cb,
 		                            fs);
 
@@ -1336,7 +1334,6 @@ static gboolean
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
                     GFileInfo      *info,
-                    gint            priority,
                     gboolean        attributes_update)
 {
 	gchar *uri, *sparql;
@@ -1368,7 +1365,7 @@ item_add_or_update (TrackerMinerFS *fs,
 	}
 
 	fs->priv->total_files_processed++;
-	push_sparql_task (fs, file, sparql, priority);
+	push_sparql_task (fs, file, sparql);
 
 	g_free (uri);
 	g_object_unref (file);
@@ -1495,12 +1492,10 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
                           GFile                   **source_file,
                           GFileInfo               **info,
                           TrackerMinerFSEventType  *type,
-                          gint                     *priority_out,
                           gboolean                 *attributes_update,
                           gboolean                 *is_dir)
 {
 	QueueEvent *event;
-	gint priority;
 
 	*file = NULL;
 	*source_file = NULL;
@@ -1520,7 +1515,7 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 		return FALSE;
 	}
 
-	event = tracker_priority_queue_peek (fs->priv->items, &priority);
+	event = tracker_priority_queue_peek (fs->priv->items, NULL);
 
 	if (event) {
 		if (should_wait (fs, event->file) ||
@@ -1536,7 +1531,6 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 		}
 
 		*type = event->type;
-		*priority_out = priority;
 		*attributes_update = event->attributes_update;
 		g_set_object (info, event->info);
 
@@ -1592,7 +1586,6 @@ push_task (TrackerMinerFS *fs,
 	task = tracker_sparql_task_new_take_sparql_str (file, sparql);
 	tracker_sparql_buffer_push (fs->priv->sparql_buffer,
 	                            task,
-	                            G_PRIORITY_DEFAULT,
 	                            sparql_buffer_task_finished_cb,
 	                            fs);
 	tracker_task_unref (task);
@@ -1610,7 +1603,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	gboolean attributes_update = FALSE;
 	gboolean is_dir = FALSE;
 	TrackerMinerFSEventType type;
-	gint priority = 0;
 	GString *task_sparql = NULL;
 	GString *source_task_sparql = NULL;
 	GFileInfo *info = NULL;
@@ -1621,7 +1613,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	}
 
 	if (!item_queue_get_next_file (fs, &file, &source_file, &info, &type,
-	                               &priority, &attributes_update, &is_dir)) {
+	                               &attributes_update, &is_dir)) {
 		/* We should flush the processing pool buffer here, because
 		 * if there was a previous task on the same file we want to
 		 * process now, we want it to get finished before we can go
@@ -1757,7 +1749,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	case TRACKER_MINER_FS_EVENT_UPDATED:
 		parent = g_file_get_parent (file);
 
-		keep_processing = item_add_or_update (fs, file, info, priority, attributes_update);
+		keep_processing = item_add_or_update (fs, file, info, attributes_update);
 
 		if (parent) {
 			g_object_unref (parent);

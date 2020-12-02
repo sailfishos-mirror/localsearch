@@ -32,7 +32,6 @@
 typedef struct _TrackerSparqlBufferPrivate TrackerSparqlBufferPrivate;
 typedef struct _SparqlTaskData SparqlTaskData;
 typedef struct _UpdateArrayData UpdateArrayData;
-typedef struct _UpdateData UpdateData;
 
 enum {
 	PROP_0,
@@ -51,11 +50,6 @@ struct _SparqlTaskData
 {
 	gchar *str;
 	GTask *async_task;
-};
-
-struct _UpdateData {
-	TrackerSparqlBuffer *buffer;
-	TrackerTask *task;
 };
 
 struct _UpdateArrayData {
@@ -340,59 +334,6 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 }
 
 static void
-tracker_sparql_buffer_update_cb (GObject      *object,
-                                 GAsyncResult *result,
-                                 gpointer      user_data)
-{
-	UpdateData *update_data = user_data;
-	SparqlTaskData *task_data;
-	GError *error = NULL;
-
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (object),
-	                                         result, &error);
-
-	task_data = tracker_task_get_data (update_data->task);
-
-	/* Call finished handler with the error, if any */
-	if (error) {
-		g_task_return_error (task_data->async_task, error);
-	} else {
-		g_task_return_pointer (task_data->async_task,
-		                       tracker_task_ref (update_data->task),
-		                       (GDestroyNotify) tracker_task_unref);
-	}
-
-	g_clear_object (&task_data->async_task);
-
-	tracker_task_pool_remove (TRACKER_TASK_POOL (update_data->buffer),
-	                          update_data->task);
-	g_slice_free (UpdateData, update_data);
-}
-
-static void
-sparql_buffer_push_high_priority (TrackerSparqlBuffer *buffer,
-                                  TrackerTask         *task,
-                                  SparqlTaskData      *data)
-{
-	TrackerSparqlBufferPrivate *priv;
-	UpdateData *update_data;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-
-	/* Task pool addition adds a reference (below) */
-	update_data = g_slice_new0 (UpdateData);
-	update_data->buffer = buffer;
-	update_data->task = task;
-
-	tracker_task_pool_add (TRACKER_TASK_POOL (buffer), task);
-	tracker_sparql_connection_update_async (priv->connection,
-	                                        data->str,
-	                                        NULL,
-	                                        tracker_sparql_buffer_update_cb,
-	                                        update_data);
-}
-
-static void
 sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
                             TrackerTask         *task)
 {
@@ -423,7 +364,6 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 void
 tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
                             TrackerTask         *task,
-                            gint                 priority,
                             GAsyncReadyCallback  cb,
                             gpointer             user_data)
 {
@@ -445,11 +385,7 @@ tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
 		                      (GDestroyNotify) tracker_task_unref);
 	}
 
-	if (priority <= G_PRIORITY_HIGH) {
-		sparql_buffer_push_high_priority (buffer, task, data);
-	} else {
-		sparql_buffer_push_to_pool (buffer, task);
-	}
+	sparql_buffer_push_to_pool (buffer, task);
 }
 
 static SparqlTaskData *
