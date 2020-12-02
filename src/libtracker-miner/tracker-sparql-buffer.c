@@ -26,9 +26,6 @@
 
 #include "tracker-sparql-buffer.h"
 
-/* Maximum time (seconds) before forcing a sparql buffer flush */
-#define MAX_SPARQL_BUFFER_TIME  15
-
 typedef struct _TrackerSparqlBufferPrivate TrackerSparqlBufferPrivate;
 typedef struct _SparqlTaskData SparqlTaskData;
 typedef struct _UpdateArrayData UpdateArrayData;
@@ -41,7 +38,6 @@ enum {
 struct _TrackerSparqlBufferPrivate
 {
 	TrackerSparqlConnection *connection;
-	guint flush_timeout_id;
 	GPtrArray *tasks;
 	gint n_updates;
 };
@@ -68,10 +64,6 @@ tracker_sparql_buffer_finalize (GObject *object)
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (object));
 
 	g_object_unref (priv->connection);
-
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-	}
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
 }
@@ -135,35 +127,6 @@ tracker_sparql_buffer_class_init (TrackerSparqlBufferClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
-}
-
-static gboolean
-flush_timeout_cb (gpointer user_data)
-{
-	TrackerSparqlBuffer *buffer = user_data;
-	TrackerSparqlBufferPrivate *priv;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-	tracker_sparql_buffer_flush (buffer, "Buffer time reached");
-	priv->flush_timeout_id = 0;
-
-	return FALSE;
-}
-
-static void
-reset_flush_timeout (TrackerSparqlBuffer *buffer)
-{
-	TrackerSparqlBufferPrivate *priv;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-	}
-
-	priv->flush_timeout_id = g_timeout_add_seconds (MAX_SPARQL_BUFFER_TIME,
-	                                                flush_timeout_cb,
-	                                                buffer);
 }
 
 static void
@@ -293,11 +256,6 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Flushing SPARQL buffer, reason: %s", reason));
 
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-		priv->flush_timeout_id = 0;
-	}
-
 	/* Loop buffer and construct array of strings */
 	sparql_array = g_array_new (FALSE, TRUE, sizeof (gchar *));
 
@@ -340,10 +298,6 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 	TrackerSparqlBufferPrivate *priv;
 
 	priv = tracker_sparql_buffer_get_instance_private (buffer);
-
-	if (tracker_task_pool_get_size (TRACKER_TASK_POOL (buffer)) == 0) {
-		reset_flush_timeout (buffer);
-	}
 
 	/* Task pool addition increments reference */
 	tracker_task_pool_add (TRACKER_TASK_POOL (buffer), task);
