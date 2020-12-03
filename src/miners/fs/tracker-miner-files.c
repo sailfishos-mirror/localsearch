@@ -2096,7 +2096,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
 
-	if (!is_directory) {
+	if (!create && !is_directory) {
 		/* In case of update: delete all information elements for the given data object
 		 * and delete extractorHash, so we ensure the file is extracted again.
 		 */
