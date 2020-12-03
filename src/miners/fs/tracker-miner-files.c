@@ -186,7 +186,8 @@ static void        index_applications_changed_cb        (GObject              *g
 static void        miner_files_process_file             (TrackerMinerFS       *fs,
                                                          GFile                *file,
                                                          GFileInfo            *info,
-                                                         TrackerSparqlBuffer  *buffer);
+                                                         TrackerSparqlBuffer  *buffer,
+                                                         gboolean              create);
 static void        miner_files_process_file_attributes  (TrackerMinerFS       *fs,
                                                          GFile                *file,
                                                          GFileInfo            *info,
@@ -2073,7 +2074,8 @@ static void
 miner_files_process_file (TrackerMinerFS      *fs,
                           GFile               *file,
                           GFileInfo           *file_info,
-                          TrackerSparqlBuffer *buffer)
+                          TrackerSparqlBuffer *buffer,
+                          gboolean             create)
 {
 	TrackerMinerFilesPrivate *priv;
 	TrackerResource *resource = NULL, *folder_resource = NULL, *graph_file = NULL;

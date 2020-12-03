@@ -401,7 +401,8 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              3, G_TYPE_FILE, G_TYPE_FILE_INFO, TRACKER_TYPE_SPARQL_BUFFER);
+		              4, G_TYPE_FILE, G_TYPE_FILE_INFO,
+		              TRACKER_TYPE_SPARQL_BUFFER, G_TYPE_BOOLEAN);
 
 	/**
 	 * TrackerMinerFS::process-file-attributes:
@@ -1297,7 +1298,8 @@ static gboolean
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
                     GFileInfo      *info,
-                    gboolean        attributes_update)
+                    gboolean        attributes_update,
+                    gboolean        create)
 {
 	gchar *uri;
 
@@ -1318,7 +1320,7 @@ item_add_or_update (TrackerMinerFS *fs,
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE], 0,
-		               file, info, fs->priv->sparql_buffer);
+		               file, info, fs->priv->sparql_buffer, create);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
 		g_signal_emit (fs, signals[PROCESS_FILE_ATTRIBUTES], 0,
@@ -1668,8 +1670,10 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		keep_processing = item_remove (fs, file, FALSE);
 		break;
 	case TRACKER_MINER_FS_EVENT_CREATED:
+		keep_processing = item_add_or_update (fs, file, info, FALSE, TRUE);
+		break;
 	case TRACKER_MINER_FS_EVENT_UPDATED:
-		keep_processing = item_add_or_update (fs, file, info, attributes_update);
+		keep_processing = item_add_or_update (fs, file, info, attributes_update, FALSE);
 		break;
 	default:
 		g_assert_not_reached ();

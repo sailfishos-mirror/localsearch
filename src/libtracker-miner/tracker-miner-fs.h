@@ -95,7 +95,8 @@ typedef struct {
 	void     (* process_file)             (TrackerMinerFS       *fs,
 	                                       GFile                *file,
 	                                       GFileInfo            *info,
-	                                       TrackerSparqlBuffer  *buffer);
+	                                       TrackerSparqlBuffer  *buffer,
+	                                       gboolean              created);
 	void     (* finished)                 (TrackerMinerFS       *fs,
 	                                       gdouble               elapsed,
 	                                       gint                  directories_found,

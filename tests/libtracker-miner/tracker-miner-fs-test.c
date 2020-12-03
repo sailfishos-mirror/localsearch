@@ -31,7 +31,8 @@ static void
 test_miner_process_file (TrackerMinerFS      *miner,
                          GFile               *file,
                          GFileInfo           *info,
-                         TrackerSparqlBuffer *buffer)
+                         TrackerSparqlBuffer *buffer,
+                         gboolean             created)
 {
 	TrackerResource *resource;
 	GDateTime *modification_time;
@@ -94,6 +95,15 @@ test_miner_process_file (TrackerMinerFS      *miner,
 }
 
 static void
+test_miner_process_file_attributes (TrackerMinerFS      *miner,
+                                    GFile               *file,
+                                    GFileInfo           *info,
+                                    TrackerSparqlBuffer *buffer)
+{
+	test_miner_process_file (miner, file, info, buffer, FALSE);
+}
+
+static void
 test_miner_remove_file (TrackerMinerFS      *miner,
                         GFile               *file,
                         TrackerSparqlBuffer *buffer)
@@ -144,7 +154,7 @@ test_miner_move_file (TrackerMinerFS      *miner,
 {
 	/* Caution: This does not deal with recursive moves */
 	test_miner_remove_file (miner, source, buffer);
-	test_miner_process_file (miner, dest, NULL, buffer);
+	test_miner_process_file (miner, dest, NULL, buffer, TRUE);
 }
 
 static void
@@ -164,7 +174,7 @@ test_miner_class_init (TestMinerClass *klass)
 	TrackerMinerFSClass *fs_class = TRACKER_MINER_FS_CLASS (klass);
 
 	fs_class->process_file = test_miner_process_file;
-	fs_class->process_file_attributes = test_miner_process_file;
+	fs_class->process_file_attributes = test_miner_process_file_attributes;
 	fs_class->remove_file = test_miner_remove_file;
 	fs_class->remove_children = test_miner_remove_children;
 	fs_class->move_file = test_miner_move_file;
