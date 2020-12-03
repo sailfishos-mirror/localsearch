@@ -2029,11 +2029,11 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 
 static TrackerResource *
 miner_files_create_folder_information_element (TrackerMinerFiles *miner,
-					       GFile             *file,
-					       const gchar       *mime_type,
-					       gboolean           is_directory)
+                                               GFile             *file,
+                                               const gchar       *mime_type)
 {
 	TrackerResource *resource, *file_resource;
+	TrackerIndexingTree *indexing_tree;
 	gchar *urn, *uri;
 
 	/* Preserve URN for nfo:Folders */
@@ -2044,20 +2044,16 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 
-	if (is_directory) {
-		TrackerIndexingTree *indexing_tree;
+	tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
+	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
 
-		tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
-		indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+		tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
+		tracker_resource_set_boolean (resource, "tracker:available", TRUE);
+		tracker_resource_set_uri (resource, "nie:rootElementOf",
+		                          tracker_resource_get_identifier (resource));
 
-		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-			tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
-			tracker_resource_set_boolean (resource, "tracker:available", TRUE);
-			tracker_resource_set_uri (resource, "nie:rootElementOf",
-			                          tracker_resource_get_identifier (resource));
-
-			miner_files_add_mount_info (miner, resource, file);
-		}
+		miner_files_add_mount_info (miner, resource, file);
 	}
 
 	uri = g_file_get_uri (file);
@@ -2156,8 +2152,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		folder_resource =
 			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
 								       file,
-								       mime_type,
-								       is_directory);
+								       mime_type);
 	}
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
