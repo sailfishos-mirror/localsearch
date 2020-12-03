@@ -39,6 +39,7 @@ struct _TrackerSparqlBufferPrivate
 {
 	TrackerSparqlConnection *connection;
 	GPtrArray *tasks;
+	GHashTable *file_set;
 	gint n_updates;
 	TrackerBatch *batch;
 };
@@ -254,6 +255,7 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 	 */
 	g_ptr_array_unref (priv->tasks);
 	priv->tasks = NULL;
+	g_clear_pointer (&priv->file_set, g_hash_table_unref);
 	priv->n_updates++;
 	g_clear_object (&priv->batch);
 
@@ -277,11 +279,13 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 
 	if (!priv->tasks) {
 		priv->tasks = g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_task_unref);
+		priv->file_set = g_hash_table_new (g_file_hash, (GEqualFunc) g_file_equal);
 	}
 
 	/* We add a reference here because we unref when removed from
 	 * the GPtrArray. */
 	g_ptr_array_add (priv->tasks, tracker_task_ref (task));
+	g_hash_table_add (priv->file_set, tracker_task_get_file (task));
 }
 
 static TrackerBatch *
@@ -417,17 +421,6 @@ tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
-static gboolean
-task_has_file (TrackerTask *task,
-               GFile       *file)
-{
-	GFile *task_file;
-
-	task_file = tracker_task_get_file (task);
-
-	return g_file_equal (task_file, file);
-}
-
 TrackerSparqlBufferState
 tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
                                  GFile               *file)
@@ -442,9 +435,7 @@ tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
 	if (!tracker_task_pool_find (TRACKER_TASK_POOL (buffer), file))
 		return TRACKER_BUFFER_STATE_UNKNOWN;
 
-	if (priv->tasks &&
-	    g_ptr_array_find_with_equal_func (priv->tasks, file,
-	                                      (GEqualFunc) task_has_file, NULL))
+	if (g_hash_table_contains (priv->file_set, file))
 		return TRACKER_BUFFER_STATE_QUEUED;
 
 	return TRACKER_BUFFER_STATE_FLUSHING;
