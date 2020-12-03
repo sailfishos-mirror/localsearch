@@ -2364,45 +2364,53 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 static gchar *
 tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
                                  GFile          *file,
-                                 gboolean        create)
+                                 gboolean        in_batch)
 {
+	gchar *uri, *bnode, *checksum;
+
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	if (create ||
-	    tracker_task_pool_find (fs->priv->task_pool, file) ||
-	    tracker_sparql_buffer_get_state (fs->priv->sparql_buffer, file) == TRACKER_BUFFER_STATE_QUEUED) {
-		gchar *uri, *bnode, *checksum;
+	uri = g_file_get_uri (file);
+	checksum = g_compute_checksum_for_string (G_CHECKSUM_MD5, uri, -1);
+	bnode = g_strdup_printf ("_:%s", checksum);
+	g_free (checksum);
+	g_free (uri);
 
-		uri = g_file_get_uri (file);
-		checksum = g_compute_checksum_for_string (G_CHECKSUM_MD5, uri, -1);
-		bnode = g_strdup_printf ("_:%s", checksum);
-		g_free (checksum);
-		g_free (uri);
-
-		return bnode;
-	}
-
-	return NULL;
+	return bnode;
 }
 
 gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                  GFile          *file,
                                  gboolean        new_resource,
+                                 gboolean        check_batch,
                                  gboolean       *is_iri)
 {
-	const gchar *urn;
+	TrackerMinerFSPrivate *priv = miner->priv;
+	gboolean in_batch = FALSE;
 
 	if (is_iri)
 		*is_iri = FALSE;
 
-	urn = tracker_miner_fs_get_folder_urn (miner, file);
-	if (urn) {
-		if (is_iri)
-			*is_iri = TRUE;
-		return g_strdup (urn);
+	if (!new_resource && check_batch) {
+		in_batch = (tracker_task_pool_find (priv->task_pool, file) ||
+		            tracker_sparql_buffer_get_state (priv->sparql_buffer, file) == TRACKER_BUFFER_STATE_QUEUED);
 	}
 
-	return tracker_miner_fs_get_file_bnode (miner, file, new_resource);
+	if (new_resource || in_batch) {
+		return tracker_miner_fs_get_file_bnode (miner, file, in_batch);
+	} else {
+		const gchar *urn = NULL;
+
+		urn = tracker_miner_fs_get_folder_urn (miner, file);
+
+		if (urn) {
+			if (is_iri)
+				*is_iri = TRUE;
+			return g_strdup (urn);
+		}
+
+		return g_strdup (urn);
+	}
 }

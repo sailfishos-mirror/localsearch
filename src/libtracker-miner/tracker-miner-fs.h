@@ -167,6 +167,7 @@ void                  tracker_miner_fs_notify_finish         (TrackerMinerFS  *f
 gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                          GFile          *file,
                                          gboolean        new_resource,
+                                         gboolean        check_batch,
                                          gboolean       *is_iri);
 
 /* Progress */

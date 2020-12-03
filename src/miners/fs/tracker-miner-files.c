@@ -1978,7 +1978,7 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			identifier = tracker_miner_fs_get_identifier (fs, root, FALSE, NULL);
+			identifier = tracker_miner_fs_get_identifier (fs, root, FALSE, TRUE, NULL);
 
 		if (identifier)
 			tracker_resource_set_uri (resource, "nie:dataSource", identifier);
@@ -2011,7 +2011,8 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 static TrackerResource *
 miner_files_create_folder_information_element (TrackerMinerFiles *miner,
                                                GFile             *file,
-                                               const gchar       *mime_type)
+                                               const gchar       *mime_type,
+                                               gboolean           create)
 {
 	TrackerResource *resource, *file_resource;
 	TrackerIndexingTree *indexing_tree;
@@ -2019,7 +2020,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 
 	/* Preserve URN for nfo:Folders */
 	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
-	                                       file, TRUE, NULL);
+	                                       file, create, TRUE, NULL);
 	resource = tracker_resource_new (urn);
 	g_free (urn);
 
@@ -2105,7 +2106,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_miner_fs_get_identifier (fs, parent, FALSE, NULL);
+	parent_urn = tracker_miner_fs_get_identifier (fs, parent, FALSE, TRUE, NULL);
 	g_object_unref (parent);
 
 	if (parent_urn) {
@@ -2135,7 +2136,8 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		folder_resource =
 			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
 								       file,
-								       mime_type);
+								       mime_type,
+								       create);
 	}
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
@@ -2314,7 +2316,7 @@ miner_files_move_file (TrackerMinerFS      *fs,
 		gchar *new_parent_id;
 		gboolean is_iri;
 
-		new_parent_id = tracker_miner_fs_get_identifier (fs, new_parent, FALSE, &is_iri);
+		new_parent_id = tracker_miner_fs_get_identifier (fs, new_parent, FALSE, FALSE, &is_iri);
 
 		if (new_parent_id) {
 			container_clause =
