@@ -164,11 +164,10 @@ void                  tracker_miner_fs_notify_finish         (TrackerMinerFS  *f
 							      GError          *error);
 
 /* URNs */
-const gchar          *tracker_miner_fs_get_folder_urn        (TrackerMinerFS  *fs,
-                                                              GFile           *file);
-gchar *               tracker_miner_fs_get_file_bnode        (TrackerMinerFS *fs,
-                                                              GFile          *file,
-                                                              gboolean        create);
+gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
+                                         GFile          *file,
+                                         gboolean        new_resource,
+                                         gboolean       *is_iri);
 
 /* Progress */
 gboolean              tracker_miner_fs_has_items_to_process  (TrackerMinerFS  *fs);

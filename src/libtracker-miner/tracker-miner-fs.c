@@ -2260,20 +2260,7 @@ tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
 	return fs->priv->throttle;
 }
 
-/**
- * tracker_miner_fs_get_folder_urn:
- * @fs: a #TrackerMinerFS
- * @file: a #GFile
- *
- * If the item exists in the store, this function retrieves
- * the URN of the given #GFile
-
- * If @file doesn't exist in the store yet, %NULL will be returned.
- *
- * Returns: The URN containing the data associated
- *          to @file, or %NULL.
- **/
-const gchar *
+static const gchar *
 tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 				 GFile          *file)
 {
@@ -2374,7 +2361,7 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 	return fs->priv->data_provider;
 }
 
-gchar *
+static gchar *
 tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
                                  GFile          *file,
                                  gboolean        create)
@@ -2397,4 +2384,25 @@ tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
 	}
 
 	return NULL;
+}
+
+gchar *
+tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
+                                 GFile          *file,
+                                 gboolean        new_resource,
+                                 gboolean       *is_iri)
+{
+	const gchar *urn;
+
+	if (is_iri)
+		*is_iri = FALSE;
+
+	urn = tracker_miner_fs_get_folder_urn (miner, file);
+	if (urn) {
+		if (is_iri)
+			*is_iri = TRUE;
+		return g_strdup (urn);
+	}
+
+	return tracker_miner_fs_get_file_bnode (miner, file, new_resource);
 }
