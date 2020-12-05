@@ -94,6 +94,7 @@ typedef struct {
 	GFile *file;
 	GFile *dest_file;
 	GFileInfo *info;
+	GList *root_node;
 } QueueEvent;
 
 typedef struct {
@@ -448,7 +449,7 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	priv->roots_to_notify = g_hash_table_new_full (g_file_hash,
 	                                               (GEqualFunc) g_file_equal,
 	                                               g_object_unref,
-	                                               NULL);
+	                                               (GDestroyNotify) g_queue_free);
 	priv->urn_lru = tracker_lru_new (DEFAULT_URN_LRU_SIZE,
 	                                 g_file_hash,
 	                                 (GEqualFunc) g_file_equal,
@@ -636,6 +637,13 @@ queue_event_dispose_node (QueueEvent *event)
 static void
 queue_event_free (QueueEvent *event)
 {
+	if (event->root_node) {
+		GQueue *root_queue;
+
+		root_queue = event->root_node->data;
+		g_queue_delete_link (root_queue, event->root_node);
+	}
+
 	queue_event_dispose_node (event);
 
 	g_clear_object (&event->dest_file);
@@ -705,13 +713,6 @@ queue_event_coalesce (const QueueEvent  *first,
 }
 
 static gboolean
-queue_event_is_descendant (QueueEvent *event,
-			   GFile      *prefix)
-{
-	return g_file_has_prefix (event->file, prefix);
-}
-
-static gboolean
 queue_event_is_equal_or_descendant (QueueEvent *event,
 				    GFile      *prefix)
 {
@@ -769,12 +770,7 @@ fs_finalize (GObject *object)
 		g_object_unref (priv->file_notifier);
 	}
 
-	if (priv->roots_to_notify) {
-		g_hash_table_unref (priv->roots_to_notify);
-
-		/* Just in case we end up using this AFTER finalize, not expected */
-		priv->roots_to_notify = NULL;
-	}
+	g_hash_table_unref (priv->roots_to_notify);
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
 }
@@ -964,42 +960,19 @@ miner_resumed (TrackerMiner *miner)
 }
 
 static void
-notify_roots_finished (TrackerMinerFS *fs,
-                       gboolean        check_queues)
+notify_roots_finished (TrackerMinerFS *fs)
 {
 	GHashTableIter iter;
 	gpointer key, value;
 
-	if (check_queues &&
-	    fs->priv->roots_to_notify &&
-	    g_hash_table_size (fs->priv->roots_to_notify) < 2) {
-		/* Technically, if there is only one root, it's
-		 * pointless to do anything before the FINISHED (not
-		 * FINISHED_ROOT) signal is emitted. In that
-		 * situation we calls function first anyway with
-		 * check_queues=FALSE so we still notify roots. This
-		 * is really just for efficiency.
-		 */
-		return;
-	} else if (fs->priv->roots_to_notify == NULL ||
-	           g_hash_table_size (fs->priv->roots_to_notify) < 1) {
-		/* Nothing to do */
-		return;
-	}
-
 	g_hash_table_iter_init (&iter, fs->priv->roots_to_notify);
+
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
 		GFile *root = key;
+		GQueue *queue = value;
 
-		/* Check if any content for root is still in the queue
-		 * to be processed. This is only called each time a
-		 * container/folder has been added to Tracker (so not
-		 * too frequently)
-		 */
-		if (check_queues &&
-		    tracker_priority_queue_find (fs->priv->items, NULL, (GEqualFunc) queue_event_is_descendant, root)) {
+		if (!g_queue_is_empty (queue))
 			continue;
-		}
 
 		/* Signal root is finished */
 		g_signal_emit (fs, signals[FINISHED_ROOT], 0, root);
@@ -1060,7 +1033,7 @@ process_stop (TrackerMinerFS *fs)
 	/* Make sure we signal _ALL_ roots as finished before the
 	 * main FINISHED signal
 	 */
-	notify_roots_finished (fs, FALSE);
+	notify_roots_finished (fs);
 
 	g_signal_emit (fs, signals[FINISHED], 0,
 	               g_timer_elapsed (fs->priv->timer, NULL),
@@ -1141,7 +1114,7 @@ sparql_buffer_flush_cb (GObject      *object,
 			                             fs);
 
 			/* Check if we've finished inserting for given prefixes ... */
-			notify_roots_finished (fs, TRUE);
+			notify_roots_finished (fs);
 		}
 	} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
 		tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),
@@ -1150,7 +1123,7 @@ sparql_buffer_flush_cb (GObject      *object,
 		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs, TRUE);
+		notify_roots_finished (fs);
 	} else {
 		item_queue_handlers_set_up (fs);
 	}
@@ -1418,7 +1391,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs, TRUE);
+		notify_roots_finished (fs);
 
 		/* Items are still being processed, so wait until
 		 * the processing pool is cleared before starting with
@@ -1524,7 +1497,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 				                             fs);
 
 				/* Check if we've finished inserting for given prefixes ... */
-				notify_roots_finished (fs, TRUE);
+				notify_roots_finished (fs);
 			}
 		}
 
@@ -1557,7 +1530,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs, TRUE);
+		notify_roots_finished (fs);
 	} else if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		tracker_sparql_buffer_flush (fs->priv->sparql_buffer,
 		                             "SPARQL buffer limit reached",
@@ -1565,7 +1538,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		                             fs);
 
 		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs, TRUE);
+		notify_roots_finished (fs);
 	} else {
 		item_queue_handlers_set_up (fs);
 	}
@@ -1685,6 +1658,32 @@ miner_fs_get_queue_priority (TrackerMinerFS *fs,
 }
 
 static void
+assign_root_node (TrackerMinerFS *fs,
+                  QueueEvent     *event)
+{
+	GFile *root, *file;
+	GQueue *queue;
+
+	file = event->dest_file ? event->dest_file : event->file;
+	root = tracker_indexing_tree_get_root (fs->priv->indexing_tree,
+	                                       file, NULL);
+	if (!root)
+		return;
+
+	queue = g_hash_table_lookup (fs->priv->roots_to_notify,
+	                             root);
+	if (!queue) {
+		queue = g_queue_new ();
+		g_hash_table_insert (fs->priv->roots_to_notify,
+		                     g_object_ref (root), queue);
+	}
+
+	event->root_node = g_list_alloc ();
+	event->root_node->data = queue;
+	g_queue_push_head_link (queue, event->root_node);
+}
+
+static void
 miner_fs_queue_event (TrackerMinerFS *fs,
 		      QueueEvent     *event,
 		      guint           priority)
@@ -1733,6 +1732,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 
 		trace_eq_event (event);
 
+		assign_root_node (fs, event);
 		link = tracker_priority_queue_add (fs->priv->items, event, priority);
 		queue_event_save_node (event, link);
 		item_queue_handlers_set_up (fs);
@@ -1871,12 +1871,6 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
 	    files_found == 0) {
 		/* Signal now because we have nothing to index */
 		g_signal_emit (fs, signals[FINISHED_ROOT], 0, directory);
-	} else {
-		/* Add root to list we want to be notified about when
-		 * finished indexing! */
-		g_hash_table_replace (fs->priv->roots_to_notify,
-		                      g_object_ref (directory),
-		                      GUINT_TO_POINTER(time(NULL)));
 	}
 }
 
