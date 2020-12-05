@@ -251,10 +251,6 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
                                                                GParamSpec     *pspec,
                                                                gpointer        user_data);
 
-static void           miner_fs_queue_event                (TrackerMinerFS *fs,
-							   QueueEvent     *event,
-							   guint           priority);
-
 static GQuark quark_last_queue_event = 0;
 static GInitableIface* miner_fs_initable_parent_iface;
 static guint signals[LAST_SIGNAL] = { 0, };
