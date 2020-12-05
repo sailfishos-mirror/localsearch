@@ -367,79 +367,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      NULL,
 	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
-
-	/**
-	 * TrackerMinerFS::process-file:
-	 * @miner_fs: the #TrackerMinerFS
-	 * @file: a #GFile
-	 * @builder: a #TrackerSparqlBuilder
-	 * @cancellable: a #GCancellable
-	 *
-	 * The ::process-file signal is emitted whenever a file should
-	 * be processed, and it's metadata extracted.
-	 *
-	 * @builder is the #TrackerSparqlBuilder where all sparql updates
-	 * to be performed for @file will be appended.
-	 *
-	 * This signal allows both synchronous and asynchronous extraction,
-	 * in the synchronous case @cancellable can be safely ignored. In
-	 * either case, on successful metadata extraction, implementations
-	 * must call tracker_miner_fs_notify_finish() to indicate that
-	 * processing has finished on @file, so the miner can execute
-	 * the SPARQL updates and continue processing other files.
-	 *
-	 * Returns: %TRUE if the file is accepted for processing,
-	 *          %FALSE if the file should be ignored.
-	 *
-	 * Since: 0.8
-	 **/
-	signals[PROCESS_FILE] =
-		g_signal_new ("process-file",
-		              G_OBJECT_CLASS_TYPE (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file),
-		              NULL, NULL,
-		              NULL,
-		              G_TYPE_NONE,
-		              4, G_TYPE_FILE, G_TYPE_FILE_INFO,
-		              TRACKER_TYPE_SPARQL_BUFFER, G_TYPE_BOOLEAN);
-
-	/**
-	 * TrackerMinerFS::process-file-attributes:
-	 * @miner_fs: the #TrackerMinerFS
-	 * @file: a #GFile
-	 * @builder: a #TrackerSparqlBuilder
-	 * @cancellable: a #GCancellable
-	 *
-	 * The ::process-file-attributes signal is emitted whenever a file should
-	 * be processed, but only the attribute-related metadata extracted.
-	 *
-	 * @builder is the #TrackerSparqlBuilder where all sparql updates
-	 * to be performed for @file will be appended. For the properties being
-	 * updated, the DELETE statements should be included as well.
-	 *
-	 * This signal allows both synchronous and asynchronous extraction,
-	 * in the synchronous case @cancellable can be safely ignored. In
-	 * either case, on successful metadata extraction, implementations
-	 * must call tracker_miner_fs_notify_finish() to indicate that
-	 * processing has finished on @file, so the miner can execute
-	 * the SPARQL updates and continue processing other files.
-	 *
-	 * Returns: %TRUE if the file is accepted for processing,
-	 *          %FALSE if the file should be ignored.
-	 *
-	 * Since: 0.10
-	 **/
-	signals[PROCESS_FILE_ATTRIBUTES] =
-		g_signal_new ("process-file-attributes",
-		              G_OBJECT_CLASS_TYPE (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, process_file_attributes),
-		              NULL, NULL,
-		              NULL,
-		              G_TYPE_NONE,
-		              3, G_TYPE_FILE, G_TYPE_FILE_INFO, TRACKER_TYPE_SPARQL_BUFFER);
-
 	/**
 	 * TrackerMinerFS::finished:
 	 * @miner_fs: the #TrackerMinerFS
@@ -493,65 +420,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_TYPE_NONE,
 		              1,
 		              G_TYPE_FILE);
-
-	/**
-	 * TrackerMinerFS::remove-file:
-	 * @miner_fs: the #TrackerMinerFS
-	 * @file: a #GFile
-	 * @children_only: #TRUE if only the children of @file are to be deleted
-	 * @builder: a #TrackerSparqlBuilder
-	 *
-	 * The ::remove-file signal will be emitted on files that need removal
-	 * according to the miner configuration (either the files themselves are
-	 * deleted, or the directory/contents no longer need inspection according
-	 * to miner configuration and their location.
-	 *
-	 * This operation is always assumed to be recursive, the @children_only
-	 * argument will be %TRUE if for any reason the topmost directory needs
-	 * to stay (e.g. moved from a recursively indexed directory tree to a
-	 * non-recursively indexed location).
-	 *
-	 * The @builder argument can be used to provide additional SPARQL
-	 * deletes and updates necessary around the deletion of those items. If
-	 * the return value of this signal is %TRUE, @builder is expected to
-	 * contain all relevant deletes for this operation.
-	 *
-	 * If the return value of this signal is %FALSE, the miner will apply
-	 * its default behavior, which is deleting all triples that correspond
-	 * to the affected URIs.
-	 *
-	 * Returns: %TRUE if @builder contains all the necessary operations to
-	 *          delete the affected resources, %FALSE to let the miner
-	 *          implicitly handle the deletion.
-	 *
-	 * Since: 1.8
-	 **/
-	signals[REMOVE_FILE] =
-		g_signal_new ("remove-file",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, remove_file),
-		              NULL, NULL, NULL,
-		              G_TYPE_NONE,
-		              2, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER);
-
-	signals[REMOVE_CHILDREN] =
-		g_signal_new ("remove-children",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, remove_children),
-		              NULL, NULL, NULL,
-		              G_TYPE_NONE,
-		              2, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER);
-
-	signals[MOVE_FILE] =
-		g_signal_new ("move-file",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, move_file),
-		              NULL, NULL, NULL,
-		              G_TYPE_NONE,
-		              4, G_TYPE_FILE, G_TYPE_FILE, TRACKER_TYPE_SPARQL_BUFFER, G_TYPE_BOOLEAN);
 
 	quark_last_queue_event = g_quark_from_static_string ("tracker-last-queue-event");
 }
@@ -1319,12 +1187,13 @@ item_add_or_update (TrackerMinerFS *fs,
 
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
-		g_signal_emit (fs, signals[PROCESS_FILE], 0,
-		               file, info, fs->priv->sparql_buffer, create);
+		TRACKER_MINER_FS_GET_CLASS (fs)->process_file (fs, file, info,
+		                                               fs->priv->sparql_buffer,
+		                                               create);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
-		g_signal_emit (fs, signals[PROCESS_FILE_ATTRIBUTES], 0,
-		               file, info, fs->priv->sparql_buffer);
+		TRACKER_MINER_FS_GET_CLASS (fs)->process_file_attributes (fs, file, info,
+		                                                          fs->priv->sparql_buffer);
 	}
 
 	fs->priv->total_files_processed++;
@@ -1341,7 +1210,6 @@ item_remove (TrackerMinerFS *fs,
              gboolean        only_children)
 {
 	gchar *uri;
-	guint signal_num;
 
 	uri = g_file_get_uri (file);
 
@@ -1354,8 +1222,14 @@ item_remove (TrackerMinerFS *fs,
 	tracker_lru_remove (fs->priv->urn_lru, file);
 
 	/* Call the implementation to generate a SPARQL update for the removal. */
-	signal_num = only_children ? REMOVE_CHILDREN : REMOVE_FILE;
-	g_signal_emit (fs, signals[signal_num], 0, file, fs->priv->sparql_buffer);
+	if (only_children) {
+		TRACKER_MINER_FS_GET_CLASS (fs)->remove_children (fs, file,
+		                                                  fs->priv->sparql_buffer);
+	} else {
+		TRACKER_MINER_FS_GET_CLASS (fs)->remove_file (fs, file,
+		                                              fs->priv->sparql_buffer);
+	}
+
 	g_free (uri);
 
 	return TRUE;
@@ -1394,8 +1268,9 @@ item_move (TrackerMinerFS *fs,
 	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
 		item_remove (fs, source_file, TRUE);
 
-	g_signal_emit (fs, signals[MOVE_FILE], 0, dest_file, source_file, fs->priv->sparql_buffer, recursive);
-
+	TRACKER_MINER_FS_GET_CLASS (fs)->move_file (fs, dest_file, source_file,
+	                                            fs->priv->sparql_buffer,
+	                                            recursive);
 	g_free (uri);
 	g_free (source_uri);
 
