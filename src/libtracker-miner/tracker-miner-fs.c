@@ -1508,7 +1508,8 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 	if (tracker_file_notifier_is_active (fs->priv->file_notifier) ||
 	    tracker_task_pool_limit_reached (fs->priv->task_pool) ||
 	    tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
-		if (tracker_task_pool_get_size (fs->priv->task_pool) == 0) {
+		if (!fs->priv->extraction_timer_stopped &&
+		    tracker_task_pool_get_size (fs->priv->task_pool) == 0) {
 			fs->priv->extraction_timer_stopped = TRUE;
 			g_timer_stop (fs->priv->extraction_timer);
 		}
@@ -1638,10 +1639,10 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		return FALSE;
 	}
 
-	if (file == NULL) {
+	if (file == NULL && !fs->priv->extraction_timer_stopped) {
 		g_timer_stop (fs->priv->extraction_timer);
 		fs->priv->extraction_timer_stopped = TRUE;
-	} else if (fs->priv->extraction_timer_stopped) {
+	} else if (file != NULL && fs->priv->extraction_timer_stopped) {
 		g_timer_continue (fs->priv->extraction_timer);
 		fs->priv->extraction_timer_stopped = FALSE;
 	}
