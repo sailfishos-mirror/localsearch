@@ -1038,6 +1038,11 @@ miner_started (TrackerMiner *miner)
 
 	fs->priv->been_started = TRUE;
 
+	if (fs->priv->timer_stopped) {
+		g_timer_start (fs->priv->timer);
+		fs->priv->timer_stopped = FALSE;
+	}
+
 	g_object_set (miner,
 	              "progress", 0.0,
 	              "status", "Initializing",
@@ -1609,11 +1614,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	GString *source_task_sparql = NULL;
 	GFileInfo *info = NULL;
 
-	if (fs->priv->timer_stopped) {
-		g_timer_start (fs->priv->timer);
-		fs->priv->timer_stopped = FALSE;
-	}
-
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		/* Task pool is full, give it a break */
 		return FALSE;
@@ -2040,11 +2040,6 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
 	if (fs->priv->timer_stopped) {
 		g_timer_start (fs->priv->timer);
 		fs->priv->timer_stopped = FALSE;
-	}
-
-	if (fs->priv->extraction_timer_stopped) {
-		g_timer_start (fs->priv->timer);
-		fs->priv->extraction_timer_stopped = FALSE;
 	}
 
 	/* Always set the progress here to at least 1%, and the remaining time
