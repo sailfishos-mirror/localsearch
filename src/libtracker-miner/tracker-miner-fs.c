@@ -2035,7 +2035,6 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 		}
 
 		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file, NULL);
-		trace_eq_event (event);
 		miner_fs_queue_event (fs, event, priority);
 	}
 
