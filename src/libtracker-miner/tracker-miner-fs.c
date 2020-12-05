@@ -1199,9 +1199,6 @@ process_stop (TrackerMinerFS *fs)
 	               fs->priv->total_files_found,
 	               fs->priv->total_files_ignored);
 
-	g_timer_stop (fs->priv->timer);
-	g_timer_stop (fs->priv->extraction_timer);
-
 	fs->priv->total_directories_found = 0;
 	fs->priv->total_directories_ignored = 0;
 	fs->priv->total_files_found = 0;
