@@ -488,7 +488,9 @@ crawler_get_cb (TrackerCrawler *crawler,
 			g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
 
 		if (error &&
-		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
 			gchar *uri;
 
 			uri = g_file_get_uri (directory);
