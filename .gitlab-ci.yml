@@ -22,18 +22,19 @@ stages:
   script:
     # We can build and test tracker-miners against tracker just by building
     # tracker as a submodule.
-    - su tracker -c '.gitlab-ci/checkout-tracker.sh'
+    - .gitlab-ci/checkout-tracker.sh
     - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
-    - su tracker -c 'mkdir build'
-    - su tracker -c 'cd build; meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true'
-    - su tracker -c 'cd build; ninja'
+    - mkdir build
+    - cd build
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true
+    - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
 
-      su tracker -c 'cd build; dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --suite tracker-miners --print-errorlogs'
+      dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --suite tracker-miners --print-errorlogs
 
   after_script:
     - |
@@ -69,12 +70,13 @@ coverage-analysis:
   allow_failure: true
   script:
     - dnf install -y gcovr
-    - su tracker -c '.gitlab-ci/checkout-tracker.sh'
-    - su tracker -c 'mkdir -p coverage-build/coveragereport'
-    - su tracker -c 'cd coverage-build; meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true'
-    - su tracker -c 'cd coverage-build; ninja'
-    - su tracker -c 'cd coverage-build; env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}'
-    - su tracker -c 'cd coverage-build; gcovr --html-details --print-summary --root=.. --exclude=subprojects --exclude=../subprojects --exclude=../tests --output coveragereport/index.html'
+    - .gitlab-ci/checkout-tracker.sh
+    - mkdir -p coverage-build/coveragereport
+    - cd coverage-build
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false
+    - ninja
+    - env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}
+    - gcovr --html-details --print-summary --root=.. --exclude=subprojects --exclude=../subprojects --exclude=../tests --output coveragereport/index.html
   coverage: '/^lines: (\d+\.\d+\%)/'
   artifacts:
     when: always
@@ -89,17 +91,21 @@ coverity:
     - dnf install -y clang
     # Build tracker, we must go out the subproject route as we don't want
     # tracker code to be included in the coverity reports for tracker-miners.
-    - su tracker -c '.gitlab-ci/checkout-tracker.sh'
-    - su tracker -c 'export INSTALL=`pwd`/install; cd subprojects/tracker; meson build --libdir lib --prefix $INSTALL; cd build; ninja install;'
-    - su tracker -c 'curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=tracker-miners" --output /tmp/coverity_tool.tgz'
-    - su tracker -c 'tar zxf /tmp/coverity_tool.tgz'
-    - su tracker -c 'mkdir coverity-build'
-    - su tracker -c 'export INSTALL=`pwd`/install; export CC=clang; cd coverity-build; meson --pkg-config-path=$INSTALL/lib/pkgconfig ..'
-    - su tracker -c 'cd coverity-build; ../cov-analysis-linux64-*/bin/cov-build --dir cov-int ninja'
-    - su tracker -c 'cd coverity-build; tar czf cov-int.tar.gz cov-int'
-    - su tracker -c 'curl https://scan.coverity.com/builds?project=tracker-miners
+    - .gitlab-ci/checkout-tracker.sh
+    - export INSTALL=`pwd`/install
+    - pushd subprojects/tracker; meson build --libdir lib --prefix $INSTALL; cd build; ninja install; popd; popd
+    - curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=tracker-miners" --output /tmp/coverity_tool.tgz
+    - tar zxf /tmp/coverity_tool.tgz
+    - mkdir coverity-build
+    - export CC=clang
+    - pushd coverity-build
+    - meson --pkg-config-path=$INSTALL/lib/pkgconfig ..
+    - ../cov-analysis-linux64-*/bin/cov-build --dir cov-int ninja
+    - tar czf cov-int.tar.gz cov-int
+    - popd
+    - curl https://scan.coverity.com/builds?project=tracker-miners
       --form token=$COVERITY_TOKEN --form email=carlosg@gnome.org
       --form file=@coverity-build/cov-int.tar.gz --form version="`git describe --tags`"
-      --form description="gitlab CI build"'
+      --form description="gitlab CI build"
   only:
     - master
