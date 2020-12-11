@@ -65,26 +65,26 @@ TrackerSparqlBuffer *tracker_sparql_buffer_new   (TrackerSparqlConnection *conne
                                                   guint                    limit);
 
 gboolean             tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
-                                                  const gchar         *reason);
-
-void                 tracker_sparql_buffer_push  (TrackerSparqlBuffer *buffer,
-                                                  TrackerTask         *task,
-                                                  gint                 priority,
+                                                  const gchar         *reason,
                                                   GAsyncReadyCallback  cb,
                                                   gpointer             user_data);
 
-TrackerTask *        tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
-                                                        GAsyncResult         *res,
-                                                        GError              **error);
+GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
+                                                         GAsyncResult         *res,
+                                                         GError              **error);
+
+void                 tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
+                                                 GFile               *file,
+                                                 const gchar         *graph,
+                                                 TrackerResource     *resource);
+void                 tracker_sparql_buffer_push_sparql (TrackerSparqlBuffer *buffer,
+                                                        GFile               *file,
+                                                        const gchar         *sparql);
 
 TrackerSparqlBufferState tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
                                                           GFile               *file);
 
-TrackerTask *        tracker_sparql_task_new_take_sparql_str (GFile                *file,
-                                                              gchar                *sparql_str);
-TrackerTask *        tracker_sparql_task_new_with_sparql_str (GFile                *file,
-                                                              const gchar          *sparql_str);
-const gchar *        tracker_sparql_task_get_sparql          (TrackerTask *task);
+gchar *              tracker_sparql_task_get_sparql          (TrackerTask *task);
 
 G_END_DECLS
 

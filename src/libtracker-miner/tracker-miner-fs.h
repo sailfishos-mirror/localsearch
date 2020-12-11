@@ -32,6 +32,7 @@
 #include "tracker-miner-object.h"
 #include "tracker-data-provider.h"
 #include "tracker-indexing-tree.h"
+#include "tracker-sparql-buffer.h"
 
 G_BEGIN_DECLS
 
@@ -91,34 +92,38 @@ struct _TrackerMinerFS {
 typedef struct {
 	TrackerMinerClass parent;
 
-	gchar *  (* process_file)             (TrackerMinerFS       *fs,
+	void     (* process_file)             (TrackerMinerFS       *fs,
 	                                       GFile                *file,
-	                                       GFileInfo            *info);
+	                                       GFileInfo            *info,
+	                                       TrackerSparqlBuffer  *buffer,
+	                                       gboolean              created);
 	void     (* finished)                 (TrackerMinerFS       *fs,
 	                                       gdouble               elapsed,
 	                                       gint                  directories_found,
 	                                       gint                  directories_ignored,
 	                                       gint                  files_found,
 	                                       gint                  files_ignored);
-	gchar *  (* process_file_attributes)  (TrackerMinerFS       *fs,
+	void     (* process_file_attributes)  (TrackerMinerFS       *fs,
 	                                       GFile                *file,
-	                                       GFileInfo            *info);
+	                                       GFileInfo            *info,
+	                                       TrackerSparqlBuffer  *buffer);
 	void     (* finished_root)            (TrackerMinerFS       *fs,
 	                                       GFile                *root,
 	                                       gint                  directories_found,
 	                                       gint                  directories_ignored,
 	                                       gint                  files_found,
 	                                       gint                  files_ignored);
-	gchar *  (* remove_file)              (TrackerMinerFS       *fs,
-	                                       GFile                *file);
-	gchar *  (* remove_children)          (TrackerMinerFS       *fs,
-	                                       GFile                *file);
-	gchar *  (* move_file)                (TrackerMinerFS       *fs,
-					       GFile                *dest,
+	void     (* remove_file)              (TrackerMinerFS       *fs,
+	                                       GFile                *file,
+	                                       TrackerSparqlBuffer  *buffer);
+	void     (* remove_children)          (TrackerMinerFS       *fs,
+	                                       GFile                *file,
+	                                       TrackerSparqlBuffer  *buffer);
+	void     (* move_file)                (TrackerMinerFS       *fs,
+	                                       GFile                *dest,
 	                                       GFile                *source,
+	                                       TrackerSparqlBuffer  *buffer,
 	                                       gboolean              recursive);
-	/* <Private> */
-	gpointer padding[20];
 } TrackerMinerFSClass;
 
 /**
@@ -159,11 +164,11 @@ void                  tracker_miner_fs_notify_finish         (TrackerMinerFS  *f
 							      GError          *error);
 
 /* URNs */
-const gchar          *tracker_miner_fs_get_folder_urn        (TrackerMinerFS  *fs,
-                                                              GFile           *file);
-gchar *               tracker_miner_fs_get_file_bnode        (TrackerMinerFS *fs,
-                                                              GFile          *file,
-                                                              gboolean        create);
+gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
+                                         GFile          *file,
+                                         gboolean        new_resource,
+                                         gboolean        check_batch,
+                                         gboolean       *is_iri);
 
 /* Progress */
 gboolean              tracker_miner_fs_has_items_to_process  (TrackerMinerFS  *fs);

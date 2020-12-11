@@ -155,7 +155,7 @@ tracker_lru_remove (TrackerLRU *lru,
 	if (!node)
 		return;
 
-	g_queue_remove (&lru->queue, node->link);
+	g_queue_remove (&lru->queue, node);
 	free_node (node, lru);
 }
 

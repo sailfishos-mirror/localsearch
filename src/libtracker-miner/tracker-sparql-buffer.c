@@ -26,13 +26,9 @@
 
 #include "tracker-sparql-buffer.h"
 
-/* Maximum time (seconds) before forcing a sparql buffer flush */
-#define MAX_SPARQL_BUFFER_TIME  15
-
 typedef struct _TrackerSparqlBufferPrivate TrackerSparqlBufferPrivate;
 typedef struct _SparqlTaskData SparqlTaskData;
-typedef struct _UpdateArrayData UpdateArrayData;
-typedef struct _UpdateData UpdateData;
+typedef struct _UpdateBatchData UpdateBatchData;
 
 enum {
 	PROP_0,
@@ -42,26 +38,38 @@ enum {
 struct _TrackerSparqlBufferPrivate
 {
 	TrackerSparqlConnection *connection;
-	guint flush_timeout_id;
 	GPtrArray *tasks;
+	GHashTable *file_set;
 	gint n_updates;
+	TrackerBatch *batch;
+};
+
+enum {
+	TASK_TYPE_RESOURCE,
+	TASK_TYPE_SPARQL
 };
 
 struct _SparqlTaskData
 {
-	gchar *str;
-	GTask *async_task;
+	guint type;
+
+	union {
+		struct {
+			gchar *graph;
+			TrackerResource *resource;
+		} resource;
+
+		struct {
+			gchar *sparql;
+		} sparql;
+	} d;
 };
 
-struct _UpdateData {
-	TrackerSparqlBuffer *buffer;
-	TrackerTask *task;
-};
-
-struct _UpdateArrayData {
+struct _UpdateBatchData {
 	TrackerSparqlBuffer *buffer;
 	GPtrArray *tasks;
-	GArray *sparql_array;
+	TrackerBatch *batch;
+	GTask *async_task;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerSparqlBuffer, tracker_sparql_buffer, TRACKER_TYPE_TASK_POOL)
@@ -74,10 +82,6 @@ tracker_sparql_buffer_finalize (GObject *object)
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (object));
 
 	g_object_unref (priv->connection);
-
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-	}
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
 }
@@ -143,35 +147,6 @@ tracker_sparql_buffer_class_init (TrackerSparqlBufferClass *klass)
 	                                                      G_PARAM_STATIC_STRINGS));
 }
 
-static gboolean
-flush_timeout_cb (gpointer user_data)
-{
-	TrackerSparqlBuffer *buffer = user_data;
-	TrackerSparqlBufferPrivate *priv;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-	tracker_sparql_buffer_flush (buffer, "Buffer time reached");
-	priv->flush_timeout_id = 0;
-
-	return FALSE;
-}
-
-static void
-reset_flush_timeout (TrackerSparqlBuffer *buffer)
-{
-	TrackerSparqlBufferPrivate *priv;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-	}
-
-	priv->flush_timeout_id = g_timeout_add_seconds (MAX_SPARQL_BUFFER_TIME,
-	                                                flush_timeout_cb,
-	                                                buffer);
-}
-
 static void
 tracker_sparql_buffer_init (TrackerSparqlBuffer *buffer)
 {
@@ -195,35 +170,27 @@ remove_task_foreach (TrackerTask     *task,
 }
 
 static void
-update_array_data_free (UpdateArrayData *update_data)
+update_batch_data_free (UpdateBatchData *batch_data)
 {
-	if (!update_data)
-		return;
+	g_object_unref (batch_data->batch);
 
-	if (update_data->sparql_array) {
-		/* The array contains pointers to strings in the tasks, so no need to
-		 * deallocate its pointed contents, just the array itself. */
-		g_array_free (update_data->sparql_array, TRUE);
-	}
-
-	g_ptr_array_foreach (update_data->tasks,
+	g_ptr_array_foreach (batch_data->tasks,
 	                     (GFunc) remove_task_foreach,
-	                     update_data->buffer);
-	g_ptr_array_free (update_data->tasks, TRUE);
+	                     batch_data->buffer);
+	g_ptr_array_unref (batch_data->tasks);
 
-	g_slice_free (UpdateArrayData, update_data);
+	g_slice_free (UpdateBatchData, batch_data);
 }
 
 static void
-tracker_sparql_buffer_update_array_cb (GObject      *object,
-                                       GAsyncResult *result,
-                                       gpointer      user_data)
+batch_execute_cb (GObject      *object,
+                  GAsyncResult *result,
+                  gpointer      user_data)
 {
 	TrackerSparqlBufferPrivate *priv;
 	TrackerSparqlBuffer *buffer;
 	GError *error = NULL;
-	UpdateArrayData *update_data;
-	gint i;
+	UpdateBatchData *update_data;
 
 	update_data = user_data;
 	buffer = TRACKER_SPARQL_BUFFER (update_data->buffer);
@@ -234,57 +201,34 @@ tracker_sparql_buffer_update_array_cb (GObject      *object,
 	              g_message ("(Sparql buffer) Finished array-update with %u tasks",
 	                         update_data->tasks->len));
 
-	if (!tracker_sparql_connection_update_array_finish (priv->connection,
-							    result,
-							    &error)) {
-		g_critical ("  (Sparql buffer) Error in array-update: %s",
-		            error->message);
+	if (!tracker_batch_execute_finish (TRACKER_BATCH (object),
+	                                   result,
+	                                   &error)) {
+		g_critical ("Error executing batch: %s\n", error->message);
+		g_error_free (error);
+		return;
 	}
-
-	/* Report status on each task of the batch update */
-	for (i = 0; i < update_data->tasks->len; i++) {
-		TrackerTask *task;
-		SparqlTaskData *task_data;
-
-		task = g_ptr_array_index (update_data->tasks, i);
-		task_data = tracker_task_get_data (task);
-
-		/* Call finished handler with the error, if any */
-		if (error) {
-			g_task_return_error (task_data->async_task,
-			                     g_error_copy (error));
-		} else {
-			g_task_return_pointer (task_data->async_task,
-			                       tracker_task_ref (task),
-			                       (GDestroyNotify) tracker_task_unref);
-		}
-
-		g_clear_object (&task_data->async_task);
-
-		/* No need to deallocate the task here, it will be done when
-		 * unref-ing the UpdateArrayData below */
-	}
-
-	/* Note that tasks are actually deallocated here */
-	update_array_data_free (update_data);
 
 	if (error) {
-		g_error_free (error);
+		g_task_return_error (update_data->async_task, error);
+	} else {
+		g_task_return_pointer (update_data->async_task,
+		                       g_ptr_array_ref (update_data->tasks),
+		                       (GDestroyNotify) g_ptr_array_unref);
 	}
 
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (buffer))) {
-		tracker_sparql_buffer_flush (buffer, "SPARQL buffer limit reached (after flush)");
-	}
+	g_clear_error (&error);
+	update_batch_data_free (update_data);
 }
 
 gboolean
 tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
-                             const gchar         *reason)
+                             const gchar         *reason,
+                             GAsyncReadyCallback  cb,
+                             gpointer             user_data)
 {
 	TrackerSparqlBufferPrivate *priv;
-	GArray *sparql_array;
-	UpdateArrayData *update_data;
-	gint i;
+	UpdateBatchData *update_data;
 
 	priv = tracker_sparql_buffer_get_instance_private (buffer);
 
@@ -299,27 +243,11 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Flushing SPARQL buffer, reason: %s", reason));
 
-	if (priv->flush_timeout_id != 0) {
-		g_source_remove (priv->flush_timeout_id);
-		priv->flush_timeout_id = 0;
-	}
-
-	/* Loop buffer and construct array of strings */
-	sparql_array = g_array_new (FALSE, TRUE, sizeof (gchar *));
-
-	for (i = 0; i < priv->tasks->len; i++) {
-		SparqlTaskData *task_data;
-		TrackerTask *task;
-
-		task = g_ptr_array_index (priv->tasks, i);
-		task_data = tracker_task_get_data (task);
-		g_array_append_val (sparql_array, task_data->str);
-	}
-
-	update_data = g_slice_new0 (UpdateArrayData);
+	update_data = g_slice_new0 (UpdateBatchData);
 	update_data->buffer = buffer;
 	update_data->tasks = g_ptr_array_ref (priv->tasks);
-	update_data->sparql_array = sparql_array;
+	update_data->batch = g_object_ref (priv->batch);
+	update_data->async_task = g_task_new (buffer, NULL, cb, user_data);
 
 	/* Empty pool, update_data will keep
 	 * references to the tasks to keep
@@ -327,69 +255,15 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 	 */
 	g_ptr_array_unref (priv->tasks);
 	priv->tasks = NULL;
+	g_clear_pointer (&priv->file_set, g_hash_table_unref);
 	priv->n_updates++;
+	g_clear_object (&priv->batch);
 
-	/* Start the update */
-	tracker_sparql_connection_update_array_async (priv->connection,
-	                                              (gchar **) update_data->sparql_array->data,
-	                                              update_data->sparql_array->len,
-	                                              NULL,
-	                                              tracker_sparql_buffer_update_array_cb,
-	                                              update_data);
+	tracker_batch_execute_async (update_data->batch,
+	                             NULL,
+	                             batch_execute_cb,
+	                             update_data);
 	return TRUE;
-}
-
-static void
-tracker_sparql_buffer_update_cb (GObject      *object,
-                                 GAsyncResult *result,
-                                 gpointer      user_data)
-{
-	UpdateData *update_data = user_data;
-	SparqlTaskData *task_data;
-	GError *error = NULL;
-
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (object),
-	                                         result, &error);
-
-	task_data = tracker_task_get_data (update_data->task);
-
-	/* Call finished handler with the error, if any */
-	if (error) {
-		g_task_return_error (task_data->async_task, error);
-	} else {
-		g_task_return_pointer (task_data->async_task,
-		                       tracker_task_ref (update_data->task),
-		                       (GDestroyNotify) tracker_task_unref);
-	}
-
-	g_clear_object (&task_data->async_task);
-
-	tracker_task_pool_remove (TRACKER_TASK_POOL (update_data->buffer),
-	                          update_data->task);
-	g_slice_free (UpdateData, update_data);
-}
-
-static void
-sparql_buffer_push_high_priority (TrackerSparqlBuffer *buffer,
-                                  TrackerTask         *task,
-                                  SparqlTaskData      *data)
-{
-	TrackerSparqlBufferPrivate *priv;
-	UpdateData *update_data;
-
-	priv = tracker_sparql_buffer_get_instance_private (buffer);
-
-	/* Task pool addition adds a reference (below) */
-	update_data = g_slice_new0 (UpdateData);
-	update_data->buffer = buffer;
-	update_data->task = task;
-
-	tracker_task_pool_add (TRACKER_TASK_POOL (buffer), task);
-	tracker_sparql_connection_update_async (priv->connection,
-	                                        data->str,
-	                                        NULL,
-	                                        tracker_sparql_buffer_update_cb,
-	                                        update_data);
 }
 
 static void
@@ -400,66 +274,57 @@ sparql_buffer_push_to_pool (TrackerSparqlBuffer *buffer,
 
 	priv = tracker_sparql_buffer_get_instance_private (buffer);
 
-	if (tracker_task_pool_get_size (TRACKER_TASK_POOL (buffer)) == 0) {
-		reset_flush_timeout (buffer);
-	}
-
 	/* Task pool addition increments reference */
 	tracker_task_pool_add (TRACKER_TASK_POOL (buffer), task);
 
 	if (!priv->tasks) {
 		priv->tasks = g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_task_unref);
+		priv->file_set = g_hash_table_new (g_file_hash, (GEqualFunc) g_file_equal);
 	}
 
 	/* We add a reference here because we unref when removed from
 	 * the GPtrArray. */
 	g_ptr_array_add (priv->tasks, tracker_task_ref (task));
-
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (buffer))) {
-		tracker_sparql_buffer_flush (buffer, "SPARQL buffer limit reached");
-	}
+	g_hash_table_add (priv->file_set, tracker_task_get_file (task));
 }
 
-void
-tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
-                            TrackerTask         *task,
-                            gint                 priority,
-                            GAsyncReadyCallback  cb,
-                            gpointer             user_data)
+static TrackerBatch *
+tracker_sparql_buffer_get_current_batch (TrackerSparqlBuffer *buffer)
 {
-	SparqlTaskData *data;
+	TrackerSparqlBufferPrivate *priv;
 
-	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
-	g_return_if_fail (task != NULL);
+	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), NULL);
 
-	/* NOTE: We don't own the task and if we want it we have to
-	 * reference it, each function below references task in
-	 * different ways.
-	 */
-	data = tracker_task_get_data (task);
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
 
-	if (!data->async_task) {
-		data->async_task = g_task_new (buffer, NULL, cb, user_data);
-		g_task_set_task_data (data->async_task,
-		                      tracker_task_ref (task),
-		                      (GDestroyNotify) tracker_task_unref);
-	}
+	if (!priv->batch)
+		priv->batch = tracker_sparql_connection_create_batch (priv->connection);
 
-	if (priority <= G_PRIORITY_HIGH) {
-		sparql_buffer_push_high_priority (buffer, task, data);
-	} else {
-		sparql_buffer_push_to_pool (buffer, task);
-	}
+	return priv->batch;
 }
 
 static SparqlTaskData *
-sparql_task_data_new (gchar *data,
-                      guint  flags)
+sparql_task_data_new_resource (const gchar     *graph,
+                               TrackerResource *resource)
 {
 	SparqlTaskData *task_data;
 
 	task_data = g_slice_new0 (SparqlTaskData);
-	task_data->str = data;
+	task_data->type = TASK_TYPE_RESOURCE;
+	task_data->d.resource.resource = g_object_ref (resource);
+	task_data->d.resource.graph = g_strdup (graph);
+
+	return task_data;
+}
+
+static SparqlTaskData *
+sparql_task_data_new_sparql (const gchar *sparql)
+{
+	SparqlTaskData *task_data;
+
+	task_data = g_slice_new0 (SparqlTaskData);
+	task_data->type = TASK_TYPE_SPARQL;
+	task_data->d.sparql.sparql = g_strdup (sparql);
 
 	return task_data;
 }
@@ -467,75 +332,93 @@ sparql_task_data_new (gchar *data,
 static void
 sparql_task_data_free (SparqlTaskData *data)
 {
-	g_free (data->str);
-
-	if (data->async_task) {
-		g_object_unref (data->async_task);
+	if (data->type == TASK_TYPE_RESOURCE) {
+		g_clear_object (&data->d.resource.resource);
+		g_free (data->d.resource.graph);
+	} else if (data->type == TASK_TYPE_SPARQL) {
+		g_free (data->d.sparql.sparql);
 	}
 
 	g_slice_free (SparqlTaskData, data);
 }
 
-TrackerTask *
-tracker_sparql_task_new_take_sparql_str (GFile *file,
-                                         gchar *sparql_str)
+void
+tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
+                            GFile               *file,
+                            const gchar         *graph,
+                            TrackerResource     *resource)
 {
+	TrackerBatch *batch;
+	TrackerTask *task;
 	SparqlTaskData *data;
 
-	data = sparql_task_data_new (sparql_str, 0);
-	return tracker_task_new (file, data,
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+	g_return_if_fail (TRACKER_IS_RESOURCE (resource));
+
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_resource (batch, graph, resource);
+
+	data = sparql_task_data_new_resource (graph, resource);
+
+	task = tracker_task_new (file, data,
 	                         (GDestroyNotify) sparql_task_data_free);
+	sparql_buffer_push_to_pool (buffer, task);
+	tracker_task_unref (task);
 }
 
-TrackerTask *
-tracker_sparql_task_new_with_sparql_str (GFile       *file,
-                                         const gchar *sparql_str)
+void
+tracker_sparql_buffer_push_sparql (TrackerSparqlBuffer *buffer,
+                                   GFile               *file,
+                                   const gchar         *sparql)
 {
+	TrackerBatch *batch;
+	TrackerTask *task;
 	SparqlTaskData *data;
 
-	data = sparql_task_data_new (g_strdup (sparql_str), 0);
-	return tracker_task_new (file, data,
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+	g_return_if_fail (sparql != NULL);
+
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_sparql (batch, sparql);
+
+	data = sparql_task_data_new_sparql (sparql);
+
+	task = tracker_task_new (file, data,
 	                         (GDestroyNotify) sparql_task_data_free);
+	sparql_buffer_push_to_pool (buffer, task);
+	tracker_task_unref (task);
 }
 
-const gchar *
+gchar *
 tracker_sparql_task_get_sparql (TrackerTask *task)
 {
 	SparqlTaskData *task_data;
 
 	task_data = tracker_task_get_data (task);
 
-	return task_data->str;
+	if (task_data->type == TASK_TYPE_RESOURCE) {
+		return tracker_resource_print_sparql_update (task_data->d.resource.resource,
+		                                             NULL,
+		                                             task_data->d.resource.graph);
+	} else if (task_data->type == TASK_TYPE_SPARQL) {
+		return g_strdup (task_data->d.sparql.sparql);
+	}
+
+	return NULL;
 }
 
-TrackerTask *
-tracker_sparql_buffer_push_finish (TrackerSparqlBuffer  *buffer,
-                                   GAsyncResult         *res,
-                                   GError              **error)
+GPtrArray *
+tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
+                                    GAsyncResult         *res,
+                                    GError              **error)
 {
-	TrackerTask *task;
-
 	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), NULL);
 	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 
-	task = g_task_propagate_pointer (G_TASK (res), error);
-
-	if (!task)
-		task = g_object_ref (g_task_get_task_data (G_TASK (res)));
-
-	return task;
-}
-
-static gboolean
-task_has_file (TrackerTask *task,
-               GFile       *file)
-{
-	GFile *task_file;
-
-	task_file = tracker_task_get_file (task);
-
-	return g_file_equal (task_file, file);
+	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
 TrackerSparqlBufferState
@@ -552,9 +435,7 @@ tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
 	if (!tracker_task_pool_find (TRACKER_TASK_POOL (buffer), file))
 		return TRACKER_BUFFER_STATE_UNKNOWN;
 
-	if (priv->tasks &&
-	    g_ptr_array_find_with_equal_func (priv->tasks, file,
-	                                      (GEqualFunc) task_has_file, NULL))
+	if (g_hash_table_contains (priv->file_set, file))
 		return TRACKER_BUFFER_STATE_QUEUED;
 
 	return TRACKER_BUFFER_STATE_FLUSHING;

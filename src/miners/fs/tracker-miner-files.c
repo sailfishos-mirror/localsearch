@@ -183,19 +183,25 @@ static void        set_up_application_indexing          (TrackerMinerFiles    *m
 static void        index_applications_changed_cb        (GObject              *gobject,
                                                          GParamSpec           *arg1,
                                                          gpointer              user_data);
-static gchar *     miner_files_process_file             (TrackerMinerFS       *fs,
+static void        miner_files_process_file             (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         GFileInfo            *info);
-static gchar *     miner_files_process_file_attributes  (TrackerMinerFS       *fs,
+                                                         GFileInfo            *info,
+                                                         TrackerSparqlBuffer  *buffer,
+                                                         gboolean              create);
+static void        miner_files_process_file_attributes  (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         GFileInfo            *info);
-static gchar *     miner_files_remove_children          (TrackerMinerFS       *fs,
-                                                         GFile                *file);
-static gchar *     miner_files_remove_file              (TrackerMinerFS       *fs,
-                                                         GFile                *file);
-static gchar *     miner_files_move_file                (TrackerMinerFS       *fs,
+                                                         GFileInfo            *info,
+                                                         TrackerSparqlBuffer  *buffer);
+static void        miner_files_remove_children          (TrackerMinerFS       *fs,
+                                                         GFile                *file,
+                                                         TrackerSparqlBuffer  *buffer);
+static void        miner_files_remove_file              (TrackerMinerFS       *fs,
+                                                         GFile                *file,
+                                                         TrackerSparqlBuffer  *buffer);
+static void        miner_files_move_file                (TrackerMinerFS       *fs,
                                                          GFile                *file,
                                                          GFile                *source_file,
+                                                         TrackerSparqlBuffer  *buffer,
                                                          gboolean              recursive);
 static void        miner_files_finished                 (TrackerMinerFS       *fs,
                                                          gdouble               elapsed,
@@ -1952,27 +1958,6 @@ index_applications_changed_cb (GObject    *gobject,
 	}
 }
 
-static gchar *
-folder_urn_or_bnode (TrackerMinerFiles *mf,
-                     GFile             *file,
-                     gboolean           new_bnode,
-                     gboolean          *is_iri)
-{
-	const gchar *urn;
-
-	if (is_iri)
-		*is_iri = FALSE;
-
-	urn = tracker_miner_fs_get_folder_urn (TRACKER_MINER_FS (mf), file);
-	if (urn) {
-		if (is_iri)
-			*is_iri = TRUE;
-		return g_strdup (urn);
-	}
-
-	return tracker_miner_fs_get_file_bnode (TRACKER_MINER_FS (mf), file, new_bnode);
-}
-
 static void
 miner_files_add_to_datasource (TrackerMinerFiles *mf,
                                GFile             *file,
@@ -1980,8 +1965,9 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
                                TrackerResource   *element_resource)
 {
 	TrackerIndexingTree *indexing_tree;
+	TrackerMinerFS *fs = TRACKER_MINER_FS (mf);
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
+	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 		tracker_resource_set_relation (resource, "nie:dataSource", element_resource);
@@ -1992,7 +1978,7 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			identifier = folder_urn_or_bnode (mf, root, FALSE, NULL);
+			identifier = tracker_miner_fs_get_identifier (fs, root, FALSE, TRUE, NULL);
 
 		if (identifier)
 			tracker_resource_set_uri (resource, "nie:dataSource", identifier);
@@ -2024,35 +2010,33 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 
 static TrackerResource *
 miner_files_create_folder_information_element (TrackerMinerFiles *miner,
-					       GFile             *file,
-					       const gchar       *mime_type,
-					       gboolean           is_directory)
+                                               GFile             *file,
+                                               const gchar       *mime_type,
+                                               gboolean           create)
 {
 	TrackerResource *resource, *file_resource;
+	TrackerIndexingTree *indexing_tree;
 	gchar *urn, *uri;
 
 	/* Preserve URN for nfo:Folders */
-	urn = folder_urn_or_bnode (miner, file, TRUE, NULL);
+	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
+	                                       file, create, TRUE, NULL);
 	resource = tracker_resource_new (urn);
 	g_free (urn);
 
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 
-	if (is_directory) {
-		TrackerIndexingTree *indexing_tree;
+	tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
+	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
 
-		tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
-		indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+		tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
+		tracker_resource_set_boolean (resource, "tracker:available", TRUE);
+		tracker_resource_set_uri (resource, "nie:rootElementOf",
+		                          tracker_resource_get_identifier (resource));
 
-		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-			tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
-			tracker_resource_set_boolean (resource, "tracker:available", TRUE);
-			tracker_resource_set_uri (resource, "nie:rootElementOf",
-			                          tracker_resource_get_identifier (resource));
-
-			miner_files_add_mount_info (miner, resource, file);
-		}
+		miner_files_add_mount_info (miner, resource, file);
 	}
 
 	uri = g_file_get_uri (file);
@@ -2068,19 +2052,21 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
-static gchar *
-miner_files_process_file (TrackerMinerFS *fs,
-                          GFile          *file,
-                          GFileInfo      *file_info)
+static void
+miner_files_process_file (TrackerMinerFS      *fs,
+                          GFile               *file,
+                          GFileInfo           *file_info,
+                          TrackerSparqlBuffer *buffer,
+                          gboolean             create)
 {
 	TrackerMinerFilesPrivate *priv;
-	TrackerResource *resource, *folder_resource = NULL;
+	TrackerResource *resource = NULL, *folder_resource = NULL, *graph_file = NULL;
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
 	guint64 time_;
 	GFile *parent;
-	gchar *uri, *sparql_str, *sparql_update_str, *time_str, *ie_update_str = NULL, *graph_file_str = NULL;
+	gchar *uri, *time_str;
 	gboolean is_directory;
 
 	priv = TRACKER_MINER_FILES (fs)->private;
@@ -2092,7 +2078,7 @@ miner_files_process_file (TrackerMinerFS *fs,
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
 
-	if (!is_directory) {
+	if (!create && !is_directory) {
 		/* In case of update: delete all information elements for the given data object
 		 * and delete extractorHash, so we ensure the file is extracted again.
 		 */
@@ -2120,7 +2106,7 @@ miner_files_process_file (TrackerMinerFS *fs,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = folder_urn_or_bnode (TRACKER_MINER_FILES (fs), parent, FALSE, NULL);
+	parent_urn = tracker_miner_fs_get_identifier (fs, parent, FALSE, TRUE, NULL);
 	g_object_unref (parent);
 
 	if (parent_urn) {
@@ -2151,25 +2137,14 @@ miner_files_process_file (TrackerMinerFS *fs,
 			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
 								       file,
 								       mime_type,
-								       is_directory);
+								       create);
 	}
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
 
-	sparql_update_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
-
-	if (folder_resource) {
-		ie_update_str = tracker_resource_print_sparql_update (folder_resource,
-		                                                      NULL,
-		                                                      DEFAULT_GRAPH);
-		g_object_unref (folder_resource);
-	}
-
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	if (graph) {
-		TrackerResource *graph_file;
-
 		/* This mimetype will be extracted by some module, pre-fill the
 		 * nfo:FileDataObject in that graph.
 		 */
@@ -2180,38 +2155,33 @@ miner_files_process_file (TrackerMinerFS *fs,
 		time_str = tracker_date_to_string (time_);
 		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
 		g_free (time_str);
-
-		graph_file_str = tracker_resource_print_sparql_update (graph_file,
-								       NULL, graph);
-		g_object_unref (graph_file);
 	}
 
-	sparql_str = g_strdup_printf ("%s %s %s %s",
-	                              delete_properties_sparql ? delete_properties_sparql : "",
-	                              sparql_update_str,
-	                              ie_update_str ? ie_update_str : "",
-				      graph_file_str ? graph_file_str : "");
-	g_free (ie_update_str);
-	g_free (delete_properties_sparql);
-	g_free (graph_file_str);
+	if (delete_properties_sparql)
+		tracker_sparql_buffer_push_sparql (buffer, file, delete_properties_sparql);
 
-	g_object_run_dispose (G_OBJECT (resource));
+	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, resource);
+
+	if (graph_file)
+		tracker_sparql_buffer_push (buffer, file, graph, graph_file);
+	if (folder_resource)
+		tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, folder_resource);
+
 	g_object_unref (resource);
+	g_clear_object (&folder_resource);
+	g_clear_object (&graph_file);
 	g_free (uri);
-	g_free (sparql_update_str);
-
-	return sparql_str;
-
 }
 
-static gchar *
-miner_files_process_file_attributes (TrackerMinerFS *fs,
-                                     GFile          *file,
-                                     GFileInfo      *info)
+static void
+miner_files_process_file_attributes (TrackerMinerFS      *fs,
+                                     GFile               *file,
+                                     GFileInfo           *info,
+                                     TrackerSparqlBuffer *buffer)
 {
 	TrackerResource *resource;
 	guint64 time_;
-	gchar *uri, *time_str, *sparql_str;
+	gchar *uri, *time_str;
 
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
@@ -2238,11 +2208,8 @@ miner_files_process_file_attributes (TrackerMinerFS *fs,
 
 	g_free (uri);
 
-	sparql_str = tracker_resource_print_sparql_update (resource, NULL, DEFAULT_GRAPH);
-
+	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, resource);
 	g_object_unref (resource);
-
-	return sparql_str;
 }
 
 static void
@@ -2258,15 +2225,16 @@ miner_files_finished (TrackerMinerFS *fs,
 	tracker_miner_files_check_unextracted (TRACKER_MINER_FILES (fs));
 }
 
-static gchar *
-create_delete_sparql (GFile    *file,
-		      gboolean  delete_self,
-		      gboolean  delete_children)
+static void
+add_delete_sparql (GFile               *file,
+                   TrackerSparqlBuffer *buffer,
+                   gboolean             delete_self,
+                   gboolean             delete_children)
 {
 	GString *sparql;
 	gchar *uri;
 
-	g_return_val_if_fail (delete_self || delete_children, NULL);
+	g_return_if_fail (delete_self || delete_children);
 
 	uri = g_file_get_uri (file);
 	sparql = g_string_new ("DELETE { "
@@ -2301,28 +2269,32 @@ create_delete_sparql (GFile    *file,
 	g_string_append (sparql, ")}");
 	g_free (uri);
 
-	return g_string_free (sparql, FALSE);
+	tracker_sparql_buffer_push_sparql (buffer, file, sparql->str);
+	g_string_free (sparql, TRUE);
 }
 
-static gchar *
-miner_files_remove_children (TrackerMinerFS *fs,
-                             GFile          *file)
+static void
+miner_files_remove_children (TrackerMinerFS      *fs,
+                             GFile               *file,
+                             TrackerSparqlBuffer *buffer)
 {
-	return create_delete_sparql (file, FALSE, TRUE);
+	add_delete_sparql (file, buffer, FALSE, TRUE);
 }
 
-static gchar *
-miner_files_remove_file (TrackerMinerFS *fs,
-                         GFile          *file)
+static void
+miner_files_remove_file (TrackerMinerFS      *fs,
+                         GFile               *file,
+                         TrackerSparqlBuffer *buffer)
 {
-	return create_delete_sparql (file, TRUE, TRUE);
+	add_delete_sparql (file, buffer, TRUE, TRUE);
 }
 
-static gchar *
-miner_files_move_file (TrackerMinerFS *fs,
-                       GFile          *file,
-                       GFile          *source_file,
-                       gboolean        recursive)
+static void
+miner_files_move_file (TrackerMinerFS      *fs,
+                       GFile               *file,
+                       GFile               *source_file,
+                       TrackerSparqlBuffer *buffer,
+                       gboolean             recursive)
 {
 	GString *sparql = g_string_new (NULL);
 	gchar *uri, *source_uri, *display_name, *container_clause = NULL;
@@ -2344,8 +2316,7 @@ miner_files_move_file (TrackerMinerFS *fs,
 		gchar *new_parent_id;
 		gboolean is_iri;
 
-		new_parent_id = folder_urn_or_bnode (TRACKER_MINER_FILES (fs),
-		                                     new_parent, FALSE, &is_iri);
+		new_parent_id = tracker_miner_fs_get_identifier (fs, new_parent, FALSE, FALSE, &is_iri);
 
 		if (new_parent_id) {
 			container_clause =
@@ -2470,12 +2441,13 @@ miner_files_move_file (TrackerMinerFS *fs,
 		                        uri, source_uri, source_uri);
 	}
 
+	tracker_sparql_buffer_push_sparql (buffer, file, sparql->str);
+
 	g_free (uri);
 	g_free (source_uri);
 	g_free (display_name);
 	g_clear_object (&new_parent);
-
-	return g_string_free (sparql, FALSE);
+	g_string_free (sparql, TRUE);
 }
 
 TrackerMiner *
