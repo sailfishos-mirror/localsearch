@@ -1079,7 +1079,7 @@ get_all_by_search (TrackerSparqlConnection *connection,
 		return FALSE;
 	}
 
-	show_all_str = show_all ? "" : "?s nie:isStoredAs/nie:dataSource/tracker:available true . ";
+	show_all_str = show_all ? "" : "?s nie:isStoredAs/nie:dataSource/tracker:available | nie:dataSource/tracker:available true . ";
 
 	if (details) {
 		query = g_strdup_printf ("SELECT tracker:coalesce (nie:isStoredAs (?s), ?s) nie:mimeType (?s) ?type fts:snippet(?s, \"%s\", \"%s\") "
