@@ -2064,7 +2064,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
-	guint64 time_;
+	time_t time_;
 	GFile *parent;
 	gchar *uri, *time_str;
 	gboolean is_directory;
@@ -2125,7 +2125,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_free (time_str);
 
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
+	time_ = (time_t) g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
@@ -2181,7 +2181,7 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
                                      TrackerSparqlBuffer *buffer)
 {
 	TrackerResource *resource;
-	guint64 time_;
+	time_t time_;
 	gchar *uri, *time_str;
 	GDateTime *modified;
 
@@ -2204,7 +2204,7 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	g_free (time_str);
 
 	/* Update nfo:fileLastAccessed */
-	time_ = g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
+	time_ = (time_t) g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
