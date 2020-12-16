@@ -2098,7 +2098,7 @@ process_file_cb (GObject      *object,
 	gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
 	GFileInfo *file_info;
-	guint64 time_;
+	time_t time_;
 	GFile *file, *parent;
 	gchar *uri, *sparql_str, *sparql_update_str, *time_str, *ie_update_str = NULL, *graph_file_str = NULL;
 	GError *error = NULL;
@@ -2184,7 +2184,7 @@ process_file_cb (GObject      *object,
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_free (time_str);
 
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
+	time_ = (time_t) g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
@@ -2300,7 +2300,7 @@ process_file_attributes_cb (GObject      *object,
 	TrackerResource *resource;
 	ProcessFileData *data;
 	GFileInfo *file_info;
-	guint64 time_;
+	time_t time_;
 	GFile *file;
 	gchar *uri, *time_str, *sparql_str;
 	GError *error = NULL;
@@ -2328,7 +2328,7 @@ process_file_attributes_cb (GObject      *object,
 	g_free (time_str);
 
 	/* Update nfo:fileLastAccessed */
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
+	time_ = (time_t) g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
