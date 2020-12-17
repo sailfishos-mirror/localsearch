@@ -64,5 +64,23 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         self.assertIn(self.indexed_dir, folder_output)
         self.assertNotIn(folder_path.as_uri(), folder_output)
 
+
+    def test_search_filename(self):
+        datadir = pathlib.Path(__file__).parent.joinpath('test-cli-data')
+
+        file1 = datadir.joinpath('text/mango.txt')
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, 'Document 2.txt'))
+
+        search_output = self.run_cli(
+            ['tracker3', 'search', 'mango'])
+        self.assertIn(target1.as_uri(), search_output)
+        self.assertNotIn(target2.as_uri(), search_output)
+
+
+
 if __name__ == '__main__':
     fixtures.tracker_test_main()
