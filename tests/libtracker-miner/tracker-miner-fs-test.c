@@ -106,7 +106,8 @@ test_miner_process_file_attributes (TrackerMinerFS      *miner,
 static void
 test_miner_remove_file (TrackerMinerFS      *miner,
                         GFile               *file,
-                        TrackerSparqlBuffer *buffer)
+                        TrackerSparqlBuffer *buffer,
+                        gboolean             is_dir)
 {
 	gchar *sparql, *uri;
 
@@ -153,7 +154,7 @@ test_miner_move_file (TrackerMinerFS      *miner,
                       gboolean             recursive)
 {
 	/* Caution: This does not deal with recursive moves */
-	test_miner_remove_file (miner, source, buffer);
+	test_miner_remove_file (miner, source, buffer, recursive);
 	test_miner_process_file (miner, dest, NULL, buffer, TRUE);
 }
 

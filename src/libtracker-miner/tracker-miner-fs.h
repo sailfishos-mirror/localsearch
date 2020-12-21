@@ -115,7 +115,8 @@ typedef struct {
 	                                       gint                  files_ignored);
 	void     (* remove_file)              (TrackerMinerFS       *fs,
 	                                       GFile                *file,
-	                                       TrackerSparqlBuffer  *buffer);
+	                                       TrackerSparqlBuffer  *buffer,
+	                                       gboolean              is_dir);
 	void     (* remove_children)          (TrackerMinerFS       *fs,
 	                                       GFile                *file,
 	                                       TrackerSparqlBuffer  *buffer);

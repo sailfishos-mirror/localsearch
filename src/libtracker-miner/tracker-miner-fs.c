@@ -1197,7 +1197,8 @@ item_remove (TrackerMinerFS *fs,
 		                                                  fs->priv->sparql_buffer);
 	} else {
 		TRACKER_MINER_FS_GET_CLASS (fs)->remove_file (fs, file,
-		                                              fs->priv->sparql_buffer);
+		                                              fs->priv->sparql_buffer,
+		                                              is_dir);
 	}
 
 	g_free (uri);

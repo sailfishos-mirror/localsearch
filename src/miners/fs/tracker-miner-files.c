@@ -197,7 +197,8 @@ static void        miner_files_remove_children          (TrackerMinerFS       *f
                                                          TrackerSparqlBuffer  *buffer);
 static void        miner_files_remove_file              (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         TrackerSparqlBuffer  *buffer);
+                                                         TrackerSparqlBuffer  *buffer,
+                                                         gboolean              is_dir);
 static void        miner_files_move_file                (TrackerMinerFS       *fs,
                                                          GFile                *file,
                                                          GFile                *source_file,
@@ -2284,9 +2285,10 @@ miner_files_remove_children (TrackerMinerFS      *fs,
 static void
 miner_files_remove_file (TrackerMinerFS      *fs,
                          GFile               *file,
-                         TrackerSparqlBuffer *buffer)
+                         TrackerSparqlBuffer *buffer,
+                         gboolean             is_dir)
 {
-	add_delete_sparql (file, buffer, TRUE, TRUE);
+	add_delete_sparql (file, buffer, TRUE, is_dir);
 }
 
 static void
