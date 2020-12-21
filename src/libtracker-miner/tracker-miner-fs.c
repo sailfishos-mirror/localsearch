@@ -1321,6 +1321,7 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 
 		*type = event->type;
 		*attributes_update = event->attributes_update;
+		*is_dir = event->is_dir;
 		g_set_object (info, event->info);
 
 		queue_event_free (event);
