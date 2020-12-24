@@ -53,7 +53,7 @@ msgstr ""
 "Si és «true» (cert), el tracker-extract esperarà que el tracker-miner-fs "
 "acabi la indexació abans d'extreure metadades. Aquesta opció és útil en "
 "entorns restringits quan és important llistar els fitxers ràpidament i es "
-"pot esperar per obtenir les metadades més tard."
+"pot esperar per a obtenir les metadades més tard."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
@@ -64,8 +64,8 @@ msgid ""
 "Simplify the words to their root to provide more results. E.g. “shelves” and "
 "“shelf” to “shel”"
 msgstr ""
-"Simplifica les paraules a la seva arrel per proporcionar més resultats. Per "
-"exemple: «prestatgeria» i «prestatge» a «prestat»"
+"Simplifica les paraules a la seva arrel per a proporcionar més resultats. "
+"Per exemple: «prestatgeria» i «prestatge» a «prestat»"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
 msgid "Enable unaccent"
@@ -136,8 +136,8 @@ msgid ""
 "database. 0 forces crawling anytime, -1 forces it only after unclean "
 "shutdowns, and -2 disables it entirely."
 msgstr ""
-"Interval, en dies, per comprovar si el sistema de fitxers està actualitzat a "
-"la base de dades. El 0 força la indexació en qualsevol moment, el -1 la "
+"Interval, en dies, per a comprovar si el sistema de fitxers està actualitzat "
+"a la base de dades. El 0 força la indexació en qualsevol moment, el -1 la "
 "força només després d'aturades incorrectes i el -2 la desactiva completament."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
@@ -435,20 +435,19 @@ msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr ""
-"El directori pare «%s» no és apte per ser indexat (basat en filtres de "
+"El directori pare «%s» no és apte per a ser indexat (basat en filtres de "
 "contingut)"
 
 #: src/miners/fs/tracker-main.c:674
 msgid "Directory is eligible to be indexed"
-msgstr "El directori no és apte per ser indexat"
+msgstr "El directori no és apte per a ser indexat"
 
 #: src/miners/fs/tracker-main.c:675
 msgid "File is eligible to be indexed"
-msgstr "El fitxer no és apte per ser indexat"
+msgstr "El fitxer no és apte per a ser indexat"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
 #: src/miners/fs/tracker-main.c:929
 msgid "— start the tracker indexer"
 msgstr "— inicia l'indexador del Tracker"
@@ -468,7 +467,6 @@ msgstr "Títol a utilitzar (s'ha d'utilitzar amb «--add-feed»)"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
 #: src/miners/rss/tracker-main.c:145
 msgid "— start the feeds indexer"
 msgstr "— inicia l'indexador de canals"
@@ -497,7 +495,6 @@ msgstr "No s'ha pogut afegir el canal"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
 #: src/tracker-control/tracker-main.c:135
 msgid "— start the tracker index proxy"
 msgstr "— inicia el servidor intermediari de l'índex del Tracker"
@@ -958,7 +955,6 @@ msgstr "Mostra el contingut del text pla si està disponible per als recursos"
 #. * of the URI. While URI supports only ASCI encoding, IRI
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
-#.
 #: src/tracker/tracker-info.c:62
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
@@ -1094,7 +1090,7 @@ msgstr "Desplaça els resultats"
 
 #: src/tracker/tracker-search.c:127
 msgid "Use OR for search terms instead of AND (the default)"
-msgstr "Utilitza «o» en comptes de «i» (predeterminat) per cercar termes"
+msgstr "Utilitza «o» en comptes de «i» (predeterminat) per a cercar termes"
 
 #: src/tracker/tracker-search.c:131
 msgid ""
@@ -1228,21 +1224,18 @@ msgstr "Estadístiques:"
 #. *   Files:
 #. *     None
 #. *
-#.
 #. To translators: This is to say there are no
 #. * resources found associated with this tag, e.g.:
 #. *
 #. *   Tags (shown by name):
 #. *     None
 #. *
-#.
 #. To translators: This is to say there are no
 #. * tags found for a particular file, e.g.:
 #. *
 #. *   /path/to/some/file:
 #. *     None
 #. *
-#.
 #: src/tracker/tracker-status.c:153 src/tracker/tracker-tag.c:321
 #: src/tracker/tracker-tag.c:453 src/tracker/tracker-tag.c:575
 #: src/tracker/tracker-tag.c:953
@@ -1346,7 +1339,7 @@ msgstr "CADENA"
 #: src/tracker/tracker-tag.c:79
 msgid "Use AND for search terms instead of OR (the default)"
 msgstr ""
-"Utilitzeu «AND» (i) en comptes d'«OR» (o, per defecte) per cercar termes"
+"Utilitzeu «AND» (i) en comptes d'«OR» (o, per defecte) per a cercar termes"
 
 #: src/tracker/tracker-tag.c:84
 msgid "FILE…"
@@ -1481,7 +1474,6 @@ msgstr "Inhabilita l'aturada després de 30 segons d'inactivitat"
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— inicia el servei d'escriptura del Tracker"
