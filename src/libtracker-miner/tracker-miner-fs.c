@@ -1128,6 +1128,7 @@ sparql_buffer_flush_cb (GObject      *object,
 		item_queue_handlers_set_up (fs);
 	}
 
+	g_ptr_array_unref (tasks);
 	g_clear_error (&error);
 }
 
