@@ -2104,6 +2104,7 @@ process_file_cb (GObject      *object,
 	GError *error = NULL;
 	gboolean is_special;
 	gboolean is_directory;
+	GDateTime *modified;
 
 	data = user_data;
 	file = G_FILE (object);
@@ -2136,6 +2137,7 @@ process_file_cb (GObject      *object,
 	data->mime_type = g_strdup (mime_type);
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
+	modified = g_file_info_get_modification_date_time (file_info);
 
 	if (!is_directory) {
 		/* In case of update: delete all information elements for the given data object
@@ -2178,8 +2180,7 @@ process_file_cb (GObject      *object,
 	tracker_resource_set_int64 (resource, "nfo:fileSize",
 	                            g_file_info_get_size (file_info));
 
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-	time_str = tracker_date_to_string (time_);
+	time_str = g_date_time_format_iso8601 (modified);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_free (time_str);
 
@@ -2221,8 +2222,7 @@ process_file_cb (GObject      *object,
 		graph_file = tracker_resource_new (uri);
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
 
-		time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-		time_str = tracker_date_to_string (time_);
+		time_str = g_date_time_format_iso8601 (modified);
 		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
 		g_free (time_str);
 
@@ -2247,6 +2247,7 @@ process_file_cb (GObject      *object,
 	process_file_data_free (data);
 
 	g_object_run_dispose (G_OBJECT (resource));
+	g_date_time_unref (modified);
 	g_object_unref (resource);
 	g_object_unref (file_info);
 	g_free (sparql_str);
@@ -2303,6 +2304,7 @@ process_file_attributes_cb (GObject      *object,
 	GFile *file;
 	gchar *uri, *time_str, *sparql_str;
 	GError *error = NULL;
+	GDateTime *modified;
 
 	data = user_data;
 	file = G_FILE (object);
@@ -2319,9 +2321,10 @@ process_file_attributes_cb (GObject      *object,
 	resource = tracker_resource_new (uri);
 
 	/* Update nfo:fileLastModified */
-	time_ = g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_MODIFIED);
-	time_str = tracker_date_to_string (time_);
+	modified = g_file_info_get_modification_date_time (file_info);
+	time_str = g_date_time_format_iso8601 (modified);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
+	g_date_time_unref (modified);
 	g_free (time_str);
 
 	/* Update nfo:fileLastAccessed */
