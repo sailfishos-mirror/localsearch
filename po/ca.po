@@ -171,7 +171,7 @@ msgstr "Indexa els dispositius extraïbles"
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
-"Establiu a «true» (cert) per activar la indexació de directoris muntats de "
+"Establiu a «true» (cert) per a activar la indexació de directoris muntats de "
 "dispositius extraïbles."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
@@ -183,9 +183,9 @@ msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
 msgstr ""
-"Establiu «true» (cert) per activar la indexació de CD's, DVD's i dispositius "
-"òptics en general (si els dispositius extraïbles no s'indexen, tampoc "
-"s'indexaran els discs òptics)"
+"Establiu «true» (cert) per a activar la indexació de CD's, DVD's i "
+"dispositius òptics en general (si els dispositius extraïbles no s'indexen, "
+"tampoc s'indexaran els discs òptics)"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
 msgid "Index when running on battery"
@@ -194,7 +194,7 @@ msgstr "Indexa quan s'estigui utilitzant la bateria"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Set to true to index while running on battery"
 msgstr ""
-"Establiu «true» (cert) per indexar quan s'estigui utilitzant la bateria"
+"Establiu «true» (cert) per a indexar quan s'estigui utilitzant la bateria"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
 msgid "Perform initial indexing when running on battery"
@@ -203,7 +203,7 @@ msgstr "Realitza la indexació inicial quan s'estigui utilitzant la bateria"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
 msgid "Set to true to index while running on battery for the first time only"
 msgstr ""
-"Establiu «true» (cert) per indexar, només la primera vegada, quan s'estigui "
+"Establiu «true» (cert) per a indexar, només la primera vegada, quan s'estigui "
 "utilitzant la bateria"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
@@ -506,7 +506,8 @@ msgstr "Ha fallat l'extractor de metadades"
 #: src/tracker-extract/tracker-extract.c:742
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
-"No s'han trobat mòduls de metadades o extractors per gestionar aquest fitxer"
+"No s'han trobat mòduls de metadades o extractors per a gestionar aquest "
+"fitxer"
 
 #: src/tracker-extract/tracker-main.c:82
 msgid "File to extract metadata for"
@@ -688,7 +689,7 @@ msgstr "Queden %s"
 
 #: src/tracker/tracker-daemon.c:278
 msgid "unknown time left"
-msgstr "es desconeix el temps per acabar"
+msgstr "es desconeix el temps per a acabar"
 
 #. Work out lengths for output spacing
 #: src/tracker/tracker-daemon.c:291 src/tracker/tracker-daemon.c:769
@@ -725,7 +726,7 @@ msgstr "La galeta és %d"
 #: src/tracker/tracker-daemon.c:481 src/tracker/tracker-daemon.c:724
 #: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
-msgstr "Premeu Ctrl+C per aturar"
+msgstr "Premeu Ctrl+C per a aturar"
 
 #: src/tracker/tracker-daemon.c:508
 #, c-format
@@ -1070,7 +1071,7 @@ msgstr "Cerca per fitxers de documents"
 
 #: src/tracker/tracker-search.c:105
 msgid "Search for software (--all has no effect on this)"
-msgstr "Cerca per programari («--all» no modifica la cerca)"
+msgstr "Cerca per a programari («--all» no modifica la cerca)"
 
 #: src/tracker/tracker-search.c:109
 msgid "Search for software categories (--all has no effect on this)"
