@@ -44,6 +44,14 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         with self.await_document_inserted(target2):
             shutil.copy(file2, self.indexed_dir)
 
+        folder_name = "test-folder"
+        folder_path = pathlib.Path(os.path.join(self.indexed_dir, folder_name))
+        with self.await_insert_dir(folder_path):
+            try:
+                os.mkdir(os.path.join(self.indexed_dir, folder_name))
+            except OSError as error:
+                print(error)
+
         # FIXME: the --all should NOT be needed.
         # See: https://gitlab.gnome.org/GNOME/tracker-miners/-/issues/116
         output = self.run_cli(
@@ -51,6 +59,10 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         self.assertIn(target1.as_uri(), output)
         self.assertNotIn(target2.as_uri(), output)
 
+        folder_output = self.run_cli(
+            ['tracker3', 'search', '--folders', 'test-monitored'])
+        self.assertIn(self.indexed_dir, folder_output)
+        self.assertNotIn(folder_path.as_uri(), folder_output)
 
 if __name__ == '__main__':
     fixtures.tracker_test_main()

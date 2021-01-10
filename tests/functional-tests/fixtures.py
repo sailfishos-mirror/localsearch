@@ -156,6 +156,15 @@ class TrackerMinerTest(ut.TestCase):
 
         return self.tracker.await_insert(DOCUMENTS_GRAPH, '; '.join(expected), timeout=cfg.AWAIT_TIMEOUT)
 
+    def await_insert_dir(self, path):
+        if isinstance(path, pathlib.Path):
+            url = path.as_uri()
+        else:
+            url = self.uri(path)
+
+        expected = f'nie:isStoredAs <{url}>'
+        return self.tracker.await_insert(FILESYSTEM_GRAPH, expected, timeout=cfg.AWAIT_TIMEOUT)
+
     def await_document_uri_change(self, resource_id, from_path, to_path):
         """Wraps await_update() context manager."""
         from_url = self.uri(from_path)
