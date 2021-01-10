@@ -198,7 +198,7 @@ print_key_and_value (GHashTable  *prefixes,
 	}
 }
 
-static void
+static gboolean
 print_plain (gchar               *urn_or_filename,
              gchar               *urn,
              TrackerSparqlCursor *cursor,
@@ -207,6 +207,7 @@ print_plain (gchar               *urn_or_filename,
 {
 	gchar *fts_key = NULL;
 	gchar *fts_value = NULL;
+	gboolean has_output = FALSE;
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		const gchar *key = tracker_sparql_cursor_get_string (cursor, 0, NULL);
@@ -214,6 +215,11 @@ print_plain (gchar               *urn_or_filename,
 
 		if (!key || !value) {
 			continue;
+		}
+
+		if (!has_output) {
+			g_print ("%s:\n", _("Results"));
+			has_output = TRUE;
 		}
 
 		/* Don't display nie:plainTextContent */
@@ -236,6 +242,8 @@ print_plain (gchar               *urn_or_filename,
 
 	g_free (fts_key);
 	g_free (fts_value);
+
+	return has_output;
 }
 
 /* print a URI prefix in Turtle format */
@@ -285,7 +293,7 @@ format_urn (GHashTable  *prefixes,
 }
 
 /* Print triples for a urn in Turtle format */
-static void
+static gboolean
 print_turtle (gchar               *urn,
               TrackerSparqlCursor *cursor,
               GHashTable          *prefixes,
@@ -294,6 +302,7 @@ print_turtle (gchar               *urn,
 	gchar *subject;
 	gchar *predicate;
 	gchar *object;
+	gboolean has_output = FALSE;
 
 	if (G_UNLIKELY (full_namespaces)) {
 		subject = g_strdup (urn);
@@ -316,6 +325,8 @@ print_turtle (gchar               *urn,
 			continue;
 		}
 
+		has_output = TRUE;
+
 		predicate = format_urn (prefixes, key, full_namespaces);
 
 		if (g_ascii_strcasecmp (is_resource, "true") == 0) {
@@ -337,6 +348,8 @@ print_turtle (gchar               *urn,
 	}
 
 	g_free (subject);
+
+	return has_output;
 }
 
 static TrackerSparqlConnection *
@@ -346,6 +359,21 @@ create_connection (GError **error)
 	                                          NULL, NULL, error);
 }
 
+static gboolean
+output_eligible_status_for_file (gchar   *path,
+                                 GError **error)
+{
+	g_autofree char *tracker_miner_fs_path;
+
+	tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "tracker-miner-fs-3", NULL);
+
+	{
+		char *argv[] = {tracker_miner_fs_path, "--eligible", path, NULL };
+
+		return g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, NULL, NULL, error);
+	}
+}
+
 static int
 info_run (void)
 {
@@ -353,6 +381,7 @@ info_run (void)
 	GError *error = NULL;
 	GHashTable *prefixes;
 	gchar **p;
+	gboolean has_output = FALSE;
 
 	connection = create_connection (&error);
 
@@ -377,7 +406,6 @@ info_run (void)
 
 	for (p = filenames; *p; p++) {
 		TrackerSparqlCursor *cursor = NULL;
-		GError *error = NULL;
 		gchar *uri = NULL;
 		gchar *query;
 		gchar *urn = NULL;
@@ -446,7 +474,6 @@ info_run (void)
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
-		g_free (uri);
 		g_free (query);
 
 		if (error) {
@@ -458,25 +485,36 @@ info_run (void)
 			continue;
 		}
 
-		if (!cursor) {
-			g_print ("  %s\n",
-			         _("No metadata available for that URI"));
-		} else {
+		if (cursor) {
 			if (turtle) {
-				print_turtle (urn, cursor, prefixes, full_namespaces);
+				has_output = print_turtle (urn, cursor, prefixes, full_namespaces);
 			} else {
-				g_print ("%s:\n", _("Results"));
-
-				print_plain (*p, urn, cursor, prefixes, full_namespaces);
+				has_output = print_plain (*p, urn, cursor, prefixes, full_namespaces);
 			}
-
-			g_print ("\n");
 
 			g_object_unref (cursor);
 		}
 
+		if (has_output) {
+			g_print ("\n");
+		} else if (turtle) {
+			g_print ("# No metadata available for <%s>\n", uri);
+		} else {
+			g_print ("  %s\n",
+			         _("No metadata available for that URI"));
+			output_eligible_status_for_file (*p, &error);
+
+			if (error) {
+				g_printerr ("%s: %s\n",
+				            _("Could not get eligible status: "),
+				            error->message);
+				g_clear_error (&error);
+			}
+		}
+
 		g_print ("\n");
 
+		g_free (uri);
 		g_free (urn);
 	}
 
@@ -490,28 +528,18 @@ static int
 info_run_eligible (void)
 {
 	char **p;
-	char *tracker_miner_fs_path;
-	GError *error = NULL;
-
-	tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "tracker-miner-fs-3", NULL);
+	g_autoptr (GError) error = NULL;
 
 	for (p = filenames; *p; p++) {
-		char *argv[] = {tracker_miner_fs_path,
-		                "--eligible", *p, NULL };
-
-		g_spawn_sync(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, NULL, NULL, &error);
+		output_eligible_status_for_file (*p, &error);
 
 		if (error) {
 			g_printerr ("%s: %s\n",
-			            _("Could not run tracker-extract: "),
+			            _("Could not get eligible status: "),
 			            error->message);
-			g_error_free (error);
-			g_free (tracker_miner_fs_path);
 			return EXIT_FAILURE;
 		}
 	}
-
-	g_free (tracker_miner_fs_path);
 
 	return EXIT_SUCCESS;
 }
