@@ -1176,6 +1176,7 @@ item_add_or_update (TrackerMinerFS *fs,
 static gboolean
 item_remove (TrackerMinerFS *fs,
              GFile          *file,
+             gboolean        is_dir,
              gboolean        only_children)
 {
 	gchar *uri;
@@ -1196,7 +1197,8 @@ item_remove (TrackerMinerFS *fs,
 		                                                  fs->priv->sparql_buffer);
 	} else {
 		TRACKER_MINER_FS_GET_CLASS (fs)->remove_file (fs, file,
-		                                              fs->priv->sparql_buffer);
+		                                              fs->priv->sparql_buffer,
+		                                              is_dir);
 	}
 
 	g_free (uri);
@@ -1227,15 +1229,17 @@ item_move (TrackerMinerFS *fs,
 	             (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
 	             is_dir);
 
-	/* Delete destination item from store if any */
-	item_remove (fs, dest_file, FALSE);
+	if (!is_dir) {
+		/* Delete destination item from store if any */
+		item_remove (fs, dest_file, is_dir, FALSE);
+	}
 
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
 	if (!recursive &&
 	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
-		item_remove (fs, source_file, TRUE);
+		item_remove (fs, source_file, is_dir, TRUE);
 
 	TRACKER_MINER_FS_GET_CLASS (fs)->move_file (fs, dest_file, source_file,
 	                                            fs->priv->sparql_buffer,
@@ -1321,6 +1325,7 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 
 		*type = event->type;
 		*attributes_update = event->attributes_update;
+		*is_dir = event->is_dir;
 		g_set_object (info, event->info);
 
 		queue_event_free (event);
@@ -1511,7 +1516,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		keep_processing = item_move (fs, file, source_file, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_DELETED:
-		keep_processing = item_remove (fs, file, FALSE);
+		keep_processing = item_remove (fs, file, is_dir, FALSE);
 		break;
 	case TRACKER_MINER_FS_EVENT_CREATED:
 		keep_processing = item_add_or_update (fs, file, info, FALSE, TRUE);
@@ -1769,6 +1774,7 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 	}
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED, file, NULL);
+	event->is_dir = !!is_dir;
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
 }
 

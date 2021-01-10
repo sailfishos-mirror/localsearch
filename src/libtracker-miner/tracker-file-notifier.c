@@ -97,6 +97,7 @@ typedef struct {
 	GQueue queue;
 
 	TrackerSparqlStatement *content_query;
+	TrackerSparqlStatement *deleted_query;
 
 	GTimer *timer;
 	gchar *file_attributes;
@@ -707,6 +708,32 @@ sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
 	return priv->content_query;
 }
 
+static TrackerSparqlStatement *
+sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
+                                 GError              **error)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (priv->deleted_query)
+		return priv->deleted_query;
+
+	priv->deleted_query =
+		tracker_sparql_connection_query_statement (priv->connection,
+		                                           "SELECT ?mimeType "
+		                                           "{"
+		                                           "  GRAPH tracker:FileSystem {"
+		                                           "  ?ie nie:mimeType ?mimeType ; "
+		                                           "      nie:isStoredAs ~uri . "
+		                                           "  }"
+		                                           "}"
+		                                           "ORDER BY ?uri",
+		                                           priv->cancellable,
+		                                           error);
+	return priv->deleted_query;
+}
+
 static void
 query_execute_cb (TrackerSparqlStatement *statement,
                   GAsyncResult           *res,
@@ -1017,6 +1044,32 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 		                                             file);
 	} else if (is_directory) {
 		tracker_monitor_remove_recursively (priv->monitor, file);
+	}
+
+	if (!is_directory) {
+		TrackerSparqlStatement *stmt;
+		TrackerSparqlCursor *cursor;
+		const gchar *mimetype;
+		gchar *uri;
+
+		/* TrackerMonitor only knows about monitored folders,
+		 * query the data if we don't know that much.
+		 */
+		stmt = sparql_deleted_ensure_statement (notifier, NULL);
+
+		if (stmt) {
+			uri = g_file_get_uri (file);
+			tracker_sparql_statement_bind_string (stmt, "uri", uri);
+			cursor = tracker_sparql_statement_execute (stmt, NULL, NULL);
+			g_free (uri);
+		}
+
+		if (cursor && tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+			mimetype = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+			is_directory = g_strcmp0 (mimetype, "inode/directory") == 0;
+		}
+
+		g_clear_object (&cursor);
 	}
 
 	if (!is_directory) {
@@ -1365,6 +1418,7 @@ tracker_file_notifier_finalize (GObject *object)
 	}
 
 	g_clear_object (&priv->content_query);
+	g_clear_object (&priv->deleted_query);
 
 	g_object_unref (priv->crawler);
 	g_object_unref (priv->monitor);

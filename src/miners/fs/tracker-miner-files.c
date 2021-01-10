@@ -197,7 +197,8 @@ static void        miner_files_remove_children          (TrackerMinerFS       *f
                                                          TrackerSparqlBuffer  *buffer);
 static void        miner_files_remove_file              (TrackerMinerFS       *fs,
                                                          GFile                *file,
-                                                         TrackerSparqlBuffer  *buffer);
+                                                         TrackerSparqlBuffer  *buffer,
+                                                         gboolean              is_dir);
 static void        miner_files_move_file                (TrackerMinerFS       *fs,
                                                          GFile                *file,
                                                          GFile                *source_file,
@@ -2240,36 +2241,70 @@ add_delete_sparql (GFile               *file,
 	g_return_if_fail (delete_self || delete_children);
 
 	uri = g_file_get_uri (file);
-	sparql = g_string_new ("DELETE { "
-	                       "  GRAPH " DEFAULT_GRAPH " {"
-	                       "    ?f a rdfs:Resource . "
-	                       "  }"
-	                       "  GRAPH ?g {"
-	                       "    ?f a rdfs:Resource . "
-	                       "    ?ie a rdfs:Resource . "
-	                       "  }"
-	                       "} WHERE {"
-	                       "  GRAPH " DEFAULT_GRAPH " {"
-	                       "    ?f a rdfs:Resource ; "
-	                       "       nie:url ?u . "
-	                       "  }"
-	                       "  GRAPH ?g {"
-	                       "    ?f a rdfs:Resource . "
-	                       "    OPTIONAL { ?ie nie:isStoredAs ?f } . "
-	                       "  }"
-	                       "  FILTER (");
 
-	if (delete_self)
-		g_string_append_printf (sparql, "?u = \"%s\" ", uri);
+	sparql = g_string_new (NULL);
 
 	if (delete_children) {
-		if (delete_self)
-			g_string_append (sparql, " || ");
+		sparql = g_string_new ("DELETE { "
+				       "  GRAPH " DEFAULT_GRAPH " {"
+				       "    ?f a rdfs:Resource . "
+				       "  }"
+				       "  GRAPH ?g {"
+				       "    ?f a rdfs:Resource . "
+				       "    ?ie a rdfs:Resource . "
+				       "  }"
+				       "} WHERE {"
+				       "  GRAPH " DEFAULT_GRAPH " {"
+				       "    ?f a rdfs:Resource ; "
+				       "       nie:url ?u . "
+				       "  }"
+				       "  GRAPH ?g {"
+				       "    ?f a rdfs:Resource . "
+				       "    OPTIONAL { ?ie nie:isStoredAs ?f } . "
+				       "  }"
+				       "  FILTER (");
 
 		g_string_append_printf (sparql, "STRSTARTS (?u, \"%s/\")", uri);
+
+		g_string_append (sparql, ")}");
 	}
 
-	g_string_append (sparql, ")}");
+	if (delete_self) {
+		const gchar *data_graphs[] = {
+			"tracker:Audio",
+			"tracker:Documents",
+			"tracker:Pictures",
+			"tracker:Software",
+			"tracker:Video",
+			"tracker:FileSystem",
+		};
+		gint i;
+
+		for (i = 0; i < G_N_ELEMENTS (data_graphs); i++) {
+			g_string_append_printf (sparql,
+						"DELETE { "
+						"  GRAPH %s {"
+						"    <%s> a rdfs:Resource . "
+						"    ?ie a rdfs:Resource . "
+						"  }"
+						"} WHERE {"
+						"  GRAPH " DEFAULT_GRAPH " {"
+						"    <%s> a rdfs:Resource . "
+						"    OPTIONAL { "
+						"      GRAPH %s {"
+						"        ?ie nie:isStoredAs <%s> "
+						"      }"
+						"    }"
+						"  }"
+						"} ",
+						data_graphs[i],
+						uri,
+						uri,
+						data_graphs[i],
+						uri);
+		}
+	}
+
 	g_free (uri);
 
 	tracker_sparql_buffer_push_sparql (buffer, file, sparql->str);
@@ -2287,9 +2322,10 @@ miner_files_remove_children (TrackerMinerFS      *fs,
 static void
 miner_files_remove_file (TrackerMinerFS      *fs,
                          GFile               *file,
-                         TrackerSparqlBuffer *buffer)
+                         TrackerSparqlBuffer *buffer,
+                         gboolean             is_dir)
 {
-	add_delete_sparql (file, buffer, TRUE, TRUE);
+	add_delete_sparql (file, buffer, TRUE, is_dir);
 }
 
 static void
