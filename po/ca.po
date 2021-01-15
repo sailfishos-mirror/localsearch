@@ -77,7 +77,7 @@ msgid ""
 "“Idea” for improved matching."
 msgstr ""
 "Tradueix els caràcters accentuats al seu equivalent sense accentuar. Per "
-"exemple: «català» a «catala» per millorar la coincidència."
+"exemple: «català» a «catala» per a millorar la coincidència."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
 msgid "Ignore numbers"
@@ -124,7 +124,7 @@ msgid ""
 "Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
 "Llindar d'espai de disc, en percentatge, en el qual s'atura la indexació, o "
-"-1 per desactivar-ho."
+"-1 per a desactivar-ho."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
 msgid "Crawling interval"
@@ -160,7 +160,7 @@ msgstr "Habilita els monitors de seguiment"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
 msgid "Set to false to completely disable any file monitoring"
 msgstr ""
-"Establiu a «false» (fals) per desactivar completament qualsevol tipus de "
+"Establiu a «false» (fals) per a desactivar completament qualsevol tipus de "
 "seguiment de canvis als fitxers"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
@@ -524,7 +524,7 @@ msgstr "MIME"
 #: src/tracker-extract/tracker-main.c:90
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr ""
-"Força l'ús d'un mòdul per extreure dades (p. ex. «imatges» per «imatge.jpg»)"
+"Força l'ús d'un mòdul per a extreure dades (p. ex. «imatges» per «imatge.jpg»)"
 
 #: src/tracker-extract/tracker-main.c:91
 msgid "MODULE"
@@ -1479,275 +1479,3 @@ msgstr "Inhabilita l'aturada després de 30 segons d'inactivitat"
 msgid "— start the tracker writeback service"
 msgstr "— inicia el servei d'escriptura del Tracker"
 
-#~ msgid "Directory is eligible to be mined (based on contents)"
-#~ msgstr ""
-#~ "Es poden fer extraccions de dades del directori (basant-se en els "
-#~ "continguts)"
-
-#~ msgid "Directory is eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "Es pot fer el seguiment del directori (basant-se en les configuracions)"
-
-#~ msgid "Directory is NOT eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "No es pot fer el seguiment del directori (basant-se en les configuracions)"
-
-#~ msgid "File is eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "Es pot fer el seguiment del fitxer (basant-se en les configuracions)"
-
-#~ msgid "File is NOT eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "No es pot fer el seguiment del fitxer (basant-se en les configuracions)"
-
-#~ msgid "File or Directory is eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "Es pot fer el seguiment del fitxer o del directori (basant-se en les "
-#~ "configuracions)"
-
-#~ msgid "File or Directory is NOT eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "No es pot fer el seguiment del fitxer o del directori (basant-se en les "
-#~ "configuracions)"
-
-#~ msgid "Would be indexed"
-#~ msgstr "S'indexaria"
-
-#~ msgid "Yes"
-#~ msgstr "Sí"
-
-#~ msgid "No"
-#~ msgstr "No"
-
-#~ msgid "Would be monitored"
-#~ msgstr "Se'n faria un seguiment"
-
-#~ msgid "Does nothing, provided for compatibility with Tracker 2.0"
-#~ msgstr "No fa res, es proporciona per compatibilitat amb el Tracker 2.0"
-
-#~ msgid "Could not (re)index file, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'ha pogut (tornar a)indexar el fitxer, no s'ha pogut crear el gestor, "
-#~ "%s"
-
-#~ msgid "Could not (re)index file"
-#~ msgstr "No s'ha pogut (tornar a)indexar el fitxer"
-
-#~ msgid "(Re)indexing file was successful"
-#~ msgstr "La (re)indexació s'ha fet correctament"
-
-#~ msgid "Could not open /proc"
-#~ msgstr "No s'ha pogut obrir /proc"
-
-#~ msgid "Could not stat() file"
-#~ msgstr "No s'ha pogut executar «stat()» al fitxer"
-
-#~ msgid "Could not open “%s”"
-#~ msgstr "No s'ha pogut obrir «%s»"
-
-#~ msgid "Could not terminate process %d — “%s”"
-#~ msgstr "No s'ha pogut acabar el procés %d — «%s»"
-
-#~ msgid "Terminated process %d — “%s”"
-#~ msgstr "S'ha finalitzat el procés %d — «%s»"
-
-#~ msgid "Search for emails"
-#~ msgstr "Cerca per correus electrònics"
-
-#~ msgid "Search for contacts"
-#~ msgstr "Cerca per contactes"
-
-#~ msgid "Search for bookmarks (--all has no effect on this)"
-#~ msgstr "Cerca adreces d'interès («--all» no modifica la cerca)"
-
-#~ msgid "No contacts were found"
-#~ msgstr "No s'ha trobat cap contacte"
-
-#~ msgid "Contacts"
-#~ msgstr "Contactes"
-
-#~ msgid "No name"
-#~ msgstr "Sense nom"
-
-#~ msgid "No E-mail address"
-#~ msgstr "Cap adreça electrònica"
-
-#~ msgid "No emails were found"
-#~ msgstr "No s'ha trobat cap correu"
-
-#~ msgid "Emails"
-#~ msgstr "Correus electrònics"
-
-#~ msgid "No bookmarks were found"
-#~ msgstr "No s'ha trobat cap adreça d'interès"
-
-#~ msgid "Bookmarks"
-#~ msgstr "Adreces d'interès"
-
-#~ msgid ""
-#~ "Collect debug information useful for problem reporting and investigation, "
-#~ "results are output to terminal"
-#~ msgstr ""
-#~ "Recull informació de depuració útil per a la investigació i proveïment "
-#~ "d'informació del problema, els resultats surten a un terminal"
-
-#~ msgid "Version"
-#~ msgstr "Versió"
-
-#~ msgid "Disk Information"
-#~ msgstr "Informació del disc"
-
-#~ msgid "Data Set"
-#~ msgstr "Conjunt de dades"
-
-#~ msgid "States"
-#~ msgstr "Estats"
-
-#~ msgid "Data Statistics"
-#~ msgstr "Estadístiques sobre les dades"
-
-#~ msgid "No connection available"
-#~ msgstr "No hi ha cap connexió disponible"
-
-#~ msgid "Could not get statistics"
-#~ msgstr "No s'han pogut obtenir les estadístiques"
-
-#~ msgid "No statistics were available"
-#~ msgstr "No hi havia estadístiques disponibles"
-
-#~ msgid "Database is currently empty"
-#~ msgstr "La base de dades està buida"
-
-#~ msgid ""
-#~ "Tell miners to reindex files which match the mime type supplied (for new "
-#~ "extractors), use -m MIME1 -m MIME2"
-#~ msgstr ""
-#~ "Fes que els extractors de dades tornin a indexar els fitxers que "
-#~ "coincideixen amb el tipus MIME proporcionat (per a extractors nous), "
-#~ "utilitzeu -m MIME1 -m MIME2"
-
-#~ msgid "Tell miners to (re)index a given file"
-#~ msgstr "(Torna a)indexar el fitxer donat"
-
-#~ msgid "Backup current index / database to the file provided"
-#~ msgstr ""
-#~ "Fes una còpia de seguretat de l'índex i la base de dades al fitxer "
-#~ "proporcionat"
-
-#~ msgid "Restore a database from a previous backup (see --backup)"
-#~ msgstr ""
-#~ "Restaura una base de dades d'una còpia de seguretat prèvia (vegeu --"
-#~ "backup)"
-
-#~ msgid "Import a dataset from the provided file (in Turtle format)"
-#~ msgstr ""
-#~ "Importa un conjunt de dades des del fitxer proporcionat (en format Turtle)"
-
-#~ msgid "Could not reindex mimetypes, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'han pogut tornar a indexar els tipus MIME, no s'ha pogut crear el "
-#~ "gestor, %s"
-
-#~ msgid "Could not reindex mimetypes"
-#~ msgstr "No s'han pogut tornar a indexar els tipus MIME"
-
-#~ msgid "Reindexing mime types was successful"
-#~ msgstr "S'ha tornat a indexar correctament els tipus MIME"
-
-#~ msgid "Importing Turtle file"
-#~ msgstr "S'està important el fitxer Turtle"
-
-#~ msgid "Unable to import Turtle file"
-#~ msgstr "No s'ha pogut importar el fitxer Turtle"
-
-#~ msgid "Backing up database"
-#~ msgstr "S'està fent una còpia de seguretat de la base de dades"
-
-#~ msgid "Could not backup database"
-#~ msgstr "No s'ha pogut crear una còpia de seguretat de la base de dades"
-
-#~ msgid "Restoring database from backup"
-#~ msgstr "S'està restaurant la base de dades des de la còpia de seguretat"
-
-#~ msgid ""
-#~ "Only one action (--backup, --restore, --index-file or --import) can be "
-#~ "used at a time"
-#~ msgstr ""
-#~ "Només es pot utilitzar una acció alhora (--backup, --restore, --index-"
-#~ "file o --import)"
-
-#~ msgid "Missing one or more files which are required"
-#~ msgstr "Manquen un o més fitxers que són necessaris"
-
-#~ msgid "Only one file can be used with --backup and --restore"
-#~ msgstr "Només es pot usar un fitxer amb --backup i --restore"
-
-#~ msgid ""
-#~ "Actions (--backup, --restore, --index-file and --import) can not be used "
-#~ "with --reindex-mime-type"
-#~ msgstr ""
-#~ "Accions (--backup, --restore, --index-file and --import) no es poden "
-#~ "utilitzar amb --reindex-mime-type"
-
-#~ msgid "Log verbosity"
-#~ msgstr "Detall del registre"
-
-#~ msgid "Log verbosity."
-#~ msgstr "Detall del registre."
-
-#~ msgid "Scheduler priority when idle"
-#~ msgstr "Prioritat del planificador quan està inactiu"
-
-#~ msgid ""
-#~ "The scheduler is the kernel component that decides which runnable "
-#~ "application will be executed by the CPU next. Each application has an "
-#~ "associated scheduling policy and priority."
-#~ msgstr ""
-#~ "El planificador és el component principal que decideix quina serà la "
-#~ "següent aplicació que s'executarà a la CPU. Cada aplicació té associada "
-#~ "una política i prioritat de planificació."
-
-#~ msgid "Enable writeback"
-#~ msgstr "Habilita la reescriptura"
-
-#~ msgid "Set to false to completely disable any file writeback"
-#~ msgstr ""
-#~ "Establiu a «false» (fals) per desactivar completament qualsevol "
-#~ "reescriptura de fitxer"
-
-#~ msgid "File system data miner"
-#~ msgstr "Extractor de dades de fitxers del sistema"
-
-#~ msgid "Tracker File System Miner"
-#~ msgstr "Extractor de dades dels fitxers del sistema del Tracker"
-
-#~ msgid "RSS/ATOM Feeds"
-#~ msgstr "Canals RSS/ATOM"
-
-#~ msgid "Fetch RSS/ATOM Feeds"
-#~ msgstr "Recull canals RSS/ATOM"
-
-#~ msgid "Tracker RSS/ATOM Feeds Miner"
-#~ msgstr "Extractor de dades de canals RSS/ATOM del Tracker"
-
-#~ msgid "Fetch RSS/ATOM feeds"
-#~ msgstr "Recull canals RSS/ATOM"
-
-#~ msgid "Extractor"
-#~ msgstr "Extractor"
-
-#~ msgid "Metadata extractor"
-#~ msgstr "Extractor de metadades"
-
-#~ msgid ""
-#~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
-#~ "(default = 0)"
-#~ msgstr ""
-#~ "Registre, 0 = només errors, 1 = mínim, 2 = detallat i 3 = depuració "
-#~ "(predeterminat = 0)"
-
-#~ msgid "Tracker Metadata Extractor"
-#~ msgstr "Extractor de metadades Tracker"
-
-#~ msgid "Extracts metadata from local files"
-#~ msgstr "Extreu metadades dels fitxers locals"
