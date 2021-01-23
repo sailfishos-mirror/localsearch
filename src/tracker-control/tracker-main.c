@@ -104,7 +104,8 @@ initialize_signal_handler (void)
 }
 
 static void
-files_index_close_cb (GMainLoop *main_loop)
+files_index_close_cb (TrackerMinerFilesIndex *index,
+                      GMainLoop              *main_loop)
 {
 	g_debug ("No further watched folders, closing");
 	g_main_loop_quit (main_loop);
