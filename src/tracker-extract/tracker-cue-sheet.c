@@ -29,10 +29,8 @@
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
 
-#if defined(HAVE_LIBCUE2)
+#if defined(HAVE_LIBCUE)
 #include <libcue.h>
-#elif defined(HAVE_LIBCUE)
-#include <libcue/libcue.h>
 #endif
 
 #include <libtracker-miners-common/tracker-file-utils.h>
@@ -107,14 +105,10 @@ add_cdtext_string_tag (Cdtext      *cd_text,
 }
 
 static void
-add_cdtext_comment_date_tag (Rem         *cd_comments,
-#if defined(HAVE_LIBCUE2)
+add_cdtext_comment_date_tag (Rem          *cd_comments,
                              enum RemType index,
-#elif defined(HAVE_LIBCUE)
-                             enum Cmt     index,
-#endif
-                             GstTagList  *tag_list,
-                             const gchar *tag)
+                             GstTagList   *tag_list,
+                             const gchar  *tag)
 {
 	const gchar *text;
 	gint year;
@@ -134,14 +128,10 @@ add_cdtext_comment_date_tag (Rem         *cd_comments,
 }
 
 static void
-add_cdtext_comment_double_tag (Rem         *cd_comments,
-#if defined(HAVE_LIBCUE2)
-                               enum RemType index,
-#elif defined(HAVE_LIBCUE)
-                               enum Cmt     index,
-#endif
-                               GstTagList  *tag_list,
-                               const gchar *tag)
+add_cdtext_comment_double_tag (Rem          *cd_comments,
+                               enum RemType  index,
+                               GstTagList   *tag_list,
+                               const gchar  *tag)
 {
 	const gchar *text;
 	gdouble value;

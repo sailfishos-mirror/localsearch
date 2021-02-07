@@ -35,9 +35,6 @@
 /* Define if we have libcue */
 #mesondefine HAVE_LIBCUE
 
-/* Define if we have libcue 2 or up */
-#mesondefine HAVE_LIBCUE2
-
 /* Define if we have libexif */
 #mesondefine HAVE_LIBEXIF
 
