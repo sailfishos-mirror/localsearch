@@ -358,7 +358,7 @@ find_local_cue_sheets (GFile *audio_file)
 }
 
 TrackerToc *
-tracker_cue_sheet_parse_uri (const gchar *uri)
+tracker_cue_sheet_guess_from_uri (const gchar *uri)
 {
 	GFile *audio_file;
 	gchar *audio_file_name;
@@ -419,7 +419,7 @@ tracker_cue_sheet_parse (const gchar *cue_sheet)
 }
 
 TrackerToc *
-tracker_cue_sheet_parse_uri (const gchar *uri)
+tracker_cue_sheet_guess_from_uri (const gchar *uri)
 {
 	return NULL;
 }

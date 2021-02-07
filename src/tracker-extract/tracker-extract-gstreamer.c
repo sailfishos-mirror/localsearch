@@ -1319,7 +1319,7 @@ tracker_extract_gstreamer (const gchar          *uri,
 		}
 
 		if (extractor->toc == NULL) {
-			extractor->toc = tracker_cue_sheet_parse_uri (uri);
+			extractor->toc = tracker_cue_sheet_guess_from_uri (uri);
 		}
 
 		if (extractor->toc == NULL &&
