@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the Tracker package.
 # Ignacio Casal Quinteiro <icq@cvs.gnome.org>, 2007, 2008.
 # Mancomún - Centro de Referencia e Servizos de Software Libre <g11n@mancomun.org>, 2009.
-# Fran Dieguez <frandieguez@gnome.org>, 2011-2020.
+# Fran Dieguez <frandieguez@gnome.org>, 2011-2021.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker.HEAD.gl\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-25 20:43+0000\n"
-"PO-Revision-Date: 2020-08-26 17:06+0200\n"
+"POT-Creation-Date: 2021-01-10 11:18+0000\n"
+"PO-Revision-Date: 2021-02-08 23:40+0100\n"
 "Last-Translator: Fran Dieguez <frandieguez@gnome.org>\n"
 "Language-Team: Galician <proxecto@trasno.gal>\n"
 "Language: gl\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
-"X-Generator: Gtranslator 3.36.0\n"
+"X-Generator: Gtranslator 3.38.0\n"
 "X-Project-Style: gnome\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -277,61 +277,57 @@ msgstr "Cartafoles con contido ignoradas"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Evitar calquera cartafol que conteña un ficheiro nesta lista negra"
 
-#: src/libtracker-miners-common/tracker-utils.c:90
-msgid "unknown time"
-msgstr "hora descoñecida"
-
-#: src/libtracker-miners-common/tracker-utils.c:104
-#: src/libtracker-miners-common/tracker-utils.c:155
+#: src/libtracker-miners-common/tracker-utils.c:101
+#: src/libtracker-miners-common/tracker-utils.c:152
 msgid "less than one second"
 msgstr "menos dun segundo"
 
 #. Translators: this is %d days
-#: src/libtracker-miners-common/tracker-utils.c:119
+#: src/libtracker-miners-common/tracker-utils.c:116
 #, c-format
 msgid " %dd"
 msgstr " %dd"
 
 #. Translators: this is %2.2d hours
-#: src/libtracker-miners-common/tracker-utils.c:123
+#: src/libtracker-miners-common/tracker-utils.c:120
 #, c-format
 msgid " %2.2dh"
 msgstr " %2.2dh"
 
 #. Translators: this is %2.2d minutes
-#: src/libtracker-miners-common/tracker-utils.c:127
+#: src/libtracker-miners-common/tracker-utils.c:124
 #, c-format
 msgid " %2.2dm"
 msgstr " %2.2dm"
 
 #. Translators: this is %2.2d seconds
-#: src/libtracker-miners-common/tracker-utils.c:131
+#: src/libtracker-miners-common/tracker-utils.c:128
 #, c-format
 msgid " %2.2ds"
 msgstr " %2.2ds"
 
-#: src/libtracker-miners-common/tracker-utils.c:135
+#: src/libtracker-miners-common/tracker-utils.c:132
 #, c-format
 msgid " %d day"
 msgid_plural " %d days"
 msgstr[0] " %d día"
 msgstr[1] " %d días"
 
-#: src/libtracker-miners-common/tracker-utils.c:139
+#: src/libtracker-miners-common/tracker-utils.c:136
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
 msgstr[0] " %2.2d hora"
 msgstr[1] " %2.2d horas"
 
-#: src/libtracker-miners-common/tracker-utils.c:143
+#: src/libtracker-miners-common/tracker-utils.c:140
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
 msgstr[0] " %2.2d minuto"
 msgstr[1] " %2.2d minutos"
 
-#: src/libtracker-miners-common/tracker-utils.c:147
+#: src/libtracker-miners-common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
@@ -353,20 +349,20 @@ msgstr ""
 "A aplicación de pausa e a razón xa coinciden cunha solicitude de pausa "
 "existente"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:81
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Tempo de repouso inicial en segundos, 0->1000 (predeterminado=15)"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:86
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Execútase até que tódalas localizacións configuradas se indexan e sae"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker/tracker-info.c:74
+#: src/miners/fs/tracker-main.c:90 src/tracker/tracker-info.c:74
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Comproba se o FICHEIRO é elexíbel para ser escrutado segundo a configuración"
 
-#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:77 src/tracker/tracker-info.c:78
@@ -374,70 +370,63 @@ msgstr ""
 msgid "FILE"
 msgstr "FICHEIRO"
 
-#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "Executa para unha ontoloxía de dominios específica"
 
-#: src/miners/fs/tracker-main.c:93
+#: src/miners/fs/tracker-main.c:98
 msgid "Avoids changes in the filesystem"
 msgstr "Evita cambios no sistema de ficheiros"
 
-#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:101
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "Mostra a información da versión"
 
-#: src/miners/fs/tracker-main.c:569
+#: src/miners/fs/tracker-main.c:624
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "O obxecto de datos «%s» xa existe"
 
-#: src/miners/fs/tracker-main.c:570
+#: src/miners/fs/tracker-main.c:625
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "O obxecto de datos «%s» non existe"
 
-#: src/miners/fs/tracker-main.c:606
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:661
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "O cartafol NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/miners/fs/tracker-main.c:610
-#| msgid "File is NOT eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:665
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "O ficheiro NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/miners/fs/tracker-main.c:613
-#| msgid "File is NOT eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:668
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "O ficheiro NON é elixíbel para ser escrutado (ficheiro oculto)"
 
-#: src/miners/fs/tracker-main.c:615
-#| msgid "File is NOT eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:670
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr ""
 "O ficheiro NON é elixíbel para ser escrutado (non está nun cartafol "
 "escrutado)"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:694
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "O cartafol pai «%s» NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:700
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "O cartafol pai «%s» NON é elixíbel para ser escrutado (ficheiro oculto)"
 
-#: src/miners/fs/tracker-main.c:653
+#: src/miners/fs/tracker-main.c:708
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on contents)"
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
@@ -445,20 +434,18 @@ msgstr ""
 "O cartafol pai «%s» NON é elixíbel para ser escrutado (segundo os filtros de "
 "contido)"
 
-#: src/miners/fs/tracker-main.c:674
-#| msgid "Directory is eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:729
 msgid "Directory is eligible to be indexed"
 msgstr "O cartafol é elixíbel para ser escrutado"
 
-#: src/miners/fs/tracker-main.c:675
-#| msgid "File is eligible to be mined (based on rules)"
+#: src/miners/fs/tracker-main.c:730
 msgid "File is eligible to be indexed"
 msgstr "O ficheiro é elixíbel para ser escrutado"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:929
+#: src/miners/fs/tracker-main.c:988
 msgid "— start the tracker indexer"
 msgstr "— iniciar o indexador do tracker"
 
@@ -482,7 +469,7 @@ msgstr "Título que usar (débese usar con «--add-feed»)"
 msgid "— start the feeds indexer"
 msgstr "— iniciar o indexador do tracker"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:361
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:390
 #: src/tracker/tracker-search.c:1210 src/tracker/tracker-status.c:88
 #: src/tracker/tracker-status.c:201 src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
@@ -493,10 +480,10 @@ msgstr "Non foi posíbel estabelecer unha conexión con Tracker"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:362 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-info.c:391 src/tracker/tracker-process.c:193
 #: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:89
-#: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:251
-#: src/tracker/tracker-status.c:280 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:248
+#: src/tracker/tracker-status.c:277 src/tracker/tracker-tag.c:976
 msgid "No error given"
 msgstr "Non se obtivo ningún erro"
 
@@ -511,11 +498,11 @@ msgstr "Non foi posíbel engadir un fornecedor"
 msgid "— start the tracker index proxy"
 msgstr "— iniciar o proxy do indexador do tracker"
 
-#: src/tracker-extract/tracker-extract.c:674
+#: src/tracker-extract/tracker-extract.c:687
 msgid "Metadata extraction failed"
 msgstr "Produciuse un fallo na extracción de metadatos"
 
-#: src/tracker-extract/tracker-extract.c:736
+#: src/tracker-extract/tracker-extract.c:762
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Non foi posíbel atopar un módulo para xestionar este ficheiro"
 
@@ -814,7 +801,7 @@ msgstr "Omítense todas as propiedades nie:plainTextConten"
 msgid "Common statuses include"
 msgstr "Os estados comúns inclúen"
 
-#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:279
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:276
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "Non foi posíbel obter o estado, non foi posíbel crear o xestor, %s"
@@ -873,9 +860,9 @@ msgstr ""
 "Se non se fornecen argumentos, mostrarase o estado dos mineiros de datos"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:554
-#: src/tracker/tracker-reset.c:260 src/tracker/tracker-search.c:1400
-#: src/tracker/tracker-status.c:602 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:582
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1400
+#: src/tracker/tracker-status.c:599 src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
 msgstr "Non se recoñeceron as opcións"
 
@@ -887,7 +874,7 @@ msgstr "Non foi posíbel estabelecer unha conexión co D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Non foi posíbel crear o proxy de D-Bus ao tracker-store"
 
-#: src/tracker/tracker-extract.c:68 src/tracker/tracker-info.c:506
+#: src/tracker/tracker-extract.c:68
 msgid "Could not run tracker-extract: "
 msgstr "Non se puido executar tracker-extract: "
 
@@ -900,7 +887,6 @@ msgid "Removes FILE from indexed locations"
 msgstr "Retira FICHEIRO das localizacións indexadas"
 
 #: src/tracker/tracker-index.c:56
-#| msgid "Directories to index recursively"
 msgid "Makes indexing recursive"
 msgstr "Fai o escrutado recursivo"
 
@@ -924,7 +910,7 @@ msgstr "--add e --remove son mutuamente exclusivos"
 msgid "--recursive requires --add"
 msgstr "--recursive require --add"
 
-#: src/tracker/tracker-index.c:344 src/tracker/tracker-status.c:403
+#: src/tracker/tracker-index.c:344 src/tracker/tracker-status.c:400
 msgid "Path"
 msgstr "Ruta"
 
@@ -976,27 +962,30 @@ msgstr "Non foi posíbel obter os prefixos de espazos de nomes"
 msgid "No namespace prefixes were returned"
 msgstr "Non foi posíbel ningún prefixo de espazo de nomes"
 
-#: src/tracker/tracker-info.c:386
+#: src/tracker/tracker-info.c:221 src/tracker/tracker-search.c:1136
+msgid "Results"
+msgstr "Resultados"
+
+#: src/tracker/tracker-info.c:414
 msgid "Querying information for entity"
 msgstr "Consultando a información para a entidade"
 
-#: src/tracker/tracker-info.c:410
-#| msgid "Unable to retrieve namespace prefixes"
+#: src/tracker/tracker-info.c:438
 msgid "Unable to retrieve URN for URI"
 msgstr "Non foi posíbel obter a URI"
 
-#: src/tracker/tracker-info.c:420 src/tracker/tracker-info.c:454
-#| msgid "Unable to retrieve namespace prefixes"
+#: src/tracker/tracker-info.c:448 src/tracker/tracker-info.c:481
 msgid "Unable to retrieve data for URI"
 msgstr "Non foi posíbel obter os datos para a URI"
 
-#: src/tracker/tracker-info.c:463
+#: src/tracker/tracker-info.c:504
 msgid "No metadata available for that URI"
 msgstr "Non hai metadatos dispoñíbeis para a URI"
 
-#: src/tracker/tracker-info.c:468 src/tracker/tracker-search.c:1136
-msgid "Results"
-msgstr "Resultados"
+#: src/tracker/tracker-info.c:509 src/tracker/tracker-info.c:538
+#| msgid "Could not get all tags"
+msgid "Could not get eligible status: "
+msgstr "Non foi posíbel obter un estado elixíbel."
 
 #: src/tracker/tracker-process.c:190
 #, c-format
@@ -1243,58 +1232,57 @@ msgstr "Estatísticas:"
 msgid "None"
 msgstr "Ningún"
 
-#: src/tracker/tracker-status.c:225 src/tracker/tracker-status.c:250
+#: src/tracker/tracker-status.c:222 src/tracker/tracker-status.c:247
 msgid "Could not get basic status for Tracker"
 msgstr "Non foi posíbel obter o estado básico de Tracker"
 
-#: src/tracker/tracker-status.c:404 src/tracker/tracker-status.c:549
+#: src/tracker/tracker-status.c:401 src/tracker/tracker-status.c:546
 msgid "Message"
 msgstr "Mensaxe"
 
-#: src/tracker/tracker-status.c:457
+#: src/tracker/tracker-status.c:454
 msgid "Currently indexed"
 msgstr "Indexados actualmente"
 
-#: src/tracker/tracker-status.c:460 src/tracker/tracker-tag.c:557
+#: src/tracker/tracker-status.c:457 src/tracker/tracker-tag.c:557
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d ficheiro"
 msgstr[1] "%d ficheiros"
 
-#: src/tracker/tracker-status.c:466
+#: src/tracker/tracker-status.c:463
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d cartafol"
 msgstr[1] "%d cartafoles"
 
-#: src/tracker/tracker-status.c:480
+#: src/tracker/tracker-status.c:477
 msgid "Remaining space on database partition"
 msgstr "Espazo libre na partición da base de datos"
 
-#: src/tracker/tracker-status.c:492
+#: src/tracker/tracker-status.c:489
 msgid "Data is still being indexed"
 msgstr "Os datos aínda se están indexando"
 
-#: src/tracker/tracker-status.c:493
+#: src/tracker/tracker-status.c:490
 #, c-format
 msgid "Estimated %s left"
 msgstr "Quedan aproximadamente %s"
 
-#: src/tracker/tracker-status.c:497
+#: src/tracker/tracker-status.c:494
 msgid "All data miners are idle, indexing complete"
 msgstr "Todos os mineiros están ociosos, o indexado completou"
 
-#: src/tracker/tracker-status.c:504
+#: src/tracker/tracker-status.c:501
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d fallo gravado"
 msgstr[1] "%d fallos gravados"
 
-#: src/tracker/tracker-status.c:565
-#| msgid "No software was found"
+#: src/tracker/tracker-status.c:562
 msgid "No reports found"
 msgstr "Non se atopou ningún rexistro"
 
@@ -1479,6 +1467,9 @@ msgstr "Desactivar o apagado despois de 30 segundos de inactividade"
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— iniciar o servizo de escrita en diferido"
+
+#~ msgid "unknown time"
+#~ msgstr "hora descoñecida"
 
 #~ msgid "Directory is eligible to be mined (based on contents)"
 #~ msgstr "O cartafol é elixíbel para ser escrutada (segundo o contido)"
