@@ -106,6 +106,11 @@ typedef struct {
 	TrackerTask *task;
 } UpdateProcessingTaskContext;
 
+typedef struct {
+	guint processed;
+	guint finished;
+} RootStats;
+
 struct _TrackerMinerFSPrivate {
 	TrackerPriorityQueue *items;
 
@@ -151,6 +156,8 @@ struct _TrackerMinerFSPrivate {
 	/*
 	 * Statistics
 	 */
+	GHashTable *root_stats;
+	GHashTable *changed_roots;
 
 	/* How many we found during crawling and how many were black
 	 * listed (ignored). Reset to 0 when processing stops. */
@@ -455,6 +462,8 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	                                 (GEqualFunc) g_file_equal,
 	                                 g_object_unref,
 	                                 g_free);
+	priv->root_stats = g_hash_table_new_full (NULL, NULL, NULL, g_free);
+	priv->changed_roots = g_hash_table_new (NULL, NULL);
 }
 
 static gboolean
@@ -731,6 +740,8 @@ fs_finalize (GObject *object)
 	g_timer_destroy (priv->extraction_timer);
 
 	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
+	g_clear_pointer (&priv->root_stats, g_hash_table_unref);
+	g_clear_pointer (&priv->changed_roots, g_hash_table_unref);
 
 	if (priv->item_queues_handler_id) {
 		g_source_remove (priv->item_queues_handler_id);
@@ -1011,6 +1022,33 @@ log_stats (TrackerMinerFS *fs)
 #endif
 }
 
+static gboolean
+signal_changed_roots (TrackerMinerFS *fs)
+{
+	GHashTableIter iter;
+	gpointer key;
+
+	g_hash_table_iter_init (&iter, fs->priv->changed_roots);
+
+	while (g_hash_table_iter_next (&iter, &key, NULL)) {
+		GFile *root = key;
+		RootStats *stats;
+		gdouble progress;
+
+		stats = g_hash_table_lookup (fs->priv->root_stats, root);
+		if (!stats)
+			continue;
+
+		progress = (gdouble) stats->finished / stats->processed;
+		g_signal_emit_by_name (fs, "detailed-progress",
+		                       g_file_peek_path (root), progress);
+		if (stats->finished == stats->processed)
+			g_hash_table_remove (fs->priv->root_stats, root);
+	}
+
+	g_hash_table_remove_all (fs->priv->changed_roots);
+}
+
 static void
 process_stop (TrackerMinerFS *fs)
 {
@@ -1023,6 +1061,8 @@ process_stop (TrackerMinerFS *fs)
 
 	fs->priv->timer_stopped = TRUE;
 	fs->priv->extraction_timer_stopped = TRUE;
+
+	signal_changed_roots (fs);
 
 	g_object_set (fs,
 	              "progress", 1.0,
@@ -1372,6 +1412,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 {
 	GFile *file = NULL;
 	GFile *source_file = NULL;
+	GFile *root;
 	gint64 time_now;
 	static gint64 time_last = 0;
 	gboolean keep_processing = TRUE;
@@ -1379,6 +1420,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	gboolean is_dir = FALSE;
 	TrackerMinerFSEventType type;
 	GFileInfo *info = NULL;
+	RootStats *stats;
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		/* Task pool is full, give it a break */
@@ -1486,7 +1528,10 @@ miner_handle_next_item (TrackerMinerFS *fs)
 
 			g_free (str2);
 			g_free (str1);
+
 		}
+
+		signal_changed_roots (fs);
 	}
 
 	if (file == NULL) {
@@ -1547,6 +1592,14 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		notify_roots_finished (fs);
 	} else {
 		item_queue_handlers_set_up (fs);
+	}
+
+	root = tracker_indexing_tree_get_root (fs->priv->indexing_tree,
+	                                       file, NULL);
+	stats = g_hash_table_lookup (fs->priv->root_stats, root);
+	if (stats) {
+		g_hash_table_add (fs->priv->changed_roots, root);
+		stats->finished++;
 	}
 
 	g_clear_object (&file);
@@ -1651,13 +1704,17 @@ item_queue_handlers_set_up (TrackerMinerFS *fs)
 }
 
 static gint
-miner_fs_get_queue_priority (TrackerMinerFS *fs,
-                             GFile          *file)
+miner_fs_get_queue_priority (TrackerMinerFS  *fs,
+                             GFile           *file,
+                             GFile          **root_out)
 {
 	TrackerDirectoryFlags flags;
+	GFile *root;
 
-	tracker_indexing_tree_get_root (fs->priv->indexing_tree,
-	                                file, &flags);
+	root = tracker_indexing_tree_get_root (fs->priv->indexing_tree,
+	                                       file, &flags);
+	if (root_out)
+		*root_out = root;
 
 	return (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) ?
 	        G_PRIORITY_HIGH : G_PRIORITY_DEFAULT;
@@ -1753,9 +1810,22 @@ file_notifier_file_created (TrackerFileNotifier  *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
+	gint priority;
+	RootStats *stats;
+	GFile *root;
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_CREATED, file, info);
-	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
+	priority = miner_fs_get_queue_priority (fs, file, &root);
+	miner_fs_queue_event (fs, event, priority);
+
+	stats = g_hash_table_lookup (fs->priv->root_stats, root);
+	if (!stats) {
+		stats = g_new0 (RootStats, 1);
+		g_hash_table_insert (fs->priv->root_stats, root, stats);
+	}
+
+	g_hash_table_add (fs->priv->changed_roots, root);
+	stats->processed++;
 }
 
 static void
@@ -1776,7 +1846,7 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED, file, NULL);
 	event->is_dir = !!is_dir;
-	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
+	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file, NULL));
 }
 
 static void
@@ -1791,7 +1861,7 @@ file_notifier_file_updated (TrackerFileNotifier  *notifier,
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, file, info);
 	event->attributes_update = attributes_only;
-	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
+	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file, NULL));
 }
 
 static void
@@ -1805,7 +1875,7 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 	QueueEvent *event;
 
 	event = queue_event_moved_new (source, dest, is_dir);
-	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, source));
+	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, source, NULL));
 }
 
 static void
@@ -1981,7 +2051,7 @@ check_file_parents (TrackerMinerFS *fs,
 
 	for (p = parents; p; p = p->next) {
 		event = queue_event_new (TRACKER_MINER_FS_EVENT_UPDATED, p->data, NULL);
-		miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, p->data));
+		miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, p->data, NULL));
 		g_object_unref (p->data);
 	}
 

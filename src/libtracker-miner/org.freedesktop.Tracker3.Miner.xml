@@ -52,5 +52,9 @@
       <arg type="d" name="progress" />
       <arg type="i" name="remaining_time" />
     </signal>
+    <signal name="DetailedProgress">
+      <arg type="s" name="detail" />
+      <arg type="d" name="progress" />
+    </signal>
   </interface>
 </node>

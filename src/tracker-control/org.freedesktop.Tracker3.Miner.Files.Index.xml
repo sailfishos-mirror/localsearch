@@ -6,6 +6,18 @@
       <arg type='as' name='flags' direction='in'>"
         <doc:doc><doc:summary>Extension flags, no allowed values at the moment</doc:summary></doc:doc>
       </arg>
+      <arg type='o' name='handle' direction='out'>
+	<doc:doc><doc:summary>
+	  Object path to the given handle, with the
+	  org.freedesktop.Tracker3.Miner.Files.Location interface
+	</doc:summary></doc:doc>
+      </arg>
     </method>
+    <property type='b' name='active' access='read' />
+  </interface>
+
+  <interface name='org.freedesktop.Tracker3.Miner.Files.Location'>
+    <property type='d' name='progress' access='read' />
+    <method name='Close' />
   </interface>
 </node>

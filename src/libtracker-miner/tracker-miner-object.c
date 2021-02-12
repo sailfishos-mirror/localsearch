@@ -84,6 +84,7 @@ enum {
 	PAUSED,
 	RESUMED,
 	PROGRESS,
+	DETAILED_PROGRESS,
 	LAST_SIGNAL
 };
 
@@ -230,6 +231,16 @@ tracker_miner_class_init (TrackerMinerClass *klass)
 		              G_TYPE_STRING,
 		              G_TYPE_DOUBLE,
 		              G_TYPE_INT);
+
+	signals[DETAILED_PROGRESS] =
+		g_signal_new ("detailed-progress",
+		              G_OBJECT_CLASS_TYPE (object_class),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL,
+		              NULL,
+		              G_TYPE_NONE, 2,
+		              G_TYPE_STRING,
+		              G_TYPE_DOUBLE);
 
 	g_object_class_install_property (object_class,
 	                                 PROP_STATUS,
