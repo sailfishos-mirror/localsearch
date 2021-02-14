@@ -95,6 +95,10 @@ if totem_plparser.found()
   extractor_tests += 'playlists/playlist-test-1'
 endif
 
+if libcue.found()
+  extractor_tests += 'disc-images/psx-game-image-1'
+endif
+
 if libgsf.found()
   extractor_tests += [
     'office/oasis-doc',
