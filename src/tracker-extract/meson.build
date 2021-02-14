@@ -97,6 +97,10 @@ if libgxps.found()
   modules += [['extract-xps', 'tracker-extract-xps.c', ['10-xps.rule'], [libgxps, tracker_miners_common_dep]]]
 endif
 
+if libcue.found()
+  modules += [['extract-disc-generic', 'tracker-extract-disc-generic.c', ['90-disc-generic.rule'], dependencies]]
+endif
+
 enabled_rule_files = []
 
 foreach module : modules

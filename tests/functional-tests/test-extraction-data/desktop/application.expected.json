@@ -11,7 +11,7 @@
         "nfo:softwareIcon": {
             "@id": "urn:theme-icon:foo",
             "@type": [
-                "nfo:Website"
+                "nfo:Image"
             ]
         },
         "nie:comment": "my awesome application",

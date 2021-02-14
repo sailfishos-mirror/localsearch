@@ -404,6 +404,11 @@ class TrackerExtractTestCase(ut.TestCase):
         for prop in expected_keys:
             self.assertDictHasKey(result, prop,
                                   error_missing_prop % (prop, filename, spec_filename))
+            if isinstance(spec[prop], list):
+                for value in spec[prop]:
+                    self.assertIn(value, result[prop])
+            else:
+                self.assertIn(spec[prop], result[prop])
 
 
 TEST_FILE_JPEG = "writeback-test-1.jpeg"
