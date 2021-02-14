@@ -1,3 +1,15 @@
+NEW in 3.1.0.beta - 2021-02-14
+==============================
+  * Fix tracker-miner-fs-control-3 stall on shutdown
+  * Improve ellipsizing in CLI tools
+  * Update list of game-related mimetypes
+  * Add disc-generic extractor guessing data for CUE files,
+    supported so far:
+    - Playstation images
+    - Turbografx images
+
+Translations: ca, cs, es, gl, id, pt_BR, ro, sl, sv
+
 NEW in 3.1.0.alpha - 2021-01-10
 ===============================
   * Fix "tracker3 search --folders"
