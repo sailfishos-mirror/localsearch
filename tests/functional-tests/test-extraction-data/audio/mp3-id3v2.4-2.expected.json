@@ -79,7 +79,7 @@
         "nie:isStoredAs": [
             {
                 "nfo:hasHash": {
-                    "@type": "nfo:hasHash",
+                    "@type": "nfo:FileHash",
                     "nfo:hashAlgorithm": "chromaprint",
                     "nfo:hashValue": "111222"
                 }
