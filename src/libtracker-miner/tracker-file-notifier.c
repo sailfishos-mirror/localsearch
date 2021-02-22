@@ -1048,7 +1048,7 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 
 	if (!is_directory) {
 		TrackerSparqlStatement *stmt;
-		TrackerSparqlCursor *cursor;
+		TrackerSparqlCursor *cursor = NULL;
 		const gchar *mimetype;
 		gchar *uri;
 
