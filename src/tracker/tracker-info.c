@@ -363,7 +363,7 @@ static gboolean
 output_eligible_status_for_file (gchar   *path,
                                  GError **error)
 {
-	g_autofree char *tracker_miner_fs_path;
+	g_autofree char *tracker_miner_fs_path = NULL;
 
 	tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "tracker-miner-fs-3", NULL);
 
