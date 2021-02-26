@@ -331,13 +331,16 @@ get_gps_coordinate (ExifData *exif,
 				(gdouble) minutes.numerator / (minutes.denominator * 60) +
 				(gdouble) seconds.numerator / (seconds.denominator * 60 * 60);
 
-			if (refentry->format == EXIF_FORMAT_ASCII && (refentry->size == 2)) {
-				// following Exif Version 2.2 specs
-				if (refentry->data[0] == 'S' || refentry->data[0] == 'W') {
-					f = -1 * f;
-				}
-			} else {
-				g_error("Invalid GPS Ref entry!");
+			if (refentry->format != EXIF_FORMAT_ASCII || refentry->size < 2) {
+				g_debug ("Invalid format/size for GPS ref entry");
+				return NULL;
+			}
+
+			/* following Exif Version 2.2 specs */
+			if (refentry->data[0] == 'S' || refentry->data[0] == 'W') {
+				f = -1 * f;
+			} else if (refentry->data[0] != 'N' && refentry->data[0] != 'E') {
+				g_debug ("Invalid GPS Ref entry content");
 				return NULL;
 			}
 
