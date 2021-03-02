@@ -1,15 +1,15 @@
 # Serbian translation for tracker.
 # Courtesy of Prevod.org team (http://prevod.org/) -- 2011—2021.
 # This file is distributed under the same license as the tracker package.
-# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2012—2021.
 # Милош Поповић <gpopac@gmail.com>, 2011—2015.
 # Марко М. Костић <marko.m.kostic@gmail.com>, 2020."
+# Мирослав Николић <miroslavnikolic@rocketmail.com>, 2012—2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-10-12 17:53+0000\n"
-"PO-Revision-Date: 2021-02-19 06:16+0200\n"
+"POT-Creation-Date: 2021-02-19 05:22+0000\n"
+"PO-Revision-Date: 2021-03-02 20:19+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -203,12 +203,6 @@ msgstr "Директоријуми за дубинско пописивање"
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
-#| msgid ""
-#| "List of directories to index recursively, Special values include: &amp;"
-#| "DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
-#| "PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS.\n"
-#| "\n"
-#| "See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index recursively, Special values include: "
 "‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -217,8 +211,8 @@ msgid ""
 msgstr ""
 "Списак директоријума који ће бити пописани дубински. У посебне вредности "
 "спадају: „&РАДНА_ПОВРШ“, „&ДОКУМЕНТИ“, „&ПРЕУЗИМАЊА“, „&МУЗИКА“, „&СЛИКЕ“, "
-"„&ЈАВНО_ДЕЉЕЊЕ“, „&ШАБЛОНИ“, „&ВИДЕО“. Погледајте „/etc/xdg/user-"
-"dirs.defaults“ и „$HOME/.config/user-dirs.default“"
+"„&ЈАВНО_ДЕЉЕЊЕ“, „&ШАБЛОНИ“, „&ВИДЕО“. Погледајте „/etc/xdg/user-dirs."
+"defaults“ и „$HOME/.config/user-dirs.default“"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
@@ -227,12 +221,6 @@ msgstr "Директоријуми за не-дубинско пописивањ
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
-#| msgid ""
-#| "List of directories to index without inspecting subfolders, Special "
-#| "values include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, "
-#| "&amp;PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS.\n"
-#| "\n"
-#| "See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -277,45 +265,40 @@ msgid "Ignored directories with content"
 msgstr "Занемарени директоријуми са садржајем"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
-#| msgid "Avoid any directory containing a file blacklisted here"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr ""
 "Избегава сваки директоријум који овде садржи датотеку блокирану на списку"
 
-#: src/libtracker-miners-common/tracker-utils.c:90
-msgid "unknown time"
-msgstr "непознато време"
-
-#: src/libtracker-miners-common/tracker-utils.c:104
-#: src/libtracker-miners-common/tracker-utils.c:155
+#: src/libtracker-miners-common/tracker-utils.c:101
+#: src/libtracker-miners-common/tracker-utils.c:152
 msgid "less than one second"
 msgstr "мање од једне секунде"
 
 #. Translators: this is %d days
-#: src/libtracker-miners-common/tracker-utils.c:119
+#: src/libtracker-miners-common/tracker-utils.c:116
 #, c-format
 msgid " %dd"
 msgstr " %dд"
 
 #. Translators: this is %2.2d hours
-#: src/libtracker-miners-common/tracker-utils.c:123
+#: src/libtracker-miners-common/tracker-utils.c:120
 #, c-format
 msgid " %2.2dh"
 msgstr " %2.2dч"
 
 #. Translators: this is %2.2d minutes
-#: src/libtracker-miners-common/tracker-utils.c:127
+#: src/libtracker-miners-common/tracker-utils.c:124
 #, c-format
 msgid " %2.2dm"
 msgstr " %2.2dм"
 
 #. Translators: this is %2.2d seconds
-#: src/libtracker-miners-common/tracker-utils.c:131
+#: src/libtracker-miners-common/tracker-utils.c:128
 #, c-format
 msgid " %2.2ds"
 msgstr " %2.2dс"
 
-#: src/libtracker-miners-common/tracker-utils.c:135
+#: src/libtracker-miners-common/tracker-utils.c:132
 #, c-format
 msgid " %d day"
 msgid_plural " %d days"
@@ -324,7 +307,7 @@ msgstr[1] " %d дана"
 msgstr[2] " %d дана"
 msgstr[3] " %d дан"
 
-#: src/libtracker-miners-common/tracker-utils.c:139
+#: src/libtracker-miners-common/tracker-utils.c:136
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
@@ -333,7 +316,7 @@ msgstr[1] " %2.2d сата"
 msgstr[2] " %2.2d сати"
 msgstr[3] " %2.2d сат"
 
-#: src/libtracker-miners-common/tracker-utils.c:143
+#: src/libtracker-miners-common/tracker-utils.c:140
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
@@ -342,7 +325,7 @@ msgstr[1] " %2.2d минута"
 msgstr[2] " %2.2d минута"
 msgstr[3] " %2.2d минут"
 
-#: src/libtracker-miners-common/tracker-utils.c:147
+#: src/libtracker-miners-common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
@@ -391,7 +374,6 @@ msgid "Runs for a specific domain ontology"
 msgstr "Ради за посебном онтологијом домена"
 
 #: src/miners/fs/tracker-main.c:98
-#| msgid "Crawls and processes files on the file system"
 msgid "Avoids changes in the filesystem"
 msgstr "Спречава измене на систему датотека"
 
@@ -412,42 +394,35 @@ msgid "Data object “%s” currently does not exist"
 msgstr "Објекат података „%s“ тренутно не постоји"
 
 #: src/miners/fs/tracker-main.c:661
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Директоријум НИЈЕ избирљив за индексирање (на основану филтера)"
 
 #: src/miners/fs/tracker-main.c:665
-#| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Датотека НИЈЕ избирљива за индексирање (на основану филтера)"
 
 #: src/miners/fs/tracker-main.c:668
-#| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Датотека НИЈЕ избирљива за индексирање (скривена датотека)"
 
 #: src/miners/fs/tracker-main.c:670
-#| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Датотека НИЈЕ избирљива за индексирање (није индексирана фасцикла)"
 
 #: src/miners/fs/tracker-main.c:694
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Полазни директоријум „%s“ НИЈЕ избирљив за индексирање (на основану филтера)"
 
 #: src/miners/fs/tracker-main.c:700
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Полазни директоријум „%s“ НИЈЕ избирљив за индексирање (скривена датотека)"
 
 #: src/miners/fs/tracker-main.c:708
 #, c-format
-#| msgid "Directory is NOT eligible to be mined (based on contents)"
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
@@ -456,19 +431,17 @@ msgstr ""
 "садржаја)"
 
 #: src/miners/fs/tracker-main.c:729
-#| msgid "Directory is eligible to be mined (based on rules)"
 msgid "Directory is eligible to be indexed"
 msgstr "Директоријум је избирљив за индексирање"
 
 #: src/miners/fs/tracker-main.c:730
-#| msgid "File is eligible to be mined (based on rules)"
 msgid "File is eligible to be indexed"
 msgstr "Датотека је избирљива за индексирање"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:987
+#: src/miners/fs/tracker-main.c:988
 msgid "— start the tracker indexer"
 msgstr "— покреће трагачевог пописника"
 
@@ -492,8 +465,8 @@ msgstr "Наслов за коришћење (користи се уз „--add-
 msgid "— start the feeds indexer"
 msgstr "— покреће пописника довода"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:361
-#: src/tracker/tracker-search.c:1210 src/tracker/tracker-status.c:88
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:390
+#: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:88
 #: src/tracker/tracker-status.c:201 src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "Не могу да успоставим везу са Трагачем"
@@ -503,8 +476,8 @@ msgstr "Не могу да успоставим везу са Трагачем"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:362 src/tracker/tracker-process.c:193
-#: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:89
+#: src/tracker/tracker-info.c:391 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-search.c:1212 src/tracker/tracker-status.c:89
 #: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:248
 #: src/tracker/tracker-status.c:277 src/tracker/tracker-tag.c:976
 msgid "No error given"
@@ -517,16 +490,15 @@ msgstr "Не могу да додам довод"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/tracker-control/tracker-main.c:135
-#| msgid "— start the tracker indexer"
+#: src/tracker-control/tracker-main.c:136
 msgid "— start the tracker index proxy"
 msgstr "— покреће посредника индекса трагача"
 
-#: src/tracker-extract/tracker-extract.c:680
+#: src/tracker-extract/tracker-extract.c:687
 msgid "Metadata extraction failed"
 msgstr "Извлачење метаподатака није успело"
 
-#: src/tracker-extract/tracker-extract.c:742
+#: src/tracker-extract/tracker-extract.c:762
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Нисам пронашао модуле метаподатака или извлачивача за руковање овом датотеком"
@@ -623,7 +595,6 @@ msgstr ""
 "датотеке)"
 
 #: src/tracker/tracker-daemon.c:119
-#| msgid "List common statuses for miners and the store"
 msgid "List common statuses for miners"
 msgstr "Исписује општа стања за копаче"
 
@@ -692,7 +663,6 @@ msgid "Use SIGTERM to stop all miners"
 msgstr "Користи „SIGTERM“ за заустављање свих копача"
 
 #: src/tracker/tracker-daemon.c:161
-#| msgid "Starting miners…"
 msgid "Starts miners"
 msgstr "Покреће копаче"
 
@@ -885,15 +855,12 @@ msgid "perhaps a disabled plugin?"
 msgstr "можда је прикључак искључен?"
 
 #: src/tracker/tracker-daemon.c:1054
-#| msgid ""
-#| "If no arguments are given, the status of the store and data miners is "
-#| "shown"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Ако нису дати аргументи, приказују се стања копача података"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:554
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1400
+#: src/tracker/tracker-index.c:389 src/tracker/tracker-info.c:582
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1401
 #: src/tracker/tracker-status.c:599 src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
 msgstr "Непознате опције"
@@ -906,7 +873,7 @@ msgstr "Не могу да добавим везу Д-сабирнице"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Не могу да направим посредника Д-сабирнице до трагачевог складишта"
 
-#: src/tracker/tracker-extract.c:68 src/tracker/tracker-info.c:506
+#: src/tracker/tracker-extract.c:68
 msgid "Could not run tracker-extract: "
 msgstr "Не могу да покренем трагачево распакивање: "
 
@@ -919,40 +886,38 @@ msgid "Removes FILE from indexed locations"
 msgstr "Уклања ДАТОТЕКУ из индексираних локација"
 
 #: src/tracker/tracker-index.c:56
-#| msgid "Directories to index recursively"
 msgid "Makes indexing recursive"
 msgstr "Чини индексирање дубинским"
 
-#: src/tracker/tracker-index.c:194
+#: src/tracker/tracker-index.c:192
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "„%s“ није директоријум"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:275
+#: src/tracker/tracker-index.c:282
 msgid "Either --add or --remove must be provided"
 msgstr "Или „--add“ или „--remove“ мора бити достављено"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:279
+#: src/tracker/tracker-index.c:286
 msgid "--add and --remove are mutually exclusive"
 msgstr "„--add“ и „--remove“ се узајамно искључују"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:289
+#: src/tracker/tracker-index.c:296
 msgid "--recursive requires --add"
 msgstr "„--recursive“ захтева „--add“"
 
-#: src/tracker/tracker-index.c:344 src/tracker/tracker-status.c:400
+#: src/tracker/tracker-index.c:351 src/tracker/tracker-status.c:400
 msgid "Path"
 msgstr "Путања"
 
-#: src/tracker/tracker-index.c:345
-#| msgid "Recurse"
+#: src/tracker/tracker-index.c:352
 msgid "Recursive"
 msgstr "Дубински"
 
-#: src/tracker/tracker-index.c:395
+#: src/tracker/tracker-index.c:402
 msgid "Please specify one or more locations to index."
 msgstr "Наведите једну или више локација за индексирање."
 
@@ -996,25 +961,31 @@ msgstr "Не могу да довучем префиксе назива"
 msgid "No namespace prefixes were returned"
 msgstr "Нема префикса назива"
 
-#: src/tracker/tracker-info.c:386
+#: src/tracker/tracker-info.c:221 src/tracker/tracker-search.c:1137
+msgid "Results"
+msgstr "Резултати"
+
+#: src/tracker/tracker-info.c:414
 msgid "Querying information for entity"
 msgstr "Пропитујем податке за ентитет"
 
-#: src/tracker/tracker-info.c:410
+#: src/tracker/tracker-info.c:438
 msgid "Unable to retrieve URN for URI"
 msgstr "Не могу да довучем једнолични назив изворишта за путању"
 
-#: src/tracker/tracker-info.c:420 src/tracker/tracker-info.c:454
+#: src/tracker/tracker-info.c:448 src/tracker/tracker-info.c:481
 msgid "Unable to retrieve data for URI"
 msgstr "Не могу да довучем податке за путању"
 
-#: src/tracker/tracker-info.c:463
+#: src/tracker/tracker-info.c:504
 msgid "No metadata available for that URI"
 msgstr "Нема доступних метаподатака за ту путању"
 
-#: src/tracker/tracker-info.c:468 src/tracker/tracker-search.c:1136
-msgid "Results"
-msgstr "Резултати"
+#: src/tracker/tracker-info.c:509 src/tracker/tracker-info.c:538
+#, fuzzy
+#| msgid "Could not get all tags"
+msgid "Could not get eligible status: "
+msgstr "Не могу да добавим стање избирљивог: "
 
 #: src/tracker/tracker-process.c:190
 #, c-format
@@ -1156,7 +1127,7 @@ msgstr ""
 #: src/tracker/tracker-search.c:262 src/tracker/tracker-search.c:576
 #: src/tracker/tracker-search.c:665 src/tracker/tracker-search.c:753
 #: src/tracker/tracker-search.c:837 src/tracker/tracker-search.c:919
-#: src/tracker/tracker-search.c:1123
+#: src/tracker/tracker-search.c:1124
 msgid "Could not get search results"
 msgstr "Не могу да добавим резултате претраге"
 
@@ -1208,7 +1179,7 @@ msgstr "Нисам пронашао категорије софтвера"
 msgid "Software Categories"
 msgstr "Категорије софтвера"
 
-#: src/tracker/tracker-search.c:1132
+#: src/tracker/tracker-search.c:1133
 msgid "No results were found matching your query"
 msgstr "Нисам пронашао ниједан резултат који одговара вашој претрази"
 
@@ -1317,7 +1288,6 @@ msgstr[2] "%d забележених неуспеха"
 msgstr[3] "Један забележени неуспех"
 
 #: src/tracker/tracker-status.c:562
-#| msgid "No properties were found"
 msgid "No reports found"
 msgstr "Нисам пронашао извештаје"
 
@@ -1501,6 +1471,9 @@ msgstr "Искључује гашење након 30 секунди неакт�
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— покреће трагачеву услугу повратног писања"
+
+#~ msgid "unknown time"
+#~ msgstr "непознато време"
 
 #~ msgid "Log verbosity"
 #~ msgstr "Опширност записника"
