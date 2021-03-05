@@ -1,6 +1,7 @@
 [Unit]
 Description=Tracker RSS/ATOM feed data miner
 ConditionUser=!root
+After=gnome-session.target
 
 [Service]
 Type=dbus
@@ -10,7 +11,6 @@ Restart=on-failure
 # Don't restart after tracker daemon -k (aka tracker-control -k)
 RestartPreventExitStatus=SIGKILL
 Slice=background.slice
-After=gnome-session.target
 
 [Install]
 WantedBy=gnome-session.target
