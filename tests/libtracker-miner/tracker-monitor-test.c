@@ -384,6 +384,7 @@ static void
 test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
                            gconstpointer              data)
 {
+	GError *error = NULL;
 	gchar *basename;
 
 	/* Create hash tables to store expected results */
@@ -404,6 +405,8 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 
 	/* Create and setup the tracker monitor */
 	fixture->monitor = tracker_monitor_new ();
+	g_initable_init (G_INITABLE (fixture->monitor), NULL, &error);
+	g_assert_no_error (error);
 	g_assert_true (fixture->monitor != NULL);
 
 	g_signal_connect (fixture->monitor, "item-created",
@@ -1262,6 +1265,7 @@ test_monitor_basic (void)
 	gchar *path_for_monitor;
 	GFile *file_for_monitor;
 	GFile *file_for_tmp;
+	GError *error = NULL;
 
 	/* Setup directories */
 	basename = g_strdup_printf ("monitor-test-%d", getpid ());
@@ -1277,6 +1281,8 @@ test_monitor_basic (void)
 
 	/* Create a monitor */
 	monitor = tracker_monitor_new ();
+	g_initable_init (G_INITABLE (monitor), NULL, &error);
+	g_assert_no_error (error);
 	g_assert_true (monitor != NULL);
 
 	/* Test general API with monitors enabled */

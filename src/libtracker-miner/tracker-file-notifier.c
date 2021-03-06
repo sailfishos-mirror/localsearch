@@ -1670,6 +1670,7 @@ static void
 tracker_file_notifier_init (TrackerFileNotifier *notifier)
 {
 	TrackerFileNotifierPrivate *priv;
+	GError *error = NULL;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	priv->timer = g_timer_new ();
@@ -1678,21 +1679,26 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 	/* Set up monitor */
 	priv->monitor = tracker_monitor_new ();
 
-	g_signal_connect (priv->monitor, "item-created",
-	                  G_CALLBACK (monitor_item_created_cb),
-	                  notifier);
-	g_signal_connect (priv->monitor, "item-updated",
-	                  G_CALLBACK (monitor_item_updated_cb),
-	                  notifier);
-	g_signal_connect (priv->monitor, "item-attribute-updated",
-	                  G_CALLBACK (monitor_item_attribute_updated_cb),
-	                  notifier);
-	g_signal_connect (priv->monitor, "item-deleted",
-	                  G_CALLBACK (monitor_item_deleted_cb),
-	                  notifier);
-	g_signal_connect (priv->monitor, "item-moved",
-	                  G_CALLBACK (monitor_item_moved_cb),
-	                  notifier);
+	if (!g_initable_init (G_INITABLE (priv->monitor), NULL, &error)) {
+		g_warning ("Could not init monitor: %s", error->message);
+		g_error_free (error);
+	} else {
+		g_signal_connect (priv->monitor, "item-created",
+		                  G_CALLBACK (monitor_item_created_cb),
+		                  notifier);
+		g_signal_connect (priv->monitor, "item-updated",
+		                  G_CALLBACK (monitor_item_updated_cb),
+		                  notifier);
+		g_signal_connect (priv->monitor, "item-attribute-updated",
+		                  G_CALLBACK (monitor_item_attribute_updated_cb),
+		                  notifier);
+		g_signal_connect (priv->monitor, "item-deleted",
+		                  G_CALLBACK (monitor_item_deleted_cb),
+		                  notifier);
+		g_signal_connect (priv->monitor, "item-moved",
+		                  G_CALLBACK (monitor_item_moved_cb),
+		                  notifier);
+	}
 
 	g_queue_init (&priv->queue);
 	priv->cache = g_hash_table_new_full (g_file_hash,

@@ -113,7 +113,114 @@ static gboolean       monitor_cancel_recursively   (TrackerMonitor *monitor,
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerMonitor, tracker_monitor, G_TYPE_OBJECT)
+static void tracker_monitor_initable_iface_init (GInitableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (TrackerMonitor, tracker_monitor, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                tracker_monitor_initable_iface_init)
+                         G_ADD_PRIVATE (TrackerMonitor))
+
+static gboolean
+tracker_monitor_initable_init (GInitable     *initable,
+                               GCancellable  *cancellable,
+                               GError       **error)
+{
+	GType monitor_backend;
+	const gchar *name;
+	GError *inner_error = NULL;
+	TrackerMonitorPrivate *priv;
+	GFile *file;
+	GFileMonitor *monitor;
+
+	priv = tracker_monitor_get_instance_private (TRACKER_MONITOR (initable));
+
+	/* For the first monitor we get the type and find out if we
+	 * are using inotify, FAM, polling, etc.
+	 */
+	file = g_file_new_for_path (g_get_home_dir ());
+	monitor = g_file_monitor_directory (file,
+	                                    G_FILE_MONITOR_WATCH_MOVES,
+	                                    NULL,
+	                                    &inner_error);
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	monitor_backend = G_OBJECT_TYPE (monitor);
+
+	/* We use the name because the type itself is actually
+	 * private and not available publically. Note this is
+	 * subject to change, but unlikely of course.
+	 */
+	name = g_type_name (monitor_backend);
+
+	/* Set limits based on backend... */
+	if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
+	    strcmp (name, "GInotifyFileMonitor") == 0) {
+		/* Using inotify */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Inotify"));
+
+		/* Setting limit based on kernel
+		 * settings in /proc...
+		 */
+		priv->monitor_limit = get_inotify_limit ();
+
+		/* We don't use 100% of the monitors, we allow other
+		 * applications to have at least 500 or so to use
+		 * between them selves. This only
+		 * applies to inotify because it is a
+		 * user shared resource.
+		 */
+		priv->monitor_limit -= 500;
+
+		/* Make sure we don't end up with a
+		 * negative maximum.
+		 */
+		priv->monitor_limit = MAX (priv->monitor_limit, 0);
+	} else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
+	           strcmp (name, "GKqueueFileMonitor") == 0) {
+		/* Using kqueue(2) */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
+
+		priv->monitor_limit = get_kqueue_limit ();
+	} else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
+		/* Using Fam */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
+
+		/* Setting limit to an arbitary limit
+		 * based on testing
+		 */
+		priv->monitor_limit = 400;
+		priv->use_changed_event = TRUE;
+	} else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
+		/* Using Windows */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
+
+		/* Guessing limit... */
+		priv->monitor_limit = 8192;
+	} else {
+		/* Unknown */
+		g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
+		           name);
+		priv->enabled = FALSE;
+	}
+
+	if (priv->enabled)
+		TRACKER_NOTE (MONITORS, g_message ("Monitor limit is %d", priv->monitor_limit));
+
+	g_file_monitor_cancel (monitor);
+	g_object_unref (monitor);
+	g_object_unref (file);
+
+	return TRUE;
+}
+
+static void
+tracker_monitor_initable_iface_init (GInitableIface *iface)
+{
+	iface->init = tracker_monitor_initable_init;
+}
 
 static void
 tracker_monitor_class_init (TrackerMonitorClass *klass)
@@ -207,9 +314,6 @@ static void
 tracker_monitor_init (TrackerMonitor *object)
 {
 	TrackerMonitorPrivate *priv;
-	GFile                 *file;
-	GFileMonitor          *monitor;
-	GError                *error = NULL;
 
 	priv = tracker_monitor_get_instance_private (object);
 
@@ -228,97 +332,6 @@ tracker_monitor_init (TrackerMonitor *object)
 		                       (GEqualFunc) g_file_equal,
 		                       g_object_unref,
 		                       (GDestroyNotify) cached_event_free);
-
-	/* For the first monitor we get the type and find out if we
-	 * are using inotify, FAM, polling, etc.
-	 */
-	file = g_file_new_for_path (g_get_home_dir ());
-	monitor = g_file_monitor_directory (file,
-	                                    G_FILE_MONITOR_WATCH_MOVES,
-	                                    NULL,
-	                                    &error);
-
-	if (error) {
-		g_critical ("Could not create sample directory monitor: %s", error->message);
-		g_error_free (error);
-
-		/* Guessing limit... */
-		priv->monitor_limit = 100;
-	} else {
-		GType monitor_backend;
-		const gchar *name;
-
-		monitor_backend = G_OBJECT_TYPE (monitor);
-
-		/* We use the name because the type itself is actually
-		 * private and not available publically. Note this is
-		 * subject to change, but unlikely of course.
-		 */
-		name = g_type_name (monitor_backend);
-
-		/* Set limits based on backend... */
-		if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
-		    strcmp (name, "GInotifyFileMonitor") == 0) {
-			/* Using inotify */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Inotify"));
-
-			/* Setting limit based on kernel
-			 * settings in /proc...
-			 */
-			priv->monitor_limit = get_inotify_limit ();
-
-			/* We don't use 100% of the monitors, we allow other
-			 * applications to have at least 500 or so to use
-			 * between them selves. This only
-			 * applies to inotify because it is a
-			 * user shared resource.
-			 */
-			priv->monitor_limit -= 500;
-
-			/* Make sure we don't end up with a
-			 * negative maximum.
-			 */
-			priv->monitor_limit = MAX (priv->monitor_limit, 0);
-		}
-		else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
-		         strcmp (name, "GKqueueFileMonitor") == 0) {
-			/* Using kqueue(2) */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
-
-			priv->monitor_limit = get_kqueue_limit ();
-		}
-		else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
-			/* Using Fam */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
-
-			/* Setting limit to an arbitary limit
-			 * based on testing
-			 */
-			priv->monitor_limit = 400;
-			priv->use_changed_event = TRUE;
-		}
-		else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
-			/* Using Windows */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
-
-			/* Guessing limit... */
-			priv->monitor_limit = 8192;
-		}
-		else {
-			/* Unknown */
-			g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
-			           name);
-			priv->enabled = FALSE;
-		}
-
-		g_file_monitor_cancel (monitor);
-		g_object_unref (monitor);
-	}
-
-	g_object_unref (file);
-
-	if (priv->enabled)
-		TRACKER_NOTE (MONITORS, g_message ("Monitor limit is %d", priv->monitor_limit));
 }
 
 static void
