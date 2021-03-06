@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2021-02-19 05:22+0000\n"
-"PO-Revision-Date: 2021-03-02 20:19+0200\n"
+"POT-Creation-Date: 2021-03-02 19:21+0000\n"
+"PO-Revision-Date: 2021-03-06 21:21+0200\n"
 "Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
@@ -982,7 +982,6 @@ msgid "No metadata available for that URI"
 msgstr "Нема доступних метаподатака за ту путању"
 
 #: src/tracker/tracker-info.c:509 src/tracker/tracker-info.c:538
-#, fuzzy
 #| msgid "Could not get all tags"
 msgid "Could not get eligible status: "
 msgstr "Не могу да добавим стање избирљивог: "
