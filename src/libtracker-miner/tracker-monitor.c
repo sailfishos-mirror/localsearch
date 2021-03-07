@@ -595,16 +595,6 @@ emit_signal_for_event (TrackerMonitor    *monitor,
                        GFile             *file,
                        GFile             *other_file)
 {
-	/* Note that in any case we should be moving the monitors
-	 * here to the new place, as the new place may be ignored.
-	 * We should leave this to the upper layers. But one thing
-	 * we must do is actually CANCEL all these monitors. */
-	if (is_directory &&
-	    (type == G_FILE_MONITOR_EVENT_MOVED ||
-	     type == G_FILE_MONITOR_EVENT_DELETED)) {
-		monitor_cancel_recursively (monitor, file);
-	}
-
 	switch (type) {
 	case G_FILE_MONITOR_EVENT_CREATED:
 		g_signal_emit (monitor,
@@ -774,6 +764,17 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 			 */
 			g_hash_table_remove (priv->cached_events, file);
 		}
+	}
+
+	/* Note that in any case we should be moving the monitors
+	 * here to the new place, as the new place may be ignored.
+	 * We should leave this to the upper layers. But one thing
+	 * we must do is actually CANCEL all these monitors. */
+	if (is_directory &&
+	    (event_type == G_FILE_MONITOR_EVENT_RENAMED ||
+	     event_type == G_FILE_MONITOR_EVENT_MOVED_IN ||
+	     event_type == G_FILE_MONITOR_EVENT_DELETED)) {
+		monitor_cancel_recursively (monitor, file);
 	}
 
 	switch (event_type) {
