@@ -71,7 +71,7 @@ typedef struct {
 	gboolean is_directory;
 	GFileMonitorEvent event_type;
 	guint source_id;
-} CachedEvent;
+} MonitorEvent;
 
 enum {
 	ITEM_CREATED,
@@ -301,7 +301,7 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 }
 
 static void
-cached_event_free (CachedEvent *event)
+monitor_event_free (MonitorEvent *event)
 {
 	if (event->source_id != 0)
 		g_source_remove (event->source_id);
@@ -331,7 +331,7 @@ tracker_monitor_init (TrackerMonitor *object)
 		g_hash_table_new_full (g_file_hash,
 		                       (GEqualFunc) g_file_equal,
 		                       g_object_unref,
-		                       (GDestroyNotify) cached_event_free);
+		                       (GDestroyNotify) monitor_event_free);
 }
 
 static void
@@ -633,7 +633,7 @@ flush_event_now (TrackerMonitor *monitor,
                  GFile          *file)
 {
 	TrackerMonitorPrivate *priv;
-	CachedEvent *event;
+	MonitorEvent *event;
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
@@ -646,6 +646,23 @@ flush_event_now (TrackerMonitor *monitor,
 	}
 }
 
+static MonitorEvent *
+monitor_event_new (TrackerMonitor    *monitor,
+                   GFile             *file,
+                   GFileMonitorEvent  event_type,
+                   gboolean           is_directory)
+{
+	MonitorEvent *event;
+
+	event = g_new0 (MonitorEvent, 1);
+	event->monitor = monitor;
+	event->file = g_object_ref (file);
+	event->event_type = event_type;
+	event->is_directory = is_directory;
+
+	return event;
+}
+
 static void
 cache_event (TrackerMonitor    *monitor,
              GFile             *file,
@@ -653,18 +670,13 @@ cache_event (TrackerMonitor    *monitor,
              gboolean           is_directory)
 {
 	TrackerMonitorPrivate *priv;
-	CachedEvent *event;
+	MonitorEvent *event;
 
 	priv = tracker_monitor_get_instance_private (monitor);
 	event = g_hash_table_lookup (priv->cached_events, file);
 
 	if (!event) {
-		event = g_new0 (CachedEvent, 1);
-		event->monitor = monitor;
-		event->file = g_object_ref (file);
-		event->event_type = event_type;
-		event->is_directory = is_directory;
-
+		event = monitor_event_new (monitor, file, event_type, is_directory);
 		g_hash_table_insert (priv->cached_events,
 		                     g_object_ref (file),
 		                     event);
@@ -674,7 +686,7 @@ cache_event (TrackerMonitor    *monitor,
 static gboolean
 flush_event_idle_cb (gpointer user_data)
 {
-	CachedEvent *event = user_data;
+	MonitorEvent *event = user_data;
 	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (event->monitor);
 
 	event->source_id = 0;
@@ -690,7 +702,7 @@ flush_event_later (TrackerMonitor *monitor,
                    GFile          *file)
 {
 	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (monitor);
-	CachedEvent *event;
+	MonitorEvent *event;
 
 	event = g_hash_table_lookup (priv->cached_events, file);
 	if (!event)
@@ -711,7 +723,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 	gchar *other_file_uri;
 	gboolean is_directory = FALSE;
 	TrackerMonitorPrivate *priv;
-	CachedEvent *prev_event;
+	MonitorEvent *prev_event;
 
 	monitor = user_data;
 	priv = tracker_monitor_get_instance_private (monitor);
