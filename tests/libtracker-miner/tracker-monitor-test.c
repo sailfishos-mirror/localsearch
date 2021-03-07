@@ -458,6 +458,7 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 
 	/* Destroy monitor */
 	g_assert_true (fixture->monitor != NULL);
+	g_signal_handlers_disconnect_by_data (fixture->monitor, fixture);
 	g_object_unref (fixture->monitor);
 
 	/* Remove the hash_tables of events */
