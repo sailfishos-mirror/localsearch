@@ -1294,10 +1294,8 @@ test_monitor_basic (void)
 	g_assert_cmpint (tracker_monitor_add (monitor, file_for_monitor), ==, TRUE); /* Test double add on purpose */
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 1);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, TRUE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_remove (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 0);
 
 	tracker_monitor_add (monitor, file_for_monitor);
@@ -1314,10 +1312,8 @@ test_monitor_basic (void)
 	g_assert_cmpint (tracker_monitor_add (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 1);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_remove (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 0);
 
 	tracker_monitor_add (monitor, file_for_monitor);

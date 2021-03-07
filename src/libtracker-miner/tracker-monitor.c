@@ -1176,26 +1176,6 @@ tracker_monitor_is_watched (TrackerMonitor *monitor,
 	return g_hash_table_lookup (priv->monitors, file) != NULL;
 }
 
-gboolean
-tracker_monitor_is_watched_by_string (TrackerMonitor *monitor,
-                                      const gchar    *path)
-{
-	TrackerMonitorPrivate *priv;
-	GFile      *file;
-	gboolean    watched;
-
-	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), FALSE);
-	g_return_val_if_fail (path != NULL, FALSE);
-
-	priv = tracker_monitor_get_instance_private (monitor);
-
-	file = g_file_new_for_path (path);
-	watched = g_hash_table_lookup (priv->monitors, file) != NULL;
-	g_object_unref (file);
-
-	return watched;
-}
-
 guint
 tracker_monitor_get_count (TrackerMonitor *monitor)
 {
