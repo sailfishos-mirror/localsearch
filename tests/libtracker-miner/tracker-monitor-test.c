@@ -384,6 +384,7 @@ static void
 test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
                            gconstpointer              data)
 {
+	GError *error = NULL;
 	gchar *basename;
 
 	/* Create hash tables to store expected results */
@@ -404,6 +405,8 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 
 	/* Create and setup the tracker monitor */
 	fixture->monitor = tracker_monitor_new ();
+	g_initable_init (G_INITABLE (fixture->monitor), NULL, &error);
+	g_assert_no_error (error);
 	g_assert_true (fixture->monitor != NULL);
 
 	g_signal_connect (fixture->monitor, "item-created",
@@ -455,6 +458,7 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 
 	/* Destroy monitor */
 	g_assert_true (fixture->monitor != NULL);
+	g_signal_handlers_disconnect_by_data (fixture->monitor, fixture);
 	g_object_unref (fixture->monitor);
 
 	/* Remove the hash_tables of events */
@@ -1262,6 +1266,7 @@ test_monitor_basic (void)
 	gchar *path_for_monitor;
 	GFile *file_for_monitor;
 	GFile *file_for_tmp;
+	GError *error = NULL;
 
 	/* Setup directories */
 	basename = g_strdup_printf ("monitor-test-%d", getpid ());
@@ -1277,6 +1282,8 @@ test_monitor_basic (void)
 
 	/* Create a monitor */
 	monitor = tracker_monitor_new ();
+	g_initable_init (G_INITABLE (monitor), NULL, &error);
+	g_assert_no_error (error);
 	g_assert_true (monitor != NULL);
 
 	/* Test general API with monitors enabled */
@@ -1288,10 +1295,8 @@ test_monitor_basic (void)
 	g_assert_cmpint (tracker_monitor_add (monitor, file_for_monitor), ==, TRUE); /* Test double add on purpose */
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 1);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, TRUE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_remove (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 0);
 
 	tracker_monitor_add (monitor, file_for_monitor);
@@ -1308,10 +1313,8 @@ test_monitor_basic (void)
 	g_assert_cmpint (tracker_monitor_add (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 1);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_remove (monitor, file_for_monitor), ==, TRUE);
 	g_assert_cmpint (tracker_monitor_is_watched (monitor, file_for_monitor), ==, FALSE);
-	g_assert_cmpint (tracker_monitor_is_watched_by_string (monitor, path_for_monitor), ==, FALSE);
 	g_assert_cmpint (tracker_monitor_get_count (monitor), ==, 0);
 
 	tracker_monitor_add (monitor, file_for_monitor);

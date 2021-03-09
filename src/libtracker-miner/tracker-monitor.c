@@ -37,7 +37,7 @@
 typedef struct TrackerMonitorPrivate  TrackerMonitorPrivate;
 
 struct TrackerMonitorPrivate {
-	GHashTable    *monitors;
+	GHashTable    *monitored_dirs;
 
 	gboolean       enabled;
 
@@ -50,9 +50,19 @@ struct TrackerMonitorPrivate {
 	 */
 	gboolean       use_changed_event;
 
-	GHashTable    *cached_events;
-
 	TrackerIndexingTree *tree;
+
+	struct {
+		GMainContext *owner_context;
+		GMainContext *monitor_context;
+		GMainLoop *monitor_thread_loop;
+		GThread *monitor_thread;
+		GHashTable *cached_events;
+		GHashTable *monitors;
+		GMutex mutex;
+		GCond cond;
+		gint n_requests;
+	} thread;
 };
 
 typedef struct {
@@ -68,10 +78,22 @@ typedef struct {
 typedef struct {
 	TrackerMonitor *monitor;
 	GFile *file;
+	GFile *other_file;
+	GSource *source;
 	gboolean is_directory;
 	GFileMonitorEvent event_type;
-	guint source_id;
-} CachedEvent;
+} MonitorEvent;
+
+typedef enum {
+	MONITOR_REQUEST_ADD,
+	MONITOR_REQUEST_REMOVE,
+} MonitorRequestType;
+
+typedef struct {
+	TrackerMonitor *monitor;
+	MonitorRequestType type;
+	GList *files;
+} MonitorRequest;
 
 enum {
 	ITEM_CREATED,
@@ -103,17 +125,148 @@ static GFileMonitor * directory_monitor_new        (TrackerMonitor *monitor,
 static void           directory_monitor_cancel     (GFileMonitor     *dir_monitor);
 
 
-static void           emit_signal_for_event        (TrackerMonitor    *monitor,
-                                                    GFileMonitorEvent  type,
-                                                    gboolean           is_directory,
-                                                    GFile             *file,
-                                                    GFile             *other_file);
 static gboolean       monitor_cancel_recursively   (TrackerMonitor *monitor,
                                                     GFile          *file);
 
 static guint signals[LAST_SIGNAL] = { 0, };
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerMonitor, tracker_monitor, G_TYPE_OBJECT)
+static void tracker_monitor_initable_iface_init (GInitableIface *iface);
+
+G_DEFINE_TYPE_WITH_CODE (TrackerMonitor, tracker_monitor, G_TYPE_OBJECT,
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                tracker_monitor_initable_iface_init)
+                         G_ADD_PRIVATE (TrackerMonitor))
+
+static gpointer
+monitor_thread_func (gpointer user_data)
+{
+	TrackerMonitor *monitor = user_data;
+	TrackerMonitorPrivate *priv;
+
+	priv = tracker_monitor_get_instance_private (monitor);
+	g_main_context_push_thread_default (priv->thread.monitor_context);
+	g_main_loop_run (priv->thread.monitor_thread_loop);
+	g_main_context_pop_thread_default (priv->thread.monitor_context);
+	g_main_loop_unref (priv->thread.monitor_thread_loop);
+
+	return NULL;
+}
+
+static gboolean
+tracker_monitor_initable_init (GInitable     *initable,
+                               GCancellable  *cancellable,
+                               GError       **error)
+{
+	GType monitor_backend;
+	const gchar *name;
+	GError *inner_error = NULL;
+	TrackerMonitorPrivate *priv;
+	GFile *file;
+	GFileMonitor *monitor;
+
+	priv = tracker_monitor_get_instance_private (TRACKER_MONITOR (initable));
+
+	/* For the first monitor we get the type and find out if we
+	 * are using inotify, FAM, polling, etc.
+	 */
+	file = g_file_new_for_path (g_get_home_dir ());
+	monitor = g_file_monitor_directory (file,
+	                                    G_FILE_MONITOR_WATCH_MOVES,
+	                                    NULL,
+	                                    &inner_error);
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	monitor_backend = G_OBJECT_TYPE (monitor);
+
+	/* We use the name because the type itself is actually
+	 * private and not available publically. Note this is
+	 * subject to change, but unlikely of course.
+	 */
+	name = g_type_name (monitor_backend);
+
+	/* Set limits based on backend... */
+	if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
+	    strcmp (name, "GInotifyFileMonitor") == 0) {
+		/* Using inotify */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Inotify"));
+
+		/* Setting limit based on kernel
+		 * settings in /proc...
+		 */
+		priv->monitor_limit = get_inotify_limit ();
+
+		/* We don't use 100% of the monitors, we allow other
+		 * applications to have at least 500 or so to use
+		 * between them selves. This only
+		 * applies to inotify because it is a
+		 * user shared resource.
+		 */
+		priv->monitor_limit -= 500;
+
+		/* Make sure we don't end up with a
+		 * negative maximum.
+		 */
+		priv->monitor_limit = MAX (priv->monitor_limit, 0);
+	} else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
+	           strcmp (name, "GKqueueFileMonitor") == 0) {
+		/* Using kqueue(2) */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
+
+		priv->monitor_limit = get_kqueue_limit ();
+	} else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
+		/* Using Fam */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
+
+		/* Setting limit to an arbitary limit
+		 * based on testing
+		 */
+		priv->monitor_limit = 400;
+		priv->use_changed_event = TRUE;
+	} else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
+		/* Using Windows */
+		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
+
+		/* Guessing limit... */
+		priv->monitor_limit = 8192;
+	} else {
+		/* Unknown */
+		g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
+		           name);
+		priv->enabled = FALSE;
+	}
+
+	if (priv->enabled)
+		TRACKER_NOTE (MONITORS, g_message ("Monitor limit is %d", priv->monitor_limit));
+
+	g_file_monitor_cancel (monitor);
+	g_object_unref (monitor);
+	g_object_unref (file);
+
+	priv->thread.owner_context = g_main_context_ref_thread_default ();
+	priv->thread.monitor_context = g_main_context_new ();
+	priv->thread.monitor_thread_loop = g_main_loop_new (priv->thread.monitor_context, FALSE);
+
+	priv->thread.monitor_thread =
+		g_thread_try_new ("Monitor thread",
+		                  monitor_thread_func,
+		                  initable,
+		                  &inner_error);
+	if (inner_error) {
+		g_propagate_error (error, inner_error);
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
+static void
+tracker_monitor_initable_iface_init (GInitableIface *iface)
+{
+	iface->init = tracker_monitor_initable_init;
+}
 
 static void
 tracker_monitor_class_init (TrackerMonitorClass *klass)
@@ -193,13 +346,32 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 	                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 }
 
-static void
-cached_event_free (CachedEvent *event)
+static MonitorEvent *
+monitor_event_new (TrackerMonitor    *monitor,
+                   GFile             *file,
+                   GFile             *other_file,
+                   GFileMonitorEvent  event_type,
+                   gboolean           is_directory)
 {
-	if (event->source_id != 0)
-		g_source_remove (event->source_id);
+	MonitorEvent *event;
 
+	event = g_new0 (MonitorEvent, 1);
+	event->monitor = g_object_ref (monitor);
+	event->file = g_object_ref (file);
+	g_set_object (&event->other_file, other_file);
+	event->event_type = event_type;
+	event->is_directory = is_directory;
+
+	return event;
+}
+
+static void
+monitor_event_free (MonitorEvent *event)
+{
+	g_object_unref (event->monitor);
 	g_object_unref (event->file);
+	g_clear_object (&event->other_file);
+	g_clear_pointer (&event->source, g_source_destroy);
 	g_free (event);
 }
 
@@ -207,9 +379,6 @@ static void
 tracker_monitor_init (TrackerMonitor *object)
 {
 	TrackerMonitorPrivate *priv;
-	GFile                 *file;
-	GFileMonitor          *monitor;
-	GError                *error = NULL;
 
 	priv = tracker_monitor_get_instance_private (object);
 
@@ -217,108 +386,37 @@ tracker_monitor_init (TrackerMonitor *object)
 	priv->enabled = TRUE;
 
 	/* Create monitors table for this module */
-	priv->monitors =
+	priv->monitored_dirs =
+		g_hash_table_new_full (g_file_hash,
+		                       (GEqualFunc) g_file_equal,
+		                       (GDestroyNotify) g_object_unref,
+		                       NULL);
+
+	priv->thread.cached_events =
+		g_hash_table_new_full (g_file_hash,
+		                       (GEqualFunc) g_file_equal,
+		                       g_object_unref,
+		                       (GDestroyNotify) monitor_event_free);
+
+	priv->thread.monitors =
 		g_hash_table_new_full (g_file_hash,
 		                       (GEqualFunc) g_file_equal,
 		                       (GDestroyNotify) g_object_unref,
 		                       (GDestroyNotify) directory_monitor_cancel);
 
-	priv->cached_events =
-		g_hash_table_new_full (g_file_hash,
-		                       (GEqualFunc) g_file_equal,
-		                       g_object_unref,
-		                       (GDestroyNotify) cached_event_free);
+	g_mutex_init (&priv->thread.mutex);
+	g_cond_init (&priv->thread.cond);
+}
 
-	/* For the first monitor we get the type and find out if we
-	 * are using inotify, FAM, polling, etc.
-	 */
-	file = g_file_new_for_path (g_get_home_dir ());
-	monitor = g_file_monitor_directory (file,
-	                                    G_FILE_MONITOR_WATCH_MOVES,
-	                                    NULL,
-	                                    &error);
+static gboolean
+quit_thread (TrackerMonitor *monitor)
+{
+	TrackerMonitorPrivate *priv;
 
-	if (error) {
-		g_critical ("Could not create sample directory monitor: %s", error->message);
-		g_error_free (error);
+	priv = tracker_monitor_get_instance_private (monitor);
+	g_main_loop_quit (priv->thread.monitor_thread_loop);
 
-		/* Guessing limit... */
-		priv->monitor_limit = 100;
-	} else {
-		GType monitor_backend;
-		const gchar *name;
-
-		monitor_backend = G_OBJECT_TYPE (monitor);
-
-		/* We use the name because the type itself is actually
-		 * private and not available publically. Note this is
-		 * subject to change, but unlikely of course.
-		 */
-		name = g_type_name (monitor_backend);
-
-		/* Set limits based on backend... */
-		if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
-		    strcmp (name, "GInotifyFileMonitor") == 0) {
-			/* Using inotify */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Inotify"));
-
-			/* Setting limit based on kernel
-			 * settings in /proc...
-			 */
-			priv->monitor_limit = get_inotify_limit ();
-
-			/* We don't use 100% of the monitors, we allow other
-			 * applications to have at least 500 or so to use
-			 * between them selves. This only
-			 * applies to inotify because it is a
-			 * user shared resource.
-			 */
-			priv->monitor_limit -= 500;
-
-			/* Make sure we don't end up with a
-			 * negative maximum.
-			 */
-			priv->monitor_limit = MAX (priv->monitor_limit, 0);
-		}
-		else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
-		         strcmp (name, "GKqueueFileMonitor") == 0) {
-			/* Using kqueue(2) */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
-
-			priv->monitor_limit = get_kqueue_limit ();
-		}
-		else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
-			/* Using Fam */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
-
-			/* Setting limit to an arbitary limit
-			 * based on testing
-			 */
-			priv->monitor_limit = 400;
-			priv->use_changed_event = TRUE;
-		}
-		else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
-			/* Using Windows */
-			TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
-
-			/* Guessing limit... */
-			priv->monitor_limit = 8192;
-		}
-		else {
-			/* Unknown */
-			g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
-			           name);
-			priv->enabled = FALSE;
-		}
-
-		g_file_monitor_cancel (monitor);
-		g_object_unref (monitor);
-	}
-
-	g_object_unref (file);
-
-	if (priv->enabled)
-		TRACKER_NOTE (MONITORS, g_message ("Monitor limit is %d", priv->monitor_limit));
+	return G_SOURCE_REMOVE;
 }
 
 static void
@@ -328,8 +426,22 @@ tracker_monitor_finalize (GObject *object)
 
 	priv = tracker_monitor_get_instance_private (TRACKER_MONITOR (object));
 
-	g_hash_table_unref (priv->cached_events);
-	g_hash_table_unref (priv->monitors);
+	if (priv->thread.monitor_thread_loop) {
+		g_main_context_invoke_full (priv->thread.monitor_context,
+		                            G_PRIORITY_HIGH,
+		                            (GSourceFunc) quit_thread,
+		                            object, NULL);
+	}
+
+	if (priv->thread.monitor_thread)
+		g_thread_join (priv->thread.monitor_thread);
+
+	g_clear_pointer (&priv->thread.monitor_context, g_main_context_unref);
+	g_clear_pointer (&priv->thread.owner_context, g_main_context_unref);
+	g_clear_pointer (&priv->thread.cached_events, g_hash_table_unref);
+	g_clear_pointer (&priv->thread.monitors, g_hash_table_unref);
+
+	g_hash_table_unref (priv->monitored_dirs);
 
 	G_OBJECT_CLASS (tracker_monitor_parent_class)->finalize (object);
 }
@@ -440,11 +552,83 @@ check_is_directory (TrackerMonitor *monitor,
 		 * hashtable to know whether it was a directory
 		 * we knew about
 		 */
-		if (g_hash_table_lookup (priv->monitors, file) != NULL)
+		if (g_hash_table_lookup (priv->thread.monitors, file) != NULL)
 			return TRUE;
 	}
 
 	return FALSE;
+}
+
+/* Executed in monitor thread */
+static gboolean
+monitor_request_execute (MonitorRequest *request)
+{
+	TrackerMonitorPrivate *priv;
+
+	priv = tracker_monitor_get_instance_private (request->monitor);
+
+	g_mutex_lock (&priv->thread.mutex);
+
+	while (request->files) {
+		GFile *file = request->files->data;
+
+		if (request->type == MONITOR_REQUEST_ADD) {
+			GFileMonitor *monitor;
+
+			monitor = directory_monitor_new (request->monitor,
+			                                 file);
+			if (monitor) {
+				g_hash_table_insert (priv->thread.monitors,
+				                     g_object_ref (file),
+				                     monitor);
+			}
+		} else if (request->type == MONITOR_REQUEST_REMOVE) {
+			g_hash_table_remove (priv->thread.monitors,
+			                     file);
+		} else {
+			g_assert_not_reached ();
+		}
+
+		request->files = g_list_remove (request->files, file);
+	}
+
+	if (g_atomic_int_dec_and_test (&priv->thread.n_requests))
+		g_cond_signal (&priv->thread.cond);
+
+	g_mutex_unlock (&priv->thread.mutex);
+
+	return G_SOURCE_REMOVE;
+}
+
+/* Executed in main thread */
+static void
+monitor_request_queue (TrackerMonitor *monitor,
+                       MonitorRequest *request)
+{
+	TrackerMonitorPrivate *priv;
+
+	priv = tracker_monitor_get_instance_private (request->monitor);
+
+	g_atomic_int_inc (&priv->thread.n_requests);
+	g_main_context_invoke_full (priv->thread.monitor_context,
+	                            G_PRIORITY_DEFAULT,
+	                            (GSourceFunc) monitor_request_execute,
+	                            request, g_free);
+}
+
+static void
+block_for_requests (TrackerMonitor *monitor)
+{
+	TrackerMonitorPrivate *priv;
+
+	priv = tracker_monitor_get_instance_private (monitor);
+
+	g_mutex_lock (&priv->thread.mutex);
+
+	while (g_atomic_int_get (&priv->thread.n_requests) != 0)
+		g_cond_wait (&priv->thread.cond, &priv->thread.mutex);
+
+	g_mutex_unlock (&priv->thread.mutex);
 }
 
 gboolean
@@ -454,9 +638,9 @@ tracker_monitor_move (TrackerMonitor *monitor,
 {
 	TrackerMonitorPrivate *priv;
 	GHashTableIter iter;
-	GHashTable *new_monitors;
+	MonitorRequest *request;
 	gchar *old_prefix;
-	gpointer iter_file, iter_file_monitor;
+	gpointer iter_file;
 	guint items_moved = 0;
 
 	priv = tracker_monitor_get_instance_private (monitor);
@@ -471,15 +655,15 @@ tracker_monitor_move (TrackerMonitor *monitor,
 	 * asynchronously on IN_IGNORE, so the opposite sequence
 	 * may possibly remove valid, just added, monitors.
 	 */
-	new_monitors = g_hash_table_new_full (g_file_hash,
-	                                      (GEqualFunc) g_file_equal,
-	                                      (GDestroyNotify) g_object_unref,
-	                                      NULL);
+	request = g_new0 (MonitorRequest, 1);
+	request->monitor = monitor;
+	request->type = MONITOR_REQUEST_ADD;
+
 	old_prefix = g_file_get_path (old_file);
 
 	/* Find out which subdirectories should have a file monitor added */
-	g_hash_table_iter_init (&iter, priv->monitors);
-	while (g_hash_table_iter_next (&iter, &iter_file, &iter_file_monitor)) {
+	g_hash_table_iter_init (&iter, priv->monitored_dirs);
+	while (g_hash_table_iter_next (&iter, &iter_file, NULL)) {
 		GFile *f;
 		gchar *old_path, *new_path;
 		gchar *new_prefix;
@@ -514,12 +698,9 @@ tracker_monitor_move (TrackerMonitor *monitor,
 		f = g_file_new_for_path (new_path);
 		g_free (new_path);
 
-		if (!g_hash_table_lookup (new_monitors, f)) {
-			g_hash_table_insert (new_monitors, f, GINT_TO_POINTER (1));
-		} else {
-			g_object_unref (f);
-		}
+		request->files = g_list_prepend (request->files, g_object_ref (f));
 
+		g_object_unref (f);
 		g_free (old_path);
 		items_moved++;
 	}
@@ -527,18 +708,15 @@ tracker_monitor_move (TrackerMonitor *monitor,
 	/* Add a new monitor for the top level directory */
 	tracker_monitor_add (monitor, new_file);
 
-	/* Add a new monitor for all subdirectories */
-	g_hash_table_iter_init (&iter, new_monitors);
-	while (g_hash_table_iter_next (&iter, &iter_file, NULL)) {
-		tracker_monitor_add (monitor, iter_file);
-		g_hash_table_iter_remove (&iter);
-	}
+	/* Add new monitors for all subdirectories */
+	monitor_request_queue (monitor, request);
 
 	/* Remove the monitor for the old top level directory hierarchy */
 	tracker_monitor_remove_recursively (monitor, old_file);
 
-	g_hash_table_unref (new_monitors);
 	g_free (old_prefix);
+
+	block_for_requests (monitor);
 
 	return items_moved > 0;
 }
@@ -575,24 +753,16 @@ monitor_event_to_string (GFileMonitorEvent event_type)
 	return "unknown";
 }
 
-static void
-emit_signal_for_event (TrackerMonitor    *monitor,
-                       GFileMonitorEvent  type,
-                       gboolean           is_directory,
-                       GFile             *file,
-                       GFile             *other_file)
+/* Executed in main thread */
+static gboolean
+emit_signal_for_event (MonitorEvent *event)
 {
-	/* Note that in any case we should be moving the monitors
-	 * here to the new place, as the new place may be ignored.
-	 * We should leave this to the upper layers. But one thing
-	 * we must do is actually CANCEL all these monitors. */
-	if (is_directory &&
-	    (type == G_FILE_MONITOR_EVENT_MOVED ||
-	     type == G_FILE_MONITOR_EVENT_DELETED)) {
-		monitor_cancel_recursively (monitor, file);
-	}
+	TrackerMonitor *monitor = event->monitor;
+	gboolean is_directory = event->is_directory;
+	GFile *file = event->file;
+	GFile *other_file = event->other_file;
 
-	switch (type) {
+	switch (event->event_type) {
 	case G_FILE_MONITOR_EVENT_CREATED:
 		g_signal_emit (monitor,
 		               signals[ITEM_CREATED], 0,
@@ -620,29 +790,56 @@ emit_signal_for_event (TrackerMonitor    *monitor,
 		break;
 	default:
 		g_warning ("Trying to emit monitor signal with unhandled event %d",
-		           type);
+		           event->event_type);
 		break;
 	}
+
+	return G_SOURCE_REMOVE;
 }
 
+/* Executed in monitor thread */
 static void
-flush_event_now (TrackerMonitor *monitor,
-                 GFile          *file)
+queue_signal_for_event (TrackerMonitor    *monitor,
+                        GFileMonitorEvent  type,
+                        gboolean           is_directory,
+                        GFile             *file,
+                        GFile             *other_file)
 {
 	TrackerMonitorPrivate *priv;
-	CachedEvent *event;
+	MonitorEvent *event;
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	event = g_hash_table_lookup (priv->cached_events, file);
+	event = monitor_event_new (monitor, file, other_file,
+	                           type, is_directory);
+
+	g_main_context_invoke_full (priv->thread.owner_context,
+	                            G_PRIORITY_HIGH,
+	                            (GSourceFunc) emit_signal_for_event,
+	                            event,
+	                            (GDestroyNotify) monitor_event_free);
+}
+
+/* Executed in monitor thread */
+static void
+flush_cached_event (TrackerMonitor *monitor,
+                    GFile          *file)
+{
+	TrackerMonitorPrivate *priv;
+	MonitorEvent *event;
+
+	priv = tracker_monitor_get_instance_private (monitor);
+
+	event = g_hash_table_lookup (priv->thread.cached_events, file);
 
 	if (event) {
-		emit_signal_for_event (monitor, event->event_type,
-		                       event->is_directory, event->file, NULL);
-		g_hash_table_remove (priv->cached_events, file);
+		queue_signal_for_event (monitor, event->event_type,
+		                        event->is_directory, event->file, NULL);
+		g_hash_table_remove (priv->thread.cached_events, file);
 	}
 }
 
+/* Executed in monitor thread */
 static void
 cache_event (TrackerMonitor    *monitor,
              GFile             *file,
@@ -650,19 +847,15 @@ cache_event (TrackerMonitor    *monitor,
              gboolean           is_directory)
 {
 	TrackerMonitorPrivate *priv;
-	CachedEvent *event;
+	MonitorEvent *event;
 
 	priv = tracker_monitor_get_instance_private (monitor);
-	event = g_hash_table_lookup (priv->cached_events, file);
+	event = g_hash_table_lookup (priv->thread.cached_events, file);
 
 	if (!event) {
-		event = g_new0 (CachedEvent, 1);
-		event->monitor = monitor;
-		event->file = g_object_ref (file);
-		event->event_type = event_type;
-		event->is_directory = is_directory;
-
-		g_hash_table_insert (priv->cached_events,
+		event = monitor_event_new (monitor, file, NULL,
+		                           event_type, is_directory);
+		g_hash_table_insert (priv->thread.cached_events,
 		                     g_object_ref (file),
 		                     event);
 	}
@@ -671,31 +864,34 @@ cache_event (TrackerMonitor    *monitor,
 static gboolean
 flush_event_idle_cb (gpointer user_data)
 {
-	CachedEvent *event = user_data;
-	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (event->monitor);
+       MonitorEvent *event = user_data;
+       TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (event->monitor);
 
-	event->source_id = 0;
-	emit_signal_for_event (event->monitor, event->event_type,
-	                       event->is_directory, event->file, NULL);
-	g_hash_table_remove (priv->cached_events, event->file);
+       queue_signal_for_event (event->monitor, event->event_type,
+                               event->is_directory, event->file, NULL);
+       g_hash_table_remove (priv->thread.cached_events, event->file);
 
-	return G_SOURCE_REMOVE;
+       return G_SOURCE_REMOVE;
 }
 
 static void
 flush_event_later (TrackerMonitor *monitor,
                    GFile          *file)
 {
-	TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (monitor);
-	CachedEvent *event;
+       TrackerMonitorPrivate *priv = tracker_monitor_get_instance_private (monitor);
+       MonitorEvent *event;
 
-	event = g_hash_table_lookup (priv->cached_events, file);
-	if (!event)
-		return;
+       event = g_hash_table_lookup (priv->thread.cached_events, file);
+       if (!event)
+               return;
 
-	event->source_id = g_idle_add (flush_event_idle_cb, event);
+       event->source = g_idle_source_new ();
+       g_source_set_callback (event->source, flush_event_idle_cb, event, NULL);
+       g_source_attach (event->source,
+                        priv->thread.monitor_context);
 }
 
+/* Executed in monitor thread */
 static void
 monitor_event_cb (GFileMonitor      *file_monitor,
                   GFile             *file,
@@ -708,11 +904,11 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 	gchar *other_file_uri;
 	gboolean is_directory = FALSE;
 	TrackerMonitorPrivate *priv;
-	CachedEvent *prev_event;
+	MonitorEvent *prev_event;
 
 	monitor = user_data;
 	priv = tracker_monitor_get_instance_private (monitor);
-	prev_event = g_hash_table_lookup (priv->cached_events, file);
+	prev_event = g_hash_table_lookup (priv->thread.cached_events, file);
 
 	if (G_UNLIKELY (!priv->enabled)) {
 		TRACKER_NOTE (MONITORS, g_message ("Silently dropping monitor event, monitor disabled for now"));
@@ -759,8 +955,19 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 			 * this event before this one, we should ensure it's cleared
 			 * out.
 			 */
-			g_hash_table_remove (priv->cached_events, file);
+			g_hash_table_remove (priv->thread.cached_events, file);
 		}
+	}
+
+	/* Note that in any case we should be moving the monitors
+	 * here to the new place, as the new place may be ignored.
+	 * We should leave this to the upper layers. But one thing
+	 * we must do is actually CANCEL all these monitors. */
+	if (is_directory &&
+	    (event_type == G_FILE_MONITOR_EVENT_RENAMED ||
+	     event_type == G_FILE_MONITOR_EVENT_MOVED_IN ||
+	     event_type == G_FILE_MONITOR_EVENT_DELETED)) {
+		monitor_cancel_recursively (monitor, file);
 	}
 
 	switch (event_type) {
@@ -769,30 +976,30 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		if (!priv->use_changed_event) {
 			cache_event (monitor, file, event_type, is_directory);
 		} else {
-			emit_signal_for_event (monitor, event_type,
-			                       is_directory, file, NULL);
+			queue_signal_for_event (monitor, event_type,
+			                        is_directory, file, NULL);
 		}
 		break;
 	case G_FILE_MONITOR_EVENT_DELETED:
 		if (prev_event &&
 		    prev_event->event_type == G_FILE_MONITOR_EVENT_CREATED) {
 			/* Consume both the cached CREATED event and this one */
-			g_hash_table_remove (priv->cached_events, file);
+			g_hash_table_remove (priv->thread.cached_events, file);
 			break;
 		}
 
 		/* In any case, cached events are stale */
-		g_hash_table_remove (priv->cached_events, file);
+		g_hash_table_remove (priv->thread.cached_events, file);
 
 		cache_event (monitor, file, event_type, is_directory);
 		flush_event_later (monitor, file);
 		break;
 	case G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED:
-		emit_signal_for_event (monitor, event_type,
-		                       is_directory, file, NULL);
+		queue_signal_for_event (monitor, event_type,
+		                        is_directory, file, NULL);
 		break;
 	case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
-		flush_event_now (monitor, file);
+		flush_cached_event (monitor, file);
 		break;
 	case G_FILE_MONITOR_EVENT_MOVED_IN:
 		if (other_file) {
@@ -800,31 +1007,31 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 			 * ::item-moved when source/dest are known. We choose
 			 * to emit it here, and ignore the MOVE_OUT.
 			 */
-			emit_signal_for_event (monitor,
-			                       G_FILE_MONITOR_EVENT_MOVED,
-			                       is_directory,
-			                       other_file, file);
+			queue_signal_for_event (monitor,
+			                        G_FILE_MONITOR_EVENT_MOVED,
+			                        is_directory,
+			                        other_file, file);
 		} else {
 			/* No known origin, treat as a new file */
-			emit_signal_for_event (monitor,
-			                       G_FILE_MONITOR_EVENT_CREATED,
-			                       is_directory,
-			                       file, NULL);
+			queue_signal_for_event (monitor,
+			                        G_FILE_MONITOR_EVENT_CREATED,
+			                        is_directory,
+			                        file, NULL);
 		}
 		break;
 	case G_FILE_MONITOR_EVENT_MOVED_OUT:
 		if (!other_file) {
 			/* No known destination. Treat as remove */
-			emit_signal_for_event (monitor,
-			                       G_FILE_MONITOR_EVENT_DELETED,
-			                       is_directory,
-			                       file, NULL);
+			queue_signal_for_event (monitor,
+			                        G_FILE_MONITOR_EVENT_DELETED,
+			                        is_directory,
+			                        file, NULL);
 		}
 		break;
 	case G_FILE_MONITOR_EVENT_RENAMED:
-		emit_signal_for_event (monitor,
-		                       G_FILE_MONITOR_EVENT_MOVED,
-		                       is_directory, file, other_file);
+		queue_signal_for_event (monitor,
+		                        G_FILE_MONITOR_EVENT_MOVED,
+		                        is_directory, file, other_file);
 		break;
 	case G_FILE_MONITOR_EVENT_MOVED:
 		g_warn_if_reached ();
@@ -902,7 +1109,7 @@ tracker_monitor_set_enabled (TrackerMonitor *monitor,
                              gboolean        enabled)
 {
 	TrackerMonitorPrivate *priv;
-	GList *keys, *k;
+	MonitorRequest *request;
 
 	g_return_if_fail (TRACKER_IS_MONITOR (monitor));
 
@@ -918,28 +1125,13 @@ tracker_monitor_set_enabled (TrackerMonitor *monitor,
 	priv->enabled = enabled;
 	g_object_notify (G_OBJECT (monitor), "enabled");
 
-	keys = g_hash_table_get_keys (priv->monitors);
+	request = g_new0 (MonitorRequest, 1);
+	request->monitor = monitor;
+	request->files = g_hash_table_get_keys (priv->monitored_dirs);
+	request->type = enabled ? MONITOR_REQUEST_ADD : MONITOR_REQUEST_REMOVE;
 
-	/* Update state on all monitored dirs */
-	for (k = keys; k != NULL; k = k->next) {
-		GFile *file;
-
-		file = k->data;
-
-		if (enabled) {
-			GFileMonitor *dir_monitor;
-
-			dir_monitor = directory_monitor_new (monitor, file);
-			g_hash_table_replace (priv->monitors,
-			                      g_object_ref (file), dir_monitor);
-		} else {
-			/* Remove monitor */
-			g_hash_table_replace (priv->monitors,
-			                      g_object_ref (file), NULL);
-		}
-	}
-
-	g_list_free (keys);
+	monitor_request_queue (monitor, request);
+	block_for_requests (monitor);
 }
 
 gboolean
@@ -947,7 +1139,6 @@ tracker_monitor_add (TrackerMonitor *monitor,
                      GFile          *file)
 {
 	TrackerMonitorPrivate *priv;
-	GFileMonitor *dir_monitor = NULL;
 	gchar *uri;
 
 	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), FALSE);
@@ -955,12 +1146,12 @@ tracker_monitor_add (TrackerMonitor *monitor,
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	if (g_hash_table_lookup (priv->monitors, file)) {
+	if (g_hash_table_lookup (priv->monitored_dirs, file)) {
 		return TRUE;
 	}
 
 	/* Cap the number of monitors */
-	if (g_hash_table_size (priv->monitors) >= priv->monitor_limit) {
+	if (g_hash_table_size (priv->monitored_dirs) >= priv->monitor_limit) {
 		priv->monitors_ignored++;
 
 		if (!priv->monitor_limit_warned) {
@@ -981,27 +1172,22 @@ tracker_monitor_add (TrackerMonitor *monitor,
 		 *
 		 * Also, we assume ALL paths passed are directories.
 		 */
-		dir_monitor = directory_monitor_new (monitor, file);
+		MonitorRequest *request;
 
-		if (!dir_monitor) {
-			g_warning ("Could not add monitor for path:'%s'",
-			           uri);
-			g_free (uri);
-			return FALSE;
-		}
+		request = g_new0 (MonitorRequest, 1);
+		request->monitor = monitor;
+		request->files = g_list_prepend (NULL, g_object_ref (file));
+		request->type = MONITOR_REQUEST_ADD;
+
+		monitor_request_queue (monitor, request);
+		block_for_requests (monitor);
 	}
 
-	/* NOTE: it is ok to add a NULL file_monitor, when our
-	 * enabled/disabled state changes, we iterate all keys and
-	 * add or remove monitors.
-	 */
-	g_hash_table_insert (priv->monitors,
-	                     g_object_ref (file),
-	                     dir_monitor);
+	g_hash_table_add (priv->monitored_dirs, g_object_ref (file));
 
 	TRACKER_NOTE (MONITORS, g_message ("Added monitor for path:'%s', total monitors:%d",
 	                                   uri,
-	                                   g_hash_table_size (priv->monitors)));
+	                                   g_hash_table_size (priv->monitored_dirs)));
 
 	g_free (uri);
 
@@ -1019,15 +1205,24 @@ tracker_monitor_remove (TrackerMonitor *monitor,
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
 	priv = tracker_monitor_get_instance_private (monitor);
-	removed = g_hash_table_remove (priv->monitors, file);
+	removed = g_hash_table_remove (priv->monitored_dirs, file);
 
 	if (removed) {
+		MonitorRequest *request;
 		gchar *uri;
+
+		request = g_new0 (MonitorRequest, 1);
+		request->monitor = monitor;
+		request->files = g_list_prepend (NULL, g_object_ref (file));
+		request->type = MONITOR_REQUEST_REMOVE;
+
+		monitor_request_queue (monitor, request);
+		block_for_requests (monitor);
 
 		uri = g_file_get_uri (file);
 		TRACKER_NOTE (MONITORS, g_message ("Removed monitor for path:'%s', total monitors:%d",
 		                                   uri,
-		                                   g_hash_table_size (priv->monitors)));
+		                                   g_hash_table_size (priv->monitored_dirs)));
 
 		g_free (uri);
 	}
@@ -1054,7 +1249,8 @@ remove_recursively (TrackerMonitor *monitor,
 {
 	TrackerMonitorPrivate *priv;
 	GHashTableIter iter;
-	gpointer iter_file, iter_file_monitor;
+	MonitorRequest *request;
+	gpointer iter_file;
 	guint items_removed = 0;
 	gchar *uri;
 
@@ -1063,13 +1259,18 @@ remove_recursively (TrackerMonitor *monitor,
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	g_hash_table_iter_init (&iter, priv->monitors);
-	while (g_hash_table_iter_next (&iter, &iter_file, &iter_file_monitor)) {
+	request = g_new0 (MonitorRequest, 1);
+	request->monitor = monitor;
+	request->type = MONITOR_REQUEST_REMOVE;
+
+	g_hash_table_iter_init (&iter, priv->monitored_dirs);
+	while (g_hash_table_iter_next (&iter, &iter_file, NULL)) {
 		if (!file_has_maybe_strict_prefix (iter_file, file,
 		                                   !remove_top_level)) {
 			continue;
 		}
 
+		request->files = g_list_prepend (request->files, g_object_ref (file));
 		g_hash_table_iter_remove (&iter);
 		items_removed++;
 	}
@@ -1079,8 +1280,11 @@ remove_recursively (TrackerMonitor *monitor,
 	              g_message ("Removed all monitors %srecursively for path:'%s', )"
 	                         "total monitors:%d",
 	                         !remove_top_level ? "(except top level) " : "",
-	                         uri, g_hash_table_size (priv->monitors)));
+	                         uri, g_hash_table_size (priv->monitored_dirs)));
 	g_free (uri);
+
+	monitor_request_queue (monitor, request);
+	block_for_requests (monitor);
 
 	if (items_removed > 0) {
 		/* We reset this because now it is possible we have limit - 1 */
@@ -1105,6 +1309,7 @@ tracker_monitor_remove_children_recursively (TrackerMonitor *monitor,
 	return remove_recursively (monitor, file, FALSE);
 }
 
+/* Runs in the monitor thread */
 static gboolean
 monitor_cancel_recursively (TrackerMonitor *monitor,
                             GFile          *file)
@@ -1116,7 +1321,7 @@ monitor_cancel_recursively (TrackerMonitor *monitor,
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	g_hash_table_iter_init (&iter, priv->monitors);
+	g_hash_table_iter_init (&iter, priv->thread.monitors);
 	while (g_hash_table_iter_next (&iter, &iter_file, &iter_file_monitor)) {
 		gchar *uri;
 
@@ -1147,27 +1352,10 @@ tracker_monitor_is_watched (TrackerMonitor *monitor,
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	return g_hash_table_lookup (priv->monitors, file) != NULL;
-}
+	if (!priv->enabled)
+		return FALSE;
 
-gboolean
-tracker_monitor_is_watched_by_string (TrackerMonitor *monitor,
-                                      const gchar    *path)
-{
-	TrackerMonitorPrivate *priv;
-	GFile      *file;
-	gboolean    watched;
-
-	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), FALSE);
-	g_return_val_if_fail (path != NULL, FALSE);
-
-	priv = tracker_monitor_get_instance_private (monitor);
-
-	file = g_file_new_for_path (path);
-	watched = g_hash_table_lookup (priv->monitors, file) != NULL;
-	g_object_unref (file);
-
-	return watched;
+	return g_hash_table_contains (priv->monitored_dirs, file);
 }
 
 guint
@@ -1179,7 +1367,7 @@ tracker_monitor_get_count (TrackerMonitor *monitor)
 
 	priv = tracker_monitor_get_instance_private (monitor);
 
-	return g_hash_table_size (priv->monitors);
+	return g_hash_table_size (priv->monitored_dirs);
 }
 
 guint

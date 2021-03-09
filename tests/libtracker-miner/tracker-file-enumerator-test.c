@@ -38,8 +38,7 @@ test_enumerator_and_provider (void)
 	data_provider = tracker_file_data_provider_new ();
 	g_assert_nonnull (data_provider);
 
-	/* FIXME: Use better tmp data structure */
-	url = g_file_new_for_path (g_get_tmp_dir ());
+	url = g_file_new_for_path ("/proc/self");
 	g_assert_nonnull (url);
 
 	/* fe = g_file_enumerate_children ( */
