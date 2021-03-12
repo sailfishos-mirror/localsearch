@@ -2153,6 +2153,9 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		graph_file = tracker_resource_new (uri);
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
 
+		tracker_resource_set_string (graph_file, "nfo:fileName",
+		                             g_file_info_get_display_name (file_info));
+
 		time_str = g_date_time_format_iso8601 (modified);
 		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
 		g_free (time_str);
