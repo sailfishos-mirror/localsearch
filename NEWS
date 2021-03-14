@@ -1,3 +1,11 @@
+NEW in 3.1.0.rc - 2021-03-14
+============================
+  * Dispatch monitor events on a private thread
+  * Fix After= usage in systemd service files
+  * Fix compiler warnings
+
+Translations: ca, de, eu, gl, hr, hu, ko, lt, lv, pl, sr, tr
+
 NEW in 3.1.0.beta - 2021-02-14
 ==============================
   * Fix tracker-miner-fs-control-3 stall on shutdown
