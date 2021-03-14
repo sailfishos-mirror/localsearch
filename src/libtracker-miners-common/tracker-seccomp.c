@@ -171,6 +171,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (eventfd2);
 	ALLOW_RULE (pipe);
 	ALLOW_RULE (pipe2);
+	ALLOW_RULE (epoll_create);
+	ALLOW_RULE (epoll_ctl);
 	/* System */
 	ALLOW_RULE (uname);
 	ALLOW_RULE (sysinfo);
