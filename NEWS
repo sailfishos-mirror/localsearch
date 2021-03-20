@@ -1,3 +1,18 @@
+NEW in 3.1.0 - 2021-03-20
+=========================
+Translations: fr, it
+
+  Highlighted changes since 3.0:
+  * Massive performance improvements to tracker-miner-fs-3
+    - Directory monitoring now is now delegated on a worker
+      thread, to free up the main thread's main context.
+    - Multiple internal refactors to avoid redundant operations
+      while checking for changes across a directory tree, and
+      better clustering when handling those changes.
+    - Use of TrackerBatch for better update performance
+  * Better support for file formats in tracker-extract-3
+    - Support for more game image formats
+
 NEW in 3.1.0.rc - 2021-03-14
 ============================
   * Dispatch monitor events on a private thread
