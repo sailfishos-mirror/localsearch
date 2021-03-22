@@ -364,7 +364,7 @@ pause_process_disappeared_cb (GDBusConnection *connection,
 	GHashTableIter iter;
 	gpointer key, value;
 
-	g_message ("Process with name:'%s' has disappeared", name);
+	g_debug ("Process with name:'%s' has disappeared", name);
 
 	g_hash_table_iter_init (&iter, priv->pauses);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
@@ -409,7 +409,7 @@ pause_miner (TrackerMinerProxy  *proxy,
 	}
 
 	if (calling_name) {
-		g_message ("Watching process with name:'%s'", calling_name);
+		g_debug ("Watching process with name:'%s'", calling_name);
 		watch_name_id = g_bus_watch_name (TRACKER_IPC_BUS,
 		                                  calling_name,
 		                                  G_BUS_NAME_WATCHER_FLAGS_NONE,

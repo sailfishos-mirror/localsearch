@@ -280,9 +280,9 @@ signal_handler (gpointer user_data)
 		/* Fall through */
 	default:
 		if (g_strsignal (signo)) {
-			g_message ("Received signal:%d->'%s'",
-			           signo,
-			           g_strsignal (signo));
+			g_debug ("Received signal:%d->'%s'",
+			         signo,
+			         g_strsignal (signo));
 		}
 		break;
 	}
@@ -430,8 +430,8 @@ miner_start (TrackerMiner  *miner,
 	}
 
 	slept = FALSE;
-	g_message ("Performing initial sleep of %d seconds",
-	           initial_sleep);
+	g_debug ("Performing initial sleep of %d seconds",
+	         initial_sleep);
 	miners_timeout_id = g_timeout_add_seconds (initial_sleep,
 	                                           miner_start_idle_cb,
 	                                           miner);
@@ -1034,13 +1034,13 @@ main (gint argc, gchar *argv[])
 	main_loop = g_main_loop_new (NULL, FALSE);
 
 	if (no_daemon) {
-		g_message ("tracker-miner-fs-3 running in --no-daemon mode.");
+		g_debug ("tracker-miner-fs-3 running in --no-daemon mode.");
 	} else if (domain_ontology_name) {
 		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
 
-		g_message ("tracker-miner-fs-3 running in --domain-ontology mode as "
-		           "%s." DBUS_NAME_SUFFIX ". The service will exit when %s "
-		           "disappears from the bus.", domain_name, domain_name);
+		g_debug ("tracker-miner-fs-3 running in --domain-ontology mode as "
+		         "%s." DBUS_NAME_SUFFIX ". The service will exit when %s "
+		         "disappears from the bus.", domain_name, domain_name);
 
 		g_bus_watch_name_on_connection (connection, domain_name,
 		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
@@ -1048,7 +1048,7 @@ main (gint argc, gchar *argv[])
 		                                main_loop, NULL);
 		g_free (domain_name);
 	} else {
-		g_message ("tracker-miner-fs-3 running as org.freedesktop." DBUS_NAME_SUFFIX);
+		g_debug ("tracker-miner-fs-3 running as org.freedesktop." DBUS_NAME_SUFFIX);
 	}
 
 	if (!dry_run) {

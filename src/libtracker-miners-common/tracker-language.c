@@ -256,8 +256,8 @@ language_add_stopwords (TrackerLanguage *language,
 
 	mapped_file = g_mapped_file_new (filename, FALSE, &error);
 	if (error) {
-		g_message ("Tracker couldn't read stopword file:'%s', %s",
-		           filename, error->message);
+		g_debug ("Tracker couldn't read stopword file:'%s', %s",
+		         filename, error->message);
 		g_clear_error (&error);
 		return;
 	}
