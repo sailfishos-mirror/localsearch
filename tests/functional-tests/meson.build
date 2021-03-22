@@ -164,6 +164,7 @@ endif
 
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
+test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 
 foreach t: extractor_tests
   data = join_paths('test-extraction-data', t) + '.expected.json'
