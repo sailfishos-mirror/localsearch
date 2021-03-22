@@ -19,5 +19,7 @@ foreach base_name: libtracker_common_tests
       dependencies: libtracker_miners_common_test_deps,
       c_args: test_c_args)
 
-    test(base_name, binary, suite: 'miners-common')
+    test(base_name, binary,
+      protocol: test_protocol,
+      suite: 'miners-common')
 endforeach

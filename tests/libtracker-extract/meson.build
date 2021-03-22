@@ -26,7 +26,9 @@ foreach base_name: libtracker_extract_tests
       dependencies: libtracker_extract_test_deps,
       c_args: test_c_args)
 
-    test(base_name, binary, suite: 'extract')
+    test(base_name, binary,
+      protocol: test_protocol,
+      suite: 'extract')
 endforeach
 
 if libiptcdata.found() and libjpeg.found()
@@ -35,5 +37,7 @@ if libiptcdata.found() and libjpeg.found()
     dependencies: libtracker_extract_test_deps + [libjpeg],
     c_args: test_c_args,
   )
-  test('extract-iptc', iptc_test, suite: 'extract')
+  test('extract-iptc', iptc_test,
+    protocol: test_protocol,
+    suite: 'extract')
 endif

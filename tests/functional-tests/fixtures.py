@@ -69,7 +69,18 @@ def tracker_test_main():
                             handlers=[handler_stderr, handler_stdout],
                             format='%(message)s')
 
-    ut.main(failfast=True, verbosity=2)
+    runner = None
+
+    if cfg.tap_protocol_enabled():
+        try:
+            from tap import TAPTestRunner
+            runner = TAPTestRunner()
+            runner.set_stream(True)
+        except ImportError as e:
+            log.error('No TAP test runner found: %s', e)
+            raise
+
+    ut.main(testRunner=runner, failfast=True, verbosity=2)
 
 
 class TrackerMinerTest(ut.TestCase):

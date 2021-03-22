@@ -66,6 +66,10 @@ def cli_subcommands_dir():
     return config['TEST_CLI_SUBCOMMANDS_DIR']
 
 
+def tap_protocol_enabled():
+    return config['TEST_TAP_ENABLED']
+
+
 def nepomuk_path():
     parser = configparser.ConfigParser()
     parser.read(config['TEST_DOMAIN_ONTOLOGY_RULE'])

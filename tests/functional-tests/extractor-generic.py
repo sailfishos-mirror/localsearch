@@ -124,6 +124,20 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
             print("\ntracker-extract returned: %s" % json.dumps(result, indent=4))
             raise
 
+def run_suite(suite):
+    if cfg.tap_protocol_enabled():
+        try:
+            from tap import TAPTestRunner
+            runner = TAPTestRunner()
+            runner.set_stream(True)
+        except ImportError as e:
+            log.error('No TAP test runner found: %s', e)
+            raise
+    else:
+        runner = ut.TextTestRunner(verbosity=1)
+
+    result = runner.run(suite)
+    sys.exit(not result.wasSuccessful())
 
 def run_all():
     ##
@@ -146,8 +160,8 @@ def run_all():
         for descfile in descriptions:
             tc = GenericExtractionTestCase(descfile=descfile)
             extractionTestSuite.addTest(tc)
-    result = ut.TextTestRunner(verbosity=1).run(extractionTestSuite)
-    sys.exit(not result.wasSuccessful())
+
+    run_suite(extractionTestSuite)
 
 
 def run_one(filename):
@@ -160,8 +174,7 @@ def run_one(filename):
     tc = GenericExtractionTestCase(descfile=description)
     extractionTestSuite.addTest(tc)
 
-    result = ut.TextTestRunner(verbosity=2).run(extractionTestSuite)
-    sys.exit(not result.wasSuccessful())
+    run_suite(extractionTestSuite)
 
 
 try:

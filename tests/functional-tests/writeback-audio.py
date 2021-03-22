@@ -56,4 +56,4 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self._writeback_test(self.datadir_path('writeback-test-8.mp4'))
 
 if __name__ == "__main__":
-    unittest.main(failfast=True, verbosity=2)
+    fixtures.tracker_test_main()

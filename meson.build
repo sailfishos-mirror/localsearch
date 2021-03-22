@@ -448,6 +448,12 @@ test_c_args = tracker_c_args + [
   '-DTOP_SRCDIR="@0@/"'.format(meson.source_root()),
 ]
 
+if get_option('tests_tap_protocol')
+  test_protocol = 'tap'
+else
+  test_protocol = 'exitcode'
+endif
+
 subdir('tests')
 
 run_uninstalled_conf = configuration_data()
