@@ -4,7 +4,7 @@
 variables:
   # These can be used to see verbose log output from the functional-tests.
   # See HACKING.md for more information.
-  G_MESSAGES_DEBUG: "Tracker"
+  G_MESSAGES_DEBUG: ""
   TRACKER_DEBUG: ""
 
   # This can be used when debugging test failures that only occur within GitLab CI.
