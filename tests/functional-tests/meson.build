@@ -18,6 +18,7 @@ testconf.set('TEST_GSETTINGS_SCHEMA_DIR', tracker_miners_uninstalled_gsettings_s
 testconf.set('TEST_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 testconf.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 testconf.set('TEST_WRITEBACK_MODULES_DIR', tracker_uninstalled_writeback_modules_dir)
+testconf.set('TEST_TAP_ENABLED', get_option('tests_tap_protocol'))
 testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
 
 test_domain_rule = configure_file(
@@ -163,6 +164,7 @@ endif
 
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
+test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 
 foreach t: extractor_tests
   data = join_paths('test-extraction-data', t) + '.expected.json'
@@ -176,6 +178,7 @@ foreach t: extractor_tests
   test(test_name, python,
     args: ['extractor-generic.py', data],
     env: test_env,
+    protocol: test_protocol,
     suite: ['extractor'] + test_suite,
     workdir: meson.current_source_dir())
 endforeach
@@ -185,6 +188,7 @@ foreach t: functional_tests
   test(t, python,
     args: [file],
     env: test_env,
+    protocol: test_protocol,
     suite: ['functional'],
     timeout: 120)
 endforeach

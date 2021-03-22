@@ -4,7 +4,7 @@
 variables:
   # These can be used to see verbose log output from the functional-tests.
   # See HACKING.md for more information.
-  G_MESSAGES_DEBUG: "Tracker"
+  G_MESSAGES_DEBUG: ""
   TRACKER_DEBUG: ""
 
   # This can be used when debugging test failures that only occur within GitLab CI.
@@ -26,7 +26,7 @@ stages:
     - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dtests_tap_protocol=true
     - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
@@ -54,7 +54,8 @@ stages:
     when: always
     paths:
     - build/meson-logs/*.txt
-
+    reports:
+      junit: "build/meson-logs/testlog.junit.xml"
 
 test-fedora-latest:
   image: registry.gitlab.gnome.org/gnome/tracker-oci-images/amd64/fedora:latest

@@ -150,9 +150,9 @@ signal_handler (gpointer user_data)
 		/* Fall through */
 	default:
 		if (g_strsignal (signo)) {
-			g_message ("Received signal:%d->'%s'",
-			           signo,
-			           g_strsignal (signo));
+			g_debug ("Received signal:%d->'%s'",
+			         signo,
+			         g_strsignal (signo));
 		}
 		break;
 	}
@@ -432,8 +432,12 @@ main (int argc, char *argv[])
 	/* Request DBus name */
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
 
-	g_message ("tracker-extract-3 running as %s. The service will exit when %s "
-	           "disappears from the bus.", dbus_name, miner_dbus_name);
+	if (tracker_term_is_tty ()) {
+		g_debug ("tracker-extract-3 running as %s", dbus_name);
+	} else {
+		g_debug ("tracker-extract-3 running as %s. The service will exit when %s "
+		         "disappears from the bus.", dbus_name, miner_dbus_name);
+	}
 
 	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
 		g_critical ("Could not request DBus name '%s': %s",

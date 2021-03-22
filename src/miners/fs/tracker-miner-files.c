@@ -1274,7 +1274,7 @@ check_battery_status (TrackerMinerFiles *mf)
 	on_battery = tracker_power_get_on_battery (mf->private->power);
 
 	if (!on_battery) {
-		g_message ("Running on AC power");
+		g_debug ("Running on AC power");
 		should_pause = FALSE;
 		should_throttle = FALSE;
 	} else if (on_low_battery) {
@@ -1290,15 +1290,15 @@ check_battery_status (TrackerMinerFiles *mf)
 				g_message ("Running on battery, but not enabled, pausing");
 				should_pause = TRUE;
 			} else if (tracker_miner_files_get_first_index_done (mf)) {
-				g_message ("Running on battery and first-time index "
-				           "already done, pausing");
+				g_debug ("Running on battery and first-time index "
+				         "already done, pausing");
 				should_pause = TRUE;
 			} else {
-				g_message ("Running on battery, but first-time index not "
-				           "already finished, keeping on");
+				g_debug ("Running on battery, but first-time index not "
+				         "already finished, keeping on");
 			}
 		} else {
-			g_message ("Running on battery");
+			g_debug ("Running on battery");
 		}
 	}
 

@@ -38,6 +38,7 @@ foreach base_name: libtracker_miner_tests
 
     test(test_name, binary,
       env: libtracker_miner_test_environment,
+      protocol: test_protocol,
       suite: 'miner')
 endforeach
 
@@ -54,5 +55,6 @@ foreach base_name: libtracker_miner_slow_tests
     test(test_name, binary,
       env: libtracker_miner_test_environment,
       timeout: 180,
+      protocol: test_protocol,
       suite: ['miner', 'slow'])
 endforeach
