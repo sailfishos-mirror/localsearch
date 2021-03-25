@@ -17,9 +17,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2020-08-26 01:37+0000\n"
-"PO-Revision-Date: 2020-08-29 10:05-0400\n"
-"Last-Translator: Dingzhong Chen <wsxy162@gmail.com>\n"
+"POT-Creation-Date: 2021-02-04 22:12+0000\n"
+"PO-Revision-Date: 2021-01-29 15:33+0800\n"
+"Last-Translator: mars <gzhqyz@gmail.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -263,58 +263,54 @@ msgstr "忽略的含内容的目录"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "忽略任何包含此处所列黑名单文件的目录"
 
-#: src/libtracker-miners-common/tracker-utils.c:90
-msgid "unknown time"
-msgstr "未知时间"
-
-#: src/libtracker-miners-common/tracker-utils.c:104
-#: src/libtracker-miners-common/tracker-utils.c:155
+#: src/libtracker-miners-common/tracker-utils.c:101
+#: src/libtracker-miners-common/tracker-utils.c:152
 msgid "less than one second"
 msgstr "不到一秒"
 
 #. Translators: this is %d days
-#: src/libtracker-miners-common/tracker-utils.c:119
+#: src/libtracker-miners-common/tracker-utils.c:116
 #, c-format
 msgid " %dd"
 msgstr " %dd"
 
 #. Translators: this is %2.2d hours
-#: src/libtracker-miners-common/tracker-utils.c:123
+#: src/libtracker-miners-common/tracker-utils.c:120
 #, c-format
 msgid " %2.2dh"
 msgstr " %2.2dh"
 
 #. Translators: this is %2.2d minutes
-#: src/libtracker-miners-common/tracker-utils.c:127
+#: src/libtracker-miners-common/tracker-utils.c:124
 #, c-format
 msgid " %2.2dm"
 msgstr " %2.2dm"
 
 #. Translators: this is %2.2d seconds
-#: src/libtracker-miners-common/tracker-utils.c:131
+#: src/libtracker-miners-common/tracker-utils.c:128
 #, c-format
 msgid " %2.2ds"
 msgstr " %2.2ds"
 
-#: src/libtracker-miners-common/tracker-utils.c:135
+#: src/libtracker-miners-common/tracker-utils.c:132
 #, c-format
 msgid " %d day"
 msgid_plural " %d days"
 msgstr[0] " %d 天"
 
-#: src/libtracker-miners-common/tracker-utils.c:139
+#: src/libtracker-miners-common/tracker-utils.c:136
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
 msgstr[0] " %2.2d 时"
 
-#: src/libtracker-miners-common/tracker-utils.c:143
+#: src/libtracker-miners-common/tracker-utils.c:140
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
 msgstr[0] " %2.2d 分"
 
-#: src/libtracker-miners-common/tracker-utils.c:147
+#: src/libtracker-miners-common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
@@ -333,19 +329,19 @@ msgstr "Cookie 未被识别用以恢复暂停的挖掘器"
 msgid "Pause application and reason match an already existing pause request"
 msgstr "暂停应用并合理匹配一个已经存在的暂停请求"
 
-#: src/miners/fs/tracker-main.c:76
+#: src/miners/fs/tracker-main.c:81
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "以秒为单位的初始睡眠时间，0 到 1000（默认 15）"
 
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:86
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "运行到所有配置的位置都已索引，然后退出"
 
-#: src/miners/fs/tracker-main.c:85 src/tracker/tracker-info.c:74
+#: src/miners/fs/tracker-main.c:90 src/tracker/tracker-info.c:74
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "检查文件是否适宜基于配置的挖掘"
 
-#: src/miners/fs/tracker-main.c:86 src/tracker-extract/tracker-main.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:77 src/tracker/tracker-info.c:78
@@ -353,76 +349,76 @@ msgstr "检查文件是否适宜基于配置的挖掘"
 msgid "FILE"
 msgstr "文件"
 
-#: src/miners/fs/tracker-main.c:89 src/miners/rss/tracker-main.c:51
+#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:51
 #: src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "为一个特定的域本体运行"
 
-#: src/miners/fs/tracker-main.c:93
+#: src/miners/fs/tracker-main.c:98
 msgid "Avoids changes in the filesystem"
 msgstr "避免文件系统中的更改"
 
-#: src/miners/fs/tracker-main.c:97 src/tracker-control/tracker-main.c:61
+#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:101
 #: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "显示版本信息"
 
-#: src/miners/fs/tracker-main.c:569
+#: src/miners/fs/tracker-main.c:624
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "数据对象“%s”目前存在"
 
-#: src/miners/fs/tracker-main.c:570
+#: src/miners/fs/tracker-main.c:625
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "数据对象“%s”目前不存在"
 
-#: src/miners/fs/tracker-main.c:606
+#: src/miners/fs/tracker-main.c:661
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "目录不适宜进行挖掘（基于过滤器）"
 
-#: src/miners/fs/tracker-main.c:610
+#: src/miners/fs/tracker-main.c:665
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "文件不适宜进行挖掘（基于过滤器）"
 
-#: src/miners/fs/tracker-main.c:613
+#: src/miners/fs/tracker-main.c:668
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "文件不适宜进行挖掘（隐藏文件）"
 
-#: src/miners/fs/tracker-main.c:615
+#: src/miners/fs/tracker-main.c:670
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "文件不适宜进行挖掘（不是被索引的文件夹）"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:694
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "上级目录“%s”不适宜进行挖掘（基于过滤器）"
 
-#: src/miners/fs/tracker-main.c:645
+#: src/miners/fs/tracker-main.c:700
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "上级目录“%s”不适宜进行挖掘（隐藏文件）"
 
-#: src/miners/fs/tracker-main.c:653
+#: src/miners/fs/tracker-main.c:708
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "上级目录“%s”不适宜进行挖掘（基于内容过滤器）"
 
-#: src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:729
 msgid "Directory is eligible to be indexed"
 msgstr "目录适宜进行挖掘"
 
-#: src/miners/fs/tracker-main.c:675
+#: src/miners/fs/tracker-main.c:730
 msgid "File is eligible to be indexed"
 msgstr "文件适宜进行挖掘"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:929
+#: src/miners/fs/tracker-main.c:988
 msgid "— start the tracker indexer"
 msgstr "— 启动 tracker 索引器"
 
@@ -446,8 +442,8 @@ msgstr "要使用的标题（必须与 --add-feed 一起使用）"
 msgid "— start the feeds indexer"
 msgstr "— 启动 Feed 索引器"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:361
-#: src/tracker/tracker-search.c:1210 src/tracker/tracker-status.c:88
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:390
+#: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:88
 #: src/tracker/tracker-status.c:201 src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "无法建立到 Tracker 的连接"
@@ -457,10 +453,10 @@ msgstr "无法建立到 Tracker 的连接"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:362 src/tracker/tracker-process.c:193
-#: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:89
-#: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:251
-#: src/tracker/tracker-status.c:280 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-info.c:391 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-search.c:1212 src/tracker/tracker-status.c:89
+#: src/tracker/tracker-status.c:202 src/tracker/tracker-status.c:248
+#: src/tracker/tracker-status.c:277 src/tracker/tracker-tag.c:976
 msgid "No error given"
 msgstr "未指定错误"
 
@@ -471,15 +467,15 @@ msgstr "无法添加 Feed"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/tracker-control/tracker-main.c:135
+#: src/tracker-control/tracker-main.c:136
 msgid "— start the tracker index proxy"
 msgstr "— 启动 tracker 索引代理服务器"
 
-#: src/tracker-extract/tracker-extract.c:674
+#: src/tracker-extract/tracker-extract.c:687
 msgid "Metadata extraction failed"
 msgstr "元数据提取失败"
 
-#: src/tracker-extract/tracker-extract.c:736
+#: src/tracker-extract/tracker-extract.c:762
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "没有找到处理此文件的原数据或提取器模块"
 
@@ -769,7 +765,7 @@ msgstr "忽略所有的 nie:plainTextContent 属性"
 msgid "Common statuses include"
 msgstr "包括常见状态"
 
-#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:279
+#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:276
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "无法获取状态，无法创建管理器，%s"
@@ -824,9 +820,9 @@ msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "如果没有指定参数，就会显示数据挖掘器的状态"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:554
-#: src/tracker/tracker-reset.c:260 src/tracker/tracker-search.c:1400
-#: src/tracker/tracker-status.c:602 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-index.c:389 src/tracker/tracker-info.c:582
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1401
+#: src/tracker/tracker-status.c:599 src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
 msgstr "无法识别的选项"
 
@@ -838,7 +834,7 @@ msgstr "无法获取 D-Bus 的连接"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "无法创建到 tracker-store 的 D-Bus 代理"
 
-#: src/tracker/tracker-extract.c:68 src/tracker/tracker-info.c:506
+#: src/tracker/tracker-extract.c:68
 msgid "Could not run tracker-extract: "
 msgstr "无法运行 tracker-extract："
 
@@ -854,35 +850,35 @@ msgstr "将文件从被索引的位置中移除"
 msgid "Makes indexing recursive"
 msgstr "递归进行索引"
 
-#: src/tracker/tracker-index.c:194
+#: src/tracker/tracker-index.c:192
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "“%s”不是目录"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:275
+#: src/tracker/tracker-index.c:282
 msgid "Either --add or --remove must be provided"
 msgstr "需要提供 --add 或 --remove 其中任意一个"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:279
+#: src/tracker/tracker-index.c:286
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add 和 --remove 是互斥的"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:289
+#: src/tracker/tracker-index.c:296
 msgid "--recursive requires --add"
 msgstr "--recursive 需要 --add"
 
-#: src/tracker/tracker-index.c:344 src/tracker/tracker-status.c:403
+#: src/tracker/tracker-index.c:351 src/tracker/tracker-status.c:400
 msgid "Path"
 msgstr "路径"
 
-#: src/tracker/tracker-index.c:345
+#: src/tracker/tracker-index.c:352
 msgid "Recursive"
 msgstr "递归"
 
-#: src/tracker/tracker-index.c:395
+#: src/tracker/tracker-index.c:402
 msgid "Please specify one or more locations to index."
 msgstr "请指定一个或多个要索引的位置。"
 
@@ -923,25 +919,29 @@ msgstr "无法获取名字空间前缀"
 msgid "No namespace prefixes were returned"
 msgstr "没有返回名字空间前缀"
 
-#: src/tracker/tracker-info.c:386
+#: src/tracker/tracker-info.c:221 src/tracker/tracker-search.c:1137
+msgid "Results"
+msgstr "结果"
+
+#: src/tracker/tracker-info.c:414
 msgid "Querying information for entity"
 msgstr "查询实体的信息"
 
-#: src/tracker/tracker-info.c:410
+#: src/tracker/tracker-info.c:438
 msgid "Unable to retrieve URN for URI"
 msgstr "无法为 URI 检索 URN"
 
-#: src/tracker/tracker-info.c:420 src/tracker/tracker-info.c:454
+#: src/tracker/tracker-info.c:448 src/tracker/tracker-info.c:481
 msgid "Unable to retrieve data for URI"
 msgstr "无法为 URI 检索数据"
 
-#: src/tracker/tracker-info.c:463
+#: src/tracker/tracker-info.c:504
 msgid "No metadata available for that URI"
 msgstr "没有那个 URI 可用的元数据"
 
-#: src/tracker/tracker-info.c:468 src/tracker/tracker-search.c:1136
-msgid "Results"
-msgstr "结果"
+#: src/tracker/tracker-info.c:509 src/tracker/tracker-info.c:538
+msgid "Could not get eligible status: "
+msgstr "不能获得适宜的状态："
 
 #: src/tracker/tracker-process.c:190
 #, c-format
@@ -1074,7 +1074,7 @@ msgstr "注意：已达到限制，在数据库中有此处未列出的更多条
 #: src/tracker/tracker-search.c:262 src/tracker/tracker-search.c:576
 #: src/tracker/tracker-search.c:665 src/tracker/tracker-search.c:753
 #: src/tracker/tracker-search.c:837 src/tracker/tracker-search.c:919
-#: src/tracker/tracker-search.c:1123
+#: src/tracker/tracker-search.c:1124
 msgid "Could not get search results"
 msgstr "不能获得搜索结果"
 
@@ -1126,7 +1126,7 @@ msgstr "没有找到软件分类"
 msgid "Software Categories"
 msgstr "软件分类"
 
-#: src/tracker/tracker-search.c:1132
+#: src/tracker/tracker-search.c:1133
 msgid "No results were found matching your query"
 msgstr "没有找到满足您的查询的结果"
 
@@ -1178,54 +1178,54 @@ msgstr "统计："
 msgid "None"
 msgstr "无"
 
-#: src/tracker/tracker-status.c:225 src/tracker/tracker-status.c:250
+#: src/tracker/tracker-status.c:222 src/tracker/tracker-status.c:247
 msgid "Could not get basic status for Tracker"
 msgstr "无法取得 Tracker 基础状态"
 
-#: src/tracker/tracker-status.c:404 src/tracker/tracker-status.c:549
+#: src/tracker/tracker-status.c:401 src/tracker/tracker-status.c:546
 msgid "Message"
 msgstr "信息"
 
-#: src/tracker/tracker-status.c:457
+#: src/tracker/tracker-status.c:454
 msgid "Currently indexed"
 msgstr "目前已索引"
 
-#: src/tracker/tracker-status.c:460 src/tracker/tracker-tag.c:557
+#: src/tracker/tracker-status.c:457 src/tracker/tracker-tag.c:557
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d 个文件"
 
-#: src/tracker/tracker-status.c:466
+#: src/tracker/tracker-status.c:463
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d 个文件夹"
 
-#: src/tracker/tracker-status.c:480
+#: src/tracker/tracker-status.c:477
 msgid "Remaining space on database partition"
 msgstr "数据库分区的剩余空间"
 
-#: src/tracker/tracker-status.c:492
+#: src/tracker/tracker-status.c:489
 msgid "Data is still being indexed"
 msgstr "数据仍正被索引"
 
-#: src/tracker/tracker-status.c:493
+#: src/tracker/tracker-status.c:490
 #, c-format
 msgid "Estimated %s left"
 msgstr "估计剩余 %s"
 
-#: src/tracker/tracker-status.c:497
+#: src/tracker/tracker-status.c:494
 msgid "All data miners are idle, indexing complete"
 msgstr "所有数据挖掘器都已闲置，索引已完成"
 
-#: src/tracker/tracker-status.c:504
+#: src/tracker/tracker-status.c:501
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d 个已记录的错误"
 
-#: src/tracker/tracker-status.c:565
+#: src/tracker/tracker-status.c:562
 msgid "No reports found"
 msgstr "没有找到报告"
 
@@ -1399,6 +1399,9 @@ msgstr "闲置 30 秒之后禁用关闭"
 #: src/tracker-writeback/tracker-main.c:85
 msgid "— start the tracker writeback service"
 msgstr "— 启动 tracker 回写服务"
+
+#~ msgid "unknown time"
+#~ msgstr "未知时间"
 
 #~ msgid "Directory is eligible to be mined (based on contents)"
 #~ msgstr "目录适宜进行挖掘（基于内容）"
