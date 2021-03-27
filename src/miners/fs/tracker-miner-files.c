@@ -2079,7 +2079,10 @@ miner_files_process_file (TrackerMinerFS      *fs,
 
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
+
 	modified = g_file_info_get_modification_date_time (file_info);
+	if (!modified)
+		modified = g_date_time_new_from_unix_utc (0);
 
 	if (!create && !is_directory) {
 		/* In case of update: delete all information elements for the given data object
@@ -2200,8 +2203,11 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
 		                          NULL, NULL);
 	}
 
-	/* Update nfo:fileLastModified */
 	modified = g_file_info_get_modification_date_time (info);
+	if (!modified)
+		modified = g_date_time_new_from_unix_utc (0);
+
+	/* Update nfo:fileLastModified */
 	time_str = g_date_time_format_iso8601 (modified);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_date_time_unref (modified);
