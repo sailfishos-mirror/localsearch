@@ -1,3 +1,11 @@
+NEW in 3.0.5 - 2021-04-02
+=========================
+  * Be more robust with broken EXIF GPS information
+  * Fall back if no modification date is found
+  * Block gstreamer's nvcoded decoders
+
+Translations: hu, sr
+
 NEW in 3.0.4 - 2021-01-10
 =========================
   * Improve time_t interpretation for negative timestamps
