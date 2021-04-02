@@ -1406,7 +1406,17 @@ tracker_extract_module_init (GError **error)
 		"bcmdec",
 		"fluiddec",
 		"vaapi",
-		"video4linux2"
+		"video4linux2",
+		"nvmpegvideodec",
+		"nvmpeg2videodec",
+		"nvmpeg4videodec",
+		"nvh264sldec",
+		"nvh264dec",
+		"nvjpegdec",
+		"nvh265sldec",
+		"nvh265dec",
+		"nvvp8dec",
+		"nvvp9dec",
 	};
 	GstRegistry *registry;
 	guint i;

@@ -2137,7 +2137,10 @@ process_file_cb (GObject      *object,
 	data->mime_type = g_strdup (mime_type);
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
 	                TRUE : FALSE);
+
 	modified = g_file_info_get_modification_date_time (file_info);
+	if (!modified)
+		modified = g_date_time_new_from_unix_utc (0);
 
 	if (!is_directory) {
 		/* In case of update: delete all information elements for the given data object
@@ -2320,8 +2323,11 @@ process_file_attributes_cb (GObject      *object,
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
 
-	/* Update nfo:fileLastModified */
 	modified = g_file_info_get_modification_date_time (file_info);
+	if (!modified)
+		modified = g_date_time_new_from_unix_utc (0);
+
+	/* Update nfo:fileLastModified */
 	time_str = g_date_time_format_iso8601 (modified);
 	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
 	g_date_time_unref (modified);
