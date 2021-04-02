@@ -1,3 +1,14 @@
+NEW in 3.1.1 - 2021-04-02
+=========================
+
+  * Block gstreamer nvcodec decoders
+  * Fall back if no modification date is found
+  * Handle new poppler enum value
+  * Be more robust with broken EXIF GPS metadata
+  * Test suite improvements
+
+Translations: en_GB, nl, zh_CN
+
 NEW in 3.1.0 - 2021-03-20
 =========================
 Translations: fr, it
