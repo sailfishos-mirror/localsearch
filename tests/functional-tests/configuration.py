@@ -67,7 +67,7 @@ def cli_subcommands_dir():
 
 
 def tap_protocol_enabled():
-    return config['TEST_TAP_ENABLED']
+    return config['TEST_TAP_ENABLED'][0] in ('T', 't', '1')
 
 
 def nepomuk_path():
