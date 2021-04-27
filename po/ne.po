@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: Gnome Nepali Translation Project\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2021-01-10 11:18+0000\n"
-"PO-Revision-Date: 2021-04-19 21:53+0545\n"
+"PO-Revision-Date: 2021-04-27 20:17+0545\n"
 "Last-Translator: Pawan Chitrakar <chautari@gmail.com>\n"
 "Language-Team: Nepali Translation Team <chautari@gmail.com>\n"
 "Language: ne\n"
@@ -27,9 +27,8 @@ msgid "Maximum number of UTF-8 bytes to extract."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:30
-#, fuzzy
 msgid "Text file allowlist"
-msgstr "पाठ घुसाउन असफल."
+msgstr "पाठ फाइल अनुमति सूची"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:31
 msgid "Filename patterns for plain text documents that should be indexed"
@@ -41,9 +40,9 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
-"When true, tracker-extract will wait for tracker-miner-fs to be done crawling before "
-"extracting meta-data. This option is useful on constrained environment where it is "
-"important to list files as fast as possible and can wait to get meta-data later."
+"When true, tracker-extract will wait for tracker-miner-fs to be done crawling before extracting meta-data. "
+"This option is useful on constrained environment where it is important to list files as fast as possible and "
+"can wait to get meta-data later."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
@@ -53,9 +52,7 @@ msgid "Enable stemmer"
 msgstr "सक्षम पार्नुहोस्"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:25
-msgid ""
-"Simplify the words to their root to provide more results. E.g. “shelves” and “shelf” to "
-"“shel”"
+msgid "Simplify the words to their root to provide more results. E.g. “shelves” and “shelf” to “shel”"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
@@ -65,16 +62,12 @@ msgid "Enable unaccent"
 msgstr "सक्षम पार्नुहोस्"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:31
-msgid ""
-"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” for "
-"improved matching."
+msgid "Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” for improved matching."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
-#, fuzzy
-#| msgid "Ignored files"
 msgid "Ignore numbers"
-msgstr "सङ्ख्याहरू"
+msgstr "सङ्ख्याहरू वेवास्ता गर्नुहोस"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 #, fuzzy
@@ -82,15 +75,13 @@ msgid "If enabled, numbers will not be indexed."
 msgstr "सङ्ख्याहरू"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:42
-#, fuzzy
-#| msgid "Ignored directories"
 msgid "Ignore stop words"
-msgstr "वेवास्ता गर्नुहोस"
+msgstr "रोकिने शब्द वेवास्ता गर्नुहोस"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:43
 msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common words like "
-"“the”, “yes”, “no”, etc."
+"If enabled, the words listed in the stop-words list are ignored. E.g. common words like “the”, “yes”, “no”, "
+"etc."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
@@ -103,7 +94,7 @@ msgstr "प्रारम्भिक सुत्ने समय, सेक�
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
 msgid "Throttle"
-msgstr ""
+msgstr "थ्रटल"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
 #, fuzzy
@@ -124,11 +115,11 @@ msgstr "अन्तराल क्रल गर्दै"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
 msgid ""
-"Interval in days to check whether the filesystem is up to date in the database. 0 forces "
-"crawling anytime, -1 forces it only after unclean shutdowns, and -2 disables it entirely."
+"Interval in days to check whether the filesystem is up to date in the database. 0 forces crawling anytime, -1 "
+"forces it only after unclean shutdowns, and -2 disables it entirely."
 msgstr ""
-"डेटाबेसमा डेटिभरेसन डेटिङ हुने हो कि छैन भनेर जाँच गर्न दिनहरूमा अन्तराल। 0 बलहरू कुनै पनि समय क्रल गर्दै, -1 "
-"यसलाई अशुद्ध बन्द भएपछि मात्र बलियो बनाउँछ, र -2 यसलाई पूर्ण रूपमा अक्षम पार्दछ।"
+"डेटाबेसमा डेटिभरेसन डेटिङ हुने हो कि छैन भनेर जाँच गर्न दिनहरूमा अन्तराल। 0 बलहरू कुनै पनि समय क्रल गर्दै, -1 यसलाई अशुद्ध बन्द "
+"भएपछि मात्र बलियो बनाउँछ, र -2 यसलाई पूर्ण रूपमा अक्षम पार्दछ।"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
 msgid "Removable devices’ data permanence threshold"
@@ -136,10 +127,9 @@ msgstr "हटाउन सकिने उपकरणहरूको डेट
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
 msgid ""
-"Threshold in days after which files from removables devices will be removed from database "
-"if not mounted. 0 means never, maximum is 365."
-msgstr ""
-"थ्रेशोल्ड दिन पछि हटाउन सकिने उपकरणहरू हटाइने डेटाबेसबाट हटाइनेछ। ० माने कहिल्यै होइन, अधिकतम ३६५ छ।"
+"Threshold in days after which files from removables devices will be removed from database if not mounted. 0 "
+"means never, maximum is 365."
+msgstr "थ्रेशोल्ड दिन पछि हटाउन सकिने उपकरणहरू हटाइने डेटाबेसबाट हटाइनेछ। ० माने कहिल्यै होइन, अधिकतम ३६५ छ।"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
 msgid "Enable monitors"
@@ -156,17 +146,17 @@ msgstr "छुट्याउन मिल्ने यन्त्र"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
 msgid "Set to true to enable indexing mounted directories for removable devices."
-msgstr ""
+msgstr "हटाउन सकिने यन्त्रका लागि अनुक्रमणिका माउन्ट गरिएको निर्देशिका सक्षम पार्न ठीकमा सेट गर्नुहोस् ।."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 #, fuzzy
 msgid "Index optical discs"
-msgstr "ध्रुवण शक्ति"
+msgstr "धेरै डिस्कहरू बर्न गर्नुहोस्"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
 msgid ""
-"Set to true to enable indexing CDs, DVDs, and generally optical media (if removable "
-"devices are not indexed, optical discs won’t be either)"
+"Set to true to enable indexing CDs, DVDs, and generally optical media (if removable devices are not indexed, "
+"optical discs won’t be either)"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
@@ -176,7 +166,7 @@ msgstr "तपाईँको ब्याट्री न्यून भैर
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Set to true to index while running on battery"
-msgstr ""
+msgstr "ब्याट्रीमा चालु गर्दा ठीकमा अनुक्रमणिकामा सेट गर्नुहोस्"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
 msgid "Perform initial indexing when running on battery"
@@ -189,15 +179,15 @@ msgstr ""
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 #, fuzzy
 msgid "Directories to index recursively"
-msgstr "यसका लागि पुनरावृतिक लागू गर्नुहोस्।"
+msgstr "अनुक्रमणिका"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid ""
-"List of directories to index recursively, Special values include: ‘&DESKTOP’, "
-"‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, "
-"‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, "
+"‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/."
+"config/user-dirs.default"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
@@ -208,21 +198,20 @@ msgstr ""
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid ""
-"List of directories to index without inspecting subfolders, Special values include: "
-"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
-"‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs."
-"default"
+"List of directories to index without inspecting subfolders, Special values include: ‘&DESKTOP’, ‘&DOCUMENTS’, "
+"‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 #, fuzzy
 msgid "Index applications installed on the system"
-msgstr "स्थापना गरिएका अनुप्रयोग ब्राउज गर्नुहोस् र चलाउनुहोस्"
+msgstr "%u अनुप्रयोगहरू स्थापना गरिएका"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files in the "
-"standard XDG system and user data directories."
+"If this option is enabled, the filesystem miner will look for .desktop files in the standard XDG system and "
+"user data directories."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
@@ -249,8 +238,7 @@ msgstr "सामाग्री सहित बेवास्ता निर
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr ""
 
-#: src/libtracker-miners-common/tracker-utils.c:101
-#: src/libtracker-miners-common/tracker-utils.c:152
+#: src/libtracker-miners-common/tracker-utils.c:101 src/libtracker-miners-common/tracker-utils.c:152
 msgid "less than one second"
 msgstr "१ सेकेण्ड भन्दा कम"
 
@@ -306,8 +294,7 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d सेकेण्ड"
 msgstr[1] " %2.2d सेकेण्ड"
 
-#: src/libtracker-miner/tracker-data-provider.c:108
-#: src/libtracker-miner/tracker-data-provider.c:168
+#: src/libtracker-miner/tracker-data-provider.c:108 src/libtracker-miner/tracker-data-provider.c:168
 msgid "Operation not supported"
 msgstr "सञ्चालन समर्थित छैन"
 
@@ -331,33 +318,29 @@ msgstr "जबसम्म सबै कन्फिगर गरिएका �
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 
-#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
-#: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
-#: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
+#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83 src/tracker/tracker-extract.c:42
+#: src/tracker/tracker-extract.c:43 src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:77 src/tracker/tracker-info.c:78 src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "फाइल"
 
-#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:51
-#: src/tracker-extract/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:51 src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "एक विशिष्ट डोमेन एन्टोलोजी लागि चलाउँछ"
 
 #: src/miners/fs/tracker-main.c:98
-#, fuzzy
-#| msgid "Crawls and processes files on the file system"
 msgid "Avoids changes in the filesystem"
-msgstr "फाइल प्रणाली"
+msgstr "फाइल प्रणालीमा परिवर्तन गर्दैन"
 
-#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:101 src/tracker-writeback/tracker-main.c:48
+#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61 src/tracker-extract/tracker-main.c:101
+#: src/tracker-writeback/tracker-main.c:48
 msgid "Displays version information"
 msgstr "संस्करण सूचना देखाउनुहोस्"
 
 #: src/miners/fs/tracker-main.c:624
 #, c-format
 msgid "Data object “%s” currently exists"
-msgstr ""
+msgstr "डेटा वस्तु \"%s\" अहिले अवस्थित छ"
 
 #: src/miners/fs/tracker-main.c:625
 #, fuzzy, c-format
@@ -442,25 +425,20 @@ msgstr "शीर्षकको प्रयोग ( --add-feed साथ प�
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/miners/rss/tracker-main.c:145
-#, fuzzy
 msgid "— start the feeds indexer"
-msgstr "—  ट्रयाकर अनुक्रमणिका सुरु गर्नुहोस्"
+msgstr "— फिड अनुक्रमणिका सुरु गर्नुहोस्"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:390
-#: src/tracker/tracker-search.c:1210 src/tracker/tracker-status.c:88
-#: src/tracker/tracker-status.c:201 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:390 src/tracker/tracker-search.c:1210
+#: src/tracker/tracker-status.c:88 src/tracker/tracker-status.c:201 src/tracker/tracker-tag.c:975
 msgid "Could not establish a connection to Tracker"
 msgstr "ट्रयाकर जडान स्थापाना असफल"
 
-#: src/miners/rss/tracker-main.c:179 src/tracker/tracker-daemon.c:448
-#: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
-#: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
-#: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63 src/tracker/tracker-info.c:391
-#: src/tracker/tracker-process.c:193 src/tracker/tracker-search.c:1211
-#: src/tracker/tracker-status.c:89 src/tracker/tracker-status.c:202
-#: src/tracker/tracker-status.c:248 src/tracker/tracker-status.c:277
-#: src/tracker/tracker-tag.c:976
+#: src/miners/rss/tracker-main.c:179 src/tracker/tracker-daemon.c:448 src/tracker/tracker-daemon.c:509
+#: src/tracker/tracker-daemon.c:544 src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980 src/tracker/tracker-dbus.c:45
+#: src/tracker/tracker-dbus.c:63 src/tracker/tracker-info.c:391 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-search.c:1211 src/tracker/tracker-status.c:89 src/tracker/tracker-status.c:202
+#: src/tracker/tracker-status.c:248 src/tracker/tracker-status.c:277 src/tracker/tracker-tag.c:976
 msgid "No error given"
 msgstr "कुनै त्रुटि दिएन"
 
@@ -472,10 +450,9 @@ msgstr "फिड थप्न सकेन"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-control/tracker-main.c:135
-#, fuzzy
 #| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
-msgstr "सुरु अनुक्रमणिका"
+msgstr "— ट्र्याकर अनुक्रमणिका प्रोक्सी सुरु गर्नुहोस्"
 
 #: src/tracker-extract/tracker-extract.c:687
 msgid "Metadata extraction failed"
@@ -526,7 +503,7 @@ msgstr "मेटाडाटा निकाल्नका लागि फा
 
 #: src/tracker-extract/tracker-main.c:334
 msgid "Filename and mime type must be provided together"
-msgstr ""
+msgstr "फाइलनाम र माइम प्रकार सँगै उपलब्ध गराउनुपर्छ"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -534,9 +511,8 @@ msgstr "अनुपलब्ध"
 
 #. generic
 #: src/tracker/tracker-daemon.c:99
-#, fuzzy
 msgid "Initializing"
-msgstr "पुस्तकचिन्हो सुरु गर्दा त्रुति %s"
+msgstr "थालनी गर्दै"
 
 #: src/tracker/tracker-daemon.c:100
 msgid "Processing…"
@@ -551,7 +527,7 @@ msgstr "%s बाट कागजाट ल्याउनुहोस्"
 #: src/tracker/tracker-daemon.c:102
 #, fuzzy, c-format
 msgid "Crawling single directory “%s”"
-msgstr "डाइरेक्टरी: %s\n"
+msgstr "“%s” निर्देशिका होईन"
 
 #: src/tracker/tracker-daemon.c:103
 #, fuzzy, c-format
@@ -568,7 +544,7 @@ msgstr "निस्क्रिय"
 
 #: src/tracker/tracker-daemon.c:111
 msgid "Follow status changes as they happen"
-msgstr ""
+msgstr "स्थिति परिवर्तन हुने बित्तिक्कै पछ्याउनुहोस्"
 
 #: src/tracker/tracker-daemon.c:115
 msgid "Watch changes to the database in real time (e.g. resources or files being added)"
@@ -576,7 +552,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:119
 msgid "List common statuses for miners"
-msgstr ""
+msgstr "खानीमा काम गर्नेहरूका लागि साझा वस्तुस्थितिहरू सूचीबद्ध गर्नुहोस्"
 
 #: src/tracker/tracker-daemon.c:124
 msgid "Pause a miner (you must use this with --miner)"
@@ -587,9 +563,7 @@ msgid "REASON"
 msgstr "कारण"
 
 #: src/tracker/tracker-daemon.c:128
-msgid ""
-"Pause a miner while the calling process is alive or until resumed (you must use this with "
-"--miner)"
+msgid "Pause a miner while the calling process is alive or until resumed (you must use this with --miner)"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:132
@@ -598,11 +572,10 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:133
 msgid "COOKIE"
-msgstr ""
+msgstr "कुकी"
 
 #: src/tracker/tracker-daemon.c:136
-msgid ""
-"Miner to use with --resume or --pause (you can use suffixes, e.g. Files or Applications)"
+msgid "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or Applications)"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:137
@@ -668,7 +641,7 @@ msgstr "पज गरियो"
 #: src/tracker/tracker-daemon.c:308
 #, fuzzy
 msgid "Not running or is a disabled plugin"
-msgstr "सञ्चालन भइरहेछ…"
+msgstr "अक्षम पारिएको"
 
 #: src/tracker/tracker-daemon.c:447
 #, c-format
@@ -687,12 +660,11 @@ msgid "Could not pause miner: %s"
 msgstr "%s लाई %s पुन: नामाकरण गर्न सकेन: %s\n"
 
 #: src/tracker/tracker-daemon.c:474
-#, fuzzy, c-format
+#, c-format
 msgid "Cookie is %d"
-msgstr "%d / %d"
+msgstr "कुकी %d हो"
 
-#: src/tracker/tracker-daemon.c:481 src/tracker/tracker-daemon.c:724
-#: src/tracker/tracker-daemon.c:841
+#: src/tracker/tracker-daemon.c:481 src/tracker/tracker-daemon.c:724 src/tracker/tracker-daemon.c:841
 #, fuzzy
 msgid "Press Ctrl+C to stop"
 msgstr "(बाँया) Ctrl + Alt नलिनलाई थिच्नुहोस्"
@@ -761,7 +733,7 @@ msgstr "कारण"
 #: src/tracker/tracker-daemon.c:680
 #, fuzzy
 msgid "No miners are paused"
-msgstr "पज गरियो"
+msgstr "पज गरिएको"
 
 #: src/tracker/tracker-daemon.c:711
 #, fuzzy
@@ -778,9 +750,8 @@ msgid "All nie:plainTextContent properties are omitted"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:740
-#, fuzzy
 msgid "Common statuses include"
-msgstr "साझा"
+msgstr "सामान्य वस्तुस्थितिहरू समाविष्ट गर्दछ"
 
 #: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:276
 #, c-format
@@ -839,9 +810,8 @@ msgstr "प्लगइन"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:382 src/tracker/tracker-info.c:582
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1400
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128 src/tracker/tracker-index.c:382
+#: src/tracker/tracker-info.c:582 src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1400
 #: src/tracker/tracker-status.c:599 src/tracker/tracker-tag.c:1084
 msgid "Unrecognized options"
 msgstr "पहिचान नभएको विकल्प"
@@ -862,13 +832,12 @@ msgid "Could not run tracker-extract: "
 msgstr "ट्रयाकर जडान स्थापाना असफल"
 
 #: src/tracker/tracker-index.c:50
-#, fuzzy
 msgid "Adds FILE as an indexed location"
-msgstr "फाइल को स्थान।."
+msgstr "अनुक्रमण गरिएको स्थानको रूपमा फाइल थप्दछ"
 
 #: src/tracker/tracker-index.c:53
 msgid "Removes FILE from indexed locations"
-msgstr ""
+msgstr "अनुक्रमण गरिएको स्थानबाट फाइल हटाउछ"
 
 #: src/tracker/tracker-index.c:56
 #, fuzzy
@@ -883,13 +852,13 @@ msgstr "“%s” निर्देशिका होईन"
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:275
 msgid "Either --add or --remove must be provided"
-msgstr ""
+msgstr "या त --add वा --remove प्रदान गरिएको हुनुपर्दछ"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:279
 #, fuzzy
 msgid "--add and --remove are mutually exclusive"
-msgstr "एउटा फिल्टर थप्नुहोस् वा हटाउनुहोस्"
+msgstr "पङ्क्तिहरू थप्ने वा हटाउने"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:289
@@ -907,7 +876,7 @@ msgstr "पुनरावृतिक"
 
 #: src/tracker/tracker-index.c:395
 msgid "Please specify one or more locations to index."
-msgstr ""
+msgstr "कृपया अनुक्रमणिकामा एक वा बढी स्थान निर्दिष्ट गर्नुहोस् ।."
 
 #: src/tracker/tracker-info.c:48
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -915,7 +884,7 @@ msgstr ""
 
 #: src/tracker/tracker-info.c:52
 msgid "Show plain text content if available for resources"
-msgstr ""
+msgstr "यदि संसाधनका लागि उपलब्ध भएमा खाली पाठ सामाग्री देखाउनुहोस्"
 
 #. To translators:
 #. * IRI (International Resource Identifier) is a generalization
@@ -925,8 +894,8 @@ msgstr ""
 #.
 #: src/tracker/tracker-info.c:62
 msgid ""
-"Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. <file:///"
-"path/to/some/file.txt>)"
+"Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. <file:///path/to/some/file."
+"txt>)"
 msgstr ""
 
 #: src/tracker/tracker-info.c:66
@@ -950,9 +919,8 @@ msgid "Results"
 msgstr "नतिजा"
 
 #: src/tracker/tracker-info.c:414
-#, fuzzy
 msgid "Querying information for entity"
-msgstr "अस्तित्व"
+msgstr "अस्तित्वका लागि सूचना क्वेरि गर्दै"
 
 #: src/tracker/tracker-info.c:438
 #, fuzzy
@@ -963,12 +931,11 @@ msgstr "URI खोल्न असक्षम"
 #, fuzzy
 #| msgid "File to extract metadata for"
 msgid "Unable to retrieve data for URI"
-msgstr "मौसमी तथ्याङ्क पुन प्राप्त गर्न सकिएन"
+msgstr "URI खोल्न असक्षम"
 
 #: src/tracker/tracker-info.c:504
-#, fuzzy
 msgid "No metadata available for that URI"
-msgstr "मेटाडेटा"
+msgstr "त्यो यूआरआइका लागि मेटाडेटा उपलब्ध छैन"
 
 #: src/tracker/tracker-info.c:509 src/tracker/tracker-info.c:538
 #, fuzzy
@@ -999,63 +966,56 @@ msgstr ""
 
 #. Now, delete the element recursively
 #: src/tracker/tracker-reset.c:95
-#, fuzzy
 msgid "Deleting…"
-msgstr "\"%s\" मेट्न"
+msgstr "मेट्दैछ…"
 
 #: src/tracker/tracker-reset.c:115
 msgid "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
 
 #: src/tracker/tracker-search.c:73
-#, fuzzy
 msgid "Search for files"
-msgstr "चलेका फाइलहरूको खोज"
+msgstr "फाइलका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:77
-#, fuzzy
 msgid "Search for folders"
-msgstr "फोल्डरहरू खोजी गर्नुहोस्"
+msgstr "फोल्डरका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:81
-#, fuzzy
 msgid "Search for music files"
-msgstr "चलेका फाइलहरूको खोज"
+msgstr "सङ्गीत फाइलका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:85
 msgid "Search for music albums (--all has no effect on this)"
-msgstr ""
+msgstr "सङ्गीत एल्बमका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
 #: src/tracker/tracker-search.c:89
 msgid "Search for music artists (--all has no effect on this)"
-msgstr ""
+msgstr "सङ्गीत कलाकारहरूका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
 #: src/tracker/tracker-search.c:93
-#, fuzzy
 msgid "Search for image files"
-msgstr "सबै छवि फाइल"
+msgstr "छवि फाइलका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:97
-#, fuzzy
 msgid "Search for video files"
-msgstr "भिडियो फाइलहरु विश्लेषण गर्दै"
+msgstr "भिडियो फाइलका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:101
-#, fuzzy
 msgid "Search for document files"
-msgstr "चलेका फाइलहरूको खोज"
+msgstr "कागजात फाइलका लागि खोजी गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:105
 msgid "Search for software (--all has no effect on this)"
-msgstr ""
+msgstr "सफ्टवेयरका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
 #: src/tracker/tracker-search.c:109
 msgid "Search for software categories (--all has no effect on this)"
-msgstr ""
+msgstr "सफ्टवेयर कोटिका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
 #: src/tracker/tracker-search.c:113
 msgid "Search for feeds (--all has no effect on this)"
-msgstr ""
+msgstr "फिडका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
 #: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
 #, fuzzy
@@ -1063,9 +1023,8 @@ msgid "Limit the number of results shown"
 msgstr "अत्याधिक खोजी परिणाम प्राप्त गर्दै..."
 
 #: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
-#, fuzzy
 msgid "Offset the results"
-msgstr "नतिजा"
+msgstr "परिणाम अफसेट गर्नुहोस्"
 
 #: src/tracker/tracker-search.c:127
 #, fuzzy
@@ -1074,8 +1033,8 @@ msgstr "प्रयोग गरिने पूर्वनिर्धार�
 
 #: src/tracker/tracker-search.c:131
 msgid ""
-"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --"
-"software, --software-categories)"
+"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --software, --software-"
+"categories)"
 msgstr ""
 
 #: src/tracker/tracker-search.c:135
@@ -1083,9 +1042,7 @@ msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 
 #: src/tracker/tracker-search.c:139
-msgid ""
-"Disable showing snippets with results. This is only shown for some categories, e.g. "
-"Documents, Music…"
+msgid "Disable showing snippets with results. This is only shown for some categories, e.g. Documents, Music…"
 msgstr ""
 
 #: src/tracker/tracker-search.c:143
@@ -1097,9 +1054,8 @@ msgid "Disable color when printing snippets and results"
 msgstr ""
 
 #: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:57
-#, fuzzy
 msgid "search terms"
-msgstr "उपयोग शब्द"
+msgstr "खोजी टर्म"
 
 #: src/tracker/tracker-search.c:155 src/tracker/tracker-status.c:58
 msgid "EXPRESSION"
@@ -1107,75 +1063,66 @@ msgstr "अभिव्यक्ति"
 
 #: src/tracker/tracker-search.c:173 src/tracker/tracker-tag.c:101
 msgid "NOTE: Limit was reached, there are more items in the database not listed here"
-msgstr ""
+msgstr "द्रष्टब्य: सीमा पुग्यो, यहाँ सूचीकृत नभएको डाटाबेसमा धेरै वस्तुहरू छन्"
 
-#: src/tracker/tracker-search.c:262 src/tracker/tracker-search.c:576
-#: src/tracker/tracker-search.c:665 src/tracker/tracker-search.c:753
-#: src/tracker/tracker-search.c:837 src/tracker/tracker-search.c:919
+#: src/tracker/tracker-search.c:262 src/tracker/tracker-search.c:576 src/tracker/tracker-search.c:665
+#: src/tracker/tracker-search.c:753 src/tracker/tracker-search.c:837 src/tracker/tracker-search.c:919
 #: src/tracker/tracker-search.c:1123
 #, fuzzy
 msgid "Could not get search results"
 msgstr "खोजी परिणाम ताजा पार्नुहोस्"
 
 #: src/tracker/tracker-search.c:271
-#, fuzzy
 msgid "No files were found"
-msgstr "कुनै मानचित्र फेला परेन"
+msgstr "कुनै फाइल फेला परेन"
 
 #: src/tracker/tracker-search.c:275 src/tracker/tracker-tag.c:437
 msgid "Files"
 msgstr "फाइल"
 
 #: src/tracker/tracker-search.c:585
-#, fuzzy
 msgid "No artists were found"
-msgstr "वर्ग फेला परेन"
+msgstr "कलाकार फेला परेन"
 
 #: src/tracker/tracker-search.c:589
 msgid "Artists"
 msgstr "कलाकार"
 
 #: src/tracker/tracker-search.c:674
-#, fuzzy
 msgid "No music was found"
-msgstr "सङ्गीत"
+msgstr "सङ्गीत फेला परेन"
 
 #: src/tracker/tracker-search.c:678
 msgid "Albums"
 msgstr "एल्बमहरू"
 
 #: src/tracker/tracker-search.c:762
-#, fuzzy
 msgid "No feeds were found"
-msgstr "कुनै मानचित्र फेला परेन"
+msgstr "फिड फेला परेन"
 
 #: src/tracker/tracker-search.c:766
 msgid "Feeds"
 msgstr "फिड"
 
 #: src/tracker/tracker-search.c:846
-#, fuzzy
 msgid "No software was found"
-msgstr "फेला पर्यो:"
+msgstr "कुनै सफ्टवेयर फेला परेन"
 
 #: src/tracker/tracker-search.c:850
 msgid "Software"
 msgstr "सफ्टवेयर"
 
 #: src/tracker/tracker-search.c:928
-#, fuzzy
 msgid "No software categories were found"
-msgstr "कुञ्जीहरू फेला पर्यो तर आयात गरिएका छैन ।"
+msgstr "कुनै सफ्टवेयर कोटिहरू फेला परेन"
 
 #: src/tracker/tracker-search.c:932
-#, fuzzy
 msgid "Software Categories"
-msgstr "सफ्टवेयर"
+msgstr "सफ्टवेयर कोटिहरू"
 
 #: src/tracker/tracker-search.c:1132
-#, fuzzy
 msgid "No results were found matching your query"
-msgstr "क्वेरिसँग मेल खाने कुनै परिणाम भेटिएन"
+msgstr "तपाईँको क्वेरीसँग मिल्दो परिणाम फेला परेन"
 
 #: src/tracker/tracker-status.c:52
 msgid "Show statistics for current index / data set"
@@ -1187,17 +1134,15 @@ msgid "Could not get Tracker statistics"
 msgstr "ट्रयाकर जडान स्थापाना असफल"
 
 #: src/tracker/tracker-status.c:109
-#, fuzzy
 msgid "No statistics available"
-msgstr "तथ्याङ्क"
+msgstr "तथ्याङ्क उपलब्ध छैन"
 
 #. To translators: This is to say there are no
 #. * statistics found. We use a "Statistics:
 #. * None" with multiple print statements
 #: src/tracker/tracker-status.c:150
-#, fuzzy
 msgid "Statistics:"
-msgstr "तथ्याङ्क"
+msgstr "तथ्याङ्क:"
 
 #. To translators: This is to say there are no
 #. * tags found with a particular unique ID.
@@ -1222,8 +1167,8 @@ msgstr "तथ्याङ्क"
 #. *     None
 #. *
 #.
-#: src/tracker/tracker-status.c:153 src/tracker/tracker-tag.c:321
-#: src/tracker/tracker-tag.c:453 src/tracker/tracker-tag.c:575 src/tracker/tracker-tag.c:953
+#: src/tracker/tracker-status.c:153 src/tracker/tracker-tag.c:321 src/tracker/tracker-tag.c:453
+#: src/tracker/tracker-tag.c:575 src/tracker/tracker-tag.c:953
 msgid "None"
 msgstr "केही छैन"
 
@@ -1238,10 +1183,8 @@ msgid "Message"
 msgstr "सन्देश"
 
 #: src/tracker/tracker-status.c:454
-#, fuzzy
-#| msgid "Would be indexed"
 msgid "Currently indexed"
-msgstr "अनुक्रमणिका भएको फाँट(s)"
+msgstr "अनुक्रमणिका हुदैछ"
 
 #: src/tracker/tracker-status.c:457 src/tracker/tracker-tag.c:557
 #, c-format
@@ -1263,9 +1206,8 @@ msgid "Remaining space on database partition"
 msgstr "चयन गरिएको अनिर्धारित खाली स्थानमा नयाँ विभाजन सिर्जना गर्नुहोस्"
 
 #: src/tracker/tracker-status.c:489
-#, fuzzy
 msgid "Data is still being indexed"
-msgstr "तपाईँको कागजात अनुक्रमण गरिएको छ"
+msgstr "डाटा अझै अनुक्रमण हुदैछ"
 
 #: src/tracker/tracker-status.c:490
 #, c-format
@@ -1277,20 +1219,19 @@ msgid "All data miners are idle, indexing complete"
 msgstr ""
 
 #: src/tracker/tracker-status.c:501
-#, fuzzy, c-format
+#, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
-msgstr[0] "असफलता"
-msgstr[1] "असफलताको सङ्ख्या"
+msgstr[0] "%d रेकर्ड असफल भयो"
+msgstr[1] "%d रेकर्ड असफल भयो"
 
 #: src/tracker/tracker-status.c:562
-#, fuzzy
 msgid "No reports found"
-msgstr "प्रतिवेदनहरू"
+msgstr "कुनै प्रतिवेदन फेला परेन"
 
 #: src/tracker/tracker-tag.c:51
 msgid "List all tags (using FILTER if specified; FILTER always uses logical OR)"
-msgstr ""
+msgstr "सबै ट्यागसूचीबद्ध गर्नुहोस् (यदि निर्दिष्ट गरिएमा FILTER प्रयोग गर्दै; फिल्टरले सधै तार्किक वा प्रयोग गर्दछ)"
 
 #: src/tracker/tracker-tag.c:52
 msgid "FILTER"
@@ -1314,7 +1255,7 @@ msgstr ""
 
 #: src/tracker/tracker-tag.c:67
 msgid "Description for a tag (this is only used with --add)"
-msgstr ""
+msgstr "ट्यागका लागि वर्णन (यो --add सँग मात्र प्रयोग गरिन्छ)"
 
 #: src/tracker/tracker-tag.c:68
 msgid "STRING"
@@ -1348,9 +1289,8 @@ msgid "Could not get all tags in the database"
 msgstr ""
 
 #: src/tracker/tracker-tag.c:389
-#, fuzzy
 msgid "No files have been tagged"
-msgstr "कुनै मुद्रण दर्ता भएको छैन"
+msgstr "कुनै फाइल ट्याग गरिएको छैन"
 
 #: src/tracker/tracker-tag.c:424
 msgid "Could not get files for matching tags"
@@ -1358,58 +1298,49 @@ msgstr ""
 
 #: src/tracker/tracker-tag.c:433
 msgid "No files were found matching ALL of those tags"
-msgstr ""
+msgstr "ती सबै ट्यागसँग मिल्दो फाइल फेला परेन"
 
 #: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:927
 #, fuzzy
 #| msgid "Could not add feed"
 msgid "Could not get all tags"
-msgstr "फाइल सूचना प्राप्त गर्न सकेन"
+msgstr "सञ्जाल स्थिति प्राप्त गर्न सकेन: "
 
 #: src/tracker/tracker-tag.c:521 src/tracker/tracker-tag.c:936
-#, fuzzy
 msgid "No tags were found"
-msgstr "कुनै मानचित्र फेला परेन"
+msgstr "ट्याग फेला परेन"
 
 #: src/tracker/tracker-tag.c:525
-#, fuzzy
 msgid "Tags (shown by name)"
-msgstr "ट्याग"
+msgstr "ट्याग (नामद्वारा देखाइएको)"
 
 #: src/tracker/tracker-tag.c:599
-#, fuzzy
 msgid "No files were modified"
-msgstr "[परिमार्जित]"
+msgstr "कुनै फाइलहरू परिमार्जन गरिएन"
 
 #: src/tracker/tracker-tag.c:649 src/tracker/tracker-tag.c:657
 msgid "Files do not exist or aren’t indexed"
-msgstr ""
+msgstr "फाइल अवस्थित छैन वा अनुक्रमण गरिएको छैन"
 
 #: src/tracker/tracker-tag.c:707
-#, fuzzy
-#| msgid "Could not add feed"
 msgid "Could not add tag"
-msgstr "फिड थप्न सकेन"
+msgstr "ट्याग थप्न सकेन"
 
 #: src/tracker/tracker-tag.c:723
-#, fuzzy
 msgid "Tag was added successfully"
-msgstr "ट्याग"
+msgstr "ट्याग सफलतापूर्वक थपियो"
 
 #: src/tracker/tracker-tag.c:752
-#, fuzzy
-#| msgid "Could not add feed"
 msgid "Could not add tag to files"
-msgstr "सङ्ग्रहमा फाइलहरू थप्न सकेन"
+msgstr "फाइलमा ट्याग थप्न सकेन"
 
 #: src/tracker/tracker-tag.c:762
 msgid "Tagged"
 msgstr "ट्यग गरियो"
 
 #: src/tracker/tracker-tag.c:763
-#, fuzzy
 msgid "Not tagged, file is not indexed"
-msgstr "अनुक्रमण गरिएको मान प्रयोगकर्ता प्रकार्य होइन"
+msgstr "ट्याग गरिएको छैन, फाइल अनुक्रमण गरिएको छैन"
 
 #: src/tracker/tracker-tag.c:809
 #, fuzzy
@@ -1417,9 +1348,8 @@ msgid "Could not get tag by label"
 msgstr "%s भाग प्राप्त गर्न सकेन"
 
 #: src/tracker/tracker-tag.c:820
-#, fuzzy
 msgid "No tags were found by that name"
-msgstr "मिल्दो रेकर्डहरू फेला परेन।"
+msgstr "त्यो नामद्वारा ट्याग फेला परेन"
 
 #: src/tracker/tracker-tag.c:837
 msgid "None of the files had this tag set"
@@ -1429,16 +1359,15 @@ msgstr ""
 #, fuzzy
 #| msgid "Could not add feed"
 msgid "Could not remove tag"
-msgstr "तिनिहरूलाई हटाउन सकेन"
+msgstr "ट्याग %s मेट्न सकिएन: %s"
 
 #: src/tracker/tracker-tag.c:890
-#, fuzzy
 msgid "Tag was removed successfully"
-msgstr "ट्याग"
+msgstr "ट्याग सफलतापूर्वक हटाइयो"
 
 #: src/tracker/tracker-tag.c:894
 msgid "Untagged"
-msgstr ""
+msgstr "ट्याग नलगाइएको"
 
 #: src/tracker/tracker-tag.c:895
 #, fuzzy
@@ -1455,7 +1384,7 @@ msgstr ""
 
 #: src/tracker/tracker-tag.c:1097
 msgid "Add and delete actions can not be used together"
-msgstr ""
+msgstr "थप्ने र मेट्ने कार्य सँगै प्रयोग गर्न सकिँदैन"
 
 #: src/tracker/tracker-tag.c:1099
 msgid "The --description option can only be used with --add"
@@ -1473,9 +1402,8 @@ msgstr ""
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-writeback/tracker-main.c:85
-#, fuzzy
 msgid "— start the tracker writeback service"
-msgstr "सेवा सुरु गर्नुहोस्"
+msgstr "— ट्र्याकर राइटब्याक सेवा सुरु गर्नुहोस्"
 
 #~ msgid "Applications data miner"
 #~ msgstr "अनुप्रयोग डाटा खनिज"
@@ -1504,12 +1432,11 @@ msgstr "सेवा सुरु गर्नुहोस्"
 #~ msgstr "निष्क्रिय हुँदा अनुसूची प्राथमिकता"
 
 #~ msgid ""
-#~ "The scheduler is the kernel component that decides which runnable application will be "
-#~ "executed by the CPU next. Each application has an associated scheduling policy and "
-#~ "priority."
+#~ "The scheduler is the kernel component that decides which runnable application will be executed by the CPU "
+#~ "next. Each application has an associated scheduling policy and priority."
 #~ msgstr ""
-#~ "अनुसूचक भनेको कर्नेल घटक हो जसले निर्णय गर्ने अर्को अनुप्रयोग CPU द्वारा कुन निष्पादित हुनेछ। प्रत्येक "
-#~ "अनुप्रयोगको सम्बन्धित अनुसूची नीति र प्राथमिकता छ।"
+#~ "अनुसूचक भनेको कर्नेल घटक हो जसले निर्णय गर्ने अर्को अनुप्रयोग CPU द्वारा कुन निष्पादित हुनेछ। प्रत्येक अनुप्रयोगको सम्बन्धित अनुसूची "
+#~ "नीति र प्राथमिकता छ।"
 
 #, fuzzy
 #~ msgid "Enable writeback"
@@ -1573,12 +1500,11 @@ msgstr "सेवा सुरु गर्नुहोस्"
 #~ msgstr "मेटाडाटा निकाटर"
 
 #~ msgid ""
-#~ "Maximum width in pixels for any media art extracted. Anything bigger is resized. Set to "
-#~ "-1 to disable saving media art from files. Setting to 0 sets no limit on the media art "
-#~ "width."
+#~ "Maximum width in pixels for any media art extracted. Anything bigger is resized. Set to -1 to disable "
+#~ "saving media art from files. Setting to 0 sets no limit on the media art width."
 #~ msgstr ""
-#~ "कुनै मिडिया कला निकालेका लागि पिक्सेलको अधिकतम चौडाइ। ठूलो चीजको आकार बदलीएको छ। फाईलहरूबाट "
-#~ "बचत मिडिया आर्ट अक्षम गर्न -१ लाई सेट गर्नुहोस्। ० सेटहरूमा सेट अप मिडिया कला चौडाइमा कुनै सीमा छैन।"
+#~ "कुनै मिडिया कला निकालेका लागि पिक्सेलको अधिकतम चौडाइ। ठूलो चीजको आकार बदलीएको छ। फाईलहरूबाट बचत मिडिया आर्ट अक्षम "
+#~ "गर्न -१ लाई सेट गर्नुहोस्। ० सेटहरूमा सेट अप मिडिया कला चौडाइमा कुनै सीमा छैन।"
 
 #~ msgid "Tracker Metadata Extractor"
 #~ msgstr "ट्रयाकर मेटाडेटा निकाटर"
