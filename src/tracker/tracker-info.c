@@ -472,13 +472,9 @@ info_run (void)
 		query = g_strdup_printf ("SELECT DISTINCT ?predicate ?object ?x"
 		                         "  ( EXISTS { ?predicate rdfs:range [ rdfs:subClassOf rdfs:Resource ] } )"
 		                         "WHERE {"
-		                         "  { <%s> ?predicate ?object . } "
-					 "  UNION "
-					 "  { <%s> nie:interpretedAs ?x . "
-					 "    ?x ?predicate ?object . "
-	                                 "  } "
-		                         "}",
-					 urn,
+		                         "  <%s> nie:interpretedAs? ?x . "
+					 "  ?x ?predicate ?object . "
+		                         "} ORDER BY ?x",
 					 urn);
 
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
