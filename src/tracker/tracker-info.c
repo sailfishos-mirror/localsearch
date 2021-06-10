@@ -32,8 +32,17 @@
 
 #include <libtracker-sparql/tracker-sparql.h>
 
+#include "tracker-cli-utils.h"
+#include "tracker-color.h"
+
 #define INFO_OPTIONS_ENABLED() \
 	(filenames && g_strv_length (filenames) > 0);
+
+#define GROUP "Report"
+#define KEY_URI "Uri"
+#define KEY_MESSAGE "Message"
+#define KEY_SPARQL "Sparql"
+#define ERROR_MESSAGE "Extraction failed for this file. Some metadata will be missing."
 
 static gchar **filenames;
 static gboolean full_namespaces;
@@ -378,6 +387,50 @@ output_eligible_status_for_file (gchar   *path,
 	}
 }
 
+static void
+print_errors (GList *keyfiles,
+	      gchar *file_uri)
+{
+	GList *l;
+	GKeyFile *keyfile;
+	GFile *file;
+
+	file = g_file_new_for_uri (file_uri);
+
+
+	for (l = keyfiles; l; l = l->next) {
+		gchar *uri;
+		GFile *error_file;
+
+		keyfile = l->data;
+		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+		error_file = g_file_new_for_uri (uri);
+
+		if (g_file_equal (file, error_file)) {
+			gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+			gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+
+			if (message)
+				g_print (CRIT_BEGIN "%s\n%s: %s" CRIT_END "\n",
+					 ERROR_MESSAGE,
+					 _("Error message"),
+					 message);
+			if (sparql)
+				g_print ("SPARQL: %s\n", sparql);
+			g_print ("\n");
+
+			g_free (message);
+		}
+
+		g_free (uri);
+		g_object_unref (error_file);
+	}
+
+	g_object_unref (file);
+
+}
+
+
 static int
 info_run (void)
 {
@@ -413,6 +466,7 @@ info_run (void)
 		gchar *uri = NULL;
 		gchar *query;
 		gchar *urn = NULL;
+		GList *keyfiles;
 
 		if (!turtle && !resource_is_iri) {
 			g_print ("%s: '%s'\n", _("Querying information for entity"), *p);
@@ -516,6 +570,11 @@ info_run (void)
 				g_clear_error (&error);
 			}
 		}
+
+		keyfiles = tracker_cli_get_error_keyfiles ();
+
+		if (keyfiles && !turtle)
+			print_errors (keyfiles, uri);
 
 		g_print ("\n");
 
