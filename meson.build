@@ -14,7 +14,7 @@ tracker_versioned_name = 'tracker@0@-miners'.format(tracker_api_major)
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
-glib_required = '2.62.0'
+glib_required = '2.58.0'
 tracker_required = '3.1.0'
 
 if get_option('tracker_core') == 'system'
