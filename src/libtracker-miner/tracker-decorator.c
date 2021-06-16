@@ -1186,7 +1186,7 @@ tracker_decorator_next (TrackerDecorator    *decorator,
 		return;
 	}
 
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Queued task %s", g_task_get_name (task)));
+	//TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Queued task %s", g_task_get_name (task)));
 	g_queue_push_tail (&priv->next_elem_queue, task);
 	decorator_pair_tasks (decorator);
 }
