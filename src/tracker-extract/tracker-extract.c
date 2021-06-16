@@ -266,8 +266,8 @@ notify_task_finish (TrackerExtractTask *task,
 			priv->unhandled_count++;
 		}
 
-		if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
-			g_timer_stop (priv->total_elapsed);
+		//if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
+		///	g_timer_stop (priv->total_elapsed);
 	}
 #endif
 
@@ -653,8 +653,8 @@ tracker_extract_file (TrackerExtract      *extract,
 
 #ifdef G_ENABLE_DEBUG
 		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-			if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
-				g_timer_continue (priv->total_elapsed);
+			//if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
+			//g_timer_continue (priv->total_elapsed);
 		}
 #endif
 
