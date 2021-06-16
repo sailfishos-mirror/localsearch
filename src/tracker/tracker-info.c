@@ -420,6 +420,7 @@ print_errors (GList *keyfiles,
 			g_print ("\n");
 
 			g_free (message);
+			g_free (sparql);
 		}
 
 		g_free (uri);
