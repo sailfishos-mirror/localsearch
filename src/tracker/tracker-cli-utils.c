@@ -83,15 +83,21 @@ tracker_cli_get_error_keyfiles (void)
 	for (l = infos; l; l = l->next) {
 		GKeyFile *keyfile;
 		GFile *child;
+		GError *error = NULL;
 
 		child = g_file_get_child (file, g_file_info_get_name (l->data));
 		path = g_file_get_path (child);
 		keyfile = g_key_file_new ();
-		g_key_file_load_from_file (keyfile,
-		                           path, 0,
-		                           NULL);
 
-		keyfiles = g_list_prepend (keyfiles, keyfile);
+		if (g_key_file_load_from_file (keyfile, path, 0, &error)) {
+			keyfiles = g_list_prepend (keyfiles, keyfile);
+
+		} else {
+			g_warning ("Error retrieving keyfiles: %s", error->message);
+			g_error_free (error);
+			g_key_file_free (keyfile);
+		}
+
 		g_object_unref (child);
 	}
 
