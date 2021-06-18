@@ -340,6 +340,7 @@ have_malloc_trim = meson.get_compiler('c').has_function('malloc_trim')
 # Config that goes in config.h
 conf.set('GUARANTEE_METADATA', get_option('guarantee_metadata') == true)
 conf.set('USING_UNZIPPSFILES', get_option('unzip_ps_gz_files') == true)
+conf.set('GIO_SUPPORTS_CREATION_TIME', glib.version().version_compare('>=2.70.0'))
 
 conf.set('HAVE_ENCA', charset_library_name == 'enca')
 conf.set('HAVE_EXEMPI', exempi.found())
@@ -491,6 +492,7 @@ summary = [
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Releasing heap memory with malloc_trim: ' + have_malloc_trim.to_string(),
+  '    Store creation time:                    ' + glib.version().version_compare('>=2.70.0').to_string(),
   '\nData Miners / Writebacks:',
   '    FS (File System):                       ' + have_tracker_miner_fs.to_string(),
   '    RSS:                                    ' + have_tracker_miner_rss.to_string(),
