@@ -47,6 +47,8 @@ else
   tracker_uninstalled_stop_words_dir = tracker_subproject.get_variable('tracker_uninstalled_stop_words_dir')
   tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
   tracker_ontologies_dir = tracker_subproject.get_variable('tracker_ontologies_dir')
+
+  tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
 endif
 
 avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
