@@ -204,12 +204,6 @@ batch_execute_cb (GObject      *object,
 	if (!tracker_batch_execute_finish (TRACKER_BATCH (object),
 	                                   result,
 	                                   &error)) {
-		g_critical ("Error executing batch: %s\n", error->message);
-		g_error_free (error);
-		return;
-	}
-
-	if (error) {
 		g_task_return_error (update_data->async_task, error);
 	} else {
 		g_task_return_pointer (update_data->async_task,
@@ -217,7 +211,6 @@ batch_execute_cb (GObject      *object,
 		                       (GDestroyNotify) g_ptr_array_unref);
 	}
 
-	g_clear_error (&error);
 	update_batch_data_free (update_data);
 }
 
