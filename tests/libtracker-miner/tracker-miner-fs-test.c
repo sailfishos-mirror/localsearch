@@ -35,7 +35,7 @@ test_miner_process_file (TrackerMinerFS      *miner,
                          gboolean             created)
 {
 	TrackerResource *resource;
-	GDateTime *modification_time;
+	GDateTime *modification_time, *creation_time;
 	TrackerIndexingTree *tree;
 	gchar *uri, *parent_uri, *str;
 	GFile *parent;
@@ -57,11 +57,16 @@ test_miner_process_file (TrackerMinerFS      *miner,
 	if (info) {
 		modification_time = g_file_info_get_modification_date_time (info);
 		if (modification_time) {
-			str = g_date_time_format_iso8601 (modification_time);
-			tracker_resource_set_string (resource, "nfo:fileLastModified", str);
-			g_free (str);
+			tracker_resource_set_datetime (resource, "nfo:fileLastModified", modification_time);
 			g_date_time_unref (modification_time);
 		}
+#ifdef GIO_SUPPORTS_CREATION_TIME
+		creation_time = g_file_info_get_creation_date_time (info);
+		if (creation_time) {
+			tracker_resource_set_datetime (resource, "nfo:fileCreated", creation_time);
+			g_date_time_unref (creation_time);
+		}
+#endif
 	}
 
 	tracker_resource_set_string (resource, "nie:url", uri);

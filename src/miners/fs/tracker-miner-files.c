@@ -61,6 +61,7 @@
 	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
 	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
 	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
+	G_FILE_ATTRIBUTE_TIME_CREATED "," \
 	G_FILE_ATTRIBUTE_TIME_ACCESS
 
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
@@ -2065,11 +2066,16 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
-	time_t time_;
 	GFile *parent;
-	gchar *uri, *time_str;
+	gchar *uri;
 	gboolean is_directory;
 	GDateTime *modified;
+#ifdef GIO_SUPPORTS_CREATION_TIME
+	GDateTime *accessed, *created;
+#else
+	time_t time_;
+	gchar *time_str;
+#endif
 
 	priv = TRACKER_MINER_FILES (fs)->private;
 
@@ -2125,14 +2131,27 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	tracker_resource_set_int64 (resource, "nfo:fileSize",
 	                            g_file_info_get_size (file_info));
 
-	time_str = g_date_time_format_iso8601 (modified);
-	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
-	g_free (time_str);
+	tracker_resource_set_datetime (resource, "nfo:fileLastModified", modified);
 
+#ifdef GIO_SUPPORTS_CREATION_TIME
+	accessed = g_file_info_get_access_date_time (file_info);
+	if (!accessed)
+		accessed = g_date_time_new_from_unix_utc (0);
+
+	tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
+	g_date_time_unref (accessed);
+
+	created = g_file_info_get_creation_date_time (file_info);
+	if (created) {
+		tracker_resource_set_datetime (resource, "nfo:fileCreated", created);
+		g_date_time_unref (created);
+	}
+#else
 	time_ = (time_t) g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
+#endif
 
 	/* The URL of the DataObject (because IE = DO, this is correct) */
 	tracker_resource_set_string (resource, "nie:url", uri);
@@ -2159,9 +2178,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		tracker_resource_set_string (graph_file, "nfo:fileName",
 		                             g_file_info_get_display_name (file_info));
 
-		time_str = g_date_time_format_iso8601 (modified);
-		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
-		g_free (time_str);
+		tracker_resource_set_datetime (graph_file, "nfo:fileLastModified", modified);
 	}
 
 	if (delete_properties_sparql)
@@ -2188,9 +2205,14 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
                                      TrackerSparqlBuffer *buffer)
 {
 	TrackerResource *resource;
-	time_t time_;
-	gchar *uri, *time_str;
+	gchar *uri;
 	GDateTime *modified;
+#ifdef GIO_SUPPORTS_CREATION_TIME
+	GDateTime *accessed, *created;
+#else
+	gchar *time_str;
+	time_t time_;
+#endif
 
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
@@ -2198,7 +2220,8 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	if (!info) {
 		info = g_file_query_info (file,
 		                          G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-		                          G_FILE_ATTRIBUTE_TIME_ACCESS,
+		                          G_FILE_ATTRIBUTE_TIME_ACCESS ","
+					  G_FILE_ATTRIBUTE_TIME_CREATED,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
 	}
@@ -2208,16 +2231,28 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
 		modified = g_date_time_new_from_unix_utc (0);
 
 	/* Update nfo:fileLastModified */
-	time_str = g_date_time_format_iso8601 (modified);
-	tracker_resource_set_string (resource, "nfo:fileLastModified", time_str);
+	tracker_resource_set_datetime (resource, "nfo:fileLastModified", modified);
 	g_date_time_unref (modified);
-	g_free (time_str);
 
+#ifdef GIO_SUPPORTS_CREATION_TIME
 	/* Update nfo:fileLastAccessed */
+	accessed = g_file_info_get_access_date_time (info);
+	tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
+	g_date_time_unref (accessed);
+
+	/* Update nfo:fileCreated */
+	created = g_file_info_get_creation_date_time (info);
+
+	if (created) {
+		tracker_resource_set_datetime (resource, "nfo:fileCreated", created);
+		g_date_time_unref (created);
+	}
+#else
 	time_ = (time_t) g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
 	g_free (time_str);
+#endif
 
 	g_free (uri);
 
