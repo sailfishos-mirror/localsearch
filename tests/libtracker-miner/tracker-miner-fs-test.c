@@ -35,9 +35,9 @@ test_miner_process_file (TrackerMinerFS      *miner,
                          gboolean             created)
 {
 	TrackerResource *resource;
-	GDateTime *modification_time, *creation_time;
+	GDateTime *modification_time;
 	TrackerIndexingTree *tree;
-	gchar *uri, *parent_uri, *str;
+	gchar *uri, *parent_uri;
 	GFile *parent;
 
 	((TestMiner *) miner)->n_process_file++;
