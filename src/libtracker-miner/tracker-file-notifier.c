@@ -1420,6 +1420,9 @@ tracker_file_notifier_finalize (GObject *object)
 	g_clear_object (&priv->content_query);
 	g_clear_object (&priv->deleted_query);
 
+	tracker_monitor_set_enabled (priv->monitor, FALSE);
+	g_signal_handlers_disconnect_by_data (priv->monitor, object);
+
 	g_object_unref (priv->crawler);
 	g_object_unref (priv->monitor);
 	g_clear_object (&priv->connection);
