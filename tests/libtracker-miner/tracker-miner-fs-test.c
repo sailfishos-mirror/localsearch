@@ -400,6 +400,26 @@ fixture_iterate (TrackerMinerFSTestFixture *fixture)
 		g_main_context_iteration (NULL, TRUE);
 }
 
+static gboolean
+loop_timeout (GMainLoop *main_loop)
+{
+	g_main_loop_quit (main_loop);
+	return G_SOURCE_REMOVE;
+}
+
+static void
+fixture_iterate_timed (TrackerMinerFSTestFixture *fixture,
+                       int                        seconds)
+{
+	GMainLoop *main_loop;
+
+	main_loop = g_main_loop_new (NULL, FALSE);
+	g_timeout_add_seconds (seconds, (GSourceFunc) loop_timeout, main_loop);
+	g_main_loop_run (main_loop);
+
+	g_main_loop_unref (main_loop);
+}
+
 static void
 test_recursive_indexing (TrackerMinerFSTestFixture *fixture,
                          gconstpointer              data)
@@ -1486,7 +1506,7 @@ test_event_queue_create_and_update (TrackerMinerFSTestFixture *fixture,
 	g_free (content);
 
 	g_assert_cmpint (((TestMiner *) fixture->miner)->n_process_file, ==, 1);
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1551,7 +1571,7 @@ test_event_queue_create_and_move (TrackerMinerFSTestFixture *fixture,
 	g_assert_cmpstr (content, ==, "recursive");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1596,7 +1616,7 @@ test_event_queue_update_and_update (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 	/* Coalescing desirable, but not mandatory */
 	g_assert_cmpint (((TestMiner *) fixture->miner)->n_process_file, >=, 1);
 
@@ -1640,7 +1660,7 @@ test_event_queue_update_and_delete (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==, "recursive");
@@ -1681,7 +1701,7 @@ test_event_queue_update_and_move (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1723,7 +1743,7 @@ test_event_queue_delete_and_create (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1767,7 +1787,7 @@ test_event_queue_move_and_update (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 	g_assert_cmpint (((TestMiner *) fixture->miner)->n_process_file, ==, 2);
 
 	content = fixture_get_content (fixture);
@@ -1810,7 +1830,7 @@ test_event_queue_move_and_create_origin (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1853,7 +1873,7 @@ test_event_queue_move_and_delete (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1894,7 +1914,7 @@ test_event_queue_move_and_move (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
@@ -1936,7 +1956,7 @@ test_event_queue_move_and_move_back (TrackerMinerFSTestFixture *fixture,
 	                 "recursive/a");
 	g_free (content);
 
-	fixture_iterate (fixture);
+	fixture_iterate_timed (fixture, 1);
 
 	content = fixture_get_content (fixture);
 	g_assert_cmpstr (content, ==,
