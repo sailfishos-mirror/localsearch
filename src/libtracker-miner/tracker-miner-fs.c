@@ -108,6 +108,7 @@ typedef struct {
 
 struct _TrackerMinerFSPrivate {
 	TrackerPriorityQueue *items;
+	GHashTable *items_by_file;
 
 	guint item_queues_handler_id;
 	GFile *item_queue_blocker;
@@ -440,6 +441,8 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	priv->extraction_timer_stopped = TRUE;
 
 	priv->items = tracker_priority_queue_new ();
+	priv->items_by_file = g_hash_table_new (g_file_hash,
+	                                        (GEqualFunc) g_file_equal);
 
 	/* Create processing pools */
 	priv->task_pool = tracker_task_pool_new (DEFAULT_WAIT_POOL_LIMIT);
@@ -605,35 +608,6 @@ queue_event_moved_new (GFile    *source,
 	return event;
 }
 
-static GList *
-queue_event_get_last_event_node (QueueEvent *event)
-{
-	return g_object_get_qdata (G_OBJECT (event->file),
-				   quark_last_queue_event);
-}
-
-static void
-queue_event_save_node (QueueEvent *event,
-		       GList      *node)
-{
-	g_assert (node->data == event);
-	g_object_set_qdata (G_OBJECT (event->file),
-			    quark_last_queue_event, node);
-}
-
-static void
-queue_event_dispose_node (QueueEvent *event)
-{
-	GList *node;
-
-	node = queue_event_get_last_event_node (event);
-
-	if (node && node->data == event) {
-		g_object_steal_qdata (G_OBJECT (event->file),
-				      quark_last_queue_event);
-	}
-}
-
 static void
 queue_event_free (QueueEvent *event)
 {
@@ -643,8 +617,6 @@ queue_event_free (QueueEvent *event)
 		root_queue = event->root_node->data;
 		g_queue_delete_link (root_queue, event->root_node);
 	}
-
-	queue_event_dispose_node (event);
 
 	g_clear_object (&event->dest_file);
 	g_clear_object (&event->file);
@@ -755,6 +727,7 @@ fs_finalize (GObject *object)
 		g_object_unref (priv->sparql_buffer);
 	}
 
+	g_hash_table_unref (priv->items_by_file);
 	tracker_priority_queue_foreach (priv->items,
 					(GFunc) queue_event_free,
 					NULL);
@@ -1281,6 +1254,33 @@ should_wait (TrackerMinerFS *fs,
 }
 
 static gboolean
+maybe_remove_file_event_node (TrackerMinerFS *fs,
+                              QueueEvent     *event)
+{
+	GList *link;
+
+	link = g_hash_table_lookup (fs->priv->items_by_file, event->file);
+
+	if (link && link->data == event) {
+		g_hash_table_remove (fs->priv->items_by_file, event->file);
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static gboolean
+remove_items_by_file_foreach (gpointer key,
+                              gpointer value,
+                              gpointer user_data)
+{
+	GList *link = value;
+	GFile *file = user_data;
+
+	return queue_event_is_equal_or_descendant (link->data, file);
+}
+
+static gboolean
 item_queue_get_next_file (TrackerMinerFS           *fs,
                           GFile                   **file,
                           GFile                   **source_file,
@@ -1329,6 +1329,7 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 		*is_dir = event->is_dir;
 		g_set_object (info, event->info);
 
+		maybe_remove_file_event_node (fs, event);
 		queue_event_free (event);
 		tracker_priority_queue_pop (fs->priv->items, NULL);
 	}
@@ -1698,13 +1699,16 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 
 	if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
 		/* Remove all children of the dest location from being processed. */
+		g_hash_table_foreach_remove (fs->priv->items_by_file,
+		                             remove_items_by_file_foreach,
+		                             event->dest_file);
 		tracker_priority_queue_foreach_remove (fs->priv->items,
 						       (GEqualFunc) queue_event_is_equal_or_descendant,
 						       event->dest_file,
 						       (GDestroyNotify) queue_event_free);
 	}
 
-	old = queue_event_get_last_event_node (event);
+	old = g_hash_table_lookup (fs->priv->items_by_file, event->file);
 
 	if (old) {
 		QueueCoalesceAction action;
@@ -1713,6 +1717,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		action = queue_event_coalesce (old->data, event, &replacement);
 
 		if (action & QUEUE_ACTION_DELETE_FIRST) {
+			maybe_remove_file_event_node (fs, old->data);
 			queue_event_free (old->data);
 			tracker_priority_queue_remove_node (fs->priv->items,
 							    old);
@@ -1730,6 +1735,9 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 	if (event) {
 		if (event->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			/* Remove all children of this file from being processed. */
+			g_hash_table_foreach_remove (fs->priv->items_by_file,
+			                             remove_items_by_file_foreach,
+			                             event->file);
 			tracker_priority_queue_foreach_remove (fs->priv->items,
 							       (GEqualFunc) queue_event_is_equal_or_descendant,
 							       event->file,
@@ -1740,7 +1748,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 
 		assign_root_node (fs, event);
 		link = tracker_priority_queue_add (fs->priv->items, event, priority);
-		queue_event_save_node (event, link);
+		g_hash_table_replace (fs->priv->items_by_file, event->file, link);
 		item_queue_handlers_set_up (fs);
 	}
 }
@@ -1937,6 +1945,9 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	/* Remove anything contained in the removed directory
 	 * from all relevant processing queues.
 	 */
+	g_hash_table_foreach_remove (fs->priv->items_by_file,
+	                             remove_items_by_file_foreach,
+	                             directory);
 	tracker_priority_queue_foreach_remove (priv->items,
 					       (GEqualFunc) queue_event_is_equal_or_descendant,
 					       directory,
