@@ -333,9 +333,7 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
             shutil.rmtree(victim)
 
         result = self.__get_text_documents()
-        self.assertEqual(len(result), 1)
-        unpacked_result = [r[0] for r in result]
-        self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
+        self.assertEqual(result, [[self.uri("test-monitored/file1.txt")]])
 
         # Restore the dirs
         os.makedirs(self.path("test-monitored/dir1"))
