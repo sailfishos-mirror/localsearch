@@ -928,6 +928,30 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		                         monitor_event_to_string (event_type),
 		                         is_directory ? "directory" : "file",
 		                         file_uri));
+
+		if (is_directory &&
+		    event_type == G_FILE_MONITOR_EVENT_DELETED) {
+			GFileMonitor *dir_monitor;
+
+			dir_monitor = g_hash_table_lookup (priv->thread.monitors, file);
+
+			/* We may get 2 DELETED events on directories, one from the
+			 * directory monitor for the directory itself, and again from
+			 * the parent folder.
+			 *
+			 * If the parent event is handled first, we cancel the monitor
+			 * so the second event does not get to us. However if the
+			 * order is inverted, just cancelling the directory monitor
+			 * for the deleted directory will not stop the parent directory
+			 * event. We must check explicitly for that case.
+			 */
+			if (dir_monitor &&
+			    dir_monitor != file_monitor &&
+			    g_file_monitor_is_cancelled (dir_monitor)) {
+				g_free (file_uri);
+				return;
+			}
+		}
 	} else {
 		if (event_type == G_FILE_MONITOR_EVENT_RENAMED ||
 		    event_type == G_FILE_MONITOR_EVENT_MOVED_OUT) {
