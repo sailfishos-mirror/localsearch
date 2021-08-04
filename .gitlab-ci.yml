@@ -16,10 +16,47 @@ variables:
   TRACKER_TESTS_AWAIT_TIMEOUT: 60
 
 stages:
+  - review
   - prepare
   - build
   - test
   - analysis
+
+.check-template: &check
+  extends:
+    - .fdo.ci-fairy
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - check-junit-report.xml
+    reports:
+      junit: check-junit-report.xml
+
+check-commit-log:
+  variables:
+    GIT_DEPTH: "100"
+  stage: review
+  script:
+    - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
+      then
+        ci-fairy check-commits --junit-xml=check-junit-report.xml ;
+      else
+        echo "Not a merge request" ;
+      fi
+  <<: *check
+
+check-merge-request:
+  variables:
+    GIT_STRATEGY: none
+  stage: review
+  script:
+    - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
+      then
+        ci-fairy check-merge-request --require-allow-collaboration --junit-xml=check-junit-report.xml ;
+      else
+        echo "Not a merge request" ;
+      fi
+  <<: *check
 
 .tracker-miners.fedora@common:
   variables:
@@ -88,6 +125,9 @@ build-fedora-container@x86_64:
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  needs:
+    - check-commit-log
+    - check-merge-request
 
 build-fedora-rawhide-container@x86_64:
   extends:
@@ -96,6 +136,9 @@ build-fedora-rawhide-container@x86_64:
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  needs:
+    - check-commit-log
+    - check-merge-request
 
 build-fedora-container@aarch64:
   extends:
@@ -104,6 +147,9 @@ build-fedora-container@aarch64:
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  needs:
+    - check-commit-log
+    - check-merge-request
 
 build-ubuntu-container@x86_64:
   extends:
@@ -112,6 +158,9 @@ build-ubuntu-container@x86_64:
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  needs:
+    - check-commit-log
+    - check-merge-request
 
 .build-template: &build
   stage: build
