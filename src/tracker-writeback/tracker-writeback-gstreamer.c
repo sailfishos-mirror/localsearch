@@ -682,6 +682,8 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 		}
 	}
 
+	gst_tag_register_musicbrainz_tags ();
+
 	properties = tracker_resource_get_properties (resource);
 
 	for (l = properties; l; l = l->next) {
