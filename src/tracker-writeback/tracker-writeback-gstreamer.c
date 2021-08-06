@@ -734,6 +734,16 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 			album = tracker_resource_get_first_relation (resource, prop);
 
 			if (album) {
+				const gchar *mb_tags[] = {
+					"https://musicbrainz.org/doc/Release",
+					"https://musicbrainz.org/doc/Release_Group",
+					NULL,
+				};
+
+				handle_musicbrainz_tags (album,
+				                         "tracker:hasExternalReference",
+				                         element, mb_tags);
+
 				album_name = tracker_resource_get_first_string (album, "nie:title");
 				artist = tracker_resource_get_first_relation (album, "nmm:albumArtist");
 			}
@@ -861,22 +871,12 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 			disc = tracker_resource_get_first_relation (resource, prop);
 
 			if (disc) {
-				const gchar *mb_tags[] = {
-					"https://musicbrainz.org/doc/Release",
-					"https://musicbrainz.org/doc/Release_Group",
-					NULL,
-				};
-
 				number = tracker_resource_get_first_int (disc,
 				                                         "nmm:setNumber");
 				g_value_init (&val, G_TYPE_INT);
 				g_value_set_int (&val, number);
 				writeback_gstreamer_set (element, GST_TAG_ALBUM_VOLUME_NUMBER, &val);
 				g_value_unset (&val);
-
-				handle_musicbrainz_tags (disc,
-				                         "tracker:hasExternalReference",
-				                         element, mb_tags);
 			}
 		}
 
