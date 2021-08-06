@@ -700,21 +700,21 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 			g_value_unset (&val);
 		}
 
-		if (g_strcmp0 (prop, "nmm:performer") == 0) {
-			TrackerResource *performer;
+		if (g_strcmp0 (prop, "nmm:artist") == 0) {
+			TrackerResource *artist;
 			const gchar *name = NULL;
 			const gchar *mb_tags[] = {
 				"https://musicbrainz.org/doc/Artist",
 				NULL,
 			};
 
-			performer = tracker_resource_get_first_relation (resource, prop);
+			artist = tracker_resource_get_first_relation (resource, prop);
 
-			if (performer) {
-				name = tracker_resource_get_first_string (performer,
+			if (artist) {
+				name = tracker_resource_get_first_string (artist,
 				                                          "nmm:artistName");
 
-				handle_musicbrainz_tags (performer,
+				handle_musicbrainz_tags (artist,
 				                         "tracker:hasExternalReference",
 				                         element, mb_tags);
 			}
