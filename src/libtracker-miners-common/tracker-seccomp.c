@@ -140,6 +140,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (lstat64);
 	ALLOW_RULE (statx);
 	ALLOW_RULE (access);
+	ALLOW_RULE (faccessat);
+	ALLOW_RULE (faccessat2);
 	ALLOW_RULE (getdents);
 	ALLOW_RULE (getdents64);
 	ALLOW_RULE (readlink);
