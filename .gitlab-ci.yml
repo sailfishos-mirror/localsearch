@@ -137,6 +137,7 @@ build-fedora-rawhide-container@x86_64:
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  allow_failure: true
   needs:
     - check-commit-log
     - check-merge-request
@@ -206,6 +207,7 @@ build-fedora-rawhide@x86_64:
     - .tracker-miners.fedora:rawhide@x86_64
   needs:
     - build-fedora-rawhide-container@x86_64
+  allow_failure: true
   <<: *build
 
 build-fedora@aarch64:
@@ -276,6 +278,7 @@ test-fedora-rawhide@x86_64:
     - .tracker-miners.fedora:rawhide@x86_64
   needs:
     - build-fedora-rawhide@x86_64
+  allow_failure: true
   <<: *test
 
 test-fedora@aarch64:
