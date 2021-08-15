@@ -713,8 +713,8 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 				                                          "nmm:artistName");
 
 				handle_musicbrainz_tags (performer,
-							 "tracker:hasExternalReference",
-							 element, mb_tags);
+				                         "tracker:hasExternalReference",
+				                         element, mb_tags);
 			}
 
 			if (name) {
@@ -873,8 +873,8 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 				g_value_unset (&val);
 
 				handle_musicbrainz_tags (disc,
-							 "tracker:hasExternalReference",
-							 element, mb_tags);
+				                         "tracker:hasExternalReference",
+				                         element, mb_tags);
 			}
 		}
 
@@ -957,9 +957,9 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 
 			if (hash) {
 				algorithm = tracker_resource_get_first_string (hash,
-									       "nfo:hashAlgorithm");
+				                                               "nfo:hashAlgorithm");
 				value = tracker_resource_get_first_string (hash,
-									   "nfo:hashValue");
+				                                           "nfo:hashValue");
 			}
 
 			if (value && algorithm && g_strcmp0 (algorithm, "chromaprint") == 0) {
