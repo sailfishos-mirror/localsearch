@@ -1,5 +1,7 @@
 python = find_program('python3')
 
+subdir('mockvolumemonitor')
+
 # Configure functional tests to run completely from source tree.
 testconf = configuration_data()
 
