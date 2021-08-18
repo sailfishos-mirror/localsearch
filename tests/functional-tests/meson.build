@@ -9,6 +9,7 @@ config_json_full_path = meson.current_build_dir() / 'configuration.json'
 dconf_profile_full_path = meson.current_source_dir() / 'trackertest'
 tracker_extractors_dir = meson.current_build_dir() / '..' / '..' / 'src' / 'tracker-extract'
 
+testconf.set('MOCK_VOLUME_MONITOR_DIR', meson.current_build_dir() / 'mockvolumemonitor')
 testconf.set('TEST_CLI_DIR', tracker_uninstalled_cli_dir)
 testconf.set('TEST_CLI_SUBCOMMANDS_DIR', tracker_uninstalled_cli_subcommands_dir)
 testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', build_root / 'tests' / 'test-bus.conf')
@@ -119,6 +120,7 @@ endif
 
 functional_tests = [
   'miner-basic',
+  'miner-removable-media',
   'miner-resource-removal',
   'fts-basic',
   'fts-file-operations',
