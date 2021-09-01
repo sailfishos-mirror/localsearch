@@ -1,3 +1,16 @@
+NEW in 3.2.0.beta - 2021-09-01
+==============================
+  * Save file creation time
+  * Coverity fixes
+  * Fix chaining up of errors after porting to TrackerBatch
+  * Fixes for test flakiness
+  * Avoid falling back to year 0 in extractors
+  * Linking fixes on misc executables
+  * CI improvements
+
+Translations: cs, es, eu, fr, gl, id, kk, ko, pt, pt_BR, ro, ru, sk, sl,
+  sv, tr, zh_TW
+
 NEW in 3.2.0.alpha.1 - 2021-06-12
 =================================
   * Brown paper bag release
