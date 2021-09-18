@@ -186,7 +186,7 @@ check-code-style:
     - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dtests_tap_protocol=true
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dtests_tap_protocol=true -Dtracker:docs=false
     - ninja
   artifacts:
     expire_in: 1 day
@@ -308,7 +308,7 @@ coverage-analysis:
     - .gitlab-ci/checkout-tracker.sh
     - mkdir -p coverage-build/coveragereport
     - cd coverage-build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false -Dtracker:docs=false
     - ninja
     - env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}
     - gcovr --html-details --print-summary --root=.. --exclude=subprojects --exclude=../subprojects --exclude=../tests --output coveragereport/index.html
