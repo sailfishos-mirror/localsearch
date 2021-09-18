@@ -1,3 +1,11 @@
+NEW in 3.2.0 - 2021-09-18
+=========================
+Translations: da, de, en_GB, hr, hu, pl
+
+  Highlighted changes since 3.1:
+  * File creation time is now part of the stored metadata
+  * Show additional information in "tracker3 info"
+
 NEW in 3.2.0.rc - 2021-09-05
 ============================
 
