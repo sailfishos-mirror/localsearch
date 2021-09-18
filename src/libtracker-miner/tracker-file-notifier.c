@@ -1161,7 +1161,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		/* else, file, do nothing */
 	} else {
 		gboolean should_process, should_process_other;
-		GFileInfo *file_info;
+		GFileInfo *file_info, *other_file_info;
 		GFile *check_file;
 
 		if (is_directory) {
@@ -1171,6 +1171,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		}
 
 		file_info = create_shallow_file_info (file, is_directory);
+		other_file_info = create_shallow_file_info (other_file, is_directory);
 
 		/* If the (parent) directory is in
 		 * the filesystem, file is stored
@@ -1178,9 +1179,10 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		should_process = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 		                                                          file, file_info);
 		should_process_other = tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
-		                                                                other_file, file_info);
+		                                                                other_file, other_file_info);
 		g_object_unref (check_file);
 		g_object_unref (file_info);
+		g_object_unref (other_file_info);
 
 		/* Ref those so they are safe to use after signal emission */
 		g_object_ref (file);
