@@ -383,5 +383,43 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         self.assertEqual(self.__get_parent_urn(document),
                          self.__get_parent_urn(self.path("test-monitored/file1.txt")))
 
+    def test_11_move_from_visible_to_hidden(self):
+        """
+        Move a file from monitored to unmonitored directory
+        """
+        source = self.path("test-monitored/dir1/file2.txt")
+        dest = self.path("test-monitored/dir1/.file2.txt")
+        source_id = self.tracker.get_content_resource_id(self.uri(source))
+        with self.tracker.await_delete(fixtures.DOCUMENTS_GRAPH, source_id, timeout=cfg.AWAIT_TIMEOUT):
+            shutil.move(source, dest)
+
+        result = self.__get_text_documents()
+        self.assertEqual(len(result), 2)
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
+
+    def test_12_move_from_hidden_to_visible(self):
+        """
+        Move a file from monitored to unmonitored directory
+        """
+        source = self.path("test-monitored/dir1/.hidden.txt")
+        dest = self.path("test-monitored/dir1/visible.txt")
+
+        with open(source, 'w') as f:
+            f.write(DEFAULT_TEXT)
+
+        with self.await_document_inserted(dest) as resource:
+            shutil.move(source, dest)
+
+        result = self.__get_text_documents()
+        self.assertEqual(len(result), 4)
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/file2.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/visible.txt"), unpacked_result)
+
+
 if __name__ == "__main__":
     fixtures.tracker_test_main()
