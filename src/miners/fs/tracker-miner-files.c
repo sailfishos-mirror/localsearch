@@ -2455,14 +2455,16 @@ miner_files_move_file (TrackerMinerFS      *fs,
 	                        "} INSERT {"
 	                        "  GRAPH ?g {"
 	                        "    <%s> a nfo:FileDataObject ; "
+	                        "         nfo:fileName \"%s\" ; "
 	                        "         ?p ?o "
 	                        "  }"
 	                        "} WHERE {"
 	                        "  GRAPH ?g {"
 	                        "    <%s> ?p ?o "
 	                        "  }"
+	                        "  FILTER (?p != nfo:fileName) . "
 	                        "}",
-	                        source_uri, uri, source_uri);
+	                        source_uri, uri, display_name, source_uri);
 	g_free (container_clause);
 
 	if (recursive) {
