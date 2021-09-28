@@ -204,6 +204,9 @@ batch_execute_cb (GObject      *object,
 	if (!tracker_batch_execute_finish (TRACKER_BATCH (object),
 	                                   result,
 	                                   &error)) {
+		g_task_set_task_data (update_data->async_task,
+		                      g_ptr_array_ref (update_data->tasks),
+		                      (GDestroyNotify) g_ptr_array_unref);
 		g_task_return_error (update_data->async_task, error);
 	} else {
 		g_task_return_pointer (update_data->async_task,
@@ -407,11 +410,18 @@ tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
                                     GAsyncResult         *res,
                                     GError              **error)
 {
+	GPtrArray *tasks;
+
 	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), NULL);
 	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 
-	return g_task_propagate_pointer (G_TASK (res), error);
+	tasks = g_task_propagate_pointer (G_TASK (res), error);
+
+	if (!tasks)
+		tasks = g_task_get_task_data (G_TASK (res));
+
+	return tasks;
 }
 
 TrackerSparqlBufferState
