@@ -2062,6 +2062,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
                           gboolean             create)
 {
 	TrackerMinerFilesPrivate *priv;
+	TrackerIndexingTree *indexing_tree;
 	TrackerResource *resource = NULL, *folder_resource = NULL, *graph_file = NULL;
 	const gchar *mime_type, *graph;
 	gchar *parent_urn;
@@ -2081,6 +2082,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 
 	priv->start_extractor = TRUE;
 	uri = g_file_get_uri (file);
+	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
 	mime_type = g_file_info_get_content_type (file_info);
 
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
@@ -2156,7 +2158,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	/* The URL of the DataObject (because IE = DO, this is correct) */
 	tracker_resource_set_string (resource, "nie:url", uri);
 
-	if (is_directory) {
+	if (is_directory || tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 		folder_resource =
 			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
 								       file,
