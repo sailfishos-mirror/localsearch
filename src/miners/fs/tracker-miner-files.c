@@ -2207,8 +2207,9 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
                                      GFileInfo           *info,
                                      TrackerSparqlBuffer *buffer)
 {
-	TrackerResource *resource;
+	TrackerResource *resource, *graph_file;
 	gchar *uri;
+	const gchar *mime_type, *graph;
 	GDateTime *modified;
 #ifdef GIO_SUPPORTS_CREATION_TIME
 	GDateTime *accessed, *created;
@@ -2233,8 +2234,17 @@ miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	if (!modified)
 		modified = g_date_time_new_from_unix_utc (0);
 
+	mime_type = g_file_info_get_content_type (info);
+	graph = tracker_extract_module_manager_get_graph (mime_type);
+
 	/* Update nfo:fileLastModified */
 	tracker_resource_set_datetime (resource, "nfo:fileLastModified", modified);
+	if (graph) {
+		graph_file = tracker_resource_new (uri);
+		tracker_resource_set_datetime (graph_file, "nfo:fileLastModified", modified);
+		tracker_sparql_buffer_push (buffer, file, graph, graph_file);
+		g_clear_object (&graph_file);
+	}
 	g_date_time_unref (modified);
 
 #ifdef GIO_SUPPORTS_CREATION_TIME
