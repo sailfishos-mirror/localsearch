@@ -2179,6 +2179,9 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		                             g_file_info_get_display_name (file_info));
 
 		tracker_resource_set_datetime (graph_file, "nfo:fileLastModified", modified);
+
+		tracker_resource_set_int64 (graph_file, "nfo:fileSize",
+		                            g_file_info_get_size (file_info));
 	}
 
 	if (delete_properties_sparql)
