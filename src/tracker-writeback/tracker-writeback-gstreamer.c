@@ -516,14 +516,14 @@ generate_gst_sample_from_image (const GValue *val)
 	const gchar *image_url = g_value_get_string (val);
 
 	filename = g_filename_from_uri (image_url, NULL, &err);
-	if (err != NULL) {
+	if (!filename && err != NULL) {
 		g_warning ("could not get filename for url (%s): %s", image_url, err->message);
 		g_clear_error (&err);
 		return img_sample;
 	}
 
 	mapped_file = g_mapped_file_new (filename, TRUE, &err);
-	if (err != NULL) {
+	if (!mapped_file && err != NULL) {
 		g_warning ("encountered error reading image file (%s): %s", filename, err->message);
 		g_error_free (err);
 	} else {
@@ -531,10 +531,12 @@ generate_gst_sample_from_image (const GValue *val)
 		byte_arr = g_bytes_unref_to_array (bytes);
 		img_sample = gst_tag_image_data_to_image_sample (byte_arr->data,
 		                                                 byte_arr->len, GST_TAG_IMAGE_TYPE_NONE);
+		g_byte_array_unref (byte_arr);
+		g_mapped_file_unref (mapped_file);
 	}
 
-	g_byte_array_unref (byte_arr);
-	g_mapped_file_unref (mapped_file);
+	g_free (filename);
+
 	return img_sample;
 }
 
