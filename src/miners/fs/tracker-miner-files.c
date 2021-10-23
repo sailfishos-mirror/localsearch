@@ -2301,8 +2301,6 @@ add_delete_sparql (GFile               *file,
 
 	uri = g_file_get_uri (file);
 
-	sparql = g_string_new (NULL);
-
 	if (delete_children) {
 		sparql = g_string_new ("DELETE { "
 				       "  GRAPH " DEFAULT_GRAPH " {"
@@ -2326,6 +2324,8 @@ add_delete_sparql (GFile               *file,
 		g_string_append_printf (sparql, "STRSTARTS (?u, \"%s/\")", uri);
 
 		g_string_append (sparql, ")}");
+	} else {
+		sparql = g_string_new (NULL);
 	}
 
 	if (delete_self) {
