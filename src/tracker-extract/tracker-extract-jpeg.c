@@ -227,13 +227,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			len = marker->data_length;
 
 #ifdef HAVE_LIBEXIF
-			if (strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
+			if (!ed && strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
 				ed = tracker_exif_new ((guchar *) marker->data, len, uri);
 			}
 #endif /* HAVE_LIBEXIF */
 
 #ifdef HAVE_EXEMPI
-			if (strncmp (XMP_NAMESPACE, str, XMP_NAMESPACE_LENGTH) == 0) {
+			if (!xd && strncmp (XMP_NAMESPACE, str, XMP_NAMESPACE_LENGTH) == 0) {
 				xd = tracker_xmp_new (str + XMP_NAMESPACE_LENGTH,
 				                      len - XMP_NAMESPACE_LENGTH,
 				                      uri);
