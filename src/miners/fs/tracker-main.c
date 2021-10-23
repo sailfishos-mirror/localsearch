@@ -736,7 +736,6 @@ check_eligible (void)
 	}
 
 	g_free (path);
-	g_object_unref (config);
 	g_object_unref (file);
 	g_object_unref (miner_files);
 	g_object_unref (info);
