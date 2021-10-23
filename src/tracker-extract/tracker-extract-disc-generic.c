@@ -234,7 +234,7 @@ ps_disc_lookup_executable_filename (const gchar *content,
 		ptr++;
 
 	strncpy (exe_buffer, ptr, buffer_len);
-	exe_buffer[buffer_len] = '\0';
+	exe_buffer[buffer_len - 1] = '\0';
 
 	/* Keep only the first line. */
 	for (i = 0; i < buffer_len; i++) {
