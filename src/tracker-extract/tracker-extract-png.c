@@ -139,14 +139,13 @@ raw_profile_new (const gchar *input,
 		size++;
 	} while (g_ascii_isdigit (*ptr));
 
-	length_str = g_strndup (length_ptr, size - 1);
-
 	if (*ptr != '\n') {
 		return NULL;
 	}
 
 	ptr++;
 
+	length_str = g_strndup (length_ptr, size - 1);
 	length = atoi (length_str);
 	g_free (length_str);
 
