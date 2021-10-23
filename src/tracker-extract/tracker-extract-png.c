@@ -229,7 +229,7 @@ read_metadata (TrackerResource      *metadata,
 				continue;
 			}
 
-			if (g_strcmp0 ("Raw profile type xmp", text_ptr[i].key) == 0) {
+			if (!xd && g_strcmp0 ("Raw profile type xmp", text_ptr[i].key) == 0) {
 				gchar *xmp_buffer;
 				guint xmp_buffer_length = 0;
 				guint input_len;
@@ -257,7 +257,7 @@ read_metadata (TrackerResource      *metadata,
 #endif /*HAVE_EXEMPI && PNG_iTXt_SUPPORTED */
 
 #if defined(HAVE_LIBEXIF) && defined(PNG_iTXt_SUPPORTED)
-			if (g_strcmp0 ("Raw profile type exif", text_ptr[i].key) == 0) {
+			if (!ed && g_strcmp0 ("Raw profile type exif", text_ptr[i].key) == 0) {
 				gchar *exif_buffer;
 				guint exif_buffer_length = 0;
 				guint input_len;
