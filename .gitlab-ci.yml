@@ -331,7 +331,7 @@ coverity:
     # tracker code to be included in the coverity reports for tracker-miners.
     - .gitlab-ci/checkout-tracker.sh
     - export INSTALL=`pwd`/install
-    - pushd subprojects/tracker; meson build --libdir lib --prefix $INSTALL; pushd build; ninja install; popd; popd
+    - pushd subprojects/tracker; meson build --libdir lib --prefix $INSTALL -Ddocs=false; pushd build; ninja install; popd; popd
     - curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=tracker-miners" --output /tmp/coverity_tool.tgz
     - tar zxf /tmp/coverity_tool.tgz
     - mkdir coverity-build
