@@ -1114,10 +1114,6 @@ item_add_or_update (TrackerMinerFS *fs,
 {
 	gchar *uri;
 
-	g_object_ref (file);
-
-	uri = g_file_get_uri (file);
-
 	if (!info) {
 		info = g_file_query_info (file,
 		                          fs->priv->file_attributes,
@@ -1127,6 +1123,8 @@ item_add_or_update (TrackerMinerFS *fs,
 
 	if (!info)
 		return TRUE;
+
+	uri = g_file_get_uri (file);
 
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
@@ -1142,7 +1140,6 @@ item_add_or_update (TrackerMinerFS *fs,
 	fs->priv->total_files_processed++;
 
 	g_free (uri);
-	g_object_unref (file);
 
 	return TRUE;
 }
