@@ -308,23 +308,16 @@ print_turtle (gchar               *urn,
               GHashTable          *prefixes,
               gboolean             full_namespaces)
 {
-	gchar *subject;
 	gchar *predicate;
 	gchar *object;
 	gboolean has_output = FALSE;
-
-	if (G_UNLIKELY (full_namespaces)) {
-		subject = g_strdup (urn);
-	} else {
-		/* truncate subject */
-		subject = tracker_sparql_get_shorthand (prefixes, urn);
-	}
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		const gchar *key = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 		const gchar *value = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 		const gchar *subject_value = tracker_sparql_cursor_get_string (cursor, 2, NULL);
 		const gchar *is_resource = tracker_sparql_cursor_get_string (cursor, 3, NULL);
+		gchar *subject_shorthand = NULL;
 
 		if (!key || !value || !is_resource) {
 			continue;
@@ -350,17 +343,22 @@ print_turtle (gchar               *urn,
 			g_free (escaped_value);
 		}
 
-		if  (subject_value)
-			subject = g_strdup (subject_value);
-
 		/* Print final statement */
-		g_print ("<%s> %s %s .\n", subject, predicate, object);
+		if (G_LIKELY (!full_namespaces)) {
+			/* truncate subject */
+			subject_shorthand = tracker_sparql_get_shorthand (prefixes, subject_value);
+		}
 
+		if (subject_shorthand && g_strcmp0 (subject_value, subject_shorthand) != 0) {
+			g_print ("%s %s %s .\n", subject_shorthand, predicate, object);
+		} else {
+			g_print ("<%s> %s %s .\n", subject_value, predicate, object);
+		}
+
+		g_free (subject_shorthand);
 		g_free (predicate);
 		g_free (object);
 	}
-
-	g_free (subject);
 
 	return has_output;
 }
