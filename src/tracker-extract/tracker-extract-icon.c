@@ -24,6 +24,7 @@
 
 #define ICON_HEADER_SIZE_16 3
 #define ICON_IMAGE_METADATA_SIZE_8 16
+#define MAX_IMAGES 16
 
 static gboolean
 find_max_width_and_height (const gchar *uri,
@@ -77,7 +78,7 @@ find_max_width_and_height (const gchar *uri,
 	g_debug ("Found '%u' images in the icon file...", n_images);
 
 	/* Loop images looking for the biggest one... */
-	for (i = 0; i < n_images; i++) {
+	for (i = 0; i < MIN (MAX_IMAGES, n_images); i++) {
 		guint8 image_metadata [ICON_IMAGE_METADATA_SIZE_8];
 
 		/* Image metadata chunk consists of:
