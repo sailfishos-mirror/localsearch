@@ -318,7 +318,7 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 				}
 			}
 
-			if (i == len) {
+			if (!fname && i == len) {
 				fname = g_strdup (data->savedstring);
 				g_debug ("Found only one name");
 			} else {
