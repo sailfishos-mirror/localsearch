@@ -883,6 +883,7 @@ remove_tag_for_urns (TrackerSparqlConnection *connection,
 		            _("Could not remove tag"),
 		            error->message);
 		g_error_free (error);
+		g_strfreev (uris);
 
 		return FALSE;
 	}

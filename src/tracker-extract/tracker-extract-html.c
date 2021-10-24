@@ -298,13 +298,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_strstrip (pd.plain_text->str);
 	g_strstrip (pd.title->str);
 
-	if (pd.title->str &&
-	    *pd.title->str != '\0') {
+	if (*pd.title->str != '\0') {
 		tracker_resource_set_string (metadata, "nie:title", pd.title->str);
 	}
 
-	if (pd.plain_text->str &&
-	    *pd.plain_text->str != '\0') {
+	if (*pd.plain_text->str != '\0') {
 		tracker_resource_set_string (metadata, "nie:plainTextContent", pd.plain_text->str);
 	}
 

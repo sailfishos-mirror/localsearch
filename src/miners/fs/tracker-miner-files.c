@@ -1388,11 +1388,11 @@ mount_pre_unmount_cb (GVolumeMonitor    *volume_monitor,
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
 	tracker_indexing_tree_remove (indexing_tree, mount_root);
-	g_object_unref (mount_root);
 
 	/* Set mount point status in tracker-store */
 	set_up_mount_point (mf, mount_root, FALSE, NULL);
 
+	g_object_unref (mount_root);
 	g_free (uri);
 }
 
@@ -2301,8 +2301,6 @@ add_delete_sparql (GFile               *file,
 
 	uri = g_file_get_uri (file);
 
-	sparql = g_string_new (NULL);
-
 	if (delete_children) {
 		sparql = g_string_new ("DELETE { "
 				       "  GRAPH " DEFAULT_GRAPH " {"
@@ -2326,6 +2324,8 @@ add_delete_sparql (GFile               *file,
 		g_string_append_printf (sparql, "STRSTARTS (?u, \"%s/\")", uri);
 
 		g_string_append (sparql, ")}");
+	} else {
+		sparql = g_string_new (NULL);
 	}
 
 	if (delete_self) {

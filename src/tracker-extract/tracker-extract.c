@@ -499,7 +499,6 @@ get_metadata (TrackerExtractTask *task)
 	    get_file_metadata (task, &info, &error)) {
 		g_task_return_pointer (G_TASK (task->res), info,
 		                       (GDestroyNotify) tracker_extract_info_unref);
-		extract_task_free (task);
 	} else {
 		if (error) {
 			g_task_return_error (G_TASK (task->res), error);
@@ -510,8 +509,6 @@ get_metadata (TrackerExtractTask *task)
 			                         "Could not get any metadata for uri:'%s' and mime:'%s'",
 			                         task->file, task->mimetype);
 		}
-
-		extract_task_free (task);
 	}
 
 #ifdef G_ENABLE_DEBUG
@@ -523,6 +520,8 @@ get_metadata (TrackerExtractTask *task)
 		g_timer_stop (stats_data->elapsed);
 	}
 #endif
+
+	extract_task_free (task);
 
 	return FALSE;
 }
