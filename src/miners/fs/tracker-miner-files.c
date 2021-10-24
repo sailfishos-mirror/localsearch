@@ -1388,11 +1388,11 @@ mount_pre_unmount_cb (GVolumeMonitor    *volume_monitor,
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
 	tracker_indexing_tree_remove (indexing_tree, mount_root);
-	g_object_unref (mount_root);
 
 	/* Set mount point status in tracker-store */
 	set_up_mount_point (mf, mount_root, FALSE, NULL);
 
+	g_object_unref (mount_root);
 	g_free (uri);
 }
 
