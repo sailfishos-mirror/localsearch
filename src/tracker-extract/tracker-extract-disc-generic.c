@@ -154,7 +154,8 @@ ps_disc_read_directory (const guchar *data,
                         PsDiscTime   *time /* out */)
 {
 	guint8 *buf;
-	gsize extent, offset;
+	gint extent;
+	gsize offset;
 
 	extent = PS_DISC_TIME_TO_EXTENT (time);
 	if (extent < 0)
