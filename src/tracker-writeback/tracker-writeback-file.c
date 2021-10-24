@@ -67,13 +67,13 @@ create_temporary_file (GFile      *file,
 
 		uri = g_file_get_uri (file);
 		g_warning ("Could not create temporary file, file is not native: '%s'", uri);
-		g_free (uri);
 
 		g_set_error (in_error,
 		             G_IO_ERROR,
 		             G_IO_ERROR_FAILED,
 		             "Could not create temporary file, file is not native: '%s'",
 		             uri);
+		g_free (uri);
 
 		return NULL;
 	}
