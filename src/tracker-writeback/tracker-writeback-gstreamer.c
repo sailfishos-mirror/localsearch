@@ -516,7 +516,8 @@ generate_gst_sample_from_image (const GValue *val)
 	const gchar *image_url = g_value_get_string (val);
 
 	filename = g_filename_from_uri (image_url, NULL, &err);
-	if (!filename && err != NULL) {
+	if (!filename) {
+		g_assert (err != NULL);
 		g_warning ("could not get filename for url (%s): %s", image_url, err->message);
 		g_clear_error (&err);
 		return img_sample;
