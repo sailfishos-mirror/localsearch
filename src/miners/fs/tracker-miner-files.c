@@ -2170,9 +2170,10 @@ miner_files_process_file (TrackerMinerFS      *fs,
 
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
-	if (graph) {
+	if (graph && g_file_info_get_size (file_info) > 0) {
 		/* This mimetype will be extracted by some module, pre-fill the
 		 * nfo:FileDataObject in that graph.
+		 * Empty files skipped as mime-type for those cannot be trusted.
 		 */
 		graph_file = tracker_resource_new (uri);
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
