@@ -438,7 +438,7 @@ tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
 	if (!tracker_task_pool_find (TRACKER_TASK_POOL (buffer), file))
 		return TRACKER_BUFFER_STATE_UNKNOWN;
 
-	if (g_hash_table_contains (priv->file_set, file))
+	if (priv->file_set != NULL && g_hash_table_contains (priv->file_set, file))
 		return TRACKER_BUFFER_STATE_QUEUED;
 
 	return TRACKER_BUFFER_STATE_FLUSHING;
