@@ -565,6 +565,17 @@ dispatch_task_cb (TrackerExtractTask *task)
 
 	priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
 
+	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
+	if (!task->graph) {
+		g_task_return_new_error (G_TASK (task->res),
+		                         tracker_extract_error_quark (),
+		                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
+		                         "Unknown target graph for uri:'%s' and mime:'%s'",
+		                         task->file, task->mimetype);
+		extract_task_free (task);
+		return FALSE;
+	}
+
 	if (!task->mimetype) {
 		g_task_return_new_error (G_TASK (task->res),
 		                         tracker_extract_error_quark (),
@@ -577,8 +588,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 		                                                          NULL,
 		                                                          &task->func);
 	}
-
-	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
 
 	async_queue = g_hash_table_lookup (priv->single_thread_extractors,
 	                                   task->module);
