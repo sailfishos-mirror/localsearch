@@ -1413,16 +1413,7 @@ tracker_extract_module_init (GError **error)
 		"fluiddec",
 		"vaapi",
 		"video4linux2",
-		"nvmpegvideodec",
-		"nvmpeg2videodec",
-		"nvmpeg4videodec",
-		"nvh264sldec",
-		"nvh264dec",
-		"nvjpegdec",
-		"nvh265sldec",
-		"nvh265dec",
-		"nvvp8dec",
-		"nvvp9dec",
+		"nvcodec",
 	};
 	GstRegistry *registry;
 	guint i;
@@ -1434,8 +1425,11 @@ tracker_extract_module_init (GError **error)
 		GstPlugin *plugin =
 			gst_registry_find_plugin (registry,
 						  blocklisted[i]);
-		if (plugin)
+		if (plugin) {
+			g_debug ("Removing GStreamer plugin '%s' from registry",
+			         blocklisted[i]);
 			gst_registry_remove_plugin (registry, plugin);
+		}
 	}
 
 	return TRUE;
