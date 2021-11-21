@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2021-06-10 12:02+0000\n"
-"PO-Revision-Date: 2021-09-25 19:26+0200\n"
+"POT-Creation-Date: 2021-11-05 18:00+0000\n"
+"PO-Revision-Date: 2021-11-21 23:13+0100\n"
 "Last-Translator: Fabio Tomat <f.t.public@gmail.com>\n"
 "Language-Team: Friulian <f.t.public@gmail.com>\n"
 "Language: fur\n"
@@ -392,45 +392,45 @@ msgstr "L'ogjet dâts «%s» al esist za"
 msgid "Data object “%s” currently does not exist"
 msgstr "L'ogjet dâts «%s» al moment nol esist"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:663
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Nol è pussibil meti in tabele la cartele (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:665
+#: src/miners/fs/tracker-main.c:667
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Nol è pussibil meti in tabele il file (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:668
+#: src/miners/fs/tracker-main.c:670
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Nol è pussibil meti in tabele il file (file platât)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:672
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Nol è pussibil meti in tabele il file (cartele no metude in tabele)"
 
-#: src/miners/fs/tracker-main.c:694
+#: src/miners/fs/tracker-main.c:696
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Nol è pussibil meti in tabele la cartele superiôr “%s” (in base ai filtris)"
 
-#: src/miners/fs/tracker-main.c:700
+#: src/miners/fs/tracker-main.c:702
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Nol è pussibil meti in tabele la cartele superiôr “%s” (file platât)"
 
-#: src/miners/fs/tracker-main.c:708
+#: src/miners/fs/tracker-main.c:710
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "Nol è pussibil meti in tabele la cartele superiôr “%s”"
 
-#: src/miners/fs/tracker-main.c:729
+#: src/miners/fs/tracker-main.c:731
 msgid "Directory is eligible to be indexed"
 msgstr "Al è pussibil meti in tabele la cartele"
 
-#: src/miners/fs/tracker-main.c:730
+#: src/miners/fs/tracker-main.c:732
 msgid "File is eligible to be indexed"
 msgstr "Al è pussibil meti in tabele il file"
 
@@ -461,9 +461,9 @@ msgstr "Titul di doprâ (al scugne jessi doprât cun --add-feed)"
 msgid "— start the feeds indexer"
 msgstr "— fâs partî indicizadôr dai feed"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:447
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:446
 #: src/tracker/tracker-search.c:1254 src/tracker/tracker-status.c:89
-#: src/tracker/tracker-status.c:202 src/tracker/tracker-tag.c:975
+#: src/tracker/tracker-status.c:202 src/tracker/tracker-tag.c:976
 msgid "Could not establish a connection to Tracker"
 msgstr "Impussibil stabilî une conession cun Tracker"
 
@@ -472,10 +472,10 @@ msgstr "Impussibil stabilî une conession cun Tracker"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:448 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:194
 #: src/tracker/tracker-search.c:1255 src/tracker/tracker-status.c:90
 #: src/tracker/tracker-status.c:203 src/tracker/tracker-status.c:249
-#: src/tracker/tracker-status.c:278 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-status.c:278 src/tracker/tracker-tag.c:977
 msgid "No error given"
 msgstr "Nissun erôr furnît"
 
@@ -490,11 +490,11 @@ msgstr "Impussibil zontâ il feed"
 msgid "— start the tracker index proxy"
 msgstr "— fâs partî il proxy de tabele dal tracker"
 
-#: src/tracker-extract/tracker-extract.c:687
+#: src/tracker-extract/tracker-extract.c:695
 msgid "Metadata extraction failed"
 msgstr "Estrazion dai meta-dâts falide"
 
-#: src/tracker-extract/tracker-extract.c:762
+#: src/tracker-extract/tracker-extract.c:770
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Nol è stât cjatât nissun modul par meta-dâts o di estrazion par gjestî chest "
@@ -692,7 +692,7 @@ msgstr "No in esecuzion o plugin disabilitât"
 #: src/tracker/tracker-daemon.c:447
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
-msgstr "Impussibil interompi l'estratôr, il gjestôr nol pues jessi creât, %s"
+msgstr "Impussibil interompi l'estratôr, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:454
 #, c-format
@@ -718,8 +718,7 @@ msgstr "Frache Ctrl+C par fermâ"
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
 msgstr ""
-"Impussibil tornâ a meti in vore l'estratôr, il gjestôr nol pues jessi creât, "
-"%s"
+"Impussibil tornâ a meti in vore l'estratôr, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:515
 #, c-format
@@ -738,7 +737,7 @@ msgstr "Fat"
 #: src/tracker/tracker-daemon.c:543
 #, c-format
 msgid "Could not list miners, manager could not be created, %s"
-msgstr "Impussibil elencâ i estratôrs, il gjestôr nol pues jessi creât, %s"
+msgstr "Impussibil elencâ i estratôrs, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:557
 #, c-format
@@ -758,7 +757,7 @@ msgstr[1] "Cjatât %d estratôrs dâts in esecuzion"
 #, c-format
 msgid "Could not get pause details, manager could not be created, %s"
 msgstr ""
-"Impussibil otignî i detais de interuzion, il gjestôr nol pues jessi creât, %s"
+"Impussibil otignî i detais de interuzion, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:622
 msgid "No miners are running"
@@ -800,7 +799,7 @@ msgstr "I stâts comuns a includin"
 #: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:277
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
-msgstr "Impussibil otignî il stât, il gjestôr nol pues jessi creât, %s"
+msgstr "Impussibil otignî il stât, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:787
 #, c-format
@@ -826,7 +825,7 @@ msgstr ""
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Nol è pussibil doprâ adun i argoments --kill e --terminate"
 
-#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:171
+#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:172
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
@@ -845,7 +844,7 @@ msgstr "Daûr a inviâ i estratôrs dâts…"
 #: src/tracker/tracker-daemon.c:979
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
-msgstr "Impussibil inviâ i estratôrs, il gjestôr nol pues jessi creât, %s"
+msgstr "Impussibil inviâ i estratôrs, impussibil creâ il gjestôr, %s"
 
 #: src/tracker/tracker-daemon.c:1004
 msgid "perhaps a disabled plugin?"
@@ -858,9 +857,9 @@ msgstr ""
 "estratôrs"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:389 src/tracker/tracker-info.c:646
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
 #: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1430
-#: src/tracker/tracker-status.c:527 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-status.c:527 src/tracker/tracker-tag.c:1085
 msgid "Unrecognized options"
 msgstr "Opzions no ricognossudis"
 
@@ -908,15 +907,15 @@ msgstr "--add e --remove si escludin a vicende"
 msgid "--recursive requires --add"
 msgstr "--recursive al à bisugne di --add"
 
-#: src/tracker/tracker-index.c:351 src/tracker/tracker-status.c:328
+#: src/tracker/tracker-index.c:356 src/tracker/tracker-status.c:328
 msgid "Path"
 msgstr "Percors"
 
-#: src/tracker/tracker-index.c:352
+#: src/tracker/tracker-index.c:357
 msgid "Recursive"
 msgstr "Ricorsîf"
 
-#: src/tracker/tracker-index.c:402
+#: src/tracker/tracker-index.c:407
 msgid "Please specify one or more locations to index."
 msgstr "Par plasê specifiche un o plui posizion par meti in tabele."
 
@@ -963,36 +962,36 @@ msgstr "Nissun prefìs di namespace cjatât"
 msgid "Results"
 msgstr "Risultâts"
 
-#: src/tracker/tracker-info.c:416
+#: src/tracker/tracker-info.c:414
 msgid "Error message"
 msgstr "Messaç di erôr"
 
-#: src/tracker/tracker-info.c:472
+#: src/tracker/tracker-info.c:471
 msgid "Querying information for entity"
 msgstr "Daûr a consultâ la informazion pe entitât"
 
-#: src/tracker/tracker-info.c:496
+#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "Impussibil otignî il URN pal URI"
 
-#: src/tracker/tracker-info.c:506 src/tracker/tracker-info.c:540
+#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
 msgid "Unable to retrieve data for URI"
 msgstr "Impussibil otignî dâts pal URI"
 
-#: src/tracker/tracker-info.c:563
+#: src/tracker/tracker-info.c:562
 msgid "No metadata available for that URI"
 msgstr "Nissun meta-dât disponibil par chel URI"
 
-#: src/tracker/tracker-info.c:568 src/tracker/tracker-info.c:602
+#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
 msgid "Could not get eligible status: "
 msgstr "Impussibil otignî stâts idonis: "
 
-#: src/tracker/tracker-process.c:190
+#: src/tracker/tracker-process.c:191
 #, c-format
 msgid "Could not kill process %d — “%s”"
 msgstr "Impussibil copâ procès %d — «%s»"
 
-#: src/tracker/tracker-process.c:196
+#: src/tracker/tracker-process.c:197
 #, c-format
 msgid "Killed process %d — “%s”"
 msgstr "Copât procès %d — «%s»"
@@ -1222,7 +1221,7 @@ msgstr "Statistichis:"
 #.
 #: src/tracker/tracker-status.c:154 src/tracker/tracker-tag.c:321
 #: src/tracker/tracker-tag.c:453 src/tracker/tracker-tag.c:575
-#: src/tracker/tracker-tag.c:953
+#: src/tracker/tracker-tag.c:954
 msgid "None"
 msgstr "Nissun"
 
@@ -1362,11 +1361,11 @@ msgstr "Impussibil otignî i files che a corispuindin aes etichetis"
 msgid "No files were found matching ALL of those tags"
 msgstr "Nissun file al è stât cjatât che al corispuindi a DUTIS chês etichetis"
 
-#: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:927
+#: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:928
 msgid "Could not get all tags"
 msgstr "Impussibil otignî dutis lis etichetis"
 
-#: src/tracker/tracker-tag.c:521 src/tracker/tracker-tag.c:936
+#: src/tracker/tracker-tag.c:521 src/tracker/tracker-tag.c:937
 msgid "No tags were found"
 msgstr "No je stade cjatade nissune etichete"
 
@@ -1418,37 +1417,37 @@ msgstr "Nissun dai files al veve stabilide cheste etichete"
 msgid "Could not remove tag"
 msgstr "Impussibil gjavâ la etichete"
 
-#: src/tracker/tracker-tag.c:890
+#: src/tracker/tracker-tag.c:891
 msgid "Tag was removed successfully"
 msgstr "Etichete gjavade cun sucès"
 
-#: src/tracker/tracker-tag.c:894
+#: src/tracker/tracker-tag.c:895
 msgid "Untagged"
 msgstr "Cence etichete"
 
-#: src/tracker/tracker-tag.c:895
+#: src/tracker/tracker-tag.c:896
 msgid "File not indexed or already untagged"
 msgstr "File no metût te tabele o etichete za gjavade"
 
-#: src/tracker/tracker-tag.c:1093
+#: src/tracker/tracker-tag.c:1094
 msgid "The --list option is required for --show-files"
 msgstr "La opzion --list e covente par --show-files"
 
-#: src/tracker/tracker-tag.c:1095
+#: src/tracker/tracker-tag.c:1096
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
-"La opzion --and-operator e pues jessi doprade nome cun --list e nons di "
+"Al è pussibil doprâ la opzion --and-operator nome cun --list e nons di "
 "etichetis"
 
-#: src/tracker/tracker-tag.c:1097
+#: src/tracker/tracker-tag.c:1098
 msgid "Add and delete actions can not be used together"
 msgstr "Lis azions \"zonte\" e \"elimine\" no puedin jessi dopradis adun"
 
-#: src/tracker/tracker-tag.c:1099
+#: src/tracker/tracker-tag.c:1100
 msgid "The --description option can only be used with --add"
-msgstr "La opzion --description e pues jessi doprade nome cun --add"
+msgstr "Al è pussibil doprâ la opzion --description nome cun --add"
 
 #: src/tracker-writeback/tracker-main.c:52
 msgid ""
