@@ -179,6 +179,8 @@ update_batch_data_free (UpdateBatchData *batch_data)
 	                     batch_data->buffer);
 	g_ptr_array_unref (batch_data->tasks);
 
+	g_clear_object (&batch_data->async_task);
+
 	g_slice_free (UpdateBatchData, batch_data);
 }
 
