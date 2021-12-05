@@ -702,6 +702,7 @@ fs_finalize (GObject *object)
 	g_timer_destroy (priv->timer);
 	g_timer_destroy (priv->extraction_timer);
 
+	g_clear_object (&priv->urn_query);
 	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
 
 	if (priv->item_queues_handler_id) {
