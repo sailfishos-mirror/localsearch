@@ -2201,6 +2201,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 	g_object_unref (resource);
 	g_clear_object (&folder_resource);
 	g_clear_object (&graph_file);
+	g_free (delete_properties_sparql);
 	g_free (uri);
 }
 
