@@ -590,6 +590,7 @@ monitor_request_execute (MonitorRequest *request)
 		}
 
 		request->files = g_list_remove (request->files, file);
+		g_object_unref (file);
 	}
 
 	if (g_atomic_int_dec_and_test (&priv->thread.n_requests))
@@ -1152,6 +1153,7 @@ tracker_monitor_set_enabled (TrackerMonitor *monitor,
 	request = g_new0 (MonitorRequest, 1);
 	request->monitor = monitor;
 	request->files = g_hash_table_get_keys (priv->monitored_dirs);
+	g_list_foreach (request->files, (GFunc) g_object_ref, NULL);
 	request->type = enabled ? MONITOR_REQUEST_ADD : MONITOR_REQUEST_REMOVE;
 
 	monitor_request_queue (monitor, request);
