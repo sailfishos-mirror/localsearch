@@ -243,6 +243,10 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 				tracker_sparql_buffer_push (buffer, file, special_graphs[i], folder_resource);
 			}
 		}
+
+		/* Always use inode/directory here, we don't really care if it's a symlink */
+		tracker_resource_set_string (resource, "tracker:extractorHash",
+		                             tracker_extract_module_manager_get_hash ("inode/directory"));
 	}
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
