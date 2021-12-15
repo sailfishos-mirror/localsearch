@@ -246,8 +246,6 @@ static void           file_notifier_finished              (TrackerFileNotifier *
 
 static void           item_queue_handlers_set_up          (TrackerMinerFS       *fs);
 
-static void           task_pool_cancel_foreach                (gpointer        data,
-                                                               gpointer        user_data);
 static void           task_pool_limit_reached_notify_cb       (GObject        *object,
                                                                GParamSpec     *pspec,
                                                                gpointer        user_data);
@@ -442,11 +440,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	priv->items = tracker_priority_queue_new ();
 	priv->items_by_file = g_hash_table_new (g_file_hash,
 	                                        (GEqualFunc) g_file_equal);
-
-	/* Create processing pools */
-	priv->task_pool = tracker_task_pool_new (DEFAULT_WAIT_POOL_LIMIT);
-	g_signal_connect (priv->task_pool, "notify::limit-reached",
-	                  G_CALLBACK (task_pool_limit_reached_notify_cb), object);
 
 	priv->roots_to_notify = g_hash_table_new_full (g_file_hash,
 	                                               (GEqualFunc) g_file_equal,
@@ -689,12 +682,6 @@ fs_finalize (GObject *object)
 		tracker_file_notifier_stop (priv->file_notifier);
 	}
 
-	/* Cancel every pending task */
-	tracker_task_pool_foreach (priv->task_pool,
-	                           task_pool_cancel_foreach,
-	                           NULL);
-	g_object_unref (priv->task_pool);
-
 	if (priv->sparql_buffer) {
 		g_object_unref (priv->sparql_buffer);
 	}
@@ -767,8 +754,6 @@ fs_set_property (GObject      *object,
 		fs->priv->root = g_value_dup_object (value);
 		break;
 	case PROP_WAIT_POOL_LIMIT:
-		tracker_task_pool_set_limit (fs->priv->task_pool,
-		                             g_value_get_uint (value));
 		break;
 	case PROP_READY_POOL_LIMIT:
 		fs->priv->sparql_buffer_limit = g_value_get_uint (value);
@@ -808,7 +793,6 @@ fs_get_property (GObject    *object,
 		g_value_set_object (value, fs->priv->root);
 		break;
 	case PROP_WAIT_POOL_LIMIT:
-		g_value_set_uint (value, tracker_task_pool_get_limit (fs->priv->task_pool));
 		break;
 	case PROP_READY_POOL_LIMIT:
 		g_value_set_uint (value, fs->priv->sparql_buffer_limit);
@@ -1262,10 +1246,8 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 	*source_file = NULL;
 
 	if (tracker_file_notifier_is_active (fs->priv->file_notifier) ||
-	    tracker_task_pool_limit_reached (fs->priv->task_pool) ||
 	    tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
-		if (!fs->priv->extraction_timer_stopped &&
-		    tracker_task_pool_get_size (fs->priv->task_pool) == 0) {
+		if (!fs->priv->extraction_timer_stopped) {
 			fs->priv->extraction_timer_stopped = TRUE;
 			g_timer_stop (fs->priv->extraction_timer);
 		}
@@ -1458,8 +1440,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	}
 
 	if (file == NULL) {
-		if (!tracker_file_notifier_is_active (fs->priv->file_notifier) &&
-		    tracker_task_pool_get_size (fs->priv->task_pool) == 0) {
+		if (!tracker_file_notifier_is_active (fs->priv->file_notifier)) {
 			if (tracker_task_pool_get_size (TRACKER_TASK_POOL (fs->priv->sparql_buffer)) == 0) {
 				/* Print stats and signal finished */
 				process_stop (fs);
@@ -1581,13 +1562,6 @@ item_queue_handlers_set_up (TrackerMinerFS *fs)
 	}
 
 	/* Already processing max number of sparql updates */
-	if (tracker_task_pool_limit_reached (fs->priv->task_pool)) {
-		trace_eq ("   cancelled: pool limit reached (tasks: %u (max %u)",
-		          tracker_task_pool_get_size (fs->priv->task_pool),
-		          tracker_task_pool_get_limit (fs->priv->task_pool));
-		return;
-	}
-
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
 		trace_eq ("   cancelled: pool limit reached (sparql buffer: %u)",
 		          tracker_task_pool_get_limit (TRACKER_TASK_POOL (fs->priv->sparql_buffer)));
@@ -1742,13 +1716,6 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 	TrackerMinerFS *fs = user_data;
 	QueueEvent *event;
 
-	if (is_dir) {
-		/* Cancel all pending tasks on files inside the path given by file */
-		tracker_task_pool_foreach (fs->priv->task_pool,
-					   task_pool_cancel_foreach,
-					   file);
-	}
-
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_DELETED, file, NULL);
 	event->is_dir = !!is_dir;
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, file));
@@ -1871,29 +1838,6 @@ file_notifier_finished (TrackerFileNotifier *notifier,
 }
 
 static void
-task_pool_cancel_foreach (gpointer data,
-                          gpointer user_data)
-{
-	TrackerTask *task = data;
-	GFile *file = user_data;
-	GFile *task_file;
-	UpdateProcessingTaskContext *ctxt;
-	GTask *gtask;
-
-	gtask = tracker_task_get_data (task);
-	ctxt = g_task_get_task_data (gtask);
-	task_file = tracker_task_get_file (task);
-
-	if (ctxt &&
-	    ctxt->cancellable &&
-	    (!file ||
-	     (g_file_equal (task_file, file) ||
-	      g_file_has_prefix (task_file, file)))) {
-		g_cancellable_cancel (ctxt->cancellable);
-	}
-}
-
-static void
 indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
                                  GFile               *directory,
                                  gpointer             user_data)
@@ -1901,11 +1845,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv = fs->priv;
 	GTimer *timer = g_timer_new ();
-
-	/* Cancel all pending tasks on files inside the path given by file */
-	tracker_task_pool_foreach (priv->task_pool,
-	                           task_pool_cancel_foreach,
-	                           directory);
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Cancelled processing pool tasks at %f\n", g_timer_elapsed (timer, NULL)));
 
