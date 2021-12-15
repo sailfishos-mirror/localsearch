@@ -1068,15 +1068,16 @@ item_add_or_update (TrackerMinerFS *fs,
 {
 	gchar *uri;
 
-	if (!info) {
+	if (info) {
+		g_object_ref (info);
+	} else {
 		info = g_file_query_info (file,
 		                          fs->priv->file_attributes,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
+		if (!info)
+			return TRUE;
 	}
-
-	if (!info)
-		return TRUE;
 
 	uri = g_file_get_uri (file);
 
@@ -1094,6 +1095,7 @@ item_add_or_update (TrackerMinerFS *fs,
 	fs->priv->total_files_processed++;
 
 	g_free (uri);
+	g_object_unref (info);
 
 	return TRUE;
 }
