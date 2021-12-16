@@ -976,6 +976,19 @@ process_stop (TrackerMinerFS *fs)
 }
 
 static void
+check_notifier_high_water (TrackerMinerFS *fs)
+{
+	gboolean high_water;
+
+	/* If there is more than worth 2 batches left processing, we can tell
+	 * the notifier to stop a bit.
+	 */
+	high_water = (tracker_priority_queue_get_length (fs->priv->items) >
+	              2 * fs->priv->sparql_buffer_limit);
+	tracker_file_notifier_set_high_water (fs->priv->file_notifier, high_water);
+}
+
+static void
 sparql_buffer_flush_cb (GObject      *object,
                         GAsyncResult *result,
                         gpointer      user_data)
@@ -1023,6 +1036,7 @@ sparql_buffer_flush_cb (GObject      *object,
 		notify_roots_finished (fs);
 	}
 
+	check_notifier_high_water (fs);
 	item_queue_handlers_set_up (fs);
 
 	g_ptr_array_unref (tasks);
@@ -1586,6 +1600,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		link = tracker_priority_queue_add (fs->priv->items, event, priority);
 		g_hash_table_replace (fs->priv->items_by_file, event->file, link);
 		item_queue_handlers_set_up (fs);
+		check_notifier_high_water (fs);
 	}
 }
 
