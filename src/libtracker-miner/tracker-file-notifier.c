@@ -109,6 +109,8 @@ typedef struct {
 	RootData *current_index_root;
 
 	guint stopped : 1;
+	guint high_water : 1;
+	guint active : 1;
 } TrackerFileNotifierPrivate;
 
 static gboolean notifier_query_root_contents (TrackerFileNotifier *notifier);
@@ -551,6 +553,11 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
+	if (priv->high_water) {
+		priv->active = FALSE;
+		return TRUE;
+	}
+
 	if (!priv->current_index_root)
 		return FALSE;
 
@@ -565,6 +572,8 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 
 		if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
 			tracker_monitor_add (priv->monitor, directory);
+
+		priv->active = TRUE;
 
 		/* Begin crawling the directory non-recursively. */
 		tracker_crawler_get (priv->crawler,
@@ -848,6 +857,8 @@ notifier_query_root_contents (TrackerFileNotifier *notifier)
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	tracker_sparql_statement_bind_string (priv->content_query, "root", uri);
 	g_free (uri);
+
+	priv->active = TRUE;
 
 	tracker_sparql_statement_execute_async (priv->content_query,
 	                                        priv->cancellable,
@@ -1726,6 +1737,28 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	                     "connection", connection,
 	                     "file-attributes", file_attributes,
 	                     NULL);
+}
+
+void
+tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
+                                      gboolean             high_water)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	g_return_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier));
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+	if (priv->high_water == high_water)
+		return;
+
+	priv->high_water = high_water;
+
+	if (!high_water && !priv->active &&
+	    tracker_file_notifier_is_active (notifier)) {
+		/* Maybe kick everything back into action */
+		if (!crawl_directory_in_current_root (notifier))
+			finish_current_directory (notifier, FALSE);
+	}
 }
 
 gboolean
