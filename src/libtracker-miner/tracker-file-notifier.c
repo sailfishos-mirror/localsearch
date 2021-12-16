@@ -441,14 +441,6 @@ file_notifier_add_node_foreach (GNode    *node,
 		                               file_type,
 		                               _time);
 
-		if (file_data->state == FILE_STATE_NONE) {
-			/* If at this point the file has no assigned event,
-			 * it didn't get changed, and can be ignored.
-			 */
-			g_queue_delete_link (&priv->queue, file_data->node);
-			g_hash_table_remove (priv->cache, file);
-		}
-
 		if (file_type == G_FILE_TYPE_DIRECTORY &&
 		    (priv->current_index_root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
 		    !G_NODE_IS_ROOT (node)) {
@@ -457,6 +449,15 @@ file_notifier_add_node_foreach (GNode    *node,
 			g_queue_push_tail (priv->current_index_root->pending_dirs,
 			                   g_object_ref (file));
 		}
+
+		g_object_ref (file);
+		g_queue_delete_link (&priv->queue, file_data->node);
+
+		if (file_data->state != FILE_STATE_NONE)
+			file_notifier_notify (file, file_data, notifier);
+
+		g_hash_table_remove (priv->cache, file);
+		g_object_unref (file);
 	}
 
 	return FALSE;
