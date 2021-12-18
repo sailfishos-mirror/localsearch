@@ -2052,25 +2052,9 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 	return fs->priv->data_provider;
 }
 
-gchar *
+const gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
-                                 GFile          *file,
-                                 gboolean        new_resource,
-                                 gboolean        check_batch,
-                                 gboolean       *is_iri)
+                                 GFile          *file)
 {
-	const gchar *urn = NULL;
-
-	if (is_iri)
-		*is_iri = FALSE;
-
-	urn = tracker_miner_fs_get_folder_urn (miner, file);
-
-	if (urn) {
-		if (is_iri)
-			*is_iri = TRUE;
-		return g_strdup (urn);
-	}
-
-	return NULL;
+	return tracker_miner_fs_get_folder_urn (miner, file);
 }
