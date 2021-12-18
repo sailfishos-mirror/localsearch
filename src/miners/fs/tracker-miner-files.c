@@ -2283,7 +2283,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                       "config", config,
 	                       "domain", domain,
 	                       "processing-pool-wait-limit", 1,
-	                       "processing-pool-ready-limit", 100,
+	                       "processing-pool-ready-limit", 800,
 	                       "file-attributes", FILE_ATTRIBUTES,
 	                       NULL);
 }
