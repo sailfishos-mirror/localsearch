@@ -109,8 +109,9 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
 
     def __get_file_urn(self, filepath):
         result = self.tracker.query("""
-          SELECT nie:interpretedAs(?u) WHERE {
+          SELECT DISTINCT ?ia WHERE {
               ?u a nfo:FileDataObject ;
+                 nie:interpretedAs ?ia ;
                  nie:url \"%s\" .
           }
           """ % (self.uri(filepath)))
@@ -365,7 +366,6 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         directory_uri = self.uri("test-monitored")
         directory = self.path("test-monitored")
         document = self.path("test-monitored/unrelated.txt")
-        resource_id = self.tracker.get_content_resource_id(directory_uri)
         urn = self.__get_file_urn(directory)
 
         with self.await_document_inserted(document) as resource:
