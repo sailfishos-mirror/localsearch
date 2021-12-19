@@ -856,6 +856,17 @@ set_up_mount_point (TrackerMinerFiles *miner,
 				"        OPTIONAL { ?u tracker:unmountDate ?date } "
 				"}",
 				uri);
+	/* Update plain tracker:available state on content specific graphs */
+	g_string_append_printf (queries,
+	                        "DELETE { GRAPH ?g { ?uri tracker:available %s } } "
+	                        "INSERT { GRAPH ?g { ?uri tracker:available %s } } "
+	                        "WHERE { GRAPH ?g { ?uri a tracker:IndexedFolder ; "
+	                        "                        nie:isStoredAs <%s> . } "
+	                        "        FILTER (?g != tracker:FileSystem) "
+	                        "}",
+	                        mounted ? "false" : "true",
+	                        mounted ? "true" : "false",
+	                        uri);
 	g_free (uri);
 
 	if (accumulator) {
@@ -2164,6 +2175,20 @@ miner_files_process_file (TrackerMinerFS      *fs,
 								       file,
 								       mime_type,
 								       create);
+		/* Add indexing roots also to content specific graphs to provide the availability information */
+		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+			const gchar *special_graphs[] = {
+				"tracker:Audio",
+				"tracker:Documents",
+				"tracker:Pictures",
+				"tracker:Software",
+				"tracker:Video"
+			};
+
+			for (gint i = 0; i < G_N_ELEMENTS (special_graphs); i++) {
+				tracker_sparql_buffer_push (buffer, file, special_graphs[i], folder_resource);
+			}
+		}
 	}
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
@@ -2185,6 +2210,7 @@ miner_files_process_file (TrackerMinerFS      *fs,
 
 		tracker_resource_set_int64 (graph_file, "nfo:fileSize",
 		                            g_file_info_get_size (file_info));
+		miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, graph_file, NULL);
 	}
 
 	if (delete_properties_sparql)
