@@ -39,6 +39,8 @@ test_miner_process_file (TrackerMinerFS      *miner,
 	TrackerIndexingTree *tree;
 	gchar *uri, *parent_uri;
 	GFile *parent;
+	GFile *root;
+	gchar *root_uri;
 
 	((TestMiner *) miner)->n_process_file++;
 
@@ -76,23 +78,20 @@ test_miner_process_file (TrackerMinerFS      *miner,
 	if (tracker_indexing_tree_file_is_root (tree, file)) {
 		tracker_resource_set_uri (resource, "nie:rootElementOf", uri);
 		tracker_resource_add_uri (resource, "rdf:type", "nie:DataSource");
-	} else {
-		GFile *root;
-		gchar *root_uri;
-
-		root = tracker_indexing_tree_get_root (tree, file, NULL);
-		if (root) {
-			root_uri = g_file_get_uri (root);
-			tracker_resource_set_uri (resource, "nie:dataSource", root_uri);
-			g_free (root_uri);
-		}
-
-		parent = g_file_get_parent (file);
-		parent_uri = g_file_get_uri (file);
-		tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_uri);
-		g_free (parent_uri);
-		g_object_unref (parent);
 	}
+
+	root = tracker_indexing_tree_get_root (tree, file, NULL);
+	if (root) {
+		root_uri = g_file_get_uri (root);
+		tracker_resource_set_uri (resource, "nie:dataSource", root_uri);
+		g_free (root_uri);
+	}
+
+	parent = g_file_get_parent (file);
+	parent_uri = g_file_get_uri (parent);
+	tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_uri);
+	g_free (parent_uri);
+	g_object_unref (parent);
 
 	tracker_sparql_buffer_push (buffer, file, "tracker:FileSystem", resource);
 	g_object_unref (resource);
@@ -272,6 +271,15 @@ fixture_setup (TrackerMinerFSTestFixture *fixture,
 	fixture->connection = tracker_sparql_connection_new (0, NULL, ontology, NULL, &error);
 	g_assert_no_error (error);
 	g_object_unref (ontology);
+
+	tracker_sparql_connection_update (fixture->connection,
+					  "CREATE SILENT GRAPH tracker:FileSystem; "
+					  "CREATE SILENT GRAPH tracker:Software; "
+					  "CREATE SILENT GRAPH tracker:Documents; "
+					  "CREATE SILENT GRAPH tracker:Pictures; "
+					  "CREATE SILENT GRAPH tracker:Audio; "
+					  "CREATE SILENT GRAPH tracker:Video ",
+					  NULL, NULL);
 
 	fixture->miner = test_miner_new (fixture->connection, &error);
 	g_assert_no_error (error);
