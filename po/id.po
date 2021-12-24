@@ -8,15 +8,15 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2021-06-10 12:02+0000\n"
-"PO-Revision-Date: 2021-07-25 21:14+0700\n"
+"POT-Creation-Date: 2021-11-05 18:00+0000\n"
+"PO-Revision-Date: 2021-12-24 14:16+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: GNOME Indonesian Translation Team <gnome@i15n.org>\n"
 "Language: id\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural= n!=1;\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 3.0\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -307,28 +307,24 @@ msgstr " %2.2dd"
 msgid " %d day"
 msgid_plural " %d days"
 msgstr[0] " %d hari"
-msgstr[1] " %d hari"
 
 #: src/libtracker-miners-common/tracker-utils.c:136
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
 msgstr[0] " %2.2d jam"
-msgstr[1] " %2.2d jam"
 
 #: src/libtracker-miners-common/tracker-utils.c:140
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
 msgstr[0] " %2.2d menit"
-msgstr[1] " %2.2d menit"
 
 #: src/libtracker-miners-common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d detik"
-msgstr[1] " %2.2d detik"
 
 #: src/libtracker-miner/tracker-data-provider.c:108
 #: src/libtracker-miner/tracker-data-provider.c:168
@@ -390,38 +386,38 @@ msgstr "Objek data \"%s\" kini telah ada"
 msgid "Data object “%s” currently does not exist"
 msgstr "Objek data \"%s\" kini belum ada"
 
-#: src/miners/fs/tracker-main.c:661
+#: src/miners/fs/tracker-main.c:663
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Direktori TIDAK memenuhi syarat untuk diindeks (berdasarkan penyaring)"
 
-#: src/miners/fs/tracker-main.c:665
+#: src/miners/fs/tracker-main.c:667
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Berkas TIDAK memenuhi syarat untuk diindeks (berdasarkan penyaring)"
 
-#: src/miners/fs/tracker-main.c:668
+#: src/miners/fs/tracker-main.c:670
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Berkas TIDAK memenuhi syarat untuk diindeks (berkas tersembunyi)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:672
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr ""
 "Berkas TIDAK memenuhi syarat untuk diindeks (bukan folder yang diindeks)"
 
-#: src/miners/fs/tracker-main.c:694
+#: src/miners/fs/tracker-main.c:696
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Direktori induk \"%s\" TIDAK memenuhi syarat untuk diindeks (berdasarkan "
 "penyaring)"
 
-#: src/miners/fs/tracker-main.c:700
+#: src/miners/fs/tracker-main.c:702
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Direktori induk \"%s\" TIDAK memenuhi syarat untuk diindeks (berkas "
 "tersembunyi)"
 
-#: src/miners/fs/tracker-main.c:708
+#: src/miners/fs/tracker-main.c:710
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -430,11 +426,11 @@ msgstr ""
 "Direktori induk \"%s\" TIDAK memenuhi syarat untuk diindeks (berdasarkan "
 "pentaring konten)"
 
-#: src/miners/fs/tracker-main.c:729
+#: src/miners/fs/tracker-main.c:731
 msgid "Directory is eligible to be indexed"
 msgstr "Direktori memenuhi syarat untuk diindeks"
 
-#: src/miners/fs/tracker-main.c:730
+#: src/miners/fs/tracker-main.c:732
 msgid "File is eligible to be indexed"
 msgstr "Berkas memenuhi syarat untuk diindeks"
 
@@ -465,9 +461,9 @@ msgstr "Judul yang dipakai (mesti dipakai dengan —add-feed)"
 msgid "— start the feeds indexer"
 msgstr "— jalankan pengindeks asupan"
 
-#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:447
+#: src/miners/rss/tracker-main.c:178 src/tracker/tracker-info.c:446
 #: src/tracker/tracker-search.c:1254 src/tracker/tracker-status.c:89
-#: src/tracker/tracker-status.c:202 src/tracker/tracker-tag.c:975
+#: src/tracker/tracker-status.c:202 src/tracker/tracker-tag.c:976
 msgid "Could not establish a connection to Tracker"
 msgstr "Tak bisa membentuk koneksi ke Pelacak"
 
@@ -476,10 +472,10 @@ msgstr "Tak bisa membentuk koneksi ke Pelacak"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:448 src/tracker/tracker-process.c:193
+#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:194
 #: src/tracker/tracker-search.c:1255 src/tracker/tracker-status.c:90
 #: src/tracker/tracker-status.c:203 src/tracker/tracker-status.c:249
-#: src/tracker/tracker-status.c:278 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-status.c:278 src/tracker/tracker-tag.c:977
 msgid "No error given"
 msgstr "Tak ada galat yang diberikan"
 
@@ -494,11 +490,11 @@ msgstr "Tak bisa menambah asupan"
 msgid "— start the tracker index proxy"
 msgstr "— jalankan proksi indeks pelacak"
 
-#: src/tracker-extract/tracker-extract.c:687
+#: src/tracker-extract/tracker-extract.c:695
 msgid "Metadata extraction failed"
 msgstr "Ekstraksi metadata gagal"
 
-#: src/tracker-extract/tracker-extract.c:762
+#: src/tracker-extract/tracker-extract.c:770
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Tak ditemukan modul pengekstrak atau metadata untuk menangani berkas ini"
@@ -745,14 +741,12 @@ msgstr "Tak bisa mendaftar penambang, manajer tak dapat dibuat, %s"
 msgid "Found %d miner installed"
 msgid_plural "Found %d miners installed"
 msgstr[0] "Ditemukan %d penambang terpasang"
-msgstr[1] "Ditemukan %d penambang terpasang"
 
 #: src/tracker/tracker-daemon.c:580
 #, c-format
 msgid "Found %d miner running"
 msgid_plural "Found %d miners running"
 msgstr[0] "Ditemukan %d penambang berjalan"
-msgstr[1] "Ditemukan %d penambang berjalan"
 
 #: src/tracker/tracker-daemon.c:612
 #, c-format
@@ -825,12 +819,11 @@ msgstr ""
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Anda tak bisa memakai argumen —kill dan —terminate bersamaan"
 
-#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:171
+#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:172
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
 msgstr[0] "Ditemukan %d PID…"
-msgstr[1] "Ditemukan %d PID…"
 
 #: src/tracker/tracker-daemon.c:948
 #, c-format
@@ -855,9 +848,9 @@ msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Bila tak ada argumen yang diberikan, status penambang data ditampilkan"
 
 #: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:389 src/tracker/tracker-info.c:646
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
 #: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1430
-#: src/tracker/tracker-status.c:527 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-status.c:527 src/tracker/tracker-tag.c:1085
 msgid "Unrecognized options"
 msgstr "Opsi tak dikenal"
 
@@ -905,15 +898,15 @@ msgstr "--add dan --remove saling eksklusif"
 msgid "--recursive requires --add"
 msgstr "--recursive membutuhkan --add"
 
-#: src/tracker/tracker-index.c:351 src/tracker/tracker-status.c:328
+#: src/tracker/tracker-index.c:356 src/tracker/tracker-status.c:328
 msgid "Path"
 msgstr "Path"
 
-#: src/tracker/tracker-index.c:352
+#: src/tracker/tracker-index.c:357
 msgid "Recursive"
 msgstr "Rekursif"
 
-#: src/tracker/tracker-index.c:402
+#: src/tracker/tracker-index.c:407
 msgid "Please specify one or more locations to index."
 msgstr "Harap tentukan satu atau beberapa lokasi untuk diindeks."
 
@@ -961,36 +954,36 @@ msgstr "Tak ada prefiks namespace yang dikembalikan"
 msgid "Results"
 msgstr "Hasil"
 
-#: src/tracker/tracker-info.c:416
+#: src/tracker/tracker-info.c:414
 msgid "Error message"
 msgstr "Pesan galat"
 
-#: src/tracker/tracker-info.c:472
+#: src/tracker/tracker-info.c:471
 msgid "Querying information for entity"
 msgstr "Mengkueri informasi tentang entitas"
 
-#: src/tracker/tracker-info.c:496
+#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "Tak bisa mengambil URN bagi URI"
 
-#: src/tracker/tracker-info.c:506 src/tracker/tracker-info.c:540
+#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
 msgid "Unable to retrieve data for URI"
 msgstr "Tak bisa mengambil data bagi URI"
 
-#: src/tracker/tracker-info.c:563
+#: src/tracker/tracker-info.c:562
 msgid "No metadata available for that URI"
 msgstr "Tak tersedia metadata bagi URI itu"
 
-#: src/tracker/tracker-info.c:568 src/tracker/tracker-info.c:602
+#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
 msgid "Could not get eligible status: "
 msgstr "Tak bisa mendapatkan status yang memenuhi syarat: "
 
-#: src/tracker/tracker-process.c:190
+#: src/tracker/tracker-process.c:191
 #, c-format
 msgid "Could not kill process %d — “%s”"
 msgstr "Tak dapat mematian proses %d - \"%s\""
 
-#: src/tracker/tracker-process.c:196
+#: src/tracker/tracker-process.c:197
 #, c-format
 msgid "Killed process %d — “%s”"
 msgstr "Proses %d dimatikan - \"%s\""
@@ -1219,7 +1212,7 @@ msgstr "Statistik:"
 #.
 #: src/tracker/tracker-status.c:154 src/tracker/tracker-tag.c:321
 #: src/tracker/tracker-tag.c:453 src/tracker/tracker-tag.c:575
-#: src/tracker/tracker-tag.c:953
+#: src/tracker/tracker-tag.c:954
 msgid "None"
 msgstr "Nihil"
 
@@ -1240,14 +1233,12 @@ msgstr "Saat ini terindeks"
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d berkas"
-msgstr[1] "%d berkas"
 
 #: src/tracker/tracker-status.c:391
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d folder"
-msgstr[1] "%d folder"
 
 #: src/tracker/tracker-status.c:405
 msgid "Remaining space on database partition"
@@ -1271,7 +1262,6 @@ msgstr "Semua penambang data menganggur, pengindeksan selesai"
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d kegagalan yang tercatat"
-msgstr[1] "%d kegagalan yang tercatat"
 
 #: src/tracker/tracker-status.c:490
 msgid "No reports found"
@@ -1359,11 +1349,11 @@ msgstr "Tak bisa mendapat berkas untuk mencocokkan tag"
 msgid "No files were found matching ALL of those tags"
 msgstr "Tak ditemukan berkas yang cocok dengan SEMUA tag itu"
 
-#: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:927
+#: src/tracker/tracker-tag.c:512 src/tracker/tracker-tag.c:928
 msgid "Could not get all tags"
 msgstr "Tak bisa mendapat semua tag"
 
-#: src/tracker/tracker-tag.c:521 src/tracker/tracker-tag.c:936
+#: src/tracker/tracker-tag.c:521 src/tracker/tracker-tag.c:937
 msgid "No tags were found"
 msgstr "Tak ditemukan tag"
 
@@ -1415,34 +1405,34 @@ msgstr "Tak satupun berkas ini yang tagnya ditata"
 msgid "Could not remove tag"
 msgstr "Tidak dapat menghapus tag"
 
-#: src/tracker/tracker-tag.c:890
+#: src/tracker/tracker-tag.c:891
 msgid "Tag was removed successfully"
 msgstr "Tag berhasil dihapus"
 
-#: src/tracker/tracker-tag.c:894
+#: src/tracker/tracker-tag.c:895
 msgid "Untagged"
 msgstr "Tak di-tag"
 
-#: src/tracker/tracker-tag.c:895
+#: src/tracker/tracker-tag.c:896
 msgid "File not indexed or already untagged"
 msgstr "Berkas tak diindeks atau telah dihapus tagnya"
 
-#: src/tracker/tracker-tag.c:1093
+#: src/tracker/tracker-tag.c:1094
 msgid "The --list option is required for --show-files"
 msgstr "Opsi —list diperlukan bagi —show-files"
 
-#: src/tracker/tracker-tag.c:1095
+#: src/tracker/tracker-tag.c:1096
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
 "Opsi —and-operator hanya dapat dipakai dengan argumen label tag dan —list"
 
-#: src/tracker/tracker-tag.c:1097
+#: src/tracker/tracker-tag.c:1098
 msgid "Add and delete actions can not be used together"
 msgstr "Aksi tambah dan hapus tak dapat dipakai bersama"
 
-#: src/tracker/tracker-tag.c:1099
+#: src/tracker/tracker-tag.c:1100
 msgid "The --description option can only be used with --add"
 msgstr "Opsi —description hanya dapat dipakai dengan —add"
 
