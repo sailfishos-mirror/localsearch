@@ -366,6 +366,8 @@ static void
 file_data_free (TrackerFileData *file_data)
 {
 	g_object_unref (file_data->file);
+	g_free (file_data->extractor_hash);
+	g_free (file_data->mimetype);
 	g_slice_free (TrackerFileData, file_data);
 }
 
