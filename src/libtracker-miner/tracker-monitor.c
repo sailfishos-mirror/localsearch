@@ -25,6 +25,7 @@
 #include "tracker-monitor-private.h"
 
 #include "tracker-monitor-glib.h"
+#include "tracker-monitor-fanotify.h"
 
 enum {
 	ITEM_CREATED,
@@ -379,6 +380,15 @@ tracker_monitor_emit_moved (TrackerMonitor *monitor,
 TrackerMonitor *
 tracker_monitor_new (GError **error)
 {
+#ifdef HAVE_FANOTIFY
+	TrackerMonitor *monitor;
+
+	monitor = g_initable_new (TRACKER_TYPE_MONITOR_FANOTIFY,
+	                          NULL, NULL, NULL);
+	if (monitor)
+		return monitor;
+#endif
+
 	return g_initable_new (TRACKER_TYPE_MONITOR_GLIB,
 	                       NULL, error, NULL);
 }

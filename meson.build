@@ -176,6 +176,27 @@ if battery_detection_library_name == ''
   endif
 endif
 
+##########################################
+# Check for Fanotify support
+##########################################
+
+result = cc.run('''
+    #include <sys/fanotify.h>
+    #include <fcntl.h>
+
+    int main (int argc, char *argv[]) {
+      int fd = fanotify_init (FAN_CLOEXEC|FAN_CLASS_NOTIF|FAN_REPORT_DFID_NAME, O_RDONLY);
+      return fd < 0 ? 1 : 0;
+    }
+  ''',
+  name: 'fanotify works without additional capabilities')
+
+if result.compiled() and result.returncode() == 0
+  have_fanotify = true
+else
+  have_fanotify = false
+endif
+
 ####################################################################
 # This section is for tracker-extract dependencies
 ####################################################################
@@ -358,6 +379,7 @@ conf.set('HAVE_LIBSECCOMP', seccomp_required and libseccomp.found())
 conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
 conf.set('HAVE_UPOWER', battery_detection_library_name == 'upower')
 conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
+conf.set('HAVE_FANOTIFY', have_fanotify)
 conf.set('DOMAIN_PREFIX', get_option('domain_prefix'))
 if get_option('domain_prefix') != 'org.freedesktop'
   rule_file = get_option('domain_prefix') + '.domain.rule'
@@ -490,6 +512,7 @@ summary = [
   '    Optimization:                           ' + get_option('optimization'),
   '    Domain prefix:                          ' + get_option('domain_prefix'),
   '\nFeature Support:',
+  '    File monitoring:                        @0@glib'.format(have_fanotify ? 'fanotify ' : ''),
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Releasing heap memory with malloc_trim: ' + have_malloc_trim.to_string(),

@@ -71,6 +71,9 @@
 /* Define to 1 if you have the `up_client_get_on_low_battery' function. */
 #mesondefine HAVE_UP_CLIENT_GET_ON_LOW_BATTERY
 
+/* Define if we have fanotify */
+#mesondefine HAVE_FANOTIFY
+
 /* Define to the address where bug reports for this package should be sent. */
 #mesondefine PACKAGE_BUGREPORT
 

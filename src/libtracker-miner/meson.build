@@ -17,6 +17,10 @@ private_sources = [
     'tracker-sparql-buffer.c',
     'tracker-utils.c']
 
+if have_fanotify
+    private_sources += 'tracker-monitor-fanotify.c'
+endif
+
 miner_sources = (
     ['tracker-data-provider.c',
     'tracker-decorator.c',
