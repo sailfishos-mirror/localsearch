@@ -358,7 +358,7 @@ test_monitor_events_moved_cb (TrackerMonitor *monitor,
 	gchar *other_path;
 
 	g_assert_true (file != NULL);
-	path = g_file_get_path (other_file);
+	path = g_file_get_path (file);
 	other_path = g_file_get_path (other_file);
 
 	g_debug ("***** '%s'->'%s' (%s) (MOVED) (source %smonitored)",
