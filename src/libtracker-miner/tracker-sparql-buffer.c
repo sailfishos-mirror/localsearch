@@ -425,7 +425,7 @@ tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
 	tasks = g_task_propagate_pointer (G_TASK (res), error);
 
 	if (!tasks)
-		tasks = g_task_get_task_data (G_TASK (res));
+		tasks = g_ptr_array_ref (g_task_get_task_data (G_TASK (res)));
 
 	return tasks;
 }
