@@ -11,6 +11,7 @@ private_sources = [
     'tracker-file-notifier.c',
     'tracker-lru.c',
     'tracker-monitor.c',
+    'tracker-monitor-glib.c',
     'tracker-priority-queue.c',
     'tracker-task-pool.c',
     'tracker-sparql-buffer.c',

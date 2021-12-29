@@ -27,7 +27,7 @@
 
 #include "tracker-file-notifier.h"
 #include "tracker-crawler.h"
-#include "tracker-monitor.h"
+#include "tracker-monitor-glib.h"
 
 enum {
 	PROP_0,
@@ -1682,9 +1682,9 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 	priv->stopped = TRUE;
 
 	/* Set up monitor */
-	priv->monitor = tracker_monitor_new ();
+	priv->monitor = tracker_monitor_new (&error);
 
-	if (!g_initable_init (G_INITABLE (priv->monitor), NULL, &error)) {
+	if (!priv->monitor) {
 		g_warning ("Could not init monitor: %s", error->message);
 		g_error_free (error);
 	} else {

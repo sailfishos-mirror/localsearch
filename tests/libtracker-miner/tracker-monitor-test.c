@@ -404,8 +404,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	                                         NULL);
 
 	/* Create and setup the tracker monitor */
-	fixture->monitor = tracker_monitor_new ();
-	g_initable_init (G_INITABLE (fixture->monitor), NULL, &error);
+	fixture->monitor = tracker_monitor_new (&error);
 	g_assert_no_error (error);
 	g_assert_true (fixture->monitor != NULL);
 
@@ -1281,8 +1280,7 @@ test_monitor_basic (void)
 	g_assert_true (G_IS_FILE (file_for_tmp));
 
 	/* Create a monitor */
-	monitor = tracker_monitor_new ();
-	g_initable_init (G_INITABLE (monitor), NULL, &error);
+	monitor = tracker_monitor_new (&error);
 	g_assert_no_error (error);
 	g_assert_true (monitor != NULL);
 
