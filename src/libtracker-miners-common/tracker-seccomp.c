@@ -156,6 +156,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (futex);
 	ALLOW_RULE (futex_time64);
 	ALLOW_RULE (set_robust_list);
+	ALLOW_RULE (rseq);
 	ALLOW_RULE (rt_sigaction);
 	ALLOW_RULE (rt_sigprocmask);
 	ALLOW_RULE (sched_yield);
