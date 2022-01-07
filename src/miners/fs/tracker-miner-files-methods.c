@@ -41,18 +41,16 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 		tracker_resource_set_relation (resource, "nie:dataSource", element_resource);
 	} else {
-		gchar *identifier = NULL;
+		const gchar *identifier = NULL;
 		GFile *root;
 
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			identifier = tracker_miner_fs_get_identifier (fs, root, FALSE, TRUE, NULL);
+			identifier = tracker_miner_fs_get_identifier (fs, root);
 
 		if (identifier)
 			tracker_resource_set_uri (resource, "nie:dataSource", identifier);
-
-		g_free (identifier);
 	}
 }
 
@@ -86,13 +84,13 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 {
 	TrackerResource *resource, *file_resource;
 	TrackerIndexingTree *indexing_tree;
-	gchar *urn, *uri;
+	const gchar *urn;
+	gchar *uri;
 
 	/* Preserve URN for nfo:Folders */
 	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
-	                                       file, create, TRUE, NULL);
+	                                       file);
 	resource = tracker_resource_new (urn);
-	g_free (urn);
 
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
@@ -132,7 +130,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	TrackerIndexingTree *indexing_tree;
 	TrackerResource *resource = NULL, *folder_resource = NULL, *graph_file = NULL;
 	const gchar *mime_type, *graph;
-	gchar *parent_urn;
+	const gchar *parent_urn;
 	gchar *delete_properties_sparql = NULL;
 	GFile *parent;
 	gchar *uri;
@@ -184,12 +182,11 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_miner_fs_get_identifier (fs, parent, FALSE, TRUE, NULL);
+	parent_urn = tracker_miner_fs_get_identifier (fs, parent);
 	g_object_unref (parent);
 
 	if (parent_urn) {
 		tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_urn);
-		g_free (parent_urn);
 	}
 
 	tracker_resource_set_string (resource, "nfo:fileName",

@@ -2130,20 +2130,15 @@ miner_files_move_file (TrackerMinerFS      *fs,
 	/* Get new parent information */
 	new_parent = g_file_get_parent (file);
 	if (new_parent) {
-		gchar *new_parent_id;
-		gboolean is_iri;
+		const gchar *new_parent_id;
 
-		new_parent_id = tracker_miner_fs_get_identifier (fs, new_parent, FALSE, FALSE, &is_iri);
+		new_parent_id = tracker_miner_fs_get_identifier (fs, new_parent);
 
 		if (new_parent_id) {
 			container_clause =
-				g_strdup_printf ("; nfo:belongsToContainer %s%s%s",
-				                 is_iri ? "<" : "",
-				                 new_parent_id,
-				                 is_iri ? ">" : "");
+				g_strdup_printf ("; nfo:belongsToContainer <%s>",
+				                 new_parent_id);
 		}
-
-		g_free (new_parent_id);
 	}
 
 	/* Update nie:isStoredAs in the nie:InformationElement */
@@ -2283,7 +2278,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                       "config", config,
 	                       "domain", domain,
 	                       "processing-pool-wait-limit", 1,
-	                       "processing-pool-ready-limit", 100,
+	                       "processing-pool-ready-limit", 800,
 	                       "file-attributes", FILE_ATTRIBUTES,
 	                       NULL);
 }

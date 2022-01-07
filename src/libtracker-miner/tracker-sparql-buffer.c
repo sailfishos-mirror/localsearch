@@ -174,9 +174,6 @@ update_batch_data_free (UpdateBatchData *batch_data)
 {
 	g_object_unref (batch_data->batch);
 
-	g_ptr_array_foreach (batch_data->tasks,
-	                     (GFunc) remove_task_foreach,
-	                     batch_data->buffer);
 	g_ptr_array_unref (batch_data->tasks);
 
 	g_clear_object (&batch_data->async_task);
@@ -256,6 +253,13 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 	g_clear_pointer (&priv->file_set, g_hash_table_unref);
 	priv->n_updates++;
 	g_clear_object (&priv->batch);
+
+	/* While flushing, remove the tasks from the task pool too, so it's
+	 * hinted as below limits again.
+	 */
+	g_ptr_array_foreach (update_data->tasks,
+	                     (GFunc) remove_task_foreach,
+	                     update_data->buffer);
 
 	tracker_batch_execute_async (update_data->batch,
 	                             NULL,
@@ -421,7 +425,7 @@ tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
 	tasks = g_task_propagate_pointer (G_TASK (res), error);
 
 	if (!tasks)
-		tasks = g_task_get_task_data (G_TASK (res));
+		tasks = g_ptr_array_ref (g_task_get_task_data (G_TASK (res)));
 
 	return tasks;
 }
