@@ -720,3 +720,35 @@ tracker_filename_casecmp_without_extension (const gchar *a,
 
 	return g_ascii_strncasecmp (a, b, len_a) == 0;
 }
+
+gchar *
+tracker_file_get_content_identifier (GFile       *file,
+                                     GFileInfo   *info,
+                                     const gchar *suffix)
+{
+	const gchar *id;
+	gchar *str;
+
+	if (info) {
+		g_object_ref (info);
+	} else {
+		info = g_file_query_info (file,
+		                          G_FILE_ATTRIBUTE_ID_FILE,
+		                          G_FILE_QUERY_INFO_NONE,
+		                          NULL,
+		                          NULL);
+		if (!info)
+			return NULL;
+	}
+
+	id = g_file_info_get_attribute_string (info, G_FILE_ATTRIBUTE_ID_FILE);
+
+	if (suffix)
+		str = g_strconcat ("urn:fileid:", id, "/", suffix, NULL);
+	else
+		str = g_strconcat ("urn:fileid:", id, NULL);
+
+	g_object_unref (info);
+
+	return str;
+}

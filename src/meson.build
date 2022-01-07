@@ -3,13 +3,13 @@ subdir('libtracker-miners-common')
 subdir('libtracker-extract')
 subdir('libtracker-miner')
 
+# Public miners
+subdir('miners')
+
 # Public data extract tool & modules
 if get_option('extract')
   subdir('tracker-extract')
 endif
-
-# Public miners
-subdir('miners')
 
 # Control Proxy
 subdir('tracker-control')

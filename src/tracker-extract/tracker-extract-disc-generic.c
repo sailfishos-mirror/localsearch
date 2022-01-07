@@ -104,11 +104,13 @@ build_basic_resource (GFile *cue,
                       GFile *image)
 {
 	TrackerResource *metadata, *child;
-	gchar *uri;
+	gchar *uri, *resource_uri;
 
-	metadata = tracker_resource_new (NULL);
+	resource_uri = tracker_file_get_content_identifier (cue, NULL, NULL);
+	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:GameImage");
 	tracker_resource_set_string (metadata, "nie:mimeType", "application/x-cue");
+	g_free (resource_uri);
 
 	uri = g_file_get_uri (cue);
 	tracker_resource_add_uri (metadata, "nie:isStoredAs", uri);

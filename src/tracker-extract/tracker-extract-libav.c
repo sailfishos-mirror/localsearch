@@ -48,7 +48,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	TrackerResource *metadata;
 	gchar *absolute_file_path;
 	gchar *content_created = NULL;
-	gchar *uri;
+	gchar *uri, *resource_uri;
 	AVFormatContext *format = NULL;
 	AVStream *audio_stream = NULL;
 	AVStream *video_stream = NULL;
@@ -89,7 +89,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		return FALSE;
 	}
 
-	metadata = tracker_resource_new (NULL);
+	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	metadata = tracker_resource_new (resource_uri);
+	g_free (resource_uri);
 
 	if (audio_stream) {
 		if (audio_stream->codec->sample_rate > 0) {

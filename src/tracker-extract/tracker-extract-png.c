@@ -652,7 +652,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	gint bit_depth, color_type;
 	gint interlace_type, compression_type, filter_type;
 	const gchar *dlna_profile, *dlna_mimetype;
-	gchar *filename, *uri;
+	gchar *filename, *uri, *resource_uri;
 	GFile *file;
 
 	file = tracker_extract_info_get_file (info);
@@ -730,7 +730,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	png_read_end (png_ptr, end_ptr);
 
-	metadata = tracker_resource_new (NULL);
+	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	metadata = tracker_resource_new (resource_uri);
+	g_free (resource_uri);
 
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");

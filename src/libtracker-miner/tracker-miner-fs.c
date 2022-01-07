@@ -125,7 +125,6 @@ struct _TrackerMinerFSPrivate {
 	guint sparql_buffer_limit;
 
 	/* Folder URN cache */
-	TrackerSparqlStatement *urn_query;
 	TrackerLRU *urn_lru;
 
 	/* Properties */
@@ -461,30 +460,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 }
 
 static gboolean
-create_folder_urn_query (TrackerMinerFS  *fs,
-                         GCancellable    *cancellable,
-                         GError         **error)
-{
-	TrackerMinerFSPrivate *priv = fs->priv;
-	TrackerSparqlConnection *sparql_conn;
-
-	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (fs));
-	priv->urn_query =
-		tracker_sparql_connection_query_statement (sparql_conn,
-		                                           "SELECT ?ie "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "    ~file a nfo:FileDataObject ;"
-		                                           "          nie:interpretedAs ?ie ."
-		                                           "    ?ie a nfo:Folder ."
-							   "  }"
-		                                           "}",
-		                                           cancellable,
-		                                           error);
-	return priv->urn_query != NULL;
-}
-
-static gboolean
 miner_fs_initable_init (GInitable     *initable,
                         GCancellable  *cancellable,
                         GError       **error)
@@ -497,9 +472,6 @@ miner_fs_initable_init (GInitable     *initable,
 	}
 
 	priv = TRACKER_MINER_FS (initable)->priv;
-
-	if (!create_folder_urn_query (TRACKER_MINER_FS (initable), cancellable, error))
-		return FALSE;
 
 	g_object_get (initable, "processing-pool-ready-limit", &limit, NULL);
 	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (initable)),
@@ -702,7 +674,6 @@ fs_finalize (GObject *object)
 	g_timer_destroy (priv->timer);
 	g_timer_destroy (priv->extraction_timer);
 
-	g_clear_object (&priv->urn_query);
 	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
 
 	if (priv->item_queues_handler_id) {
@@ -1076,8 +1047,6 @@ sparql_buffer_flush_cb (GObject      *object,
 
 		if (item_queue_is_blocked_by_file (fs, task_file))
 			g_clear_object (&fs->priv->item_queue_blocker);
-
-		tracker_lru_remove (fs->priv->urn_lru, task_file);
 	}
 
 	if (priv->item_queue_blocker != NULL) {
@@ -2144,35 +2113,33 @@ static const gchar *
 tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 				 GFile          *file)
 {
-	TrackerSparqlCursor *cursor;
-	const gchar *urn;
-	gchar *uri, *str;
+	GFileInfo *info;
+	gchar *str;
 
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	if (tracker_lru_find (fs->priv->urn_lru, file, (gpointer*) &urn))
-		return urn;
+	if (tracker_lru_find (fs->priv->urn_lru, file, (gpointer*) &str))
+		return str;
 
-	uri = g_file_get_uri (file);
-	tracker_sparql_statement_bind_string (fs->priv->urn_query, "file", uri);
-	g_free (uri);
-
-	cursor = tracker_sparql_statement_execute (fs->priv->urn_query, NULL, NULL);
-	if (!cursor)
+	info = g_file_query_info (file,
+	                          G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                          G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
+	                          G_FILE_ATTRIBUTE_ID_FILE,
+	                          G_FILE_QUERY_INFO_NONE,
+	                          NULL,
+	                          NULL);
+	if (!info)
 		return NULL;
 
-	if (!tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), NULL);
-		g_object_unref (cursor);
+	if (!tracker_indexing_tree_file_is_indexable (fs->priv->indexing_tree, file, info)) {
+		g_object_unref (info);
 		return NULL;
 	}
 
-	urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-	str = g_strdup (urn);
-	g_object_unref (cursor);
-
+	str = tracker_file_get_content_identifier (file, info, NULL);
 	tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), str);
+	g_object_unref (info);
 
 	return str;
 }
@@ -2241,25 +2208,6 @@ tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
 	return fs->priv->data_provider;
 }
 
-static gchar *
-tracker_miner_fs_get_file_bnode (TrackerMinerFS *fs,
-                                 GFile          *file,
-                                 gboolean        in_batch)
-{
-	gchar *uri, *bnode, *checksum;
-
-	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
-	g_return_val_if_fail (G_IS_FILE (file), NULL);
-
-	uri = g_file_get_uri (file);
-	checksum = g_compute_checksum_for_string (G_CHECKSUM_MD5, uri, -1);
-	bnode = g_strdup_printf ("_:%s", checksum);
-	g_free (checksum);
-	g_free (uri);
-
-	return bnode;
-}
-
 gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                  GFile          *file,
@@ -2267,30 +2215,18 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                  gboolean        check_batch,
                                  gboolean       *is_iri)
 {
-	TrackerMinerFSPrivate *priv = miner->priv;
-	gboolean in_batch = FALSE;
+	const gchar *urn = NULL;
 
 	if (is_iri)
 		*is_iri = FALSE;
 
-	if (!new_resource && check_batch) {
-		in_batch = (tracker_task_pool_find (priv->task_pool, file) ||
-		            tracker_sparql_buffer_get_state (priv->sparql_buffer, file) == TRACKER_BUFFER_STATE_QUEUED);
-	}
+	urn = tracker_miner_fs_get_folder_urn (miner, file);
 
-	if (new_resource || in_batch) {
-		return tracker_miner_fs_get_file_bnode (miner, file, in_batch);
-	} else {
-		const gchar *urn = NULL;
-
-		urn = tracker_miner_fs_get_folder_urn (miner, file);
-
-		if (urn) {
-			if (is_iri)
-				*is_iri = TRUE;
-			return g_strdup (urn);
-		}
-
+	if (urn) {
+		if (is_iri)
+			*is_iri = TRUE;
 		return g_strdup (urn);
 	}
+
+	return NULL;
 }

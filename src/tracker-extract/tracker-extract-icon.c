@@ -133,12 +133,14 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	guint max_width;
 	guint max_height;
 	GFile *file;
-	gchar *uri;
+	gchar *uri, *resource_uri;
 
 	file = tracker_extract_info_get_file (info);
 	uri = g_file_get_uri (file);
 
-	metadata = tracker_resource_new (NULL);
+	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	metadata = tracker_resource_new (resource_uri);
+	g_free (resource_uri);
 
 	/* The Windows Icon file format may contain the same icon with different
 	 * sizes inside, so there's no clear way of setting single width and
