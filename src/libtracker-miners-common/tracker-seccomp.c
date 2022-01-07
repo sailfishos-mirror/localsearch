@@ -108,6 +108,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (mremap);
 	ALLOW_RULE (mprotect);
 	ALLOW_RULE (madvise);
+	ALLOW_RULE (mbind);
 	ERROR_RULE (mlock, EPERM);
 	ERROR_RULE (mlock2, EPERM);
 	ERROR_RULE (munlock, EPERM);
@@ -156,6 +157,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (futex);
 	ALLOW_RULE (futex_time64);
 	ALLOW_RULE (set_robust_list);
+	ALLOW_RULE (rseq);
 	ALLOW_RULE (rt_sigaction);
 	ALLOW_RULE (rt_sigprocmask);
 	ALLOW_RULE (sched_yield);
