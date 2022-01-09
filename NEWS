@@ -1,3 +1,16 @@
+NEW in 3.3.0.alpha - 2022-01-09
+===============================
+  * Use FANotify for file monitoring if available
+  * Use a more stable URN scheme for file content
+  * Add indexing roots to content specific graphs for availability info
+  * Truly disable nvcodec in gstreamer extractor
+  * Use the configured domain prefix in miner symlinks
+  * Add seccomp rules for recently used syscalls
+  * Performance improvements to tracker-miner-fs-3
+  * Plug memory leaks in tracker-miner-fs-3
+
+Translations: ca, fur, id, it, zh_CN
+
 NEW in 3.2.1 - 2021-10-30
 =========================
   * Fix files moving between hidden and non-hidden
