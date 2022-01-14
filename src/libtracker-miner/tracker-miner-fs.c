@@ -1969,7 +1969,8 @@ tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_TYPE ","
 	                          G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
-	                          G_FILE_ATTRIBUTE_ID_FILE,
+	                          G_FILE_ATTRIBUTE_ID_FILESYSTEM ","
+	                          G_FILE_ATTRIBUTE_UNIX_INODE,
 	                          G_FILE_QUERY_INFO_NONE,
 	                          NULL,
 	                          NULL);

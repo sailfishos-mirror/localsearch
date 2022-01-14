@@ -34,9 +34,12 @@
 #include <sys/statfs.h>
 #endif
 
+#include <blkid.h>
+
 #include <glib.h>
 #include <glib/gstdio.h>
 #include <gio/gio.h>
+#include <gio/gunixmounts.h>
 
 #include "tracker-file-utils.h"
 #include "tracker-type-utils.h"
@@ -721,19 +724,148 @@ tracker_filename_casecmp_without_extension (const gchar *a,
 	return g_ascii_strncasecmp (a, b, len_a) == 0;
 }
 
+typedef struct {
+	GFile *file;
+	gchar *mount_point;
+	gchar *id;
+} UnixMountInfo;
+
+typedef struct {
+	GUnixMountMonitor *monitor;
+	blkid_cache id_cache;
+	GArray *mounts;
+	GRWLock lock;
+} TrackerUnixMountCache;
+
+static gint
+sort_by_mount (gconstpointer a,
+	       gconstpointer b)
+{
+	const UnixMountInfo *info_a =a, *info_b = b;
+
+	return g_strcmp0 (info_a->mount_point, info_b->mount_point);
+}
+
+static void
+clear_mount_info (gpointer user_data)
+{
+	UnixMountInfo *info = user_data;
+
+	g_object_unref (info->file);
+	g_free (info->mount_point);
+	g_free (info->id);
+}
+
+static void
+update_mounts (TrackerUnixMountCache *cache)
+{
+	GList *mounts;
+	const GList *l;
+
+	g_rw_lock_writer_lock (&cache->lock);
+
+	g_array_set_size (cache->mounts, 0);
+
+	mounts = g_unix_mounts_get (NULL);
+
+	for (l = mounts; l; l = l->next) {
+		GUnixMountEntry *entry = l->data;
+		const gchar *devname;
+		gchar *id;
+		UnixMountInfo mount;
+
+		devname = g_unix_mount_get_device_path (entry);
+		id = blkid_get_tag_value (cache->id_cache, "UUID", devname);
+		if (!id && strchr (devname, G_DIR_SEPARATOR) != NULL)
+			id = g_strdup (devname);
+
+		if (!id)
+			continue;
+
+		mount.mount_point = g_strdup (g_unix_mount_get_mount_path (entry));
+		mount.file = g_file_new_for_path (mount.mount_point);
+		mount.id = id;
+		g_array_append_val (cache->mounts, mount);
+	}
+
+	g_array_sort (cache->mounts, sort_by_mount);
+
+	g_rw_lock_writer_unlock (&cache->lock);
+	g_list_free_full (mounts, (GDestroyNotify) g_unix_mount_free);
+}
+
+static void
+on_mounts_changed (GUnixMountMonitor *monitor,
+		   gpointer           user_data)
+{
+	TrackerUnixMountCache *cache = user_data;
+
+	update_mounts (cache);
+}
+
+static TrackerUnixMountCache *
+tracker_unix_mount_cache_get (void)
+{
+	static TrackerUnixMountCache *cache = NULL;
+	TrackerUnixMountCache *obj;
+
+	if (cache == NULL) {
+		obj = g_new0 (TrackerUnixMountCache, 1);
+		g_rw_lock_init (&obj->lock);
+		obj->monitor = g_unix_mount_monitor_get ();
+		obj->mounts = g_array_new (FALSE, FALSE, sizeof (UnixMountInfo));
+		g_array_set_clear_func (obj->mounts, clear_mount_info);
+
+		blkid_get_cache (&obj->id_cache, NULL);
+
+		g_signal_connect (obj->monitor, "mounts-changed",
+				  G_CALLBACK (on_mounts_changed), obj);
+		update_mounts (obj);
+		cache = obj;
+	}
+
+	return cache;
+}
+
+static const gchar *
+tracker_unix_mount_cache_lookup_filesystem_id (GFile *file)
+{
+	TrackerUnixMountCache *cache;
+	const gchar *id = NULL;
+	gint i;
+
+	cache = tracker_unix_mount_cache_get ();
+
+	g_rw_lock_reader_lock (&cache->lock);
+
+	for (i = (gint) cache->mounts->len - 1; i >= 0; i--) {
+		UnixMountInfo *info = &g_array_index (cache->mounts, UnixMountInfo, i);
+
+		if (g_file_has_prefix (file, info->file)) {
+			id = info->id;
+			break;
+		}
+	}
+
+	g_rw_lock_reader_unlock (&cache->lock);
+
+	return id;
+}
+
 gchar *
 tracker_file_get_content_identifier (GFile       *file,
                                      GFileInfo   *info,
                                      const gchar *suffix)
 {
 	const gchar *id;
-	gchar *str;
+	gchar *inode, *str;
 
 	if (info) {
 		g_object_ref (info);
 	} else {
 		info = g_file_query_info (file,
-		                          G_FILE_ATTRIBUTE_ID_FILE,
+		                          G_FILE_ATTRIBUTE_ID_FILESYSTEM ","
+		                          G_FILE_ATTRIBUTE_UNIX_INODE,
 		                          G_FILE_QUERY_INFO_NONE,
 		                          NULL,
 		                          NULL);
@@ -741,14 +873,21 @@ tracker_file_get_content_identifier (GFile       *file,
 			return NULL;
 	}
 
-	id = g_file_info_get_attribute_string (info, G_FILE_ATTRIBUTE_ID_FILE);
+	id = tracker_unix_mount_cache_lookup_filesystem_id (file);
 
-	if (suffix)
-		str = g_strconcat ("urn:fileid:", id, "/", suffix, NULL);
-	else
-		str = g_strconcat ("urn:fileid:", id, NULL);
+	if (!id) {
+		id = g_file_info_get_attribute_string (info,
+		                                       G_FILE_ATTRIBUTE_ID_FILESYSTEM);
+	}
+
+	inode = g_file_info_get_attribute_as_string (info, G_FILE_ATTRIBUTE_UNIX_INODE);
+
+	str = g_strconcat ("urn:fileid:", id, ":", inode,
+			   suffix ? "/" : NULL,
+			   suffix, NULL);
 
 	g_object_unref (info);
+	g_free (inode);
 
 	return str;
 }
