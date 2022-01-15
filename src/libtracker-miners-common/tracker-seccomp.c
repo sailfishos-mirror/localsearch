@@ -117,6 +117,7 @@ tracker_seccomp_init (void)
 	/* Process management */
 	ALLOW_RULE (exit_group);
 	ALLOW_RULE (getuid);
+	ALLOW_RULE (getgid);
 	ALLOW_RULE (getuid32);
 	ALLOW_RULE (getegid);
 	ALLOW_RULE (getegid32);
@@ -145,6 +146,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (faccessat2);
 	ALLOW_RULE (getdents);
 	ALLOW_RULE (getdents64);
+	ALLOW_RULE (getcwd);
 	ALLOW_RULE (readlink);
 	ALLOW_RULE (readlinkat);
 	ALLOW_RULE (utime);
