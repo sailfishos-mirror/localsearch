@@ -297,9 +297,8 @@ get_all_tags_show_tag_id (TrackerSparqlConnection *connection,
 	gchar *query;
 
 	/* Get resources associated */
-	query = g_strdup_printf ("SELECT ?uri WHERE {"
+	query = g_strdup_printf ("SELECT (COALESCE (nie:isStoredAs(?urn), ?urn) AS ?uri) WHERE {"
 	                         "  ?urn a rdfs:Resource; "
-	                         "  nie:url ?uri ; "
 	                         "  nao:hasTag \"%s\" . "
 	                         "}",
 	                         id);
