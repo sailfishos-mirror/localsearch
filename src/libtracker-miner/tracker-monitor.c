@@ -229,7 +229,7 @@ tracker_monitor_set_enabled (TrackerMonitor *monitor,
 {
 	g_return_if_fail (TRACKER_IS_MONITOR (monitor));
 
-	g_object_set (monitor, "enabled", !!enabled, NULL);
+	TRACKER_MONITOR_GET_CLASS (monitor)->set_enabled (monitor, !!enabled);
 }
 
 gboolean
@@ -291,13 +291,9 @@ tracker_monitor_is_watched (TrackerMonitor *monitor,
 guint
 tracker_monitor_get_count (TrackerMonitor *monitor)
 {
-	guint count;
-
 	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), 0);
 
-	g_object_get (monitor, "count", &count, NULL);
-
-	return count;
+	return TRACKER_MONITOR_GET_CLASS (monitor)->get_count (monitor);
 }
 
 guint

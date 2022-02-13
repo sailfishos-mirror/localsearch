@@ -148,8 +148,8 @@ static gboolean tracker_monitor_glib_move (TrackerMonitor *monitor,
                                            GFile          *other_file);
 static gboolean tracker_monitor_glib_is_watched (TrackerMonitor *monitor,
                                                  GFile          *file);
-static void tracker_monitor_glib_set_enabled (TrackerMonitorGlib *monitor,
-                                              gboolean            enabled);
+static void tracker_monitor_glib_set_enabled (TrackerMonitor *monitor,
+                                              gboolean        enabled);
 
 G_DEFINE_TYPE_WITH_CODE (TrackerMonitorGlib, tracker_monitor_glib, TRACKER_TYPE_MONITOR,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
@@ -287,6 +287,16 @@ tracker_monitor_glib_initable_iface_init (GInitableIface *iface)
 	iface->init = tracker_monitor_glib_initable_init;
 }
 
+static guint
+tracker_monitor_glib_get_count (TrackerMonitor *monitor)
+{
+	TrackerMonitorGlibPrivate *priv;
+
+	priv = tracker_monitor_glib_get_instance_private (TRACKER_MONITOR_GLIB (monitor));
+
+	return g_hash_table_size (priv->monitored_dirs);
+}
+
 static void
 tracker_monitor_glib_class_init (TrackerMonitorGlibClass *klass)
 {
@@ -305,6 +315,8 @@ tracker_monitor_glib_class_init (TrackerMonitorGlibClass *klass)
 	monitor_class->remove_recursively = tracker_monitor_glib_remove_recursively;
 	monitor_class->move = tracker_monitor_glib_move;
 	monitor_class->is_watched = tracker_monitor_glib_is_watched;
+	monitor_class->set_enabled = tracker_monitor_glib_set_enabled;
+	monitor_class->get_count = tracker_monitor_glib_get_count;
 
 	g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
 	g_object_class_override_property (object_class, PROP_LIMIT, "limit");
@@ -420,8 +432,8 @@ tracker_monitor_glib_set_property (GObject      *object,
 {
 	switch (prop_id) {
 	case PROP_ENABLED:
-		tracker_monitor_glib_set_enabled (TRACKER_MONITOR_GLIB (object),
-		                                  g_value_get_boolean (value));
+		tracker_monitor_set_enabled (TRACKER_MONITOR (object),
+		                             g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -446,7 +458,7 @@ tracker_monitor_glib_get_property (GObject      *object,
 		g_value_set_uint (value, priv->monitor_limit);
 		break;
 	case PROP_COUNT:
-		g_value_set_uint (value, g_hash_table_size (priv->monitored_dirs));
+		g_value_set_uint (value, tracker_monitor_get_count (TRACKER_MONITOR (object)));
 		break;
 	case PROP_IGNORED:
 		g_value_set_uint (value, priv->monitors_ignored);
@@ -1077,9 +1089,10 @@ directory_monitor_cancel (GFileMonitor *monitor)
 }
 
 static void
-tracker_monitor_glib_set_enabled (TrackerMonitorGlib *monitor,
-                                  gboolean            enabled)
+tracker_monitor_glib_set_enabled (TrackerMonitor *object,
+                                  gboolean        enabled)
 {
+	TrackerMonitorGlib *monitor = TRACKER_MONITOR_GLIB (object);
 	TrackerMonitorGlibPrivate *priv;
 	MonitorRequest *request;
 
