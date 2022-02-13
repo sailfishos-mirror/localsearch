@@ -64,10 +64,6 @@ struct TrackerMonitorGlibPrivate {
 	} thread;
 };
 
-struct _TrackerMonitorGlib {
-	TrackerMonitor parent_instance;
-};
-
 typedef struct {
 	GFile    *file;
 	gchar    *file_uri;

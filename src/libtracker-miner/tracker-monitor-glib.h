@@ -34,9 +34,13 @@
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_MONITOR_GLIB (tracker_monitor_glib_get_type ())
-G_DECLARE_FINAL_TYPE (TrackerMonitorGlib, tracker_monitor_glib,
-                      TRACKER, MONITOR_GLIB,
-                      TrackerMonitor)
+G_DECLARE_DERIVABLE_TYPE (TrackerMonitorGlib, tracker_monitor_glib,
+                          TRACKER, MONITOR_GLIB,
+                          TrackerMonitor)
+
+struct _TrackerMonitorGlibClass {
+	TrackerMonitorClass parent_class;
+};
 
 G_END_DECLS
 
