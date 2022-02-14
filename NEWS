@@ -1,3 +1,14 @@
+NEW in 3.3.0.beta - 2022-02-14
+==============================
+  * Changed to skip mountpoints found during recursive indexing.
+    Mountpoints must be explicitly configured as indexed folders now
+  * Fixed FANotify monitor to safely fallback to inotify in the cases
+    not currently covered by FANotify (e.g. btrfs subvolumes)
+  * Improved the stable URN scheme so it is guaranteed to be stable
+  * Removed deprecated API usage in libav extractor
+  * Fix --show-files in "tracker3 tag"
+  * Fix possible crashes with Clang
+
 NEW in 3.3.0.alpha - 2022-01-09
 ===============================
   * Use FANotify for file monitoring if available
