@@ -104,10 +104,12 @@ enum {
 	PROP_IGNORED,
 };
 
+static GInitableIface *initable_parent_iface = NULL;
+
 static void tracker_monitor_fanotify_initable_iface_init (GInitableIface *iface);
 
 G_DEFINE_TYPE_WITH_CODE (TrackerMonitorFanotify, tracker_monitor_fanotify,
-                         TRACKER_TYPE_MONITOR,
+                         TRACKER_TYPE_MONITOR_GLIB,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_monitor_fanotify_initable_iface_init))
 
@@ -446,13 +448,14 @@ tracker_monitor_fanotify_initable_init (GInitable     *initable,
 	                       initable, NULL);
 	g_source_attach (monitor->source, NULL);
 
-	return TRUE;
+	return initable_parent_iface->init (initable, cancellable, error);
 }
 
 static void
-tracker_monitor_fanotify_set_enabled (TrackerMonitorFanotify *monitor,
-                                      gboolean                enabled)
+tracker_monitor_fanotify_set_enabled (TrackerMonitor *object,
+                                      gboolean        enabled)
 {
+	TrackerMonitorFanotify *monitor = TRACKER_MONITOR_FANOTIFY (object);
 	GList *files = NULL;
 
 	g_return_if_fail (TRACKER_IS_MONITOR (monitor));
@@ -481,11 +484,16 @@ tracker_monitor_fanotify_set_enabled (TrackerMonitorFanotify *monitor,
 		files = g_list_remove (files, file);
 		g_object_unref (file);
 	}
+
+	TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->set_enabled (object,
+                                                                                    enabled);
 }
 
 static void
 tracker_monitor_fanotify_initable_iface_init (GInitableIface *iface)
 {
+	initable_parent_iface = g_type_interface_peek_parent (iface);
+
 	iface->init = tracker_monitor_fanotify_initable_init;
 }
 
@@ -513,8 +521,8 @@ tracker_monitor_fanotify_set_property (GObject      *object,
 {
 	switch (prop_id) {
 	case PROP_ENABLED:
-		tracker_monitor_fanotify_set_enabled (TRACKER_MONITOR_FANOTIFY (object),
-		                                      g_value_get_boolean (value));
+		tracker_monitor_set_enabled (TRACKER_MONITOR (object),
+		                             g_value_get_boolean (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -537,7 +545,7 @@ tracker_monitor_fanotify_get_property (GObject      *object,
 		g_value_set_uint (value, monitor->limit);
 		break;
 	case PROP_COUNT:
-		g_value_set_uint (value, g_hash_table_size (monitor->monitored_dirs));
+		g_value_set_uint (value, tracker_monitor_get_count (TRACKER_MONITOR (object)));
 		break;
 	case PROP_IGNORED:
 		g_value_set_uint (value, monitor->ignored);
@@ -677,8 +685,13 @@ tracker_monitor_fanotify_add (TrackerMonitor *object,
 
 	if (monitor->enabled) {
 		data = monitored_file_new (monitor, file);
-		if (!data)
-			return FALSE;
+		if (!data) {
+			/* If we cannot create fanotify handles (e.g. EXDEV on
+			 * btrfs), fall back to inotify.
+			 */
+			return TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->add (object,
+			                                                                           file);
+		}
 
 		g_hash_table_insert (monitor->monitored_dirs, g_object_ref (data->file), data);
 		g_hash_table_insert (monitor->handles, data->handle_bytes, data);
@@ -704,7 +717,11 @@ tracker_monitor_fanotify_remove (TrackerMonitor *object,
 		                                   g_hash_table_size (monitor->monitored_dirs) - 1));
 	}
 
-	return g_hash_table_remove (monitor->monitored_dirs, file);
+	if (g_hash_table_remove (monitor->monitored_dirs, file))
+		return TRUE;
+
+	return TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->remove (object,
+	                                                                              file);
 }
 
 /* If @is_strict is %TRUE, return %TRUE iff @file is a child of @prefix.
@@ -730,6 +747,12 @@ tracker_monitor_fanotify_remove_recursively (TrackerMonitor *object,
 	guint items_removed = 0;
 	GFile *f;
 	gchar *uri;
+
+	if (!g_hash_table_contains (monitor->monitored_dirs, file)) {
+		return TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->remove_recursively (object,
+		                                                                                          file,
+		                                                                                          only_children);
+	}
 
 	g_hash_table_iter_init (&iter, monitor->monitored_dirs);
 	while (g_hash_table_iter_next (&iter, (gpointer *) &f, (gpointer *) &data)) {
@@ -766,6 +789,12 @@ tracker_monitor_fanotify_move (TrackerMonitor *object,
 	guint items_moved = 0;
 	GList *files = NULL;
 	GFile *f;
+
+	if (!g_hash_table_contains (monitor->monitored_dirs, old_file)) {
+		return TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->move (object,
+		                                                                            old_file,
+		                                                                            new_file);
+	}
 
 	old_prefix = g_file_get_path (old_file);
 
@@ -834,7 +863,24 @@ tracker_monitor_fanotify_is_watched (TrackerMonitor *object,
 	if (!monitor->enabled)
 		return FALSE;
 
-	return g_hash_table_contains (monitor->monitored_dirs, file);
+	if (g_hash_table_contains (monitor->monitored_dirs, file)) {
+		return TRUE;
+	} else {
+		return TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->is_watched (object,
+		                                                                                  file);
+	}
+}
+
+static guint
+tracker_monitor_fanotify_get_count (TrackerMonitor *object)
+{
+	TrackerMonitorFanotify *monitor = TRACKER_MONITOR_FANOTIFY (object);
+	guint count;
+
+	count = g_hash_table_size (monitor->monitored_dirs);
+	count += TRACKER_MONITOR_CLASS (tracker_monitor_fanotify_parent_class)->get_count (object);
+
+	return count;
 }
 
 static void
@@ -855,6 +901,8 @@ tracker_monitor_fanotify_class_init (TrackerMonitorFanotifyClass *klass)
 	monitor_class->remove_recursively = tracker_monitor_fanotify_remove_recursively;
 	monitor_class->move = tracker_monitor_fanotify_move;
 	monitor_class->is_watched = tracker_monitor_fanotify_is_watched;
+	monitor_class->set_enabled = tracker_monitor_fanotify_set_enabled;
+	monitor_class->get_count = tracker_monitor_fanotify_get_count;
 
 	g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
 	g_object_class_override_property (object_class, PROP_LIMIT, "limit");

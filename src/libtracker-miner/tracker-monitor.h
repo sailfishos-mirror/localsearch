@@ -49,6 +49,9 @@ struct _TrackerMonitorClass {
 	                   GFile          *dst);
 	gboolean (* is_watched) (TrackerMonitor *monitor,
 	                         GFile          *file);
+	void (* set_enabled) (TrackerMonitor *monitor,
+	                      gboolean        enabled);
+	guint (* get_count) (TrackerMonitor *monitor);
 };
 
 GType           tracker_monitor_get_type             (void);

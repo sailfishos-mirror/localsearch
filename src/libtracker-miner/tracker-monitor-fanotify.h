@@ -29,14 +29,14 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
-#include "tracker-monitor.h"
+#include "tracker-monitor-glib.h"
 
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_MONITOR_FANOTIFY (tracker_monitor_fanotify_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerMonitorFanotify, tracker_monitor_fanotify,
                       TRACKER, MONITOR_FANOTIFY,
-                      TrackerMonitor)
+                      TrackerMonitorGlib)
 
 G_END_DECLS
 
