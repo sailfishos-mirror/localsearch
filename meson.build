@@ -106,8 +106,7 @@ if have_tracker_miner_rss
 endif
 
 if get_option('man')
-  asciidoc = find_program('asciidoc')
-  xsltproc = find_program('xsltproc')
+  a2x = find_program('a2x')
 endif
 
 sha256sum = find_program('sha256sum')
