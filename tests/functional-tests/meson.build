@@ -143,6 +143,9 @@ detect_h264_codec = join_paths(meson.current_source_dir(), 'detect-h264-codec.sh
 detect_h264_codec_result = run_command(detect_h264_codec)
 
 if detect_h264_codec_result.returncode() == 0
+  if gstreamer.version() >= '1.20.0'
+    extractor_tests += 'video/mkv-basic'
+  endif
   extractor_tests += [
     'video/mov-basic',
     'video/mp4-basic',
