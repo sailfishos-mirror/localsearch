@@ -60,6 +60,8 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
+static int show_errors (gchar **terms);
+
 static TrackerSparqlCursor *
 statistics_query (TrackerSparqlConnection  *connection,
 		  GError                  **error)
@@ -376,8 +378,9 @@ get_no_args (void)
 	gint remaining_time;
 	gint files, folders;
 	GList *keyfiles;
+	gboolean use_pager;
 
-	tracker_term_pipe_to_pager ();
+	use_pager = tracker_term_pipe_to_pager ();
 
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
@@ -437,7 +440,14 @@ get_no_args (void)
 		         g_list_length (keyfiles));
 
 		g_print ("\n\n");
-		print_errors (keyfiles);
+
+		if (use_pager) {
+			print_errors (keyfiles);
+		} else {
+			gchar *all[2] = { "", NULL };
+			show_errors ((GStrv) all);
+		}
+
 		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
 	}
 
@@ -453,8 +463,6 @@ show_errors (gchar **terms)
 	GKeyFile *keyfile;
 	guint i;
 	gboolean found = FALSE;
-
-	tracker_term_pipe_to_pager ();
 
 	keyfiles = tracker_cli_get_error_keyfiles ();
 
@@ -497,8 +505,6 @@ show_errors (gchar **terms)
 
 	if (!found)
 		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("No reports found"));
-
-	tracker_term_pager_close ();
 
 	return EXIT_SUCCESS;
 }
@@ -545,8 +551,15 @@ main (int argc, const char **argv)
 		return status_run ();
 	}
 
-	if (terms)
-		return show_errors (terms);
+	if (terms) {
+		gint result;
+
+		tracker_term_pipe_to_pager ();
+		result = show_errors (terms);
+		tracker_term_pager_close ();
+
+		return result;
+	}
 
 	return status_run_default ();
 }
