@@ -337,13 +337,19 @@ print_errors (GList *keyfiles)
 	for (l = keyfiles; l; l = l->next) {
 		GKeyFile *keyfile = l->data;
 		gchar *uri, *message, *path, *str1, *str2;
-		GFile *file;
+		g_autoptr(GFile) file = NULL;
 
 		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
 		file = g_file_new_for_uri (uri);
 		path = g_file_get_path (file);
+		g_free (uri);
+
+		if (!g_file_query_exists (file, NULL)) {
+			tracker_error_report_delete (file);
+			continue;
+		}
+
 		message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
-		g_object_unref (file);
 
 		str1 = tracker_term_ellipsize (path, col_len[0], TRACKER_ELLIPSIZE_START);
 		str2 = tracker_term_ellipsize (message, col_len[1], TRACKER_ELLIPSIZE_END);
@@ -351,7 +357,6 @@ print_errors (GList *keyfiles)
 		g_print ("%-*s %-*s\n",
 		         col_len[0], str1,
 		         col_len[1], str2);
-		g_free (uri);
 		g_free (path);
 		g_free (message);
 		g_free (str1);
@@ -455,13 +460,18 @@ show_errors (gchar **terms)
 
 	for (i = 0; terms[i] != NULL; i++) {
 		for (l = keyfiles; l; l = l->next) {
-			GFile *file;
+			g_autoptr(GFile) file = NULL;
 			gchar *uri, *path;
 
 			keyfile = l->data;
 			uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
 			file = g_file_new_for_uri (uri);
 			path = g_file_get_path (file);
+
+			if (!g_file_query_exists (file, NULL)) {
+				tracker_error_report_delete (file);
+				continue;
+			}
 
 			if (strstr (path, terms[i])) {
 				gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
@@ -480,7 +490,6 @@ show_errors (gchar **terms)
 				g_free (message);
 			}
 
-			g_object_unref (file);
 			g_free (uri);
 			g_free (path);
 		}
