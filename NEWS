@@ -1,3 +1,15 @@
+NEW in 3.4.0.alpha - 2022-07-13
+===============================
+  * Fix fallback from fanotify to inotify
+  * Improvements to "tracker3 status" CLI
+  * Check field type on IPTC data embedded in TIFFs
+  * Avoid non-existent ontology in libav extractor
+  * Fix some file updates being missed through
+    fanotify
+  * Fix possible tracker-miner-fs-3 crashes on shutdown
+
+Translations: ka
+
 NEW in 3.3.0 - 2022-03-19
 =========================
   * Initialize stable URN cache prior to extractor modules in
