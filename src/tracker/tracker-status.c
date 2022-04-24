@@ -60,7 +60,8 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
-static int show_errors (gchar **terms);
+static int show_errors (gchar    **terms,
+                        gboolean   piped);
 
 static TrackerSparqlCursor *
 statistics_query (TrackerSparqlConnection  *connection,
@@ -445,7 +446,7 @@ get_no_args (void)
 			print_errors (keyfiles);
 		} else {
 			gchar *all[2] = { "", NULL };
-			show_errors ((GStrv) all);
+			show_errors ((GStrv) all, TRUE);
 		}
 
 		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
@@ -457,7 +458,8 @@ get_no_args (void)
 }
 
 static int
-show_errors (gchar **terms)
+show_errors (gchar    **terms,
+             gboolean   piped)
 {
 	GList *keyfiles, *l;
 	GKeyFile *keyfile;
@@ -486,12 +488,24 @@ show_errors (gchar **terms)
 				gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
 
 				found = TRUE;
-				g_print (BOLD_BEGIN "URI:" BOLD_END " %s\n", uri);
+				g_print (piped ?
+				         BOLD_BEGIN "URI:" BOLD_END " %s\n" :
+				         "URI: %s\n", uri);
 
-				if (message)
-					g_print (BOLD_BEGIN "%s:" BOLD_END " %s\n", _("Message"), message);
-				if (sparql)
-					g_print (BOLD_BEGIN "SPARQL:" BOLD_END " %s\n", sparql);
+				if (message) {
+					g_print (piped ?
+					         BOLD_BEGIN "%s:" BOLD_END " %s\n" :
+					         "%s: %s\n",
+					         _("Message"), message);
+				}
+
+				if (sparql) {
+					g_print (piped ?
+					         BOLD_BEGIN "SPARQL:" BOLD_END " %s\n" :
+					         "SPARQL: %s\n",
+					         sparql);
+				}
+
 				g_print ("\n");
 
 				g_free (sparql);
@@ -503,8 +517,12 @@ show_errors (gchar **terms)
 		}
 	}
 
-	if (!found)
-		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("No reports found"));
+	if (!found) {
+		g_print (piped ?
+		         BOLD_BEGIN "%s" BOLD_END "\n" :
+		         "%s\n",
+		         _("No reports found"));
+	}
 
 	return EXIT_SUCCESS;
 }
@@ -555,7 +573,7 @@ main (int argc, const char **argv)
 		gint result;
 
 		tracker_term_pipe_to_pager ();
-		result = show_errors (terms);
+		result = show_errors (terms, FALSE);
 		tracker_term_pager_close ();
 
 		return result;
