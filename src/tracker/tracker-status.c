@@ -488,19 +488,19 @@ show_errors (gchar    **terms,
 				gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
 
 				found = TRUE;
-				g_print (piped ?
+				g_print (!piped ?
 				         BOLD_BEGIN "URI:" BOLD_END " %s\n" :
 				         "URI: %s\n", uri);
 
 				if (message) {
-					g_print (piped ?
+					g_print (!piped ?
 					         BOLD_BEGIN "%s:" BOLD_END " %s\n" :
 					         "%s: %s\n",
 					         _("Message"), message);
 				}
 
 				if (sparql) {
-					g_print (piped ?
+					g_print (!piped ?
 					         BOLD_BEGIN "SPARQL:" BOLD_END " %s\n" :
 					         "SPARQL: %s\n",
 					         sparql);
@@ -518,7 +518,7 @@ show_errors (gchar    **terms,
 	}
 
 	if (!found) {
-		g_print (piped ?
+		g_print (!piped ?
 		         BOLD_BEGIN "%s" BOLD_END "\n" :
 		         "%s\n",
 		         _("No reports found"));
