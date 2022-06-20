@@ -33,6 +33,7 @@
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/RSS"
 
 static gchar *add_feed;
+static gchar *list_feeds;
 static gchar *title;
 static gchar *domain_ontology_name = NULL;
 
@@ -45,6 +46,11 @@ static GOptionEntry entries[] = {
 	{ "title", 't', 0,
 	  G_OPTION_ARG_STRING, &title,
 	  N_("Title to use (must be used with --add-feed)"),
+	  NULL },
+	{ "list-feeds", 'l', 0,
+	  G_OPTION_ARG_NONE, &list_feeds,
+	  /* Translators: this is a "feed" as in RSS */
+	  N_("List feeds"),
 	  NULL },
 	{ "domain-ontology", 'd', 0,
 	  G_OPTION_ARG_STRING, &domain_ontology_name,
@@ -189,6 +195,72 @@ handle_add_feed_option(GOptionContext *context)
 }
 
 int
+handle_list_feeds_option(GOptionContext *context)
+{
+	GError *error = NULL;
+	TrackerSparqlConnection *connection;
+	const char *query;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.RSS",
+	                                                NULL, NULL, &error);
+	if (!connection) {
+		g_printerr ("%s: %s\n",
+		            _("Could not establish a connection to Tracker"),
+		            error ? error->message : _("No error given"));
+		g_clear_error (&error);
+		return EXIT_FAILURE;
+	}
+
+	query = "SELECT ?url ?title {"
+	        "    ?feed a mfo:FeedChannel . "
+	        "    ?feed nie:url ?url "
+	        "    OPTIONAL { ?feed nie:title ?title }"
+	        "}";
+
+	stmt = tracker_sparql_connection_query_statement (connection,
+	                                                  query,
+	                                                  NULL,
+	                                                  &error);
+	if (!stmt) {
+		g_printerr ("Couldn't create a prepared statement: '%s'",
+		            error->message);
+		return EXIT_FAILURE;
+	}
+
+	cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	if (!cursor) {
+		g_printerr ("Couldn't execute query: '%s'",
+		            error->message);
+		return EXIT_FAILURE;
+	}
+
+	while (tracker_sparql_cursor_next (cursor, NULL, &error)) {
+		if (tracker_sparql_cursor_get_string (cursor, 1, NULL)) {
+			g_print ("%s - %s\n",
+			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
+			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
+		}
+		else {
+			g_print ("%s\n",
+			        tracker_sparql_cursor_get_string (cursor, 0, NULL));
+		}
+	}
+
+	if (error) {
+		g_printerr ("%s, %s\n",
+		            _("Could not list feeds"),
+		            error->message);
+		g_error_free (error);
+		g_object_unref (connection);
+		return EXIT_FAILURE;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int
 handle_default()
 {
 	GMainLoop *loop;
@@ -314,6 +386,9 @@ main (int argc, char **argv)
 
 	if (add_feed)
 		return handle_add_feed_option(context);
+
+	if (list_feeds)
+		return handle_list_feeds_option(context);
 
 	return handle_default();
 }
