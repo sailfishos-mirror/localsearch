@@ -34,6 +34,7 @@
 
 static gchar *add_feed;
 static gchar *list_feeds;
+static gchar *delete_feed;
 static gchar *title;
 static gchar *domain_ontology_name = NULL;
 
@@ -52,6 +53,11 @@ static GOptionEntry entries[] = {
 	  /* Translators: this is a "feed" as in RSS */
 	  N_("List feeds"),
 	  NULL },
+	{ "delete-feed", 'x', 0,
+	  G_OPTION_ARG_STRING, &delete_feed,
+	  /* Translators: this is a "feed" as in RSS */
+	  N_("Delete feed"),
+	  N_("URL") },
 	{ "domain-ontology", 'd', 0,
 	  G_OPTION_ARG_STRING, &domain_ontology_name,
 	  N_("Runs for a specific domain ontology"),
@@ -189,8 +195,45 @@ handle_add_feed_option(GOptionContext *context)
 		return EXIT_FAILURE;
 	}
 
-	g_print ("Done\n");
+	return EXIT_SUCCESS;
+}
 
+int
+handle_remove_feed_option(GOptionContext *context)
+{
+	TrackerSparqlConnection *connection;
+	GError *error = NULL;
+	gchar* query = g_strdup_printf("DELETE WHERE { "
+	                               "    ?feed a mfo:FeedChannel ."
+	                               "    ?feed nie:url \"%s\""
+	                               "}",
+	                               delete_feed);
+
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.RSS",
+	                                                NULL, NULL, &error);
+	if (!connection) {
+		g_printerr ("%s: %s\n",
+		            _("Could not establish a connection to Tracker"),
+		            error ? error->message : _("No error given"));
+		g_clear_error (&error);
+		return EXIT_FAILURE;
+	}
+
+	tracker_sparql_connection_update (connection,
+	                                  query,
+	                                  NULL,
+	                                  &error);
+	if (error) {
+		g_printerr ("%s, %s\n",
+		            _("Could not remove feed"),
+		            error->message);
+		g_error_free (error);
+		g_object_unref (connection);
+
+		return EXIT_FAILURE;
+	}
+
+	g_print ("Done\n");
 	return EXIT_SUCCESS;
 }
 
@@ -389,6 +432,9 @@ main (int argc, char **argv)
 
 	if (list_feeds)
 		return handle_list_feeds_option(context);
+
+	if (delete_feed)
+		return handle_remove_feed_option(context);
 
 	return handle_default();
 }
