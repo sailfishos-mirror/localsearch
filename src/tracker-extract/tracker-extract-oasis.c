@@ -460,6 +460,12 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 			return; \
 		};
 
+	#define handle_tag_and_return_n(name, id, n) \
+		if (g_ascii_strncasecmp (element_name, name, n) == 0) { \
+			push_tag (id); \
+			return; \
+		};
+
 	switch (data->file_type) {
 	case FILE_TYPE_ODT:
 		handle_tag_and_return ("text:p", ODT_TAG_TYPE_WORD_TEXT);
@@ -479,12 +485,12 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 		return;
 
 	case FILE_TYPE_ODS:
-		handle_tag_and_return ("text", ODT_TAG_TYPE_SPREADSHEET_TEXT);
+		handle_tag_and_return_n ("text", ODT_TAG_TYPE_SPREADSHEET_TEXT, 4);
 		push_tag (ODT_TAG_TYPE_UNKNOWN);
 		return;
 
 	case FILE_TYPE_ODG:
-		handle_tag_and_return ("text", ODT_TAG_TYPE_GRAPHICS_TEXT);
+		handle_tag_and_return_n ("text", ODT_TAG_TYPE_GRAPHICS_TEXT, 4);
 		push_tag (ODT_TAG_TYPE_UNKNOWN);
 		return;
 
@@ -496,6 +502,7 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 
 	#undef push_tag
 	#undef handle_tag_and_return
+	#undef handle_tag_and_return_n
 }
 
 static void
