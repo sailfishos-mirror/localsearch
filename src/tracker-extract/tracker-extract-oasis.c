@@ -311,7 +311,7 @@ xml_start_element_handler_metadata (GMarkupParseContext  *context,
 	push_tag (ODT_TAG_TYPE_UNKNOWN);
 
 	#undef push_tag
-	#undef handle_tag
+	#undef handle_tag_and_return
 }
 
 static void
@@ -495,7 +495,7 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 	}
 
 	#undef push_tag
-	#undef handle_tag
+	#undef handle_tag_and_return
 }
 
 static void
