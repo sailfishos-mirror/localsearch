@@ -260,13 +260,13 @@ xml_start_element_handler_metadata (GMarkupParseContext  *context,
 {
 	ODTMetadataParseInfo *data = user_data;
 
-	#define push_tag(id)                                                             \
+	#define push_tag(id) \
 		g_queue_push_head (data->tag_stack, GINT_TO_POINTER(id));
 
-	#define handle_tag_and_return(name, id)                                          \
-		if (g_ascii_strcasecmp (element_name, name) == 0) {                          \
-			push_tag (id);                                                           \
-			return;                                                                  \
+	#define handle_tag_and_return(name, id) \
+		if (g_ascii_strcasecmp (element_name, name) == 0) { \
+			push_tag (id); \
+			return; \
 		};
 
 	handle_tag_and_return ("dc:title", ODT_TAG_TYPE_TITLE);
@@ -451,13 +451,13 @@ xml_start_element_handler_content (GMarkupParseContext  *context,
 {
 	ODTContentParseInfo *data = user_data;
 
-	#define push_tag(id)                                                             \
+	#define push_tag(id) \
 		g_queue_push_head (data->tag_stack, GINT_TO_POINTER(id));
 
-	#define handle_tag_and_return(name, id)                                          \
-		if (g_ascii_strcasecmp (element_name, name) == 0) {                          \
-			push_tag (id);                                                           \
-			return;                                                                  \
+	#define handle_tag_and_return(name, id) \
+		if (g_ascii_strcasecmp (element_name, name) == 0) { \
+			push_tag (id); \
+			return; \
 		};
 
 	switch (data->file_type) {
