@@ -161,7 +161,6 @@ struct _TrackerMinerFSPrivate {
 
 	/* How many we indexed and how many had errors indexing. */
 	guint total_files_processed;
-	guint total_files_notified;
 	guint total_files_notified_error;
 };
 
@@ -926,9 +925,8 @@ log_stats (TrackerMinerFS *fs)
 			g_info ("Total files       : %d (%d ignored)",
 			        fs->priv->total_files_found,
 			        fs->priv->total_files_ignored);
-			g_info ("Total processed   : %d (%d notified, %d with error)",
+			g_info ("Changes processed : %d (%d errors)",
 			        fs->priv->total_files_processed,
-			        fs->priv->total_files_notified,
 			        fs->priv->total_files_notified_error);
 			g_info ("--------------------------------------------------\n");
 		}
