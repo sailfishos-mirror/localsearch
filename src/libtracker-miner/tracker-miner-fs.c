@@ -1270,6 +1270,11 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	item_queue_get_next_file (fs, &file, &source_file, &info, &type,
 	                          &attributes_update, &is_dir);
 
+	if (fs->priv->timer_stopped) {
+		g_timer_start (fs->priv->timer);
+		fs->priv->timer_stopped = FALSE;
+	}
+
 	if (file == NULL && !fs->priv->extraction_timer_stopped) {
 		g_timer_stop (fs->priv->extraction_timer);
 		fs->priv->extraction_timer_stopped = TRUE;
@@ -1678,11 +1683,6 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
         } else {
                 str = g_strdup_printf ("Crawling single directory '%s'", uri);
         }
-
-	if (fs->priv->timer_stopped) {
-		g_timer_start (fs->priv->timer);
-		fs->priv->timer_stopped = FALSE;
-	}
 
 	/* Always set the progress here to at least 1%, and the remaining time
          * to -1 as we cannot guess during crawling (we don't know how many directories
