@@ -1,3 +1,14 @@
+NEW in 3.4.0.beta - 2022-08-08
+==============================
+  * Add --list and --delete options to RSS miner
+  * Text extraction fixes on ODS and ODG file formats
+  * Build fixes on MacOS
+  * Improve logging of filesystem miner elapsed time information
+  * Improve performance of filesystem move operations
+  * Do not show duplicate results in "tracker3 search" CLI tool
+
+Translations: ab, es, pt, sv, uk
+
 NEW in 3.4.0.alpha - 2022-07-13
 ===============================
   * Fix fallback from fanotify to inotify
