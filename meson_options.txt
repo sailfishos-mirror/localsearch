@@ -76,7 +76,7 @@ option('xps', type: 'feature', value: 'auto',
 
 option('battery_detection', type: 'combo', choices: ['upower', 'hal', 'none'], value: 'upower',
        description: 'Enable upower or HAL for battery/mains power detection')
-option('charset_detection', type: 'combo', choices: ['auto', 'enca', 'icu', 'none'], value: 'auto',
+option('charset_detection', type: 'combo', choices: ['icu', 'enca', 'none'], value: 'icu',
        description: 'Enable enca or libicu for charset detection in MP3s')
 option('generic_media_extractor', type: 'combo', choices: ['gstreamer', 'libav', 'none'], value: 'gstreamer',
        description: 'Enables one of the (gstreamer, libav) generic media extractor backends')

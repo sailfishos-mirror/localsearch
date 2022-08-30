@@ -64,8 +64,6 @@ gstreamer_audio = dependency('gstreamer-audio-1.0', required: false)
 gstreamer_tag = dependency('gstreamer-tag-1.0', required: false)
 gupnp_dlna = dependency('gupnp-dlna-2.0', version: '>= 0.9.4', required: false)
 gupnp_dlna_gst = dependency('gupnp-dlna-gst-2.0', version: '>= 0.9.4', required: false)
-icu_i18n = dependency('icu-i18n', version: '>= 4.8.1.1', required: false)
-icu_uc = dependency('icu-uc', version: '>= 4.8.1.1', required: false)
 libcue = dependency('libcue', version: '>= 2.0.0', required: get_option('cue'))
 libexif = dependency('libexif', version: '>= 0.6', required: get_option('exif'))
 libgsf = dependency('libgsf-1', version: '>= 1.14.24', required: get_option('gsf'))
@@ -185,41 +183,28 @@ endif
 
 ##########################################################################
 # Check for tracker-extract: icu or enca for detecting Cyrillic in MP3s
-#
-# By default, AUTO with this order of preference:
-#  1)  icu
-#  2)  enca
 ##########################################################################
 
-charset_library_name = 'none'
-have_libicu = false
+charset_library_help = 'You can use the "charset_detection" config option to select a different backend or set `-Dcharset_detection=none` to disable this feature.'
+charset_library_name = get_option('charset_detection')
 
-if icu_i18n.found() and icu_uc.found()
-  have_libicu = true
-endif
+if charset_library_name == 'icu'
+  icu_i18n = dependency('icu-i18n',
+    version: '>= 4.8.1.1',
+    not_found_message: charset_library_help)
+  icu_uc = dependency('icu-uc',
+    version: '>= 4.8.1.1',
+    not_found_message: charset_library_help)
 
-if have_libicu
-  if get_option('charset_detection') == 'auto' or get_option('charset_detection') == 'icu'
-    charset_library = declare_dependency(
-       dependencies: [icu_uc, icu_i18n]
-    )
-    charset_library_name = 'icu'
-  endif
-else
-  if get_option('charset_detection') == 'icu'
-    error('libicu requested for character set detection, but it was not found')
-  endif
-endif
+  charset_library = declare_dependency(
+     dependencies: [icu_uc, icu_i18n]
+  )
+elif charset_library_name == 'enca'
+  enca = dependency('enca',
+    version: '>= 1.9',
+    not_found_message: charset_library_help)
 
-if charset_library_name == 'none' and get_option('charset_detection') != 'none'
-  enca = dependency('enca', version: '>= 1.9', required: false)
-
-  if enca.found()
-    charset_library = enca
-    charset_library_name = 'enca'
-  elif get_option('enca') == 'yes'
-    error('enca support explicitly requested, but enca couldn\'t be found')
-  endif
+  charset_library = enca
 endif
 
 ####################################################################
