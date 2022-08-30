@@ -51,9 +51,6 @@ else
   tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
 endif
 
-avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
-avformat = dependency('libavformat', version: '>= 0.8.4', required: false)
-avutil = dependency('libavutil', version: '>= 0.8.4', required: false)
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
 gexiv2 = dependency('gexiv2', required: get_option('raw'))
@@ -64,7 +61,6 @@ gmodule = dependency('gmodule-2.0', version: '>=' + glib_required)
 gobject = dependency('gobject-2.0', version: '>=' + glib_required)
 gstreamer = dependency('gstreamer-1.0', required: false)
 gstreamer_audio = dependency('gstreamer-audio-1.0', required: false)
-gstreamer_pbutils = dependency('gstreamer-pbutils-1.0', required: false)
 gstreamer_tag = dependency('gstreamer-tag-1.0', required: false)
 gupnp_dlna = dependency('gupnp-dlna-2.0', version: '>= 0.9.4', required: false)
 gupnp_dlna_gst = dependency('gupnp-dlna-gst-2.0', version: '>= 0.9.4', required: false)
@@ -244,34 +240,28 @@ endif
 # Check for tracker-extract: gstreamer/etc
 ####################################################################
 
-generic_media_handler = []
-generic_media_handler_name = 'none'
+generic_media_handler_name = get_option('generic_media_extractor')
 
-if get_option('generic_media_extractor') == 'auto'
-  if gstreamer.found() and gstreamer_tag.found()
-    generic_media_handler = [gstreamer, gstreamer_tag]
-    generic_media_handler_name = 'gstreamer'
-  elif avcodec.found() and avformat.found() and avutil.found()
-    generic_media_handler = [avcodec, avformat, avutil]
-    generic_media_handler_name = 'libav'
-  else
-    generic_media_handler_name = 'none'
-    generic_media_handler = []
-  endif
-elif get_option('generic_media_extractor') == 'gstreamer'
-  if gstreamer.found() and gstreamer_tag.found()
-    generic_media_handler = [gstreamer, gstreamer_tag]
-    generic_media_handler_name = 'gstreamer'
+if generic_media_handler_name  == 'gstreamer'
+  gstreamer_pbutils = dependency('gstreamer-pbutils-1.0', required: false)
+
+  if gstreamer.found() and gstreamer_pbutils.found()
+    generic_media_handler = [gstreamer, gstreamer_pbutils]
   else
     error('GStreamer media handler was enabled but required GStreamer libraries were not found')
   endif
-elif get_option('generic_media_extractor') == 'libav'
+elif generic_media_handler_name == 'libav'
+  avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
+  avformat = dependency('libavformat', version: '>= 0.8.4', required: false)
+  avutil = dependency('libavutil', version: '>= 0.8.4', required: false)
+
   if avcodec.found() and avformat.found() and avutil.found()
     generic_media_handler = [avcodec, avformat, avutil]
-    generic_media_handler_name = 'libav'
   else
     error('libav media handler was enabled but required libav libraries were not found')
   endif
+else
+  generic_media_handler = []
 endif
 
 ###########################################################################
