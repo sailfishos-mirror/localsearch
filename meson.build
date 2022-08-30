@@ -79,7 +79,6 @@ libtiff = dependency('libtiff-4', required: get_option('tiff'))
 libxml2 = dependency('libxml-2.0', version: '>= 2.6', required: get_option('xml'))
 poppler = dependency('poppler-glib', version: '>= 0.16.0', required: get_option('pdf'))
 totem_plparser = dependency('totem-plparser', required: get_option('playlist'))
-upower = dependency('upower-glib', version: '>= 0.9.0', required: false)
 blkid = dependency('blkid', required: true)
 
 libgif = cc.find_library('gif', required: get_option('gif'))
@@ -141,35 +140,22 @@ add_project_arguments(debug_cflags, language: 'c')
 
 ##################################################################
 # Check for libtracker-common: battery/mains power detection
-#
-# By default, AUTO with this order of preference:
-#  1)  upower
-#  2)  hal
 ##################################################################
 
-have_hal = false
-battery_detection_library_name = ''
+battery_detection_help = 'You can use the "battery_detection" config option to select a different backend or set `-Dbattery_detection=none` to disable this feature.'
+battery_detection_library_name = get_option('battery_detection')
+if battery_detection_library_name == 'upower'
+  upower = dependency('upower-glib',
+    version: '>= 0.9.0',
+    not_found_message: battery_detection_help)
 
-if upower.found()
-  if get_option('battery_detection') == 'auto' or get_option('battery_detection') == 'upower'
-    battery_detection_library = upower
-    battery_detection_library_name = 'upower'
-  endif
-elif get_option('battery_detection') == 'upower'
-  error('upower explicitly requested, but upower library was not found')
-endif
+  battery_detection_library = upower
+elif battery_detection_library_name == 'hal'
+  hal = dependency('hal',
+    version: '>= 0.5',
+    not_found_message: battery_detection_help)
 
-if battery_detection_library_name == ''
-  hal = dependency('hal', version: '>= 0.5', required: false)
-
-  if hal.found()
-    battery_detection_library = hal
-    battery_detection_library_name = 'hal'
-  elif get_option('battery_detection') == 'hal'
-    error('HAL explicitly requested, but not found')
-  else
-    battery_detection_library_name = '(none)'
-  endif
+  battery_detection_library = hal
 endif
 
 ##########################################
