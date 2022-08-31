@@ -240,6 +240,7 @@ extract_music_album_info(TrackerResource *metadata,
 	const char *album_title = NULL;
 	const char *content_created;
 	int disc_number = 1;
+	int album_track_count = 0;
 	AVDictionaryEntry *tag = NULL;
 
 	if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
@@ -266,6 +267,21 @@ extract_music_album_info(TrackerResource *metadata,
 
 	tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
 	tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
+
+	/* There is no officially specified 'total tracks' field, these two names
+	 * are taken from MusicBrainz Picard tag mapping for Vorbis comments.
+	 *
+	 * https://picard-docs.musicbrainz.org/en/appendices/tag_mapping.html
+	 */
+	if ((tag = find_tag (format, audio_stream, NULL, "TOTALTRACKS"))) {
+		album_track_count = atoi (tag->value);
+	} else if ((tag = find_tag (format, audio_stream, NULL, "TRACKTOTAL"))) {
+		album_track_count = atoi (tag->value);
+	}
+
+	if (album_track_count > 0) {
+		tracker_resource_set_int (album, "nmm:albumTrackCount", album_track_count);
+	}
 
 	if ((tag = find_tag (format, audio_stream, NULL, "MUSICBRAINZ_ALBUMID"))) {
 		const char *mb_release_id = tag->value;
