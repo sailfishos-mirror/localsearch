@@ -122,9 +122,7 @@ extract_music_piece_info(TrackerResource *metadata,
                          AVFormatContext *format,
                          AVStream        *audio_stream)
 {
-	g_autoptr(TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
-	char *album_artist_name = NULL;
-	char *album_title = NULL;
+	g_autoptr(TrackerResource) artist = NULL, performer = NULL;
 	g_autofree char *content_created = NULL;
 	AVDictionaryEntry *tag = NULL;
 
@@ -142,15 +140,6 @@ extract_music_piece_info(TrackerResource *metadata,
 		if (track > 0) {
 			tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
 		}
-	}
-
-	if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
-		album_title = tag->value;
-	}
-
-	if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
-		album_artist_name = tag->value;
-		album_artist = tracker_extract_new_artist (album_artist_name);
 	}
 
 	if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
@@ -181,8 +170,29 @@ extract_music_piece_info(TrackerResource *metadata,
 		tracker_resource_set_relation (metadata, "nmm:composer", composer);
 		g_object_unref (composer);
 	}
+}
+
+static void
+extract_music_album_info(TrackerResource *metadata,
+                         AVFormatContext *format,
+                         AVStream        *audio_stream)
+{
+	g_autoptr(TrackerResource) album_artist = NULL;
+	const char *album_artist_name = NULL;
+	const char *album_title = NULL;
+	AVDictionaryEntry *tag = NULL;
+
+	if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
+		album_title = tag->value;
+	}
+
+	if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
+		album_artist_name = tag->value;
+		album_artist = tracker_extract_new_artist (album_artist_name);
+	}
 
 	if (album_title) {
+		const char *content_created = tracker_resource_get_first_string (metadata, "nie:contentCreated");
 		int disc_number = 1;
 		TrackerResource *album_disc;
 
@@ -255,6 +265,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		extract_video_info (metadata, format, video_stream);
 	} else if (audio_stream) {
 		extract_music_piece_info (metadata, format, audio_stream);
+		extract_music_album_info (metadata, format, audio_stream);
 	}
 
 	if (format->bit_rate > 0) {
