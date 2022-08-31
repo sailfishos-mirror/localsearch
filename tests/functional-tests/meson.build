@@ -129,7 +129,7 @@ functional_tests = [
   'cli',
 ]
 
-if libcue.found()
+if libcue.found() and generic_media_handler_name == 'gstreamer'
   functional_tests += 'extractor-flac-cuesheet'
 endif
 
