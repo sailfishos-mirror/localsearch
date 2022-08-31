@@ -47,6 +47,156 @@ find_tag (AVFormatContext *format,
 	return tag;
 }
 
+static void
+extract_audio_info(TrackerResource *metadata,
+                   AVFormatContext *format,
+                   AVStream        *audio_stream)
+{
+	if (audio_stream->codecpar->sample_rate > 0) {
+		tracker_resource_set_int64 (metadata, "nfo:sampleRate", audio_stream->codecpar->sample_rate);
+	}
+	if (audio_stream->codecpar->channels > 0) {
+		tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->channels);
+	}
+}
+
+static void
+extract_video_info(TrackerResource *metadata,
+                   AVFormatContext *format,
+                   AVStream        *video_stream)
+{
+	g_autofree char *content_created = NULL;
+	AVDictionaryEntry *tag = NULL;
+
+	tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
+
+	if (video_stream->codecpar->width > 0 && video_stream->codecpar->height > 0) {
+		tracker_resource_set_int64 (metadata, "nfo:width", video_stream->codecpar->width);
+		tracker_resource_set_int64 (metadata, "nfo:height", video_stream->codecpar->height);
+	}
+
+	if (video_stream->avg_frame_rate.num > 0) {
+		gdouble frame_rate = (gdouble) video_stream->avg_frame_rate.num
+		                     / video_stream->avg_frame_rate.den;
+		tracker_resource_set_double (metadata, "nfo:frameRate", frame_rate);
+	}
+
+	if (video_stream->duration > 0) {
+		gint64 duration = av_rescale(video_stream->duration, video_stream->time_base.num,
+		                             video_stream->time_base.den);
+		tracker_resource_set_int64 (metadata, "nfo:duration", duration);
+	}
+
+	if (video_stream->sample_aspect_ratio.num > 0) {
+		gdouble aspect_ratio = (gdouble) video_stream->sample_aspect_ratio.num
+		                       / video_stream->sample_aspect_ratio.den;
+		tracker_resource_set_double (metadata, "nfo:aspectRatio", aspect_ratio);
+	}
+
+	if (video_stream->nb_frames > 0) {
+		tracker_resource_set_int64 (metadata, "nfo:frameCount", video_stream->nb_frames);
+	}
+
+	if ((tag = find_tag (format, video_stream, NULL, "synopsis"))) {
+		tracker_resource_set_string (metadata, "nmm:synopsis", tag->value);
+	}
+
+	if ((tag = find_tag (format, video_stream, NULL, "episode_sort"))) {
+		tracker_resource_set_int64 (metadata, "nmm:episodeNumber", atoi (tag->value));
+	}
+
+	if ((tag = find_tag (format, video_stream, NULL, "season_number"))) {
+		tracker_resource_set_int64 (metadata, "nmm:season", atoi (tag->value));
+	}
+
+	if ((tag = find_tag (format, video_stream, NULL, "creation_time"))) {
+		content_created = tracker_date_guess (tag->value);
+		if (content_created) {
+			tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
+		}
+	}
+}
+
+static void
+extract_music_piece_info(TrackerResource *metadata,
+                         AVFormatContext *format,
+                         AVStream        *audio_stream)
+{
+	g_autoptr(TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
+	char *album_artist_name = NULL;
+	char *album_title = NULL;
+	g_autofree char *content_created = NULL;
+	AVDictionaryEntry *tag = NULL;
+
+	tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
+	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
+
+	if (audio_stream->duration > 0) {
+		gint64 duration = av_rescale(audio_stream->duration, audio_stream->time_base.num,
+		                             audio_stream->time_base.den);
+		tracker_resource_set_int64 (metadata, "nfo:duration", duration);
+	}
+
+	if ((tag = find_tag (format, audio_stream, NULL, "track"))) {
+		int track = atoi(tag->value);
+		if (track > 0) {
+			tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
+		}
+	}
+
+	if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
+		album_title = tag->value;
+	}
+
+	if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
+		album_artist_name = tag->value;
+		album_artist = tracker_extract_new_artist (album_artist_name);
+	}
+
+	if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
+		artist = tracker_extract_new_artist (tag->value);
+	}
+
+	if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
+		performer = tracker_extract_new_artist (tag->value);
+	}
+
+	if ((tag = av_dict_get (format->metadata, "date", NULL, 0))) {
+		content_created = tracker_date_guess (tag->value);
+		if (content_created) {
+			tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
+		}
+	}
+
+	if (artist) {
+		tracker_resource_set_relation (metadata, "nmm:artist", artist);
+	}
+
+	if (performer) {
+		tracker_resource_set_relation (metadata, "nmm:performer", performer);
+	}
+
+	if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
+		TrackerResource *composer = tracker_extract_new_artist (tag->value);
+		tracker_resource_set_relation (metadata, "nmm:composer", composer);
+		g_object_unref (composer);
+	}
+
+	if (album_title) {
+		int disc_number = 1;
+		TrackerResource *album_disc;
+
+		if ((tag = find_tag (format, audio_stream, NULL, "disc"))) {
+			disc_number = atoi (tag->value);
+		}
+
+		album_disc = tracker_extract_new_music_album_disc (album_title, album_artist, disc_number, content_created);
+
+		tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
+		tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
+	}
+}
+
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
@@ -54,7 +204,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GFile *file;
 	TrackerResource *metadata;
 	gchar *absolute_file_path;
-	gchar *content_created = NULL;
 	gchar *uri, *resource_uri;
 	AVFormatContext *format = NULL;
 	AVStream *audio_stream = NULL;
@@ -99,143 +248,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_free (resource_uri);
 
 	if (audio_stream) {
-		if (audio_stream->codecpar->sample_rate > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:sampleRate", audio_stream->codecpar->sample_rate);
-		}
-		if (audio_stream->codecpar->channels > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->channels);
-		}
+		extract_audio_info (metadata, format, audio_stream);
 	}
 
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
-		tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
-
-		if (video_stream->codecpar->width > 0 && video_stream->codecpar->height > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:width", video_stream->codecpar->width);
-			tracker_resource_set_int64 (metadata, "nfo:height", video_stream->codecpar->height);
-		}
-
-		if (video_stream->avg_frame_rate.num > 0) {
-			gdouble frame_rate = (gdouble) video_stream->avg_frame_rate.num
-			                     / video_stream->avg_frame_rate.den;
-			tracker_resource_set_double (metadata, "nfo:frameRate", frame_rate);
-		}
-
-		if (video_stream->duration > 0) {
-			gint64 duration = av_rescale(video_stream->duration, video_stream->time_base.num,
-			                             video_stream->time_base.den);
-			tracker_resource_set_int64 (metadata, "nfo:duration", duration);
-		}
-
-		if (video_stream->sample_aspect_ratio.num > 0) {
-			gdouble aspect_ratio = (gdouble) video_stream->sample_aspect_ratio.num
-			                       / video_stream->sample_aspect_ratio.den;
-			tracker_resource_set_double (metadata, "nfo:aspectRatio", aspect_ratio);
-		}
-
-		if (video_stream->nb_frames > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:frameCount", video_stream->nb_frames);
-		}
-
-		if ((tag = find_tag (format, video_stream, NULL, "synopsis"))) {
-			tracker_resource_set_string (metadata, "nmm:synopsis", tag->value);
-		}
-
-		if ((tag = find_tag (format, video_stream, NULL, "episode_sort"))) {
-			tracker_resource_set_int64 (metadata, "nmm:episodeNumber", atoi (tag->value));
-		}
-
-		if ((tag = find_tag (format, video_stream, NULL, "season_number"))) {
-			tracker_resource_set_int64 (metadata, "nmm:season", atoi (tag->value));
-		}
-
-		if ((tag = find_tag (format, video_stream, NULL, "creation_time"))) {
-			content_created = tracker_date_guess (tag->value);
-			if (content_created) {
-				tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
-			}
-		}
-
+		extract_video_info (metadata, format, video_stream);
 	} else if (audio_stream) {
-		TrackerResource *album_artist = NULL, *artist = NULL, *performer = NULL;
-		char *album_artist_name = NULL;
-		char *album_title = NULL;
-
-		tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
-		tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
-
-		if (audio_stream->duration > 0) {
-			gint64 duration = av_rescale(audio_stream->duration, audio_stream->time_base.num,
-			                             audio_stream->time_base.den);
-			tracker_resource_set_int64 (metadata, "nfo:duration", duration);
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "track"))) {
-			int track = atoi (tag->value);
-			if (track > 0) {
-				tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
-			}
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
-			album_title = tag->value;
-		}
-
-		if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
-			album_artist_name = tag->value;
-			album_artist = tracker_extract_new_artist (album_artist_name);
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
-			artist = tracker_extract_new_artist (tag->value);
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
-			performer = tracker_extract_new_artist (tag->value);
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "date"))) {
-			content_created = tracker_date_guess (tag->value);
-			if (content_created) {
-				tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
-			}
-		}
-
-		if (artist) {
-			tracker_resource_set_relation (metadata, "nmm:artist", artist);
-		}
-
-		if (performer) {
-			tracker_resource_set_relation (metadata, "nmm:performer", performer);
-		}
-
-		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
-			TrackerResource *composer = tracker_extract_new_artist (tag->value);
-			tracker_resource_set_relation (metadata, "nmm:composer", composer);
-			g_object_unref (composer);
-		}
-
-		if (album_title) {
-			int disc_number = 1;
-			TrackerResource *album_disc;
-
-			if ((tag = find_tag (format, audio_stream, NULL, "disc"))) {
-				disc_number = atoi (tag->value);
-			}
-
-			album_disc = tracker_extract_new_music_album_disc (album_title, album_artist, disc_number, content_created);
-
-			tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
-			tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
-
-			g_object_unref (album_disc);
-		}
-
-		if (artist)
-			g_object_unref (artist);
-
-		if (performer)
-			g_object_unref (performer);
+		extract_music_piece_info (metadata, format, audio_stream);
 	}
 
 	if (format->bit_rate > 0) {
@@ -264,7 +283,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	tracker_guarantee_resource_title_from_file (metadata, "nie:title", title, uri, NULL);
 
-	g_free (content_created);
 	g_free (uri);
 
 	avformat_close_input (&format);
