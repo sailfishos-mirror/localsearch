@@ -166,7 +166,7 @@ extract_music_piece_info(const char      *file_url,
 		performer = tracker_extract_new_artist (tag->value);
 	}
 
-	if ((tag = av_dict_get (format->metadata, "date", NULL, 0))) {
+	if ((tag = find_tag (format, audio_stream, NULL, "date"))) {
 		content_created = tracker_date_guess (tag->value);
 		if (content_created) {
 			tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
