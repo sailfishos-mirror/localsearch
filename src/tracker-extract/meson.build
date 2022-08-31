@@ -51,7 +51,7 @@ if libjpeg.found()
   modules += [['extract-jpeg', 'tracker-extract-jpeg.c', ['10-jpeg.rule'], [libjpeg, tracker_miners_common_dep]]]
 endif
 
-if generic_media_handler_name == 'libav'
+if generic_media_handler_name in ['ffmpeg', 'libav']
   rules = ['90-libav-audio-generic.rule', '90-libav-video-generic.rule']
   dependencies = [avcodec, avformat, avutil, tracker_miners_common_dep]
   modules += [['extract-libav', 'tracker-extract-libav.c', rules, dependencies]]
