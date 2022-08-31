@@ -99,7 +99,7 @@ if totem_plparser.found()
   extractor_tests += 'playlists/playlist-test-1'
 endif
 
-if libcue.found()
+if libcue.found() and generic_media_handler_name == 'gstreamer'
   extractor_tests += 'disc-images/psx-game-image-1'
 endif
 
