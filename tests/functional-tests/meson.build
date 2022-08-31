@@ -139,7 +139,7 @@ if libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and
   ]
 endif
 
-if generic_media_handler_name != 'none'
+if generic_media_handler_name == 'gstreamer'
   functional_tests += 'writeback-audio'
 endif
 
