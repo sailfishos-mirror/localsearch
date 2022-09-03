@@ -186,7 +186,7 @@ check-code-style:
     - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dtests_tap_protocol=true -Dtracker:docs=false --auto-features=enabled
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false -Dtests_tap_protocol=true -Dtracker:docs=false --auto-features=enabled
     - ninja
   artifacts:
     expire_in: 1 day
@@ -233,16 +233,21 @@ build-ubuntu-rolling@x86_64:
   script:
     - .gitlab-ci/checkout-tracker.sh
     - cd build
+    - ninja clean
     - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
-
-      dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 eatmydata meson test --suite tracker-miners --print-errorlogs
+      dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite tracker-miners --print-errorlogs ${MESON_TEST_EXTRA_ARGS}
 
   after_script:
+    - pushd build
+    - gcovr --root=.. --exclude=../build --exclude=./build
+        --exclude=../tests --exclude=./subprojects --exclude=../subprojects
+        --json --print-summary --output=../coverage-${CI_JOB_NAME}.json
+    - popd
     - |
       echo "Distribution: "
       echo
@@ -261,6 +266,7 @@ build-ubuntu-rolling@x86_64:
     when: always
     paths:
     - build/meson-logs/*.txt
+    - coverage-*.json
     reports:
       junit: "build/meson-logs/testlog.junit.xml"
 
@@ -298,27 +304,27 @@ test-ubuntu@x86_64:
     - build-ubuntu-rolling@x86_64
   <<: *test
 
-coverage-analysis:
+coverage:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:36@x86_64
   stage: analysis
   allow_failure: true
   script:
-    - .gitlab-ci/checkout-tracker.sh
-    - mkdir -p coverage-build/coveragereport
-    - cd coverage-build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false -Dtracker:docs=false --auto-features=enabled
-    - ninja
-    - env LANG=C.UTF-8 LC_ALL=C.UTF-8 dbus-run-session eatmydata meson test --print-errorlogs ${MESON_TEST_EXTRA_ARGS}
-    - gcovr --html-details --print-summary --root=.. --exclude=subprojects --exclude=../subprojects --exclude=../tests --output coveragereport/index.html
+    - mkdir coveragereport
+    - gcovr --add-tracefile 'coverage-*.json'
+        --exclude=build
+        --html-details --print-summary --output coveragereport/index.html
   coverage: '/^lines: (\d+\.\d+\%)/'
   artifacts:
     when: always
     paths:
-    - coverage-build/coveragereport
+    - coveragereport
   needs:
     - test-fedora@x86_64
+    - test-fedora-rawhide@x86_64
+    - test-fedora@aarch64
+    - test-ubuntu@x86_64
 
 coverity:
   extends:
