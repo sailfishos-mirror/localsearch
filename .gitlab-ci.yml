@@ -70,23 +70,13 @@ check-merge-request:
       dnf clean all &&
       pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py meson &&
       dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
-      dnf install -y --setopt=install_weak_deps=False gstreamer1-libav &&
-      curl --get 'https://www.flamingspork.com/projects/libeatmydata/libeatmydata-105.tar.gz' --output libeatmydata-105.tar.gz &&
-      tar -x -f ./libeatmydata-105.tar.gz &&
-      cd libeatmydata-105 &&
-      ./configure --prefix=/usr &&
-      make install &&
-      sed -e '/dpkg-architecture/ d' -i /usr/bin/eatmydata &&
-      sed -e 's@shlib="/usr/lib/$DEB_BUILD_MULTIARCH/eatmydata.sh@shlib="/usr/libexec/eatmydata.sh@' -i /usr/bin/eatmydata &&
-      cd .. &&
-      rm ./libeatmydata-105.tar.gz &&
-      rm -Rf ./libeatmydata-105
+      dnf install -y --setopt=install_weak_deps=False gstreamer1-libav
 
 .tracker-miners.ubuntu@common:
   variables:
     BASE_TAG: '2021-08-04.0'
     FDO_UPSTREAM_REPO: GNOME/tracker
-    FDO_DISTRIBUTION_PACKAGES: 'python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev eatmydata'
+    FDO_DISTRIBUTION_PACKAGES: 'python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list &&
