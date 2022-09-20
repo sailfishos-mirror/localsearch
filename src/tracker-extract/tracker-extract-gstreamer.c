@@ -1293,20 +1293,25 @@ discoverer_init_and_run (MetadataExtractor *extractor,
 
 	for (l = extractor->streams; l; l = g_list_next (l)) {
 		GstDiscovererStreamInfo *stream = l->data;
-		GstTagList *stream_tags;
+		GstTagList *stream_tags, *copy = NULL;
 
-		stream_tags = gst_tag_list_copy (gst_discoverer_stream_info_get_tags (stream));
+		stream_tags = gst_discoverer_stream_info_get_tags (stream);
+
+		if (stream_tags)
+			copy = gst_tag_list_copy (stream_tags);
+
 		if (extractor->has_video &&
+		    copy &&
 		    gst_tag_list_get_tag_size (extractor->tagcache, "title") > 0)
-			gst_tag_list_remove_tag (stream_tags, "title");
+			gst_tag_list_remove_tag (copy, "title");
 
-		if (stream_tags) {
+		if (copy) {
 			gst_tag_list_insert (extractor->tagcache,
-					     stream_tags,
+					     copy,
 					     GST_TAG_MERGE_APPEND);
 		}
 
-		gst_tag_list_unref (stream_tags);
+		g_clear_pointer (&copy, gst_tag_list_unref);
 	}
 
 	gst_discoverer_info_unref (info);
