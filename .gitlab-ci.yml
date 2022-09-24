@@ -21,6 +21,7 @@ stages:
   - code-review
   - build
   - test
+  - seccomp
   - analysis
 
 .check-template: &check
@@ -176,7 +177,7 @@ check-code-style:
     - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Db_coverage=true -Dseccomp=false -Dtests_tap_protocol=true -Dtracker:docs=false --auto-features=enabled
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Dtests_tap_protocol=true -Dtracker:docs=false --auto-features=enabled
     - ninja
   artifacts:
     expire_in: 1 day
@@ -224,6 +225,7 @@ build-ubuntu-rolling@x86_64:
     - .gitlab-ci/checkout-tracker.sh
     - cd build
     - ninja clean
+    - meson configure -Db_coverage=true -Dseccomp=false
     - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
@@ -293,6 +295,61 @@ test-ubuntu@x86_64:
   needs:
     - build-ubuntu-rolling@x86_64
   <<: *test
+
+.seccomp_template: &seccomp
+  stage: seccomp
+
+  script:
+    - .gitlab-ci/checkout-tracker.sh
+    - cd build
+    - |
+      # Remove the many "CI_" variables from the environment. Meson dumps the
+      # whole environment for every failed test, and that gives a whole
+      # screenful of junk each time unless we strip these.
+      unset $(env|grep -o '^CI_[^=]*')
+      dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite tracker-miners --print-errorlogs ${MESON_TEST_EXTRA_ARGS}
+
+  artifacts:
+    expire_in: 1 day
+    when: always
+    paths:
+    - build/meson-logs/*.txt
+    reports:
+      junit: "build/meson-logs/testlog.junit.xml"
+
+seccomp-fedora@x86_64:
+  extends:
+    - .fdo.distribution-image@fedora
+    - .tracker-miners.fedora:36@x86_64
+  needs:
+    - build-fedora@x86_64
+  <<: *seccomp
+
+seccomp-fedora-rawhide@x86_64:
+  extends:
+    - .fdo.distribution-image@fedora
+    - .tracker-miners.fedora:rawhide@x86_64
+  needs:
+    - build-fedora-rawhide@x86_64
+  allow_failure: true
+  <<: *seccomp
+
+seccomp-fedora@aarch64:
+  extends:
+    - .fdo.distribution-image@fedora
+    - .tracker-miners.fedora:36@aarch64
+  needs:
+    - build-fedora@aarch64
+  allow_failure: true
+  <<: *seccomp
+
+seccomp-ubuntu@x86_64:
+  extends:
+    - .fdo.distribution-image@ubuntu
+    - .tracker-miners.ubuntu:rolling@x86_64
+  needs:
+    - build-ubuntu-rolling@x86_64
+  <<: *seccomp
 
 coverage:
   extends:
