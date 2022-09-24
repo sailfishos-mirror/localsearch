@@ -400,3 +400,37 @@ coverity:
       --form description="gitlab CI build"
   only:
     - master
+
+# Triggered from a scheduled job
+
+.container_rebuild_template: &container_rebuild
+  only:
+    variables:
+      - $CI_PIPELINE_SOURCE == "schedule" && $CRON_TASK == "REBUILD_CI_CONTAINERS"
+  variables:
+    GIT_STRATEGY: none # no need to pull the whole tree for rebuilding the image
+    FDO_FORCE_REBUILD: 1 # Force rebuilding the image
+
+rebuild-fedora-container@x86_64:
+  extends:
+    - .fdo.container-build@fedora
+    - .tracker-miners.fedora:36@x86_64
+  <<: *container_rebuild
+
+rebuild-fedora-rawhide-container@x86_64:
+  extends:
+    - .fdo.container-build@fedora
+    - .tracker-miners.fedora:rawhide@x86_64
+  <<: *container_rebuild
+
+rebuild-fedora-container@aarch64:
+  extends:
+    - .fdo.container-build@fedora
+    - .tracker-miners.fedora:36@aarch64
+  <<: *container_rebuild
+
+rebuild-ubuntu-container@x86_64:
+  extends:
+    - .fdo.container-build@ubuntu
+    - .tracker-miners.ubuntu:rolling@x86_64
+  <<: *container_rebuild
