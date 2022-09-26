@@ -102,6 +102,8 @@ tracker_seccomp_init (void)
 
 	/* Memory management */
 	ALLOW_RULE (brk);
+	ALLOW_RULE (get_mempolicy);
+	ALLOW_RULE (set_mempolicy);
 	ALLOW_RULE (mmap);
 	ALLOW_RULE (mmap2);
 	ALLOW_RULE (munmap);
