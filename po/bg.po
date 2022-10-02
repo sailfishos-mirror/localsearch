@@ -1,4 +1,4 @@
-# Bulgarian translation of tracker po-file.
+# Bulgarian translation of tracker-miners po-file.
 # Copyright (C) 2015 Free Software Foundation, Inc.
 # Copyright (C) Alexander Shopov <ash@kambanaria.org>.
 # This file is distributed under the same license as the tracer package.
@@ -6,10 +6,10 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: tracker master\n"
+"Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2022-09-27 13:50+0000\n"
-"PO-Revision-Date: 2022-10-02 16:15+0200\n"
+"PO-Revision-Date: 2022-10-02 18:25+0200\n"
 "Last-Translator: Alexander Shopov <ash@kambanaria.org>\n"
 "Language-Team: Bulgarian <dict@fsa-bg.org>\n"
 "Language: bg\n"
