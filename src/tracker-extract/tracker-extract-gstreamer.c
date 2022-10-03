@@ -1249,7 +1249,13 @@ discoverer_init_and_run (MetadataExtractor *extractor,
 	/* Retrieve global tags */
 #if defined(HAVE_GSTREAMER_1_20)
 	GstDiscovererStreamInfo *sinfo = gst_discoverer_info_get_stream_info (info);
-	discoverer_tags = gst_discoverer_container_info_get_tags ((GstDiscovererContainerInfo *)sinfo);
+
+	if (GST_IS_DISCOVERER_CONTAINER_INFO (sinfo))
+		discoverer_tags = gst_discoverer_container_info_get_tags (GST_DISCOVERER_CONTAINER_INFO (sinfo));
+	else if (GST_IS_DISCOVERER_STREAM_INFO (sinfo))
+		discoverer_tags = gst_discoverer_stream_info_get_tags (sinfo);
+	else
+		discoverer_tags = NULL;
 #else
 	discoverer_tags = gst_discoverer_info_get_tags (info);
 #endif
