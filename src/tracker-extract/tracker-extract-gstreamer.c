@@ -1363,7 +1363,7 @@ tracker_extract_gstreamer (const gchar          *uri,
 			if (!local_conn)
 				local_conn = tracker_main_get_readonly_connection (NULL);
 
-			extractor->toc = tracker_cue_sheet_guess_from_uri (uri);
+			extractor->toc = tracker_cue_sheet_guess_from_uri (local_conn, uri);
 		}
 
 		if (extractor->toc == NULL &&
