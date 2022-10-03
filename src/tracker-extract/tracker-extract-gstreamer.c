@@ -1293,7 +1293,8 @@ discoverer_init_and_run (MetadataExtractor *extractor,
 
 	for (l = extractor->streams; l; l = g_list_next (l)) {
 		GstDiscovererStreamInfo *stream = l->data;
-		GstTagList *stream_tags, *copy = NULL;
+		const GstTagList *stream_tags;
+		GstTagList *copy = NULL;
 
 		stream_tags = gst_discoverer_stream_info_get_tags (stream);
 
