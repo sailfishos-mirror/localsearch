@@ -54,6 +54,7 @@
 #include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-cue-sheet.h"
+#include "tracker-main.h"
 
 typedef enum {
 	EXTRACT_MIME_AUDIO,
@@ -103,6 +104,8 @@ typedef struct {
 	gfloat          video_fps;
 #endif
 } MetadataExtractor;
+
+static TrackerSparqlConnection *local_conn = NULL;
 
 static void common_extract_stream_metadata (MetadataExtractor    *extractor,
                                             const gchar          *uri,
@@ -1357,6 +1360,9 @@ tracker_extract_gstreamer (const gchar          *uri,
 		}
 
 		if (extractor->toc == NULL) {
+			if (!local_conn)
+				local_conn = tracker_main_get_readonly_connection (NULL);
+
 			extractor->toc = tracker_cue_sheet_guess_from_uri (uri);
 		}
 
@@ -1470,5 +1476,12 @@ tracker_extract_module_init (GError **error)
 		}
 	}
 
+	return TRUE;
+}
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_shutdown (void)
+{
+	g_clear_object (&local_conn);
 	return TRUE;
 }
