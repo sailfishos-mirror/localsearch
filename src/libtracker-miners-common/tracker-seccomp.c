@@ -155,6 +155,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (time);
 	ALLOW_RULE (fsync);
 	ALLOW_RULE (umask);
+	ERROR_RULE (fchown, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
