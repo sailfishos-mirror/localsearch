@@ -1464,6 +1464,7 @@ tracker_extract_module_init (GError **error)
 		"vaapi",
 		"video4linux2",
 		"nvcodec",
+		"ges",
 	};
 	GstRegistry *registry;
 	guint i;
