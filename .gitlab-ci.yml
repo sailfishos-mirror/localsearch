@@ -362,6 +362,9 @@ coverage:
     - gcovr --add-tracefile 'coverage-*.json'
         --exclude=build
         --html-details --print-summary --output coveragereport/index.html
+    - gcovr --add-tracefile 'coverage-*.json'
+        --exclude=build
+        --xml --output coveragereport/coverage.xml
   coverage: '/^lines: (\d+\.\d+\%)/'
   artifacts:
     expose_as: 'Coverage'
@@ -369,6 +372,10 @@ coverage:
     paths:
     - coveragereport
     - coveragereport/index.html
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coveragereport/coverage.xml
   needs:
     - test-fedora@x86_64
     - test-fedora-rawhide@x86_64
