@@ -648,6 +648,8 @@ retry:
 			g_warning ("Could not get file handle for '%s': %m", path);
 		}
 
+		g_slice_free1 (sizeof (MonitoredFile) +
+			       monitor->file_handle_payload, data);
 		g_free (path);
 		return NULL;
 	}
