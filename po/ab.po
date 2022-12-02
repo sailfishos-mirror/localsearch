@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2022-10-03 08:35+0000\n"
+"POT-Creation-Date: 2022-10-31 11:14+0000\n"
 "Last-Translator: Нанба Наала <naala-nanba@rambler.ru>\n"
 "Language-Team: Abkhazian <daniel.abzakh@gmail.com>\n"
 "Language: ab\n"
@@ -11,9 +11,222 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-DamnedLies-Scope: partial\n"
 
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:23
+msgid "Max bytes to extract"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:24
+msgid "Maximum number of UTF-8 bytes to extract."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:30
+msgid "Text file allowlist"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+msgid "Filename patterns for plain text documents that should be indexed"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:37
+msgid "Wait for FS miner to be done before extracting"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:38
+msgid ""
+"When true, tracker-extract will wait for tracker-miner-fs to be done "
+"crawling before extracting meta-data. This option is useful on constrained "
+"environment where it is important to list files as fast as possible and can "
+"wait to get meta-data later."
+msgstr ""
+
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
 msgstr "«stemmer» аҿакра"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:25
+msgid ""
+"Simplify the words to their root to provide more results. E.g. “shelves” and "
+"“shelf” to “shel”"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:30
+msgid "Enable unaccent"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
+msgid ""
+"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
+"“Idea” for improved matching."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:36
+msgid "Ignore numbers"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+msgid "If enabled, numbers will not be indexed."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:42
+msgid "Ignore stop words"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
+msgid ""
+"If enabled, the words listed in the stop-words list are ignored. E.g. common "
+"words like “the”, “yes”, “no”, etc."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
+msgid "Initial sleep"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
+msgid "Initial sleep time, in seconds."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
+msgid "Throttle"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
+msgid "Indexing speed, the higher the slower."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
+msgid "Low disk space limit"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
+msgid ""
+"Disk space threshold in percent at which to pause indexing, or -1 to disable."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
+msgid "Crawling interval"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
+msgid ""
+"Interval in days to check whether the filesystem is up to date in the "
+"database. 0 forces crawling anytime, -1 forces it only after unclean "
+"shutdowns, and -2 disables it entirely."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
+msgid "Removable devices’ data permanence threshold"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
+msgid ""
+"Threshold in days after which files from removables devices will be removed "
+"from database if not mounted. 0 means never, maximum is 365."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
+msgid "Enable monitors"
+msgstr "«stemmer» аҿакра"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
+msgid "Set to false to completely disable any file monitoring"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
+msgid "Index removable devices"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
+msgid ""
+"Set to true to enable indexing mounted directories for removable devices."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
+msgid "Index optical discs"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
+msgid ""
+"Set to true to enable indexing CDs, DVDs, and generally optical media (if "
+"removable devices are not indexed, optical discs won’t be either)"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
+msgid "Index when running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
+msgid "Set to true to index while running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
+msgid "Perform initial indexing when running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
+msgid "Set to true to index while running on battery for the first time only"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
+msgid "Directories to index recursively"
+msgstr ""
+
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+msgid ""
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
+msgid "Directories to index non-recursively"
+msgstr ""
+
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+msgid ""
+"List of directories to index without inspecting subfolders, Special values "
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
+msgid "Index applications installed on the system"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
+msgid ""
+"If this option is enabled, the filesystem miner will look for .desktop files "
+"in the standard XDG system and user data directories."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
+msgid "Ignored files"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
+msgid "List of file patterns to avoid"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
+msgid "Ignored directories"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
+msgid "List of directories to avoid"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
+msgid "Ignored directories with content"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr ""
 
 #: src/libtracker-miners-common/tracker-utils.c:101
 #: src/libtracker-miners-common/tracker-utils.c:152
@@ -290,11 +503,11 @@ msgstr ""
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:319
+#: src/tracker-extract/tracker-main.c:342
 msgid "— Extract file meta data"
 msgstr ""
 
-#: src/tracker-extract/tracker-main.c:334
+#: src/tracker-extract/tracker-main.c:357
 msgid "Filename and mime type must be provided together"
 msgstr ""
 
@@ -480,7 +693,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:526
 msgid "Done"
-msgstr ""
+msgstr "Ихиоуп"
 
 #: src/tracker/tracker-daemon.c:543
 #, c-format
@@ -517,7 +730,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:669
 msgid "Application"
-msgstr ""
+msgstr "Аҧшьы"
 
 #: src/tracker/tracker-daemon.c:671
 msgid "Reason"
@@ -699,7 +912,7 @@ msgstr ""
 
 #: src/tracker/tracker-info.c:230 src/tracker/tracker-search.c:1301
 msgid "Results"
-msgstr ""
+msgstr "Алҵшәақәа"
 
 #: src/tracker/tracker-info.c:414
 msgid "Error message"
@@ -951,7 +1164,7 @@ msgstr ""
 #: src/tracker/tracker-tag.c:452 src/tracker/tracker-tag.c:574
 #: src/tracker/tracker-tag.c:953
 msgid "None"
-msgstr ""
+msgstr "Мап"
 
 #: src/tracker/tracker-status.c:226 src/tracker/tracker-status.c:251
 msgid "Could not get basic status for Tracker"
@@ -1182,868 +1395,3 @@ msgstr ""
 #: src/tracker-writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#, fuzzy
