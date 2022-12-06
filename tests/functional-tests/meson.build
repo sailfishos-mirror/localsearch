@@ -79,10 +79,11 @@ if libgif.found()
 endif
 
 if libpng.found()
-  extractor_tests += [
-    'images/png-basic',
-    'images/png-region-of-interest',
-  ]
+  extractor_tests += 'images/png-basic'
+
+  if exempi.found()
+    extractor_tests += 'images/png-region-of-interest'
+  endif
 endif
 
 if gexiv2.found()
