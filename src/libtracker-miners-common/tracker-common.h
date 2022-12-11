@@ -37,7 +37,6 @@
 #include "tracker-file-utils.h"
 #include "tracker-fts-config.h"
 #include "tracker-ioprio.h"
-#include "tracker-language.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
 #include "tracker-term-utils.h"
