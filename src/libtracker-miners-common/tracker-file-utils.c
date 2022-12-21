@@ -867,7 +867,8 @@ tracker_unix_mount_cache_lookup_filesystem_id (GFile *file)
 	for (i = (gint) cache->mounts->len - 1; i >= 0; i--) {
 		UnixMountInfo *info = &g_array_index (cache->mounts, UnixMountInfo, i);
 
-		if (g_file_has_prefix (file, info->file)) {
+		if (g_file_equal (file, info->file) ||
+		    g_file_has_prefix (file, info->file)) {
 			id = info->id;
 			break;
 		}
