@@ -307,7 +307,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 		info = g_file_query_info (file,
 		                          G_FILE_ATTRIBUTE_TIME_MODIFIED ","
 		                          G_FILE_ATTRIBUTE_TIME_ACCESS ","
-					  G_FILE_ATTRIBUTE_TIME_CREATED,
+		                          G_FILE_ATTRIBUTE_TIME_CREATED,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
 	}
