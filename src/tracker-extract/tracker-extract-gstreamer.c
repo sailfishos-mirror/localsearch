@@ -1475,7 +1475,7 @@ tracker_extract_module_init (GError **error)
 	for (i = 0; i < G_N_ELEMENTS (blocklisted); i++) {
 		GstPlugin *plugin =
 			gst_registry_find_plugin (registry,
-						  blocklisted[i]);
+			                          blocklisted[i]);
 		if (plugin) {
 			g_debug ("Removing GStreamer plugin '%s' from registry",
 			         blocklisted[i]);
