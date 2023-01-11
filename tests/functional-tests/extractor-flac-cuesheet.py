@@ -109,9 +109,10 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
 
             result = fixtures.get_tracker_extract_output(
                 cfg.test_environment(tmpdir), audio_path, output_format='json-ld')
+            file_data = result['@graph'][0]
 
         self.assert_extract_result_matches_spec(
-            self.spec(audio_path), result, audio_path, __file__)
+            self.spec(audio_path), file_data, audio_path, __file__)
 
 
 if __name__ == '__main__':

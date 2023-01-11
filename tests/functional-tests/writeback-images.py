@@ -65,7 +65,8 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
 
         results = fixtures.get_tracker_extract_output({}, path, mime_type=mimetype, output_format='json-ld')
         keyDict = expectedKey or prop
-        self.assertIn(TEST_VALUE, results[keyDict])
+        file_data = results['@graph'][0]
+        self.assertIn(TEST_VALUE, file_data[keyDict])
 
     def __writeback_hasTag_test(self, filename, mimetype):
 
