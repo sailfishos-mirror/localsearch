@@ -5,7 +5,11 @@
         "Comment": "Location information shouldn't be retrieved from the image"
     },
     "metadata": {
-        "@type": "nmm:Photo",
-        "!slo:location": ""
+        "@graph": [
+	    {
+		"@type": "nmm:Photo",
+		"!slo:location": ""
+	    }
+	]
     }
 }

@@ -3,14 +3,18 @@
         "Filename": "jpeg-basic.jpg",
         "Comment": "Basic jpeg example, ISO image tags checks"
     },
-    "metadata": {
-        "nao:hasTag": [
+    "metadata":  {
+	"@graph": [
             {
-                "nao:prefLabel": "test"
-            },
-            {
-                "nao:prefLabel": "tracker"
+		"nao:hasTag": [
+                    {
+			"nao:prefLabel": "test"
+                    },
+                    {
+			"nao:prefLabel": "tracker"
+                    }
+		]
             }
-        ]
+	]
     }
 }
