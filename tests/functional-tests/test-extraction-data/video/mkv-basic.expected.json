@@ -4,9 +4,13 @@
         "Comment": "Just one standard mkv"
     },
     "metadata": {
-        "@type": "nmm:Video",
-        "nie:title": "MYTITLE",
-        "nfo:height": "1080",
-        "nfo:width": "1920"
+        "@graph": [
+	    {
+		"@type": "nmm:Video",
+		"nie:title": "MYTITLE",
+		"nfo:height": "1080",
+		"nfo:width": "1920"
+	    }
+	]
     }
 }

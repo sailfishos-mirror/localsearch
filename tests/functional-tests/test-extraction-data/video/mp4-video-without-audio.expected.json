@@ -5,9 +5,13 @@
         "Comment": "Video without audio stream. Seems to be clasified as Audio."
     },
     "metadata": {
-        "@type": "nmm:Video",
-        "!@type": "nmm:Audio",
-        "nfo:height": "480",
-        "nfo:width": "864"
+        "@graph": [
+	    {
+		"@type": "nmm:Video",
+		"!@type": "nmm:Audio",
+		"nfo:height": "480",
+		"nfo:width": "864"
+	    }
+	]
     }
 }

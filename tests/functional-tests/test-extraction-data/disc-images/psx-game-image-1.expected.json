@@ -4,7 +4,11 @@
         "Comment": "PSX game image with CUE file"
     },
     "metadata": {
-        "@type": [ "nfo:GameImage" ],
-	"nie:mimeType": "application/x-cue"
+        "@graph": [
+	    {
+		"@type": [ "nfo:GameImage" ],
+		"nie:mimeType": "application/x-cue"
+	    }
+	]
     }
 }
