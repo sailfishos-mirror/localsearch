@@ -693,7 +693,7 @@ extractor_apply_audio_metadata (MetadataExtractor     *extractor,
 			tracker_resource_set_gvalue (hash_resource, "nfo:hashValue", &acoustid_fingerprint);
 			tracker_resource_set_string (hash_resource, "nfo:hashAlgorithm", "chromaprint");
 
-			tracker_resource_add_take_relation (file_resource, "nfo:hasHash", hash_resource);
+			tracker_resource_set_take_relation (file_resource, "nfo:hasHash", hash_resource);
 			g_value_unset (&acoustid_fingerprint);
 		}
 	#endif
