@@ -41,8 +41,18 @@ extractor_tests = [
   'audio/mp3-id3v2.3-empty-artist-album',
   'audio/mp3-id3v2.4-2',
   'desktop/application',
-  'desktop/link-wikipedia-tracker'
+  'desktop/link-wikipedia-tracker',
+  'images/bmp-basic-1',
+  'images/bmp-corrupt-1',
+  'images/bmp-corrupt-2',
+  'images/bmp-corrupt-3',
+  'images/bmp-corrupt-4',
+  'images/ico-basic-1',
 ]
+
+if get_option('abiword')
+  extractor_tests += 'office/abw-1'
+endif
 
 # Gstreamer 1.17/1.18 introduced support for some additional
 # MusicBrainz tags
@@ -103,19 +113,40 @@ if libcue.found()
   extractor_tests += 'disc-images/psx-game-image-1'
 endif
 
+if libosinfo.found()
+  extractor_tests += [
+    'disc-images/bootable-1',
+    'disc-images/bootable-2',
+    'disc-images/non-bootable-1',
+  ]
+endif
+
 if libgsf.found()
   extractor_tests += [
+    'office/epub-doc-1',
     'office/oasis-doc',
     'office/office-doc',
+    'office/office-xml-doc-1',
     'office/powerpoint',
     'office/pdf-doc',
+    'office/pdf-encrypted',
     'office/ps-doc',
     'office/ps-doc-atend',
+    'office/pptx-presentation-1',
+    'office/xlsx-spreadsheet-1',
   ]
 endif
 
 if get_option('unzip_ps_gz_files')
   extractor_tests += 'office/psgz-doc'
+endif
+
+if libxml2.found()
+  extractor_tests += 'office/html-1'
+endif
+
+if libgxps.found()
+   extractor_tests += 'office/xps-doc-1'
 endif
 
 functional_tests = [
