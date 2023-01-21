@@ -15,6 +15,7 @@ tracker_miners_common_sources = [
   'tracker-file-utils.c',
   'tracker-fts-config.c',
   'tracker-ioprio.c',
+  'tracker-miner-object.c',
   'tracker-sched.c',
   'tracker-term-utils.c',
   'tracker-type-utils.c',
@@ -24,7 +25,7 @@ tracker_miners_common_sources = [
   enums[0], enums[1],
 ]
 
-tracker_miners_common_dependencies = [glib, gio, gio_unix, libmath]
+tracker_miners_common_dependencies = [glib, gio, gio_unix, libmath, tracker_sparql]
 
 tracker_miners_common_private_dependencies = [charset_library, blkid]
 if libseccomp.found()

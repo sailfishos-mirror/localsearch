@@ -26,7 +26,6 @@ miner_sources = (
     'tracker-decorator.c',
     'tracker-decorator-fs.c',
     'tracker-indexing-tree.c',
-    'tracker-miner-object.c',
     'tracker-miner-online.c',
     'tracker-miner-proxy.c',
     'tracker-miner-fs.c'])

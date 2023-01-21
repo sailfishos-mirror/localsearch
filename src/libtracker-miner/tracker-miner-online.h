@@ -24,7 +24,7 @@
 #error "Only <libtracker-miner/tracker-miner.h> can be included directly."
 #endif
 
-#include <libtracker-miner/tracker-miner-object.h>
+#include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-miner/tracker-miner-enums.h>
 
 #define TRACKER_TYPE_MINER_ONLINE         (tracker_miner_online_get_type())
