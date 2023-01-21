@@ -21,7 +21,7 @@
 #ifndef __TRACKER_MINER_RSS_H__
 #define __TRACKER_MINER_RSS_H__
 
-#include <libtracker-miner/tracker-miner.h>
+#include <libtracker-miners-common/tracker-common.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
 
