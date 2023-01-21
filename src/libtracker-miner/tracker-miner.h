@@ -26,8 +26,6 @@
        "urn:nepomuk:datasource:"
 
 #include <libtracker-miner/tracker-data-provider.h>
-#include <libtracker-miner/tracker-decorator.h>
-#include <libtracker-miner/tracker-decorator-fs.h>
 #include <libtracker-miner/tracker-miner-online.h>
 #include <libtracker-miner/tracker-miner-fs.h>
 #include <libtracker-miner/tracker-miner-enums.h>

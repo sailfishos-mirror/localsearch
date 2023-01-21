@@ -23,8 +23,6 @@ endif
 
 miner_sources = (
     ['tracker-data-provider.c',
-    'tracker-decorator.c',
-    'tracker-decorator-fs.c',
     'tracker-indexing-tree.c',
     'tracker-miner-online.c',
     'tracker-miner-fs.c'])

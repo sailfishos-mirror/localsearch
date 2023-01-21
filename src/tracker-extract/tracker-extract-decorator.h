@@ -24,6 +24,7 @@
 #include <libtracker-miner/tracker-miner.h>
 
 #include "tracker-extract.h"
+#include "tracker-decorator-fs.h"
 
 G_BEGIN_DECLS
 
