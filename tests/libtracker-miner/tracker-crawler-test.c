@@ -21,7 +21,7 @@
 
 #include <locale.h>
 
-#include <libtracker-miner/tracker-crawler.h>
+#include <tracker-crawler.h>
 
 typedef struct CrawlerTest CrawlerTest;
 

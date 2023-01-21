@@ -21,9 +21,8 @@
 
 #include <locale.h>
 
-#include <libtracker-miner/tracker-miner.h>
-/* Normally private */
-#include <libtracker-miner/tracker-file-data-provider.h>
+#include <tracker-miner-fs.h>
+#include <tracker-file-data-provider.h>
 
 static void
 test_enumerator_and_provider (void)

@@ -20,7 +20,7 @@
 #include <glib-object.h>
 
 /* NOTE: We're not including tracker-miner.h here because this is private. */
-#include <libtracker-miner/tracker-priority-queue.h>
+#include <tracker-priority-queue.h>
 
 static void
 test_priority_queue_ref_unref (void)

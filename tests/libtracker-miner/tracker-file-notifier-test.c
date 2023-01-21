@@ -29,8 +29,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <libtracker-miner/tracker-miner-enums.h>
-#include <libtracker-miner/tracker-file-notifier.h>
+#include <tracker-file-notifier.h>
 
 typedef struct {
 	gint op;

@@ -1,5 +1,5 @@
 #include <glib.h>
-#include <libtracker-miner/tracker-miner.h>
+#include <tracker-miner-fs.h>
 #include <libtracker-miners-common/tracker-common.h>
 
 typedef struct {

@@ -23,8 +23,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-/* Special case, the monitor header is not normally exported */
-#include <libtracker-miner/tracker-monitor.h>
+#include <tracker-monitor.h>
 
 /* -------------- COMMON FOR ALL FILE EVENT TESTS ----------------- */
 
