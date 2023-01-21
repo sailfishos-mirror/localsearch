@@ -24,7 +24,6 @@ endif
 miner_sources = (
     ['tracker-data-provider.c',
     'tracker-indexing-tree.c',
-    'tracker-miner-online.c',
     'tracker-miner-fs.c'])
 
 libtracker_miner_private = static_library(
@@ -33,11 +32,6 @@ libtracker_miner_private = static_library(
     dependencies: [tracker_miners_common_dep, tracker_sparql, tracker_extract_dep],
     c_args: tracker_c_args,
 )
-
-tracker_miner_dependencies = []
-if have_network_manager
-    tracker_miner_dependencies += network_manager
-endif
 
 libtracker_miner = library(
     'tracker-miner-' + tracker_api_version,
@@ -49,7 +43,7 @@ libtracker_miner = library(
     # This doesn't depend on tracker_common_dep because of
     # https://github.com/mesonbuild/meson/issues/671
     include_directories: [commoninc, configinc, srcinc],
-    dependencies: [tracker_sparql, tracker_miner_dependencies, tracker_miners_common_dep],
+    dependencies: [tracker_sparql, tracker_miners_common_dep],
     link_with: [libtracker_miner_private],
 )
 

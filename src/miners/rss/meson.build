@@ -1,11 +1,12 @@
 sources = [
     'tracker-main.c',
+    'tracker-miner-online.c',
     'tracker-miner-rss.c',
 ]
 
 executable('tracker-miner-rss-@0@'.format(tracker_api_major),
     sources,
-    dependencies: [libgrss, tracker_miner, tracker_miners_common_dep, tracker_extract_dep],
+    dependencies: [libgrss, network_manager, tracker_miner, tracker_miners_common_dep, tracker_extract_dep],
     c_args: tracker_c_args,
     install: true,
     install_dir: get_option('libexecdir'),

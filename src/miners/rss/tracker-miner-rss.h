@@ -25,6 +25,8 @@
 
 #include <libtracker-sparql/tracker-sparql.h>
 
+#include "tracker-miner-online.h"
+
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_MINER_RSS         (tracker_miner_rss_get_type())
