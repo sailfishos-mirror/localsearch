@@ -27,7 +27,6 @@ miner_sources = (
     'tracker-decorator-fs.c',
     'tracker-indexing-tree.c',
     'tracker-miner-online.c',
-    'tracker-miner-proxy.c',
     'tracker-miner-fs.c'])
 
 libtracker_miner_private = static_library(

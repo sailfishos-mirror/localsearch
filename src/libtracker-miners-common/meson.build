@@ -16,6 +16,7 @@ tracker_miners_common_sources = [
   'tracker-fts-config.c',
   'tracker-ioprio.c',
   'tracker-miner-object.c',
+  'tracker-miner-proxy.c',
   'tracker-sched.c',
   'tracker-term-utils.c',
   'tracker-type-utils.c',
