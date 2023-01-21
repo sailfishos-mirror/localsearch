@@ -1,3 +1,7 @@
+miner_rss_enums = gnome.mkenums_simple('tracker-enum-types',
+    sources: 'tracker-enums.h',
+)
+
 sources = [
     'tracker-main.c',
     'tracker-miner-online.c',
@@ -6,6 +10,7 @@ sources = [
 
 executable('tracker-miner-rss-@0@'.format(tracker_api_major),
     sources,
+    miner_rss_enums[0], miner_rss_enums[1],
     dependencies: [libgrss, network_manager, tracker_miner, tracker_miners_common_dep, tracker_extract_dep],
     c_args: tracker_c_args,
     install: true,
