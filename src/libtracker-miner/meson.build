@@ -54,7 +54,3 @@ tracker_miner = declare_dependency(
     link_with: libtracker_miner,
     include_directories: include_directories('.')
 )
-
-install_data(
-    'org.freedesktop.Tracker3.Miner.xml',
-    install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'dbus-1', 'interfaces'))
