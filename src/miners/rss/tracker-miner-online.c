@@ -21,7 +21,7 @@
 #include "config-miners.h"
 
 #include "tracker-miner-online.h"
-#include "tracker-miner-enum-types.h"
+#include "tracker-enum-types.h"
 
 #include <glib/gi18n.h>
 

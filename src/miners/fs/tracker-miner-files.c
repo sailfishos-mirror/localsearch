@@ -37,7 +37,6 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-extract/tracker-extract.h>
-#include <libtracker-miner/tracker-miner.h>
 
 #include "tracker-power.h"
 #include "tracker-miner-files.h"

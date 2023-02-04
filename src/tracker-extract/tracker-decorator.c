@@ -24,7 +24,6 @@
 #include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-decorator.h"
-#include "tracker-priority-queue.h"
 #include "tracker-decorator-private.h"
 
 #define QUERY_BATCH_SIZE 200

@@ -23,7 +23,7 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <libtracker-miner/tracker-indexing-tree.h>
+#include <tracker-indexing-tree.h>
 
 /*
  * Test directory structure:

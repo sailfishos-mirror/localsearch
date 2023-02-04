@@ -20,7 +20,7 @@
 #include <glib.h>
 
 /* NOTE: We're not including tracker-miner.h here because this is private. */
-#include <libtracker-miner/tracker-task-pool.h>
+#include <tracker-task-pool.h>
 
 static void
 test_task_pool_limit_set (void)
