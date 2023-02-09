@@ -257,35 +257,24 @@ static GStrv
 result_to_strv (TrackerSparqlCursor *cursor,
                 gint                 n_col)
 {
-	GStrv strv;
-	gint count, i;
+	GPtrArray *results;
 
 	if (!cursor) {
 		return NULL;
 	}
 
-	i = 0;
-	count = 0;
-
-	/* Really no other option here, but we iterate the cursor
-	 * first to get the length.
-	 */
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		count++;
-	}
-
-	strv = g_new0 (gchar *, count + 1);
-
-	tracker_sparql_cursor_rewind (cursor);
+	results = g_ptr_array_new ();
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		const gchar *str;
 
 		str = tracker_sparql_cursor_get_string (cursor, n_col, NULL);
-		strv[i++] = g_strdup (str);
+		g_ptr_array_add (results, g_strdup (str));
 	}
 
-	return strv;
+	g_ptr_array_add (results, NULL);
+
+	return (GStrv) g_ptr_array_free (results, FALSE);
 }
 
 static void
@@ -383,7 +372,7 @@ get_all_resources_with_tags (TrackerSparqlConnection *connection,
 	}
 
 	tag_urns = result_to_strv (cursor, 0);
-	if (!tag_urns) {
+	if (!tag_urns || !*tag_urns) {
 		g_print ("%s\n",
 		         _("No files have been tagged"));
 
@@ -830,8 +819,9 @@ remove_tag_for_urns (TrackerSparqlConnection *connection,
 
 		urn = tracker_sparql_cursor_get_string (tag_cursor, 0, NULL);
 		urns_cursor = get_file_urns (connection, uris, urn);
+		urns_strv = result_to_strv (urns_cursor, 0);
 
-		if (!urns_cursor || !tracker_sparql_cursor_next (urns_cursor, NULL, NULL)) {
+		if (!urns_strv || !*urns_strv) {
 			g_print ("%s\n",
 			         _("None of the files had this tag set"));
 
@@ -846,7 +836,6 @@ remove_tag_for_urns (TrackerSparqlConnection *connection,
 			return TRUE;
 		}
 
-		urns_strv = result_to_strv (urns_cursor, 0);
 		filter = get_filter_string (urns_strv, "?urn", TRUE, urn);
 		g_strfreev (urns_strv);
 
