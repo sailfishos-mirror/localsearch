@@ -286,9 +286,10 @@ get_all_tags_show_tag_id (TrackerSparqlConnection *connection,
 	gchar *query;
 
 	/* Get resources associated */
-	query = g_strdup_printf ("SELECT (COALESCE (nie:isStoredAs(?urn), ?urn) AS ?uri) WHERE {"
-	                         "  ?urn a rdfs:Resource; "
-	                         "  nao:hasTag \"%s\" . "
+	query = g_strdup_printf ("SELECT ?uri WHERE {"
+	                         "  ?urn nao:hasTag \"%s\" . "
+	                         "  BIND (nie:isStoredAs(?urn) AS ?sa). "
+	                         "  BIND (COALESCE (?sa, ?urn) AS ?uri). "
 	                         "}",
 	                         id);
 
@@ -649,36 +650,28 @@ add_tag_for_urns (TrackerSparqlConnection *connection,
 		description_escaped = get_escaped_sparql_string (description);
 
 		query = g_strdup_printf ("INSERT { "
-					 "  _:tag a nao:Tag;"
-					 "  nao:prefLabel %s ;"
-					 "  nao:description %s ."
-					 "} "
-					 "WHERE {"
-					 "  OPTIONAL {"
-					 "     ?tag a nao:Tag ;"
-					 "     nao:prefLabel %s ."
-					 "  } ."
-					 "  FILTER (!bound(?tag)) "
-					 "}",
-					 tag_escaped,
-					 description_escaped,
-					 tag_escaped);
+		                         "  _:tag a nao:Tag;"
+		                         "  nao:prefLabel %s ;"
+		                         "  nao:description %s ."
+		                         "} "
+		                         "WHERE {"
+		                         "  FILTER (!EXISTS { ?u nao:prefLabel %s }) "
+		                         "}",
+		                         tag_escaped,
+		                         description_escaped,
+		                         tag_escaped);
 
 		g_free (description_escaped);
 	} else {
 		query = g_strdup_printf ("INSERT { "
-					 "  _:tag a nao:Tag;"
-					 "  nao:prefLabel %s ."
-					 "} "
-					 "WHERE {"
-					 "  OPTIONAL {"
-					 "     ?tag a nao:Tag ;"
-					 "     nao:prefLabel %s ."
-					 "  } ."
-					 "  FILTER (!bound(?tag)) "
-					 "}",
-					 tag_escaped,
-					 tag_escaped);
+		                         "  _:tag a nao:Tag;"
+		                         "  nao:prefLabel %s ."
+		                         "} "
+		                         "WHERE {"
+		                         "  FILTER (!EXISTS { ?u nao:prefLabel %s }) "
+		                         "}",
+		                         tag_escaped,
+		                         tag_escaped);
 	}
 
 	tracker_sparql_connection_update (connection, query, NULL, &error);
@@ -710,7 +703,8 @@ add_tag_for_urns (TrackerSparqlConnection *connection,
 
 		/* Add tag to specific urns */
 		query = g_strdup_printf ("INSERT { "
-		                         "  ?urn nao:hasTag ?id "
+		                         "  ?urn a rdfs:Resource ;"
+		                         "    nao:hasTag ?id "
 		                         "} "
 		                         "WHERE {"
 		                         "  ?urn nie:url ?f ."
@@ -840,10 +834,12 @@ remove_tag_for_urns (TrackerSparqlConnection *connection,
 	} else {
 		/* Remove tag completely */
 		query = g_strdup_printf ("DELETE { "
-		                         "  ?tag a nao:Tag "
+		                         "  ?tag a rdfs:Resource . "
+		                         "  ?r nao:hasTag ?tag . "
 		                         "} "
 		                         "WHERE {"
-		                         "  ?tag nao:prefLabel %s "
+		                         "  ?tag nao:prefLabel %s . "
+		                         "  OPTIONAL { ?r nao:hasTag ?tag } . "
 		                         "}",
 		                         tag_escaped);
 	}
