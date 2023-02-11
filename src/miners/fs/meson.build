@@ -4,6 +4,12 @@ miner_fs_enums = gnome.mkenums_simple('tracker-miner-enum-types',
     sources: 'tracker-miner-enums.h',
 )
 
+miner_fs_resources = gnome.compile_resources(
+    'miner-fs-resources',
+    'org.freedesktop.Tracker3.Miner.Files.gresource.xml',
+    c_name: 'tracker_miner_fs',
+)
+
 private_sources = [
     'tracker-crawler.c',
     'tracker-data-provider.c',
@@ -26,7 +32,9 @@ endif
 
 libtracker_miner_private = static_library(
     'tracker-miner-private',
-    miner_fs_enums[0], miner_fs_enums[1], private_sources,
+    miner_fs_resources[0], miner_fs_resources[1],
+    miner_fs_enums[0], miner_fs_enums[1],
+    private_sources,
     dependencies: [tracker_miners_common_dep, tracker_sparql, tracker_extract_dep],
     c_args: tracker_c_args,
 )
@@ -62,6 +70,7 @@ endif
 
 executable('tracker-miner-fs-@0@'.format(tracker_api_major),
     sources,
+    miner_fs_resources[0], miner_fs_resources[1],
     miner_fs_enums[0], miner_fs_enums[1],
     dependencies: tracker_miner_fs_deps,
     c_args: tracker_c_args,

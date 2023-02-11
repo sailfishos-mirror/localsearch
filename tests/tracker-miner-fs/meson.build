@@ -32,6 +32,7 @@ foreach base_name: libtracker_miner_tests
     test_name = 'miner-@0@'.format(base_name)
 
     binary = executable(binary_name, source,
+      miner_fs_resources[0], miner_fs_resources[1],
       dependencies: libtracker_miner_test_deps,
       c_args: libtracker_miner_test_c_args,
       link_with: [libtracker_miner_private])
@@ -48,6 +49,7 @@ foreach base_name: libtracker_miner_slow_tests
     test_name = 'miner-@0@'.format(base_name)
 
     binary = executable(binary_name, source,
+      miner_fs_resources[0], miner_fs_resources[1],
       dependencies: libtracker_miner_test_deps,
       c_args: libtracker_miner_test_c_args,
       link_with: [libtracker_miner_private])

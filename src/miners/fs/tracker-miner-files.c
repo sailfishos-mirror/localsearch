@@ -44,6 +44,7 @@
 #include "tracker-config.h"
 #include "tracker-storage.h"
 #include "tracker-extract-watchdog.h"
+#include "tracker-utils.h"
 
 #define DISK_SPACE_CHECK_FREQUENCY 10
 #define SECONDS_PER_DAY 86400
@@ -912,28 +913,28 @@ static void
 init_mount_points (TrackerMinerFiles *miner_files)
 {
 	TrackerMiner *miner = TRACKER_MINER (miner_files);
+	TrackerSparqlConnection *conn;
+	TrackerSparqlStatement *stmt;
 	TrackerMinerFilesPrivate *priv;
 	GHashTable *volumes;
 	GHashTableIter iter;
 	gpointer key, value;
 	GString *accumulator;
 	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
+	TrackerSparqlCursor *cursor = NULL;
 	GSList *mounts, *l;
 	GFile *file;
 
 	g_debug ("Initializing mount points...");
 
-	/* First, get all mounted volumes, according to tracker-store (SYNC!) */
-	cursor = tracker_sparql_connection_query (tracker_miner_get_connection (miner),
-	                                          "SELECT ?f WHERE { "
-	                                          "  ?v a tracker:IndexedFolder ; "
-	                                          "     tracker:isRemovable true; "
-	                                          "     tracker:available true . "
-	                                          "  ?f a nfo:FileDataObject ; "
-	                                          "     nie:interpretedAs/nie:rootElementOf ?v . "
-	                                          "}",
-	                                          NULL, &error);
+	conn = tracker_miner_get_connection (miner);
+	stmt = tracker_load_statement (conn, "get-index-roots.rq", &error);
+
+	if (stmt) {
+		/* First, get all mounted volumes, according to tracker-store (SYNC!) */
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	}
+
 	if (error) {
 		g_critical ("Could not obtain the mounted volumes: %s", error->message);
 		g_error_free (error);
