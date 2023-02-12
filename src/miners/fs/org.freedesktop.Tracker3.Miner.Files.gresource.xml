@@ -2,5 +2,6 @@
 <gresources>
   <gresource prefix="/org/freedesktop/Tracker3/Miner/Files">
     <file>queries/get-index-roots.rq</file>
+    <file>queries/get-folder-count.rq</file>
   </gresource>
 </gresources>

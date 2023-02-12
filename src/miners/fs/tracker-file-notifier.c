@@ -28,6 +28,7 @@
 #include "tracker-file-notifier.h"
 #include "tracker-crawler.h"
 #include "tracker-monitor-glib.h"
+#include "tracker-utils.h"
 
 enum {
 	PROP_0,
@@ -1452,14 +1453,17 @@ static void
 check_disable_monitor (TrackerFileNotifier *notifier)
 {
 	TrackerFileNotifierPrivate *priv;
-	TrackerSparqlCursor *cursor;
+	TrackerSparqlStatement *stmt;
+	TrackerSparqlCursor *cursor = NULL;
 	gint64 folder_count = 0;
 	GError *error = NULL;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	cursor = tracker_sparql_connection_query (priv->connection,
-	                                          "SELECT COUNT(?f) { ?f a nfo:Folder }",
-	                                          NULL, &error);
+	stmt = tracker_load_statement (priv->connection, "get-folder-count.rq", &error);
+
+	if (stmt) {
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	}
 
 	if (!error && tracker_sparql_cursor_next (cursor, NULL, &error)) {
 		folder_count = tracker_sparql_cursor_get_integer (cursor, 0);
