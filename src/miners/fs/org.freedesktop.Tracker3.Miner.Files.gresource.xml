@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/org/freedesktop/Tracker3/Miner/Files">
     <file>queries/delete-file.rq</file>
+    <file>queries/delete-file-content.rq</file>
     <file>queries/delete-folder-contents.rq</file>
     <file>queries/delete-mountpoints-by-date.rq</file>
     <file>queries/delete-mountpoints-by-type.rq</file>

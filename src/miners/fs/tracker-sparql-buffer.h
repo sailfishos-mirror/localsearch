@@ -100,6 +100,18 @@ void tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
                                              GFile               *source,
                                              GFile               *dest);
 
+void tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
+                                     GFile               *file,
+                                     const gchar         *content_graph,
+                                     TrackerResource     *file_resource,
+                                     TrackerResource     *graph_resource);
+
+void tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
+                                       GFile               *file,
+                                       gboolean             is_root,
+                                       TrackerResource     *file_resource,
+                                       TrackerResource     *folder_resource);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_SPARQL_BUFFER_H__ */
