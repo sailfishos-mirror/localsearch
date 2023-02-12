@@ -2326,20 +2326,21 @@ remove_files_in_removable_media_cb (GObject      *object,
                                     GAsyncResult *result,
                                     gpointer      user_data)
 {
-	GError *error = NULL;
+	g_autofree GError *error = NULL;
 
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (object), result, &error);
+	tracker_sparql_statement_update_finish (TRACKER_SPARQL_STATEMENT (object),
+	                                        result, &error);
 
-	if (error) {
+	if (error)
 		g_critical ("Could not remove files in volumes: %s", error->message);
-		g_error_free (error);
-	}
 }
 
 static gboolean
 miner_files_in_removable_media_remove_by_type (TrackerMinerFiles  *miner,
                                                TrackerStorageType  type)
 {
+	TrackerSparqlConnection *conn;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	gboolean removable;
 	gboolean optical;
 
@@ -2347,92 +2348,42 @@ miner_files_in_removable_media_remove_by_type (TrackerMinerFiles  *miner,
 	optical = TRACKER_STORAGE_TYPE_IS_OPTICAL (type);
 
 	/* Only remove if any of the flags was TRUE */
-	if (removable || optical) {
-		GString *queries;
+	if (!removable && !optical)
+		return FALSE;
 
-		g_debug ("  Removing all resources in store from %s ",
-		         optical ? "optical discs" : "removable devices");
+	g_debug ("  Removing all resources in store from %s ",
+	         optical ? "optical discs" : "removable devices");
 
-		queries = g_string_new ("");
+	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
+	stmt = tracker_load_statement (conn, "delete-mountpoints-by-type.rq", NULL);
 
-		/* Delete all resources where nie:dataSource is a volume
-		 * of the given type */
-		g_string_append_printf (queries,
-		                        "DELETE { "
-		                        "  ?f a rdfs:Resource . "
-		                        "  GRAPH ?g {"
-		                        "    ?ie a rdfs:Resource "
-		                        "  }"
-		                        "} WHERE { "
-		                        "  ?v a tracker:IndexedFolder ; "
-		                        "     tracker:isRemovable %s ; "
-		                        "     tracker:isOptical %s . "
-		                        "  ?f nie:dataSource ?v . "
-		                        "  GRAPH ?g {"
-		                        "    ?ie nie:isStoredAs ?f "
-		                        "  }"
-		                        "}",
-		                        removable ? "true" : "false",
-		                        optical ? "true" : "false");
+	tracker_sparql_statement_bind_boolean (stmt, "isRemovable", removable);
+	tracker_sparql_statement_bind_boolean (stmt, "isOptical", optical);
+	tracker_sparql_statement_update_async (stmt, NULL,
+	                                       remove_files_in_removable_media_cb,
+	                                       NULL);
 
-		tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
-		                                        queries->str,
-		                                        NULL,
-		                                        remove_files_in_removable_media_cb,
-		                                        NULL);
-
-		g_string_free (queries, TRUE);
-
-		return TRUE;
-	}
-
-	return FALSE;
+	return TRUE;
 }
 
 static void
 miner_files_in_removable_media_remove_by_date (TrackerMinerFiles  *miner,
                                                const gchar        *date)
 {
-	GString *queries;
+	TrackerSparqlConnection *conn;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 
 	g_debug ("  Removing all resources in store from removable or "
 	         "optical devices not mounted after '%s'",
 	         date);
 
-	queries = g_string_new ("");
+	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
+	stmt = tracker_load_statement (conn, "delete-mountpoints-by-date.rq", NULL);
 
-	/* Delete all resources where nie:dataSource is a volume
-	 * which was last unmounted before the given date */
-	g_string_append_printf (queries,
-	                        "DELETE { "
-				"  GRAPH " DEFAULT_GRAPH " {"
-	                        "    ?f a rdfs:Resource . "
-				"  }"
-	                        "  GRAPH ?g {"
-	                        "    ?ie a rdfs:Resource "
-	                        "  }"
-	                        "} WHERE { "
-				"  GRAPH " DEFAULT_GRAPH " {"
-	                        "    ?v a tracker:IndexedFolder ; "
-	                        "       tracker:isRemovable true ; "
-	                        "       tracker:available false ; "
-	                        "       tracker:unmountDate ?d . "
-	                        "    ?f nie:dataSource ?v . "
-	                        "    FILTER ( ?d < \"%s\"^^xsd:dateTime) "
-				"  }"
-	                        "  GRAPH ?g {"
-	                        "    ?ie nie:isStoredAs ?f "
-	                        "  }"
-	                        "}",
-	                        date);
-
-	tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
-	                                        queries->str,
-	                                        NULL,
-	                                        remove_files_in_removable_media_cb,
-	                                        NULL);
-
-	g_string_free (queries, TRUE);
+	tracker_sparql_statement_bind_string (stmt, "unmountDate", date);
+	tracker_sparql_statement_update_async (stmt, NULL,
+	                                       remove_files_in_removable_media_cb,
+	                                       NULL);
 }
 
 static void
