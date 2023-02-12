@@ -799,15 +799,14 @@ set_up_mount_point_cb (GObject      *source,
                        GAsyncResult *result,
                        gpointer      user_data)
 {
-	TrackerSparqlConnection *connection = TRACKER_SPARQL_CONNECTION (source);
-	GError *error = NULL;
+	g_autofree GError *error = NULL;
 
-	tracker_sparql_connection_update_finish (connection, result, &error);
+	tracker_sparql_statement_update_finish (TRACKER_SPARQL_STATEMENT (source),
+	                                        result, &error);
 
 	if (error) {
 		g_critical ("Could not set mount point in database, %s",
 		            error->message);
-		g_error_free (error);
 	}
 }
 
@@ -817,70 +816,35 @@ set_up_mount_point (TrackerMinerFiles *miner,
                     gboolean           mounted,
                     TrackerBatch      *batch)
 {
-	GString *queries;
-	gchar *uri;
+	TrackerSparqlConnection *conn;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autofree gchar *now = NULL, *uri = NULL;
 
-	queries = g_string_new ("WITH " DEFAULT_GRAPH " ");
 	uri = g_file_get_uri (mount_point);
+	now = tracker_date_to_string (time (NULL));
 
-	if (mounted) {
-		g_debug ("Mount point state (MOUNTED) being set in DB for mount_point '%s'",
-		         uri);
+	g_debug ("Mount point state (%s) being set in DB for mount_point '%s'",
+	         mounted ? "MOUNTED" : "UNMOUNTED",
+	         uri);
 
-		g_string_append (queries,
-				 "DELETE { ?u tracker:unmountDate ?date ;"
-				 "            tracker:available ?avail } "
-				 "INSERT { ?u tracker:available true } ");
-	} else {
-		gchar *now;
-
-		g_debug ("Mount point state (UNMOUNTED) being set in DB for URI '%s'",
-		         uri);
-
-		now = tracker_date_to_string (time (NULL));
-
-		g_string_append_printf (queries,
-		                        "DELETE { ?u tracker:unmountDate ?date ;"
-		                        "            tracker:available ?avail } "
-		                        "INSERT { ?u tracker:unmountDate \"%s\" ; "
-					"            tracker:available false } ",
-		                        now);
-
-		g_free (now);
-	}
-
-	g_string_append_printf (queries,
-				"WHERE { <%s> a nfo:FileDataObject ; "
-				"             nie:interpretedAs/"
-				"             nie:rootElementOf ?u . "
-				"        ?u tracker:available ?avail . "
-				"        OPTIONAL { ?u tracker:unmountDate ?date } "
-				"}",
-				uri);
-	/* Update plain tracker:available state on content specific graphs */
-	g_string_append_printf (queries,
-	                        "DELETE { GRAPH ?g { ?uri tracker:available %s } } "
-	                        "INSERT { GRAPH ?g { ?uri tracker:available %s } } "
-	                        "WHERE { GRAPH ?g { ?uri a tracker:IndexedFolder ; "
-	                        "                        nie:isStoredAs <%s> . } "
-	                        "        FILTER (?g != tracker:FileSystem) "
-	                        "}",
-	                        mounted ? "false" : "true",
-	                        mounted ? "true" : "false",
-	                        uri);
-	g_free (uri);
+	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
+	stmt = tracker_load_statement (conn, "update-mountpoint.rq", NULL);
 
 	if (batch) {
-		tracker_batch_add_sparql (batch, queries->str);
+		tracker_batch_add_statement (batch, stmt,
+		                             "mountPoint", G_TYPE_STRING, uri,
+		                             "mounted", G_TYPE_BOOLEAN, mounted,
+		                             "currentDate", G_TYPE_STRING, now,
+		                             NULL);
 	} else {
-		tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
-		                                        queries->str,
-		                                        NULL,
-		                                        set_up_mount_point_cb,
-		                                        NULL);
+		tracker_sparql_statement_bind_string (stmt, "mountPoint", uri);
+		tracker_sparql_statement_bind_boolean (stmt, "mounted", mounted);
+		tracker_sparql_statement_bind_string (stmt, "currentDate", now);
+		tracker_sparql_statement_update_async (stmt,
+		                                       NULL,
+		                                       set_up_mount_point_cb,
+		                                       NULL);
 	}
-
-	g_string_free (queries, TRUE);
 }
 
 static void
