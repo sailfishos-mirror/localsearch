@@ -92,6 +92,14 @@ void tracker_sparql_buffer_log_delete (TrackerSparqlBuffer *buffer,
 void tracker_sparql_buffer_log_delete_content (TrackerSparqlBuffer *buffer,
                                                GFile               *file);
 
+void tracker_sparql_buffer_log_move (TrackerSparqlBuffer *buffer,
+                                     GFile               *source,
+                                     GFile               *dest);
+
+void tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
+                                             GFile               *source,
+                                             GFile               *dest);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_SPARQL_BUFFER_H__ */

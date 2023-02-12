@@ -9,6 +9,8 @@
     <file>queries/get-index-roots.rq</file>
     <file>queries/get-file-mimetype.rq</file>
     <file>queries/get-folder-count.rq</file>
+    <file>queries/move-file.rq</file>
+    <file>queries/move-folder-contents.rq</file>
     <file>queries/update-mountpoint.rq</file>
   </gresource>
 </gresources>

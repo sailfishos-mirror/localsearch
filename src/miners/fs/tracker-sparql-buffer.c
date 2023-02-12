@@ -47,6 +47,8 @@ struct _TrackerSparqlBufferPrivate
 
 	TrackerSparqlStatement *delete_file;
 	TrackerSparqlStatement *delete_content;
+	TrackerSparqlStatement *move_file;
+	TrackerSparqlStatement *move_content;
 };
 
 enum {
@@ -91,6 +93,8 @@ tracker_sparql_buffer_finalize (GObject *object)
 
 	g_object_unref (priv->delete_file);
 	g_object_unref (priv->delete_content);
+	g_object_unref (priv->move_file);
+	g_object_unref (priv->move_content);
 	g_object_unref (priv->connection);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
@@ -148,6 +152,10 @@ tracker_sparql_buffer_constructed (GObject *object)
 		tracker_load_statement (priv->connection, "delete-file.rq", NULL);
 	priv->delete_content =
 		tracker_load_statement (priv->connection, "delete-folder-contents.rq", NULL);
+	priv->move_file =
+		tracker_load_statement (priv->connection, "move-file.rq", NULL);
+	priv->move_content =
+		tracker_load_statement (priv->connection, "move-folder-contents.rq", NULL);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->constructed (object);
 }
@@ -545,4 +553,66 @@ tracker_sparql_buffer_log_delete_content (TrackerSparqlBuffer *buffer,
 	                             "uri", G_TYPE_STRING, uri,
 	                             NULL);
 	push_stmt_task (buffer, priv->delete_content, file);
+}
+
+void
+tracker_sparql_buffer_log_move (TrackerSparqlBuffer *buffer,
+                                GFile               *source,
+                                GFile               *dest)
+{
+	TrackerSparqlBufferPrivate *priv;
+	TrackerBatch *batch;
+	g_autofree gchar *source_uri = NULL, *dest_uri = NULL, *new_parent_uri = NULL;
+	g_autofree gchar *basename = NULL, *path = NULL;
+	g_autoptr (GFile) new_parent = NULL;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (source));
+	g_return_if_fail (G_IS_FILE (dest));
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
+
+	source_uri = g_file_get_uri (source);
+	dest_uri = g_file_get_uri (dest);
+	path = g_file_get_path (dest);
+	new_parent = g_file_get_parent (dest);
+	new_parent_uri = g_file_get_uri (new_parent);
+	basename = g_filename_display_basename (path);
+
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_statement (batch, priv->move_file,
+	                             "sourceUri", G_TYPE_STRING, source_uri,
+	                             "destUri", G_TYPE_STRING, dest_uri,
+	                             "newFilename", G_TYPE_STRING, basename,
+	                             "newParent", G_TYPE_STRING, new_parent_uri,
+	                             NULL);
+
+	push_stmt_task (buffer, priv->move_file, dest);
+}
+
+void
+tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
+                                        GFile               *source,
+                                        GFile               *dest)
+{
+	TrackerSparqlBufferPrivate *priv;
+	TrackerBatch *batch;
+	g_autofree gchar *source_uri = NULL, *dest_uri = NULL;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (source));
+	g_return_if_fail (G_IS_FILE (dest));
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
+
+	source_uri = g_file_get_uri (source);
+	dest_uri = g_file_get_uri (dest);
+
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_statement (batch, priv->move_content,
+	                             "sourceUri", G_TYPE_STRING, source_uri,
+	                             "destUri", G_TYPE_STRING, dest_uri,
+	                             NULL);
+
+	push_stmt_task (buffer, priv->move_content, dest);
 }
