@@ -815,7 +815,7 @@ static void
 set_up_mount_point (TrackerMinerFiles *miner,
                     GFile             *mount_point,
                     gboolean           mounted,
-                    GString           *accumulator)
+                    TrackerBatch      *batch)
 {
 	GString *queries;
 	gchar *uri;
@@ -870,8 +870,8 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	                        uri);
 	g_free (uri);
 
-	if (accumulator) {
-		g_string_append_printf (accumulator, "%s ", queries->str);
+	if (batch) {
+		tracker_batch_add_sparql (batch, queries->str);
 	} else {
 		tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (miner)),
 		                                        queries->str,
@@ -888,16 +888,13 @@ init_mount_points_cb (GObject      *source,
                       GAsyncResult *result,
                       gpointer      user_data)
 {
-	GError *error = NULL;
+	g_autofree GError *error = NULL;
 
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (source),
-	                                         result,
-	                                         &error);
+	tracker_batch_execute_finish (TRACKER_BATCH (source), result, &error);
 
 	if (error) {
 		g_critical ("Could not initialize currently active mount points: %s",
 		            error->message);
-		g_error_free (error);
 	} else {
 		/* Mount points correctly initialized */
 		(TRACKER_MINER_FILES (user_data))->private->mount_points_initialized = TRUE;
@@ -919,7 +916,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 	GHashTable *volumes;
 	GHashTableIter iter;
 	gpointer key, value;
-	GString *accumulator;
+	g_autoptr (TrackerBatch) batch = NULL;
 	GError *error = NULL;
 	TrackerSparqlCursor *cursor = NULL;
 	GSList *mounts, *l;
@@ -1002,7 +999,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 		g_slist_free (mounts);
 	}
 
-	accumulator = g_string_new (NULL);
+	batch = tracker_sparql_connection_create_batch (conn);
 	g_hash_table_iter_init (&iter, volumes);
 
 	/* Finally, set up volumes based on the composed info */
@@ -1021,7 +1018,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			set_up_mount_point (TRACKER_MINER_FILES (miner),
 			                    file,
 			                    TRUE,
-			                    accumulator);
+			                    batch);
 
 			if (mount_point) {
 				TrackerIndexingTree *indexing_tree;
@@ -1051,7 +1048,7 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			set_up_mount_point (TRACKER_MINER_FILES (miner),
 			                    file,
 			                    FALSE,
-			                    accumulator);
+			                    batch);
 			/* There's no need to force mtime check in these inconsistent
 			 * mount points, as they are not mounted right now. */
 		}
@@ -1059,19 +1056,11 @@ init_mount_points (TrackerMinerFiles *miner_files)
 		g_free (mount_point);
 	}
 
-	if (accumulator->str[0] != '\0') {
-		tracker_sparql_connection_update_async (tracker_miner_get_connection (miner),
-		                                        accumulator->str,
-		                                        NULL,
-		                                        init_mount_points_cb,
-		                                        miner);
-	} else {
-		/* Note. Not initializing stale volume removal timeout because
-		 * we do not have the configuration setup yet */
-		(TRACKER_MINER_FILES (miner))->private->mount_points_initialized = TRUE;
-	}
+	tracker_batch_execute_async (batch,
+	                             NULL,
+	                             init_mount_points_cb,
+	                             miner);
 
-	g_string_free (accumulator, TRUE);
 	g_hash_table_unref (volumes);
 }
 
