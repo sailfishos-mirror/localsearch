@@ -709,17 +709,7 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 		return priv->deleted_query;
 
 	priv->deleted_query =
-		tracker_sparql_connection_query_statement (priv->connection,
-		                                           "SELECT ?mimeType "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "  ?ie nie:mimeType ?mimeType ; "
-		                                           "      nie:isStoredAs ~uri . "
-		                                           "  }"
-		                                           "}"
-		                                           "ORDER BY ?uri",
-		                                           priv->cancellable,
-		                                           error);
+		tracker_load_statement (priv->connection, "get-file-mimetype.rq", error);
 	return priv->deleted_query;
 }
 
