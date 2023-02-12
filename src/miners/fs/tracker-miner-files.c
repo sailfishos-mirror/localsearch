@@ -1961,93 +1961,11 @@ miner_files_finished (TrackerMinerFS *fs,
 }
 
 static void
-add_delete_sparql (GFile               *file,
-                   TrackerSparqlBuffer *buffer,
-                   gboolean             delete_self,
-                   gboolean             delete_children)
-{
-	GString *sparql;
-	gchar *uri;
-
-	g_return_if_fail (delete_self || delete_children);
-
-	uri = g_file_get_uri (file);
-
-	if (delete_children) {
-		sparql = g_string_new ("DELETE { "
-				       "  GRAPH " DEFAULT_GRAPH " {"
-				       "    ?f a rdfs:Resource . "
-				       "  }"
-				       "  GRAPH ?g {"
-				       "    ?f a rdfs:Resource . "
-				       "    ?ie a rdfs:Resource . "
-				       "  }"
-				       "} WHERE {"
-				       "  GRAPH " DEFAULT_GRAPH " {"
-				       "    ?f a rdfs:Resource ; "
-				       "       nie:url ?u . "
-				       "  }"
-				       "  GRAPH ?g {"
-				       "    ?f a rdfs:Resource . "
-				       "    OPTIONAL { ?ie nie:isStoredAs ?f } . "
-				       "  }"
-				       "  FILTER (");
-
-		g_string_append_printf (sparql, "STRSTARTS (?u, \"%s/\")", uri);
-
-		g_string_append (sparql, ")}");
-	} else {
-		sparql = g_string_new (NULL);
-	}
-
-	if (delete_self) {
-		const gchar *data_graphs[] = {
-			"tracker:Audio",
-			"tracker:Documents",
-			"tracker:Pictures",
-			"tracker:Software",
-			"tracker:Video",
-			"tracker:FileSystem",
-		};
-		gint i;
-
-		for (i = 0; i < G_N_ELEMENTS (data_graphs); i++) {
-			g_string_append_printf (sparql,
-						"DELETE { "
-						"  GRAPH %s {"
-						"    <%s> a rdfs:Resource . "
-						"    ?ie a rdfs:Resource . "
-						"  }"
-						"} WHERE {"
-						"  GRAPH " DEFAULT_GRAPH " {"
-						"    <%s> a rdfs:Resource . "
-						"    OPTIONAL { "
-						"      GRAPH %s {"
-						"        ?ie nie:isStoredAs <%s> "
-						"      }"
-						"    }"
-						"  }"
-						"} ",
-						data_graphs[i],
-						uri,
-						uri,
-						data_graphs[i],
-						uri);
-		}
-	}
-
-	g_free (uri);
-
-	tracker_sparql_buffer_push_sparql (buffer, file, sparql->str);
-	g_string_free (sparql, TRUE);
-}
-
-static void
 miner_files_remove_children (TrackerMinerFS      *fs,
                              GFile               *file,
                              TrackerSparqlBuffer *buffer)
 {
-	add_delete_sparql (file, buffer, FALSE, TRUE);
+	tracker_sparql_buffer_log_delete_content (buffer, file);
 }
 
 static void
@@ -2056,7 +1974,10 @@ miner_files_remove_file (TrackerMinerFS      *fs,
                          TrackerSparqlBuffer *buffer,
                          gboolean             is_dir)
 {
-	add_delete_sparql (file, buffer, TRUE, is_dir);
+	if (is_dir)
+		tracker_sparql_buffer_log_delete_content (buffer, file);
+
+	tracker_sparql_buffer_log_delete (buffer, file);
 }
 
 static void

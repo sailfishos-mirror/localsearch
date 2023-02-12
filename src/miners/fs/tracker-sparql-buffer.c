@@ -26,6 +26,8 @@
 
 #include "tracker-sparql-buffer.h"
 
+#include "tracker-utils.h"
+
 typedef struct _TrackerSparqlBufferPrivate TrackerSparqlBufferPrivate;
 typedef struct _SparqlTaskData SparqlTaskData;
 typedef struct _UpdateBatchData UpdateBatchData;
@@ -42,10 +44,14 @@ struct _TrackerSparqlBufferPrivate
 	GHashTable *file_set;
 	gint n_updates;
 	TrackerBatch *batch;
+
+	TrackerSparqlStatement *delete_file;
+	TrackerSparqlStatement *delete_content;
 };
 
 enum {
 	TASK_TYPE_RESOURCE,
+	TASK_TYPE_STMT,
 	TASK_TYPE_SPARQL
 };
 
@@ -58,7 +64,9 @@ struct _SparqlTaskData
 			gchar *graph;
 			TrackerResource *resource;
 		} resource;
-
+		struct {
+			TrackerSparqlStatement *stmt;
+		} stmt;
 		struct {
 			gchar *sparql;
 		} sparql;
@@ -81,6 +89,8 @@ tracker_sparql_buffer_finalize (GObject *object)
 
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (object));
 
+	g_object_unref (priv->delete_file);
+	g_object_unref (priv->delete_content);
 	g_object_unref (priv->connection);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
@@ -128,6 +138,21 @@ tracker_sparql_buffer_get_property (GObject    *object,
 }
 
 static void
+tracker_sparql_buffer_constructed (GObject *object)
+{
+	TrackerSparqlBufferPrivate *priv;
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (object));
+
+	priv->delete_file =
+		tracker_load_statement (priv->connection, "delete-file.rq", NULL);
+	priv->delete_content =
+		tracker_load_statement (priv->connection, "delete-folder-contents.rq", NULL);
+
+	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->constructed (object);
+}
+
+static void
 tracker_sparql_buffer_class_init (TrackerSparqlBufferClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
@@ -135,6 +160,7 @@ tracker_sparql_buffer_class_init (TrackerSparqlBufferClass *klass)
 	object_class->finalize = tracker_sparql_buffer_finalize;
 	object_class->set_property = tracker_sparql_buffer_set_property;
 	object_class->get_property = tracker_sparql_buffer_get_property;
+	object_class->constructed = tracker_sparql_buffer_constructed;
 
 	g_object_class_install_property (object_class,
 	                                 PROP_CONNECTION,
@@ -331,6 +357,18 @@ sparql_task_data_new_sparql (const gchar *sparql)
 	return task_data;
 }
 
+static SparqlTaskData *
+sparql_task_data_new_stmt (TrackerSparqlStatement *stmt)
+{
+	SparqlTaskData *task_data;
+
+	task_data = g_slice_new0 (SparqlTaskData);
+	task_data->type = TASK_TYPE_STMT;
+	task_data->d.stmt.stmt = stmt;
+
+	return task_data;
+}
+
 static void
 sparql_task_data_free (SparqlTaskData *data)
 {
@@ -404,6 +442,8 @@ tracker_sparql_task_get_sparql (TrackerTask *task)
 		return tracker_resource_print_sparql_update (task_data->d.resource.resource,
 		                                             NULL,
 		                                             task_data->d.resource.graph);
+	} else if (task_data->type == TASK_TYPE_STMT) {
+		return g_strdup (tracker_sparql_statement_get_sparql (task_data->d.stmt.stmt));
 	} else if (task_data->type == TASK_TYPE_SPARQL) {
 		return g_strdup (task_data->d.sparql.sparql);
 	}
@@ -448,4 +488,61 @@ tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
 		return TRACKER_BUFFER_STATE_QUEUED;
 
 	return TRACKER_BUFFER_STATE_FLUSHING;
+}
+
+static void
+push_stmt_task (TrackerSparqlBuffer    *buffer,
+                TrackerSparqlStatement *stmt,
+                GFile                  *file)
+{
+	TrackerTask *task;
+	SparqlTaskData *data;
+
+	data = sparql_task_data_new_stmt (stmt);
+	task = tracker_task_new (file, data,
+	                         (GDestroyNotify) sparql_task_data_free);
+	sparql_buffer_push_to_pool (buffer, task);
+	tracker_task_unref (task);
+}
+
+void
+tracker_sparql_buffer_log_delete (TrackerSparqlBuffer *buffer,
+                                  GFile               *file)
+{
+	TrackerSparqlBufferPrivate *priv;
+	TrackerBatch *batch;
+	g_autofree gchar *uri = NULL;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
+
+	uri = g_file_get_uri (file);
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_statement (batch, priv->delete_file,
+	                             "uri", G_TYPE_STRING, uri,
+	                             NULL);
+	push_stmt_task (buffer, priv->delete_file, file);
+}
+
+void
+tracker_sparql_buffer_log_delete_content (TrackerSparqlBuffer *buffer,
+                                          GFile               *file)
+{
+	TrackerSparqlBufferPrivate *priv;
+	TrackerBatch *batch;
+	g_autofree gchar *uri = NULL;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
+
+	uri = g_file_get_uri (file);
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_statement (batch, priv->delete_content,
+	                             "uri", G_TYPE_STRING, uri,
+	                             NULL);
+	push_stmt_task (buffer, priv->delete_content, file);
 }

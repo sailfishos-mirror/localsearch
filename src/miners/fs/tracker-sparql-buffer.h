@@ -86,6 +86,12 @@ TrackerSparqlBufferState tracker_sparql_buffer_get_state (TrackerSparqlBuffer *b
 
 gchar *              tracker_sparql_task_get_sparql          (TrackerTask *task);
 
+void tracker_sparql_buffer_log_delete (TrackerSparqlBuffer *buffer,
+                                       GFile               *file);
+
+void tracker_sparql_buffer_log_delete_content (TrackerSparqlBuffer *buffer,
+                                               GFile               *file);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_SPARQL_BUFFER_H__ */
