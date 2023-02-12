@@ -693,30 +693,7 @@ sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
 		return priv->content_query;
 
 	priv->content_query =
-		tracker_sparql_connection_query_statement (priv->connection,
-		                                           "SELECT ?uri ?folderUrn ?lastModified ?hash nie:mimeType(?ie) "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "    ?uri a nfo:FileDataObject ;"
-		                                           "         nfo:fileLastModified ?lastModified ;"
-		                                           "         nie:dataSource ?s ."
-		                                           "    ~root nie:interpretedAs /"
-		                                           "          nie:rootElementOf ?s ."
-		                                           "    OPTIONAL {"
-		                                           "      ?uri nie:interpretedAs ?folderUrn ."
-		                                           "      ?folderUrn a nfo:Folder "
-		                                           "    }"
-		                                           "    OPTIONAL {"
-		                                           "      ?uri tracker:extractorHash ?hash "
-		                                           "    }"
-		                                           "  }"
-		                                           "  OPTIONAL {"
-		                                           "    ?uri nie:interpretedAs ?ie "
-		                                           "  }"
-		                                           "}"
-		                                           "ORDER BY ?uri",
-		                                           priv->cancellable,
-		                                           error);
+		tracker_load_statement (priv->connection, "get-index-root-content.rq", error);
 	return priv->content_query;
 }
 
