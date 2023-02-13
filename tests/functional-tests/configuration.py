@@ -44,7 +44,6 @@ TRACKER_EXTRACT_PATH = config['TRACKER_EXTRACT_PATH']
 
 def test_environment(tmpdir):
     return {
-        'DCONF_PROFILE': config['TEST_DCONF_PROFILE'],
         'GIO_MODULE_DIR': config['MOCK_VOLUME_MONITOR_DIR'],
         'TRACKER_TEST_DOMAIN_ONTOLOGY_RULE': config['TEST_DOMAIN_ONTOLOGY_RULE'],
         'TRACKER_EXTRACTOR_RULES_DIR': config['TEST_EXTRACTOR_RULES_DIR'],
