@@ -243,14 +243,14 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
                                              GFileInfo           *info,
                                              TrackerSparqlBuffer *buffer)
 {
-	TrackerResource *resource, *graph_file;
-	gchar *uri;
+	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
+	g_autofree gchar *uri = NULL;
 	const gchar *mime_type, *graph;
-	GDateTime *modified;
+	g_autoptr (GDateTime) modified = NULL;
 #ifdef GIO_SUPPORTS_CREATION_TIME
-	GDateTime *accessed, *created;
+	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 #else
-	gchar *time_str;
+	g_autofree gchar *time_str = NULL;
 	time_t time_;
 #endif
 
@@ -280,33 +280,27 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 		graph_file = tracker_resource_new (uri);
 		tracker_resource_add_uri (graph_file, "rdf:type", "nfo:FileDataObject");
 		tracker_resource_set_datetime (graph_file, "nfo:fileLastModified", modified);
-		tracker_sparql_buffer_push (buffer, file, graph, graph_file);
-		g_clear_object (&graph_file);
 	}
-	g_date_time_unref (modified);
 
 #ifdef GIO_SUPPORTS_CREATION_TIME
 	/* Update nfo:fileLastAccessed */
 	accessed = g_file_info_get_access_date_time (info);
 	tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
-	g_date_time_unref (accessed);
 
 	/* Update nfo:fileCreated */
 	created = g_file_info_get_creation_date_time (info);
 
-	if (created) {
+	if (created)
 		tracker_resource_set_datetime (resource, "nfo:fileCreated", created);
-		g_date_time_unref (created);
-	}
 #else
 	time_ = (time_t) g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
 	time_str = tracker_date_to_string (time_);
 	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
-	g_free (time_str);
 #endif
 
-	g_free (uri);
-
-	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, resource);
-	g_object_unref (resource);
+	tracker_sparql_buffer_log_attributes_update (buffer,
+	                                             file,
+	                                             graph,
+	                                             resource,
+	                                             graph_file);
 }

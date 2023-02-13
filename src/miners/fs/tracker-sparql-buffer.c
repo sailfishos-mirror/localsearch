@@ -683,3 +683,21 @@ tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
 	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, file_resource);
 	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, folder_resource);
 }
+
+void
+tracker_sparql_buffer_log_attributes_update (TrackerSparqlBuffer *buffer,
+                                             GFile               *file,
+                                             const gchar         *content_graph,
+                                             TrackerResource     *file_resource,
+                                             TrackerResource     *graph_resource)
+{
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+	g_return_if_fail (TRACKER_IS_RESOURCE (file_resource));
+	g_return_if_fail (!graph_resource || TRACKER_IS_RESOURCE (graph_resource));
+
+	if (content_graph && graph_resource)
+		tracker_sparql_buffer_push (buffer, file, content_graph, graph_resource);
+
+	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, file_resource);
+}

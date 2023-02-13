@@ -112,6 +112,12 @@ void tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
                                        TrackerResource     *file_resource,
                                        TrackerResource     *folder_resource);
 
+void tracker_sparql_buffer_log_attributes_update (TrackerSparqlBuffer *buffer,
+                                                  GFile               *file,
+                                                  const gchar         *content_graph,
+                                                  TrackerResource     *file_resource,
+                                                  TrackerResource     *graph_resource);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_SPARQL_BUFFER_H__ */
