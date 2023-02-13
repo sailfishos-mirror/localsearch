@@ -29,11 +29,6 @@
 
 G_BEGIN_DECLS
 
-gboolean tracker_accumulator_check_file (GSignalInvocationHint *hint,
-                                         GValue                *return_accumulator,
-                                         const GValue          *handler_return,
-                                         gpointer               accumulator_data);
-
 TrackerSparqlStatement * tracker_load_statement (TrackerSparqlConnection  *conn,
                                                  const gchar              *query_filename,
                                                  GError                  **error);

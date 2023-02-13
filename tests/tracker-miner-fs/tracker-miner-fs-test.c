@@ -93,7 +93,7 @@ test_miner_process_file (TrackerMinerFS      *miner,
 	g_free (parent_uri);
 	g_object_unref (parent);
 
-	tracker_sparql_buffer_push (buffer, file, "tracker:FileSystem", resource);
+	tracker_sparql_buffer_log_file (buffer, file, "tracker:FileSystem", resource, NULL);
 	g_object_unref (resource);
 	g_free (uri);
 }
@@ -113,20 +113,9 @@ test_miner_remove_file (TrackerMinerFS      *miner,
                         TrackerSparqlBuffer *buffer,
                         gboolean             is_dir)
 {
-	gchar *sparql, *uri;
-
-	uri = g_file_get_uri (file);
-	sparql = g_strdup_printf ("WITH tracker:FileSystem "
-	                          "DELETE {"
-	                          "  ?u a rdfs:Resource . "
-	                          "} WHERE {"
-	                          "  ?u nie:url ?url ."
-	                          "  FILTER (?url = '%s' || STRSTARTS (?url, '%s/'))"
-	                          "}", uri, uri);
-	g_free (uri);
-
-	tracker_sparql_buffer_push_sparql (buffer, file, sparql);
-	g_free (sparql);
+	tracker_sparql_buffer_log_delete (buffer, file);
+	if (is_dir)
+		tracker_sparql_buffer_log_delete_content (buffer, file);
 }
 
 static void
@@ -134,20 +123,7 @@ test_miner_remove_children (TrackerMinerFS      *miner,
                             GFile               *file,
                             TrackerSparqlBuffer *buffer)
 {
-	gchar *sparql, *uri;
-
-	uri = g_file_get_uri (file);
-	sparql = g_strdup_printf ("WITH tracker:FileSystem "
-	                          "DELETE {"
-	                          "  ?u a rdfs:Resource . "
-	                          "} WHERE {"
-	                          "  ?u nie:url ?url ."
-	                          "  FILTER (STRSTARTS (?url, '%s/'))"
-	                          "}", uri);
-	g_free (uri);
-
-	tracker_sparql_buffer_push_sparql (buffer, file, sparql);
-	g_free (sparql);
+	tracker_sparql_buffer_log_delete_content (buffer, file);
 }
 
 static void

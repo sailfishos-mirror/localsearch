@@ -23,20 +23,6 @@
 
 #define QUERY_RESOURCE "/org/freedesktop/Tracker3/Miner/Files/queries/"
 
-gboolean
-tracker_accumulator_check_file (GSignalInvocationHint *hint,
-                                GValue                *return_accumulator,
-                                const GValue          *handler_return,
-                                gpointer               accumulator_data)
-{
-	gboolean use;
-
-	use = g_value_get_boolean (handler_return);
-	g_value_set_boolean (return_accumulator, use);
-
-	return (use == TRUE);
-}
-
 TrackerSparqlStatement *
 tracker_load_statement (TrackerSparqlConnection  *conn,
                         const gchar              *query_filename,

@@ -42,13 +42,6 @@ G_BEGIN_DECLS
 typedef struct _TrackerSparqlBuffer TrackerSparqlBuffer;
 typedef struct _TrackerSparqlBufferClass TrackerSparqlBufferClass;
 
-typedef enum
-{
-	TRACKER_BUFFER_STATE_UNKNOWN,
-	TRACKER_BUFFER_STATE_QUEUED,
-	TRACKER_BUFFER_STATE_FLUSHING,
-} TrackerSparqlBufferState;
-
 struct _TrackerSparqlBuffer
 {
 	TrackerTaskPool parent_instance;
@@ -72,13 +65,6 @@ gboolean             tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
                                                          GAsyncResult         *res,
                                                          GError              **error);
-
-void                 tracker_sparql_buffer_push_sparql (TrackerSparqlBuffer *buffer,
-                                                        GFile               *file,
-                                                        const gchar         *sparql);
-
-TrackerSparqlBufferState tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
-                                                          GFile               *file);
 
 gchar *              tracker_sparql_task_get_sparql          (TrackerTask *task);
 
