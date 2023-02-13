@@ -434,7 +434,7 @@ class TrackerExtractTestCase(ut.TestCase):
 
         Use get_tracker_extract_output() to get the extractor output.
 
-        Look in test-extraction-data/*/*.expected.json for examples of the spec
+        Look in data/extractor-content/*/*.expected.json for examples of the spec
         format.
         """
 
@@ -528,7 +528,7 @@ class TrackerWritebackTest (TrackerMinerTest):
 
     def datadir_path(self, filename):
         """Returns the full path to a writeback test file."""
-        datadir = os.path.join(os.path.dirname(__file__), 'test-writeback-data')
+        datadir = os.path.join(os.path.dirname(__file__), 'data/writeback-content')
         return pathlib.Path(os.path.join(datadir, filename))
 
     def writeback_data(self, variant):

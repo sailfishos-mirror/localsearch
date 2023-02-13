@@ -28,7 +28,7 @@ import shutil
 
 class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_search(self):
-        datadir = pathlib.Path(__file__).parent.joinpath('test-cli-data')
+        datadir = pathlib.Path(__file__).parent.joinpath('data/content')
 
         # FIXME: synchronous `tracker index` isn't ready yet; 
         # see https://gitlab.gnome.org/GNOME/tracker/-/issues/188
@@ -66,7 +66,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
 
     def test_search_filename(self):
-        datadir = pathlib.Path(__file__).parent.joinpath('test-cli-data')
+        datadir = pathlib.Path(__file__).parent.joinpath('data/content')
 
         file1 = datadir.joinpath('text/mango.txt')
         target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))

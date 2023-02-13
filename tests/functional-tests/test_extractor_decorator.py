@@ -29,7 +29,7 @@ import fixtures
 
 
 VALID_FILE = os.path.join(
-    os.path.dirname(__file__), 'test-extraction-data', 'audio',
+    os.path.dirname(__file__), 'data', 'extractor-content', 'audio',
     'mp3-id3v2.4-1.mp3')
 VALID_FILE_TITLE = 'Simply Juvenile'
 

@@ -101,7 +101,7 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
 
     def test_external_cue_sheet(self):
         with tempfile.TemporaryDirectory() as tmpdir:
-            datadir = pathlib.Path(__file__).parent.joinpath('test-extraction-data')
+            datadir = pathlib.Path(__file__).parent.joinpath('data', 'extractor-content')
             shutil.copy(datadir.joinpath('audio', 'cuesheet-test.cue'), tmpdir)
 
             audio_path = pathlib.Path(tmpdir).joinpath('cuesheet-test.flac')
