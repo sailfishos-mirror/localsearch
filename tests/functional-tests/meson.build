@@ -150,28 +150,28 @@ if libgxps.found()
 endif
 
 functional_tests = [
-  'miner-basic',
-  'miner-removable-media',
-  'miner-resource-removal',
-  'fts-basic',
-  'fts-file-operations',
-  'fts-stopwords',
-  'extractor-decorator',
-  'cli',
+  'test_cli',
+  'test_extractor_decorator',
+  'test_fts_basic',
+  'test_fts_file_operations',
+  'test_fts_stopwords',
+  'test_miner_basic',
+  'test_miner_removable_media',
+  'test_miner_resource_removal',
 ]
 
 if libcue.found()
-  functional_tests += 'extractor-flac-cuesheet'
+  functional_tests += 'test_extractor_flac_cuesheet'
 endif
 
 if libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and exempi.found() and libexif.found()
   functional_tests += [
-    'writeback-images',
+    'test_writeback_images',
   ]
 endif
 
 if generic_media_handler_name != 'none'
-  functional_tests += 'writeback-audio'
+  functional_tests += 'test_writeback_audio'
 endif
 
 detect_h264_codec = join_paths(meson.current_source_dir(), 'detect-h264-codec.sh')
@@ -214,7 +214,7 @@ foreach t: extractor_tests
     test_suite = [test_parts[0]]
   endif
   test(test_name, python,
-    args: ['extractor-generic.py', data],
+    args: ['test_extractor_generic.py', data],
     env: test_env,
     protocol: test_protocol,
     suite: ['extractor'] + test_suite,
