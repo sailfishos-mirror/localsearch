@@ -396,7 +396,7 @@ sparql_task_data_free (SparqlTaskData *data)
 	g_slice_free (SparqlTaskData, data);
 }
 
-void
+static void
 tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
                             GFile               *file,
                             const gchar         *graph,

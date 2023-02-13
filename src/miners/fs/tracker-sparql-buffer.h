@@ -73,10 +73,6 @@ GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *b
                                                          GAsyncResult         *res,
                                                          GError              **error);
 
-void                 tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
-                                                 GFile               *file,
-                                                 const gchar         *graph,
-                                                 TrackerResource     *resource);
 void                 tracker_sparql_buffer_push_sparql (TrackerSparqlBuffer *buffer,
                                                         GFile               *file,
                                                         const gchar         *sparql);
