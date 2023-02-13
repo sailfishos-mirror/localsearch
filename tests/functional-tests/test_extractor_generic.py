@@ -24,7 +24,8 @@ directory (containing xxx.expected files)
 """
 
 import gi
-gi.require_version('Tracker', '3.0')
+
+gi.require_version("Tracker", "3.0")
 from gi.repository import Gio
 from gi.repository import Tracker
 
@@ -38,12 +39,13 @@ import unittest as ut
 import configuration as cfg
 import fixtures
 
+
 class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
     """
     Test checks if the tracker extractor is able to retrieve metadata
     """
 
-    def __init__(self, methodName='runTest', descfile=None):
+    def __init__(self, methodName="runTest", descfile=None):
         """
         Descfile is the description file in a relative path
         """
@@ -55,19 +57,17 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
             self.fail("Error loading %s: %s" % (descfile, e))
 
         # Add a method to the class called after the description file
-        methodName = descfile.lower()[:-len(".expected")].replace(" ", "_")[-60:]
+        methodName = descfile.lower()[: -len(".expected")].replace(" ", "_")[-60:]
 
-        if (self.spec['test'].get('ExpectedFailure', False)):
-            setattr(self,
-                    methodName,
-                    self.expected_failure_test_extraction)
+        if self.spec["test"].get("ExpectedFailure", False):
+            setattr(self, methodName, self.expected_failure_test_extraction)
         else:
             setattr(self, methodName, self.generic_test_extraction)
 
         super(GenericExtractionTestCase, self).__init__(methodName)
 
     def __get_bugnumber(self):
-        return self.spec['test'].get('Bugzilla')
+        return self.spec["test"].get("Bugzilla")
 
     def validate_sparql_update(self, sparql):
         """Create a temporary database and run the given SPARQL update.
@@ -78,10 +78,12 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         """
         cancellable = None
         ontology_path = Gio.File.new_for_uri(cfg.nepomuk_path())
-        db = Tracker.SparqlConnection.new(Tracker.SparqlConnectionFlags.NONE,
-                                          None, # create in-memory database,
-                                          ontology_path,
-                                          cancellable)
+        db = Tracker.SparqlConnection.new(
+            Tracker.SparqlConnectionFlags.NONE,
+            None,  # create in-memory database,
+            ontology_path,
+            cancellable,
+        )
         db.update(sparql, cancellable)
 
     def generic_test_extraction(self):
@@ -90,20 +92,20 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         # Filename contains the file to extract, in a relative path to the description file
         desc_root, desc_file = os.path.split(abs_description)
 
-        filename_to_extract = self.spec['test']['Filename']
+        filename_to_extract = self.spec["test"]["Filename"]
         self.file_to_extract = os.path.join(desc_root, filename_to_extract)
 
-        tmpdir = tempfile.mkdtemp(prefix='tracker-extract-test-')
+        tmpdir = tempfile.mkdtemp(prefix="tracker-extract-test-")
         try:
             extra_env = cfg.test_environment(tmpdir)
-            jsonld = fixtures.get_tracker_extract_output(extra_env,
-                                                         self.file_to_extract,
-                                                         output_format='json-ld')
+            jsonld = fixtures.get_tracker_extract_output(
+                extra_env, self.file_to_extract, output_format="json-ld"
+            )
             self.__assert_extraction_ok(jsonld)
 
-            sparql = fixtures.get_tracker_extract_output(extra_env,
-                                                         self.file_to_extract,
-                                                         output_format='sparql')
+            sparql = fixtures.get_tracker_extract_output(
+                extra_env, self.file_to_extract, output_format="sparql"
+            )
             self.validate_sparql_update(sparql)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
@@ -113,31 +115,40 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         self.generic_test_extraction()
 
         if self.__get_bugnumber():
-            raise Exception("Unexpected success. Maybe bug: " + self.__get_bugnumber() + " has been fixed?")
+            raise Exception(
+                "Unexpected success. Maybe bug: "
+                + self.__get_bugnumber()
+                + " has been fixed?"
+            )
         else:
             raise Exception("Unexpected success. Check " + self.rel_description)
 
     def __assert_extraction_ok(self, result):
         try:
-            self.assert_extract_result_matches_spec(self.spec['metadata'], result, self.file_to_extract, self.descfile)
+            self.assert_extract_result_matches_spec(
+                self.spec["metadata"], result, self.file_to_extract, self.descfile
+            )
         except AssertionError:
             print("\ntracker-extract returned: %s" % json.dumps(result, indent=4))
             raise
+
 
 def run_suite(suite):
     if cfg.tap_protocol_enabled():
         try:
             from tap import TAPTestRunner
+
             runner = TAPTestRunner()
             runner.set_stream(True)
         except ImportError as e:
-            log.error('No TAP test runner found: %s', e)
+            log.error("No TAP test runner found: %s", e)
             raise
     else:
         runner = ut.TextTestRunner(verbosity=1)
 
     result = runner.run(suite)
     sys.exit(not result.wasSuccessful())
+
 
 def run_all():
     ##
@@ -147,12 +158,13 @@ def run_all():
     # Is we do this inside a single TestCase an error in one test would stop the whole
     # testing.
     ##
-    if (os.path.exists(os.getcwd() + "/test-extraction-data")):
+    if os.path.exists(os.getcwd() + "/test-extraction-data"):
         # Use local directory if available
         TEST_DATA_PATH = os.getcwd() + "/test-extraction-data"
     else:
-        TEST_DATA_PATH = os.path.join(cfg.DATADIR, "tracker-tests",
-                                      "test-extraction-data")
+        TEST_DATA_PATH = os.path.join(
+            cfg.DATADIR, "tracker-tests", "test-extraction-data"
+        )
     print("Loading test descriptions from", TEST_DATA_PATH)
     extractionTestSuite = ut.TestSuite()
     for root, dirs, files in os.walk(TEST_DATA_PATH):

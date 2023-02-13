@@ -32,23 +32,28 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
     def setUp(self):
         super(MinerRemovableMediaTest, self).setUp()
 
-        self.device_path = pathlib.Path(self.workdir).joinpath('removable-device-1')
+        self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
         self.device_path.mkdir()
 
     def __get_text_documents(self):
-        return self.tracker.query("""
+        return self.tracker.query(
+            """
           SELECT DISTINCT ?url WHERE {
               ?u a nfo:TextDocument ;
                  nie:isStoredAs/nie:url ?url.
           }
-          """)
+          """
+        )
 
     def data_source_available(self, uri):
         """Check tracker:available set on the datasource containing `uri`"""
-        result = self.tracker.query("""
+        result = self.tracker.query(
+            """
           SELECT tracker:available(?folder) WHERE {
               <%s> nie:dataSource ?folder
-          }""" % uri)
+          }"""
+            % uri
+        )
         return True if result[0][0] == "true" else False
 
     def create_test_data(self):
@@ -78,8 +83,9 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
 
         for f in files:
             self.ensure_document_inserted(path)
-            assert not self.data_source_available(path.as_uri()), \
+            assert not self.data_source_available(path.as_uri()), (
                 "Path %s should be marked unavailable" % path.as_uri()
+            )
 
 
 if __name__ == "__main__":

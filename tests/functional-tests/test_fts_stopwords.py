@@ -38,7 +38,7 @@ import fixtures
 
 class MinerFTSStopwordsTest(fixtures.TrackerMinerFTSTest):
     """
-    Search for stopwords in a file 
+    Search for stopwords in a file
     """
 
     def __get_some_stopwords(self):
@@ -46,11 +46,14 @@ class MinerFTSStopwordsTest(fixtures.TrackerMinerFTSTest):
         if "_" in langcode:
             langcode = langcode.split("_")[0]
 
-        stopwordsdir = os.environ['TRACKER_LANGUAGE_STOP_WORDS_DIR']
+        stopwordsdir = os.environ["TRACKER_LANGUAGE_STOP_WORDS_DIR"]
         stopwordsfile = os.path.join(stopwordsdir, "stopwords." + langcode)
 
         if not os.path.exists(stopwordsfile):
-            self.skipTest("No stopwords for the current locale ('%s' doesn't exist)" % (stopwordsfile))
+            self.skipTest(
+                "No stopwords for the current locale ('%s' doesn't exist)"
+                % (stopwordsfile)
+            )
             return []
 
         stopwords = []
@@ -66,7 +69,9 @@ class MinerFTSStopwordsTest(fixtures.TrackerMinerFTSTest):
 
         return stopwords
 
-    @ut.skip("Stopwords are disabled by default since https://gitlab.gnome.org/GNOME/tracker/merge_requests/172")
+    @ut.skip(
+        "Stopwords are disabled by default since https://gitlab.gnome.org/GNOME/tracker/merge_requests/172"
+    )
     def test_01_stopwords(self):
         stopwords = self.__get_some_stopwords()
         TEXT = " ".join(["this a completely normal text automobile"] + stopwords)

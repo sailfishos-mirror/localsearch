@@ -29,11 +29,11 @@ import fixtures
 
 
 VALID_FILE = os.path.join(
-    os.path.dirname(__file__), 'data', 'extractor-content', 'audio',
-    'mp3-id3v2.4-1.mp3')
-VALID_FILE_TITLE = 'Simply Juvenile'
+    os.path.dirname(__file__), "data", "extractor-content", "audio", "mp3-id3v2.4-1.mp3"
+)
+VALID_FILE_TITLE = "Simply Juvenile"
 
-TRACKER_EXTRACT_FAILURE_DATA_SOURCE = 'tracker:extractor-failure-data-source'
+TRACKER_EXTRACT_FAILURE_DATA_SOURCE = "tracker:extractor-failure-data-source"
 
 
 class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
@@ -45,8 +45,9 @@ class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
         # Insert a valid file and wait extraction of its metadata.
         file_path = os.path.join(self.indexed_dir, os.path.basename(VALID_FILE))
         expected = f'a nmm:MusicPiece ; nie:title "{VALID_FILE_TITLE}"'
-        with self.tracker.await_insert(fixtures.AUDIO_GRAPH, expected,
-                                       timeout=cfg.AWAIT_TIMEOUT) as resource:
+        with self.tracker.await_insert(
+            fixtures.AUDIO_GRAPH, expected, timeout=cfg.AWAIT_TIMEOUT
+        ) as resource:
             shutil.copy(VALID_FILE, file_path)
         file_urn = resource.urn
 
@@ -55,25 +56,31 @@ class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
             #   (Writeback must be disabled in the config so that the file
             #   itself is not changed).
             store.update(
-                'DELETE { GRAPH ?g { <%s> nie:title ?title } }'
-                ' WHERE { GRAPH ?g { <%s> nie:title ?title } }' % (file_urn, file_urn))
-            assert not store.ask('ASK { <%s> nie:title ?title }' % file_urn)
+                "DELETE { GRAPH ?g { <%s> nie:title ?title } }"
+                " WHERE { GRAPH ?g { <%s> nie:title ?title } }" % (file_urn, file_urn)
+            )
+            assert not store.ask("ASK { <%s> nie:title ?title }" % file_urn)
 
-            file_uri = 'file://' + os.path.join(self.indexed_dir, file_path)
+            file_uri = "file://" + os.path.join(self.indexed_dir, file_path)
 
             # Request re-indexing (same as `tracker index --file ...`)
             # The extractor should reindex the file and re-add the metadata that we
             # deleted, so we should see the nie:title property change.
-            with self.tracker.await_insert(fixtures.AUDIO_GRAPH, f'nie:title "{VALID_FILE_TITLE}"',
-                                           timeout=cfg.AWAIT_TIMEOUT):
+            with self.tracker.await_insert(
+                fixtures.AUDIO_GRAPH,
+                f'nie:title "{VALID_FILE_TITLE}"',
+                timeout=cfg.AWAIT_TIMEOUT,
+            ):
                 miner_fs.index_location(file_uri, [], [])
 
-            title_result = store.query('SELECT ?title { <%s> nie:interpretedAs/nie:title ?title }' % file_uri)
+            title_result = store.query(
+                "SELECT ?title { <%s> nie:interpretedAs/nie:title ?title }" % file_uri
+            )
             assert len(title_result) == 1
             self.assertEqual(title_result[0][0], VALID_FILE_TITLE)
         finally:
             os.remove(file_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     fixtures.tracker_test_main()

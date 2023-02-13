@@ -29,22 +29,25 @@ import fixtures
 log = logging.getLogger(__name__)
 
 
-class WritebackKeepDateTest (fixtures.TrackerWritebackTest):
-
+class WritebackKeepDateTest(fixtures.TrackerWritebackTest):
     def setUp(self):
         super(WritebackKeepDateTest, self).setUp()
         self.favorite = self.__prepare_favorite_tag()
 
     def __prepare_favorite_tag(self):
         # Check here if favorite has tag... to make sure writeback is actually writing
-        results = self.tracker.query("""
-             SELECT ?label WHERE { nao:predefined-tag-favorite nao:prefLabel ?label }""")
+        results = self.tracker.query(
+            """
+             SELECT ?label WHERE { nao:predefined-tag-favorite nao:prefLabel ?label }"""
+        )
 
         if len(results) == 0:
-            self.tracker.update("""
+            self.tracker.update(
+                """
              INSERT { nao:predefined-tag-favorite nao:prefLabel 'favorite'}
              WHERE { nao:predefined-tag-favorite a nao:Tag }
-             """)
+             """
+            )
             return "favorite"
         else:
             return str(results[0][0])
@@ -53,9 +56,9 @@ class WritebackKeepDateTest (fixtures.TrackerWritebackTest):
         """
         NB#217627 - Order if results is different when an image is marked as favorite.
         """
-        jpeg_path = self.prepare_test_image(self.datadir_path('writeback-test-1.jpeg'))
-        tif_path = self.prepare_test_image(self.datadir_path('writeback-test-2.tif'))
-        png_path = self.prepare_test_image(self.datadir_path('writeback-test-4.png'))
+        jpeg_path = self.prepare_test_image(self.datadir_path("writeback-test-1.jpeg"))
+        tif_path = self.prepare_test_image(self.datadir_path("writeback-test-2.tif"))
+        png_path = self.prepare_test_image(self.datadir_path("writeback-test-4.png"))
 
         query_images = """
           SELECT nie:url(?u) ?contentCreated WHERE {
@@ -66,31 +69,37 @@ class WritebackKeepDateTest (fixtures.TrackerWritebackTest):
         results = self.tracker.query(query_images)
         self.assertEqual(len(results), 3, results)
 
-        log.debug("Waiting 2 seconds to ensure there is a noticiable difference in the timestamp")
+        log.debug(
+            "Waiting 2 seconds to ensure there is a noticiable difference in the timestamp"
+        )
         time.sleep(2)
 
         initial_mtime = jpeg_path.stat().st_mtime
 
         # This triggers the writeback
-        mark_as_favorite = """
+        mark_as_favorite = (
+            """
          INSERT {
            ?u a rdfs:Resource ; nao:hasTag nao:predefined-tag-favorite .
          } WHERE {
            ?u nie:url <%s> .
          }
-        """ % jpeg_path.as_uri()
+        """
+            % jpeg_path.as_uri()
+        )
         self.tracker.update(mark_as_favorite)
         log.debug("Setting favorite in <%s>", jpeg_path.as_uri())
 
         self.wait_for_file_change(jpeg_path, initial_mtime)
 
         # Check the value is written in the file
-        metadata = fixtures.get_tracker_extract_output(self.extra_env, jpeg_path, output_format='json-ld')
+        metadata = fixtures.get_tracker_extract_output(
+            self.extra_env, jpeg_path, output_format="json-ld"
+        )
 
-        tags = metadata.get('nao:hasTag', [])
-        tag_names = [tag['nao:prefLabel'] for tag in tags]
-        self.assertIn(self.favorite, tag_names,
-                      "Tag hasn't been written in the file")
+        tags = metadata.get("nao:hasTag", [])
+        tag_names = [tag["nao:prefLabel"] for tag in tags]
+        self.assertIn(self.favorite, tag_names, "Tag hasn't been written in the file")
 
         # Now check the modification date of the files and it should be the same :)
         new_results = self.tracker.query(query_images)
@@ -102,8 +111,14 @@ class WritebackKeepDateTest (fixtures.TrackerWritebackTest):
 
         # Indeed the order of the results should be the same
         for i in range(0, len(results)):
-            self.assertEqual(results[i][0], new_results[i][0], "Order of the files is different")
-            self.assertEqual(results[i][1], new_results[i][1], "Date has change in file <%s>" % results[i][0])
+            self.assertEqual(
+                results[i][0], new_results[i][0], "Order of the files is different"
+            )
+            self.assertEqual(
+                results[i][1],
+                new_results[i][1],
+                "Date has change in file <%s>" % results[i][0],
+            )
 
 
 if __name__ == "__main__":
