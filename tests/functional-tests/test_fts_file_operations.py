@@ -74,7 +74,6 @@ class MinerFTSFileOperationsTest(fixtures.TrackerMinerFTSTest):
         results = self.search_word("automobile")
         self.assertEqual(len(results), 0)
 
-    @ut.skip("FIXME: this test fails!")
     def test_03_update_the_file(self):
         """
         Changing the contents of the file, updates the index
