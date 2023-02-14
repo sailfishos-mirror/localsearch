@@ -264,7 +264,7 @@ class TrackerMinerFTSTest(TrackerMinerTest):
         text_escaped = Tracker.sparql_escape_string(text)
         path = pathlib.Path(self.path(self.testfile))
 
-        if path.exists():
+        if path.exists() and text != '':
             old_text_escaped = Tracker.sparql_escape_string(path.read_text())
             resource_id = self.tracker.get_content_resource_id(self.uri(self.testfile))
             with self.tracker.await_content_update(
@@ -275,7 +275,14 @@ class TrackerMinerFTSTest(TrackerMinerTest):
                 timeout=cfg.AWAIT_TIMEOUT,
             ):
                 path.write_text(text)
-        else:
+        elif path.exists() and text == '':
+            old_text_escaped = Tracker.sparql_escape_string(path.read_text())
+            resource_id = self.tracker.get_content_resource_id(self.uri(self.testfile))
+            with self.tracker.await_delete(DOCUMENTS_GRAPH,
+                                           resource_id,
+                                           timeout=cfg.AWAIT_TIMEOUT):
+                path.write_text(text)
+        elif text != '':
             url = self.uri(self.testfile)
             expected = f'a nfo:Document; nie:isStoredAs <{url}>; nie:plainTextContent "{text_escaped}"'
             with self.tracker.await_insert(
