@@ -1,3 +1,14 @@
+NEW in 3.5.0.beta - 2023-02-15
+==============================
+  * The filesystem miner moved all SPARQL queries and updates to
+    a GResource. Consistently uses TrackerSparqlStatement/TrackerResource
+    for updates.
+  * The "tracker3 tag" has been fixed, and functional tests added to avoid
+    regressions.
+  * The functional tests have been refurbished and modernized
+  * Internal code refactors
+  * The extractor test suite has been extended
+
 NEW in 3.5.0.alpha - 2023-01-11
 ===============================
   * Fix GSource leak in tracker-extract-3
