@@ -21,16 +21,19 @@
 
 #include "tracker-utils.h"
 
-gboolean
-tracker_accumulator_check_file (GSignalInvocationHint *hint,
-                                GValue                *return_accumulator,
-                                const GValue          *handler_return,
-                                gpointer               accumulator_data)
+#define QUERY_RESOURCE "/org/freedesktop/Tracker3/Miner/Files/queries/"
+
+TrackerSparqlStatement *
+tracker_load_statement (TrackerSparqlConnection  *conn,
+                        const gchar              *query_filename,
+                        GError                  **error)
 {
-	gboolean use;
+	g_autofree gchar *resource_path = NULL;
 
-	use = g_value_get_boolean (handler_return);
-	g_value_set_boolean (return_accumulator, use);
+	resource_path = g_strconcat (QUERY_RESOURCE, query_filename, NULL);
 
-	return (use == TRUE);
+	return tracker_sparql_connection_load_statement_from_gresource (conn,
+	                                                                resource_path,
+	                                                                NULL,
+	                                                                error);
 }

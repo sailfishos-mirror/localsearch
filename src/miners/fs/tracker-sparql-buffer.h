@@ -42,13 +42,6 @@ G_BEGIN_DECLS
 typedef struct _TrackerSparqlBuffer TrackerSparqlBuffer;
 typedef struct _TrackerSparqlBufferClass TrackerSparqlBufferClass;
 
-typedef enum
-{
-	TRACKER_BUFFER_STATE_UNKNOWN,
-	TRACKER_BUFFER_STATE_QUEUED,
-	TRACKER_BUFFER_STATE_FLUSHING,
-} TrackerSparqlBufferState;
-
 struct _TrackerSparqlBuffer
 {
 	TrackerTaskPool parent_instance;
@@ -73,18 +66,39 @@ GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *b
                                                          GAsyncResult         *res,
                                                          GError              **error);
 
-void                 tracker_sparql_buffer_push (TrackerSparqlBuffer *buffer,
-                                                 GFile               *file,
-                                                 const gchar         *graph,
-                                                 TrackerResource     *resource);
-void                 tracker_sparql_buffer_push_sparql (TrackerSparqlBuffer *buffer,
-                                                        GFile               *file,
-                                                        const gchar         *sparql);
-
-TrackerSparqlBufferState tracker_sparql_buffer_get_state (TrackerSparqlBuffer *buffer,
-                                                          GFile               *file);
-
 gchar *              tracker_sparql_task_get_sparql          (TrackerTask *task);
+
+void tracker_sparql_buffer_log_delete (TrackerSparqlBuffer *buffer,
+                                       GFile               *file);
+
+void tracker_sparql_buffer_log_delete_content (TrackerSparqlBuffer *buffer,
+                                               GFile               *file);
+
+void tracker_sparql_buffer_log_move (TrackerSparqlBuffer *buffer,
+                                     GFile               *source,
+                                     GFile               *dest);
+
+void tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
+                                             GFile               *source,
+                                             GFile               *dest);
+
+void tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
+                                     GFile               *file,
+                                     const gchar         *content_graph,
+                                     TrackerResource     *file_resource,
+                                     TrackerResource     *graph_resource);
+
+void tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
+                                       GFile               *file,
+                                       gboolean             is_root,
+                                       TrackerResource     *file_resource,
+                                       TrackerResource     *folder_resource);
+
+void tracker_sparql_buffer_log_attributes_update (TrackerSparqlBuffer *buffer,
+                                                  GFile               *file,
+                                                  const gchar         *content_graph,
+                                                  TrackerResource     *file_resource,
+                                                  TrackerResource     *graph_resource);
 
 G_END_DECLS
 

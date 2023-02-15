@@ -28,6 +28,7 @@
 #include "tracker-file-notifier.h"
 #include "tracker-crawler.h"
 #include "tracker-monitor-glib.h"
+#include "tracker-utils.h"
 
 enum {
 	PROP_0,
@@ -692,30 +693,7 @@ sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
 		return priv->content_query;
 
 	priv->content_query =
-		tracker_sparql_connection_query_statement (priv->connection,
-		                                           "SELECT ?uri ?folderUrn ?lastModified ?hash nie:mimeType(?ie) "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "    ?uri a nfo:FileDataObject ;"
-		                                           "         nfo:fileLastModified ?lastModified ;"
-		                                           "         nie:dataSource ?s ."
-		                                           "    ~root nie:interpretedAs /"
-		                                           "          nie:rootElementOf ?s ."
-		                                           "    OPTIONAL {"
-		                                           "      ?uri nie:interpretedAs ?folderUrn ."
-		                                           "      ?folderUrn a nfo:Folder "
-		                                           "    }"
-		                                           "    OPTIONAL {"
-		                                           "      ?uri tracker:extractorHash ?hash "
-		                                           "    }"
-		                                           "  }"
-		                                           "  OPTIONAL {"
-		                                           "    ?uri nie:interpretedAs ?ie "
-		                                           "  }"
-		                                           "}"
-		                                           "ORDER BY ?uri",
-		                                           priv->cancellable,
-		                                           error);
+		tracker_load_statement (priv->connection, "get-index-root-content.rq", error);
 	return priv->content_query;
 }
 
@@ -731,17 +709,7 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 		return priv->deleted_query;
 
 	priv->deleted_query =
-		tracker_sparql_connection_query_statement (priv->connection,
-		                                           "SELECT ?mimeType "
-		                                           "{"
-		                                           "  GRAPH tracker:FileSystem {"
-		                                           "  ?ie nie:mimeType ?mimeType ; "
-		                                           "      nie:isStoredAs ~uri . "
-		                                           "  }"
-		                                           "}"
-		                                           "ORDER BY ?uri",
-		                                           priv->cancellable,
-		                                           error);
+		tracker_load_statement (priv->connection, "get-file-mimetype.rq", error);
 	return priv->deleted_query;
 }
 
@@ -1452,14 +1420,17 @@ static void
 check_disable_monitor (TrackerFileNotifier *notifier)
 {
 	TrackerFileNotifierPrivate *priv;
-	TrackerSparqlCursor *cursor;
+	TrackerSparqlStatement *stmt;
+	TrackerSparqlCursor *cursor = NULL;
 	gint64 folder_count = 0;
 	GError *error = NULL;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	cursor = tracker_sparql_connection_query (priv->connection,
-	                                          "SELECT COUNT(?f) { ?f a nfo:Folder }",
-	                                          NULL, &error);
+	stmt = tracker_load_statement (priv->connection, "get-folder-count.rq", &error);
+
+	if (stmt) {
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	}
 
 	if (!error && tracker_sparql_cursor_next (cursor, NULL, &error)) {
 		folder_count = tracker_sparql_cursor_get_integer (cursor, 0);
