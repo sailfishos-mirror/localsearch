@@ -94,7 +94,9 @@ class MinerFTSBasicTest(fixtures.TrackerMinerFTSTest):
         TEXT = "abc123"
         self.basic_test(TEXT, "abc123")
 
-    @ut.skip("We don't ignore numbers by default since https://gitlab.gnome.org/GNOME/tracker/merge_requests/172.")
+    @ut.skip(
+        "We don't ignore numbers by default since https://gitlab.gnome.org/GNOME/tracker/merge_requests/172."
+    )
     def test_10_ignore_numbers(self):
         TEXT = "palabra 123123"
         self.set_text(TEXT)
@@ -110,13 +112,16 @@ class MinerFTSWAllowlistTest(fixtures.TrackerMinerFTSTest):
     video game data, etc., so we use an extension-based allowlist to limit
     what gets FTS indexed.
     """
+
     def test_no_extension_file(self):
         self.testfile = "test-monitored/miner-fts-test-no-extension"
 
         path = pathlib.Path(self.path(self.testfile))
         url = self.uri(self.testfile)
-        expected = f'a nfo:Document; nie:isStoredAs <{url}>'
-        with self.tracker.await_insert(fixtures.DOCUMENTS_GRAPH, expected, timeout=cfg.AWAIT_TIMEOUT):
+        expected = f"a nfo:Document; nie:isStoredAs <{url}>"
+        with self.tracker.await_insert(
+            fixtures.DOCUMENTS_GRAPH, expected, timeout=cfg.AWAIT_TIMEOUT
+        ):
             path.write_text("Definitely do not index this file.")
 
         # No results for full text search.

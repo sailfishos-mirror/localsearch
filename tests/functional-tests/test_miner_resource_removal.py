@@ -30,22 +30,26 @@ import fixtures
 
 
 class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
-
     def prepare_directories(self):
         # Override content from the base class
         pass
 
     def create_extra_audio_content(self, file_urn, url, title):
-        sparql = "WITH <%s> INSERT { \
+        sparql = (
+            'WITH <%s> INSERT { \
                     <%s> a nfo:FileDataObject . \
                     <%s> a nmm:MusicPiece ; \
-                         nie:title \"%s\" ; \
+                         nie:title "%s" ; \
                          nie:isStoredAs <%s> . \
-                  } " % (fixtures.AUDIO_GRAPH, url, file_urn, title, url)
+                  } '
+            % (fixtures.AUDIO_GRAPH, url, file_urn, title, url)
+        )
 
-        with self.tracker.await_insert(fixtures.AUDIO_GRAPH,
-                                       f'a nmm:MusicPiece; nie:title "{title}"',
-                                       timeout=cfg.AWAIT_TIMEOUT) as resource:
+        with self.tracker.await_insert(
+            fixtures.AUDIO_GRAPH,
+            f'a nmm:MusicPiece; nie:title "{title}"',
+            timeout=cfg.AWAIT_TIMEOUT,
+        ) as resource:
             self.tracker.update(sparql)
         return resource
 
@@ -71,10 +75,16 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
         # This creates an unrealistic situation, in which a text data-object
         # has audio content. Because nie:isStoredAs links it to the text file,
         # it should nevertheless be removed when the text file is deleted.
-        ie_1 = self.create_extra_audio_content(file_1.urn, self.uri(file_1_name), "Test resource 1")
-        ie_2 = self.create_extra_audio_content(file_2.urn, self.uri(file_2_name), "Test resource 2")
+        ie_1 = self.create_extra_audio_content(
+            file_1.urn, self.uri(file_1_name), "Test resource 1"
+        )
+        ie_2 = self.create_extra_audio_content(
+            file_2.urn, self.uri(file_2_name), "Test resource 2"
+        )
 
-        with self.tracker.await_delete(fixtures.DOCUMENTS_GRAPH, file_1.id, timeout=cfg.AWAIT_TIMEOUT):
+        with self.tracker.await_delete(
+            fixtures.DOCUMENTS_GRAPH, file_1.id, timeout=cfg.AWAIT_TIMEOUT
+        ):
             os.unlink(self.path("test-monitored/test_1.txt"))
 
         self.assertResourceMissing(self.uri(file_1_name))
@@ -95,19 +105,19 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
     #    a fake removable volume: https://bugzilla.gnome.org/show_bug.cgi?id=659739
     #    """
 
-        #dconf = DConfClient ()
-        #dconf.write (cfg.DCONF_MINER_SCHEMA, 'index-removable-devices', 'true')
+    # dconf = DConfClient ()
+    # dconf.write (cfg.DCONF_MINER_SCHEMA, 'index-removable-devices', 'true')
 
-        #self.mount_test_removable_volume ()
+    # self.mount_test_removable_volume ()
 
-        #self.add_test_resource ("urn:test:1", test_volume_urn)
-        #self.add_test_resource ("urn:test:2", None)
+    # self.add_test_resource ("urn:test:1", test_volume_urn)
+    # self.add_test_resource ("urn:test:2", None)
 
-        # Trigger removal of all resources from removable devices
-        #dconf.write (cfg.DCONF_MINER_SCHEMA, 'index-removable-devices', 'false')
+    # Trigger removal of all resources from removable devices
+    # dconf.write (cfg.DCONF_MINER_SCHEMA, 'index-removable-devices', 'false')
 
-        # Check that only the data on the removable volume was deleted
-        #self.await_updates (2)
+    # Check that only the data on the removable volume was deleted
+    # self.await_updates (2)
 
 
 if __name__ == "__main__":

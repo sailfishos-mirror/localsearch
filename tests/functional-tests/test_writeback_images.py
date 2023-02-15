@@ -53,19 +53,23 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         initial_mtime = path.stat().st_mtime
 
         TEST_VALUE = prop.replace(":", "") + "test"
-        self.writeback_data({
-            'rdf:type': GLib.Variant('s', 'nfo:Image'),
-            'nie:isStoredAs': GLib.Variant('s', path.as_uri()),
-            prop: GLib.Variant('s', TEST_VALUE),
-        })
+        self.writeback_data(
+            {
+                "rdf:type": GLib.Variant("s", "nfo:Image"),
+                "nie:isStoredAs": GLib.Variant("s", path.as_uri()),
+                prop: GLib.Variant("s", TEST_VALUE),
+            }
+        )
 
         log.debug("Waiting for change on %s", path)
         self.wait_for_file_change(path, initial_mtime)
         log.debug("Got the change")
 
-        results = fixtures.get_tracker_extract_output({}, path, mime_type=mimetype, output_format='json-ld')
+        results = fixtures.get_tracker_extract_output(
+            {}, path, mime_type=mimetype, output_format="json-ld"
+        )
         keyDict = expectedKey or prop
-        file_data = results['@graph'][0]
+        file_data = results["@graph"][0]
         self.assertIn(TEST_VALUE, file_data[keyDict])
 
     def __writeback_hasTag_test(self, filename, mimetype):
@@ -88,7 +92,9 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
 
         self.wait_for_file_change(path, initial_mtime)
 
-        results = fixtures.get_tracker_extract_output(self.extra_env, filename, mime_type=mimetype, output_format='json-ld')
+        results = fixtures.get_tracker_extract_output(
+            self.extra_env, filename, mime_type=mimetype, output_format="json-ld"
+        )
         self.assertIn("testTag", results["nao:hasTag"])
 
     # JPEG test

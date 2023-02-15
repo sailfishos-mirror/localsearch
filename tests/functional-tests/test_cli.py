@@ -26,20 +26,21 @@ import configuration
 import fixtures
 import shutil
 
+
 class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_search(self):
-        datadir = pathlib.Path(__file__).parent.joinpath('test-cli-data')
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
-        # FIXME: synchronous `tracker index` isn't ready yet; 
+        # FIXME: synchronous `tracker index` isn't ready yet;
         # see https://gitlab.gnome.org/GNOME/tracker/-/issues/188
         # in the meantime we manually wait for it to finish.
 
-        file1 = datadir.joinpath('text/Document 1.txt')
+        file1 = datadir.joinpath("text/Document 1.txt")
         target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
         with self.await_document_inserted(target1):
             shutil.copy(file1, self.indexed_dir)
 
-        file2 = datadir.joinpath('text/Document 2.txt')
+        file2 = datadir.joinpath("text/Document 2.txt")
         target2 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file2)))
         with self.await_document_inserted(target2):
             shutil.copy(file2, self.indexed_dir)
@@ -54,33 +55,30 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # FIXME: the --all should NOT be needed.
         # See: https://gitlab.gnome.org/GNOME/tracker-miners/-/issues/116
-        output = self.run_cli(
-            ['tracker3', 'search', '--all', 'banana'])
+        output = self.run_cli(["tracker3", "search", "--all", "banana"])
         self.assertIn(target1.as_uri(), output)
         self.assertNotIn(target2.as_uri(), output)
 
         folder_output = self.run_cli(
-            ['tracker3', 'search', '--folders', 'test-monitored'])
+            ["tracker3", "search", "--folders", "test-monitored"]
+        )
         self.assertIn(self.indexed_dir, folder_output)
         self.assertNotIn(folder_path.as_uri(), folder_output)
 
-
     def test_search_filename(self):
-        datadir = pathlib.Path(__file__).parent.joinpath('test-cli-data')
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
-        file1 = datadir.joinpath('text/mango.txt')
+        file1 = datadir.joinpath("text/mango.txt")
         target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
         with self.await_document_inserted(target1):
             shutil.copy(file1, self.indexed_dir)
 
-        target2 = pathlib.Path(os.path.join(self.indexed_dir, 'Document 2.txt'))
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, "Document 2.txt"))
 
-        search_output = self.run_cli(
-            ['tracker3', 'search', 'mango'])
+        search_output = self.run_cli(["tracker3", "search", "mango"])
         self.assertIn(target1.as_uri(), search_output)
         self.assertNotIn(target2.as_uri(), search_output)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     fixtures.tracker_test_main()

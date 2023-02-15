@@ -23,38 +23,42 @@ import fixtures
 import gi
 from gi.repository import GLib
 
+
 class WritebackAudioTest(fixtures.TrackerWritebackTest):
     def _writeback_test(self, path):
-        prop = 'nie:title'
+        prop = "nie:title"
 
         path = self.prepare_test_audio(self.datadir_path(path))
         initial_mtime = path.stat().st_mtime
 
         TEST_VALUE = prop.replace(":", "") + "test"
 
-        self.writeback_data({
-            'rdf:type': GLib.Variant('s', 'nfo:Audio'),
-            'nie:isStoredAs': GLib.Variant('s', path.as_uri()),
-            'nie:title': GLib.Variant('s', TEST_VALUE),
-        })
+        self.writeback_data(
+            {
+                "rdf:type": GLib.Variant("s", "nfo:Audio"),
+                "nie:isStoredAs": GLib.Variant("s", path.as_uri()),
+                "nie:title": GLib.Variant("s", TEST_VALUE),
+            }
+        )
 
         self.wait_for_file_change(path, initial_mtime)
 
-        results = fixtures.get_tracker_extract_output({}, path, output_format='json-ld')
-        file_data = results['@graph'][0]
+        results = fixtures.get_tracker_extract_output({}, path, output_format="json-ld")
+        file_data = results["@graph"][0]
         self.assertIn(TEST_VALUE, file_data[prop])
 
     def test_writeback_mp3(self):
-        self._writeback_test(self.datadir_path('writeback-test-5.mp3'))
+        self._writeback_test(self.datadir_path("writeback-test-5.mp3"))
 
     def test_writeback_ogg(self):
-        self._writeback_test(self.datadir_path('writeback-test-6.ogg'))
+        self._writeback_test(self.datadir_path("writeback-test-6.ogg"))
 
     def test_writeback_flac(self):
-        self._writeback_test(self.datadir_path('writeback-test-7.flac'))
+        self._writeback_test(self.datadir_path("writeback-test-7.flac"))
 
     def test_writeback_aac(self):
-        self._writeback_test(self.datadir_path('writeback-test-8.mp4'))
+        self._writeback_test(self.datadir_path("writeback-test-8.mp4"))
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

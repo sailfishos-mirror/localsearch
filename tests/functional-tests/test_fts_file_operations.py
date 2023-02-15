@@ -44,7 +44,7 @@ class MinerFTSFileOperationsTest(fixtures.TrackerMinerFTSTest):
     def setUp(self):
         fixtures.TrackerMinerFTSTest.setUp(self)
 
-        no_monitored_dir = self.path('test-no-monitored')
+        no_monitored_dir = self.path("test-no-monitored")
         os.makedirs(no_monitored_dir, exist_ok=True)
 
     def test_01_removal_of_file(self):
@@ -55,7 +55,9 @@ class MinerFTSFileOperationsTest(fixtures.TrackerMinerFTSTest):
         self.basic_test(TEXT, "automobile")
 
         id = self._query_id(self.uri(self.testfile))
-        with self.tracker.await_delete(fixtures.DOCUMENTS_GRAPH, id, timeout=cfg.AWAIT_TIMEOUT):
+        with self.tracker.await_delete(
+            fixtures.DOCUMENTS_GRAPH, id, timeout=cfg.AWAIT_TIMEOUT
+        ):
             os.remove(self.path(self.testfile))
 
         results = self.search_word("automobile")
