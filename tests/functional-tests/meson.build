@@ -193,7 +193,7 @@ test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_LANGUAGE_STOP_WORDS_DIR', tracker_uninstalled_stop_words_dir)
 
 foreach t: extractor_tests
-  data = join_paths('data/extractor-content', t) + '.expected.json'
+  data = meson.current_source_dir() / 'data/extractor-content' / t + '.expected.json'
   test_name = t
   test_parts = t.split('/')
   test_suite = []
@@ -202,11 +202,13 @@ foreach t: extractor_tests
     test_suite = [test_parts[0]]
   endif
   test(test_name, python,
-    args: ['test_extractor_generic.py', data],
+    args: [
+      meson.current_source_dir() / 'test_extractor_generic.py',
+      data
+    ],
     env: test_env,
     protocol: test_protocol,
-    suite: ['extractor'] + test_suite,
-    workdir: meson.current_source_dir())
+    suite: ['extractor'] + test_suite)
 endforeach
 
 foreach t: functional_tests
