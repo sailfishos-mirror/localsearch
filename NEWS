@@ -1,3 +1,14 @@
+NEW in 3.5.0 - 2023-03-19
+=========================
+  * Test suite fixes
+  * Added membarrier syscall to seccomp
+
+  Highlighted changes since 3.4.0:
+  * Modernized tracker-miner-fs code with TrackerSparqlStatement
+    and SPARQL declared in GResource.
+  * Massive tracker-extract performance improvements when many
+    files need metadata extraction.
+
 NEW in 3.5.0.rc - 2023-03-05
 ============================
   * Fix deletion of not yet extracted files
