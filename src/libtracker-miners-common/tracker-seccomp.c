@@ -111,6 +111,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (mprotect);
 	ALLOW_RULE (madvise);
 	ALLOW_RULE (mbind);
+	ALLOW_RULE (membarrier);
 	ERROR_RULE (mlock, EPERM);
 	ERROR_RULE (mlock2, EPERM);
 	ERROR_RULE (munlock, EPERM);
