@@ -426,7 +426,7 @@ coverity:
   only:
     - master
 
-deploy-docs:
+pages:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:36@x86_64
