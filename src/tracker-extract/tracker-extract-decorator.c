@@ -29,8 +29,6 @@ enum {
 	PROP_EXTRACTOR = 1
 };
 
-#define MAX_EXTRACTING_FILES 1
-
 typedef struct _TrackerExtractDecoratorPrivate TrackerExtractDecoratorPrivate;
 typedef struct _ExtractData ExtractData;
 
@@ -45,7 +43,7 @@ struct _ExtractData {
 struct _TrackerExtractDecoratorPrivate {
 	TrackerExtract *extractor;
 	GTimer *timer;
-	guint n_extracting_files;
+	gboolean extracting;
 
 	TrackerExtractPersistence *persistence;
 	GDBusProxy *index_proxy;
@@ -205,7 +203,7 @@ get_metadata_cb (TrackerExtract *extract,
 		tracker_extract_info_unref (info);
 	}
 
-	priv->n_extracting_files--;
+	priv->extracting = FALSE;
 	decorator_get_next_file (data->decorator);
 
 	tracker_decorator_info_unref (data->decorator_info);
@@ -252,7 +250,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	info = tracker_decorator_next_finish (decorator, result, &error);
 
 	if (!info) {
-		priv->n_extracting_files--;
+		priv->extracting = FALSE;
 
 		if (error &&
 		    error->domain == tracker_decorator_error_quark ()) {
@@ -271,7 +269,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 		return;
 	} else if (!tracker_decorator_info_get_url (info)) {
 		/* Skip virtual elements with no real file representation */
-		priv->n_extracting_files--;
+		priv->extracting = FALSE;
 		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
@@ -282,7 +280,7 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	if (!g_file_is_native (file)) {
 		g_warning ("URI '%s' is not native",
 		           tracker_decorator_info_get_url (info));
-		priv->n_extracting_files--;
+		priv->extracting = FALSE;
 		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
@@ -324,12 +322,13 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	    tracker_miner_is_paused (TRACKER_MINER (decorator)))
 		return;
 
-	while (priv->n_extracting_files < MAX_EXTRACTING_FILES) {
-		priv->n_extracting_files++;
-		tracker_decorator_next (decorator, NULL,
-		                        (GAsyncReadyCallback) decorator_next_item_cb,
-		                        NULL);
-	}
+	if (priv->extracting)
+		return;
+
+	priv->extracting = TRUE;
+	tracker_decorator_next (decorator, NULL,
+				(GAsyncReadyCallback) decorator_next_item_cb,
+				NULL);
 }
 
 static void
