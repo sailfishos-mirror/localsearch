@@ -31,8 +31,6 @@ enum {
 
 #define MAX_EXTRACTING_FILES 1
 
-#define TRACKER_EXTRACT_DECORATOR_GET_PRIVATE(o) (G_TYPE_INSTANCE_GET_PRIVATE ((o), TRACKER_TYPE_EXTRACT_DECORATOR, TrackerExtractDecoratorPrivate))
-
 typedef struct _TrackerExtractDecoratorPrivate TrackerExtractDecoratorPrivate;
 typedef struct _ExtractData ExtractData;
 
@@ -52,11 +50,6 @@ struct _TrackerExtractDecoratorPrivate {
 	TrackerExtractPersistence *persistence;
 	GDBusProxy *index_proxy;
 };
-
-typedef struct {
-	guint watch_id;
-	gchar **rdf_types;
-} AppData;
 
 static GInitableIface *parent_initable_iface;
 
