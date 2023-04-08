@@ -241,7 +241,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	TrackerDecoratorInfo *info;
 	g_autoptr (GError) error = NULL;
 	ExtractData *data;
-	GTask *task;
+	GCancellable *cancellable;
 	GFile *file;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
@@ -294,7 +294,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	data->decorator = decorator;
 	data->decorator_info = info;
 	data->file = file;
-	task = tracker_decorator_info_get_task (info);
+	cancellable = tracker_decorator_info_get_cancellable (info);
 
 	TRACKER_NOTE (DECORATOR,
 	              g_message ("[Decorator] Extracting metadata for '%s'",
@@ -302,7 +302,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 	tracker_extract_persistence_add_file (priv->persistence, data->file);
 
-	g_set_object (&data->cancellable, g_task_get_cancellable (task));
+	g_set_object (&data->cancellable, cancellable);
 
 	if (data->cancellable) {
 		data->signal_id = g_cancellable_connect (data->cancellable,
@@ -313,7 +313,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	tracker_extract_file (priv->extractor,
 	                      tracker_decorator_info_get_url (info),
 	                      tracker_decorator_info_get_mimetype (info),
-	                      g_task_get_cancellable (task),
+	                      cancellable,
 	                      (GAsyncReadyCallback) get_metadata_cb, data);
 }
 

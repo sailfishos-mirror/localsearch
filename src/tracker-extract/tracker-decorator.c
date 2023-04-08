@@ -1189,26 +1189,11 @@ tracker_decorator_info_get_mimetype (TrackerDecoratorInfo *info)
 }
 
 
-/**
- * tracker_decorator_info_get_task:
- * @info: a #TrackerDecoratorInfo.
- *
- * Get the #GTask associated with retrieving extended metadata and
- * information for a URN in Tracker.
- *
- * Use tracker_decorator_info_complete() to complete the task instead
- * using this object.
- *
- * Returns: (transfer none): the #GTask for #TrackerDecoratorInfo on
- * success or #NULL if there is no existing #GTask.
- *
- * Since: 0.18
- **/
-GTask *
-tracker_decorator_info_get_task (TrackerDecoratorInfo *info)
+GCancellable *
+tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info)
 {
 	g_return_val_if_fail (info != NULL, NULL);
-	return info->task;
+	return g_task_get_cancellable (info->task);
 }
 
 /**
