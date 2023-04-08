@@ -85,8 +85,8 @@ struct _TrackerDecoratorPrivate {
 	GCancellable *task_cancellable;
 
 	gint batch_size;
-	gint n_updates;
 
+	guint updating   : 1;
 	guint processing : 1;
 	guint querying   : 1;
 };
@@ -300,7 +300,7 @@ decorator_commit_cb (GObject      *object,
 	priv = decorator->priv;
 	conn = TRACKER_SPARQL_CONNECTION (object);
 
-	priv->n_updates--;
+	priv->updating = FALSE;
 
 	if (!tracker_sparql_connection_update_array_finish (conn, result, NULL)) {
 		g_debug ("SPARQL error detected in batch, retrying one by one");
@@ -352,7 +352,7 @@ decorator_commit_info (TrackerDecorator *decorator)
 	/* Move sparql buffer to commit buffer */
 	priv->commit_buffer = priv->sparql_buffer;
 	priv->sparql_buffer = NULL;
-	priv->n_updates++;
+	priv->updating = TRUE;
 	array = g_ptr_array_new ();
 
 	for (i = 0; i < priv->commit_buffer->len; i++) {
@@ -471,7 +471,7 @@ decorator_task_done (GObject      *object,
 
 	if (priv->n_remaining_items == 0) {
 		decorator_finish (decorator);
-		if (priv->n_updates == 0)
+		if (!priv->updating)
 			decorator_rebuild_cache (decorator);
 	} else if (g_queue_is_empty (&priv->item_cache) &&
 	           (!priv->sparql_buffer || !priv->commit_buffer)) {
@@ -703,7 +703,7 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 	TrackerDecoratorPrivate *priv = decorator->priv;
 
 	if (priv->querying ||
-	    priv->n_updates > 1 ||
+	    priv->updating ||
 	    !g_queue_is_empty (&priv->item_cache))
 		return;
 
@@ -805,7 +805,7 @@ notifier_events_cb (TrackerDecorator *decorator,
 		}
 	}
 
-	if (check_added && !priv->querying && priv->n_updates == 0)
+	if (check_added && !priv->querying && !priv->updating)
 		decorator_cache_next_items (decorator);
 }
 
