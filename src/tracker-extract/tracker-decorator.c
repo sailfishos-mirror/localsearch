@@ -127,7 +127,7 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	TrackerDecoratorPrivate *priv;
 	TrackerDecoratorInfo *info;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	info = g_slice_new0 (TrackerDecoratorInfo);
 	info->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
@@ -199,7 +199,7 @@ decorator_update_state (TrackerDecorator *decorator,
 	gdouble progress = 1;
 	gsize total_items;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 	remaining_time = 0;
 	total_items = priv->n_remaining_items + priv->n_processed_items;
 
@@ -279,7 +279,7 @@ decorator_commit_cb (GObject      *object,
 	TrackerBatch *batch;
 
 	decorator = user_data;
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 	batch = TRACKER_BATCH (object);
 
 	priv->updating = FALSE;
@@ -305,7 +305,7 @@ decorator_commit_info (TrackerDecorator *decorator)
 	TrackerBatch *batch;
 	gint i;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (!priv->sparql_buffer || priv->sparql_buffer->len == 0)
 		return FALSE;
@@ -342,7 +342,7 @@ decorator_check_commit (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (!priv->sparql_buffer ||
 	    (priv->n_remaining_items > 0 &&
@@ -355,7 +355,9 @@ decorator_check_commit (TrackerDecorator *decorator)
 static void
 decorator_start (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (priv->processing)
 		return;
@@ -368,7 +370,9 @@ decorator_start (TrackerDecorator *decorator)
 static void
 decorator_finish (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	priv->processing = FALSE;
 	priv->n_remaining_items = priv->n_processed_items = 0;
@@ -380,14 +384,16 @@ decorator_finish (TrackerDecorator *decorator)
 static void
 decorator_rebuild_cache (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	priv->n_remaining_items = 0;
 	g_queue_foreach (&priv->item_cache,
 	                 (GFunc) tracker_decorator_info_unref, NULL);
 	g_queue_clear (&priv->item_cache);
 
-        decorator_cache_next_items (decorator);
+	decorator_cache_next_items (decorator);
 }
 
 /* This function is called after the caller has completed the
@@ -405,7 +411,7 @@ decorator_task_done (GObject      *object,
 	TrackerExtractInfo *extract_info;
 	GError *error = NULL;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 	extract_info = g_task_propagate_pointer (G_TASK (result), &error);
 
 	if (!extract_info) {
@@ -443,7 +449,7 @@ append_graph_patterns (TrackerDecorator *decorator,
                        gboolean          priority,
                        gboolean          first)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
 	const gchar *graphs[] = {
 		"tracker:Audio",
 		"tracker:Pictures",
@@ -452,6 +458,8 @@ append_graph_patterns (TrackerDecorator *decorator,
 		"tracker:Documents",
 	};
 	gint i;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	for (i = 0; i < G_N_ELEMENTS (graphs); i++) {
 		if (priority !=
@@ -505,12 +513,13 @@ static TrackerSparqlStatement *
 create_prepared_statement (TrackerDecorator  *decorator,
                            gchar            **select_clauses)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerSparqlStatement *statement;
 	GError *error = NULL;
 	gchar *query;
 
+	priv = tracker_decorator_get_instance_private (decorator);
 	query = create_query_string (decorator, select_clauses);
 
 	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
@@ -531,7 +540,7 @@ create_prepared_statement (TrackerDecorator  *decorator,
 static TrackerSparqlStatement *
 ensure_remaining_items_query (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
 	gchar *clauses[] = {
 		"?urn",
 		"tracker:id(?urn)",
@@ -539,6 +548,8 @@ ensure_remaining_items_query (TrackerDecorator *decorator)
 		"nie:mimeType(?urn)",
 		NULL
 	};
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (!priv->remaining_items_query)
 		priv->remaining_items_query = create_prepared_statement (decorator, clauses);
@@ -567,7 +578,7 @@ decorator_count_remaining_items_cb (GObject      *object,
 	if (!tracker_sparql_cursor_next (cursor, NULL, NULL))
 		return;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 	priv->querying = FALSE;
 
 	priv->n_remaining_items = g_queue_get_length (&priv->item_cache) +
@@ -588,7 +599,7 @@ decorator_count_remaining_items (TrackerDecorator *decorator)
 	gchar *clauses[] = { "COUNT(?urn)", NULL };
 	TrackerDecoratorPrivate *priv;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (!priv->item_count_query)
 		priv->item_count_query = create_prepared_statement (decorator, clauses);
@@ -605,8 +616,10 @@ static void
 decorator_item_cache_remove (TrackerDecorator *decorator,
                              gint              id)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
 	GList *item;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	for (item = g_queue_peek_head_link (&priv->item_cache);
 	     item; item = item->next) {
@@ -633,8 +646,8 @@ decorator_cache_items_cb (GObject      *object,
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
-	priv = decorator->priv;
-        priv->querying = FALSE;
+	priv = tracker_decorator_get_instance_private (decorator);
+	priv->querying = FALSE;
 
 	decorator_commit_info (decorator);
 
@@ -658,14 +671,16 @@ decorator_cache_items_cb (GObject      *object,
 static void
 decorator_cache_next_items (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (priv->querying ||
 	    priv->updating ||
 	    !g_queue_is_empty (&priv->item_cache))
 		return;
 
-        priv->querying = TRUE;
+	priv->querying = TRUE;
 
 	if (priv->n_remaining_items == 0) {
 		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
@@ -697,7 +712,7 @@ tracker_decorator_get_property (GObject    *object,
 {
 	TrackerDecoratorPrivate *priv;
 
-	priv = TRACKER_DECORATOR (object)->priv;
+	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (object));
 
 	switch (param_id) {
 	case PROP_COMMIT_BATCH_SIZE:
@@ -714,10 +729,9 @@ tracker_decorator_set_property (GObject      *object,
                                 const GValue *value,
                                 GParamSpec   *pspec)
 {
-	TrackerDecorator *decorator = TRACKER_DECORATOR (object);
 	TrackerDecoratorPrivate *priv;
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (object));
 
 	switch (param_id) {
 	case PROP_COMMIT_BATCH_SIZE:
@@ -730,15 +744,17 @@ tracker_decorator_set_property (GObject      *object,
 
 static void
 notifier_events_cb (TrackerDecorator *decorator,
-		    const gchar      *service,
-		    const gchar      *graph,
-		    GPtrArray        *events,
-		    TrackerNotifier  *notifier)
+                    const gchar      *service,
+                    const gchar      *graph,
+                    GPtrArray        *events,
+                    TrackerNotifier  *notifier)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
 	gboolean check_added = FALSE;
 	gint64 id;
 	gint i;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	for (i = 0; i < events->len; i++) {
 		TrackerNotifierEvent *event;
@@ -785,8 +801,8 @@ tracker_decorator_initable_init (GInitable     *initable,
 	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
 	priv->notifier = tracker_sparql_connection_create_notifier (conn);
 	g_signal_connect_swapped (priv->notifier, "events",
-				  G_CALLBACK (notifier_events_cb),
-				  decorator);
+	                          G_CALLBACK (notifier_events_cb),
+	                          decorator);
 
 	decorator_update_state (decorator, "Idle", FALSE);
 	return TRUE;
@@ -806,7 +822,7 @@ tracker_decorator_finalize (GObject *object)
 	TrackerDecorator *decorator;
 
 	decorator = TRACKER_DECORATOR (object);
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	g_clear_object (&priv->remaining_items_query);
 	g_clear_object (&priv->item_count_query);
@@ -839,7 +855,7 @@ tracker_decorator_paused (TrackerMiner *miner)
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Paused"));
 
-	priv = TRACKER_DECORATOR (miner)->priv;
+	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
 	g_timer_stop (priv->timer);
 
 	g_cancellable_cancel (priv->task_cancellable);
@@ -854,7 +870,7 @@ tracker_decorator_resumed (TrackerMiner *miner)
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Resumed"));
 	decorator_cache_next_items (TRACKER_DECORATOR (miner));
-	priv = TRACKER_DECORATOR (miner)->priv;
+	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
 	g_timer_continue (priv->timer);
 }
 
@@ -864,7 +880,7 @@ tracker_decorator_stopped (TrackerMiner *miner)
 	TrackerDecoratorPrivate *priv;
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Stopped"));
-	priv = TRACKER_DECORATOR (miner)->priv;
+	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
 	g_timer_stop (priv->timer);
 }
 
@@ -875,7 +891,7 @@ tracker_decorator_started (TrackerMiner *miner)
 	TrackerDecorator *decorator;
 
 	decorator = TRACKER_DECORATOR (miner);
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Started"));
 	g_timer_start (priv->timer);
@@ -947,7 +963,7 @@ tracker_decorator_init (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
 
-	decorator->priv = priv = tracker_decorator_get_instance_private (decorator);
+	priv = tracker_decorator_get_instance_private (decorator);
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
@@ -976,7 +992,7 @@ tracker_decorator_get_n_items (TrackerDecorator *decorator)
 
 	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), 0);
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	return priv->n_remaining_items;
 }
@@ -990,7 +1006,7 @@ tracker_decorator_next (TrackerDecorator  *decorator,
 
 	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
 
-	priv = decorator->priv;
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (tracker_miner_is_paused (TRACKER_MINER (decorator))) {
 		g_set_error (error,
@@ -1013,7 +1029,9 @@ void
 tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
                                        const gchar * const *graphs)
 {
-	TrackerDecoratorPrivate *priv = decorator->priv;
+	TrackerDecoratorPrivate *priv;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 
 	g_strfreev (priv->priority_graphs);
 	priv->priority_graphs = g_strdupv ((gchar **) graphs);

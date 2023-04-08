@@ -49,7 +49,6 @@ typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
  **/
 struct _TrackerDecorator {
 	TrackerMiner parent_instance;
-	gpointer priv;
 };
 
 /**
