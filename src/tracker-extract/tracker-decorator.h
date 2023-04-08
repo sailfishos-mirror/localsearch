@@ -75,8 +75,9 @@ struct _TrackerDecoratorClass {
 	gpointer padding[10];
 };
 
+#define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
+
 typedef enum {
-	TRACKER_DECORATOR_ERROR_EMPTY,
 	TRACKER_DECORATOR_ERROR_PAUSED
 } TrackerDecoratorError;
 

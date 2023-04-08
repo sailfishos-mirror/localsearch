@@ -1051,13 +1051,8 @@ tracker_decorator_next (TrackerDecorator  *decorator,
 	}
 
 	info = g_queue_pop_head (&priv->item_cache);
-	if (!info) {
-		g_set_error (error,
-		             tracker_decorator_error_quark (),
-		             TRACKER_DECORATOR_ERROR_EMPTY,
-		             "There are no items left");
+	if (!info)
 		return NULL;
-	}
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s", info->url));
 

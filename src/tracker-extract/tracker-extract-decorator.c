@@ -257,14 +257,10 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 	if (!info) {
 		if (error &&
-		    error->domain == tracker_decorator_error_quark ()) {
-			switch (error->code) {
-			case TRACKER_DECORATOR_ERROR_EMPTY:
-				g_debug ("There are no further items to extract");
-				break;
-			case TRACKER_DECORATOR_ERROR_PAUSED:
-				g_debug ("Next item is on hold because miner is paused");
-			}
+		    g_error_matches (error,
+		                     TRACKER_DECORATOR_ERROR,
+		                     TRACKER_DECORATOR_ERROR_PAUSED)) {
+			g_debug ("Next item is on hold because miner is paused");
 		} else if (error) {
 			g_warning ("Next item could not be processed, %s", error->message);
 		}
