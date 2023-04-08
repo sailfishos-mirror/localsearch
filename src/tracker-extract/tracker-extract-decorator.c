@@ -235,23 +235,27 @@ task_cancellable_cancelled_cb (GCancellable *cancellable,
 }
 
 static void
-decorator_next_item_cb (TrackerDecorator *decorator,
-                        GAsyncResult     *result,
-                        gpointer          user_data)
+decorator_get_next_file (TrackerDecorator *decorator)
 {
 	TrackerExtractDecoratorPrivate *priv;
 	TrackerDecoratorInfo *info;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 	ExtractData *data;
 	GTask *task;
 	GFile *file;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
-	info = tracker_decorator_next_finish (decorator, result, &error);
+
+	if (!tracker_miner_is_started (TRACKER_MINER (decorator)) ||
+	    tracker_miner_is_paused (TRACKER_MINER (decorator)))
+		return;
+
+	if (priv->extracting)
+		return;
+
+	info = tracker_decorator_next (decorator, &error);
 
 	if (!info) {
-		priv->extracting = FALSE;
-
 		if (error &&
 		    error->domain == tracker_decorator_error_quark ()) {
 			switch (error->code) {
@@ -269,7 +273,6 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 		return;
 	} else if (!tracker_decorator_info_get_url (info)) {
 		/* Skip virtual elements with no real file representation */
-		priv->extracting = FALSE;
 		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
@@ -280,11 +283,12 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	if (!g_file_is_native (file)) {
 		g_warning ("URI '%s' is not native",
 		           tracker_decorator_info_get_url (info));
-		priv->extracting = FALSE;
 		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
 	}
+
+	priv->extracting = TRUE;
 
 	data = g_new0 (ExtractData, 1);
 	data->decorator = decorator;
@@ -292,7 +296,9 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	data->file = file;
 	task = tracker_decorator_info_get_task (info);
 
-	g_debug ("Extracting metadata for '%s'", tracker_decorator_info_get_url (info));
+	TRACKER_NOTE (DECORATOR,
+	              g_message ("[Decorator] Extracting metadata for '%s'",
+	                         tracker_decorator_info_get_url (info)));
 
 	tracker_extract_persistence_add_file (priv->persistence, data->file);
 
@@ -309,26 +315,6 @@ decorator_next_item_cb (TrackerDecorator *decorator,
 	                      tracker_decorator_info_get_mimetype (info),
 	                      g_task_get_cancellable (task),
 	                      (GAsyncReadyCallback) get_metadata_cb, data);
-}
-
-static void
-decorator_get_next_file (TrackerDecorator *decorator)
-{
-	TrackerExtractDecoratorPrivate *priv;
-
-	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
-
-	if (!tracker_miner_is_started (TRACKER_MINER (decorator)) ||
-	    tracker_miner_is_paused (TRACKER_MINER (decorator)))
-		return;
-
-	if (priv->extracting)
-		return;
-
-	priv->extracting = TRUE;
-	tracker_decorator_next (decorator, NULL,
-				(GAsyncReadyCallback) decorator_next_item_cb,
-				NULL);
 }
 
 static void

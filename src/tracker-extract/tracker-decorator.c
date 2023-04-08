@@ -78,7 +78,6 @@ struct _TrackerDecoratorPrivate {
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
 	GArray *commit_buffer; /* Array of SparqlUpdate */
 	GTimer *timer;
-	GQueue next_elem_queue; /* Queue of incoming tasks */
 
 	TrackerSparqlStatement *remaining_items_query;
 	TrackerSparqlStatement *item_count_query;
@@ -390,32 +389,6 @@ decorator_check_commit (TrackerDecorator *decorator)
 }
 
 static void
-decorator_notify_task_error (TrackerDecorator *decorator,
-                             GError           *error)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GTask *task;
-
-	while (!g_queue_is_empty (&priv->next_elem_queue)) {
-		task = g_queue_pop_head (&priv->next_elem_queue);
-		g_task_return_error (task, g_error_copy (error));
-		g_object_unref (task);
-	}
-}
-
-static void
-decorator_notify_empty (TrackerDecorator *decorator)
-{
-	GError *error;
-
-	error = g_error_new (tracker_decorator_error_quark (),
-	                     TRACKER_DECORATOR_ERROR_EMPTY,
-	                     "There are no items left");
-	decorator_notify_task_error (decorator, error);
-	g_error_free (error);
-}
-
-static void
 decorator_start (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv = decorator->priv;
@@ -437,7 +410,6 @@ decorator_finish (TrackerDecorator *decorator)
 	priv->n_remaining_items = priv->n_processed_items = 0;
 	g_signal_emit (decorator, signals[FINISHED], 0);
 	decorator_commit_info (decorator);
-	decorator_notify_empty (decorator);
 	decorator_update_state (decorator, "Idle", FALSE);
 }
 
@@ -641,16 +613,18 @@ decorator_count_remaining_items_cb (GObject      *object,
 	TrackerDecorator *decorator = user_data;
 	TrackerDecoratorPrivate *priv;
 	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
 
-	if (error || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
-		decorator_notify_task_error (decorator, error);
-		g_error_free (error);
+	if (error) {
+		g_warning ("Could not get remaining item count: %s", error->message);
 		return;
 	}
+
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL))
+		return;
 
 	priv = decorator->priv;
 	priv->querying = FALSE;
@@ -678,40 +652,12 @@ decorator_count_remaining_items (TrackerDecorator *decorator)
 	if (!priv->item_count_query)
 		priv->item_count_query = create_prepared_statement (decorator, clauses);
 
-	if (priv->item_count_query) {
-		tracker_sparql_statement_bind_int (priv->item_count_query,
-		                                   "offset", 0);
-		tracker_sparql_statement_execute_async (priv->item_count_query,
-		                                        priv->cancellable,
-		                                        decorator_count_remaining_items_cb,
-		                                        decorator);
-	} else {
-		decorator_notify_empty (decorator);
-	}
-}
-
-static void
-decorator_pair_tasks (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	TrackerDecoratorInfo *info;
-	GTask *task;
-
-	while (!g_queue_is_empty (&priv->item_cache) &&
-	       !g_queue_is_empty (&priv->next_elem_queue)) {
-		info = g_queue_pop_head (&priv->item_cache);
-		task = g_queue_pop_head (&priv->next_elem_queue);
-
-		g_task_set_task_data (task, GINT_TO_POINTER (info->id), NULL);
-
-		/* Pass ownership of info */
-		g_task_return_pointer (task, info,
-		                       (GDestroyNotify) tracker_decorator_info_unref);
-		g_object_unref (task);
-
-		/* Store the decorator-side task in the active task pool */
-		g_hash_table_add (priv->tasks, info->task);
-	}
+	tracker_sparql_statement_bind_int (priv->item_count_query,
+	                                   "offset", 0);
+	tracker_sparql_statement_execute_async (priv->item_count_query,
+	                                        priv->cancellable,
+	                                        decorator_count_remaining_items_cb,
+	                                        decorator);
 }
 
 static void
@@ -740,9 +686,9 @@ decorator_cache_items_cb (GObject      *object,
 {
 	TrackerDecorator *decorator = user_data;
 	TrackerDecoratorPrivate *priv;
-	TrackerSparqlCursor *cursor;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	TrackerDecoratorInfo *info;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
@@ -752,8 +698,8 @@ decorator_cache_items_cb (GObject      *object,
 	decorator_commit_info (decorator);
 
 	if (error) {
-		decorator_notify_task_error (decorator, error);
-		g_error_free (error);
+		g_warning ("Could not get unextracted files: %s", error->message);
+		return;
 	} else {
 		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 			info = tracker_decorator_info_new (decorator, cursor);
@@ -766,9 +712,6 @@ decorator_cache_items_cb (GObject      *object,
 	} else if (g_queue_is_empty (&priv->item_cache) && priv->processing) {
 		decorator_finish (decorator);
 	}
-
-	decorator_pair_tasks (decorator);
-	g_object_unref (cursor);
 }
 
 static void
@@ -944,7 +887,6 @@ tracker_decorator_finalize (GObject *object)
 	g_queue_clear (&priv->item_cache);
 
 	decorator_cancel_active_tasks (decorator);
-	decorator_notify_empty (decorator);
 
 	g_strfreev (priv->class_names);
 	g_hash_table_destroy (priv->tasks);
@@ -1091,7 +1033,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
 
-	g_queue_init (&priv->next_elem_queue);
 	g_queue_init (&priv->item_cache);
 	priv->tasks = g_hash_table_new (NULL, NULL);
 }
@@ -1143,78 +1084,40 @@ tracker_decorator_get_n_items (TrackerDecorator *decorator)
 	return priv->n_remaining_items;
 }
 
-/**
- * tracker_decorator_next:
- * @decorator: a #TrackerDecorator.
- * @cancellable: a #GCancellable.
- * @callback: a #GAsyncReadyCallback.
- * @user_data: user_data for @callback.
- *
- * Processes the next resource in the queue to have extended metadata
- * extracted. If the item in the queue has been completed already, it
- * signals its completion instead.
- *
- * This function will give a #GError if the miner is paused at the
- * time it is called.
- *
- * Since: 0.18
- **/
-void
-tracker_decorator_next (TrackerDecorator    *decorator,
-                        GCancellable        *cancellable,
-                        GAsyncReadyCallback  callback,
-                        gpointer             user_data)
+TrackerDecoratorInfo *
+tracker_decorator_next (TrackerDecorator  *decorator,
+                        GError           **error)
 {
 	TrackerDecoratorPrivate *priv;
-	GTask *task;
+	TrackerDecoratorInfo *info;
 
-	g_return_if_fail (TRACKER_IS_DECORATOR (decorator));
+	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
 
 	priv = decorator->priv;
 
-	task = g_task_new (decorator, cancellable, callback, user_data);
-
 	if (tracker_miner_is_paused (TRACKER_MINER (decorator))) {
-		GError *error;
-
-		error = g_error_new (tracker_decorator_error_quark (),
-		                     TRACKER_DECORATOR_ERROR_PAUSED,
-		                     "Decorator is paused");
-		g_task_return_error (task, error);
-		g_object_unref (task);
-		return;
+		g_set_error (error,
+		             tracker_decorator_error_quark (),
+		             TRACKER_DECORATOR_ERROR_PAUSED,
+		             "Decorator is paused");
+		return NULL;
 	}
 
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Queued task %s", g_task_get_name (task)));
-	g_queue_push_tail (&priv->next_elem_queue, task);
-	decorator_pair_tasks (decorator);
-}
+	info = g_queue_pop_head (&priv->item_cache);
+	if (!info) {
+		g_set_error (error,
+		             tracker_decorator_error_quark (),
+		             TRACKER_DECORATOR_ERROR_EMPTY,
+		             "There are no items left");
+		return NULL;
+	}
 
-/**
- * tracker_decorator_next_finish:
- * @decorator: a #TrackerDecorator.
- * @result: a #GAsyncResult.
- * @error: return location for a #GError, or NULL.
- *
- * Should be called in the callback function provided to
- * tracker_decorator_next() to return the result of the task be it an
- * error or not.
- *
- * Returns: (transfer full): a #TrackerDecoratorInfo on success or
- *  #NULL on error. Free with tracker_decorator_info_unref().
- *
- * Since: 0.18
- **/
-TrackerDecoratorInfo *
-tracker_decorator_next_finish (TrackerDecorator  *decorator,
-                               GAsyncResult      *result,
-                               GError           **error)
-{
-	g_return_val_if_fail (TRACKER_DECORATOR (decorator), NULL);
-	g_return_val_if_fail (G_IS_ASYNC_RESULT (result), NULL);
-	g_return_val_if_fail (!error || !*error, NULL);
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s", info->url));
 
-	return g_task_propagate_pointer (G_TASK (result), error);
+	/* Store the decorator-side task in the active task pool */
+	g_hash_table_add (priv->tasks, info->task);
+
+	return info;
 }
 
 void
