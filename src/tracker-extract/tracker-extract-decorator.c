@@ -117,15 +117,21 @@ tracker_extract_decorator_finalize (GObject *object)
 }
 
 static void
-fill_data (TrackerResource *resource,
-           const gchar     *url,
-           const gchar     *mimetype)
+ensure_data (TrackerExtractInfo *info)
 {
-	TrackerResource *dataobject;
+	TrackerResource *resource, *dataobject;
 	GStrv rdf_types;
+	const gchar *mimetype;
+	g_autofree gchar *uri = NULL;
+	GFile *file;
 	gint i;
 
-	dataobject = tracker_resource_new (url);
+	resource = tracker_extract_info_get_resource (info);
+	mimetype = tracker_extract_info_get_mimetype (info);
+	file = tracker_extract_info_get_file (info);
+	uri = g_file_get_uri (file);
+
+	dataobject = tracker_resource_new (uri);
 	tracker_resource_set_string (resource, "nie:mimeType", mimetype);
 	tracker_resource_add_take_relation (resource, "nie:isStoredAs", dataobject);
 	tracker_resource_add_uri (dataobject, "nie:interpretedAs",
@@ -139,9 +145,10 @@ fill_data (TrackerResource *resource,
 	g_strfreev (rdf_types);
 }
 
-static gchar *
+static void
 tracker_extract_decorator_update (TrackerDecorator   *decorator,
-                                  TrackerExtractInfo *info)
+                                  TrackerExtractInfo *info,
+                                  TrackerBatch       *batch)
 {
 	TrackerResource *resource;
 	const gchar *graph, *mime_type, *hash;
@@ -163,24 +170,10 @@ tracker_extract_decorator_update (TrackerDecorator   *decorator,
 		                 "  }"
 		                 "}",
 		                 uri, hash);
+	tracker_batch_add_sparql (batch, update_hash_sparql);
 
-	if (resource) {
-		gchar *sparql, *resource_sparql;
-
-		fill_data (resource, uri, mime_type);
-
-		resource_sparql = tracker_resource_print_sparql_update (resource, NULL, graph);
-
-		sparql = g_strdup_printf ("%s; %s",
-		                          update_hash_sparql,
-		                          resource_sparql);
-		g_free (resource_sparql);
-		g_free (update_hash_sparql);
-
-		return sparql;
-	} else {
-		return update_hash_sparql;
-	}
+	if (resource)
+		tracker_batch_add_resource (batch, graph, resource);
 }
 
 static void
@@ -207,6 +200,7 @@ get_metadata_cb (TrackerExtract *extract,
 		                       error->message, NULL);
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
+		ensure_data (info);
 		tracker_decorator_info_complete (data->decorator_info, info);
 		tracker_extract_info_unref (info);
 	}
@@ -383,16 +377,24 @@ tracker_extract_decorator_finished (TrackerDecorator *decorator)
 }
 
 static void
-tracker_extract_decorator_error (TrackerDecorator *decorator,
-                                 const gchar      *url,
-                                 const gchar      *error_message,
-                                 const gchar      *sparql)
+tracker_extract_decorator_error (TrackerDecorator   *decorator,
+                                 TrackerExtractInfo *extract_info,
+                                 const gchar        *error_message)
 {
+	g_autofree gchar *sparql = NULL;
+	TrackerResource *resource;
+	const gchar *graph;
 	GFile *file;
 
-	file = g_file_new_for_uri (url);
+	file = tracker_extract_info_get_file (extract_info);
+	graph = tracker_extract_info_get_graph (extract_info);
+	resource = tracker_extract_info_get_resource (extract_info);
+
+	sparql = tracker_resource_print_sparql_update (resource,
+	                                               NULL,
+	                                               graph);
+
 	decorator_ignore_file (file, TRACKER_EXTRACT_DECORATOR (decorator), error_message, sparql);
-	g_object_unref (file);
 }
 
 static void

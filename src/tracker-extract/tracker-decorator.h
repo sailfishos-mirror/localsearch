@@ -69,13 +69,14 @@ struct _TrackerDecoratorClass {
 
 	void (* items_available) (TrackerDecorator *decorator);
 	void (* finished)        (TrackerDecorator *decorator);
-	void (* error)           (TrackerDecorator *decorator,
-	                          const gchar      *url,
-	                          const gchar      *error_message,
-	                          const gchar      *sparql);
 
-	gchar * (* update) (TrackerDecorator   *decorator,
-	                    TrackerExtractInfo *extract_info);
+	void (* error) (TrackerDecorator   *decorator,
+	                TrackerExtractInfo *extract_info,
+	                const gchar        *error_message);
+
+	void (* update) (TrackerDecorator   *decorator,
+	                 TrackerExtractInfo *extract_info,
+	                 TrackerBatch       *batch);
 };
 
 #define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
