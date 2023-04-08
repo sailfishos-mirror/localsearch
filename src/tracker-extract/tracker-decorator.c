@@ -74,7 +74,6 @@ struct _TrackerDecoratorPrivate {
 
 	GStrv priority_graphs;
 
-	GHashTable *tasks; /* Associative array of GTasks */
 	GArray *sparql_buffer; /* Array of SparqlUpdate */
 	GArray *commit_buffer; /* Array of SparqlUpdate */
 	GTimer *timer;
@@ -466,8 +465,6 @@ decorator_task_done (GObject      *object,
 		g_array_append_val (priv->sparql_buffer, update);
 	}
 
-	g_hash_table_remove (priv->tasks, result);
-
 	if (priv->n_remaining_items > 0)
 		priv->n_remaining_items--;
 	priv->n_processed_items++;
@@ -477,7 +474,6 @@ decorator_task_done (GObject      *object,
 		if (priv->n_updates == 0)
 			decorator_rebuild_cache (decorator);
 	} else if (g_queue_is_empty (&priv->item_cache) &&
-	           g_hash_table_size (priv->tasks) == 0 &&
 	           (!priv->sparql_buffer || !priv->commit_buffer)) {
 		decorator_cache_next_items (decorator);
 	}
@@ -708,7 +704,6 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 
 	if (priv->querying ||
 	    priv->n_updates > 1 ||
-	    g_hash_table_size (priv->tasks) > 0 ||
 	    !g_queue_is_empty (&priv->item_cache))
 		return;
 
@@ -719,9 +714,8 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 		decorator_count_remaining_items (decorator);
 	} else {
 		TrackerSparqlStatement *statement;
-		gint offset;
+		gint offset = 0;
 
-		offset = g_hash_table_size (priv->tasks);
 		if (priv->sparql_buffer)
 			offset += priv->sparql_buffer->len;
 		if (priv->commit_buffer)
@@ -877,7 +871,6 @@ tracker_decorator_finalize (GObject *object)
 	g_queue_clear (&priv->item_cache);
 
 	g_strfreev (priv->class_names);
-	g_hash_table_destroy (priv->tasks);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
 	g_timer_destroy (priv->timer);
@@ -1026,7 +1019,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	priv->task_cancellable = g_cancellable_new ();
 
 	g_queue_init (&priv->item_cache);
-	priv->tasks = g_hash_table_new (NULL, NULL);
 }
 
 /**
@@ -1105,9 +1097,6 @@ tracker_decorator_next (TrackerDecorator  *decorator,
 	}
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s", info->url));
-
-	/* Store the decorator-side task in the active task pool */
-	g_hash_table_add (priv->tasks, info->task);
 
 	return info;
 }
