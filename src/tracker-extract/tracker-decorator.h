@@ -84,7 +84,6 @@ typedef enum {
 GType         tracker_decorator_get_type          (void) G_GNUC_CONST;
 GQuark        tracker_decorator_error_quark       (void);
 
-const gchar** tracker_decorator_get_class_names   (TrackerDecorator     *decorator);
 guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorator);
 
 TrackerDecoratorInfo * tracker_decorator_next (TrackerDecorator  *decorator,

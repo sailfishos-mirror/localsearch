@@ -65,8 +65,6 @@ struct _SparqlUpdate {
 struct _TrackerDecoratorPrivate {
 	TrackerNotifier *notifier;
 
-	gchar **class_names;
-
 	gssize n_remaining_items;
 	gssize n_processed_items;
 
@@ -92,8 +90,7 @@ struct _TrackerDecoratorPrivate {
 };
 
 enum {
-	PROP_CLASS_NAMES = 1,
-	PROP_COMMIT_BATCH_SIZE,
+	PROP_COMMIT_BATCH_SIZE = 1,
 };
 
 enum {
@@ -742,9 +739,6 @@ tracker_decorator_get_property (GObject    *object,
 	priv = TRACKER_DECORATOR (object)->priv;
 
 	switch (param_id) {
-	case PROP_CLASS_NAMES:
-		g_value_set_boxed (value, priv->class_names);
-		break;
 	case PROP_COMMIT_BATCH_SIZE:
 		g_value_set_int (value, priv->batch_size);
 		break;
@@ -870,7 +864,6 @@ tracker_decorator_finalize (GObject *object)
 	                 NULL);
 	g_queue_clear (&priv->item_cache);
 
-	g_strfreev (priv->class_names);
 	g_clear_pointer (&priv->sparql_buffer, g_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_array_unref);
 	g_timer_destroy (priv->timer);
@@ -944,14 +937,6 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 	miner_class->stopped = tracker_decorator_stopped;
 
 	g_object_class_install_property (object_class,
-	                                 PROP_CLASS_NAMES,
-	                                 g_param_spec_boxed ("class-names",
-	                                                     "Class names",
-	                                                     "rdfs:Class objects to listen to for changes",
-	                                                     G_TYPE_STRV,
-	                                                     G_PARAM_READWRITE |
-	                                                     G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
 	                                 PROP_COMMIT_BATCH_SIZE,
 	                                 g_param_spec_int ("commit-batch-size",
 	                                                   "Commit batch size",
@@ -1019,28 +1004,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	priv->task_cancellable = g_cancellable_new ();
 
 	g_queue_init (&priv->item_cache);
-}
-
-/**
- * tracker_decorator_get_class_names:
- * @decorator: a #TrackerDecorator.
- *
- * This function returns a string list of class names which are being
- * updated with extended metadata. An example would be 'nfo:Document'.
- *
- * Returns: (transfer none): a const gchar** or #NULL.
- *
- * Since: 0.18
- **/
-const gchar **
-tracker_decorator_get_class_names (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
-
-	priv = decorator->priv;
-	return (const gchar **) priv->class_names;
 }
 
 /**
