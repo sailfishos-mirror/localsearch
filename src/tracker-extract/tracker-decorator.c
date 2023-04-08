@@ -83,6 +83,7 @@ struct _TrackerDecoratorPrivate {
 	TrackerSparqlStatement *item_count_query;
 
 	GCancellable *cancellable;
+	GCancellable *task_cancellable;
 
 	gint batch_size;
 	gint n_updates;
@@ -140,8 +141,10 @@ static TrackerDecoratorInfo *
 tracker_decorator_info_new (TrackerDecorator    *decorator,
                             TrackerSparqlCursor *cursor)
 {
+	TrackerDecoratorPrivate *priv;
 	TrackerDecoratorInfo *info;
-	GCancellable *cancellable;
+
+	priv = decorator->priv;
 
 	info = g_slice_new0 (TrackerDecoratorInfo);
 	info->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
@@ -150,10 +153,10 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info->mimetype = g_strdup (tracker_sparql_cursor_get_string (cursor, 3, NULL));
 	info->ref_count = 1;
 
-	cancellable = g_cancellable_new ();
-	info->task = g_task_new (decorator, cancellable,
-	                         decorator_task_done, info);
-	g_object_unref (cancellable);
+	info->task = g_task_new (decorator,
+	                         priv->task_cancellable,
+	                         decorator_task_done,
+	                         info);
 
 	return info;
 }
@@ -478,22 +481,6 @@ decorator_task_done (GObject      *object,
 	           (!priv->sparql_buffer || !priv->commit_buffer)) {
 		decorator_cache_next_items (decorator);
 	}
-}
-
-static void
-decorator_cancel_active_tasks (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv = decorator->priv;
-	GHashTableIter iter;
-	GTask *task;
-
-	g_hash_table_iter_init (&iter, priv->tasks);
-
-	while (g_hash_table_iter_next (&iter, NULL, (gpointer*) &task)) {
-		g_cancellable_cancel (g_task_get_cancellable (task));
-	}
-
-	g_hash_table_remove_all (priv->tasks);
 }
 
 static gboolean
@@ -879,14 +866,15 @@ tracker_decorator_finalize (GObject *object)
 	g_cancellable_cancel (priv->cancellable);
 	g_clear_object (&priv->cancellable);
 
+	g_cancellable_cancel (priv->task_cancellable);
+	g_clear_object (&priv->task_cancellable);
+
 	g_clear_object (&priv->notifier);
 
 	g_queue_foreach (&priv->item_cache,
 	                 (GFunc) tracker_decorator_info_unref,
 	                 NULL);
 	g_queue_clear (&priv->item_cache);
-
-	decorator_cancel_active_tasks (decorator);
 
 	g_strfreev (priv->class_names);
 	g_hash_table_destroy (priv->tasks);
@@ -903,9 +891,13 @@ tracker_decorator_paused (TrackerMiner *miner)
 	TrackerDecoratorPrivate *priv;
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Paused"));
-	decorator_cancel_active_tasks (TRACKER_DECORATOR (miner));
+
 	priv = TRACKER_DECORATOR (miner)->priv;
 	g_timer_stop (priv->timer);
+
+	g_cancellable_cancel (priv->task_cancellable);
+	g_clear_object (&priv->task_cancellable);
+	priv->task_cancellable = g_cancellable_new ();
 }
 
 static void
@@ -925,7 +917,6 @@ tracker_decorator_stopped (TrackerMiner *miner)
 	TrackerDecoratorPrivate *priv;
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Stopped"));
-	decorator_cancel_active_tasks (TRACKER_DECORATOR (miner));
 	priv = TRACKER_DECORATOR (miner)->priv;
 	g_timer_stop (priv->timer);
 }
@@ -1032,6 +1023,7 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	priv->batch_size = DEFAULT_BATCH_SIZE;
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
+	priv->task_cancellable = g_cancellable_new ();
 
 	g_queue_init (&priv->item_cache);
 	priv->tasks = g_hash_table_new (NULL, NULL);
