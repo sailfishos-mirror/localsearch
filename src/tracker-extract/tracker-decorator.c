@@ -111,12 +111,6 @@ static void decorator_task_done (GObject      *object,
 static void decorator_cache_next_items (TrackerDecorator *decorator);
 static gboolean decorator_check_commit (TrackerDecorator *decorator);
 
-static void notifier_events_cb (TrackerDecorator *decorator,
-				const gchar      *service,
-				const gchar      *graph,
-				GPtrArray        *events,
-				TrackerNotifier  *notifier);
-
 /**
  * tracker_decorator_error_quark:
  *
