@@ -139,6 +139,50 @@ fill_data (TrackerResource *resource,
 	g_strfreev (rdf_types);
 }
 
+static gchar *
+tracker_extract_decorator_update (TrackerDecorator   *decorator,
+                                  TrackerExtractInfo *info)
+{
+	TrackerResource *resource;
+	const gchar *graph, *mime_type, *hash;
+	gchar *update_hash_sparql;
+	g_autofree gchar *uri = NULL;
+	GFile *file;
+
+	mime_type = tracker_extract_info_get_mimetype (info);
+	hash = tracker_extract_module_manager_get_hash (mime_type);
+	graph = tracker_extract_info_get_graph (info);
+	resource = tracker_extract_info_get_resource (info);
+	file = tracker_extract_info_get_file (info);
+	uri = g_file_get_uri (file);
+
+	update_hash_sparql =
+		g_strdup_printf ("INSERT DATA {"
+		                 "  GRAPH tracker:FileSystem {"
+		                 "    <%s> tracker:extractorHash \"%s\" ."
+		                 "  }"
+		                 "}",
+		                 uri, hash);
+
+	if (resource) {
+		gchar *sparql, *resource_sparql;
+
+		fill_data (resource, uri, mime_type);
+
+		resource_sparql = tracker_resource_print_sparql_update (resource, NULL, graph);
+
+		sparql = g_strdup_printf ("%s; %s",
+		                          update_hash_sparql,
+		                          resource_sparql);
+		g_free (resource_sparql);
+		g_free (update_hash_sparql);
+
+		return sparql;
+	} else {
+		return update_hash_sparql;
+	}
+}
+
 static void
 get_metadata_cb (TrackerExtract *extract,
                  GAsyncResult   *result,
@@ -146,10 +190,7 @@ get_metadata_cb (TrackerExtract *extract,
 {
 	TrackerExtractDecoratorPrivate *priv;
 	TrackerExtractInfo *info;
-	TrackerResource *resource;
 	GError *error = NULL;
-	const gchar *graph, *mime_type, *hash;
-	gchar *update_hash_sparql;
 
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (data->decorator));
 	info = tracker_extract_file_finish (extract, result, &error);
@@ -166,40 +207,7 @@ get_metadata_cb (TrackerExtract *extract,
 		                       error->message, NULL);
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
-		gchar *resource_sparql, *sparql;
-
-		mime_type = tracker_extract_info_get_mimetype (info);
-		hash = tracker_extract_module_manager_get_hash (mime_type);
-		graph = tracker_extract_info_get_graph (info);
-		resource = tracker_extract_info_get_resource (info);
-
-		update_hash_sparql =
-			g_strdup_printf ("INSERT DATA {"
-			                 "  GRAPH tracker:FileSystem {"
-			                 "    <%s> tracker:extractorHash \"%s\" ."
-			                 "  }"
-			                 "}",
-			                 tracker_decorator_info_get_url (data->decorator_info),
-			                 hash);
-
-		if (resource) {
-			fill_data (resource,
-			           tracker_decorator_info_get_url (data->decorator_info),
-			           mime_type);
-
-			resource_sparql = tracker_resource_print_sparql_update (resource, NULL, graph);
-
-			sparql = g_strdup_printf ("%s; %s",
-			                          update_hash_sparql,
-			                          resource_sparql);
-			g_free (resource_sparql);
-			g_free (update_hash_sparql);
-
-			tracker_decorator_info_complete (data->decorator_info, sparql);
-		} else {
-			tracker_decorator_info_complete (data->decorator_info, update_hash_sparql);
-		}
-
+		tracker_decorator_info_complete (data->decorator_info, info);
 		tracker_extract_info_unref (info);
 	}
 
@@ -404,6 +412,7 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 	decorator_class->items_available = tracker_extract_decorator_items_available;
 	decorator_class->finished = tracker_extract_decorator_finished;
 	decorator_class->error = tracker_extract_decorator_error;
+	decorator_class->update = tracker_extract_decorator_update;
 
 	g_object_class_install_property (object_class,
 	                                 PROP_EXTRACTOR,

@@ -26,6 +26,8 @@
 
 #include "tracker-miner-object.h"
 
+#include <libtracker-extract/tracker-extract.h>
+
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_DECORATOR         (tracker_decorator_get_type())
@@ -71,8 +73,9 @@ struct _TrackerDecoratorClass {
 	                          const gchar      *url,
 	                          const gchar      *error_message,
 	                          const gchar      *sparql);
-	/* <Private> */
-	gpointer padding[10];
+
+	gchar * (* update) (TrackerDecorator   *decorator,
+	                    TrackerExtractInfo *extract_info);
 };
 
 #define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
@@ -103,7 +106,7 @@ const gchar * tracker_decorator_info_get_url      (TrackerDecoratorInfo *info);
 const gchar * tracker_decorator_info_get_mimetype (TrackerDecoratorInfo *info);
 GCancellable * tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info);
 void          tracker_decorator_info_complete     (TrackerDecoratorInfo *info,
-                                                   gchar                *sparql);
+                                                   TrackerExtractInfo   *extract_info);
 void          tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
                                                      GError               *error);
 

@@ -437,13 +437,13 @@ decorator_task_done (GObject      *object,
 	TrackerDecorator *decorator = TRACKER_DECORATOR (object);
 	TrackerDecoratorInfo *info = user_data;
 	TrackerDecoratorPrivate *priv;
+	TrackerExtractInfo *extract_info;
 	GError *error = NULL;
-	gchar *sparql;
 
 	priv = decorator->priv;
-	sparql = g_task_propagate_pointer (G_TASK (result), &error);
+	extract_info = g_task_propagate_pointer (G_TASK (result), &error);
 
-	if (!sparql) {
+	if (!extract_info) {
 		if (error) {
 			g_warning ("Task for '%s' finished with error: %s\n",
 			           info->url, error->message);
@@ -451,6 +451,9 @@ decorator_task_done (GObject      *object,
 		}
 	} else {
 		SparqlUpdate update;
+		gchar *sparql;
+
+		sparql = TRACKER_DECORATOR_GET_CLASS (decorator)->update (decorator, extract_info);
 
 		/* Add resulting sparql to buffer and check whether flushing */
 		update.sparql = sparql;
@@ -460,6 +463,7 @@ decorator_task_done (GObject      *object,
 			priv->sparql_buffer = sparql_buffer_new ();
 
 		g_array_append_val (priv->sparql_buffer, update);
+		tracker_extract_info_unref (extract_info);
 	}
 
 	if (priv->n_remaining_items > 0)
@@ -1147,10 +1151,12 @@ tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info)
  **/
 void
 tracker_decorator_info_complete (TrackerDecoratorInfo *info,
-                                 gchar                *sparql)
+                                 TrackerExtractInfo   *extract_info)
 {
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s completed successfully", info->url));
-	g_task_return_pointer (info->task, sparql, g_free);
+	g_task_return_pointer (info->task,
+	                       tracker_extract_info_ref (extract_info),
+	                       (GDestroyNotify) tracker_extract_info_unref);
 }
 
 /**
