@@ -431,100 +431,6 @@ decorator_task_done (GObject      *object,
 	}
 }
 
-static gboolean
-append_graph_patterns (TrackerDecorator *decorator,
-                       GString          *query,
-                       gboolean          priority,
-                       gboolean          first)
-{
-	TrackerDecoratorPrivate *priv;
-	const gchar *graphs[] = {
-		"tracker:Audio",
-		"tracker:Pictures",
-		"tracker:Video",
-		"tracker:Software",
-		"tracker:Documents",
-	};
-	gint i;
-
-	priv = tracker_decorator_get_instance_private (decorator);
-
-	for (i = 0; i < G_N_ELEMENTS (graphs); i++) {
-		if (priority !=
-		    (priv->priority_graphs &&
-		     g_strv_contains ((const gchar * const *) priv->priority_graphs, graphs[i])))
-			continue;
-
-		if (!first)
-			g_string_append (query, "UNION ");
-
-		g_string_append_printf (query,
-		                        "{ GRAPH %s { ?urn a nfo:FileDataObject ; nfo:fileName [] } } ",
-		                        graphs[i]);
-		first = FALSE;
-	}
-
-	return first;
-}
-
-static gchar *
-create_query_string (TrackerDecorator  *decorator,
-                     gchar            **select_clauses)
-{
-	GString *query;
-	gboolean first;
-	gint i;
-
-	query = g_string_new ("SELECT ");
-
-	for (i = 0; select_clauses[i]; i++) {
-		g_string_append_printf (query, "%s ", select_clauses[i]);
-	}
-
-	g_string_append (query, "{ ");
-
-	/* Add priority graphs first, so they come up first in the query */
-	first = append_graph_patterns (decorator, query, TRUE, TRUE);
-	append_graph_patterns (decorator, query, FALSE, first);
-
-	g_string_append_printf (query,
-	                        "FILTER (NOT EXISTS {"
-	                        "  GRAPH tracker:FileSystem { ?urn tracker:extractorHash ?hash }"
-	                        "})"
-	                        "} OFFSET ~offset LIMIT %d",
-	                        QUERY_BATCH_SIZE);
-
-	return g_string_free (query, FALSE);
-}
-
-static TrackerSparqlStatement *
-create_prepared_statement (TrackerDecorator  *decorator,
-                           gchar            **select_clauses)
-{
-	TrackerDecoratorPrivate *priv;
-	TrackerSparqlConnection *sparql_conn;
-	TrackerSparqlStatement *statement;
-	GError *error = NULL;
-	gchar *query;
-
-	priv = tracker_decorator_get_instance_private (decorator);
-	query = create_query_string (decorator, select_clauses);
-
-	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	statement = tracker_sparql_connection_query_statement (sparql_conn,
-	                                                       query,
-	                                                       priv->cancellable,
-	                                                       &error);
-	g_free (query);
-
-	if (error) {
-		g_warning ("Could not create statement: %s", error->message);
-		g_error_free (error);
-	}
-
-	return statement;
-}
-
 static TrackerSparqlStatement *
 load_statement (TrackerDecorator *decorator,
                 const gchar      *query_filename)
@@ -542,24 +448,6 @@ load_statement (TrackerDecorator *decorator,
 	                                                                resource_path,
 	                                                                NULL,
 	                                                                NULL);
-}
-
-static TrackerSparqlStatement *
-ensure_remaining_items_query (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv;
-	gchar *clauses[] = {
-		"?urn",
-		"tracker:id(?urn)",
-		NULL
-	};
-
-	priv = tracker_decorator_get_instance_private (decorator);
-
-	if (!priv->remaining_items_query)
-		priv->remaining_items_query = create_prepared_statement (decorator, clauses);
-
-	return priv->remaining_items_query;
 }
 
 static void
@@ -669,6 +557,75 @@ decorator_cache_items_cb (GObject      *object,
 }
 
 static void
+bind_graphs (TrackerDecorator *decorator,
+             int              *arg_counter,
+             gboolean          priority)
+{
+	TrackerDecoratorPrivate *priv;
+	TrackerSparqlConnection *conn;
+	TrackerNamespaceManager *namespaces;
+	const gchar *graphs[] = {
+		"tracker:Audio",
+		"tracker:Pictures",
+		"tracker:Video",
+		"tracker:Software",
+		"tracker:Documents",
+	};
+	guint i;
+
+	priv = tracker_decorator_get_instance_private (decorator);
+	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
+	namespaces = tracker_sparql_connection_get_namespace_manager (conn);
+
+	for (i = 0; i < G_N_ELEMENTS (graphs); i++) {
+		gboolean is_priority;
+		g_autofree gchar *arg = NULL, *expanded = NULL;
+
+		is_priority = priv->priority_graphs &&
+			g_strv_contains ((const gchar * const *) priv->priority_graphs, graphs[i]);
+
+		if (priority != is_priority)
+			continue;
+
+		arg = g_strdup_printf ("graph%d", (*arg_counter) + 1);
+		expanded = tracker_namespace_manager_expand_uri (namespaces, graphs[i]);
+		tracker_sparql_statement_bind_string (priv->remaining_items_query, arg, expanded);
+		(* arg_counter)++;
+	}
+}
+
+static void
+decorator_query_next_items (TrackerDecorator *decorator)
+{
+	TrackerDecoratorPrivate *priv;
+	gint offset = 0, n_graph = 0;
+
+	priv = tracker_decorator_get_instance_private (decorator);
+
+	if (priv->sparql_buffer)
+		offset += priv->sparql_buffer->len;
+	if (priv->commit_buffer)
+		offset += priv->commit_buffer->len;
+
+	if (!priv->remaining_items_query)
+		priv->remaining_items_query = load_statement (decorator, "get-items.rq");
+
+	/* Bind all graphs, in priority order */
+	bind_graphs (decorator, &n_graph, TRUE);
+	bind_graphs (decorator, &n_graph, FALSE);
+
+	tracker_sparql_statement_bind_int (priv->remaining_items_query,
+	                                   "offset", offset);
+	tracker_sparql_statement_bind_int (priv->remaining_items_query,
+	                                   "limit", QUERY_BATCH_SIZE);
+
+	tracker_sparql_statement_execute_async (priv->remaining_items_query,
+	                                        priv->cancellable,
+	                                        decorator_cache_items_cb,
+	                                        decorator);
+}
+
+static void
 decorator_cache_next_items (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
@@ -686,21 +643,8 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
 		decorator_count_remaining_items (decorator);
 	} else {
-		TrackerSparqlStatement *statement;
-		gint offset = 0;
-
-		if (priv->sparql_buffer)
-			offset += priv->sparql_buffer->len;
-		if (priv->commit_buffer)
-			offset += priv->commit_buffer->len;
-
 		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Querying items which still need processing"));
-		statement = ensure_remaining_items_query (decorator);
-		tracker_sparql_statement_bind_int (statement, "offset", offset);
-		tracker_sparql_statement_execute_async (statement,
-		                                        priv->cancellable,
-		                                        decorator_cache_items_cb,
-		                                        decorator);
+		decorator_query_next_items (decorator);
 	}
 }
 
