@@ -342,7 +342,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 	tracker_extract_file (priv->extractor,
 	                      tracker_decorator_info_get_url (info),
-	                      tracker_decorator_info_get_mimetype (info),
+	                      NULL,
 	                      cancellable,
 	                      (GAsyncReadyCallback) get_metadata_cb, data);
 }

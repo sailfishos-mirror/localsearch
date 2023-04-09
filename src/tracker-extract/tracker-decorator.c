@@ -50,7 +50,6 @@ struct _TrackerDecoratorInfo {
 	GTask *task;
 	gchar *urn;
 	gchar *url;
-	gchar *mimetype;
 	gint id;
 	gint ref_count;
 };
@@ -127,7 +126,6 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-	info->mimetype = g_strdup (tracker_sparql_cursor_get_string (cursor, 3, NULL));
 	info->ref_count = 1;
 
 	info->task = g_task_new (decorator,
@@ -174,7 +172,6 @@ tracker_decorator_info_unref (TrackerDecoratorInfo *info)
 		g_object_unref (info->task);
 	g_free (info->urn);
 	g_free (info->url);
-	g_free (info->mimetype);
 	g_slice_free (TrackerDecoratorInfo, info);
 }
 
@@ -539,7 +536,6 @@ ensure_remaining_items_query (TrackerDecorator *decorator)
 		"?urn",
 		"tracker:id(?urn)",
 		"?urn",
-		"nie:mimeType(?urn)",
 		NULL
 	};
 
@@ -1054,28 +1050,6 @@ tracker_decorator_info_get_url (TrackerDecoratorInfo *info)
 	g_return_val_if_fail (info != NULL, NULL);
 	return info->url;
 }
-
-/**
- * tracker_decorator_info_get_mimetype:
- * @info: a #TrackerDecoratorInfo.
- *
- * A MIME¹ type is a way of describing the content type of a file or
- * set of data. An example would be 'text/plain' for a clear text
- * document or file.
- *
- * ¹: http://en.wikipedia.org/wiki/MIME
- *
- * Returns: the MIME type for #TrackerDecoratorInfo on success or #NULL on error.
- *
- * Since: 0.18
- **/
-const gchar *
-tracker_decorator_info_get_mimetype (TrackerDecoratorInfo *info)
-{
-       g_return_val_if_fail (info != NULL, NULL);
-       return info->mimetype;
-}
-
 
 GCancellable *
 tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info)
