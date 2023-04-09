@@ -22,7 +22,6 @@
 #include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#include "tracker-decorator-private.h"
 #include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
 
@@ -504,7 +503,7 @@ mount_points_changed_cb (GVolumeMonitor *monitor,
 
 	if (drive) {
 		if (g_drive_is_media_removable (drive))
-			_tracker_decorator_invalidate_cache (user_data);
+			tracker_decorator_invalidate_cache (user_data);
 		g_object_unref (drive);
 	}
 }

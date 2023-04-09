@@ -24,7 +24,6 @@
 #include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-decorator.h"
-#include "tracker-decorator-private.h"
 
 #define QUERY_BATCH_SIZE 200
 #define DEFAULT_BATCH_SIZE 200
@@ -1124,7 +1123,7 @@ tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
 }
 
 void
-_tracker_decorator_invalidate_cache (TrackerDecorator *decorator)
+tracker_decorator_invalidate_cache (TrackerDecorator *decorator)
 {
 	decorator_rebuild_cache (decorator);
 }
