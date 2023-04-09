@@ -526,6 +526,25 @@ create_prepared_statement (TrackerDecorator  *decorator,
 }
 
 static TrackerSparqlStatement *
+load_statement (TrackerDecorator *decorator,
+                const gchar      *query_filename)
+{
+	g_autofree gchar *resource_path = NULL;
+	TrackerSparqlConnection *conn;
+
+	resource_path =
+		g_strconcat ("/org/freedesktop/Tracker3/Extract/queries/",
+		             query_filename, NULL);
+
+	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
+
+	return tracker_sparql_connection_load_statement_from_gresource (conn,
+	                                                                resource_path,
+	                                                                NULL,
+	                                                                NULL);
+}
+
+static TrackerSparqlStatement *
 ensure_remaining_items_query (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
@@ -550,7 +569,7 @@ decorator_count_remaining_items_cb (GObject      *object,
 {
 	TrackerDecorator *decorator = user_data;
 	TrackerDecoratorPrivate *priv;
-	TrackerSparqlCursor *cursor;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	g_autoptr (GError) error = NULL;
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
@@ -567,9 +586,7 @@ decorator_count_remaining_items_cb (GObject      *object,
 	priv = tracker_decorator_get_instance_private (decorator);
 	priv->querying = FALSE;
 
-	priv->n_remaining_items = g_queue_get_length (&priv->item_cache) +
-		tracker_sparql_cursor_get_integer (cursor, 0);
-	g_object_unref (cursor);
+	priv->n_remaining_items = tracker_sparql_cursor_get_integer (cursor, 0);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Found %" G_GSIZE_FORMAT " items to extract", priv->n_remaining_items));
 
@@ -582,16 +599,13 @@ decorator_count_remaining_items_cb (GObject      *object,
 static void
 decorator_count_remaining_items (TrackerDecorator *decorator)
 {
-	gchar *clauses[] = { "COUNT(?urn)", NULL };
 	TrackerDecoratorPrivate *priv;
 
 	priv = tracker_decorator_get_instance_private (decorator);
 
 	if (!priv->item_count_query)
-		priv->item_count_query = create_prepared_statement (decorator, clauses);
+		priv->item_count_query = load_statement (decorator, "get-item-count.rq");
 
-	tracker_sparql_statement_bind_int (priv->item_count_query,
-	                                   "offset", 0);
 	tracker_sparql_statement_execute_async (priv->item_count_query,
 	                                        priv->cancellable,
 	                                        decorator_count_remaining_items_cb,
