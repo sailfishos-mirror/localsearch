@@ -48,20 +48,15 @@ struct _TrackerExtractDecoratorPrivate {
 	TrackerExtractPersistence *persistence;
 };
 
-static GInitableIface *parent_initable_iface;
-
 static void decorator_get_next_file (TrackerDecorator *decorator);
-static void tracker_extract_decorator_initable_iface_init (GInitableIface *iface);
 
 static void decorator_ignore_file (GFile                   *file,
                                    TrackerExtractDecorator *decorator,
                                    const gchar             *error_message,
                                    const gchar             *extra_info);
 
-G_DEFINE_TYPE_WITH_CODE (TrackerExtractDecorator, tracker_extract_decorator,
-                        TRACKER_TYPE_DECORATOR_FS,
-                        G_ADD_PRIVATE (TrackerExtractDecorator)
-                        G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_extract_decorator_initable_iface_init))
+G_DEFINE_TYPE_WITH_PRIVATE (TrackerExtractDecorator, tracker_extract_decorator,
+                            TRACKER_TYPE_DECORATOR_FS)
 
 static void
 tracker_extract_decorator_get_property (GObject    *object,
@@ -499,37 +494,12 @@ persistence_ignore_file (GFile    *file,
 static void
 tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
-}
-
-static gboolean
-tracker_extract_decorator_initable_init (GInitable     *initable,
-                                         GCancellable  *cancellable,
-                                         GError       **error)
-{
-	TrackerExtractDecorator        *decorator;
 	TrackerExtractDecoratorPrivate *priv;
-	gboolean                        ret = TRUE;
 
-	decorator = TRACKER_EXTRACT_DECORATOR (initable);
-	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
-
-	/* Chainup to parent's init last, to have a chance to export our
-	 * DBus interface before RequestName returns. Otherwise our iface
-	 * won't be ready by the time the tracker-extract appear on the bus. */
-	if (!parent_initable_iface->init (initable, cancellable, error)) {
-		ret = FALSE;
-	}
+	priv = tracker_extract_decorator_get_instance_private (decorator);
 
 	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
 	                                                            decorator);
-	return ret;
-}
-
-static void
-tracker_extract_decorator_initable_iface_init (GInitableIface *iface)
-{
-	parent_initable_iface = g_type_interface_peek_parent (iface);
-	iface->init = tracker_extract_decorator_initable_init;
 }
 
 TrackerDecorator *
