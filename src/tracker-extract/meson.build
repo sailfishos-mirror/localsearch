@@ -138,7 +138,6 @@ tracker_extract_priority_dbus = gnome.gdbus_codegen(
 tracker_extract_sources = [
   'tracker-config.c',
   'tracker-decorator.c',
-  'tracker-decorator-fs.c',
   'tracker-extract.c',
   'tracker-extract-controller.c',
   'tracker-extract-decorator.c',

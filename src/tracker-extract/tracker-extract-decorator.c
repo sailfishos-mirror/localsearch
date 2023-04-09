@@ -22,6 +22,7 @@
 #include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-extract/tracker-extract.h>
 
+#include "tracker-decorator-private.h"
 #include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
 
@@ -46,6 +47,7 @@ struct _TrackerExtractDecoratorPrivate {
 	gboolean extracting;
 
 	TrackerExtractPersistence *persistence;
+	GVolumeMonitor *volume_monitor;
 };
 
 static void decorator_get_next_file (TrackerDecorator *decorator);
@@ -56,7 +58,7 @@ static void decorator_ignore_file (GFile                   *file,
                                    const gchar             *extra_info);
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerExtractDecorator, tracker_extract_decorator,
-                            TRACKER_TYPE_DECORATOR_FS)
+                            TRACKER_TYPE_DECORATOR)
 
 static void
 tracker_extract_decorator_get_property (GObject    *object,
@@ -104,6 +106,8 @@ tracker_extract_decorator_finalize (GObject *object)
 
 	if (priv->timer)
 		g_timer_destroy (priv->timer);
+
+	g_clear_object (&priv->volume_monitor);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -492,6 +496,20 @@ persistence_ignore_file (GFile    *file,
 }
 
 static void
+mount_points_changed_cb (GVolumeMonitor *monitor,
+                         GMount         *mount,
+                         gpointer        user_data)
+{
+	GDrive *drive = g_mount_get_drive (mount);
+
+	if (drive) {
+		if (g_drive_is_media_removable (drive))
+			_tracker_decorator_invalidate_cache (user_data);
+		g_object_unref (drive);
+	}
+}
+
+static void
 tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
 	TrackerExtractDecoratorPrivate *priv;
@@ -500,6 +518,14 @@ tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 
 	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
 	                                                            decorator);
+
+	priv->volume_monitor = g_volume_monitor_get ();
+	g_signal_connect_object (priv->volume_monitor, "mount-added",
+	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
+	g_signal_connect_object (priv->volume_monitor, "mount-pre-unmount",
+	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
+	g_signal_connect_object (priv->volume_monitor, "mount-removed",
+	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
 }
 
 TrackerDecorator *
