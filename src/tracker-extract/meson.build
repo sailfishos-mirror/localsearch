@@ -135,12 +135,6 @@ extract_resources = gnome.compile_resources(
     c_name: 'tracker_extract',
 )
 
-tracker_extract_priority_dbus = gnome.gdbus_codegen(
-  'tracker-extract-priority-dbus',
-  'tracker-extract-priority.xml',
-  interface_prefix: 'org.freedesktop.Tracker3.Extract.',
-  namespace: 'TrackerExtractDBus')
-
 tracker_extract_sources = [
   'tracker-config.c',
   'tracker-decorator.c',
@@ -151,7 +145,6 @@ tracker_extract_sources = [
   'tracker-read.c',
   'tracker-main.c',
   extract_resources,
-  tracker_extract_priority_dbus
 ]
 
 tracker_extract_dependencies = [
