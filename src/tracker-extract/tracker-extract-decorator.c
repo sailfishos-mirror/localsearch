@@ -46,7 +46,6 @@ struct _TrackerExtractDecoratorPrivate {
 	gboolean extracting;
 
 	TrackerExtractPersistence *persistence;
-	GDBusProxy *index_proxy;
 };
 
 static GInitableIface *parent_initable_iface;
@@ -110,8 +109,6 @@ tracker_extract_decorator_finalize (GObject *object)
 
 	if (priv->timer)
 		g_timer_destroy (priv->timer);
-
-	g_clear_object (&priv->index_proxy);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -504,31 +501,6 @@ tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
 }
 
-static void
-update_graphs_from_proxy (TrackerExtractDecorator *decorator,
-                          GDBusProxy              *proxy)
-{
-	const gchar **graphs = NULL;
-	GVariant *v;
-
-	v = g_dbus_proxy_get_cached_property (proxy, "Graphs");
-	if (v)
-		graphs = g_variant_get_strv (v, NULL);
-
-	tracker_decorator_set_priority_graphs (TRACKER_DECORATOR (decorator),
-	                                       graphs);
-	g_free (graphs);
-}
-
-static void
-proxy_properties_changed_cb (GDBusProxy *proxy,
-                             GVariant   *changed_properties,
-                             GStrv       invalidated_properties,
-                             gpointer    user_data)
-{
-	update_graphs_from_proxy (user_data, proxy);
-}
-
 static gboolean
 tracker_extract_decorator_initable_init (GInitable     *initable,
                                          GCancellable  *cancellable,
@@ -536,34 +508,10 @@ tracker_extract_decorator_initable_init (GInitable     *initable,
 {
 	TrackerExtractDecorator        *decorator;
 	TrackerExtractDecoratorPrivate *priv;
-	GDBusConnection                *conn;
 	gboolean                        ret = TRUE;
 
 	decorator = TRACKER_EXTRACT_DECORATOR (initable);
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
-
-	conn = g_bus_get_sync (TRACKER_IPC_BUS, NULL, error);
-	if (conn == NULL) {
-		ret = FALSE;
-		goto out;
-	}
-
-	priv->index_proxy = g_dbus_proxy_new_sync (conn,
-	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-	                                           NULL,
-	                                           "org.freedesktop.Tracker3.Miner.Files.Control",
-	                                           "/org/freedesktop/Tracker3/Miner/Files/Proxy",
-	                                           "org.freedesktop.Tracker3.Miner.Files.Proxy",
-	                                           cancellable,
-	                                           error);
-	if (!priv->index_proxy) {
-		ret = FALSE;
-		goto out;
-	}
-
-	g_signal_connect (priv->index_proxy, "g-properties-changed",
-	                  G_CALLBACK (proxy_properties_changed_cb), decorator);
-	update_graphs_from_proxy (decorator, priv->index_proxy);
 
 	/* Chainup to parent's init last, to have a chance to export our
 	 * DBus interface before RequestName returns. Otherwise our iface
@@ -574,9 +522,6 @@ tracker_extract_decorator_initable_init (GInitable     *initable,
 
 	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
 	                                                            decorator);
-out:
-	g_clear_object (&conn);
-
 	return ret;
 }
 
