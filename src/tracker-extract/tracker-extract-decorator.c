@@ -45,6 +45,9 @@ struct _TrackerExtractDecoratorPrivate {
 	GTimer *timer;
 	gboolean extracting;
 
+	TrackerSparqlStatement *update_hash;
+	TrackerSparqlStatement *delete_file;
+
 	TrackerExtractPersistence *persistence;
 	GVolumeMonitor *volume_monitor;
 };
@@ -93,6 +96,39 @@ tracker_extract_decorator_set_property (GObject      *object,
 	}
 }
 
+static TrackerSparqlStatement *
+load_statement (TrackerExtractDecorator *decorator,
+                const gchar             *query_filename)
+{
+	g_autofree gchar *resource_path = NULL;
+	TrackerSparqlConnection *conn;
+
+	resource_path =
+		g_strconcat ("/org/freedesktop/Tracker3/Extract/queries/",
+		             query_filename, NULL);
+
+	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
+
+	return tracker_sparql_connection_load_statement_from_gresource (conn,
+	                                                                resource_path,
+	                                                                NULL,
+	                                                                NULL);
+}
+
+static void
+tracker_extract_decorator_constructed (GObject *object)
+{
+	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (object);
+	TrackerExtractDecoratorPrivate *priv;
+
+	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (object));
+
+	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->constructed (object);
+
+	priv->update_hash = load_statement (decorator, "update-hash.rq");
+	priv->delete_file = load_statement (decorator, "delete-file.rq");
+}
+
 static void
 tracker_extract_decorator_finalize (GObject *object)
 {
@@ -107,6 +143,9 @@ tracker_extract_decorator_finalize (GObject *object)
 		g_timer_destroy (priv->timer);
 
 	g_clear_object (&priv->volume_monitor);
+
+	g_clear_object (&priv->update_hash);
+	g_clear_object (&priv->delete_file);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -145,11 +184,13 @@ tracker_extract_decorator_update (TrackerDecorator   *decorator,
                                   TrackerExtractInfo *info,
                                   TrackerBatch       *batch)
 {
+	TrackerExtractDecoratorPrivate *priv;
 	TrackerResource *resource;
 	const gchar *graph, *mime_type, *hash;
-	gchar *update_hash_sparql;
 	g_autofree gchar *uri = NULL;
 	GFile *file;
+
+	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (decorator));
 
 	mime_type = tracker_extract_info_get_mimetype (info);
 	hash = tracker_extract_module_manager_get_hash (mime_type);
@@ -158,14 +199,10 @@ tracker_extract_decorator_update (TrackerDecorator   *decorator,
 	file = tracker_extract_info_get_file (info);
 	uri = g_file_get_uri (file);
 
-	update_hash_sparql =
-		g_strdup_printf ("INSERT DATA {"
-		                 "  GRAPH tracker:FileSystem {"
-		                 "    <%s> tracker:extractorHash \"%s\" ."
-		                 "  }"
-		                 "}",
-		                 uri, hash);
-	tracker_batch_add_sparql (batch, update_hash_sparql);
+	tracker_batch_add_statement (batch, priv->update_hash,
+	                             "file", G_TYPE_STRING, uri,
+	                             "hash", G_TYPE_STRING, hash,
+	                             NULL);
 
 	if (resource)
 		tracker_batch_add_resource (batch, graph, resource);
@@ -399,6 +436,7 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 	TrackerMinerClass *miner_class = TRACKER_MINER_CLASS (klass);
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+	object_class->constructed = tracker_extract_decorator_constructed;
 	object_class->finalize = tracker_extract_decorator_finalize;
 	object_class->get_property = tracker_extract_decorator_get_property;
 	object_class->set_property = tracker_extract_decorator_set_property;
@@ -428,11 +466,12 @@ decorator_ignore_file (GFile                   *file,
                        const gchar             *error_message,
                        const gchar             *extra_info)
 {
-	TrackerSparqlConnection *conn;
-	GError *error = NULL;
-	gchar *uri, *query;
-	const gchar *mimetype, *hash;
-	GFileInfo *info;
+	TrackerExtractDecoratorPrivate *priv;
+	g_autoptr (GError) error = NULL, info_error = NULL;
+	g_autofree gchar *uri = NULL;
+	g_autoptr (GFileInfo) info = NULL;
+
+	priv = tracker_extract_decorator_get_instance_private (decorator);
 
 	uri = g_file_get_uri (file);
 	g_debug ("Extraction on file '%s' failed in previous execution, ignoring", uri);
@@ -440,49 +479,37 @@ decorator_ignore_file (GFile                   *file,
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                          NULL, &error);
+	                          NULL, &info_error);
 
 	if (info) {
+		const gchar *mimetype, *hash;
+
 		tracker_error_report (file, error_message, extra_info);
 
 		mimetype = g_file_info_get_attribute_string (info,
 		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
 		hash = tracker_extract_module_manager_get_hash (mimetype);
-		g_object_unref (info);
 
-		query = g_strdup_printf ("INSERT DATA { GRAPH tracker:FileSystem {"
-		                         "  <%s> tracker:extractorHash \"%s\" ;"
-		                         "}}",
-		                         uri, hash);
+		tracker_sparql_statement_bind_string (priv->update_hash, "file", uri);
+		tracker_sparql_statement_bind_string (priv->update_hash, "hash", hash);
+
+		tracker_sparql_statement_update (priv->update_hash, NULL, &error);
 	} else {
-		g_debug ("Could not get mimetype: %s", error->message);
+		g_debug ("Could not get mimetype: %s", info_error->message);
 
-		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		if (g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
 			tracker_error_report_delete (file);
 		else
-			tracker_error_report (file, error->message, NULL);
+			tracker_error_report (file, info_error->message, NULL);
 
-		g_clear_error (&error);
-		query = g_strdup_printf ("DELETE {"
-		                         "  GRAPH ?g { <%s> a rdfs:Resource }"
-		                         "} WHERE {"
-		                         "  GRAPH ?g { <%s> a nfo:FileDataObject }"
-		                         "  FILTER (?g != tracker:FileSystem)"
-		                         "}",
-		                         uri, uri);
+		tracker_sparql_statement_bind_string (priv->delete_file, "file", uri);
+		tracker_sparql_statement_update (priv->delete_file, NULL, &error);
 	}
-
-	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	tracker_sparql_connection_update (conn, query, NULL, &error);
 
 	if (error) {
 		g_warning ("Failed to update ignored file '%s': %s",
 		           uri, error->message);
-		g_error_free (error);
 	}
-
-	g_free (query);
-	g_free (uri);
 }
 
 static void
