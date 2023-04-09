@@ -94,9 +94,6 @@ enum {
 };
 
 static guint signals[LAST_SIGNAL] = { 0 };
-static GInitableIface *parent_initable_iface;
-
-static void   tracker_decorator_initable_iface_init (GInitableIface   *iface);
 
 static void decorator_task_done (GObject      *object,
                                  GAsyncResult *result,
@@ -116,9 +113,7 @@ static gboolean decorator_check_commit (TrackerDecorator *decorator);
  **/
 G_DEFINE_QUARK (TrackerDecoratorError, tracker_decorator_error)
 
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (TrackerDecorator, tracker_decorator, TRACKER_TYPE_MINER,
-                                  G_ADD_PRIVATE (TrackerDecorator)
-                                  G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_decorator_initable_iface_init))
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerDecorator, tracker_decorator, TRACKER_TYPE_MINER)
 
 static TrackerDecoratorInfo *
 tracker_decorator_info_new (TrackerDecorator    *decorator,
@@ -780,23 +775,17 @@ notifier_events_cb (TrackerDecorator *decorator,
 		decorator_cache_next_items (decorator);
 }
 
-static gboolean
-tracker_decorator_initable_init (GInitable     *initable,
-                                 GCancellable  *cancellable,
-                                 GError       **error)
+static void
+tracker_decorator_constructed (GObject *object)
 {
 	TrackerDecorator *decorator;
 	TrackerDecoratorPrivate *priv;
 	TrackerSparqlConnection *conn;
 
-	if (!parent_initable_iface->init (initable, cancellable, error))
-		return FALSE;
+	G_OBJECT_CLASS (tracker_decorator_parent_class)->constructed (object);
 
-	decorator = TRACKER_DECORATOR (initable);
+	decorator = TRACKER_DECORATOR (object);
 	priv = tracker_decorator_get_instance_private (decorator);
-
-	if (g_cancellable_is_cancelled (cancellable))
-		return FALSE;
 
 	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
 	priv->notifier = tracker_sparql_connection_create_notifier (conn);
@@ -805,14 +794,6 @@ tracker_decorator_initable_init (GInitable     *initable,
 	                          decorator);
 
 	decorator_update_state (decorator, "Idle", FALSE);
-	return TRUE;
-}
-
-static void
-tracker_decorator_initable_iface_init (GInitableIface *iface)
-{
-	parent_initable_iface = g_type_interface_peek_parent (iface);
-	iface->init = tracker_decorator_initable_init;
 }
 
 static void
@@ -904,6 +885,7 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 	TrackerMinerClass *miner_class = TRACKER_MINER_CLASS (klass);
 
+	object_class->constructed = tracker_decorator_constructed;
 	object_class->get_property = tracker_decorator_get_property;
 	object_class->set_property = tracker_decorator_set_property;
 	object_class->finalize = tracker_decorator_finalize;
