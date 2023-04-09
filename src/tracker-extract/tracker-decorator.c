@@ -48,7 +48,6 @@ typedef struct _ClassInfo ClassInfo;
 
 struct _TrackerDecoratorInfo {
 	GTask *task;
-	gchar *urn;
 	gchar *url;
 	gint id;
 	gint ref_count;
@@ -123,9 +122,8 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	priv = tracker_decorator_get_instance_private (decorator);
 
 	info = g_slice_new0 (TrackerDecoratorInfo);
-	info->urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
+	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
-	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 	info->ref_count = 1;
 
 	info->task = g_task_new (decorator,
@@ -170,7 +168,6 @@ tracker_decorator_info_unref (TrackerDecoratorInfo *info)
 
 	if (info->task)
 		g_object_unref (info->task);
-	g_free (info->urn);
 	g_free (info->url);
 	g_slice_free (TrackerDecoratorInfo, info);
 }
@@ -535,7 +532,6 @@ ensure_remaining_items_query (TrackerDecorator *decorator)
 	gchar *clauses[] = {
 		"?urn",
 		"tracker:id(?urn)",
-		"?urn",
 		NULL
 	};
 
@@ -1013,24 +1009,6 @@ tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
 	g_strfreev (priv->priority_graphs);
 	priv->priority_graphs = g_strdupv ((gchar **) graphs);
 	decorator_rebuild_cache (decorator);
-}
-
-/**
- * tracker_decorator_info_get_urn:
- * @info: a #TrackerDecoratorInfo.
- *
- * A URN is a Uniform Resource Name and should be a unique identifier
- * for a resource in the database.
- *
- * Returns: the URN for #TrackerDecoratorInfo on success or #NULL on error.
- *
- * Since: 0.18
- **/
-const gchar *
-tracker_decorator_info_get_urn (TrackerDecoratorInfo *info)
-{
-	g_return_val_if_fail (info != NULL, NULL);
-	return info->urn;
 }
 
 /**
