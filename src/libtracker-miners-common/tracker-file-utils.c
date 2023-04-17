@@ -894,7 +894,7 @@ tracker_file_get_content_identifier (GFile       *file,
                                      const gchar *suffix)
 {
 	const gchar *id;
-	gchar *inode, *str;
+	g_autofree gchar *inode = NULL, *str = NULL;
 
 	if (info) {
 		g_object_ref (info);
@@ -923,7 +923,6 @@ tracker_file_get_content_identifier (GFile       *file,
 			   suffix, NULL);
 
 	g_object_unref (info);
-	g_free (inode);
 
-	return str;
+	return g_steal_pointer (&str);
 }
