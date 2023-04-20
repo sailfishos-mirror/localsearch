@@ -116,6 +116,15 @@ load_statement (TrackerExtractDecorator *decorator,
 }
 
 static void
+persistence_ignore_file (GFile    *file,
+                         gpointer  user_data)
+{
+	TrackerExtractDecorator *decorator = user_data;
+
+	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
+}
+
+static void
 tracker_extract_decorator_constructed (GObject *object)
 {
 	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (object);
@@ -127,6 +136,9 @@ tracker_extract_decorator_constructed (GObject *object)
 
 	priv->update_hash = load_statement (decorator, "update-hash.rq");
 	priv->delete_file = load_statement (decorator, "delete-file.rq");
+
+	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
+	                                                            decorator);
 }
 
 static void
@@ -518,15 +530,6 @@ decorator_ignore_file (GFile                   *file,
 }
 
 static void
-persistence_ignore_file (GFile    *file,
-                         gpointer  user_data)
-{
-	TrackerExtractDecorator *decorator = user_data;
-
-	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
-}
-
-static void
 mount_points_changed_cb (GVolumeMonitor *monitor,
                          GMount         *mount,
                          gpointer        user_data)
@@ -546,9 +549,6 @@ tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 	TrackerExtractDecoratorPrivate *priv;
 
 	priv = tracker_extract_decorator_get_instance_private (decorator);
-
-	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
-	                                                            decorator);
 
 	priv->volume_monitor = g_volume_monitor_get ();
 	g_signal_connect_object (priv->volume_monitor, "mount-added",
