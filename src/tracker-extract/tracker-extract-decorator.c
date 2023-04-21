@@ -116,6 +116,15 @@ load_statement (TrackerExtractDecorator *decorator,
 }
 
 static void
+persistence_ignore_file (GFile    *file,
+                         gpointer  user_data)
+{
+	TrackerExtractDecorator *decorator = user_data;
+
+	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
+}
+
+static void
 tracker_extract_decorator_constructed (GObject *object)
 {
 	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (object);
@@ -127,6 +136,9 @@ tracker_extract_decorator_constructed (GObject *object)
 
 	priv->update_hash = load_statement (decorator, "update-hash.rq");
 	priv->delete_file = load_statement (decorator, "delete-file.rq");
+
+	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
+	                                                            decorator);
 }
 
 static void
@@ -470,6 +482,8 @@ decorator_ignore_file (GFile                   *file,
 	g_autoptr (GError) error = NULL, info_error = NULL;
 	g_autofree gchar *uri = NULL;
 	g_autoptr (GFileInfo) info = NULL;
+	const gchar *hash = NULL;
+	gboolean removed_hash = FALSE;
 
 	priv = tracker_extract_decorator_get_instance_private (decorator);
 
@@ -482,26 +496,29 @@ decorator_ignore_file (GFile                   *file,
 	                          NULL, &info_error);
 
 	if (info) {
-		const gchar *mimetype, *hash;
-
-		tracker_error_report (file, error_message, extra_info);
+		const gchar *mimetype;
 
 		mimetype = g_file_info_get_attribute_string (info,
 		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
 		hash = tracker_extract_module_manager_get_hash (mimetype);
+	}
+
+	if (hash) {
+		tracker_error_report (file, error_message, extra_info);
 
 		tracker_sparql_statement_bind_string (priv->update_hash, "file", uri);
 		tracker_sparql_statement_bind_string (priv->update_hash, "hash", hash);
 
-		tracker_sparql_statement_update (priv->update_hash, NULL, &error);
-	} else {
-		g_debug ("Could not get mimetype: %s", info_error->message);
+		removed_hash = tracker_sparql_statement_update (priv->update_hash, NULL, &error);
+	}
 
-		if (g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+	if (!removed_hash) {
+		if (!info_error || g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
 			tracker_error_report_delete (file);
 		else
 			tracker_error_report (file, info_error->message, NULL);
 
+		g_clear_error (&error);
 		tracker_sparql_statement_bind_string (priv->delete_file, "file", uri);
 		tracker_sparql_statement_update (priv->delete_file, NULL, &error);
 	}
@@ -510,15 +527,6 @@ decorator_ignore_file (GFile                   *file,
 		g_warning ("Failed to update ignored file '%s': %s",
 		           uri, error->message);
 	}
-}
-
-static void
-persistence_ignore_file (GFile    *file,
-                         gpointer  user_data)
-{
-	TrackerExtractDecorator *decorator = user_data;
-
-	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
 }
 
 static void
@@ -541,9 +549,6 @@ tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 	TrackerExtractDecoratorPrivate *priv;
 
 	priv = tracker_extract_decorator_get_instance_private (decorator);
-
-	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
-	                                                            decorator);
 
 	priv->volume_monitor = g_volume_monitor_get ();
 	g_signal_connect_object (priv->volume_monitor, "mount-added",
