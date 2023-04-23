@@ -735,10 +735,11 @@ query_execute_cb (TrackerSparqlStatement *statement,
 				    uri, error->message);
 			g_free (uri);
 			g_error_free (error);
+
+			/* Move on to next root */
+			finish_current_directory (notifier, TRUE);
 		}
 
-		/* Move on to next root */
-		finish_current_directory (notifier, TRUE);
 		return;
 	}
 
