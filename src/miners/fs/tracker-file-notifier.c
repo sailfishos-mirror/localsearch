@@ -74,13 +74,16 @@ typedef struct {
 
 typedef struct {
 	TrackerFileNotifier *notifier;
+	TrackerSparqlCursor *cursor;
 	GFile *root;
+	GCancellable *cancellable;
 	GHashTable *cache;
 	GQueue queue;
 	GFile *current_dir;
 	GQueue *pending_dirs;
 	GTimer *timer;
 	guint flags;
+	guint cursor_idle_id;
 	guint directories_found;
 	guint directories_ignored;
 	guint files_found;
@@ -113,6 +116,8 @@ typedef struct {
 	guint high_water : 1;
 	guint active : 1;
 } TrackerFileNotifierPrivate;
+
+#define N_CURSOR_BATCH_ITEMS 200
 
 static gboolean tracker_index_root_query_contents (TrackerIndexRoot *root);
 static gboolean tracker_index_root_crawl_next (TrackerIndexRoot *root);
@@ -225,6 +230,9 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	g_queue_clear (&data->queue);
 	g_hash_table_destroy (data->cache);
 	g_clear_object (&data->current_dir);
+	g_clear_object (&data->cursor);
+	g_clear_handle_id (&data->cursor_idle_id, g_source_remove);
+	g_clear_object (&data->cancellable);
 	g_object_unref (data->root);
 	g_free (data);
 }
@@ -701,38 +709,24 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 	return priv->deleted_query;
 }
 
-static void
-query_execute_cb (TrackerSparqlStatement *statement,
-                  GAsyncResult           *res,
-                  TrackerIndexRoot       *root)
+static gboolean
+handle_cursor (TrackerIndexRoot *root)
 {
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
+	TrackerSparqlCursor *cursor = root->cursor;
+	GCancellable *cancellable = root->cancellable;
+	g_autoptr (GError) error = NULL;
+	gboolean finished = TRUE;
+	int i;
 
-	cursor = tracker_sparql_statement_execute_finish (statement, res, &error);
-
-	if (!cursor) {
-		gchar *uri;
-
-		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			uri = g_file_get_uri (root->root);
-			g_critical ("Could not query contents for indexed folder '%s': %s",
-				    uri, error->message);
-			g_free (uri);
-
-			tracker_file_notifier_emit_directory_finished (root->notifier,
-			                                               root);
-		}
-
-		g_clear_error (&error);
-		return;
-	}
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+	for (i = 0; i < N_CURSOR_BATCH_ITEMS; i++) {
 		const gchar *time_str, *folder_urn, *uri;
 		GFileType file_type;
 		GFile *file;
 		guint64 _time;
+
+		finished = !tracker_sparql_cursor_next (cursor, cancellable, &error);
+		if (finished)
+			break;
 
 		uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 		folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
@@ -752,9 +746,53 @@ query_execute_cb (TrackerSparqlStatement *statement,
 		g_object_unref (file);
 	}
 
-	g_object_unref (cursor);
+	if (finished) {
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return G_SOURCE_REMOVE;
 
-	tracker_index_root_continue (root);
+		if (error) {
+			g_autofree gchar *uri = NULL;
+
+			uri = g_file_get_uri (root->root);
+			g_critical ("Error iterating cursor for indexed folder '%s': %s",
+			            uri, error->message);
+		}
+
+		root->cursor_idle_id = 0;
+		tracker_index_root_continue (root);
+	}
+
+	return finished ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE;
+}
+
+static void
+query_execute_cb (TrackerSparqlStatement *statement,
+                  GAsyncResult           *res,
+                  TrackerIndexRoot       *root)
+{
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
+
+	cursor = tracker_sparql_statement_execute_finish (statement, res, &error);
+
+	if (!cursor) {
+		if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			g_autofree gchar *uri = NULL;
+
+			uri = g_file_get_uri (root->root);
+			g_critical ("Could not query contents for indexed folder '%s': %s",
+			            uri, error->message);
+
+			tracker_file_notifier_emit_directory_finished (root->notifier,
+			                                               root);
+		}
+
+		return;
+	}
+
+	root->cursor = g_steal_pointer (&cursor);
+	root->cursor_idle_id =
+		g_idle_add ((GSourceFunc) handle_cursor, root);
 }
 
 static gboolean
@@ -768,9 +806,9 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	if (priv->cancellable)
-		g_object_unref (priv->cancellable);
-	priv->cancellable = g_cancellable_new ();
+	if (!root->cancellable)
+		root->cancellable = g_cancellable_new ();
+	g_set_object (&priv->cancellable, root->cancellable);
 
 	directory = root->root;
 	flags = root->flags;
@@ -792,7 +830,7 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	priv->active = TRUE;
 
 	tracker_sparql_statement_execute_async (priv->content_query,
-	                                        priv->cancellable,
+	                                        root->cancellable,
 	                                        (GAsyncReadyCallback) query_execute_cb,
 	                                        root);
 	return TRUE;
