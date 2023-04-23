@@ -709,6 +709,32 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 	return priv->deleted_query;
 }
 
+static void
+handle_file_from_cursor (TrackerIndexRoot    *root,
+                         TrackerSparqlCursor *cursor)
+{
+	const gchar *folder_urn, *uri;
+	GFileType file_type;
+	g_autoptr (GFile) file = NULL;
+	g_autoptr (GDateTime) datetime = NULL;
+	gint64 _time;
+
+	uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+	datetime = tracker_sparql_cursor_get_datetime (cursor, 2);
+
+	file = g_file_new_for_uri (uri);
+	_time = g_date_time_to_unix (datetime);
+	file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
+
+	_insert_store_info (root,
+	                    file,
+	                    file_type,
+	                    tracker_sparql_cursor_get_string (cursor, 3, NULL),
+	                    tracker_sparql_cursor_get_string (cursor, 4, NULL),
+	                    _time);
+}
+
 static gboolean
 handle_cursor (TrackerIndexRoot *root)
 {
@@ -719,31 +745,11 @@ handle_cursor (TrackerIndexRoot *root)
 	int i;
 
 	for (i = 0; i < N_CURSOR_BATCH_ITEMS; i++) {
-		const gchar *time_str, *folder_urn, *uri;
-		GFileType file_type;
-		GFile *file;
-		guint64 _time;
-
 		finished = !tracker_sparql_cursor_next (cursor, cancellable, &error);
 		if (finished)
 			break;
 
-		uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-		time_str = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-
-		file = g_file_new_for_uri (uri);
-		_time = tracker_string_to_date (time_str, NULL, &error);
-		file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
-
-		_insert_store_info (root,
-		                    file,
-		                    file_type,
-		                    tracker_sparql_cursor_get_string (cursor, 3, NULL),
-		                    tracker_sparql_cursor_get_string (cursor, 4, NULL),
-		                    _time);
-
-		g_object_unref (file);
+		handle_file_from_cursor (root, cursor);
 	}
 
 	if (finished) {
