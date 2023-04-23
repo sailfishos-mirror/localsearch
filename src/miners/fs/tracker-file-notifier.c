@@ -553,6 +553,7 @@ static gboolean
 crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 {
 	TrackerFileNotifierPrivate *priv;
+	TrackerDirectoryFlags flags;
 	GFile *directory;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -564,33 +565,29 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 
 	if (!priv->current_index_root)
 		return FALSE;
+	if (g_queue_is_empty (priv->current_index_root->pending_dirs))
+		return FALSE;
 
-	while (!g_queue_is_empty (priv->current_index_root->pending_dirs)) {
-		TrackerDirectoryFlags flags;
+	directory = g_queue_pop_head (priv->current_index_root->pending_dirs);
+	g_set_object (&priv->current_index_root->current_dir, directory);
 
-		directory = g_queue_pop_head (priv->current_index_root->pending_dirs);
-		g_set_object (&priv->current_index_root->current_dir, directory);
+	tracker_indexing_tree_get_root (priv->indexing_tree,
+	                                directory, &flags);
 
-		tracker_indexing_tree_get_root (priv->indexing_tree,
-		                                directory, &flags);
+	if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
+		tracker_monitor_add (priv->monitor, directory);
 
-		if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
-			tracker_monitor_add (priv->monitor, directory);
+	priv->active = TRUE;
 
-		priv->active = TRUE;
-
-		/* Begin crawling the directory non-recursively. */
-		tracker_crawler_get (priv->crawler,
-		                     directory,
-		                     priv->current_index_root->flags,
-		                     priv->cancellable,
-		                     (GAsyncReadyCallback) crawler_get_cb,
-		                     notifier);
-		g_object_unref (directory);
-		return TRUE;
-	}
-
-	return FALSE;
+	/* Begin crawling the directory non-recursively. */
+	tracker_crawler_get (priv->crawler,
+	                     directory,
+	                     priv->current_index_root->flags,
+	                     priv->cancellable,
+	                     (GAsyncReadyCallback) crawler_get_cb,
+	                     notifier);
+	g_object_unref (directory);
+	return TRUE;
 }
 
 static void
