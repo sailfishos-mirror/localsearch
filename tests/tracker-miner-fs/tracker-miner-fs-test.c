@@ -236,17 +236,19 @@ fixture_setup (TrackerMinerFSTestFixture *fixture,
                gconstpointer              data)
 {
 	GError *error = NULL;
-	GFile *ontology;
+	GFile *ontology, *db;
 	gchar *path;
 
 	path = g_build_filename (g_get_tmp_dir (), "tracker-miner-fs-test-XXXXXX", NULL);
 	fixture->test_root_path = g_mkdtemp_full (path, 0700);
 	fixture->test_root = g_file_new_for_path (fixture->test_root_path);
 
+	db = g_file_get_child (fixture->test_root, ".db");
 	ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
-	fixture->connection = tracker_sparql_connection_new (0, NULL, ontology, NULL, &error);
+	fixture->connection = tracker_sparql_connection_new (0, db, ontology, NULL, &error);
 	g_assert_no_error (error);
 	g_object_unref (ontology);
+	g_object_unref (db);
 
 	tracker_sparql_connection_update (fixture->connection,
 					  "CREATE SILENT GRAPH tracker:FileSystem; "
