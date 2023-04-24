@@ -1984,7 +1984,11 @@ miner_files_move_file (TrackerMinerFS      *fs,
                        TrackerSparqlBuffer *buffer,
                        gboolean             recursive)
 {
-	tracker_sparql_buffer_log_move (buffer, source_file, file);
+	const gchar *data_source;
+
+	data_source = tracker_miner_fs_get_identifier (fs, file);
+	tracker_sparql_buffer_log_move (buffer, source_file, file,
+	                                data_source);
 
 	if (recursive)
 		tracker_sparql_buffer_log_move_content (buffer, source_file, file);
