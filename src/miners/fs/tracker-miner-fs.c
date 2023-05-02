@@ -97,6 +97,7 @@ typedef struct {
 	GFile *dest_file;
 	GFileInfo *info;
 	GList *root_node;
+	GList *queue_node;
 } QueueEvent;
 
 typedef struct {
@@ -1556,7 +1557,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		      QueueEvent     *event,
 		      guint           priority)
 {
-	GList *old = NULL, *link = NULL;
+	GList *old = NULL;
 
 	if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
 		/* Remove all children of the dest location from being processed. */
@@ -1612,8 +1613,9 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		trace_eq_event (event);
 
 		assign_root_node (fs, event);
-		link = tracker_priority_queue_add (fs->priv->items, event, priority);
-		g_hash_table_replace (fs->priv->items_by_file, event->file, link);
+		event->queue_node =
+			tracker_priority_queue_add (fs->priv->items, event, priority);
+		g_hash_table_replace (fs->priv->items_by_file, event->file, event->queue_node);
 		item_queue_handlers_set_up (fs);
 		check_notifier_high_water (fs);
 	}
