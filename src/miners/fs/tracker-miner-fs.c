@@ -442,8 +442,9 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	priv->extraction_timer_stopped = TRUE;
 
 	priv->items = tracker_priority_queue_new ();
-	priv->items_by_file = g_hash_table_new (g_file_hash,
-	                                        (GEqualFunc) g_file_equal);
+	priv->items_by_file = g_hash_table_new_full (g_file_hash,
+	                                             (GEqualFunc) g_file_equal,
+	                                             g_object_unref, NULL);
 
 	priv->roots_to_notify = g_hash_table_new_full (g_file_hash,
 	                                               (GEqualFunc) g_file_equal,
@@ -1187,10 +1188,11 @@ remove_items_by_file_foreach (gpointer key,
                               gpointer value,
                               gpointer user_data)
 {
-	QueueEvent *event = value;
+	GFile *file = key;
 	GFile *prefix = user_data;
 
-	return queue_event_is_equal_or_descendant (event, file);
+	return (g_file_equal (file, prefix) ||
+	        g_file_has_prefix (file, prefix));
 }
 
 static void
@@ -1614,7 +1616,8 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		assign_root_node (fs, event);
 		event->queue_node =
 			tracker_priority_queue_add (fs->priv->items, event, priority);
-		g_hash_table_replace (fs->priv->items_by_file, event->file, event);
+		g_hash_table_replace (fs->priv->items_by_file,
+		                      g_object_ref (event->file), event);
 		item_queue_handlers_set_up (fs);
 		check_notifier_high_water (fs);
 	}
