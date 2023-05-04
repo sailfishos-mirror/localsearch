@@ -265,6 +265,7 @@ decorator_commit_cb (GObject      *object,
 	TrackerDecoratorPrivate *priv;
 	TrackerDecorator *decorator;
 	TrackerBatch *batch;
+	g_autoptr (GError) error = NULL;
 
 	decorator = user_data;
 	priv = tracker_decorator_get_instance_private (decorator);
@@ -272,7 +273,10 @@ decorator_commit_cb (GObject      *object,
 
 	priv->updating = FALSE;
 
-	if (!tracker_batch_execute_finish (batch, result, NULL)) {
+	if (!tracker_batch_execute_finish (batch, result, &error)) {
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return;
+
 		g_debug ("SPARQL error detected in batch, retrying one by one");
 		retry_synchronously (decorator, priv->commit_buffer);
 	} else {
