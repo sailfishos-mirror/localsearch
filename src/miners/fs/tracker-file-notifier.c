@@ -73,6 +73,7 @@ typedef struct {
 } TrackerFileData;
 
 typedef struct {
+	TrackerFileNotifier *notifier;
 	GFile *root;
 	GFile *current_dir;
 	GQueue *pending_dirs;
@@ -83,7 +84,7 @@ typedef struct {
 	guint files_ignored;
 	guint current_dir_content_filtered : 1;
 	guint ignore_root                  : 1;
-} RootData;
+} TrackerIndexRoot;
 
 typedef struct {
 	TrackerIndexingTree *indexing_tree;
@@ -107,7 +108,7 @@ typedef struct {
 	 * trees to get data from
 	 */
 	GList *pending_index_roots;
-	RootData *current_index_root;
+	TrackerIndexRoot *current_index_root;
 
 	guint stopped : 1;
 	guint high_water : 1;
@@ -179,15 +180,16 @@ tracker_file_notifier_get_property (GObject    *object,
 	}
 }
 
-static RootData *
-root_data_new (TrackerFileNotifier *notifier,
-               GFile               *file,
-               guint                flags,
-               gboolean             ignore_root)
+static TrackerIndexRoot *
+tracker_index_root_new (TrackerFileNotifier *notifier,
+                        GFile               *file,
+                        guint                flags,
+                        gboolean             ignore_root)
 {
-	RootData *data;
+	TrackerIndexRoot *data;
 
-	data = g_new0 (RootData, 1);
+	data = g_new0 (TrackerIndexRoot, 1);
+	data->notifier = notifier;
 	data->root = g_object_ref (file);
 	data->pending_dirs = g_queue_new ();
 	data->flags = flags;
@@ -199,12 +201,10 @@ root_data_new (TrackerFileNotifier *notifier,
 }
 
 static void
-root_data_free (RootData *data)
+tracker_index_root_free (TrackerIndexRoot *data)
 {
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
-	if (data->current_dir) {
-		g_object_unref (data->current_dir);
-	}
+	g_clear_object (&data->current_dir);
 	g_object_unref (data->root);
 	g_free (data);
 }
@@ -630,17 +630,17 @@ finish_current_directory (TrackerFileNotifier *notifier,
 		                         priv->current_index_root->files_ignored));
 
 		if (!interrupted) {
-			g_clear_pointer (&priv->current_index_root, root_data_free);
+			g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
 			notifier_check_next_root (notifier);
 		}
 	}
 }
 
 static gboolean
-root_data_remove_directory (RootData *data,
-			    GFile    *directory)
+tracker_index_root_remove_directory (TrackerIndexRoot *root,
+                                     GFile            *directory)
 {
-	GList *l = data->pending_dirs->head, *next;
+	GList *l = root->pending_dirs->head, *next;
 	GFile *file;
 
 	while (l) {
@@ -649,28 +649,28 @@ root_data_remove_directory (RootData *data,
 
 		if (g_file_equal (file, directory) ||
 		    g_file_has_prefix (file, directory)) {
-			g_queue_remove (data->pending_dirs, file);
+			g_queue_remove (root->pending_dirs, file);
 			g_object_unref (file);
 		}
 
 		l = next;
 	}
 
-	return (data->current_dir &&
-		(g_file_equal (data->current_dir, directory) ||
-		 g_file_has_prefix (data->current_dir, directory)));
+	return (root->current_dir &&
+		(g_file_equal (root->current_dir, directory) ||
+		 g_file_has_prefix (root->current_dir, directory)));
 }
 
 static void
 file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier,
-						   GFile               *file)
+                                                   GFile               *file)
 {
 	TrackerFileNotifierPrivate *priv;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (priv->current_index_root &&
-	    root_data_remove_directory (priv->current_index_root, file)) {
+	    tracker_index_root_remove_directory (priv->current_index_root, file)) {
 		g_cancellable_cancel (priv->cancellable);
 
 		if (!crawl_directory_in_current_root (notifier))
@@ -814,7 +814,7 @@ notifier_query_root_contents (TrackerFileNotifier *notifier)
 		}
 
 		/* Move on to next root */
-		g_clear_pointer (&priv->current_index_root, root_data_free);
+		g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
 		notifier_check_next_root (notifier);
 		return TRUE;
 	}
@@ -836,10 +836,10 @@ notifier_query_root_contents (TrackerFileNotifier *notifier)
 }
 
 static gint
-find_directory_root (RootData *data,
-                     GFile    *file)
+find_directory_root (TrackerIndexRoot *root,
+                     GFile            *file)
 {
-	if (g_file_equal (data->root, file))
+	if (g_file_equal (root->root, file))
 		return 0;
 
 	return -1;
@@ -852,7 +852,7 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
                      gboolean               ignore_root)
 {
 	TrackerFileNotifierPrivate *priv;
-	RootData *data;
+	TrackerIndexRoot *root;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
@@ -864,12 +864,12 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 	                        (GCompareFunc) find_directory_root))
 		return;
 
-	data = root_data_new (notifier, file, flags, ignore_root);
+	root = tracker_index_root_new (notifier, file, flags, ignore_root);
 
 	if (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) {
-		priv->pending_index_roots = g_list_prepend (priv->pending_index_roots, data);
+		priv->pending_index_roots = g_list_prepend (priv->pending_index_roots, root);
 	} else {
-		priv->pending_index_roots = g_list_append (priv->pending_index_roots, data);
+		priv->pending_index_roots = g_list_append (priv->pending_index_roots, root);
 	}
 
 	if (!priv->current_index_root)
@@ -1315,7 +1315,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	                           (GCompareFunc) find_directory_root);
 
 	if (elem) {
-		root_data_free (elem->data);
+		tracker_index_root_free (elem->data);
 		priv->pending_index_roots =
 			g_list_delete_link (priv->pending_index_roots, elem);
 	}
@@ -1325,7 +1325,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 		/* Directory being currently processed */
 		g_cancellable_cancel (priv->cancellable);
 		finish_current_directory (notifier, TRUE);
-		g_clear_pointer (&priv->current_index_root, root_data_free);
+		g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1405,9 +1405,9 @@ tracker_file_notifier_finalize (GObject *object)
 	g_object_unref (priv->monitor);
 	g_clear_object (&priv->connection);
 
-	g_clear_pointer (&priv->current_index_root, root_data_free);
+	g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
 
-	g_list_foreach (priv->pending_index_roots, (GFunc) root_data_free, NULL);
+	g_list_foreach (priv->pending_index_roots, (GFunc) tracker_index_root_free, NULL);
 	g_list_free (priv->pending_index_roots);
 	g_timer_destroy (priv->timer);
 
