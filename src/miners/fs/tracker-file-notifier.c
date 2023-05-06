@@ -82,8 +82,7 @@ typedef struct {
 	guint directories_ignored;
 	guint files_found;
 	guint files_ignored;
-	guint current_dir_content_filtered : 1;
-	guint ignore_root                  : 1;
+	guint ignore_root : 1;
 } TrackerIndexRoot;
 
 typedef struct {
@@ -265,10 +264,8 @@ check_directory_contents (TrackerFileNotifier *notifier,
 		                                                     parent, (GList*) children);
 	}
 
-	if (!process) {
-		priv->current_index_root->current_dir_content_filtered = TRUE;
+	if (!process)
 		tracker_monitor_remove (priv->monitor, parent);
-	}
 
 	return process;
 }
