@@ -79,6 +79,7 @@ typedef struct {
 	GQueue queue;
 	GFile *current_dir;
 	GQueue *pending_dirs;
+	GTimer *timer;
 	guint flags;
 	guint directories_found;
 	guint directories_ignored;
@@ -100,7 +101,6 @@ typedef struct {
 	TrackerSparqlStatement *content_query;
 	TrackerSparqlStatement *deleted_query;
 
-	GTimer *timer;
 	gchar *file_attributes;
 
 	/* List of pending directory
@@ -205,6 +205,7 @@ tracker_index_root_new (TrackerFileNotifier *notifier,
 	data->pending_dirs = g_queue_new ();
 	data->flags = flags;
 	data->ignore_root = ignore_root;
+	data->timer = g_timer_new ();
 
 	g_queue_init (&data->queue);
 	data->cache = g_hash_table_new_full (g_file_hash,
@@ -221,6 +222,7 @@ static void
 tracker_index_root_free (TrackerIndexRoot *data)
 {
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
+	g_timer_destroy (data->timer);
 	g_queue_clear (&data->queue);
 	g_hash_table_destroy (data->cache);
 	g_clear_object (&data->current_dir);
@@ -599,10 +601,6 @@ static void
 tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
                                                TrackerIndexRoot    *root)
 {
-	TrackerFileNotifierPrivate *priv;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-
 	g_signal_emit (notifier, signals[DIRECTORY_FINISHED], 0,
 	               root->root,
 	               root->directories_found,
@@ -612,7 +610,7 @@ tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
 
 	TRACKER_NOTE (STATISTICS,
 	              g_message ("  Notified files after %2.2f seconds",
-	                         g_timer_elapsed (priv->timer, NULL)));
+	                         g_timer_elapsed (root->timer, NULL)));
 	TRACKER_NOTE (STATISTICS,
 	              g_message ("  Found %d directories, ignored %d directories",
 	                         root->directories_found,
@@ -805,7 +803,7 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 		return FALSE;
 	}
 
-	g_timer_reset (priv->timer);
+	g_timer_reset (root->timer);
 	g_signal_emit (notifier, signals[DIRECTORY_STARTED], 0, directory);
 
 	uri = g_file_get_uri (directory);
@@ -1384,7 +1382,6 @@ tracker_file_notifier_finalize (GObject *object)
 
 	g_list_foreach (priv->pending_index_roots, (GFunc) tracker_index_root_free, NULL);
 	g_list_free (priv->pending_index_roots);
-	g_timer_destroy (priv->timer);
 
 	G_OBJECT_CLASS (tracker_file_notifier_parent_class)->finalize (object);
 }
@@ -1629,7 +1626,6 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 	GError *error = NULL;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	priv->timer = g_timer_new ();
 	priv->stopped = TRUE;
 
 	/* Set up monitor */
