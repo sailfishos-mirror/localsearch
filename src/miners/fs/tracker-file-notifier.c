@@ -495,27 +495,27 @@ crawler_get_cb (TrackerCrawler   *crawler,
 	                                 &files_found,
 	                                 &files_ignored,
 	                                 &error)) {
-		gboolean interrupted;
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			/* Nothing to do */
+			g_clear_error (&error);
+		} else {
+			if (error &&
+			    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+			    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
+				gchar *uri;
 
-		interrupted = error &&
-			g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED);
+				uri = g_file_get_uri (directory);
+				g_warning ("Got error crawling '%s': %s\n",
+				           uri, error->message);
+				g_free (uri);
+			}
 
-		if (error &&
-		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED) &&
-		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
-		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
-			gchar *uri;
+			g_clear_error (&error);
 
-			uri = g_file_get_uri (directory);
-			g_warning ("Got error crawling '%s': %s\n",
-			           uri, error->message);
-			g_free (uri);
+			if (!tracker_index_root_crawl_next (root))
+				finish_current_directory (notifier, FALSE);
 		}
 
-		if (!interrupted && !tracker_index_root_crawl_next (root))
-			finish_current_directory (notifier, FALSE);
-
-		g_clear_error (&error);
 		return;
 	}
 
