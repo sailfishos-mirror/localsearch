@@ -116,8 +116,7 @@ typedef struct {
 
 static gboolean tracker_index_root_query_contents (TrackerIndexRoot *root);
 static gboolean tracker_index_root_crawl_next (TrackerIndexRoot *root);
-static void finish_current_directory (TrackerFileNotifier *notifier,
-                                      gboolean             interrupted);
+static void tracker_index_root_continue (TrackerIndexRoot *root);
 
 static TrackerSparqlStatement * sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
                                                                   GError              **error);
@@ -322,13 +321,14 @@ notifier_check_next_root (TrackerFileNotifier *notifier)
 	TrackerFileNotifierPrivate *priv;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	g_assert (priv->current_index_root == NULL);
 
 	if (priv->stopped)
 		return FALSE;
 
 	if (!sparql_contents_ensure_statement (notifier, NULL))
 		return FALSE;
+
+	g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
 
 	while (priv->pending_index_roots) {
 		priv->current_index_root = priv->pending_index_roots->data;
@@ -481,7 +481,6 @@ crawler_get_cb (TrackerCrawler   *crawler,
                 GAsyncResult     *result,
                 TrackerIndexRoot *root)
 {
-	TrackerFileNotifier *notifier = root->notifier;
 	guint directories_found, directories_ignored;
 	guint files_found, files_ignored;
 	GFile *directory;
@@ -514,8 +513,7 @@ crawler_get_cb (TrackerCrawler   *crawler,
 
 			g_clear_error (&error);
 
-			if (!tracker_index_root_crawl_next (root))
-				finish_current_directory (notifier, FALSE);
+			tracker_index_root_continue (root);
 		}
 
 		return;
@@ -533,8 +531,7 @@ crawler_get_cb (TrackerCrawler   *crawler,
 	root->files_found += files_found;
 	root->files_ignored += files_ignored;
 
-	if (!tracker_index_root_crawl_next (root))
-		finish_current_directory (notifier, FALSE);
+	tracker_index_root_continue (root);
 }
 
 static void
@@ -622,27 +619,14 @@ tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
 }
 
 static void
-finish_current_directory (TrackerFileNotifier *notifier,
-                          gboolean             interrupted)
+tracker_index_root_continue (TrackerIndexRoot *root)
 {
-	TrackerFileNotifierPrivate *priv;
-	TrackerIndexRoot *root;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-
-	root = priv->current_index_root;
-	if (!root)
+	if (tracker_index_root_crawl_next (root))
 		return;
 
-	if (!interrupted)
-		tracker_index_root_notify_changes (root);
-
-	tracker_file_notifier_emit_directory_finished (notifier, root);
-
-	if (!interrupted) {
-		g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
-		notifier_check_next_root (notifier);
-	}
+	tracker_index_root_notify_changes (root);
+	tracker_file_notifier_emit_directory_finished (root->notifier, root);
+	notifier_check_next_root (root->notifier);
 }
 
 static gboolean
@@ -681,9 +665,7 @@ file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier
 	if (priv->current_index_root &&
 	    tracker_index_root_remove_directory (priv->current_index_root, file)) {
 		g_cancellable_cancel (priv->cancellable);
-
-		if (!tracker_index_root_crawl_next (priv->current_index_root))
-			finish_current_directory (notifier, FALSE);
+		tracker_index_root_continue (priv->current_index_root);
 	}
 }
 
@@ -737,12 +719,12 @@ query_execute_cb (TrackerSparqlStatement *statement,
 			g_critical ("Could not query contents for indexed folder '%s': %s",
 				    uri, error->message);
 			g_free (uri);
-			g_error_free (error);
 
-			/* Move on to next root */
-			finish_current_directory (root->notifier, TRUE);
+			tracker_file_notifier_emit_directory_finished (root->notifier,
+			                                               root);
 		}
 
+		g_clear_error (&error);
 		return;
 	}
 
@@ -772,9 +754,7 @@ query_execute_cb (TrackerSparqlStatement *statement,
 
 	g_object_unref (cursor);
 
-	if (!tracker_index_root_crawl_next (root)) {
-		finish_current_directory (root->notifier, FALSE);
-	}
+	tracker_index_root_continue (root);
 }
 
 static gboolean
@@ -1299,8 +1279,8 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	    g_file_equal (directory, priv->current_index_root->root)) {
 		/* Directory being currently processed */
 		g_cancellable_cancel (priv->cancellable);
-		finish_current_directory (notifier, TRUE);
-		g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
+		tracker_file_notifier_emit_directory_finished (notifier,
+		                                               priv->current_index_root);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1686,9 +1666,10 @@ tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
 	if (!high_water && !priv->active &&
 	    tracker_file_notifier_is_active (notifier)) {
 		/* Maybe kick everything back into action */
-		if (!priv->current_index_root ||
-		    !tracker_index_root_crawl_next (priv->current_index_root))
-			finish_current_directory (notifier, FALSE);
+		if (priv->current_index_root)
+			tracker_index_root_continue (priv->current_index_root);
+		else
+			notifier_check_next_root (notifier);
 	}
 }
 
@@ -1704,12 +1685,10 @@ tracker_file_notifier_start (TrackerFileNotifier *notifier)
 	if (priv->stopped) {
 		priv->stopped = FALSE;
 
-		if (priv->current_index_root) {
-			if (!tracker_index_root_crawl_next (priv->current_index_root))
-				finish_current_directory (notifier, FALSE);
-		} else {
+		if (priv->current_index_root)
+			tracker_index_root_continue (priv->current_index_root);
+		else
 			notifier_check_next_root (notifier);
-		}
 	}
 
 	return TRUE;
