@@ -115,7 +115,7 @@ typedef struct {
 } TrackerFileNotifierPrivate;
 
 static gboolean tracker_index_root_query_contents (TrackerIndexRoot *root);
-static gboolean crawl_directory_in_current_root (TrackerFileNotifier *notifier);
+static gboolean tracker_index_root_crawl_next (TrackerIndexRoot *root);
 static void finish_current_directory (TrackerFileNotifier *notifier,
                                       gboolean             interrupted);
 
@@ -475,13 +475,11 @@ file_notifier_add_node_foreach (GNode    *node,
 }
 
 static void
-crawler_get_cb (TrackerCrawler *crawler,
-                GAsyncResult   *result,
-                gpointer        user_data)
+crawler_get_cb (TrackerCrawler   *crawler,
+                GAsyncResult     *result,
+                TrackerIndexRoot *root)
 {
-	TrackerFileNotifier *notifier = user_data;
-	TrackerFileNotifierPrivate *priv =
-		tracker_file_notifier_get_instance_private (notifier);
+	TrackerFileNotifier *notifier = root->notifier;
 	guint directories_found, directories_ignored;
 	guint files_found, files_ignored;
 	GFile *directory;
@@ -514,7 +512,7 @@ crawler_get_cb (TrackerCrawler *crawler,
 			g_free (uri);
 		}
 
-		if (!interrupted && !crawl_directory_in_current_root (notifier))
+		if (!interrupted && !tracker_index_root_crawl_next (root))
 			finish_current_directory (notifier, FALSE);
 
 		g_clear_error (&error);
@@ -526,14 +524,14 @@ crawler_get_cb (TrackerCrawler *crawler,
 	                 G_TRAVERSE_ALL,
 	                 -1,
 	                 file_notifier_add_node_foreach,
-	                 priv->current_index_root);
+	                 root);
 
-	priv->current_index_root->directories_found += directories_found;
-	priv->current_index_root->directories_ignored += directories_ignored;
-	priv->current_index_root->files_found += files_found;
-	priv->current_index_root->files_ignored += files_ignored;
+	root->directories_found += directories_found;
+	root->directories_ignored += directories_ignored;
+	root->files_found += files_found;
+	root->files_ignored += files_ignored;
 
-	if (!crawl_directory_in_current_root (notifier))
+	if (!tracker_index_root_crawl_next (root))
 		finish_current_directory (notifier, FALSE);
 }
 
@@ -557,12 +555,14 @@ _insert_store_info (TrackerIndexRoot *root,
 }
 
 static gboolean
-crawl_directory_in_current_root (TrackerFileNotifier *notifier)
+tracker_index_root_crawl_next (TrackerIndexRoot *root)
 {
+	TrackerFileNotifier *notifier;
 	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
 	GFile *directory;
 
+	notifier = root->notifier;
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (priv->high_water) {
@@ -570,13 +570,11 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 		return TRUE;
 	}
 
-	if (!priv->current_index_root)
-		return FALSE;
-	if (g_queue_is_empty (priv->current_index_root->pending_dirs))
+	if (g_queue_is_empty (root->pending_dirs))
 		return FALSE;
 
-	directory = g_queue_pop_head (priv->current_index_root->pending_dirs);
-	g_set_object (&priv->current_index_root->current_dir, directory);
+	directory = g_queue_pop_head (root->pending_dirs);
+	g_set_object (&root->current_dir, directory);
 
 	tracker_indexing_tree_get_root (priv->indexing_tree,
 	                                directory, &flags);
@@ -592,7 +590,7 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 	                     priv->current_index_root->flags,
 	                     priv->cancellable,
 	                     (GAsyncReadyCallback) crawler_get_cb,
-	                     notifier);
+	                     root);
 	g_object_unref (directory);
 	return TRUE;
 }
@@ -686,7 +684,7 @@ file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier
 	    tracker_index_root_remove_directory (priv->current_index_root, file)) {
 		g_cancellable_cancel (priv->cancellable);
 
-		if (!crawl_directory_in_current_root (notifier))
+		if (!tracker_index_root_crawl_next (priv->current_index_root))
 			finish_current_directory (notifier, FALSE);
 	}
 }
@@ -776,7 +774,7 @@ query_execute_cb (TrackerSparqlStatement *statement,
 
 	g_object_unref (cursor);
 
-	if (!crawl_directory_in_current_root (root->notifier)) {
+	if (!tracker_index_root_crawl_next (root)) {
 		finish_current_directory (root->notifier, FALSE);
 	}
 }
@@ -1692,7 +1690,8 @@ tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
 	if (!high_water && !priv->active &&
 	    tracker_file_notifier_is_active (notifier)) {
 		/* Maybe kick everything back into action */
-		if (!crawl_directory_in_current_root (notifier))
+		if (!priv->current_index_root ||
+		    !tracker_index_root_crawl_next (priv->current_index_root))
 			finish_current_directory (notifier, FALSE);
 	}
 }
@@ -1710,7 +1709,7 @@ tracker_file_notifier_start (TrackerFileNotifier *notifier)
 		priv->stopped = FALSE;
 
 		if (priv->current_index_root) {
-			if (!crawl_directory_in_current_root (notifier))
+			if (!tracker_index_root_crawl_next (priv->current_index_root))
 				finish_current_directory (notifier, FALSE);
 		} else {
 			notifier_check_next_root (notifier);
