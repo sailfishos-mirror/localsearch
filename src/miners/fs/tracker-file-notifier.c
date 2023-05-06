@@ -630,17 +630,11 @@ finish_current_directory (TrackerFileNotifier *notifier,
 		file_notifier_traverse_tree (notifier);
 	}
 
+	tracker_file_notifier_emit_directory_finished (notifier, priv->current_index_root);
 
-	if (interrupted || !crawl_directory_in_current_root (notifier)) {
-		/* No more directories left to be crawled in the current
-		 * root, jump to the next one.
-		 */
-		tracker_file_notifier_emit_directory_finished (notifier, priv->current_index_root);
-
-		if (!interrupted) {
-			g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
-			notifier_check_next_root (notifier);
-		}
+	if (!interrupted) {
+		g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
+		notifier_check_next_root (notifier);
 	}
 }
 
