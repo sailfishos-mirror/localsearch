@@ -271,16 +271,12 @@ check_directory_contents (TrackerFileNotifier *notifier,
 }
 
 static gboolean
-file_notifier_notify (GFile           *file,
-                      TrackerFileData *file_data,
-                      gpointer         user_data)
+tracker_file_notifier_notify (TrackerFileNotifier *notifier,
+                              TrackerFileData     *file_data,
+                              GFileInfo           *info)
 {
-	TrackerFileNotifier *notifier;
-	TrackerFileNotifierPrivate *priv;
+	GFile *file = file_data->file;
 	gboolean stop = FALSE;
-
-	notifier = user_data;
-	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (file_data->state == FILE_STATE_DELETE) {
 		/* In store but not in disk, delete */
@@ -289,13 +285,10 @@ file_notifier_notify (GFile           *file,
 		stop = TRUE;
 	} else if (file_data->state == FILE_STATE_CREATE) {
 		/* In disk but not in store, create */
-		g_signal_emit (notifier, signals[FILE_CREATED], 0, file,
-		               tracker_crawler_get_file_info (priv->crawler, file));
+		g_signal_emit (notifier, signals[FILE_CREATED], 0, file, info);
 	} else if (file_data->state == FILE_STATE_UPDATE) {
 		/* File changed, update */
-		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file,
-		               tracker_crawler_get_file_info (priv->crawler, file),
-		               FALSE);
+		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, info, FALSE);
 	}
 
 	return stop;
@@ -327,7 +320,7 @@ file_notifier_traverse_tree (TrackerFileNotifier *notifier)
 	g_assert (priv->current_index_root != NULL);
 
 	while ((data = g_queue_pop_tail (&priv->queue)) != NULL) {
-		file_notifier_notify (data->file, data, notifier);
+		tracker_file_notifier_notify (notifier, data, NULL);
 		g_hash_table_remove (priv->cache, data->file);
 	}
 }
@@ -455,7 +448,7 @@ file_notifier_add_node_foreach (GNode    *node,
 		g_queue_delete_link (&priv->queue, file_data->node);
 
 		if (file_data->state != FILE_STATE_NONE)
-			file_notifier_notify (file, file_data, notifier);
+			tracker_file_notifier_notify (notifier, file_data, file_info);
 
 		g_hash_table_remove (priv->cache, file);
 		g_object_unref (file);
