@@ -588,6 +588,34 @@ crawl_directory_in_current_root (TrackerFileNotifier *notifier)
 }
 
 static void
+tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
+                                               TrackerIndexRoot    *root)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	g_signal_emit (notifier, signals[DIRECTORY_FINISHED], 0,
+	               root->root,
+	               root->directories_found,
+	               root->directories_ignored,
+	               root->files_found,
+	               root->files_ignored);
+
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Notified files after %2.2f seconds",
+	                         g_timer_elapsed (priv->timer, NULL)));
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Found %d directories, ignored %d directories",
+	                         root->directories_found,
+	                         root->directories_ignored));
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Found %d files, ignored %d files",
+	                         root->files_found,
+	                         root->files_ignored));
+}
+
+static void
 finish_current_directory (TrackerFileNotifier *notifier,
                           gboolean             interrupted)
 {
@@ -607,24 +635,7 @@ finish_current_directory (TrackerFileNotifier *notifier,
 		/* No more directories left to be crawled in the current
 		 * root, jump to the next one.
 		 */
-		g_signal_emit (notifier, signals[DIRECTORY_FINISHED], 0,
-		               priv->current_index_root->root,
-		               priv->current_index_root->directories_found,
-		               priv->current_index_root->directories_ignored,
-		               priv->current_index_root->files_found,
-		               priv->current_index_root->files_ignored);
-
-		TRACKER_NOTE (STATISTICS,
-		              g_message ("  Notified files after %2.2f seconds",
-		                         g_timer_elapsed (priv->timer, NULL)));
-		TRACKER_NOTE (STATISTICS,
-		              g_message ("  Found %d directories, ignored %d directories",
-		                        priv->current_index_root->directories_found,
-		                        priv->current_index_root->directories_ignored));
-		TRACKER_NOTE (STATISTICS,
-		              g_message ("  Found %d files, ignored %d files",
-		                         priv->current_index_root->files_found,
-		                         priv->current_index_root->files_ignored));
+		tracker_file_notifier_emit_directory_finished (notifier, priv->current_index_root);
 
 		if (!interrupted) {
 			g_clear_pointer (&priv->current_index_root, tracker_index_root_free);
