@@ -644,7 +644,7 @@ tracker_index_root_continue (TrackerIndexRoot *root)
 	notifier_check_next_root (root->notifier);
 }
 
-static gboolean
+static void
 tracker_index_root_remove_directory (TrackerIndexRoot *root,
                                      GFile            *directory)
 {
@@ -663,10 +663,6 @@ tracker_index_root_remove_directory (TrackerIndexRoot *root,
 
 		l = next;
 	}
-
-	return (root->current_dir &&
-		(g_file_equal (root->current_dir, directory) ||
-		 g_file_has_prefix (root->current_dir, directory)));
 }
 
 static void
@@ -677,11 +673,8 @@ file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	if (priv->current_index_root &&
-	    tracker_index_root_remove_directory (priv->current_index_root, file)) {
-		g_cancellable_cancel (priv->cancellable);
-		tracker_index_root_continue (priv->current_index_root);
-	}
+	if (priv->current_index_root)
+		tracker_index_root_remove_directory (priv->current_index_root, file);
 }
 
 static TrackerSparqlStatement *
@@ -1405,7 +1398,8 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	if (priv->current_index_root &&
 	    g_file_equal (directory, priv->current_index_root->root)) {
 		/* Directory being currently processed */
-		g_cancellable_cancel (priv->cancellable);
+		if (priv->cancellable)
+			g_cancellable_cancel (priv->cancellable);
 		tracker_file_notifier_emit_directory_finished (notifier,
 		                                               priv->current_index_root);
 		notifier_check_next_root (notifier);
@@ -1831,7 +1825,23 @@ tracker_file_notifier_stop (TrackerFileNotifier *notifier)
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	if (!priv->stopped) {
-		g_cancellable_cancel (priv->cancellable);
+		if (priv->cancellable)
+			g_cancellable_cancel (priv->cancellable);
+
+		if (priv->current_index_root) {
+			/* Index root arbitrarily cancelled cannot be easily
+			 * resumed, best to queue it again and start from
+			 * scratch.
+			 */
+			notifier_queue_root (notifier,
+			                     priv->current_index_root->root,
+			                     priv->current_index_root->flags |
+			                     TRACKER_DIRECTORY_FLAG_PRIORITY,
+			                     priv->current_index_root->ignore_root);
+			g_clear_pointer (&priv->current_index_root,
+			                 tracker_index_root_free);
+		}
+
 		priv->stopped = TRUE;
 	}
 }
