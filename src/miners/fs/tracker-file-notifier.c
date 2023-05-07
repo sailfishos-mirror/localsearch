@@ -79,6 +79,7 @@ typedef struct {
 	GCancellable *cancellable;
 	GHashTable *cache;
 	GQueue queue;
+	GQueue deleted_dirs;
 	GFile *current_dir;
 	GQueue *pending_dirs;
 	GTimer *timer;
@@ -89,6 +90,7 @@ typedef struct {
 	guint files_found;
 	guint files_ignored;
 	guint ignore_root : 1;
+	guint cursor_has_content : 1;
 } TrackerIndexRoot;
 
 typedef struct {
@@ -213,13 +215,12 @@ tracker_index_root_new (TrackerFileNotifier *notifier,
 	data->ignore_root = ignore_root;
 	data->timer = g_timer_new ();
 
+	g_queue_init (&data->deleted_dirs);
 	g_queue_init (&data->queue);
 	data->cache = g_hash_table_new_full (g_file_hash,
 	                                     (GEqualFunc) g_file_equal,
 	                                     NULL,
 	                                     (GDestroyNotify) file_data_free);
-
-	g_queue_push_tail (data->pending_dirs, g_object_ref (file));
 
 	return data;
 }
@@ -230,6 +231,7 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
 	g_timer_destroy (data->timer);
 	g_queue_clear (&data->queue);
+	g_queue_clear_full (&data->deleted_dirs, g_object_unref);
 	g_hash_table_destroy (data->cache);
 	g_clear_object (&data->current_dir);
 	g_clear_object (&data->cursor);
@@ -465,6 +467,7 @@ file_notifier_add_node_foreach (GNode    *node,
 		                               datetime);
 
 		if (file_type == G_FILE_TYPE_DIRECTORY &&
+		    file_data->state == FILE_STATE_CREATE &&
 		    (root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
 		    !g_file_info_get_attribute_boolean (file_info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT) &&
 		    !G_NODE_IS_ROOT (node)) {
@@ -544,7 +547,7 @@ crawler_get_cb (TrackerCrawler   *crawler,
 	tracker_index_root_continue (root);
 }
 
-static void
+static TrackerFileData *
 _insert_store_info (TrackerIndexRoot *root,
                     GFile            *file,
                     GFileType         file_type,
@@ -561,6 +564,8 @@ _insert_store_info (TrackerIndexRoot *root,
 	file_data->mimetype = g_strdup (mimetype);
 	file_data->store_mtime = g_date_time_ref (datetime);
 	update_state (file_data);
+
+	return file_data;
 }
 
 static gboolean
@@ -711,28 +716,102 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 	return priv->deleted_query;
 }
 
+static int
+file_is_equal (gconstpointer a,
+               gconstpointer b)
+{
+	return g_file_equal (G_FILE (a), G_FILE (b)) ? 0 : -1;
+}
+
+static int
+file_is_equal_or_descendant (gconstpointer a,
+                             gconstpointer b)
+{
+	GFile *deleted_file = G_FILE (a);
+	GFile *file = G_FILE (b);
+
+	return (g_file_equal (file, deleted_file) || g_file_has_prefix (file, deleted_file)) ? 0 : -1;
+}
+
 static void
 handle_file_from_cursor (TrackerIndexRoot    *root,
                          TrackerSparqlCursor *cursor)
 {
+	TrackerFileNotifier *notifier;
+	TrackerFileNotifierPrivate *priv;
 	const gchar *folder_urn, *uri;
 	GFileType file_type;
-	g_autoptr (GFile) file = NULL;
-	g_autoptr (GDateTime) datetime = NULL;
+	g_autoptr (GFile) file = NULL, parent = NULL;
+	g_autoptr (GDateTime) store_mtime = NULL;
+	g_autoptr (GFileInfo) info = NULL;
+	TrackerFileData *file_data;
 
+	notifier = root->notifier;
+	priv = tracker_file_notifier_get_instance_private (notifier);
 	uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-	datetime = tracker_sparql_cursor_get_datetime (cursor, 2);
-
 	file = g_file_new_for_uri (uri);
+
+	/* If the file is contained in a deleted dir, skip it */
+	if (g_queue_find_custom (&root->deleted_dirs, file,
+	                         file_is_equal_or_descendant))
+		return;
+
+	/* Get stored info */
+	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+	store_mtime = tracker_sparql_cursor_get_datetime (cursor, 2);
 	file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
 
-	_insert_store_info (root,
-	                    file,
-	                    file_type,
-	                    tracker_sparql_cursor_get_string (cursor, 3, NULL),
-	                    tracker_sparql_cursor_get_string (cursor, 4, NULL),
-	                    datetime);
+	file_data = _insert_store_info (root,
+	                                file,
+	                                file_type,
+	                                tracker_sparql_cursor_get_string (cursor, 3, NULL),
+	                                tracker_sparql_cursor_get_string (cursor, 4, NULL),
+	                                store_mtime);
+
+	/* Query fs info in place */
+	info = g_file_query_info (file, priv->file_attributes,
+	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                          NULL, NULL);
+
+	if (info) {
+		g_autoptr (GDateTime) disk_mtime = NULL;
+		GFileType file_type;
+
+		file_type = g_file_info_get_file_type (info);
+		disk_mtime = g_file_info_get_modification_date_time (info);
+
+		_insert_disk_info (root,
+		                   file,
+		                   file_type,
+		                   disk_mtime);
+	}
+
+	if (file_data->state == FILE_STATE_DELETE &&
+	    (file_data->is_dir_in_store || file_data->is_dir_in_disk)) {
+		/* Cache deleted dir, in order to skip children */
+		g_queue_push_head (&root->deleted_dirs, g_object_ref (file));
+	} else if (file_data->is_dir_in_disk &&
+	           (!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) ||
+	            g_file_equal (file, root->root)) &&
+	           (file_data->state == FILE_STATE_CREATE ||
+	            file_data->state == FILE_STATE_UPDATE) &&
+	           !g_queue_find_custom (root->pending_dirs, file, file_is_equal)) {
+		/* Updated directory, needs crawling */
+		g_queue_push_head (root->pending_dirs, g_object_ref (file));
+	}
+
+	parent = g_file_get_parent (file);
+
+	/* Notify immediately of changes, unless the directory needs crawling.
+	 * Deleted events can be emitted right away.
+	 */
+	if (file_data->state == FILE_STATE_DELETE ||
+	    !g_queue_find_custom (root->pending_dirs, parent,
+	                          file_is_equal_or_descendant)) {
+		tracker_file_notifier_notify (notifier, file_data, info);
+		g_queue_delete_link (&root->queue, file_data->node);
+		g_hash_table_remove (root->cache, file);
+	}
 }
 
 static gboolean
@@ -750,6 +829,7 @@ handle_cursor (TrackerIndexRoot *root)
 			break;
 
 		handle_file_from_cursor (root, cursor);
+		root->cursor_has_content = TRUE;
 	}
 
 	if (finished) {
@@ -762,6 +842,9 @@ handle_cursor (TrackerIndexRoot *root)
 			uri = g_file_get_uri (root->root);
 			g_critical ("Error iterating cursor for indexed folder '%s': %s",
 			            uri, error->message);
+		} else if (!root->cursor_has_content) {
+			/* Indexing from scratch, crawl root dir */
+			g_queue_push_tail (root->pending_dirs, g_object_ref (root->root));
 		}
 
 		root->cursor_idle_id = 0;
