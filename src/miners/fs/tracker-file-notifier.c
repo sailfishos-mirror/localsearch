@@ -851,14 +851,6 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	if (priv->current_index_root &&
-	    g_file_equal (priv->current_index_root->root, file))
-		return;
-
-	if (g_list_find_custom (priv->pending_index_roots, file,
-	                        (GCompareFunc) find_directory_root))
-		return;
-
 	root = tracker_index_root_new (notifier, file, flags, ignore_root);
 
 	if (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) {
