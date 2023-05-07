@@ -66,8 +66,8 @@ typedef struct {
 	guint is_dir_in_disk : 1;
 	guint is_dir_in_store : 1;
 	guint state : 2;
-	guint64 store_mtime;
-	guint64 disk_mtime;
+	GDateTime *store_mtime;
+	GDateTime *disk_mtime;
 	gchar *extractor_hash;
 	gchar *mimetype;
 } TrackerFileData;
@@ -190,6 +190,8 @@ static void
 file_data_free (TrackerFileData *file_data)
 {
 	g_object_unref (file_data->file);
+	g_clear_pointer (&file_data->store_mtime, g_date_time_unref);
+	g_clear_pointer (&file_data->disk_mtime, g_date_time_unref);
 	g_free (file_data->extractor_hash);
 	g_free (file_data->mimetype);
 	g_slice_free (TrackerFileData, file_data);
@@ -372,7 +374,7 @@ update_state (TrackerFileData *data)
 
 	if (data->in_disk) {
 		if (data->in_store) {
-			if (data->store_mtime != data->disk_mtime) {
+			if (!g_date_time_equal (data->store_mtime, data->disk_mtime)) {
 				data->state = FILE_STATE_UPDATE;
 			} else if (data->mimetype) {
 				const gchar *current_hash;
@@ -416,14 +418,15 @@ static TrackerFileData *
 _insert_disk_info (TrackerIndexRoot *root,
                    GFile            *file,
                    GFileType         file_type,
-                   guint64           _time)
+                   GDateTime        *datetime)
 {
 	TrackerFileData *file_data;
 
 	file_data = ensure_file_data (root, file);
 	file_data->in_disk = TRUE;
 	file_data->is_dir_in_disk = file_type == G_FILE_TYPE_DIRECTORY;
-	file_data->disk_mtime = _time;
+	g_clear_pointer (&file_data->disk_mtime, g_date_time_unref);
+	file_data->disk_mtime = g_date_time_ref (datetime);
 	update_state (file_data);
 
 	return file_data;
@@ -451,16 +454,15 @@ file_notifier_add_node_foreach (GNode    *node,
 	if (file_info) {
 		TrackerFileData *file_data;
 		GFileType file_type;
-		guint64 _time;
+		g_autoptr (GDateTime) datetime = NULL;
 
 		file_type = g_file_info_get_file_type (file_info);
-		_time = g_file_info_get_attribute_uint64 (file_info,
-		                                          G_FILE_ATTRIBUTE_TIME_MODIFIED);
+		datetime = g_file_info_get_modification_date_time (file_info);
 
 		file_data = _insert_disk_info (root,
 		                               file,
 		                               file_type,
-		                               _time);
+		                               datetime);
 
 		if (file_type == G_FILE_TYPE_DIRECTORY &&
 		    (root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
@@ -548,7 +550,7 @@ _insert_store_info (TrackerIndexRoot *root,
                     GFileType         file_type,
                     const gchar      *extractor_hash,
                     const gchar      *mimetype,
-                    guint64           _time)
+                    GDateTime        *datetime)
 {
 	TrackerFileData *file_data;
 
@@ -557,7 +559,7 @@ _insert_store_info (TrackerIndexRoot *root,
 	file_data->is_dir_in_store = file_type == G_FILE_TYPE_DIRECTORY;
 	file_data->extractor_hash = g_strdup (extractor_hash);
 	file_data->mimetype = g_strdup (mimetype);
-	file_data->store_mtime = _time;
+	file_data->store_mtime = g_date_time_ref (datetime);
 	update_state (file_data);
 }
 
@@ -717,14 +719,12 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	GFileType file_type;
 	g_autoptr (GFile) file = NULL;
 	g_autoptr (GDateTime) datetime = NULL;
-	gint64 _time;
 
 	uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 	datetime = tracker_sparql_cursor_get_datetime (cursor, 2);
 
 	file = g_file_new_for_uri (uri);
-	_time = g_date_time_to_unix (datetime);
 	file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
 
 	_insert_store_info (root,
@@ -732,7 +732,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	                    file_type,
 	                    tracker_sparql_cursor_get_string (cursor, 3, NULL),
 	                    tracker_sparql_cursor_get_string (cursor, 4, NULL),
-	                    _time);
+	                    datetime);
 }
 
 static gboolean
