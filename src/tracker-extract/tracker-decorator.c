@@ -566,40 +566,39 @@ decorator_cache_items_cb (GObject      *object,
 }
 
 static void
-bind_graphs (TrackerDecorator *decorator,
-             int              *arg_counter,
-             gboolean          priority)
+bind_graph_limits (TrackerDecorator *decorator,
+                   gboolean          priority)
 {
 	TrackerDecoratorPrivate *priv;
-	TrackerSparqlConnection *conn;
-	TrackerNamespaceManager *namespaces;
-	const gchar *graphs[] = {
-		"tracker:Audio",
-		"tracker:Pictures",
-		"tracker:Video",
-		"tracker:Software",
-		"tracker:Documents",
+	const gchar *graphs[][3] = {
+		{ "tracker:Audio", "audioHigh", "audioLow" },
+		{ "tracker:Pictures", "picturesHigh", "picturesLow" },
+		{ "tracker:Video", "videoHigh", "videoLow" },
+		{ "tracker:Software", "softwareHigh", "softwareLow" },
+		{ "tracker:Documents", "documentsHigh", "documentsLow" },
 	};
 	guint i;
 
 	priv = tracker_decorator_get_instance_private (decorator);
-	conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	namespaces = tracker_sparql_connection_get_namespace_manager (conn);
 
 	for (i = 0; i < G_N_ELEMENTS (graphs); i++) {
+		const gchar *graph = graphs[i][0];
+		const gchar *high_limit = graphs[i][1];
+		const gchar *low_limit = graphs[i][2];
 		gboolean is_priority;
-		g_autofree gchar *arg = NULL, *expanded = NULL;
 
 		is_priority = priv->priority_graphs &&
-			g_strv_contains ((const gchar * const *) priv->priority_graphs, graphs[i]);
+			g_strv_contains ((const gchar * const *) priv->priority_graphs, graph);
 
-		if (priority != is_priority)
-			continue;
-
-		arg = g_strdup_printf ("graph%d", (*arg_counter) + 1);
-		expanded = tracker_namespace_manager_expand_uri (namespaces, graphs[i]);
-		tracker_sparql_statement_bind_string (priv->remaining_items_query, arg, expanded);
-		(* arg_counter)++;
+		/* Graphs with high priority get unbound high limit and 0 low limit,
+		 * graphs with regular priority get the opposite.
+		 */
+		tracker_sparql_statement_bind_int (priv->remaining_items_query,
+		                                   high_limit,
+		                                   is_priority ? -1 : 0);
+		tracker_sparql_statement_bind_int (priv->remaining_items_query,
+		                                   low_limit,
+		                                   is_priority ? 0 : -1);
 	}
 }
 
@@ -607,7 +606,7 @@ static void
 decorator_query_next_items (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
-	gint offset = 0, n_graph = 0;
+	gint offset = 0;
 
 	priv = tracker_decorator_get_instance_private (decorator);
 
@@ -619,10 +618,7 @@ decorator_query_next_items (TrackerDecorator *decorator)
 	if (!priv->remaining_items_query)
 		priv->remaining_items_query = load_statement (decorator, "get-items.rq");
 
-	/* Bind all graphs, in priority order */
-	bind_graphs (decorator, &n_graph, TRUE);
-	bind_graphs (decorator, &n_graph, FALSE);
-
+	bind_graph_limits (decorator, TRUE);
 	tracker_sparql_statement_bind_int (priv->remaining_items_query,
 	                                   "offset", offset);
 	tracker_sparql_statement_bind_int (priv->remaining_items_query,
