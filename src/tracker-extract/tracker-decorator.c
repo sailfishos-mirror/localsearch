@@ -535,6 +535,7 @@ decorator_cache_items_cb (GObject      *object,
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	TrackerDecoratorInfo *info;
 	g_autoptr (GError) error = NULL;
+	gboolean queue_was_empty;
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
@@ -542,6 +543,8 @@ decorator_cache_items_cb (GObject      *object,
 	priv->querying = FALSE;
 
 	decorator_commit_info (decorator);
+
+	queue_was_empty = g_queue_is_empty (&priv->item_cache);
 
 	if (error) {
 		g_warning ("Could not get unextracted files: %s", error->message);
@@ -557,6 +560,8 @@ decorator_cache_items_cb (GObject      *object,
 		decorator_start (decorator);
 	} else if (g_queue_is_empty (&priv->item_cache) && priv->processing) {
 		decorator_finish (decorator);
+	} else if (queue_was_empty) {
+		g_signal_emit (decorator, signals[ITEMS_AVAILABLE], 0);
 	}
 }
 
