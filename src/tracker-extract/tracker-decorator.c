@@ -522,6 +522,7 @@ decorator_item_cache_remove (TrackerDecorator *decorator,
 
 		g_queue_remove (&priv->item_cache, info);
 		tracker_decorator_info_unref (info);
+		break;
 	}
 }
 
