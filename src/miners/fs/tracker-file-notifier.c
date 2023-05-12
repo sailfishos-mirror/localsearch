@@ -123,6 +123,7 @@ typedef struct {
 
 static gboolean tracker_index_root_query_contents (TrackerIndexRoot *root);
 static gboolean tracker_index_root_crawl_next (TrackerIndexRoot *root);
+static gboolean tracker_index_root_continue_cursor (TrackerIndexRoot *root);
 static void tracker_index_root_continue (TrackerIndexRoot *root);
 
 static TrackerSparqlStatement * sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
@@ -569,6 +570,21 @@ _insert_store_info (TrackerIndexRoot *root,
 }
 
 static gboolean
+check_high_water (TrackerFileNotifier *notifier)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (priv->high_water) {
+		priv->active = FALSE;
+		return TRUE;
+	}
+
+	return FALSE;
+}
+
+static gboolean
 tracker_index_root_crawl_next (TrackerIndexRoot *root)
 {
 	TrackerFileNotifier *notifier;
@@ -579,10 +595,8 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	notifier = root->notifier;
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
-	if (priv->high_water) {
-		priv->active = FALSE;
+	if (check_high_water (root->notifier))
 		return TRUE;
-	}
 
 	if (g_queue_is_empty (root->pending_dirs))
 		return FALSE;
@@ -636,6 +650,9 @@ tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
 static void
 tracker_index_root_continue (TrackerIndexRoot *root)
 {
+	if (tracker_index_root_continue_cursor (root))
+		return;
+
 	if (tracker_index_root_crawl_next (root))
 		return;
 
@@ -813,7 +830,7 @@ handle_cursor (TrackerIndexRoot *root)
 	TrackerSparqlCursor *cursor = root->cursor;
 	GCancellable *cancellable = root->cancellable;
 	g_autoptr (GError) error = NULL;
-	gboolean finished = TRUE;
+	gboolean finished = TRUE, stop = TRUE;
 	int i;
 
 	for (i = 0; i < N_CURSOR_BATCH_ITEMS; i++) {
@@ -840,11 +857,34 @@ handle_cursor (TrackerIndexRoot *root)
 			g_queue_push_tail (root->pending_dirs, g_object_ref (root->root));
 		}
 
+		g_clear_object (&root->cursor);
+	}
+
+	stop = finished || check_high_water (root->notifier);
+
+	if (stop) {
 		root->cursor_idle_id = 0;
 		tracker_index_root_continue (root);
 	}
 
-	return finished ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE;
+	return stop ? G_SOURCE_REMOVE : G_SOURCE_CONTINUE;
+}
+
+static gboolean
+tracker_index_root_continue_cursor (TrackerIndexRoot *root)
+{
+	if (!root->cursor)
+		return FALSE;
+
+	if (check_high_water (root->notifier))
+		return TRUE;
+
+	if (root->cursor_idle_id == 0) {
+		root->cursor_idle_id =
+			g_idle_add ((GSourceFunc) handle_cursor, root);
+	}
+
+	return TRUE;
 }
 
 static void
@@ -873,8 +913,7 @@ query_execute_cb (TrackerSparqlStatement *statement,
 	}
 
 	root->cursor = g_steal_pointer (&cursor);
-	root->cursor_idle_id =
-		g_idle_add ((GSourceFunc) handle_cursor, root);
+	tracker_index_root_continue_cursor (root);
 }
 
 static gboolean
@@ -1770,6 +1809,19 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	                     NULL);
 }
 
+static void
+tracker_file_notifier_continue (TrackerFileNotifier *notifier)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (priv->current_index_root)
+		tracker_index_root_continue (priv->current_index_root);
+	else
+		notifier_check_next_root (notifier);
+}
+
 void
 tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
                                       gboolean             high_water)
@@ -1787,10 +1839,7 @@ tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
 	if (!high_water && !priv->active &&
 	    tracker_file_notifier_is_active (notifier)) {
 		/* Maybe kick everything back into action */
-		if (priv->current_index_root)
-			tracker_index_root_continue (priv->current_index_root);
-		else
-			notifier_check_next_root (notifier);
+		tracker_file_notifier_continue (notifier);
 	}
 }
 
@@ -1805,11 +1854,7 @@ tracker_file_notifier_start (TrackerFileNotifier *notifier)
 
 	if (priv->stopped) {
 		priv->stopped = FALSE;
-
-		if (priv->current_index_root)
-			tracker_index_root_continue (priv->current_index_root);
-		else
-			notifier_check_next_root (notifier);
+		tracker_file_notifier_continue (notifier);
 	}
 
 	return TRUE;
