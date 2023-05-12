@@ -325,6 +325,7 @@ decorator_commit_info (TrackerDecorator *decorator)
 	                             decorator_commit_cb,
 	                             decorator);
 	decorator_update_state (decorator, NULL, TRUE);
+	g_object_unref (batch);
 
 	return TRUE;
 }
