@@ -13,8 +13,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2022-08-22 02:02+0000\n"
-"PO-Revision-Date: 2022-08-21 13:20+0300\n"
+"POT-Creation-Date: 2023-02-04 16:14+0000\n"
+"PO-Revision-Date: 2023-05-12 14:09+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.1.1\n"
+"X-Generator: Poedit 3.2.2\n"
 "X-POOTLE-MTIME: 1436541455.000000\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -278,6 +278,14 @@ msgstr "İçeriğiyle yok sayılmış dizinler"
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Engel listesine alınan dosyayı bulunduran dizinleri dışla"
 
+#: src/libtracker-miners-common/tracker-miner-proxy.c:349
+msgid "Cookie not recognized to resume paused miner"
+msgstr "Çerezde, duraklatılmış madenci için devam etme tanınmadı"
+
+#: src/libtracker-miners-common/tracker-miner-proxy.c:406
+msgid "Pause application and reason match an already existing pause request"
+msgstr "Uygulama duraklatma ve neden eşleşmesi zaten duraklatma isteğinde var"
+
 #: src/libtracker-miners-common/tracker-utils.c:101
 #: src/libtracker-miners-common/tracker-utils.c:152
 msgid "less than one second"
@@ -331,32 +339,24 @@ msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d saniye"
 
-#: src/libtracker-miner/tracker-data-provider.c:108
-#: src/libtracker-miner/tracker-data-provider.c:168
+#: src/miners/fs/tracker-data-provider.c:108
+#: src/miners/fs/tracker-data-provider.c:168
 msgid "Operation not supported"
 msgstr "İşlem desteklenmiyor"
 
-#: src/libtracker-miner/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Çerezde, duraklatılmış madenci için devam etme tanınmadı"
-
-#: src/libtracker-miner/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "Uygulama duraklatma ve neden eşleşmesi zaten duraklatma isteğinde var"
-
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:80
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Saniye türünden başlangıç uyuma süresi, 0->1000 (öntanımlı=15)"
 
-#: src/miners/fs/tracker-main.c:86
+#: src/miners/fs/tracker-main.c:85
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Tüm yapılandırılmış konumlar dizinlenene dek çalışır ve sonra çıkar"
 
-#: src/miners/fs/tracker-main.c:90 src/tracker/tracker-info.c:83
+#: src/miners/fs/tracker-main.c:89 src/tracker/tracker-info.c:83
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "FILE değişkeninin yapılandırmaya uygun yaranmışlığını denetler"
 
-#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
+#: src/miners/fs/tracker-main.c:90 src/tracker-extract/tracker-main.c:83
 #: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
 #: src/tracker/tracker-info.c:86 src/tracker/tracker-info.c:87
@@ -364,76 +364,76 @@ msgstr "FILE değişkeninin yapılandırmaya uygun yaranmışlığını denetler
 msgid "FILE"
 msgstr "DOSYA"
 
-#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:63
+#: src/miners/fs/tracker-main.c:93 src/miners/rss/tracker-main.c:63
 #: src/tracker-extract/tracker-main.c:97
 msgid "Runs for a specific domain ontology"
 msgstr "Belirli bir etki alanı ontolojisi için çalışır"
 
-#: src/miners/fs/tracker-main.c:98
+#: src/miners/fs/tracker-main.c:97
 msgid "Avoids changes in the filesystem"
 msgstr "Dosya sistemindeki değişiklikleri dışlar"
 
-#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
+#: src/miners/fs/tracker-main.c:101 src/tracker-control/tracker-main.c:61
 #: src/tracker-extract/tracker-main.c:101
-#: src/tracker-writeback/tracker-main.c:48
+#: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Sürüm bilgisini görüntüler"
 
-#: src/miners/fs/tracker-main.c:626
+#: src/miners/fs/tracker-main.c:638
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” veri nesnesi, şu anda var"
 
-#: src/miners/fs/tracker-main.c:627
+#: src/miners/fs/tracker-main.c:639
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” veri nesnesi, şu anda yok"
 
-#: src/miners/fs/tracker-main.c:665
+#: src/miners/fs/tracker-main.c:677
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Dizin, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
 
-#: src/miners/fs/tracker-main.c:669
+#: src/miners/fs/tracker-main.c:681
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Dosya, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
 
-#: src/miners/fs/tracker-main.c:672
+#: src/miners/fs/tracker-main.c:684
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Dosya, dizinlenmeye uygun DEĞİL (gizli dosya)"
 
-#: src/miners/fs/tracker-main.c:674
+#: src/miners/fs/tracker-main.c:686
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Dosya, dizinlenmeye uygun DEĞİL (dizinlenmiş klasör değil)"
 
-#: src/miners/fs/tracker-main.c:698
+#: src/miners/fs/tracker-main.c:710
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
 
-#: src/miners/fs/tracker-main.c:704
+#: src/miners/fs/tracker-main.c:716
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (gizli dosya)"
 
-#: src/miners/fs/tracker-main.c:712
+#: src/miners/fs/tracker-main.c:724
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (içerik süzgeçlerine göre)"
 
-#: src/miners/fs/tracker-main.c:733
+#: src/miners/fs/tracker-main.c:745
 msgid "Directory is eligible to be indexed"
 msgstr "Dizin, dizinlenmeye uygun"
 
-#: src/miners/fs/tracker-main.c:734
+#: src/miners/fs/tracker-main.c:746
 msgid "File is eligible to be indexed"
 msgstr "Dosya dizinlenmeye uygun"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:990
+#: src/miners/fs/tracker-main.c:1073
 msgid "— start the tracker indexer"
 msgstr "— tracker dizinleyicisini çalıştır"
 
@@ -506,11 +506,11 @@ msgstr "— besleme dizinleyicisini çalıştır"
 msgid "— start the tracker index proxy"
 msgstr "— tracker dizin vekilini çalıştır"
 
-#: src/tracker-extract/tracker-extract.c:695
+#: src/tracker-extract/tracker-extract.c:697
 msgid "Metadata extraction failed"
 msgstr "Üst veri ayıklama başarısız"
 
-#: src/tracker-extract/tracker-extract.c:770
+#: src/tracker-extract/tracker-extract.c:776
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Bu dosyayı işleyecek üst veri veya ayıklayıcı modül bulunamadı"
 
@@ -549,11 +549,11 @@ msgstr "Desteklenmeyen dönüştürme biçimi “%s”\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:319
+#: src/tracker-extract/tracker-main.c:342
 msgid "— Extract file meta data"
 msgstr "— Dosya üst verisini ayıkla"
 
-#: src/tracker-extract/tracker-main.c:334
+#: src/tracker-extract/tracker-main.c:357
 msgid "Filename and mime type must be provided together"
 msgstr "Dosya adı ve mime türü birlikte sağlanmalıdır"
 
@@ -1443,20 +1443,20 @@ msgstr "Ekle ve sil eylemleri birlikte kullanılamaz"
 msgid "The --description option can only be used with --add"
 msgstr "--description seçeneği yalnızca --add ile birlikte kullanılabilir"
 
-#: src/tracker-writeback/tracker-main.c:52
+#: src/tracker-writeback/tracker-main.c:54
 msgid ""
 "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
 msgstr ""
 "Günlükleme, 0 = yalnızca hatalar, 1 = asgari, 2 = ayrıntılı ve 3 = hata "
 "ayıklama (öntanımlı=0)"
 
-#: src/tracker-writeback/tracker-main.c:59
+#: src/tracker-writeback/tracker-main.c:61
 msgid "Disable shutting down after 30 seconds of inactivity"
 msgstr "30 saniye hareketsizlikten sonra kapatmayı devre dışı bırak"
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/tracker-writeback/tracker-main.c:85
+#: src/tracker-writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
-msgstr "— tracker geri yazma servisini başlat"
+msgstr "— tracker geri yazma hizmetini başlat"
