@@ -256,6 +256,16 @@ check_file (TrackerFileNotifier *notifier,
 	                                                file, info);
 }
 
+static gint
+index_root_equals_file (TrackerIndexRoot *root,
+                        GFile            *file)
+{
+	if (g_file_equal (root->root, file))
+		return 0;
+
+	return -1;
+}
+
 static gboolean
 check_directory (TrackerFileNotifier *notifier,
                  GFile               *directory,
@@ -271,9 +281,8 @@ check_directory (TrackerFileNotifier *notifier,
 	 * when the time arrives.
 	 */
 	if (tracker_indexing_tree_file_is_root (priv->indexing_tree, directory) &&
-	    !g_file_equal (directory, priv->current_index_root->root)) {
+	    index_root_equals_file (priv->current_index_root, directory) != 0)
 		return FALSE;
-	}
 
 	return tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 	                                                directory, info);
@@ -802,7 +811,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		g_queue_push_head (&root->deleted_dirs, g_object_ref (file));
 	} else if (file_data->is_dir_in_disk &&
 	           (!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) ||
-	            g_file_equal (file, root->root)) &&
+	            index_root_equals_file (root, file) == 0) &&
 	           (file_data->state == FILE_STATE_CREATE ||
 	            file_data->state == FILE_STATE_UPDATE) &&
 	           !g_queue_find_custom (root->pending_dirs, file, file_is_equal)) {
@@ -955,16 +964,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	                                        (GAsyncReadyCallback) query_execute_cb,
 	                                        root);
 	return TRUE;
-}
-
-static gint
-find_directory_root (TrackerIndexRoot *root,
-                     GFile            *file)
-{
-	if (g_file_equal (root->root, file))
-		return 0;
-
-	return -1;
 }
 
 static void
@@ -1426,7 +1425,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	}
 
 	elem = g_list_find_custom (priv->pending_index_roots, directory,
-	                           (GCompareFunc) find_directory_root);
+	                           (GCompareFunc) index_root_equals_file);
 
 	if (elem) {
 		tracker_index_root_free (elem->data);
@@ -1435,7 +1434,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	}
 
 	if (priv->current_index_root &&
-	    g_file_equal (directory, priv->current_index_root->root)) {
+	    index_root_equals_file (priv->current_index_root, directory) == 0) {
 		/* Directory being currently processed */
 		if (priv->cancellable)
 			g_cancellable_cancel (priv->cancellable);
