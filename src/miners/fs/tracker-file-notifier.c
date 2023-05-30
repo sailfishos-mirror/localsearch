@@ -743,6 +743,16 @@ file_is_equal (gconstpointer a,
 }
 
 static int
+file_is_equal_or_child (gconstpointer a,
+                        gconstpointer b)
+{
+	GFile *deleted_file = G_FILE (a);
+	GFile *file = G_FILE (b);
+
+	return (g_file_equal (file, deleted_file) || g_file_has_parent (file, deleted_file)) ? 0 : -1;
+}
+
+static int
 file_is_equal_or_descendant (gconstpointer a,
                              gconstpointer b)
 {
@@ -826,7 +836,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	 */
 	if (file_data->state == FILE_STATE_DELETE ||
 	    !g_queue_find_custom (root->pending_dirs, parent,
-	                          file_is_equal_or_descendant)) {
+	                          file_is_equal_or_child)) {
 		tracker_file_notifier_notify (notifier, file_data, info);
 		g_queue_delete_link (&root->queue, file_data->node);
 		g_hash_table_remove (root->cache, file);
