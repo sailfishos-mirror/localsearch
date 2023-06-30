@@ -389,8 +389,8 @@ conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#inclu
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
 conf.set('HAVE_STRNLEN', cc.has_function('strnlen', prefix : '#include <string.h>'))
 
-conf.set('LOCALEDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('localedir')))
-conf.set('SHAREDIR', '"@0@/@1@"'.format(get_option('prefix'), get_option('datadir')))
+conf.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
+conf.set_quoted('SHAREDIR', get_option('prefix') / get_option('datadir'))
 conf.set('TRACKER_MINERS_DIR', '"@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'miners')))
 
 conf.set('GETTEXT_PACKAGE', '"@0@"'.format(tracker_versioned_name))
