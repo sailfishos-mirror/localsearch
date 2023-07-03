@@ -829,6 +829,12 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
+	if (file_data->state != FILE_STATE_DELETE &&
+	    file_data->is_dir_in_store &&
+	    !!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
+		tracker_monitor_add (priv->monitor, file);
+	}
+
 	parent = g_file_get_parent (file);
 
 	/* Notify immediately of changes, unless the directory needs crawling.
