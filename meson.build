@@ -15,7 +15,7 @@ libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.62.0'
-tracker_required = '3.5.0'
+tracker_required = '3.6.0'
 
 if get_option('tracker_core') == 'system'
   tracker_sparql = dependency('tracker-sparql-3.0', version: '>=' + tracker_required, required: false)
@@ -32,7 +32,6 @@ if get_option('tracker_core') == 'system'
   # installed locations.
   tracker_uninstalled_cli_dir = join_paths (tracker_sparql.get_variable(pkgconfig: 'exec_prefix'), 'bin')
   tracker_uninstalled_nepomuk_ontologies_dir = join_paths(tracker_sparql.get_variable(pkgconfig: 'ontologies_dir'), 'nepomuk')
-  tracker_uninstalled_stop_words_dir = join_paths(tracker_sparql.get_variable(pkgconfig: 'tracker_datadir'), 'stop-words')
   tracker_uninstalled_testutils_dir = tracker_testutils.get_variable(pkgconfig: 'python_path')
   tracker_ontologies_dir = tracker_sparql.get_variable(pkgconfig: 'ontologies_dir')
 
@@ -44,7 +43,6 @@ else
 
   tracker_uninstalled_cli_dir = tracker_subproject.get_variable('tracker_uninstalled_cli_dir')
   tracker_uninstalled_nepomuk_ontologies_dir = tracker_subproject.get_variable('tracker_uninstalled_nepomuk_ontologies_dir')
-  tracker_uninstalled_stop_words_dir = tracker_subproject.get_variable('tracker_uninstalled_stop_words_dir')
   tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
   tracker_ontologies_dir = tracker_subproject.get_variable('tracker_ontologies_dir')
 
@@ -476,7 +474,6 @@ run_uninstalled_conf.set('tracker_uninstalled_domain_rule', meson.current_build_
 run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninstalled_extract_rules_dir)
 run_uninstalled_conf.set('tracker_uninstalled_extractors_dir', meson.current_build_dir() / 'src' / 'tracker-extract')
 run_uninstalled_conf.set('tracker_uninstalled_miner_services_dir', tracker_uninstalled_miner_services_dir)
-run_uninstalled_conf.set('tracker_uninstalled_stop_words_dir', tracker_uninstalled_stop_words_dir)
 run_uninstalled_conf.set('tracker_uninstalled_testutils_dir', tracker_uninstalled_testutils_dir)
 run_uninstalled_conf.set('tracker_uninstalled_writeback_modules_dir', tracker_uninstalled_writeback_modules_dir)
 run_uninstalled_conf.set('uninstalled_gsettings_schema_dir', tracker_miners_uninstalled_gsettings_schema_dir)
