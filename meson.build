@@ -15,7 +15,7 @@ libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.62.0'
-tracker_required = '3.6.0'
+tracker_required = '3.6'
 
 if get_option('tracker_core') == 'system'
   tracker_sparql = dependency('tracker-sparql-3.0', version: '>=' + tracker_required, required: false)
