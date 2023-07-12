@@ -36,7 +36,6 @@
 
 /* Default values */
 #define DEFAULT_IGNORE_NUMBERS       TRUE
-#define DEFAULT_IGNORE_STOP_WORDS    TRUE
 #define DEFAULT_ENABLE_STEMMER       FALSE  /* As per GB#526346, disabled */
 #define DEFAULT_ENABLE_UNACCENT      TRUE
 
@@ -58,7 +57,6 @@ enum {
 	PROP_ENABLE_STEMMER,
 	PROP_ENABLE_UNACCENT,
 	PROP_IGNORE_NUMBERS,
-	PROP_IGNORE_STOP_WORDS,
 };
 
 G_DEFINE_TYPE (TrackerFTSConfig, tracker_fts_config, G_TYPE_SETTINGS);
