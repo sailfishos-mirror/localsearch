@@ -105,9 +105,6 @@ struct TrackerMinerFilesPrivate {
 	gboolean index_optical_discs;
 	guint volumes_changed_id;
 
-	GSList *application_dirs;
-	guint applications_changed_id;
-
 	gboolean mount_points_initialized;
 
 	guint stale_volumes_check_id;
@@ -179,10 +176,6 @@ static void        trigger_recheck_cb                   (GObject              *g
                                                          GParamSpec           *arg1,
                                                          gpointer              user_data);
 static void        index_volumes_changed_cb             (GObject              *gobject,
-                                                         GParamSpec           *arg1,
-                                                         gpointer              user_data);
-static void        set_up_application_indexing          (TrackerMinerFiles    *mf);
-static void        index_applications_changed_cb        (GObject              *gobject,
                                                          GParamSpec           *arg1,
                                                          gpointer              user_data);
 static void        miner_files_process_file             (TrackerMinerFS       *fs,
@@ -608,9 +601,6 @@ miner_files_initable_init (GInitable     *initable,
 		                                                NULL);
 	}
 
-	/* Initialize application indexing */
-	set_up_application_indexing (mf);
-
 	/* We want to get notified when config changes */
 
 	g_signal_connect (mf->private->config, "notify::low-disk-space-limit",
@@ -639,9 +629,6 @@ miner_files_initable_init (GInitable     *initable,
 	                  mf);
 	g_signal_connect (mf->private->config, "notify::index-optical-discs",
 	                  G_CALLBACK (index_volumes_changed_cb),
-	                  mf);
-	g_signal_connect (mf->private->config, "notify::index-applications",
-	                  G_CALLBACK (index_applications_changed_cb),
 	                  mf);
 	g_signal_connect (mf->private->config, "notify::removable-days-threshold",
 	                  G_CALLBACK (index_volumes_changed_cb),
@@ -749,8 +736,6 @@ miner_files_finalize (GObject *object)
 	}
 
 	disk_space_check_stop (TRACKER_MINER_FILES (object));
-
-	g_slist_free_full (mf->private->application_dirs, g_object_unref);
 
 	if (priv->index_recursive_directories) {
 		g_slist_foreach (priv->index_recursive_directories, (GFunc) g_free, NULL);
@@ -1834,91 +1819,6 @@ index_volumes_changed_cb (GObject    *gobject,
 		/* Set idle so multiple changes in the config lead to one check */
 		miner_files->private->volumes_changed_id =
 			g_idle_add (index_volumes_changed_idle, miner_files);
-	}
-}
-
-static void
-miner_files_add_application_dir (TrackerMinerFiles   *mf,
-                                 TrackerIndexingTree *indexing_tree,
-                                 const gchar         *dir)
-{
-	GFile *file;
-	gchar *path;
-
-	/* Add $dir/applications */
-	path = g_build_filename (dir, "applications", NULL);
-	file = g_file_new_for_path (path);
-	TRACKER_NOTE (CONFIG, g_message ("  Adding:'%s'", path));
-
-	tracker_indexing_tree_add (indexing_tree, file,
-				   TRACKER_DIRECTORY_FLAG_RECURSE |
-				   TRACKER_DIRECTORY_FLAG_MONITOR |
-				   TRACKER_DIRECTORY_FLAG_CHECK_MTIME);
-	g_free (path);
-
-	mf->private->application_dirs = g_slist_prepend(mf->private->application_dirs, file);
-}
-
-static void
-set_up_application_indexing (TrackerMinerFiles *mf)
-{
-	TrackerIndexingTree *indexing_tree;
-	const gchar *user_data_dir;
-	const gchar * const *xdg_dirs;
-	GSList *n;
-	int i;
-
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
-
-	if (tracker_config_get_index_applications (mf->private->config)) {
-		TRACKER_NOTE (CONFIG, g_message ("Setting up applications to iterate from XDG system directories"));
-		xdg_dirs = g_get_system_data_dirs ();
-
-		for (i = 0; xdg_dirs[i]; i++) {
-			miner_files_add_application_dir (mf, indexing_tree, xdg_dirs[i]);
-		}
-
-		user_data_dir = g_get_user_data_dir ();
-		if (user_data_dir) {
-			miner_files_add_application_dir (mf, indexing_tree, user_data_dir);
-		}
-	} else {
-		TRACKER_NOTE (CONFIG, g_message ("Removing configured application directories from indexing tree"));
-
-		for (n = mf->private->application_dirs; n != NULL; n = n->next) {
-			tracker_indexing_tree_remove (indexing_tree, G_FILE (n->data));
-		};
-
-		g_slist_free_full (mf->private->application_dirs, g_object_unref);
-		mf->private->application_dirs = NULL;
-	}
-}
-
-static gboolean
-index_applications_changed_idle (gpointer user_data)
-{
-	TrackerMinerFiles *mf;
-
-	mf = TRACKER_MINER_FILES (user_data);
-
-	set_up_application_indexing (mf);
-
-	return FALSE;
-}
-
-static void
-index_applications_changed_cb (GObject    *gobject,
-                               GParamSpec *arg1,
-                               gpointer    user_data)
-{
-	TrackerMinerFiles *miner_files = user_data;
-
-	TRACKER_NOTE (CONFIG, g_message ("Application related configuration changed, updating..."));
-
-	if (miner_files->private->applications_changed_id == 0) {
-		/* Set idle so multiple changes in the config lead to one check */
-		miner_files->private->applications_changed_id =
-			g_idle_add (index_applications_changed_idle, miner_files);
 	}
 }
 
