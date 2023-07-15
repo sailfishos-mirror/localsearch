@@ -39,6 +39,7 @@
 #include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-config.h"
+#include "tracker-controller.h"
 #include "tracker-miner-files.h"
 
 #define ABOUT	  \
@@ -1047,6 +1048,7 @@ main (gint argc, gchar *argv[])
 	GDBusConnection *connection;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerDomainOntology *domain_ontology;
+	TrackerController *controller;
 	GCancellable *cancellable;
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	GMemoryMonitor *memory_monitor;
@@ -1170,6 +1172,9 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
+	controller = tracker_controller_new (tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files)),
+	                                     tracker_miner_files_get_storage (TRACKER_MINER_FILES (miner_files)));
+
 	proxy_folders = g_ptr_array_new_with_free_func (g_object_unref);
 	cancellable = g_cancellable_new ();
 	g_dbus_proxy_new (connection,
@@ -1287,6 +1292,8 @@ main (gint argc, gchar *argv[])
 	g_object_unref (cancellable);
 	g_clear_object (&index_proxy);
 	g_clear_pointer (&proxy_folders, g_ptr_array_unref);
+
+	g_object_unref (controller);
 
 	g_object_unref (miner_files);
 
