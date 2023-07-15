@@ -320,8 +320,6 @@ static void
 tracker_miner_files_init (TrackerMinerFiles *mf)
 {
 	TrackerMinerFilesPrivate *priv;
-	gchar *rdf_types_str;
-	GStrv rdf_types;
 
 	priv = mf->private = TRACKER_MINER_FILES_GET_PRIVATE (mf);
 
@@ -358,12 +356,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	                  mf);
 
 	priv->mtime_check = TRUE;
-
-	rdf_types = tracker_extract_module_manager_get_all_rdf_types ();
-	rdf_types_str = g_strjoinv (",", rdf_types);
-	g_strfreev (rdf_types);
-
-	g_free (rdf_types_str);
 }
 
 static void
