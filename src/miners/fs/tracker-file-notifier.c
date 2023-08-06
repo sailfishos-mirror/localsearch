@@ -56,6 +56,7 @@ enum {
 	FILE_STATE_CREATE,
 	FILE_STATE_UPDATE,
 	FILE_STATE_DELETE,
+	FILE_STATE_EXTRACTOR_UPDATE,
 };
 
 typedef struct {
@@ -65,7 +66,7 @@ typedef struct {
 	guint in_store : 1;
 	guint is_dir_in_disk : 1;
 	guint is_dir_in_store : 1;
-	guint state : 2;
+	guint state : 3;
 	GDateTime *store_mtime;
 	GDateTime *disk_mtime;
 	gchar *extractor_hash;
@@ -329,7 +330,8 @@ tracker_file_notifier_notify (TrackerFileNotifier *notifier,
 	} else if (file_data->state == FILE_STATE_CREATE) {
 		/* In disk but not in store, create */
 		g_signal_emit (notifier, signals[FILE_CREATED], 0, file, info);
-	} else if (file_data->state == FILE_STATE_UPDATE) {
+	} else if (file_data->state == FILE_STATE_UPDATE ||
+	           file_data->state == FILE_STATE_EXTRACTOR_UPDATE) {
 		/* File changed, update */
 		g_signal_emit (notifier, signals[FILE_UPDATED], 0, file, info, FALSE);
 	}
@@ -394,7 +396,7 @@ update_state (TrackerFileData *data)
 				current_hash = tracker_extract_module_manager_get_hash (data->mimetype);
 
 				if (g_strcmp0 (data->extractor_hash, current_hash) != 0) {
-					data->state = FILE_STATE_UPDATE;
+					data->state = FILE_STATE_EXTRACTOR_UPDATE;
 				}
 			}
 		} else {
@@ -838,9 +840,11 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	parent = g_file_get_parent (file);
 
 	/* Notify immediately of changes, unless the directory needs crawling.
-	 * Deleted events can be emitted right away.
+	 * Deleted events and updates due to extractor changes can be emitted
+	 * right away.
 	 */
 	if (file_data->state == FILE_STATE_DELETE ||
+	    file_data->state == FILE_STATE_EXTRACTOR_UPDATE ||
 	    !g_queue_find_custom (root->pending_dirs, parent,
 	                          file_is_equal_or_child)) {
 		tracker_file_notifier_notify (notifier, file_data, info);
