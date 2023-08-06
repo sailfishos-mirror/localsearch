@@ -47,7 +47,6 @@ struct _PatternData
 {
 	GPatternSpec *pattern;
 	TrackerFilterType type;
-	GFile *file; /* Only filled in in absolute paths */
 };
 
 struct _FindNodeData
@@ -123,20 +122,12 @@ pattern_data_new (const gchar *glob_string,
 	data->pattern = g_pattern_spec_new (glob_string);
 	data->type = type;
 
-	if (g_path_is_absolute (glob_string)) {
-		data->file = g_file_new_for_path (glob_string);
-	}
-
 	return data;
 }
 
 static void
 pattern_data_free (PatternData *data)
 {
-	if (data->file) {
-		g_object_unref (data->file);
-	}
-
 	g_pattern_spec_free (data->pattern);
 	g_slice_free (PatternData, data);
 }
@@ -695,6 +686,11 @@ tracker_indexing_tree_add_filter (TrackerIndexingTree *tree,
 
 	priv = tree->priv;
 
+	if (g_path_is_absolute (glob_string)) {
+		g_warning ("Absolute paths are no longer allowed in 'ignored-files', 'ignored-directories', or 'ignored-directories-with-content'");
+		return;
+	}
+
 	data = pattern_data_new (glob_string, filter);
 	priv->filter_patterns = g_list_prepend (priv->filter_patterns, data);
 }
@@ -770,13 +766,6 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 
 		if (data->type != type)
 			continue;
-
-		if (data->file &&
-		    (g_file_equal (file, data->file) ||
-		     g_file_has_prefix (file, data->file))) {
-			match = TRUE;
-			break;
-		}
 
 #if GLIB_CHECK_VERSION (2, 70, 0)
 		if (g_pattern_spec_match (data->pattern, len, str, reverse))
