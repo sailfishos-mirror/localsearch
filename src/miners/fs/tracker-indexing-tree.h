@@ -105,9 +105,8 @@ gboolean  tracker_indexing_tree_file_matches_filter  (TrackerIndexingTree  *tree
 gboolean  tracker_indexing_tree_file_is_indexable    (TrackerIndexingTree  *tree,
                                                       GFile                *file,
                                                       GFileInfo            *info);
-gboolean  tracker_indexing_tree_parent_is_indexable  (TrackerIndexingTree  *tree,
-                                                      GFile                *parent,
-                                                      GList                *children);
+gboolean  tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree  *tree,
+                                                     GFile                *file);
 
 gboolean  tracker_indexing_tree_get_filter_hidden    (TrackerIndexingTree  *tree);
 void      tracker_indexing_tree_set_filter_hidden    (TrackerIndexingTree  *tree,

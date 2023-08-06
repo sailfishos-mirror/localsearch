@@ -528,34 +528,6 @@ miner_finished_cb (TrackerMinerFS *fs,
 	}
 }
 
-static GList *
-get_dir_children_as_gfiles (const gchar *path)
-{
-	GList *children = NULL;
-	GDir *dir;
-
-	dir = g_dir_open (path, 0, NULL);
-
-	if (dir) {
-		const gchar *basename;
-
-		while ((basename = g_dir_read_name (dir)) != NULL) {
-			GFile *child;
-			gchar *str;
-
-			str = g_build_filename (path, basename, NULL);
-			child = g_file_new_for_path (str);
-			g_free (str);
-
-			children = g_list_prepend (children, child);
-		}
-
-		g_dir_close (dir);
-	}
-
-	return children;
-}
-
 static void
 dummy_log_handler (const gchar    *domain,
                    GLogLevelFlags  log_level,
@@ -717,16 +689,12 @@ check_eligible (void)
 				g_print ("\n");
 				parents_indexable = FALSE;
 			} else {
-				GList *children = get_dir_children_as_gfiles (dir_path);
-
-				if (!tracker_indexing_tree_parent_is_indexable (indexing_tree, l->data, children)) {
+				if (!tracker_indexing_tree_parent_is_indexable (indexing_tree, l->data)) {
 					g_print (_("Parent directory “%s” is NOT eligible to be indexed (based on content filters)"),
 					         dir_path);
 					g_print ("\n");
 					parents_indexable = FALSE;
 				}
-
-				g_list_free_full (children, g_object_unref);
 			}
 
 			g_free (dir_path);

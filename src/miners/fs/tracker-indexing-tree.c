@@ -888,8 +888,7 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 /**
  * tracker_indexing_tree_parent_is_indexable:
  * @tree: a #TrackerIndexingTree
- * @parent: parent directory
- * @children: (element-type GFile): children within @parent
+ * @parent: directory
  *
  * returns %TRUE if @parent should be indexed based on its contents.
  *
@@ -897,19 +896,33 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
  **/
 gboolean
 tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
-                                           GFile               *parent,
-                                           GList               *children)
+                                           GFile               *parent)
 {
+	TrackerIndexingTreePrivate *priv;
 	gboolean has_match = FALSE;
+	GList *filters;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (parent), FALSE);
 
-	while (children && !has_match) {
-		has_match = tracker_indexing_tree_file_matches_filter (tree,
-		                                                       TRACKER_FILTER_PARENT_DIRECTORY,
-		                                                       children->data);
-		children = children->next;
+	priv = tree->priv;
+	filters = priv->filter_patterns;
+
+	while (filters) {
+		PatternData *data = filters->data;
+		g_autoptr (GFile) child = NULL;
+
+		filters = filters->next;
+
+		if (data->type != TRACKER_FILTER_PARENT_DIRECTORY)
+			continue;
+
+		child = g_file_get_child (parent, data->string);
+
+		if (g_file_query_exists (child, NULL)) {
+			has_match = TRUE;
+			break;
+		}
 	}
 
 	return !has_match;

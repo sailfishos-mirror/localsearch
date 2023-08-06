@@ -305,7 +305,7 @@ check_directory_contents (TrackerFileNotifier *notifier,
 	 */
 	if (!tracker_indexing_tree_file_is_root (priv->indexing_tree, parent)) {
 		process = tracker_indexing_tree_parent_is_indexable (priv->indexing_tree,
-		                                                     parent, (GList*) children);
+		                                                     parent);
 	}
 
 	if (!process)
@@ -1045,17 +1045,13 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 
 	if (!is_directory) {
 		gboolean parent_indexable;
-		GList *children;
 		GFile *parent;
 
 		parent = g_file_get_parent (file);
 
 		if (parent) {
-			children = g_list_prepend (NULL, file);
 			parent_indexable = tracker_indexing_tree_parent_is_indexable (priv->indexing_tree,
-			                                                              parent,
-			                                                              children);
-			g_list_free (children);
+			                                                              parent);
 
 			if (!parent_indexable) {
 				/* New file triggered a directory content
@@ -1187,15 +1183,12 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 	if (!is_directory) {
 		TrackerDirectoryFlags flags;
 		gboolean indexable;
-		GList *children;
 		GFile *parent;
 
-		children = g_list_prepend (NULL, file);
 		parent = g_file_get_parent (file);
 
 		indexable = tracker_indexing_tree_parent_is_indexable (priv->indexing_tree,
-		                                                       parent, children);
-		g_list_free (children);
+		                                                       parent);
 
 		/* note: This supposedly works, but in practice
 		 * won't ever happen as we don't get monitor events
