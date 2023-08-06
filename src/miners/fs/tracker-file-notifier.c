@@ -26,7 +26,6 @@
 #include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-file-notifier.h"
-#include "tracker-crawler.h"
 #include "tracker-monitor-glib.h"
 #include "tracker-utils.h"
 
@@ -77,6 +76,7 @@ typedef struct {
 	TrackerFileNotifier *notifier;
 	TrackerSparqlCursor *cursor;
 	GFile *root;
+	GFileEnumerator *enumerator;
 	GCancellable *cancellable;
 	GHashTable *cache;
 	GQueue queue;
@@ -100,7 +100,6 @@ typedef struct {
 	TrackerSparqlConnection *connection;
 	GCancellable *cancellable;
 
-	TrackerCrawler *crawler;
 	TrackerMonitor *monitor;
 	TrackerDataProvider *data_provider;
 
@@ -121,6 +120,7 @@ typedef struct {
 } TrackerFileNotifierPrivate;
 
 #define N_CURSOR_BATCH_ITEMS 200
+#define N_ENUMERATOR_BATCH_ITEMS 200
 
 static gboolean tracker_index_root_query_contents (TrackerIndexRoot *root);
 static gboolean tracker_index_root_crawl_next (TrackerIndexRoot *root);
@@ -235,6 +235,7 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	g_queue_clear (&data->queue);
 	g_queue_clear_full (&data->deleted_dirs, g_object_unref);
 	g_hash_table_destroy (data->cache);
+	g_clear_object (&data->enumerator);
 	g_clear_object (&data->current_dir);
 	g_clear_object (&data->cursor);
 	g_clear_handle_id (&data->cursor_idle_id, g_source_remove);
@@ -243,7 +244,6 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	g_free (data);
 }
 
-/* Crawler signal handlers */
 static gboolean
 check_file (TrackerFileNotifier *notifier,
             GFile               *file,
@@ -291,8 +291,7 @@ check_directory (TrackerFileNotifier *notifier,
 
 static gboolean
 check_directory_contents (TrackerFileNotifier *notifier,
-                          GFile               *parent,
-                          const GList         *children)
+                          GFile               *parent)
 {
 	TrackerFileNotifierPrivate *priv;
 	gboolean process = TRUE;
@@ -446,119 +445,6 @@ _insert_disk_info (TrackerIndexRoot *root,
 	return file_data;
 }
 
-static gboolean
-file_notifier_add_node_foreach (GNode    *node,
-                                gpointer  user_data)
-{
-	TrackerIndexRoot *root = user_data;
-	TrackerFileNotifier *notifier = root->notifier;
-	TrackerFileNotifierPrivate *priv;
-	GFileInfo *file_info;
-	GFile *file;
-
-	priv = tracker_file_notifier_get_instance_private (notifier);
-	file = node->data;
-
-	if (G_NODE_IS_ROOT (node) &&
-	    (file != root->root || root->ignore_root))
-		return FALSE;
-
-	file_info = tracker_crawler_get_file_info (priv->crawler, file);
-
-	if (file_info) {
-		TrackerFileData *file_data;
-		GFileType file_type;
-		g_autoptr (GDateTime) datetime = NULL;
-
-		file_type = g_file_info_get_file_type (file_info);
-		datetime = g_file_info_get_modification_date_time (file_info);
-
-		file_data = _insert_disk_info (root,
-		                               file,
-		                               file_type,
-		                               datetime);
-
-		if (file_type == G_FILE_TYPE_DIRECTORY &&
-		    file_data->state == FILE_STATE_CREATE &&
-		    (root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
-		    !g_file_info_get_attribute_boolean (file_info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT) &&
-		    !G_NODE_IS_ROOT (node)) {
-			/* Queue child dirs for later processing */
-			g_assert (node->children == NULL);
-			g_queue_push_tail (root->pending_dirs, g_object_ref (file));
-		}
-
-		g_object_ref (file);
-		g_queue_delete_link (&root->queue, file_data->node);
-
-		if (file_data->state != FILE_STATE_NONE)
-			tracker_file_notifier_notify (notifier, file_data, file_info);
-
-		g_hash_table_remove (root->cache, file);
-		g_object_unref (file);
-	}
-
-	return FALSE;
-}
-
-static void
-crawler_get_cb (TrackerCrawler   *crawler,
-                GAsyncResult     *result,
-                TrackerIndexRoot *root)
-{
-	guint directories_found, directories_ignored;
-	guint files_found, files_ignored;
-	GFile *directory;
-	GNode *tree;
-	GError *error = NULL;
-
-	if (!tracker_crawler_get_finish (crawler,
-	                                 result,
-	                                 &directory,
-	                                 &tree,
-	                                 &directories_found,
-	                                 &directories_ignored,
-	                                 &files_found,
-	                                 &files_ignored,
-	                                 &error)) {
-		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			/* Nothing to do */
-			g_clear_error (&error);
-		} else {
-			if (error &&
-			    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
-			    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
-				gchar *uri;
-
-				uri = g_file_get_uri (directory);
-				g_warning ("Got error crawling '%s': %s\n",
-				           uri, error->message);
-				g_free (uri);
-			}
-
-			g_clear_error (&error);
-
-			tracker_index_root_continue (root);
-		}
-
-		return;
-	}
-
-	g_node_traverse (tree,
-	                 G_PRE_ORDER,
-	                 G_TRAVERSE_ALL,
-	                 -1,
-	                 file_notifier_add_node_foreach,
-	                 root);
-
-	root->directories_found += directories_found;
-	root->directories_ignored += directories_ignored;
-	root->files_found += files_found;
-	root->files_ignored += files_ignored;
-
-	tracker_index_root_continue (root);
-}
-
 static TrackerFileData *
 _insert_store_info (TrackerIndexRoot *root,
                     GFile            *file,
@@ -595,13 +481,204 @@ check_high_water (TrackerFileNotifier *notifier)
 	return FALSE;
 }
 
+static void
+handle_file_from_filesystem (TrackerIndexRoot *root,
+                             GFile            *file,
+                             GFileInfo        *info)
+{
+	TrackerFileData *file_data;
+	GFileType file_type;
+	g_autoptr (GDateTime) datetime = NULL;
+
+	file_type = g_file_info_get_file_type (info);
+	datetime = g_file_info_get_modification_date_time (info);
+	file_data = _insert_disk_info (root,
+	                               file,
+	                               file_type,
+	                               datetime);
+
+	if (file_type == G_FILE_TYPE_DIRECTORY &&
+	    file_data->state == FILE_STATE_CREATE &&
+	    (root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
+	    !g_file_equal (file, root->current_dir) &&
+	    check_directory_contents (root->notifier, file) &&
+	    !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) {
+		/* Queue child dirs for later processing */
+		g_queue_push_tail (root->pending_dirs, g_object_ref (file));
+	}
+
+	tracker_file_notifier_notify (root->notifier, file_data, info);
+	g_queue_delete_link (&root->queue, file_data->node);
+	g_hash_table_remove (root->cache, file);
+}
+
+static void
+enumerator_next_files_cb (GObject      *object,
+                          GAsyncResult *res,
+                          gpointer      user_data)
+{
+	TrackerIndexRoot *root;
+	g_autoptr (GError) error = NULL;
+	GList *infos, *l;
+	int n_files = 0;
+
+	infos = g_file_enumerator_next_files_finish (G_FILE_ENUMERATOR (object), res, &error);
+
+	if (error) {
+		g_autofree gchar *uri = NULL;
+
+		/* Caller already commanded the way to continue */
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return;
+
+		uri = g_file_get_uri (g_file_enumerator_get_container (G_FILE_ENUMERATOR (object)));
+		g_warning ("Got error crawling '%s': %s\n",
+		           uri, error->message);
+
+		tracker_index_root_continue (user_data);
+		return;
+	} else if (!infos) {
+		/* Directory contents were fully obtained */
+		tracker_index_root_continue (user_data);
+		return;
+	}
+
+	root = user_data;
+
+	for (l = infos; l; l = l->next) {
+		GFileInfo *info = l->data;
+		GFileType file_type;
+		g_autoptr (GFile) file = NULL;
+
+		file = g_file_enumerator_get_child (G_FILE_ENUMERATOR (object), info);
+		file_type = g_file_info_get_file_type (info);
+		n_files++;
+
+		if (file_type == G_FILE_TYPE_DIRECTORY) {
+			root->directories_found++;
+
+			if (!check_directory (root->notifier, file, info)) {
+				root->directories_ignored++;
+				continue;
+			}
+		} else {
+			root->files_found++;
+
+			if (!check_file (root->notifier, file, info)) {
+				root->files_ignored++;
+				continue;
+			}
+		}
+
+		handle_file_from_filesystem (root, file, info);
+	}
+
+	g_list_free_full (infos, g_object_unref);
+
+	if (n_files == N_ENUMERATOR_BATCH_ITEMS) {
+		g_file_enumerator_next_files_async (root->enumerator,
+		                                    N_ENUMERATOR_BATCH_ITEMS,
+		                                    G_PRIORITY_DEFAULT,
+		                                    root->cancellable,
+		                                    enumerator_next_files_cb,
+		                                    root);
+	} else {
+		tracker_index_root_continue (user_data);
+	}
+}
+
+static void
+enumerate_children_cb (GObject      *object,
+                       GAsyncResult *res,
+                       gpointer      user_data)
+{
+	TrackerIndexRoot *root;
+	g_autoptr (GFileEnumerator) enumerator = NULL;
+	g_autoptr (GError) error = NULL;
+
+	enumerator = g_file_enumerate_children_finish (G_FILE (object), res, &error);
+
+	if (!enumerator) {
+		/* Caller already commanded the way to continue */
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return;
+
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
+			g_autofree gchar *uri = NULL;
+
+			uri = g_file_get_uri (G_FILE (object));
+			g_warning ("Got error crawling '%s': %s\n",
+			           uri, error->message);
+		}
+
+		tracker_index_root_continue (user_data);
+		return;
+	}
+
+	root = user_data;
+	g_set_object (&root->enumerator, enumerator);
+	g_file_enumerator_next_files_async (root->enumerator,
+	                                    N_ENUMERATOR_BATCH_ITEMS,
+	                                    G_PRIORITY_DEFAULT,
+	                                    root->cancellable,
+	                                    enumerator_next_files_cb,
+	                                    root);
+}
+
+static void
+query_root_info_cb (GObject      *object,
+                    GAsyncResult *res,
+                    gpointer      user_data)
+{
+	TrackerIndexRoot *root;
+	TrackerFileNotifier *notifier;
+	TrackerFileNotifierPrivate *priv;
+	g_autoptr (GFileInfo) info = NULL;
+	g_autoptr (GError) error = NULL;
+
+	info = g_file_query_info_finish (G_FILE (object), res, &error);
+	if (error) {
+		/* Caller already commanded the way to continue */
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return;
+
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND) &&
+		    !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_PERMISSION_DENIED)) {
+			gchar *uri;
+
+			uri = g_file_get_uri (G_FILE (object));
+			g_warning ("Got error querying root '%s': %s\n",
+			           uri, error->message);
+			g_free (uri);
+		}
+
+		tracker_index_root_continue (user_data);
+		return;
+	}
+
+	root = user_data;
+	notifier = root->notifier;
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	handle_file_from_filesystem (root, G_FILE (object), info);
+
+	g_file_enumerate_children_async (G_FILE (object),
+	                                 priv->file_attributes,
+	                                 G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                                 G_PRIORITY_DEFAULT,
+	                                 root->cancellable,
+	                                 enumerate_children_cb,
+	                                 root);
+}
+
 static gboolean
 tracker_index_root_crawl_next (TrackerIndexRoot *root)
 {
 	TrackerFileNotifier *notifier;
 	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
-	GFile *directory;
+	g_autoptr (GFile) directory = NULL;
 
 	notifier = root->notifier;
 	priv = tracker_file_notifier_get_instance_private (notifier);
@@ -623,14 +700,24 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 
 	priv->active = TRUE;
 
-	/* Begin crawling the directory non-recursively. */
-	tracker_crawler_get (priv->crawler,
-	                     directory,
-	                     priv->current_index_root->flags,
-	                     priv->cancellable,
-	                     (GAsyncReadyCallback) crawler_get_cb,
-	                     root);
-	g_object_unref (directory);
+	if (directory == root->root && !root->ignore_root) {
+		g_file_query_info_async (directory,
+		                         priv->file_attributes,
+		                         G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                         G_PRIORITY_DEFAULT,
+		                         root->cancellable,
+		                         query_root_info_cb,
+		                         root);
+	} else {
+		g_file_enumerate_children_async (directory,
+		                                 priv->file_attributes,
+		                                 G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                                 G_PRIORITY_DEFAULT,
+		                                 root->cancellable,
+		                                 enumerate_children_cb,
+		                                 root);
+	}
+
 	return TRUE;
 }
 
@@ -1525,7 +1612,6 @@ tracker_file_notifier_finalize (GObject *object)
 	tracker_monitor_set_enabled (priv->monitor, FALSE);
 	g_signal_handlers_disconnect_by_data (priv->monitor, object);
 
-	g_object_unref (priv->crawler);
 	g_object_unref (priv->monitor);
 	g_clear_object (&priv->connection);
 
@@ -1574,34 +1660,6 @@ check_disable_monitor (TrackerFileNotifier *notifier)
 	}
 }
 
-static gboolean
-crawler_check_func (TrackerCrawler           *crawler,
-                    TrackerCrawlerCheckFlags  flags,
-                    GFile                    *file,
-                    GFileInfo                *file_info,
-                    const GList              *children,
-                    gpointer                  user_data)
-{
-	TrackerFileNotifier *notifier = user_data;
-
-	if (flags & TRACKER_CRAWLER_CHECK_FILE) {
-		if (!check_file (notifier, file, file_info))
-			return FALSE;
-	}
-
-	if (flags & TRACKER_CRAWLER_CHECK_DIRECTORY) {
-		if (!check_directory (notifier, file, file_info))
-			return FALSE;
-	}
-
-	if (flags & TRACKER_CRAWLER_CHECK_CONTENT) {
-		if (!check_directory_contents (notifier, file, children))
-			return FALSE;
-	}
-
-	return TRUE;
-}
-
 static void
 tracker_file_notifier_constructed (GObject *object)
 {
@@ -1620,13 +1678,6 @@ tracker_file_notifier_constructed (GObject *object)
 	                  G_CALLBACK (indexing_tree_directory_removed), object);
 	g_signal_connect (priv->indexing_tree, "child-updated",
 	                  G_CALLBACK (indexing_tree_child_updated), object);
-
-	/* Set up crawler */
-	priv->crawler = tracker_crawler_new (priv->data_provider);
-	tracker_crawler_set_check_func (priv->crawler,
-	                                crawler_check_func,
-	                                object, NULL);
-	tracker_crawler_set_file_attributes (priv->crawler, priv->file_attributes);
 
 	check_disable_monitor (TRACKER_FILE_NOTIFIER (object));
 }
