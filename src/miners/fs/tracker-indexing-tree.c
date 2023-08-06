@@ -46,6 +46,7 @@ struct _NodeData
 struct _PatternData
 {
 	GPatternSpec *pattern;
+	gchar *string;
 	TrackerFilterType type;
 };
 
@@ -113,14 +114,23 @@ node_free (GNode    *node,
 }
 
 static PatternData *
-pattern_data_new (const gchar *glob_string,
+pattern_data_new (const gchar *string,
                   guint        type)
 {
 	PatternData *data;
 
 	data = g_slice_new0 (PatternData);
-	data->pattern = g_pattern_spec_new (glob_string);
 	data->type = type;
+
+	switch (type) {
+	case TRACKER_FILTER_FILE:
+	case TRACKER_FILTER_DIRECTORY:
+		data->pattern = g_pattern_spec_new (string);
+		break;
+	case TRACKER_FILTER_PARENT_DIRECTORY:
+		data->string = g_strdup (string);
+		break;
+	}
 
 	return data;
 }
@@ -128,7 +138,8 @@ pattern_data_new (const gchar *glob_string,
 static void
 pattern_data_free (PatternData *data)
 {
-	g_pattern_spec_free (data->pattern);
+	g_clear_pointer (&data->pattern, g_pattern_spec_free);
+	g_free (data->string);
 	g_slice_free (PatternData, data);
 }
 
@@ -691,6 +702,11 @@ tracker_indexing_tree_add_filter (TrackerIndexingTree *tree,
 		return;
 	}
 
+	if (filter == TRACKER_FILTER_PARENT_DIRECTORY && g_utf8_strchr (glob_string, -1, '*')) {
+		g_warning ("Glob strings are no longer allowed in 'ignored-directories-with-content'");
+		return;
+	}
+
 	data = pattern_data_new (glob_string, filter);
 	priv->filter_patterns = g_list_prepend (priv->filter_patterns, data);
 }
@@ -766,6 +782,11 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 
 		if (data->type != type)
 			continue;
+
+		if (!data->pattern) {
+			match = g_strcmp0 (str, data->string) == 0;
+			break;
+		}
 
 #if GLIB_CHECK_VERSION (2, 70, 0)
 		if (g_pattern_spec_match (data->pattern, len, str, reverse))
