@@ -39,6 +39,7 @@
 #include "tracker-ioprio.h"
 #include "tracker-miner-object.h"
 #include "tracker-miner-proxy.h"
+#include "tracker-power.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
 #include "tracker-term-utils.h"
