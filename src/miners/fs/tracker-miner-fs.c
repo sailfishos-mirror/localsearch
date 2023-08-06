@@ -21,7 +21,6 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 
-#include "tracker-crawler.h"
 #include "tracker-miner-fs.h"
 #include "tracker-monitor.h"
 #include "tracker-utils.h"
@@ -45,6 +44,8 @@
 #define TRACKER_TASK_PRIORITY G_PRIORITY_DEFAULT_IDLE + 10
 
 #define MAX_SIMULTANEOUS_ITEMS 64
+
+#define TRACKER_CRAWLER_MAX_TIMEOUT_INTERVAL 1000
 
 /**
  * SECTION:tracker-miner-fs
