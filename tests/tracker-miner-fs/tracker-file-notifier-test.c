@@ -273,20 +273,18 @@ assert_notifier_properties (TrackerFileNotifier     *notifier,
 			    TrackerIndexingTree     *tree,
 			    const gchar             *attributes)
 {
-	g_autoptr (GObject) c = NULL, i = NULL, p = NULL;
+	g_autoptr (GObject) c = NULL, i = NULL;
 	g_autofree gchar *a = NULL;
 
 	g_object_get (notifier,
 		      "connection", &c,
 		      "indexing-tree", &i,
 		      "file-attributes", &a,
-		      "data-provider", &p,
 		      NULL);
 
 	g_assert_true (connection == TRACKER_SPARQL_CONNECTION (c));
 	g_assert_true (tree == TRACKER_INDEXING_TREE (i));
 	g_assert_cmpstr (attributes, ==, a);
-	g_assert_null (p);
 }
 
 static void
@@ -318,7 +316,7 @@ test_common_context_setup (TestCommonContext *fixture,
 	tracker_indexing_tree_set_filter_hidden (fixture->indexing_tree, TRUE);
 
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
-	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree, FALSE,
+	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree,
 	                                               fixture->connection,
 	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
 	                                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","

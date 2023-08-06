@@ -83,7 +83,6 @@
  *                         error,
  *                         "name", "MyMinerFiles",
  *                         "root", root,
- *                         "data-provider", data_provider,
  *                         "processing-pool-wait-limit", 10,
  *                         "processing-pool-ready-limit", 100,
  *                         NULL);
@@ -120,7 +119,6 @@ struct _TrackerMinerFSPrivate {
 	GFile *root;
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
-	TrackerDataProvider *data_provider;
 
 	/* Sparql insertion tasks */
 	TrackerTaskPool *task_pool;
@@ -191,7 +189,6 @@ enum {
 	PROP_ROOT,
 	PROP_WAIT_POOL_LIMIT,
 	PROP_READY_POOL_LIMIT,
-	PROP_DATA_PROVIDER,
 	PROP_FILE_ATTRIBUTES,
 };
 
@@ -351,13 +348,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                    1, G_MAXUINT, DEFAULT_READY_POOL_LIMIT,
 	                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
-	                                 PROP_DATA_PROVIDER,
-	                                 g_param_spec_object ("data-provider",
-	                                                      "Data provider",
-	                                                      "Data provider populating data, e.g. like GFileEnumerator",
-	                                                      TRACKER_TYPE_DATA_PROVIDER,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
 	                                 PROP_FILE_ATTRIBUTES,
 	                                 g_param_spec_string ("file-attributes",
 	                                                      "File attributes",
@@ -502,7 +492,6 @@ miner_fs_initable_init (GInitable     *initable,
 
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
-	                                                 priv->data_provider,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (initable)),
 	                                                 priv->file_attributes);
 
@@ -766,9 +755,6 @@ fs_set_property (GObject      *object,
 			                             fs->priv->sparql_buffer_limit);
 		}
 		break;
-	case PROP_DATA_PROVIDER:
-		fs->priv->data_provider = g_value_dup_object (value);
-		break;
 	case PROP_FILE_ATTRIBUTES:
 		fs->priv->file_attributes = g_value_dup_string (value);
 		break;
@@ -799,9 +785,6 @@ fs_get_property (GObject    *object,
 		break;
 	case PROP_READY_POOL_LIMIT:
 		g_value_set_uint (value, fs->priv->sparql_buffer_limit);
-		break;
-	case PROP_DATA_PROVIDER:
-		g_value_set_object (value, fs->priv->data_provider);
 		break;
 	case PROP_FILE_ATTRIBUTES:
 		g_value_set_string (value, fs->priv->file_attributes);
@@ -1919,25 +1902,6 @@ tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 
 	return fs->priv->indexing_tree;
-}
-
-/**
- * tracker_miner_fs_get_data_provider:
- * @fs: a #TrackerMinerFS
- *
- * Returns the #TrackerDataProvider implementation, which is being used
- * to supply #GFile and #GFileInfo content to Tracker.
- *
- * Returns: (transfer none): The #TrackerDataProvider supplying content
- *
- * Since: 1.2
- **/
-TrackerDataProvider *
-tracker_miner_fs_get_data_provider (TrackerMinerFS *fs)
-{
-	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
-
-	return fs->priv->data_provider;
 }
 
 const gchar *
