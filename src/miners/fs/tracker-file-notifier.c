@@ -1548,7 +1548,7 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerFileNotifierPrivate *priv;
 	TrackerDirectoryFlags flags;
-	GFileInfo *child_info;
+	g_autoptr (GFileInfo) child_info = NULL;
 	GFileType child_type;
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
