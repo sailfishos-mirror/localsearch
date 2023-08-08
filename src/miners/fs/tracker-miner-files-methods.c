@@ -120,6 +120,23 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
+gchar *
+get_content_type (GFile     *file,
+		  GFileInfo *file_info)
+{
+	g_autoptr (GFileInfo) content_info = NULL;
+
+	if (!g_file_info_has_attribute (file_info, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE)) {
+		content_info =
+			g_file_query_info (file,
+					   G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+					   G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+					   NULL, NULL);
+	}
+
+	return g_strdup (g_file_info_get_content_type (content_info ? content_info : file_info));
+}
+
 void
 tracker_miner_files_process_file (TrackerMinerFS      *fs,
                                   GFile               *file,
@@ -129,10 +146,11 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 {
 	TrackerIndexingTree *indexing_tree;
 	g_autoptr (TrackerResource) resource = NULL, folder_resource = NULL, graph_file = NULL;
-	const gchar *mime_type, *graph;
+	const gchar *graph;
 	const gchar *parent_urn;
 	g_autoptr (GFile) parent = NULL;
 	g_autofree gchar *uri = NULL;
+	g_autofree gchar *mime_type = NULL;
 	gboolean is_directory, is_root;
 	g_autoptr (GDateTime) modified = NULL;
 #ifdef GIO_SUPPORTS_CREATION_TIME
@@ -144,7 +162,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 	uri = g_file_get_uri (file);
 	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
-	mime_type = g_file_info_get_content_type (file_info);
+	mime_type = get_content_type (file, file_info);
 
 	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
@@ -245,7 +263,8 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 {
 	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
 	g_autofree gchar *uri = NULL;
-	const gchar *mime_type, *graph;
+	g_autofree gchar *mime_type = NULL;
+	const gchar *graph;
 	g_autoptr (GDateTime) modified = NULL;
 #ifdef GIO_SUPPORTS_CREATION_TIME
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
@@ -271,7 +290,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	if (!modified)
 		modified = g_date_time_new_from_unix_utc (0);
 
-	mime_type = g_file_info_get_content_type (info);
+	mime_type = get_content_type (file, info);
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	/* Update nfo:fileLastModified */
