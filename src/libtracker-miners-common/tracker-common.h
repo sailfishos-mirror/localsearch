@@ -28,6 +28,10 @@
 
 #define __LIBTRACKER_COMMON_INSIDE__
 
+#ifdef HAVE_POWER
+#include "tracker-power.h"
+#endif
+
 #include "tracker-date-time.h"
 #include "tracker-dbus.h"
 #include "tracker-debug.h"
@@ -39,7 +43,6 @@
 #include "tracker-ioprio.h"
 #include "tracker-miner-object.h"
 #include "tracker-miner-proxy.h"
-#include "tracker-power.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
 #include "tracker-term-utils.h"
