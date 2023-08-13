@@ -24,6 +24,7 @@
 #include <locale.h>
 #include <errno.h>
 #include <sys/types.h>
+#include <sys/resource.h>
 #include <unistd.h>
 
 #ifdef HAVE_MALLOC_TRIM
@@ -336,6 +337,19 @@ initialize_priority_and_scheduling (void)
 		g_message ("Couldn't set nice value to 19, %s",
 		           str ? str : "no error given");
 	}
+}
+
+static void
+raise_file_descriptor_limit (void)
+{
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) != 0)
+		return;
+
+	rl.rlim_cur = rl.rlim_max;
+	if (setrlimit(RLIMIT_NOFILE, &rl) != 0)
+		g_warning ("Failed to increase file descriptor limit: %m");
 }
 
 static gboolean
@@ -924,6 +938,11 @@ main (gint argc, gchar *argv[])
 
 	/* This makes sure we don't steal all the system's resources */
 	initialize_priority_and_scheduling ();
+
+	/* This makes it harder to run out of file descriptors while there
+	 * are many concurrently running queries through the endpoint.
+	 */
+	raise_file_descriptor_limit ();
 
 	/* Translators: this messagge will apper immediately after the
 	 * usage string - Usage: COMMAND <THIS_MESSAGE>
