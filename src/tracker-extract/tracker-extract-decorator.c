@@ -46,6 +46,7 @@ struct _TrackerExtractDecoratorPrivate {
 	TrackerExtract *extractor;
 	GTimer *timer;
 	gboolean extracting;
+	gboolean paused_on_low_battery;
 
 	TrackerSparqlStatement *update_hash;
 	TrackerSparqlStatement *delete_file;
@@ -133,6 +134,24 @@ persistence_ignore_file (GFile    *file,
 }
 
 static void
+low_battery_cb (TrackerExtractDecorator *extract_decorator)
+{
+	TrackerExtractDecoratorPrivate *priv =
+		tracker_extract_decorator_get_instance_private (extract_decorator);
+	gboolean on_low_battery;
+
+	on_low_battery = tracker_power_get_on_low_battery (priv->power);
+
+	if (on_low_battery && !priv->paused_on_low_battery) {
+		tracker_miner_pause (TRACKER_MINER (extract_decorator));
+		priv->paused_on_low_battery = TRUE;
+	} else if (!on_low_battery && priv->paused_on_low_battery) {
+		tracker_miner_resume (TRACKER_MINER (extract_decorator));
+		priv->paused_on_low_battery = FALSE;
+	}
+}
+
+static void
 tracker_extract_decorator_constructed (GObject *object)
 {
 	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (object);
@@ -150,6 +169,9 @@ tracker_extract_decorator_constructed (GObject *object)
 
 #ifdef HAVE_POWER
 	priv->power = tracker_power_new ();
+	g_signal_connect_swapped (priv->power, "notify::on-low-battery",
+				  G_CALLBACK (low_battery_cb),
+				  object);
 #endif /* HAVE_POWER */
 }
 
