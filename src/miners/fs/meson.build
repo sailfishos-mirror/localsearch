@@ -60,14 +60,6 @@ tracker_miner_fs_deps = [
      tracker_extract_dep
 ]
 
-if battery_detection_library_name == 'upower'
-  sources += 'tracker-power-upower.c'
-  tracker_miner_fs_deps += upower
-elif battery_detection_library_name == 'hal'
-  sources += 'tracker-power-hal.c'
-  tracker_miner_fs_deps += hal
-endif
-
 executable('tracker-miner-fs-@0@'.format(tracker_api_major),
     sources,
     miner_fs_resources[0], miner_fs_resources[1],
