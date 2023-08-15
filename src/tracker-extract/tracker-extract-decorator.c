@@ -133,6 +133,7 @@ persistence_ignore_file (GFile    *file,
 	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
 }
 
+#ifdef HAVE_POWER
 static void
 low_battery_cb (TrackerExtractDecorator *extract_decorator)
 {
@@ -150,6 +151,7 @@ low_battery_cb (TrackerExtractDecorator *extract_decorator)
 		priv->paused_on_low_battery = FALSE;
 	}
 }
+#endif /* HAVE_POWER */
 
 static void
 tracker_extract_decorator_constructed (GObject *object)
