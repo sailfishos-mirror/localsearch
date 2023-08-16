@@ -13,7 +13,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2023-05-20 06:53+0000\n"
+"POT-Creation-Date: 2023-07-15 15:44+0000\n"
 "PO-Revision-Date: 2023-05-31 03:37+0300\n"
 "Last-Translator: Sabri Ünal <libreajans@gmail.com>\n"
 "Language-Team: Türkçe <takim@gnome.org.tr>\n"
@@ -88,18 +88,6 @@ msgstr "Sayıları yok say"
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 msgid "If enabled, numbers will not be indexed."
 msgstr "Etkinleştirildiğinde sayılar dizinlenemez."
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:42
-msgid "Ignore stop words"
-msgstr "Durdurma sözcüklerini yok say"
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
-msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common "
-"words like “the”, “yes”, “no”, etc."
-msgstr ""
-"Etkinleştirildiğinde durdurma-sözcüklerinde listelenen sözcükler yok "
-"sayılır. Örneğin; “evet”, “hayır” ve “ve” gibi sözcükler."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
@@ -243,38 +231,26 @@ msgstr ""
 "defaults ve $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
-msgid "Index applications installed on the system"
-msgstr "Sistemde kurulu uygulamaları dizinle"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
-msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files "
-"in the standard XDG system and user data directories."
-msgstr ""
-"Bu seçenek etkinleştirilirse; dosya sistemi madencisi, standart XDG sistem "
-"ve kullanıcı veri dizinlerinde .desktop dosyalarına bakacak."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Yok sayılan dosyalar"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
 msgstr "Kaçınılacak dosya örüntülerinin listesi"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
 msgstr "Yok sayılan dizinler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
 msgstr "Kaçınılacak dizinlerin listesi"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
 msgstr "İçeriğiyle yok sayılmış dizinler"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Engel listesine alınan dosyayı bulunduran dizinleri dışla"
 
@@ -433,7 +409,7 @@ msgstr "Dosya dizinlenmeye uygun"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:1075
+#: src/miners/fs/tracker-main.c:1073
 msgid "— start the tracker indexer"
 msgstr "— tracker dizinleyicisini çalıştır"
 
@@ -460,15 +436,15 @@ msgstr "Beslemeleri listele"
 msgid "Delete feed"
 msgstr "Beslemeyi sil"
 
-#: src/miners/rss/tracker-main.c:164 src/miners/rss/tracker-main.c:216
-#: src/miners/rss/tracker-main.c:253 src/tracker/tracker-info.c:446
+#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
+#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:446
 #: src/tracker/tracker-search.c:1371 src/tracker/tracker-status.c:92
 #: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "Tracker uygulamasına bağlantı kurulamıyor"
 
-#: src/miners/rss/tracker-main.c:165 src/miners/rss/tracker-main.c:217
-#: src/miners/rss/tracker-main.c:254 src/tracker/tracker-daemon.c:448
+#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
+#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:448
 #: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
@@ -480,22 +456,22 @@ msgstr "Tracker uygulamasına bağlantı kurulamıyor"
 msgid "No error given"
 msgstr "Hata belirtilmedi"
 
-#: src/miners/rss/tracker-main.c:190
+#: src/miners/rss/tracker-main.c:188
 msgid "Could not add feed"
 msgstr "Beseleme eklenemedi"
 
-#: src/miners/rss/tracker-main.c:228
+#: src/miners/rss/tracker-main.c:226
 msgid "Could not remove feed"
 msgstr "Besleme kaldırılamadı"
 
-#: src/miners/rss/tracker-main.c:296
+#: src/miners/rss/tracker-main.c:294
 msgid "Could not list feeds"
 msgstr "Bestelemeler listelenemedi"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/rss/tracker-main.c:424
+#: src/miners/rss/tracker-main.c:422
 msgid "— start the feeds indexer"
 msgstr "— besleme dizinleyicisini çalıştır"
 
