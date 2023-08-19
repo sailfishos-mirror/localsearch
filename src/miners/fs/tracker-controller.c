@@ -15,6 +15,10 @@ struct _TrackerController
 	TrackerConfig *config;
 	GVolumeMonitor *volume_monitor;
 
+	GDBusProxy *control_proxy;
+	GCancellable *control_proxy_cancellable;
+	GPtrArray *control_proxy_folders;
+
 	GSList *config_recursive_directories;
 	GSList *config_single_directories;
 
@@ -643,6 +647,105 @@ initialize_from_config (TrackerController *controller)
 }
 
 static void
+update_indexed_files_from_proxy (TrackerController *controller,
+                                 GDBusProxy        *proxy)
+{
+	TrackerIndexingTree *indexing_tree;
+	const gchar **indexed_uris = NULL;
+	GVariant *v;
+	gint i;
+
+	v = g_dbus_proxy_get_cached_property (proxy, "IndexedLocations");
+	if (v)
+		indexed_uris = g_variant_get_strv (v, NULL);
+
+	indexing_tree = controller->indexing_tree;
+
+	/* Remove folders no longer there */
+	for (i = 0; i < controller->control_proxy_folders->len; i++) {
+		GFile *file;
+		g_autofree gchar *uri = NULL;
+
+		file = g_ptr_array_index (controller->control_proxy_folders, i);
+		uri = g_file_get_uri (file);
+
+		if (!indexed_uris || !g_strv_contains (indexed_uris, uri)) {
+			tracker_indexing_tree_remove (indexing_tree,
+			                              file);
+		}
+	}
+
+	for (i = 0; indexed_uris && indexed_uris[i]; i++) {
+		g_autoptr (GFileInfo) file_info = NULL;
+		g_autoptr (GFile) file = NULL;
+
+		file = g_file_new_for_uri (indexed_uris[i]);
+		if (g_ptr_array_find_with_equal_func (controller->control_proxy_folders,
+		                                      file,
+		                                      (GEqualFunc) g_file_equal,
+		                                      NULL))
+			continue;
+
+		file_info = g_file_query_info (file,
+		                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+		                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
+		                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+		                               NULL, NULL);
+
+		if (!file_info)
+			continue;
+
+		if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
+			if (!tracker_indexing_tree_file_is_indexable (indexing_tree,
+			                                              file, file_info)) {
+				tracker_indexing_tree_add (indexing_tree,
+				                           file,
+				                           TRACKER_DIRECTORY_FLAG_RECURSE |
+				                           TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
+				                           TRACKER_DIRECTORY_FLAG_MONITOR);
+				g_ptr_array_add (controller->control_proxy_folders,
+				                 g_object_ref (file));
+			} else {
+				tracker_indexing_tree_notify_update (indexing_tree, file, TRUE);
+			}
+		} else {
+			tracker_indexing_tree_notify_update (indexing_tree, file, FALSE);
+		}
+	}
+
+	g_free (indexed_uris);
+}
+
+static void
+proxy_properties_changed_cb (GDBusProxy *proxy,
+                             GVariant   *changed_properties,
+                             GStrv       invalidated_properties,
+                             gpointer    user_data)
+{
+	update_indexed_files_from_proxy (user_data, proxy);
+}
+
+static void
+on_control_proxy_ready (GObject      *source,
+                        GAsyncResult *res,
+                        gpointer      user_data)
+{
+	TrackerController *controller = user_data;
+	GError *error = NULL;
+
+	controller->control_proxy = g_dbus_proxy_new_finish (res, &error);
+	if (error) {
+		g_critical ("Could not set up proxy: %s", error->message);
+		g_error_free (error);
+		return;
+	}
+
+	g_signal_connect (controller->control_proxy, "g-properties-changed",
+	                  G_CALLBACK (proxy_properties_changed_cb), controller);
+	update_indexed_files_from_proxy (controller, controller->control_proxy);
+}
+
+static void
 tracker_controller_constructed (GObject *object)
 {
 	TrackerController *controller = TRACKER_CONTROLLER (object);
@@ -691,6 +794,16 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 
+	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
+	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+	                          NULL,
+	                          "org.freedesktop.Tracker3.Miner.Files.Control",
+	                          "/org/freedesktop/Tracker3/Miner/Files/Proxy",
+	                          "org.freedesktop.Tracker3.Miner.Files.Proxy",
+	                          NULL,
+	                          on_control_proxy_ready,
+	                          controller);
+
 	initialize_from_config (controller);
 }
 
@@ -698,6 +811,11 @@ static void
 tracker_controller_finalize (GObject *object)
 {
 	TrackerController *controller = TRACKER_CONTROLLER (object);
+
+	g_cancellable_cancel (controller->control_proxy_cancellable);
+	g_clear_object (&controller->control_proxy_cancellable);
+	g_clear_object (&controller->control_proxy);
+	g_clear_pointer (&controller->control_proxy_folders, g_ptr_array_unref);
 
 	g_clear_handle_id (&controller->force_recheck_id, g_source_remove);
 	g_clear_handle_id (&controller->volumes_changed_id, g_source_remove);
@@ -746,6 +864,8 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 static void
 tracker_controller_init (TrackerController *controller)
 {
+	controller->control_proxy_folders =
+		g_ptr_array_new_with_free_func (g_object_unref);
 }
 
 TrackerController *
