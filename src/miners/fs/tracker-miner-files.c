@@ -94,8 +94,6 @@ struct TrackerMinerFilesPrivate {
 #endif /* HAVE_POWER) */
 	gulong finished_handler;
 
-	GDBusConnection *connection;
-
 	guint force_recheck_id;
 
 	gboolean mtime_check;
@@ -396,15 +394,6 @@ miner_files_initable_init (GInitable     *initable,
 	mf->private->domain_ontology = tracker_domain_ontology_new (mf->private->domain, NULL, &inner_error);
 	if (!mf->private->domain_ontology) {
 		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
-
-	/* Set up extractor and signals */
-	mf->private->connection =  g_bus_get_sync (TRACKER_IPC_BUS, NULL, &inner_error);
-	if (!mf->private->connection) {
-		g_propagate_error (error, inner_error);
-		g_prefix_error (error,
-		                "Could not connect to the D-Bus session bus. ");
 		return FALSE;
 	}
 
