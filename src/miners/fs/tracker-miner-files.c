@@ -159,8 +159,6 @@ static void        miner_finished_cb                    (TrackerMinerFS *fs,
                                                          guint           total_files_ignored,
                                                          gpointer        user_data);
 
-static gboolean    miner_files_in_removable_media_remove_by_type  (TrackerMinerFiles  *miner,
-                                                                   TrackerStorageType  type);
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
                                                                    const gchar        *date);
 
@@ -305,30 +303,6 @@ miner_files_initable_iface_init (GInitableIface *iface)
 }
 
 static void
-index_removable_devices_changed (TrackerMinerFiles *mf)
-{
-	TRACKER_NOTE (CONFIG, g_message ("Catching up with removable device configuration..."));
-
-	if (!tracker_config_get_index_removable_devices (mf->private->config))
-		miner_files_in_removable_media_remove_by_type (mf, TRACKER_STORAGE_REMOVABLE);
-}
-
-static void
-index_optical_discs_changed (TrackerMinerFiles *mf)
-{
-	gboolean index_optical_discs;
-
-	TRACKER_NOTE (CONFIG, g_message ("Catching up with optical disc configuration..."));
-
-	index_optical_discs = (tracker_config_get_index_removable_devices (mf->private->config) ?
-	                       tracker_config_get_index_optical_discs (mf->private->config) :
-	                       FALSE);
-
-	if (!index_optical_discs)
-		miner_files_in_removable_media_remove_by_type (mf, TRACKER_STORAGE_REMOVABLE | TRACKER_STORAGE_OPTICAL);
-}
-
-static void
 removable_days_threshold_changed (TrackerMinerFiles *mf)
 {
 	/* Check if the stale volume removal configuration changed from enabled to disabled
@@ -387,21 +361,10 @@ miner_files_initable_init (GInitable     *initable,
 	check_battery_status (mf);
 #endif /* HAVE_POWER */
 
-	index_removable_devices_changed (mf);
-	index_optical_discs_changed (mf);
-
 	/* We want to get notified when config changes */
 	g_signal_connect (mf->private->config, "notify::low-disk-space-limit",
 	                  G_CALLBACK (low_disk_space_limit_cb),
 	                  mf);
-	g_signal_connect_swapped (mf->private->config,
-	                          "notify::index-removable-devices",
-	                          G_CALLBACK (index_removable_devices_changed),
-	                          mf);
-	g_signal_connect_swapped (mf->private->config,
-	                          "notify::index-optical-discs",
-	                          G_CALLBACK (index_optical_discs_changed),
-	                          mf);
 	g_signal_connect_swapped (mf->private->config,
 	                          "notify::removable-days-threshold",
 	                          G_CALLBACK (removable_days_threshold_changed),
@@ -583,6 +546,22 @@ set_up_mount_point (TrackerMinerFiles *miner,
 }
 
 static void
+delete_index_root (TrackerMinerFiles *miner,
+                   GFile             *mount_point,
+                   TrackerBatch      *batch)
+{
+	g_autofree gchar *uri = NULL;
+	TrackerSparqlConnection *conn = tracker_batch_get_connection (batch);
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+
+	uri = g_file_get_uri (mount_point);
+	stmt = tracker_load_statement (conn, "delete-index-root.rq", NULL);
+	tracker_batch_add_statement (batch, stmt,
+	                             "rootFolder", G_TYPE_STRING, uri,
+	                             NULL);
+}
+
+static void
 init_mount_points_cb (GObject      *source,
                       GAsyncResult *result,
                       gpointer      user_data)
@@ -690,12 +669,17 @@ init_mount_points (TrackerMinerFiles *miner_files)
 			g_debug ("Mount point state incorrect in DB for mount '%s', "
 			         "currently it is NOT mounted",
 			         mount_point);
-			set_up_mount_point (TRACKER_MINER_FILES (miner),
-			                    file,
-			                    FALSE,
-			                    batch);
-			/* There's no need to force mtime check in these inconsistent
-			 * mount points, as they are not mounted right now. */
+
+			if (!tracker_config_get_index_removable_devices (miner_files->private->config) ||
+			    tracker_config_get_removable_days_threshold (miner_files->private->config) == 0) {
+				delete_index_root (TRACKER_MINER_FILES (miner),
+				                   file, batch);
+			} else {
+				set_up_mount_point (TRACKER_MINER_FILES (miner),
+				                    file,
+				                    FALSE,
+				                    batch);
+			}
 		}
 
 		g_free (mount_point);
@@ -1028,15 +1012,42 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
 	TrackerMinerFiles *miner_files = user_data;
 	TrackerStorage *storage = miner_files->private->storage;
 	TrackerStorageType type = 0;
+	TrackerSparqlConnection *conn;
+	g_autoptr (TrackerBatch) batch = NULL;
+	g_autoptr (GError) error = NULL;
 	const gchar *uuid;
+	gboolean delete = FALSE, update_mount = FALSE;
 
 	uuid = tracker_storage_get_uuid_for_file (storage, directory);
 
 	if (uuid)
 		type = tracker_storage_get_type_for_uuid (storage, uuid);
 
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
-		set_up_mount_point (miner_files, directory, FALSE, NULL);
+	if ((type & TRACKER_STORAGE_REMOVABLE) != 0) {
+		if (!tracker_config_get_index_removable_devices (miner_files->private->config))
+			delete = TRUE;
+		else if ((type & TRACKER_STORAGE_OPTICAL) != 0 &&
+		         !tracker_config_get_index_optical_discs (miner_files->private->config))
+			delete = TRUE;
+		else if (tracker_config_get_removable_days_threshold (miner_files->private->config) == 0)
+			delete = TRUE;
+		else
+			update_mount = TRUE;
+	}
+
+	if (!delete && !update_mount)
+		return;
+
+	conn = tracker_miner_get_connection (TRACKER_MINER (miner_files));
+	batch = tracker_sparql_connection_create_batch (conn);
+
+	if (delete)
+		delete_index_root (miner_files, directory, batch);
+	else if (update_mount)
+		set_up_mount_point (miner_files, directory, FALSE, batch);
+
+	if (!tracker_batch_execute (batch, NULL, &error))
+		g_warning ("Error updating indexed folder: %s", error->message);
 }
 
 static void
@@ -1156,37 +1167,6 @@ remove_files_in_removable_media_cb (GObject      *object,
 
 	if (error)
 		g_critical ("Could not remove files in volumes: %s", error->message);
-}
-
-static gboolean
-miner_files_in_removable_media_remove_by_type (TrackerMinerFiles  *miner,
-                                               TrackerStorageType  type)
-{
-	TrackerSparqlConnection *conn;
-	g_autoptr (TrackerSparqlStatement) stmt = NULL;
-	gboolean removable;
-	gboolean optical;
-
-	removable = TRACKER_STORAGE_TYPE_IS_REMOVABLE (type);
-	optical = TRACKER_STORAGE_TYPE_IS_OPTICAL (type);
-
-	/* Only remove if any of the flags was TRUE */
-	if (!removable && !optical)
-		return FALSE;
-
-	g_debug ("  Removing all resources in store from %s ",
-	         optical ? "optical discs" : "removable devices");
-
-	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
-	stmt = tracker_load_statement (conn, "delete-mountpoints-by-type.rq", NULL);
-
-	tracker_sparql_statement_bind_boolean (stmt, "isRemovable", removable);
-	tracker_sparql_statement_bind_boolean (stmt, "isOptical", optical);
-	tracker_sparql_statement_update_async (stmt, NULL,
-	                                       remove_files_in_removable_media_cb,
-	                                       NULL);
-
-	return TRUE;
 }
 
 static void
