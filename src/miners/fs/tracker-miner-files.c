@@ -83,11 +83,6 @@ struct TrackerMinerFilesPrivate {
 };
 
 enum {
-	VOLUME_MOUNTED_IN_STORE = 1 << 0,
-	VOLUME_MOUNTED = 1 << 1
-};
-
-enum {
 	PROP_0,
 	PROP_CONFIG,
 	PROP_DOMAIN,
@@ -116,7 +111,7 @@ static void        index_on_battery_cb                  (GObject    *object,
                                                          GParamSpec *pspec,
                                                          gpointer    user_data);
 #endif /* HAVE_POWER */
-static void        init_mount_points                    (TrackerMinerFiles    *miner);
+static void        init_index_roots                     (TrackerMinerFiles    *miner);
 static void        init_stale_volume_removal            (TrackerMinerFiles    *miner);
 static void        disk_space_check_start               (TrackerMinerFiles    *mf);
 static void        disk_space_check_stop                (TrackerMinerFiles    *mf);
@@ -355,7 +350,7 @@ miner_files_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	init_mount_points (mf);
+	init_index_roots (mf);
 
 #ifdef HAVE_POWER
 	check_battery_status (mf);
@@ -562,9 +557,9 @@ delete_index_root (TrackerMinerFiles *miner,
 }
 
 static void
-init_mount_points_cb (GObject      *source,
-                      GAsyncResult *result,
-                      gpointer      user_data)
+init_index_roots_cb (GObject      *source,
+                     GAsyncResult *result,
+                     gpointer      user_data)
 {
 	g_autofree GError *error = NULL;
 
@@ -579,21 +574,18 @@ init_mount_points_cb (GObject      *source,
 }
 
 static void
-init_mount_points (TrackerMinerFiles *miner_files)
+init_index_roots (TrackerMinerFiles *miner_files)
 {
 	TrackerMiner *miner = TRACKER_MINER (miner_files);
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	TrackerIndexingTree *indexing_tree;
 	g_autoptr (GList) roots = NULL;
-	GHashTable *volumes;
-	GHashTableIter iter;
-	gpointer key, value;
+	g_autoptr (GHashTable) handled = NULL;
 	g_autoptr (TrackerBatch) batch = NULL;
 	g_autoptr (GError) error = NULL;
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	GList *l;
-	GFile *file;
 
 	g_debug ("Initializing mount points...");
 
@@ -610,87 +602,75 @@ init_mount_points (TrackerMinerFiles *miner_files)
 		return;
 	}
 
-	volumes = g_hash_table_new_full (g_file_hash, (GEqualFunc) g_file_equal,
-	                                 (GDestroyNotify) g_object_unref,
-	                                 NULL);
+	batch = tracker_sparql_connection_create_batch (conn);
+	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	handled = g_hash_table_new_full (g_file_hash, (GEqualFunc) g_file_equal,
+	                                 g_object_unref, NULL);
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		gint state;
-		const gchar *urn;
+		const gchar *uri;
+		gboolean is_removable, is_optical;
+		GFile *file;
 
-		state = VOLUME_MOUNTED_IN_STORE;
+		uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		is_removable = tracker_sparql_cursor_get_boolean (cursor, 1);
+		is_optical = tracker_sparql_cursor_get_boolean (cursor, 2);
 
-		urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		file = g_file_new_for_uri (uri);
+		g_hash_table_add (handled, file);
 
-		if (!urn)
-			continue;
-
-		file = g_file_new_for_uri (urn);
-		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
+		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+			/* Directory is indexed and configured */
+			if (is_removable || is_optical) {
+				set_up_mount_point (TRACKER_MINER_FILES (miner),
+				                    file,
+				                    TRUE,
+				                    batch);
+			}
+		} else {
+			/* Directory is indexed, but no longer configured */
+			if (tracker_config_get_removable_days_threshold (miner_files->private->config) > 0 &&
+			    ((is_optical &&
+			      tracker_config_get_index_optical_discs (miner_files->private->config)) ||
+			     (!is_optical && is_removable &&
+			      tracker_config_get_index_removable_devices (miner_files->private->config)))) {
+				/* Preserve */
+				set_up_mount_point (TRACKER_MINER_FILES (miner),
+				                    file, FALSE, batch);
+			} else {
+				/* Not a removable device to preserve, or a no
+				 * longer configured folder.
+				 */
+				delete_index_root (TRACKER_MINER_FILES (miner),
+				                   file, batch);
+			}
+		}
 	}
-
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
 
 	roots = tracker_indexing_tree_list_roots (indexing_tree);
 
 	for (l = roots; l; l = l->next) {
-		gint state;
+		TrackerStorage *storage = miner_files->private->storage;
+		TrackerStorageType type = 0;
+		const gchar *uuid;
+		GFile *file = l->data;
 
-		file = l->data;
+		if (g_hash_table_contains (handled, file))
+			continue;
 
-		state = GPOINTER_TO_INT (g_hash_table_lookup (volumes, file));
-		state |= VOLUME_MOUNTED;
-		g_hash_table_replace (volumes, g_object_ref (file),
-		                      GINT_TO_POINTER (state));
-	}
+		uuid = tracker_storage_get_uuid_for_file (storage, file);
 
-	batch = tracker_sparql_connection_create_batch (conn);
-	g_hash_table_iter_init (&iter, volumes);
+		if (uuid)
+			type = tracker_storage_get_type_for_uuid (storage, uuid);
 
-	/* Finally, set up volumes based on the composed info */
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		GFile *file = key;
-		gint state = GPOINTER_TO_INT (value);
-		gchar *mount_point = g_file_get_uri (file);
-
-		if ((state & VOLUME_MOUNTED) &&
-		    !(state & VOLUME_MOUNTED_IN_STORE)) {
-			g_debug ("Mount point state incorrect in DB for mount '%s', "
-			         "currently it is mounted",
-			         mount_point);
-
-			/* Set mount point state */
-			set_up_mount_point (TRACKER_MINER_FILES (miner),
-			                    file,
-			                    TRUE,
-			                    batch);
-		} else if (!(state & VOLUME_MOUNTED) &&
-		           (state & VOLUME_MOUNTED_IN_STORE)) {
-			g_debug ("Mount point state incorrect in DB for mount '%s', "
-			         "currently it is NOT mounted",
-			         mount_point);
-
-			if (!tracker_config_get_index_removable_devices (miner_files->private->config) ||
-			    tracker_config_get_removable_days_threshold (miner_files->private->config) == 0) {
-				delete_index_root (TRACKER_MINER_FILES (miner),
-				                   file, batch);
-			} else {
-				set_up_mount_point (TRACKER_MINER_FILES (miner),
-				                    file,
-				                    FALSE,
-				                    batch);
-			}
-		}
-
-		g_free (mount_point);
+		if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+			set_up_mount_point (miner_files, file, TRUE, NULL);
 	}
 
 	tracker_batch_execute_async (batch,
 	                             NULL,
-	                             init_mount_points_cb,
+	                             init_index_roots_cb,
 	                             miner);
-
-	g_hash_table_unref (volumes);
 }
 
 static gboolean
@@ -1033,10 +1013,9 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
 			delete = TRUE;
 		else
 			update_mount = TRUE;
+	} else {
+		delete = TRUE;
 	}
-
-	if (!delete && !update_mount)
-		return;
 
 	conn = tracker_miner_get_connection (TRACKER_MINER (miner_files));
 	batch = tracker_sparql_connection_create_batch (conn);
