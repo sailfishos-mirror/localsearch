@@ -880,11 +880,6 @@ init_mount_points (TrackerMinerFiles *miner_files)
 		if (!urn)
 			continue;
 
-		if (strcmp (urn, TRACKER_DATASOURCE_URN_NON_REMOVABLE_MEDIA) == 0) {
-			/* Report non-removable media to be mounted by HAL as well */
-			state |= VOLUME_MOUNTED;
-		}
-
 		file = g_file_new_for_uri (urn);
 		g_hash_table_replace (volumes, file, GINT_TO_POINTER (state));
 	}
