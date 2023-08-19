@@ -19,24 +19,11 @@
 
 #include "config-miners.h"
 
-#include <sys/statvfs.h>
-#include <fcntl.h>
-#ifdef __linux__
-#include <sys/ioctl.h>
-#include <linux/msdos_fs.h>
-#endif /* __linux__ */
-#include <unistd.h>
-
-#include <glib/gi18n.h>
 #include <glib/gstdio.h>
 
 #include <gio/gio.h>
-#include <gio/gunixfdlist.h>
-#include <gio/gunixinputstream.h>
 
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-ontologies.h>
-#include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-miner-files.h"
 #include "tracker-miner-files-methods.h"
