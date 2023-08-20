@@ -168,7 +168,7 @@ static void
 miner_files_started (TrackerMiner *miner)
 {
 	TRACKER_MINER_CLASS (tracker_miner_files_parent_class)->started (miner);
-	init_mount_points (TRACKER_MINER_FILES (miner));
+	init_index_roots (TRACKER_MINER_FILES (miner));
 }
 
 static void
@@ -349,8 +349,6 @@ miner_files_initable_init (GInitable     *initable,
 		             G_OBJECT_TYPE_NAME (mf));
 		return FALSE;
 	}
-
-	init_index_roots (mf);
 
 #ifdef HAVE_POWER
 	check_battery_status (mf);
