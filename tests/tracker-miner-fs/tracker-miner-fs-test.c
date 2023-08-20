@@ -1951,60 +1951,6 @@ test_event_queue_move_and_move_back (TrackerMinerFSTestFixture *fixture,
 	g_free (content);
 }
 
-static void
-test_api_check_file (TrackerMinerFSTestFixture *fixture,
-                     gconstpointer              data)
-{
-	GFile *file;
-	gchar *content;
-
-	CREATE_FOLDER (fixture, "recursive");
-	CREATE_FOLDER (fixture, "not-indexed");
-	CREATE_UPDATE_FILE (fixture, "recursive/a");
-	CREATE_UPDATE_FILE (fixture, "not-indexed/b");
-	CREATE_UPDATE_FILE (fixture, "not-indexed/c");
-
-	fixture_add_indexed_folder (fixture, "recursive",
-	                            TRACKER_DIRECTORY_FLAG_MONITOR |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_MTIME |
-	                            TRACKER_DIRECTORY_FLAG_RECURSE);
-
-	tracker_miner_start (TRACKER_MINER (fixture->miner));
-
-	fixture_iterate (fixture);
-
-	content = fixture_get_content (fixture);
-	g_assert_cmpstr (content, ==,
-	                 "recursive,"
-	                 "recursive/a");
-	g_free (content);
-
-	test_miner_reset_counters ((TestMiner *) fixture->miner);
-
-	file = fixture_get_relative_file (fixture, "recursive/a");
-	tracker_miner_fs_check_file (fixture->miner, file, G_PRIORITY_DEFAULT, FALSE);
-	g_object_unref (file);
-
-	file = fixture_get_relative_file (fixture, "not-indexed/b");
-	tracker_miner_fs_check_file (fixture->miner, file, G_PRIORITY_DEFAULT, FALSE);
-	g_object_unref (file);
-
-	file = fixture_get_relative_file (fixture, "not-indexed/c");
-	tracker_miner_fs_check_file (fixture->miner, file, G_PRIORITY_DEFAULT, TRUE);
-	g_object_unref (file);
-
-	fixture_iterate (fixture);
-
-	g_assert_cmpint (((TestMiner *) fixture->miner)->n_process_file, ==, 2);
-
-	content = fixture_get_content (fixture);
-	g_assert_cmpstr (content, ==,
-	                 "not-indexed/b,"
-	                 "recursive,"
-	                 "recursive/a");
-	g_free (content);
-}
-
 gint
 main (gint    argc,
       gchar **argv)
@@ -2094,10 +2040,6 @@ main (gint    argc,
 	          test_event_queue_move_and_move);
 	ADD_TEST ("event-queue/move-and-move-back",
 	          test_event_queue_move_and_move_back);
-
-	/* API tests */
-	ADD_TEST ("api/check_file",
-	          test_api_check_file);
 
 	return g_test_run ();
 }

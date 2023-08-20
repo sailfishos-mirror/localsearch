@@ -144,12 +144,6 @@ gdouble               tracker_miner_fs_get_throttle          (TrackerMinerFS  *f
 void                  tracker_miner_fs_set_throttle          (TrackerMinerFS  *fs,
                                                               gdouble          throttle);
 
-/* Queueing files to be processed AFTER checking rules in IndexingTree */
-void                  tracker_miner_fs_check_file            (TrackerMinerFS  *fs,
-                                                              GFile           *file,
-                                                              gint             priority,
-                                                              gboolean         check_parents);
-
 /* URNs */
 const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                                GFile          *file);
