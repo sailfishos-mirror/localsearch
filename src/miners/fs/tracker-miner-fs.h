@@ -150,12 +150,6 @@ void                  tracker_miner_fs_check_file            (TrackerMinerFS  *f
                                                               gint             priority,
                                                               gboolean         check_parents);
 
-/* Continuation for async vmethods */
-void                  tracker_miner_fs_notify_finish         (TrackerMinerFS  *fs,
-							      GTask           *task,
-							      const gchar     *sparql,
-							      GError          *error);
-
 /* URNs */
 const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                                GFile          *file);

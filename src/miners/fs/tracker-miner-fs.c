@@ -1879,38 +1879,6 @@ tracker_miner_fs_check_file (TrackerMinerFS *fs,
 }
 
 /**
- * tracker_miner_fs_notify_finish:
- * @fs: a #TrackerMinerFS
- * @task: a #GTask obtained in a #TrackerMinerFS signal/vmethod
- * @sparql: (nullable): Resulting sparql for the given operation, or %NULL if
- *   there is an error
- * @error: a #GError with the error that happened during processing, or %NULL.
- *
- * Notifies @fs that all processing on @file has been finished, if any error
- * happened during file data processing, it should be passed in @error, else
- * @sparql should contain correct SPARQL representing the operation in
- * particular.
- *
- * This function is expected to be called in reaction to all #TrackerMinerFS
- * signals
- **/
-void
-tracker_miner_fs_notify_finish (TrackerMinerFS *fs,
-                                GTask          *task,
-                                const gchar    *sparql,
-                                GError         *error)
-{
-	g_return_if_fail (TRACKER_IS_MINER_FS (fs));
-	g_return_if_fail (G_IS_TASK (task));
-	g_return_if_fail (sparql || error);
-
-	if (error)
-		g_task_return_error (task, error);
-	else
-		g_task_return_pointer (task, g_strdup (sparql), g_free);
-}
-
-/**
  * tracker_miner_fs_set_throttle:
  * @fs: a #TrackerMinerFS
  * @throttle: a double between 0.0 and 1.0
