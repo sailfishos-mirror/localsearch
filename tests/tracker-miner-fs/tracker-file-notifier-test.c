@@ -321,12 +321,14 @@ test_common_context_setup (TestCommonContext *fixture,
 	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree, FALSE,
 	                                               fixture->connection,
 	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
 	                                               G_FILE_ATTRIBUTE_TIME_MODIFIED);
 
 	assert_notifier_properties (fixture->notifier,
 	                            fixture->connection,
 	                            fixture->indexing_tree,
 	                            G_FILE_ATTRIBUTE_STANDARD_TYPE ","
+	                            G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
 	                            G_FILE_ATTRIBUTE_TIME_MODIFIED);
 
 	g_signal_connect (fixture->notifier, "file-created",
