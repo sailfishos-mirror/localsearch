@@ -277,15 +277,6 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
-	if (!info) {
-		info = g_file_query_info (file,
-		                          G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-		                          G_FILE_ATTRIBUTE_TIME_ACCESS ","
-		                          G_FILE_ATTRIBUTE_TIME_CREATED,
-		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-		                          NULL, NULL);
-	}
-
 	modified = g_file_info_get_modification_date_time (info);
 	if (!modified)
 		modified = g_date_time_new_from_unix_utc (0);
