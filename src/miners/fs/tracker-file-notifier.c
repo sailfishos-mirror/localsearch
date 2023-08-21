@@ -1483,8 +1483,7 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	child_info = g_file_query_info (child,
-	                                G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-	                                G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN,
+	                                priv->file_attributes,
 	                                G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                                NULL, NULL);
 	if (!child_info)
