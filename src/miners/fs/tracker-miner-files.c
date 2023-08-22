@@ -65,7 +65,6 @@ struct TrackerMinerFilesPrivate {
 	TrackerExtractWatchdog *extract_watchdog;
 	guint grace_period_timeout_id;
 
-	gchar *domain;
 	TrackerDomainOntology *domain_ontology;
 
 	guint disk_space_check_id;
@@ -88,7 +87,7 @@ struct TrackerMinerFilesPrivate {
 enum {
 	PROP_0,
 	PROP_CONFIG,
-	PROP_DOMAIN,
+	PROP_DOMAIN_ONTOLOGY,
 };
 
 static void        miner_files_set_property             (GObject              *object,
@@ -201,12 +200,11 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                      TRACKER_TYPE_CONFIG,
 	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
-	                                 PROP_DOMAIN,
-	                                 g_param_spec_string ("domain",
-	                                                      "Domain",
-	                                                      "Domain",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+	                                 PROP_DOMAIN_ONTOLOGY,
+	                                 g_param_spec_boxed ("domain-ontology",
+	                                                     NULL, NULL,
+	                                                     TRACKER_TYPE_DOMAIN_ONTOLOGY,
+	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -323,16 +321,9 @@ miner_files_initable_init (GInitable     *initable,
                            GError       **error)
 {
 	TrackerMinerFiles *mf;
-	GError *inner_error = NULL;
 	gchar *domain_name;
 
 	mf = TRACKER_MINER_FILES (initable);
-
-	mf->private->domain_ontology = tracker_domain_ontology_new (mf->private->domain, NULL, &inner_error);
-	if (!mf->private->domain_ontology) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
 
 	/* We must have a configuration setup here */
 	if (G_UNLIKELY (!mf->private->config)) {
@@ -393,8 +384,8 @@ miner_files_set_property (GObject      *object,
 	case PROP_CONFIG:
 		priv->config = g_value_dup_object (value);
 		break;
-	case PROP_DOMAIN:
-		priv->domain = g_value_dup_string (value);
+	case PROP_DOMAIN_ONTOLOGY:
+		priv->domain_ontology = g_value_dup_boxed (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -416,8 +407,8 @@ miner_files_get_property (GObject    *object,
 	case PROP_CONFIG:
 		g_value_set_object (value, priv->config);
 		break;
-	case PROP_DOMAIN:
-		g_value_set_string (value, priv->domain);
+	case PROP_DOMAIN_ONTOLOGY:
+		g_value_set_boxed (value, priv->domain_ontology);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -434,8 +425,6 @@ miner_files_finalize (GObject *object)
 
 	mf = TRACKER_MINER_FILES (object);
 	priv = mf->private;
-
-	g_free (priv->domain);
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
 	g_signal_handlers_disconnect_by_data (indexing_tree, mf);
@@ -1110,7 +1099,7 @@ miner_files_constructed (GObject *object)
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerConfig            *config,
-                         const gchar              *domain,
+                         TrackerDomainOntology    *domain_ontology,
                          GError                  **error)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
@@ -1123,7 +1112,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                       "connection", connection,
 	                       "root", NULL,
 	                       "config", config,
-	                       "domain", domain,
+	                       "domain-ontology", domain_ontology,
 	                       "processing-pool-wait-limit", 1,
 	                       "processing-pool-ready-limit", 800,
 	                       "file-attributes", FILE_ATTRIBUTES,

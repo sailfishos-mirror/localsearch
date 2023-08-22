@@ -53,7 +53,7 @@ GType         tracker_miner_files_get_type                 (void) G_GNUC_CONST;
 
 TrackerMiner *tracker_miner_files_new                      (TrackerSparqlConnection  *connection,
                                                             TrackerConfig            *config,
-                                                            const gchar              *domain,
+                                                            TrackerDomainOntology    *domain,
                                                             GError                  **error);
 
 /* Global functions to handle timestamp files */

@@ -522,7 +522,7 @@ check_eligible (void)
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology_name, NULL);
+	                                       domain_ontology, NULL);
 	g_object_unref (config);
 
 	if (!miner_files) {
@@ -918,7 +918,7 @@ main (gint argc, gchar *argv[])
 
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology_name, &error);
+	                                       domain_ontology, &error);
 	if (!miner_files) {
 		g_critical ("Couldn't create new Files miner: '%s'",
 		            error ? error->message : "unknown error");
