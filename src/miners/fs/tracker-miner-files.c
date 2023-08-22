@@ -100,10 +100,6 @@ static void        miner_files_get_property             (GObject              *o
                                                          GParamSpec           *pspec);
 static void        miner_files_constructed              (GObject              *object);
 static void        miner_files_finalize                 (GObject              *object);
-static void        miner_files_initable_iface_init      (GInitableIface       *iface);
-static gboolean    miner_files_initable_init            (GInitable            *initable,
-                                                         GCancellable         *cancellable,
-                                                         GError              **error);
 #ifdef HAVE_POWER
 static void        check_battery_status                 (TrackerMinerFiles    *fs);
 static void        battery_status_cb                    (GObject              *object,
@@ -159,10 +155,7 @@ static void        miner_finished_cb                    (TrackerMinerFS *fs,
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
                                                                    const gchar        *date);
 
-G_DEFINE_TYPE_WITH_CODE (TrackerMinerFiles, tracker_miner_files, TRACKER_TYPE_MINER_FS,
-                         G_ADD_PRIVATE (TrackerMinerFiles)
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                miner_files_initable_iface_init))
+G_DEFINE_TYPE_WITH_PRIVATE (TrackerMinerFiles, tracker_miner_files, TRACKER_TYPE_MINER_FS)
 
 static void
 miner_files_started (TrackerMiner *miner)
@@ -290,12 +283,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 }
 
 static void
-miner_files_initable_iface_init (GInitableIface *iface)
-{
-	iface->init = miner_files_initable_init;
-}
-
-static void
 removable_days_threshold_changed (TrackerMinerFiles *mf)
 {
 	/* Check if the stale volume removal configuration changed from enabled to disabled
@@ -313,61 +300,6 @@ removable_days_threshold_changed (TrackerMinerFiles *mf)
 		 * timeout. */
 		init_stale_volume_removal (TRACKER_MINER_FILES (mf));
 	}
-}
-
-static gboolean
-miner_files_initable_init (GInitable     *initable,
-                           GCancellable  *cancellable,
-                           GError       **error)
-{
-	TrackerMinerFiles *mf;
-	gchar *domain_name;
-
-	mf = TRACKER_MINER_FILES (initable);
-
-	/* We must have a configuration setup here */
-	if (G_UNLIKELY (!mf->private->config)) {
-		g_set_error (error,
-		             TRACKER_MINER_ERROR,
-		             0,
-		             "No config set for miner %s",
-		             G_OBJECT_TYPE_NAME (mf));
-		return FALSE;
-	}
-
-#ifdef HAVE_POWER
-	check_battery_status (mf);
-#endif /* HAVE_POWER */
-
-	/* We want to get notified when config changes */
-	g_signal_connect (mf->private->config, "notify::low-disk-space-limit",
-	                  G_CALLBACK (low_disk_space_limit_cb),
-	                  mf);
-	g_signal_connect_swapped (mf->private->config,
-	                          "notify::removable-days-threshold",
-	                          G_CALLBACK (removable_days_threshold_changed),
-	                          mf);
-
-#ifdef HAVE_POWER
-	g_signal_connect (mf->private->config, "notify::index-on-battery",
-	                  G_CALLBACK (index_on_battery_cb),
-	                  mf);
-	g_signal_connect (mf->private->config, "notify::index-on-battery-first-time",
-	                  G_CALLBACK (index_on_battery_cb),
-	                  mf);
-#endif /* HAVE_POWER */
-
-	disk_space_check_start (mf);
-
-	domain_name = tracker_domain_ontology_get_domain (mf->private->domain_ontology, NULL);
-	mf->private->extract_watchdog = tracker_extract_watchdog_new (domain_name);
-	g_signal_connect (mf->private->extract_watchdog, "lost",
-	                  G_CALLBACK (on_extractor_lost), mf);
-	g_signal_connect (mf->private->extract_watchdog, "status",
-	                  G_CALLBACK (on_extractor_status), mf);
-	g_free (domain_name);
-
-	return TRUE;
 }
 
 static void
@@ -1085,7 +1017,9 @@ miner_files_move_file (TrackerMinerFS      *fs,
 static void
 miner_files_constructed (GObject *object)
 {
+	TrackerMinerFiles *mf = TRACKER_MINER_FILES (object);;
 	TrackerIndexingTree *indexing_tree;
+	g_autofree gchar *domain_name = NULL;
 
 	G_OBJECT_CLASS (tracker_miner_files_parent_class)->constructed (object);
 
@@ -1094,29 +1028,54 @@ miner_files_constructed (GObject *object)
 	                  G_CALLBACK (indexing_tree_directory_added_cb), object);
 	g_signal_connect (indexing_tree, "directory-removed",
 	                  G_CALLBACK (indexing_tree_directory_removed_cb), object);
+
+	/* We want to get notified when config changes */
+	g_signal_connect (mf->private->config, "notify::low-disk-space-limit",
+	                  G_CALLBACK (low_disk_space_limit_cb),
+	                  mf);
+	g_signal_connect_swapped (mf->private->config,
+	                          "notify::removable-days-threshold",
+	                          G_CALLBACK (removable_days_threshold_changed),
+	                          mf);
+
+#ifdef HAVE_POWER
+	g_signal_connect (mf->private->config, "notify::index-on-battery",
+	                  G_CALLBACK (index_on_battery_cb),
+	                  mf);
+	g_signal_connect (mf->private->config, "notify::index-on-battery-first-time",
+	                  G_CALLBACK (index_on_battery_cb),
+	                  mf);
+
+	check_battery_status (mf);
+#endif /* HAVE_POWER */
+
+	disk_space_check_start (mf);
+
+	domain_name = tracker_domain_ontology_get_domain (mf->private->domain_ontology, NULL);
+	mf->private->extract_watchdog = tracker_extract_watchdog_new (domain_name);
+	g_signal_connect (mf->private->extract_watchdog, "lost",
+	                  G_CALLBACK (on_extractor_lost), mf);
+	g_signal_connect (mf->private->extract_watchdog, "status",
+	                  G_CALLBACK (on_extractor_status), mf);
 }
 
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerConfig            *config,
-                         TrackerDomainOntology    *domain_ontology,
-                         GError                  **error)
+                         TrackerDomainOntology    *domain_ontology)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
-	g_return_val_if_fail (!error || !*error, NULL);
 
-	return g_initable_new (TRACKER_TYPE_MINER_FILES,
-	                       NULL,
-	                       error,
-	                       "connection", connection,
-	                       "root", NULL,
-	                       "config", config,
-	                       "domain-ontology", domain_ontology,
-	                       "processing-pool-wait-limit", 1,
-	                       "processing-pool-ready-limit", 800,
-	                       "file-attributes", FILE_ATTRIBUTES,
-	                       NULL);
+	return g_object_new (TRACKER_TYPE_MINER_FILES,
+	                     "connection", connection,
+	                     "root", NULL,
+	                     "config", config,
+	                     "domain-ontology", domain_ontology,
+	                     "processing-pool-wait-limit", 1,
+	                     "processing-pool-ready-limit", 800,
+	                     "file-attributes", FILE_ATTRIBUTES,
+	                     NULL);
 }
 
 static void

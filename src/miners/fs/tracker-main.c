@@ -522,14 +522,8 @@ check_eligible (void)
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology, NULL);
+	                                       domain_ontology);
 	g_object_unref (config);
-
-	if (!miner_files) {
-		g_object_unref (info);
-		g_object_unref (sparql_conn);
-		return EXIT_FAILURE;
-	}
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files));
 
@@ -918,13 +912,7 @@ main (gint argc, gchar *argv[])
 
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn, config,
-	                                       domain_ontology, &error);
-	if (!miner_files) {
-		g_critical ("Couldn't create new Files miner: '%s'",
-		            error ? error->message : "unknown error");
-		g_object_unref (config);
-		return EXIT_FAILURE;
-	}
+	                                       domain_ontology);
 
 	controller = tracker_controller_new (tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files)),
 	                                     tracker_miner_files_get_storage (TRACKER_MINER_FILES (miner_files)));
