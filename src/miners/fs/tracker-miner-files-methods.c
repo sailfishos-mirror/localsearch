@@ -160,9 +160,12 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	g_autofree gchar *time_str = NULL;
 #endif
 
+	mime_type = get_content_type (file, file_info);
+	if (!mime_type)
+		return;
+
 	uri = g_file_get_uri (file);
 	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
-	mime_type = get_content_type (file, file_info);
 
 	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
 	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
@@ -273,24 +276,18 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	time_t time_;
 #endif
 
+	mime_type = get_content_type (file, info);
+	if (!mime_type)
+		return;
+
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
-
-	if (!info) {
-		info = g_file_query_info (file,
-		                          G_FILE_ATTRIBUTE_TIME_MODIFIED ","
-		                          G_FILE_ATTRIBUTE_TIME_ACCESS ","
-		                          G_FILE_ATTRIBUTE_TIME_CREATED,
-		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-		                          NULL, NULL);
-	}
 
 	modified = g_file_info_get_modification_date_time (info);
 	if (!modified)
 		modified = g_date_time_new_from_unix_utc (0);
 
-	mime_type = get_content_type (file, info);
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	/* Update nfo:fileLastModified */
