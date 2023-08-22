@@ -103,9 +103,6 @@ struct _TrackerMinerFSPrivate {
 	GTimer *timer;
 	GTimer *extraction_timer;
 
-	guint been_started : 1;     /* TRUE if miner has been started */
-	guint been_crawled : 1;     /* TRUE if initial crawling has been
-	                             * done */
 	guint shown_totals : 1;     /* TRUE if totals have been shown */
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
@@ -655,8 +652,6 @@ miner_started (TrackerMiner *miner)
 
 	fs = TRACKER_MINER_FS (miner);
 
-	fs->priv->been_started = TRUE;
-
 	if (fs->priv->timer_stopped) {
 		g_timer_start (fs->priv->timer);
 		fs->priv->timer_stopped = FALSE;
@@ -806,8 +801,6 @@ process_stop (TrackerMinerFS *fs)
 	fs->priv->total_files_ignored = 0;
 	fs->priv->changes_processed = 0;
 	fs->priv->total_files_notified_error = 0;
-
-	fs->priv->been_crawled = TRUE;
 }
 
 static void
