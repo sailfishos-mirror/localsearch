@@ -30,8 +30,7 @@
 #include "tracker-file-notifier.h"
 #include "tracker-lru.h"
 
-/* Default processing pool limits to be set */
-#define DEFAULT_READY_POOL_LIMIT 1
+#define BUFFER_POOL_LIMIT 800
 #define DEFAULT_URN_LRU_SIZE 100
 
 #define BIG_QUEUE_THRESHOLD 1000
@@ -92,7 +91,6 @@ struct _TrackerMinerFSPrivate {
 	/* Sparql insertion tasks */
 	TrackerTaskPool *task_pool;
 	TrackerSparqlBuffer *sparql_buffer;
-	guint sparql_buffer_limit;
 
 	/* Folder URN cache */
 	TrackerLRU *urn_lru;
@@ -155,7 +153,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_THROTTLE,
-	PROP_READY_POOL_LIMIT,
 	PROP_FILE_ATTRIBUTES,
 };
 
@@ -273,14 +270,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      "Modifier for the indexing speed, 0 is max speed",
 	                                                      0, 1, 0,
 	                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_READY_POOL_LIMIT,
-	                                 g_param_spec_uint ("processing-pool-ready-limit",
-	                                                    "Processing pool limit for READY tasks",
-	                                                    "Maximum number of SPARQL updates that can be merged "
-	                                                    "in a single connection to the store",
-	                                                    1, G_MAXUINT, DEFAULT_READY_POOL_LIMIT,
-	                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_FILE_ATTRIBUTES,
 	                                 g_param_spec_string ("file-attributes",
@@ -571,7 +560,7 @@ fs_constructed (GObject *object)
 	                  object);
 
 	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 priv->sparql_buffer_limit);
+	                                                 BUFFER_POOL_LIMIT);
 	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
 	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
 	                  object);
@@ -617,14 +606,6 @@ fs_set_property (GObject      *object,
 		tracker_miner_fs_set_throttle (TRACKER_MINER_FS (object),
 		                               g_value_get_double (value));
 		break;
-	case PROP_READY_POOL_LIMIT:
-		fs->priv->sparql_buffer_limit = g_value_get_uint (value);
-
-		if (fs->priv->sparql_buffer) {
-			tracker_task_pool_set_limit (TRACKER_TASK_POOL (fs->priv->sparql_buffer),
-			                             fs->priv->sparql_buffer_limit);
-		}
-		break;
 	case PROP_FILE_ATTRIBUTES:
 		fs->priv->file_attributes = g_value_dup_string (value);
 		break;
@@ -647,9 +628,6 @@ fs_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_THROTTLE:
 		g_value_set_double (value, fs->priv->throttle);
-		break;
-	case PROP_READY_POOL_LIMIT:
-		g_value_set_uint (value, fs->priv->sparql_buffer_limit);
 		break;
 	case PROP_FILE_ATTRIBUTES:
 		g_value_set_string (value, fs->priv->file_attributes);
@@ -841,7 +819,7 @@ check_notifier_high_water (TrackerMinerFS *fs)
 	 * the notifier to stop a bit.
 	 */
 	high_water = (tracker_priority_queue_get_length (fs->priv->items) >
-	              2 * fs->priv->sparql_buffer_limit);
+	              2 * BUFFER_POOL_LIMIT);
 	tracker_file_notifier_set_high_water (fs->priv->file_notifier, high_water);
 }
 
