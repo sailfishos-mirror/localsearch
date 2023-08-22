@@ -1122,6 +1122,10 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          const gchar              *domain,
                          GError                  **error)
 {
+	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
+	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
+	g_return_val_if_fail (!error || !*error, NULL);
+
 	return g_initable_new (TRACKER_TYPE_MINER_FILES,
 	                       NULL,
 	                       error,
