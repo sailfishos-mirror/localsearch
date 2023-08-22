@@ -251,7 +251,6 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
                                                                gpointer        user_data);
 
 static GQuark quark_last_queue_event = 0;
-static GInitableIface* miner_fs_initable_parent_iface;
 static guint signals[LAST_SIGNAL] = { 0, };
 
 /**
@@ -456,10 +455,6 @@ miner_fs_initable_init (GInitable     *initable,
 	TrackerMinerFSPrivate *priv;
 	guint limit;
 
-	if (!miner_fs_initable_parent_iface->init (initable, cancellable, error)) {
-		return FALSE;
-	}
-
 	priv = TRACKER_MINER_FS (initable)->priv;
 
 	g_object_get (initable, "processing-pool-ready-limit", &limit, NULL);
@@ -531,7 +526,6 @@ miner_fs_initable_init (GInitable     *initable,
 static void
 miner_fs_initable_iface_init (GInitableIface *iface)
 {
-	miner_fs_initable_parent_iface = g_type_interface_peek_parent (iface);
 	iface->init = miner_fs_initable_init;
 }
 

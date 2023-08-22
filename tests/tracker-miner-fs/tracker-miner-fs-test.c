@@ -169,14 +169,12 @@ test_miner_init (TestMiner *miner)
 }
 
 static TrackerMinerFS *
-test_miner_new (TrackerSparqlConnection  *conn,
-                GError                  **error)
+test_miner_new (TrackerSparqlConnection *conn)
 {
-	return g_initable_new (test_miner_get_type (),
-	                       NULL, error,
-	                       "connection", conn,
-	                       "file-attributes", "standard::*,time::*",
-	                       NULL);
+	return g_object_new (test_miner_get_type (),
+			     "connection", conn,
+			     "file-attributes", "standard::*,time::*",
+			     NULL);
 }
 
 static gboolean
@@ -257,10 +255,10 @@ fixture_setup (TrackerMinerFSTestFixture *fixture,
 					  "CREATE SILENT GRAPH tracker:Pictures; "
 					  "CREATE SILENT GRAPH tracker:Audio; "
 					  "CREATE SILENT GRAPH tracker:Video ",
-					  NULL, NULL);
-
-	fixture->miner = test_miner_new (fixture->connection, &error);
+					  NULL, &error);
 	g_assert_no_error (error);
+
+	fixture->miner = test_miner_new (fixture->connection);
 }
 
 static void
