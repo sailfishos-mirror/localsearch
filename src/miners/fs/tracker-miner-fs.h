@@ -28,8 +28,8 @@
 #include <gio/gio.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-miners-common/tracker-common.h>
 
-#include "tracker-miner-object.h"
 #include "tracker-indexing-tree.h"
 #include "tracker-sparql-buffer.h"
 
