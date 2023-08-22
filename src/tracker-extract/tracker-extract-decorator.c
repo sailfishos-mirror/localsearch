@@ -216,6 +216,9 @@ ensure_data (TrackerExtractInfo *info)
 	gint i;
 
 	resource = tracker_extract_info_get_resource (info);
+	if (!resource)
+		return;
+
 	mimetype = tracker_extract_info_get_mimetype (info);
 	file = tracker_extract_info_get_file (info);
 	uri = g_file_get_uri (file);
