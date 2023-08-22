@@ -87,8 +87,6 @@ struct _TrackerMinerFSPrivate {
 
 	guint item_queues_handler_id;
 
-	/* Root / tree / index */
-	GFile *root;
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
 
@@ -158,7 +156,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_THROTTLE,
-	PROP_ROOT,
 	PROP_WAIT_POOL_LIMIT,
 	PROP_READY_POOL_LIMIT,
 	PROP_FILE_ATTRIBUTES,
@@ -278,13 +275,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      "Modifier for the indexing speed, 0 is max speed",
 	                                                      0, 1, 0,
 	                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_ROOT,
-	                                 g_param_spec_object ("root",
-	                                                      "Root",
-	                                                      "Top level URI for our indexing tree and file notify clases",
-	                                                      G_TYPE_FILE,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_WAIT_POOL_LIMIT,
 	                                 g_param_spec_uint ("processing-pool-wait-limit",
@@ -551,8 +541,6 @@ fs_finalize (GObject *object)
 					NULL);
 	tracker_priority_queue_unref (priv->items);
 
-	g_object_unref (priv->root);
-
 	if (priv->indexing_tree) {
 		g_object_unref (priv->indexing_tree);
 	}
@@ -586,14 +574,8 @@ fs_constructed (GObject *object)
 
 	priv = TRACKER_MINER_FS (object)->priv;
 
-	/* Create root if one didn't exist */
-	if (priv->root == NULL) {
-		/* We default to file:/// */
-		priv->root = g_file_new_for_uri ("file:///");
-	}
-
 	/* Create indexing tree */
-	priv->indexing_tree = tracker_indexing_tree_new_with_root (priv->root);
+	priv->indexing_tree = tracker_indexing_tree_new ();
 	g_signal_connect (priv->indexing_tree, "directory-removed",
 	                  G_CALLBACK (indexing_tree_directory_removed),
 	                  object);
@@ -645,10 +627,6 @@ fs_set_property (GObject      *object,
 		tracker_miner_fs_set_throttle (TRACKER_MINER_FS (object),
 		                               g_value_get_double (value));
 		break;
-	case PROP_ROOT:
-		/* We expect this to only occur once, on object construct */
-		fs->priv->root = g_value_dup_object (value);
-		break;
 	case PROP_WAIT_POOL_LIMIT:
 		break;
 	case PROP_READY_POOL_LIMIT:
@@ -681,9 +659,6 @@ fs_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_THROTTLE:
 		g_value_set_double (value, fs->priv->throttle);
-		break;
-	case PROP_ROOT:
-		g_value_set_object (value, fs->priv->root);
 		break;
 	case PROP_WAIT_POOL_LIMIT:
 		break;

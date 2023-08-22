@@ -1069,7 +1069,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
-	                     "root", NULL,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
 	                     "processing-pool-wait-limit", 1,
