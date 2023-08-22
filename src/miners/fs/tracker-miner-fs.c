@@ -31,7 +31,6 @@
 #include "tracker-lru.h"
 
 /* Default processing pool limits to be set */
-#define DEFAULT_WAIT_POOL_LIMIT 1
 #define DEFAULT_READY_POOL_LIMIT 1
 #define DEFAULT_URN_LRU_SIZE 100
 
@@ -156,7 +155,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_THROTTLE,
-	PROP_WAIT_POOL_LIMIT,
 	PROP_READY_POOL_LIMIT,
 	PROP_FILE_ATTRIBUTES,
 };
@@ -275,14 +273,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      "Modifier for the indexing speed, 0 is max speed",
 	                                                      0, 1, 0,
 	                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_WAIT_POOL_LIMIT,
-	                                 g_param_spec_uint ("processing-pool-wait-limit",
-	                                                    "Processing pool limit for WAIT tasks",
-	                                                    "Maximum number of files that can be concurrently "
-	                                                    "processed by the upper layer",
-	                                                    1, G_MAXUINT, DEFAULT_WAIT_POOL_LIMIT,
-	                                                    G_PARAM_READWRITE | G_PARAM_CONSTRUCT | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_READY_POOL_LIMIT,
 	                                 g_param_spec_uint ("processing-pool-ready-limit",
@@ -627,8 +617,6 @@ fs_set_property (GObject      *object,
 		tracker_miner_fs_set_throttle (TRACKER_MINER_FS (object),
 		                               g_value_get_double (value));
 		break;
-	case PROP_WAIT_POOL_LIMIT:
-		break;
 	case PROP_READY_POOL_LIMIT:
 		fs->priv->sparql_buffer_limit = g_value_get_uint (value);
 
@@ -659,8 +647,6 @@ fs_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_THROTTLE:
 		g_value_set_double (value, fs->priv->throttle);
-		break;
-	case PROP_WAIT_POOL_LIMIT:
 		break;
 	case PROP_READY_POOL_LIMIT:
 		g_value_set_uint (value, fs->priv->sparql_buffer_limit);

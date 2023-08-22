@@ -1071,7 +1071,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "connection", connection,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
-	                     "processing-pool-wait-limit", 1,
 	                     "processing-pool-ready-limit", 800,
 	                     "file-attributes", FILE_ATTRIBUTES,
 	                     NULL);
