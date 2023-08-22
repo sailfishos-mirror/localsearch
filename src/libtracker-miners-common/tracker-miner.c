@@ -62,7 +62,6 @@ struct _TrackerMinerPrivate {
 	gchar *status;
 	gdouble progress;
 	gint remaining_time;
-	gint availability_cookie;
 	guint update_id;
 };
 
