@@ -59,34 +59,6 @@
  * All the filesystem crawling and monitoring is abstracted away,
  * leaving to implementations the decisions of what directories/files
  * should it process, and the actual data extraction.
- *
- * Example creating a TrackerMinerFS with our own file system root and
- * data provider.
- *
- * First create our class and base it on TrackerMinerFS:
- * |[
- * G_DEFINE_TYPE_WITH_CODE (MyMinerFiles, my_miner_files, TRACKER_TYPE_MINER_FS,
- *                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
- *                                                 my_miner_files_initable_iface_init))
- * ]|
- *
- * Later in our class creation function, we are supplying the
- * arguments we want. In this case, the 'root' is a #GFile pointing to
- * a root URI location (for example 'file:///') and 'data_provider' is a
- * #TrackerDataProvider used to enumerate 'root' and return children it
- * finds. If 'data_provider' is %NULL (the default), then a
- * #TrackerFileDataProvider is created automatically.
- * |[
- * // Note that only 'name' is mandatory
- * miner = g_initable_new (MY_TYPE_MINER_FILES,
- *                         NULL,
- *                         error,
- *                         "name", "MyMinerFiles",
- *                         "root", root,
- *                         "processing-pool-wait-limit", 10,
- *                         "processing-pool-ready-limit", 100,
- *                         NULL);
- * ]|
  **/
 
 typedef struct {
@@ -192,8 +164,6 @@ enum {
 	PROP_FILE_ATTRIBUTES,
 };
 
-static void           miner_fs_initable_iface_init        (GInitableIface       *iface);
-
 static void           fs_finalize                         (GObject              *object);
 static void           fs_constructed                      (GObject              *object);
 static void           fs_set_property                     (GObject              *object,
@@ -253,22 +223,7 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
 static GQuark quark_last_queue_event = 0;
 static guint signals[LAST_SIGNAL] = { 0, };
 
-/**
- * tracker_miner_fs_error_quark:
- *
- * Gives the caller the #GQuark used to identify #TrackerMinerFS errors
- * in #GError structures. The #GQuark is used as the domain for the error.
- *
- * Returns: the #GQuark used for the domain of a #GError.
- *
- * Since: 1.2
- **/
-G_DEFINE_QUARK (TrackerMinerFSError, tracker_miner_fs_error)
-
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER,
-                                  G_ADD_PRIVATE (TrackerMinerFS)
-                                  G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
-                                                         miner_fs_initable_iface_init));
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
 
 /* For TRACKER_DEBUG=miner-fs-events */
 #ifdef G_ENABLE_DEBUG
@@ -445,88 +400,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	                                 (GEqualFunc) g_file_equal,
 	                                 g_object_unref,
 	                                 g_free);
-}
-
-static gboolean
-miner_fs_initable_init (GInitable     *initable,
-                        GCancellable  *cancellable,
-                        GError       **error)
-{
-	TrackerMinerFSPrivate *priv;
-	guint limit;
-
-	priv = TRACKER_MINER_FS (initable)->priv;
-
-	g_object_get (initable, "processing-pool-ready-limit", &limit, NULL);
-	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (initable)),
-	                                                 limit);
-
-	if (!priv->sparql_buffer) {
-		g_set_error (error,
-		             tracker_miner_fs_error_quark (),
-		             TRACKER_MINER_FS_ERROR_INIT,
-		             "Could not create TrackerSparqlBuffer needed to process resources");
-		return FALSE;
-	}
-
-	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
-	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
-	                  initable);
-
-	if (!priv->indexing_tree) {
-		g_set_error (error,
-		             tracker_miner_fs_error_quark (),
-		             TRACKER_MINER_FS_ERROR_INIT,
-		             "Could not create TrackerIndexingTree needed to manage content indexed");
-		return FALSE;
-	}
-
-	g_signal_connect (priv->indexing_tree, "directory-removed",
-	                  G_CALLBACK (indexing_tree_directory_removed),
-	                  initable);
-
-	/* Create the file notifier */
-	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
-	                                                 tracker_miner_get_connection (TRACKER_MINER (initable)),
-	                                                 priv->file_attributes);
-
-	if (!priv->file_notifier) {
-		g_set_error (error,
-		             tracker_miner_fs_error_quark (),
-		             TRACKER_MINER_FS_ERROR_INIT,
-		             "Could not create TrackerFileNotifier needed to signal new resources to be indexed");
-		return FALSE;
-	}
-
-	g_signal_connect (priv->file_notifier, "file-created",
-	                  G_CALLBACK (file_notifier_file_created),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "file-updated",
-	                  G_CALLBACK (file_notifier_file_updated),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "file-deleted",
-	                  G_CALLBACK (file_notifier_file_deleted),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "file-moved",
-	                  G_CALLBACK (file_notifier_file_moved),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "directory-started",
-	                  G_CALLBACK (file_notifier_directory_started),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "directory-finished",
-	                  G_CALLBACK (file_notifier_directory_finished),
-	                  initable);
-	g_signal_connect (priv->file_notifier, "finished",
-	                  G_CALLBACK (file_notifier_finished),
-	                  initable);
-
-	return TRUE;
-}
-
-static void
-miner_fs_initable_iface_init (GInitableIface *iface)
-{
-	iface->init = miner_fs_initable_init;
 }
 
 static QueueEvent *
@@ -721,6 +594,42 @@ fs_constructed (GObject *object)
 
 	/* Create indexing tree */
 	priv->indexing_tree = tracker_indexing_tree_new_with_root (priv->root);
+	g_signal_connect (priv->indexing_tree, "directory-removed",
+	                  G_CALLBACK (indexing_tree_directory_removed),
+	                  object);
+
+	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
+	                                                 priv->sparql_buffer_limit);
+	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
+	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
+	                  object);
+
+	/* Create the file notifier */
+	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
+	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
+	                                                 priv->file_attributes);
+
+	g_signal_connect (priv->file_notifier, "file-created",
+	                  G_CALLBACK (file_notifier_file_created),
+	                  object);
+	g_signal_connect (priv->file_notifier, "file-updated",
+	                  G_CALLBACK (file_notifier_file_updated),
+	                  object);
+	g_signal_connect (priv->file_notifier, "file-deleted",
+	                  G_CALLBACK (file_notifier_file_deleted),
+	                  object);
+	g_signal_connect (priv->file_notifier, "file-moved",
+	                  G_CALLBACK (file_notifier_file_moved),
+	                  object);
+	g_signal_connect (priv->file_notifier, "directory-started",
+	                  G_CALLBACK (file_notifier_directory_started),
+	                  object);
+	g_signal_connect (priv->file_notifier, "directory-finished",
+	                  G_CALLBACK (file_notifier_directory_finished),
+	                  object);
+	g_signal_connect (priv->file_notifier, "finished",
+	                  G_CALLBACK (file_notifier_finished),
+	                  object);
 }
 
 static void

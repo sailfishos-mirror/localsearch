@@ -160,8 +160,6 @@ static void        miner_finished_cb                    (TrackerMinerFS *fs,
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
                                                                    const gchar        *date);
 
-static GInitableIface* miner_files_initable_parent_iface;
-
 G_DEFINE_TYPE_WITH_CODE (TrackerMinerFiles, tracker_miner_files, TRACKER_TYPE_MINER_FS,
                          G_ADD_PRIVATE (TrackerMinerFiles)
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
@@ -296,7 +294,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 static void
 miner_files_initable_iface_init (GInitableIface *iface)
 {
-	miner_files_initable_parent_iface = g_type_interface_peek_parent (iface);
 	iface->init = miner_files_initable_init;
 }
 
@@ -328,12 +325,6 @@ miner_files_initable_init (GInitable     *initable,
 	TrackerMinerFiles *mf;
 	GError *inner_error = NULL;
 	gchar *domain_name;
-
-	/* Chain up parent's initable callback before calling child's one */
-	if (!miner_files_initable_parent_iface->init (initable, cancellable, &inner_error)) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
 
 	mf = TRACKER_MINER_FILES (initable);
 
