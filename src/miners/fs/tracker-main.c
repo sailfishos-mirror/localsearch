@@ -57,7 +57,6 @@
 
 #define DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
-#define LOCALE_FILENAME "locale-for-miner-apps.txt"
 
 static GMainLoop *main_loop;
 static guint cleanup_id;
@@ -142,33 +141,6 @@ log_option_values (TrackerConfig *config)
 #endif
 }
 
-static void
-miner_reset_applications (TrackerMiner *miner)
-{
-	const gchar *sparql;
-	GError *error = NULL;
-
-	sparql =
-		"DELETE { ?icon a rdfs:Resource } "
-		"WHERE { ?app a nfo:SoftwareApplication; nfo:softwareIcon ?icon }; "
-		"DELETE { ?app tracker:extractorHash ?h } "
-		"WHERE { ?app a nfo:SoftwareApplication ; "
-		"             tracker:extractorHash ?h } ";
-
-	/* Execute a sync update, we don't want the apps miner to start before
-	 * we finish this. */
-	tracker_sparql_connection_update (tracker_miner_get_connection (miner),
-	                                  sparql,
-	                                  NULL, &error);
-
-	if (error) {
-		/* Some error happened performing the query, not good */
-		g_critical ("Couldn't reset indexed applications: %s",
-		            error ? error->message : "unknown error");
-		g_error_free (error);
-	}
-}
-
 static GFile *
 get_cache_dir (TrackerDomainOntology *domain_ontology)
 {
@@ -176,99 +148,6 @@ get_cache_dir (TrackerDomainOntology *domain_ontology)
 
 	cache = tracker_domain_ontology_get_cache (domain_ontology);
 	return g_file_get_child (cache, "files");
-}
-
-static void
-save_current_locale (TrackerDomainOntology *domain_ontology)
-{
-	GError *error = NULL;
-	gchar *locale = tracker_locale_get (TRACKER_LOCALE_LANGUAGE);
-	GFile *cache = get_cache_dir (domain_ontology);
-	gchar *cache_path = g_file_get_path (cache);
-	gchar *locale_file;
-
-	locale_file = g_build_filename (cache_path, LOCALE_FILENAME, NULL);
-	g_free (cache_path);
-
-	TRACKER_NOTE (CONFIG, g_message ("Saving locale used to index applications"));
-	TRACKER_NOTE (CONFIG, g_message ("  Creating locale file '%s'", locale_file));
-
-	if (locale == NULL) {
-		locale = g_strdup ("");
-	}
-
-	if (!g_file_set_contents (locale_file, locale, -1, &error)) {
-		g_message ("  Could not set file contents, %s",
-		           error ? error->message : "no error given");
-		g_clear_error (&error);
-	}
-
-	g_object_unref (cache);
-	g_free (locale);
-	g_free (locale_file);
-}
-
-static gboolean
-detect_locale_changed (TrackerMiner          *miner,
-		       TrackerDomainOntology *domain_ontology)
-{
-	GFile *cache;
-	gchar *cache_path;
-	gchar *locale_file;
-	gchar *previous_locale = NULL;
-	gchar *current_locale;
-	gboolean changed;
-
-	cache = get_cache_dir (domain_ontology);
-	cache_path = g_file_get_path (cache);
-	locale_file = g_build_filename (cache_path, LOCALE_FILENAME, NULL);
-	g_object_unref (cache);
-	g_free (cache_path);
-
-	if (G_LIKELY (g_file_test (locale_file, G_FILE_TEST_EXISTS))) {
-		gchar *contents;
-
-		/* Check locale is correct */
-		if (G_LIKELY (g_file_get_contents (locale_file, &contents, NULL, NULL))) {
-			if (contents &&
-			    contents[0] == '\0') {
-				g_critical ("  Empty locale file found at '%s'", locale_file);
-				g_free (contents);
-			} else {
-				/* Re-use contents */
-				previous_locale = contents;
-			}
-		} else {
-			g_critical ("  Could not get content of file '%s'", locale_file);
-		}
-	} else {
-		TRACKER_NOTE (CONFIG, g_message ("  Could not find locale file:'%s'", locale_file));
-	}
-
-	g_free (locale_file);
-
-	current_locale = tracker_locale_get (TRACKER_LOCALE_LANGUAGE);
-
-	/* Note that having both to NULL is actually valid, they would default
-	 * to the unicode collation without locale-specific stuff. */
-	if (g_strcmp0 (previous_locale, current_locale) != 0) {
-		TRACKER_NOTE (CONFIG, g_message ("Locale change detected from '%s' to '%s'...",
-		                      previous_locale, current_locale));
-		changed = TRUE;
-	} else {
-		TRACKER_NOTE (CONFIG, g_message ("Current and previous locales match: '%s'", previous_locale));
-		changed = FALSE;
-	}
-
-	g_free (current_locale);
-	g_free (previous_locale);
-
-	if (changed) {
-		TRACKER_NOTE (CONFIG, g_message ("Resetting nfo:Software due to locale change..."));
-		miner_reset_applications (miner);
-	}
-
-	return changed;
 }
 
 static gboolean
@@ -1050,9 +929,6 @@ main (gint argc, gchar *argv[])
 	controller = tracker_controller_new (tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files)),
 	                                     tracker_miner_files_get_storage (TRACKER_MINER_FILES (miner_files)));
 
-	/* If the locales changed, we need to reset some things first */
-	detect_locale_changed (TRACKER_MINER (miner_files), domain_ontology);
-
 	proxy = tracker_miner_proxy_new (miner_files, connection, DBUS_PATH, NULL, &error);
 	if (error) {
 		g_critical ("Couldn't create miner proxy: %s", error->message);
@@ -1141,10 +1017,8 @@ main (gint argc, gchar *argv[])
 
 	g_debug ("Shutdown started");
 
-	if (!dry_run && miners_timeout_id == 0 && !miner_needs_check (miner_files)) {
+	if (!dry_run && miners_timeout_id == 0 && !miner_needs_check (miner_files))
 		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), FALSE);
-		save_current_locale (domain_ontology);
-	}
 
 	finish_endpoint_thread ();
 
