@@ -901,19 +901,21 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		/* Cache deleted dir, in order to skip children */
 		g_queue_push_head (&root->deleted_dirs, g_object_ref (file));
 	} else if (file_data->is_dir_in_disk &&
-	           (!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) ||
+	           ((!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) &&
+	             !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) ||
 	            index_root_equals_file (root, file) == 0) &&
-	           (file_data->state == FILE_STATE_CREATE ||
-	            file_data->state == FILE_STATE_UPDATE) &&
-	           !g_queue_find_custom (root->pending_dirs, file, file_is_equal)) {
-		/* Updated directory, needs crawling */
-		g_queue_push_head (root->pending_dirs, g_object_ref (file));
-	}
+	           check_directory_contents (notifier, file)) {
+		if (!!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
+			/* Directory, needs monitoring */
+			tracker_monitor_add (priv->monitor, file);
+		}
 
-	if (file_data->state != FILE_STATE_DELETE &&
-	    file_data->is_dir_in_store &&
-	    !!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
-		tracker_monitor_add (priv->monitor, file);
+		if ((file_data->state == FILE_STATE_CREATE ||
+		     file_data->state == FILE_STATE_UPDATE) &&
+		    !g_queue_find_custom (root->pending_dirs, file, file_is_equal)) {
+			/* Updated directory, needs crawling */
+			g_queue_push_head (root->pending_dirs, g_object_ref (file));
+		}
 	}
 
 	parent = g_file_get_parent (file);
