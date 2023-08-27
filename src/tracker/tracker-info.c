@@ -130,113 +130,27 @@ describe_statement_for_urns (TrackerSparqlConnection *conn,
 	return stmt;
 }
 
-gchar *
-tracker_sparql_get_shorthand (GHashTable  *prefixes,
-                              const gchar *longhand)
-{
-	gchar *hash;
-
-	hash = strrchr (longhand, '#');
-
-	if (hash) {
-		gchar *property;
-		const gchar *prefix;
-
-		property = hash + 1;
-		*hash = '\0';
-
-		prefix = g_hash_table_lookup (prefixes, longhand);
-
-		return g_strdup_printf ("%s:%s", prefix, property);
-	}
-
-	return g_strdup (longhand);
-}
-
-GHashTable *
-tracker_sparql_get_prefixes (TrackerSparqlConnection *connection)
-{
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-	GHashTable *retval;
-	const gchar *query;
-
-	retval = g_hash_table_new_full (g_str_hash,
-	                                g_str_equal,
-	                                g_free,
-	                                g_free);
-
-	/* FIXME: Would like to get this in the same SPARQL that we
-	 * use to get the info, but doesn't seem possible at the
-	 * moment with the limited string manipulation features we
-	 * support in SPARQL.
-	 */
-	query = "SELECT ?ns ?prefix "
-	        "WHERE {"
-	        "  ?ns a nrl:Namespace ;"
-	        "  nrl:prefix ?prefix "
-	        "}";
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-			    _("Unable to retrieve namespace prefixes"),
-			    error->message);
-
-		g_error_free (error);
-		return retval;
-	}
-
-	if (!cursor) {
-		g_printerr ("%s\n", _("No namespace prefixes were returned"));
-		return retval;
-	}
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		const gchar *key, *value;
-
-		key = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		value = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-
-		if (!key || !value) {
-			continue;
-		}
-
-		g_hash_table_insert (retval,
-		                     g_strndup (key, strlen (key) - 1),
-		                     g_strdup (value));
-	}
-
-	if (cursor) {
-		g_object_unref (cursor);
-	}
-
-	return retval;
-}
-
 static inline void
-print_key_and_value (GHashTable  *prefixes,
-                     const gchar *key,
-                     const gchar *value)
+print_key_and_value (TrackerNamespaceManager *namespaces,
+                     const gchar             *key,
+                     const gchar             *value)
 {
 	if (G_UNLIKELY (full_namespaces)) {
 		g_print ("  '%s' = '%s'\n", key, value);
 	} else {
-		gchar *shorthand;
+		g_autofree gchar *shorthand = NULL;
 
-		shorthand = tracker_sparql_get_shorthand (prefixes, key);
+		shorthand = tracker_namespace_manager_compress_uri (namespaces, key);
 		g_print ("  '%s' = '%s'\n", shorthand, value);
-		g_free (shorthand);
 	}
 }
 
 static gboolean
-print_plain (const gchar         *urn_or_filename,
-             const gchar         *urn,
-             TrackerSparqlCursor *cursor,
-             GHashTable          *prefixes,
-             gboolean             full_namespaces)
+print_plain (const gchar             *urn_or_filename,
+             const gchar             *urn,
+             TrackerSparqlCursor     *cursor,
+             TrackerNamespaceManager *namespaces,
+             gboolean                 full_namespaces)
 {
 	gchar *fts_key = NULL;
 	gchar *fts_value = NULL;
@@ -266,11 +180,11 @@ print_plain (const gchar         *urn_or_filename,
 			continue;
 		}
 
-		print_key_and_value (prefixes, key, value);
+		print_key_and_value (namespaces, key, value);
 	}
 
 	if (fts_key && fts_value) {
-		print_key_and_value (prefixes, fts_key, fts_value);
+		print_key_and_value (namespaces, fts_key, fts_value);
 	}
 
 	g_free (fts_key);
@@ -382,7 +296,6 @@ info_run (void)
 {
 	TrackerSparqlConnection *connection;
 	GError *error = NULL;
-	GHashTable *prefixes;
 	GList *urns = NULL, *l;
 	gchar **p;
 
@@ -395,8 +308,6 @@ info_run (void)
 		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
-
-	prefixes = tracker_sparql_get_prefixes (connection);
 
 	if (!url_property)
 		url_property = g_strdup ("nie:url");
@@ -528,7 +439,6 @@ info_run (void)
 		g_main_loop_run (main_loop);
 
 		g_list_free_full (urns, g_free);
-		g_hash_table_unref (prefixes);
 		g_object_unref (connection);
 
 		return EXIT_SUCCESS;
@@ -536,6 +446,7 @@ info_run (void)
 
 	for (l = urns; l; l = l->next) {
 		TrackerSparqlCursor *cursor;
+		TrackerNamespaceManager *namespaces;
 		const gchar *urn = l->data;
 		gchar *query;
 
@@ -547,6 +458,7 @@ info_run (void)
 		                         "} ORDER BY ?x",
 					 urn);
 
+		namespaces = tracker_sparql_connection_get_namespace_manager (connection);
 		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
 
 		g_free (query);
@@ -562,7 +474,7 @@ info_run (void)
 
 		if (cursor) {
 			g_print ("  '%s'\n", urn);
-			print_plain (*p, urn, cursor, prefixes, full_namespaces);
+			print_plain (*p, urn, cursor, namespaces, full_namespaces);
 			g_object_unref (cursor);
 		}
 
@@ -571,7 +483,6 @@ info_run (void)
 
  out:
 	g_list_free_full (urns, g_free);
-	g_hash_table_unref (prefixes);
 	g_object_unref (connection);
 
 	return EXIT_SUCCESS;
