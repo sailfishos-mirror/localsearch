@@ -210,8 +210,8 @@ print_key_and_value (GHashTable  *prefixes,
 }
 
 static gboolean
-print_plain (gchar               *urn_or_filename,
-             gchar               *urn,
+print_plain (const gchar         *urn_or_filename,
+             const gchar         *urn,
              TrackerSparqlCursor *cursor,
              GHashTable          *prefixes,
              gboolean             full_namespaces)
@@ -305,7 +305,7 @@ format_urn (GHashTable  *prefixes,
 
 /* Print triples for a urn in Turtle format */
 static gboolean
-print_turtle (gchar               *urn,
+print_turtle (const gchar         *urn,
               TrackerSparqlCursor *cursor,
               GHashTable          *prefixes,
               gboolean             full_namespaces)
@@ -393,8 +393,8 @@ output_eligible_status_for_file (gchar   *path,
 }
 
 static void
-print_errors (GList *keyfiles,
-	      gchar *file_uri)
+print_errors (GList       *keyfiles,
+              const gchar *file_uri)
 {
 	GList *l;
 	GKeyFile *keyfile;
@@ -443,8 +443,8 @@ info_run (void)
 	TrackerSparqlConnection *connection;
 	GError *error = NULL;
 	GHashTable *prefixes;
+	GList *urns = NULL, *l;
 	gchar **p;
-	gboolean has_output = FALSE;
 
 	connection = create_connection (&error);
 
@@ -468,11 +468,12 @@ info_run (void)
 		url_property = g_strdup ("nie:url");
 
 	for (p = filenames; *p; p++) {
-		TrackerSparqlCursor *cursor = NULL;
+		g_autoptr (TrackerSparqlStatement) stmt = NULL;
+		g_autoptr (TrackerSparqlCursor) cursor = NULL;
 		gchar *uri = NULL;
 		gchar *query;
-		gchar *urn = NULL;
 		GList *keyfiles;
+		gboolean found = FALSE;
 
 		if (!turtle && !resource_is_iri) {
 			g_print ("%s: '%s'\n", _("Querying information for entity"), *p);
@@ -492,10 +493,25 @@ info_run (void)
 		}
 
 		if (!resource_is_iri) {
+			g_autoptr (TrackerSparqlStatement) stmt = NULL;
+			g_autoptr (TrackerSparqlCursor) cursor = NULL;
+
 			/* First check whether there's some entity with nie:url like this */
-			query = g_strdup_printf ("SELECT ?urn WHERE { ?urn %s \"%s\" }", url_property, uri);
-			cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+			query = g_strdup_printf ("SELECT ?urn { ?urn %s ~value }", url_property);
+			stmt = tracker_sparql_connection_query_statement (connection, query,
+			                                                  NULL, &error);
 			g_free (query);
+
+			if (stmt) {
+				tracker_sparql_statement_bind_string (stmt, "prop", url_property);
+				tracker_sparql_statement_bind_string (stmt, "value", uri);
+				cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+			}
+
+			if (cursor && tracker_sparql_cursor_next (cursor, NULL, &error)) {
+				g_clear_pointer (&uri, g_free);
+				uri = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
+			}
 
 			if (error) {
 				g_printerr ("  %s, %s\n",
@@ -506,28 +522,67 @@ info_run (void)
 			}
 		}
 
-		if (!cursor || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
-			if (error) {
-				g_printerr ("  %s, %s\n",
-				            _("Unable to retrieve data for URI"),
-				            error->message);
-				g_object_unref (cursor);
-				g_clear_error (&error);
-
-				continue;
-			}
-
-			/* No URN matches, use uri as URN */
-			urn = g_strdup (uri);
-		} else {
-			urn = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
-
-			if (!turtle) {
-				g_print ("  '%s'\n", urn);
-			}
-
-			g_object_unref (cursor);
+		stmt = tracker_sparql_connection_query_statement (connection,
+		                                                  "SELECT DISTINCT ?urn {"
+		                                                  "  {"
+		                                                  "    BIND (~uri AS ?urn) . "
+		                                                  "    ?urn a rdfs:Resource . "
+		                                                  "  } UNION {"
+		                                                  "    ~uri nie:interpretedAs ?urn ."
+		                                                  "  }"
+		                                                  "}",
+		                                                  NULL, &error);
+		if (stmt) {
+			tracker_sparql_statement_bind_string (stmt, "uri", uri);
+			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 		}
+
+		if (cursor) {
+			while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+				const gchar *str;
+
+				str = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+				urns = g_list_prepend (urns, g_strdup (str));
+				found = TRUE;
+			}
+		}
+
+		if (error) {
+			g_printerr ("  %s, %s\n",
+			            _("Unable to retrieve data for URI"),
+			            error->message);
+			g_clear_error (&error);
+		}
+
+		if (!found) {
+			if (turtle) {
+				g_print ("# No metadata available for <%s>\n", uri);
+			} else {
+				g_print ("  %s\n",
+				         _("No metadata available for that URI"));
+				output_eligible_status_for_file (*p, &error);
+
+				if (error) {
+					g_printerr ("%s: %s\n",
+					            _("Could not get eligible status: "),
+					            error->message);
+					g_clear_error (&error);
+				}
+
+				keyfiles = tracker_cli_get_error_keyfiles ();
+				if (keyfiles)
+					print_errors (keyfiles, uri);
+			}
+		}
+	}
+
+	if (!urns)
+		goto out;
+
+	for (l = urns; l; l = l->next) {
+		TrackerSparqlCursor *cursor;
+		const gchar *urn = l->data;
+		gchar *query;
 
 		query = g_strdup_printf ("SELECT DISTINCT ?predicate ?object ?x"
 		                         "  ( EXISTS { ?predicate rdfs:range [ rdfs:subClassOf rdfs:Resource ] } )"
@@ -552,42 +607,20 @@ info_run (void)
 
 		if (cursor) {
 			if (turtle) {
-				has_output = print_turtle (urn, cursor, prefixes, full_namespaces);
+				print_turtle (urn, cursor, prefixes, full_namespaces);
 			} else {
-				has_output = print_plain (*p, urn, cursor, prefixes, full_namespaces);
+				g_print ("  '%s'\n", urn);
+				print_plain (*p, urn, cursor, prefixes, full_namespaces);
 			}
 
 			g_object_unref (cursor);
 		}
 
-		if (has_output) {
-			g_print ("\n");
-		} else if (turtle) {
-			g_print ("# No metadata available for <%s>\n", uri);
-		} else {
-			g_print ("  %s\n",
-			         _("No metadata available for that URI"));
-			output_eligible_status_for_file (*p, &error);
-
-			if (error) {
-				g_printerr ("%s: %s\n",
-				            _("Could not get eligible status: "),
-				            error->message);
-				g_clear_error (&error);
-			}
-		}
-
-		keyfiles = tracker_cli_get_error_keyfiles ();
-
-		if (keyfiles && !turtle)
-			print_errors (keyfiles, uri);
-
 		g_print ("\n");
-
-		g_free (uri);
-		g_free (urn);
 	}
 
+ out:
+	g_list_free_full (urns, g_free);
 	g_hash_table_unref (prefixes);
 	g_object_unref (connection);
 
