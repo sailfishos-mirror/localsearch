@@ -309,9 +309,6 @@ info_run (void)
 		return EXIT_FAILURE;
 	}
 
-	if (!url_property)
-		url_property = g_strdup ("nie:url");
-
 	for (p = filenames; *p; p++) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (TrackerSparqlCursor) cursor = NULL;
@@ -337,7 +334,7 @@ info_run (void)
 			g_object_unref (file);
 		}
 
-		if (!resource_is_iri) {
+		if (url_property) {
 			g_autoptr (TrackerSparqlStatement) stmt = NULL;
 			g_autoptr (TrackerSparqlCursor) cursor = NULL;
 
