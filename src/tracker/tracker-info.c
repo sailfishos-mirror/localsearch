@@ -46,6 +46,8 @@
 #define KEY_SPARQL "Sparql"
 #define ERROR_MESSAGE "Extraction failed for this file. Some metadata will be missing."
 
+#define LINK_STR "[🡕]" /* NORTH EAST SANS-SERIF ARROW, in consistence with systemd */
+
 static gboolean inside_build_tree = FALSE;
 
 static gchar **filenames;
@@ -155,6 +157,12 @@ accumulate_value (GHashTable  *values,
 }
 
 static void
+print_link (const gchar *url)
+{
+	g_print ("\x1B]8;;%s\a" LINK_STR "\x1B]8;;\a", url);
+}
+
+static void
 print_object (const gchar *object,
               int          multiline_padding)
 {
@@ -193,6 +201,8 @@ print_plain_values (const gchar             *subject,
 	GHashTableIter iter;
 	const gchar *pred;
 	GList *objects, *l;
+	int link_padding = 0;
+	gboolean show_links = !full_namespaces && output_is_tty;
 
 	g_hash_table_iter_init (&iter, values);
 
@@ -201,16 +211,26 @@ print_plain_values (const gchar             *subject,
 	else
 		g_print ("%s:\n", subject);
 
+	if (!full_namespaces && show_links)
+		link_padding = g_utf8_strlen (LINK_STR, -1);
+
 	while (g_hash_table_iter_next (&iter, (gpointer*) &pred, (gpointer*) &objects)) {
 		int len, padding;
 
 		len = g_utf8_strlen (pred, -1);
 		padding = axis_column - len;
 		g_print ("%*c%s", padding, ' ', pred);
+
+		if (show_links) {
+			g_autofree gchar *expanded = NULL;
+			expanded = tracker_namespace_manager_expand_uri (namespaces, pred);
+			print_link (expanded);
+		}
+
 		g_print (": ");
 
 		for (l = objects; l; l = l->next) {
-			gchar *str;
+			g_autofree gchar *str = NULL;
 
 			if (!full_namespaces && g_str_has_prefix (l->data, "http"))
 				str = tracker_namespace_manager_compress_uri (namespaces, l->data);
@@ -221,6 +241,10 @@ print_plain_values (const gchar             *subject,
 				g_print ("%*c", axis_column + link_padding + 2, ' ');
 
 			print_object (str, axis_column + link_padding + 2);
+
+			if (show_links && g_strcmp0 (str, l->data) != 0)
+				print_link (l->data);
+
 			g_print ("\n");
 		}
 	}
@@ -593,6 +617,12 @@ main (int argc, const char **argv)
 	GError *error = NULL;
 
 	output_is_tty = tracker_term_is_tty ();
+
+	setlocale (LC_ALL, "");
+
+	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
+	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
+	textdomain (GETTEXT_PACKAGE);
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
