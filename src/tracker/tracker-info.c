@@ -29,8 +29,10 @@
 
 #include <glib.h>
 #include <glib/gi18n.h>
+#include <gio/gunixoutputstream.h>
 
 #include <libtracker-sparql/tracker-sparql.h>
+#include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-cli-utils.h"
 #include "tracker-color.h"
@@ -106,6 +108,26 @@ has_valid_uri_scheme (const gchar *uri)
 	} while (g_ascii_isalnum (*s) || *s == '+' || *s == '.' || *s == '-');
 
 	return (*s == ':');
+}
+
+static TrackerSparqlStatement *
+describe_statement_for_urns (TrackerSparqlConnection *conn,
+                             GList                   *urns)
+{
+	TrackerSparqlStatement *stmt;
+	g_autoptr (GString) str = NULL;
+	GList *l;
+
+	str = g_string_new ("DESCRIBE");
+
+	for (l = urns; l; l = l->next)
+		g_string_append_printf (str, " <%s>", (gchar*) l->data);
+
+	stmt = tracker_sparql_connection_query_statement (conn,
+	                                                  str->str,
+	                                                  NULL, NULL);
+
+	return stmt;
 }
 
 gchar *
@@ -257,112 +279,30 @@ print_plain (const gchar         *urn_or_filename,
 	return has_output;
 }
 
-/* print a URI prefix in Turtle format */
 static void
-print_prefix (gpointer key,
-              gpointer value,
-              gpointer user_data)
+serialize_cb (GObject *object,
+              GAsyncResult *res,
+              gpointer      user_data)
 {
-	g_print ("@prefix %s: <%s#> .\n", (gchar *) value, (gchar *) key);
-}
+	GMainLoop *main_loop = user_data;
+	g_autoptr (GInputStream) istream = NULL;
+	g_autoptr (GOutputStream) ostream = NULL;
+	g_autoptr (GError) error = NULL;
 
-/* format a URI for Turtle; if it has a prefix, display uri
- * as prefix:rest_of_uri; if not, display as <uri>
- */
-inline static gchar *
-format_urn (GHashTable  *prefixes,
-            const gchar *urn,
-            gboolean     full_namespaces)
-{
-	gchar *urn_out;
-
-	if (full_namespaces) {
-		urn_out = g_strdup_printf ("<%s>", urn);
-	} else {
-		gchar *shorthand = tracker_sparql_get_shorthand (prefixes, urn);
-
-		/* If the shorthand is the same as the urn passed, we
-		 * assume it is a resource and pass it in as one,
-		 *
-		 *   e.g.: http://purl.org/dc/elements/1.1/date
-		 *     to: http://purl.org/dc/elements/1.1/date
-		 *
-		 * Otherwise, we use the shorthand version instead.
-		 *
-		 *   e.g.: http://www.w3.org/1999/02/22-rdf-syntax-ns
-		 *     to: rdf
-		 */
-		if (g_strcmp0 (shorthand, urn) == 0) {
-			urn_out = g_strdup_printf ("<%s>", urn);
-			g_free (shorthand);
-		} else {
-			urn_out = shorthand;
-		}
+	istream = tracker_sparql_statement_serialize_finish (TRACKER_SPARQL_STATEMENT (object),
+	                                                     res, &error);
+	if (istream) {
+		tracker_term_pipe_to_pager ();
+		ostream = g_unix_output_stream_new (STDOUT_FILENO, FALSE);
+		g_output_stream_splice (ostream, istream, G_OUTPUT_STREAM_SPLICE_NONE, NULL, &error);
+		g_output_stream_close (ostream, NULL, NULL);
+		tracker_term_pager_close ();
 	}
 
-	return urn_out;
-}
+	if (error)
+		g_printerr ("%s\n", error->message);
 
-/* Print triples for a urn in Turtle format */
-static gboolean
-print_turtle (const gchar         *urn,
-              TrackerSparqlCursor *cursor,
-              GHashTable          *prefixes,
-              gboolean             full_namespaces)
-{
-	gchar *predicate;
-	gchar *object;
-	gboolean has_output = FALSE;
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		const gchar *key = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		const gchar *value = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-		const gchar *subject_value = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-		const gchar *is_resource = tracker_sparql_cursor_get_string (cursor, 3, NULL);
-		gchar *subject_shorthand = NULL;
-
-		if (!key || !value || !is_resource) {
-			continue;
-		}
-
-		/* Don't display nie:plainTextContent */
-		if (!plain_text_content && strcmp (key, "http://tracker.api.gnome.org/ontology/v3/nie#plainTextContent") == 0) {
-			continue;
-		}
-
-		has_output = TRUE;
-
-		predicate = format_urn (prefixes, key, full_namespaces);
-
-		if (g_ascii_strcasecmp (is_resource, "true") == 0) {
-			object = g_strdup_printf ("<%s>", value);
-		} else {
-			gchar *escaped_value;
-
-			/* Escape value and make sure it is encapsulated properly */
-			escaped_value = tracker_sparql_escape_string (value);
-			object = g_strdup_printf ("\"%s\"", escaped_value);
-			g_free (escaped_value);
-		}
-
-		/* Print final statement */
-		if (G_LIKELY (!full_namespaces)) {
-			/* truncate subject */
-			subject_shorthand = tracker_sparql_get_shorthand (prefixes, subject_value);
-		}
-
-		if (subject_shorthand && g_strcmp0 (subject_value, subject_shorthand) != 0) {
-			g_print ("%s %s %s .\n", subject_shorthand, predicate, object);
-		} else {
-			g_print ("<%s> %s %s .\n", subject_value, predicate, object);
-		}
-
-		g_free (subject_shorthand);
-		g_free (predicate);
-		g_free (object);
-	}
-
-	return has_output;
+	g_main_loop_quit (main_loop);
 }
 
 static TrackerSparqlConnection *
@@ -457,12 +397,6 @@ info_run (void)
 	}
 
 	prefixes = tracker_sparql_get_prefixes (connection);
-
-	/* print all prefixes if using turtle format and not showing full namespaces */
-	if (turtle && !full_namespaces) {
-		g_hash_table_foreach (prefixes, (GHFunc) print_prefix, NULL);
-		g_print ("\n");
-	}
 
 	if (!url_property)
 		url_property = g_strdup ("nie:url");
@@ -579,6 +513,27 @@ info_run (void)
 	if (!urns)
 		goto out;
 
+	if (turtle) {
+		g_autoptr (TrackerSparqlStatement) stmt = NULL;
+		g_autoptr (GMainLoop) main_loop = NULL;
+
+		stmt = describe_statement_for_urns (connection, urns);
+		main_loop = g_main_loop_new (NULL, FALSE);
+		tracker_sparql_statement_serialize_async (stmt,
+		                                          TRACKER_SERIALIZE_FLAGS_NONE,
+		                                          TRACKER_RDF_FORMAT_TURTLE,
+		                                          NULL,
+		                                          serialize_cb,
+		                                          main_loop);
+		g_main_loop_run (main_loop);
+
+		g_list_free_full (urns, g_free);
+		g_hash_table_unref (prefixes);
+		g_object_unref (connection);
+
+		return EXIT_SUCCESS;
+	}
+
 	for (l = urns; l; l = l->next) {
 		TrackerSparqlCursor *cursor;
 		const gchar *urn = l->data;
@@ -606,13 +561,8 @@ info_run (void)
 		}
 
 		if (cursor) {
-			if (turtle) {
-				print_turtle (urn, cursor, prefixes, full_namespaces);
-			} else {
-				g_print ("  '%s'\n", urn);
-				print_plain (*p, urn, cursor, prefixes, full_namespaces);
-			}
-
+			g_print ("  '%s'\n", urn);
+			print_plain (*p, urn, cursor, prefixes, full_namespaces);
 			g_object_unref (cursor);
 		}
 
