@@ -171,9 +171,11 @@ tracker_extract_decorator_constructed (GObject *object)
 
 #ifdef HAVE_POWER
 	priv->power = tracker_power_new ();
-	g_signal_connect_swapped (priv->power, "notify::on-low-battery",
-				  G_CALLBACK (low_battery_cb),
-				  object);
+	if (priv->power) {
+		g_signal_connect_swapped (priv->power, "notify::on-low-battery",
+		                          G_CALLBACK (low_battery_cb),
+		                          object);
+	}
 #endif /* HAVE_POWER */
 }
 
@@ -286,7 +288,7 @@ throttle_next_item (TrackerDecorator *decorator)
 		tracker_extract_decorator_get_instance_private (extract_decorator);
 
 #ifdef HAVE_POWER
-	if (tracker_power_get_on_battery (priv->power)) {
+	if (priv->power && tracker_power_get_on_battery (priv->power)) {
 		priv->throttle_id =
 			g_timeout_add (THROTTLED_TIMEOUT_MS,
 				       throttle_next_item_cb,
