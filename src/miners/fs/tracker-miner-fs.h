@@ -30,7 +30,6 @@
 #include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-miner-object.h"
-#include "tracker-data-provider.h"
 #include "tracker-indexing-tree.h"
 #include "tracker-sparql-buffer.h"
 
@@ -139,7 +138,6 @@ GQuark                tracker_miner_fs_error_quark           (void);
 
 /* Properties */
 TrackerIndexingTree * tracker_miner_fs_get_indexing_tree     (TrackerMinerFS  *fs);
-TrackerDataProvider * tracker_miner_fs_get_data_provider     (TrackerMinerFS  *fs);
 gdouble               tracker_miner_fs_get_throttle          (TrackerMinerFS  *fs);
 void                  tracker_miner_fs_set_throttle          (TrackerMinerFS  *fs,
                                                               gdouble          throttle);
