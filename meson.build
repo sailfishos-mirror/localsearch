@@ -179,22 +179,7 @@ endif
 # Check for btrfs ioctls
 ##########################################
 
-result = cc.run('''
-    #include <errno.h>
-    #include <fcntl.h>
-    #include <sys/ioctl.h>
-    #include <linux/btrfs.h>
-
-    int main (int argc, char *argv[]) {
-      struct btrfs_ioctl_ino_lookup_args args = { 0, };
-      int fd = open ("/", O_RDONLY);
-      int ret = ioctl (fd, BTRFS_IOC_INO_LOOKUP, &args);
-      return (ret < 0 && errno != ENOTTY) ? 1 : 0;
-    }
-  ''',
-  name: 'BTRFS_IOC_INO_LOOKUP ioctl is available')
-
-if result.compiled() and result.returncode() == 0
+if cc.has_header_symbol('linux/btrfs.h', 'BTRFS_IOC_INO_LOOKUP')
   have_btrfs_ioctl = true
 else
   have_btrfs_ioctl = false
