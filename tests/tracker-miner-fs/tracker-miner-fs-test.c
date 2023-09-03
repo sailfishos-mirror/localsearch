@@ -171,7 +171,12 @@ test_miner_init (TestMiner *miner)
 static TrackerMinerFS *
 test_miner_new (TrackerSparqlConnection *conn)
 {
+	g_autoptr (TrackerIndexingTree) indexing_tree = NULL;
+
+	indexing_tree = tracker_indexing_tree_new ();
+
 	return g_object_new (test_miner_get_type (),
+	                     "indexing-tree", indexing_tree,
 			     "connection", conn,
 			     "file-attributes", "standard::*,time::*",
 			     NULL);

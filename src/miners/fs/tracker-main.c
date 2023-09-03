@@ -519,13 +519,15 @@ check_eligible (void)
 		return EXIT_FAILURE;
 	}
 
+	indexing_tree = tracker_indexing_tree_new ();
+
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
-	miner_files = tracker_miner_files_new (sparql_conn, config,
+	miner_files = tracker_miner_files_new (sparql_conn,
+	                                       indexing_tree,
+	                                       config,
 	                                       domain_ontology);
 	g_object_unref (config);
-
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files));
 
 	indexable = tracker_indexing_tree_file_is_indexable (indexing_tree, file, info);
 
@@ -609,6 +611,7 @@ check_eligible (void)
 	g_object_unref (file);
 	g_object_unref (miner_files);
 	g_object_unref (info);
+	g_object_unref (indexing_tree);
 
 	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -791,6 +794,7 @@ main (gint argc, gchar *argv[])
 	TrackerMinerProxy *proxy;
 	GDBusConnection *connection;
 	TrackerSparqlConnection *sparql_conn;
+	TrackerIndexingTree *indexing_tree;
 	TrackerDomainOntology *domain_ontology;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
@@ -836,6 +840,8 @@ main (gint argc, gchar *argv[])
 		g_print ("\n" ABOUT "\n" LICENSE "\n");
 		return EXIT_SUCCESS;
 	}
+
+	indexing_tree = tracker_indexing_tree_new ();
 
 	if (eligible) {
 		return check_eligible ();
@@ -911,7 +917,9 @@ main (gint argc, gchar *argv[])
 	}
 
 	/* Create new TrackerMinerFiles object */
-	miner_files = tracker_miner_files_new (sparql_conn, config,
+	miner_files = tracker_miner_files_new (sparql_conn,
+	                                       indexing_tree,
+	                                       config,
 	                                       domain_ontology);
 
 	controller = tracker_controller_new (tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files)),
@@ -1023,6 +1031,8 @@ main (gint argc, gchar *argv[])
 
 	tracker_sparql_connection_close (sparql_conn);
 	g_object_unref (sparql_conn);
+
+	g_clear_object (&indexing_tree);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);

@@ -1061,6 +1061,7 @@ miner_files_constructed (GObject *object)
 
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
+                         TrackerIndexingTree      *indexing_tree,
                          TrackerConfig            *config,
                          TrackerDomainOntology    *domain_ontology)
 {
@@ -1069,6 +1070,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
+	                     "indexing-tree", indexing_tree,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
 	                     "file-attributes", FILE_ATTRIBUTES,

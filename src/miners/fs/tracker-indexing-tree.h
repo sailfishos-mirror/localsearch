@@ -78,6 +78,8 @@ typedef struct {
 	gpointer padding[9];
 } TrackerIndexingTreeClass;
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerIndexingTree, g_object_unref)
+
 GType                 tracker_indexing_tree_get_type (void) G_GNUC_CONST;
 
 TrackerIndexingTree * tracker_indexing_tree_new      (void);

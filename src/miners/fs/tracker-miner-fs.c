@@ -151,6 +151,7 @@ enum {
 	PROP_0,
 	PROP_THROTTLE,
 	PROP_FILE_ATTRIBUTES,
+	PROP_INDEXING_TREE,
 };
 
 static void           fs_finalize                         (GObject              *object);
@@ -274,6 +275,14 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	                                                      "File attributes",
 	                                                      NULL,
 	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_INDEXING_TREE,
+	                                 g_param_spec_object ("indexing-tree",
+	                                                      NULL, NULL,
+	                                                      TRACKER_TYPE_INDEXING_TREE,
+	                                                      G_PARAM_READWRITE |
+	                                                      G_PARAM_CONSTRUCT_ONLY |
+	                                                      G_PARAM_STATIC_STRINGS));
 
 	/**
 	 * TrackerMinerFS::finished:
@@ -550,8 +559,6 @@ fs_constructed (GObject *object)
 
 	priv = TRACKER_MINER_FS (object)->priv;
 
-	/* Create indexing tree */
-	priv->indexing_tree = tracker_indexing_tree_new ();
 	g_signal_connect (priv->indexing_tree, "directory-removed",
 	                  G_CALLBACK (indexing_tree_directory_removed),
 	                  object);
@@ -606,6 +613,9 @@ fs_set_property (GObject      *object,
 	case PROP_FILE_ATTRIBUTES:
 		fs->priv->file_attributes = g_value_dup_string (value);
 		break;
+	case PROP_INDEXING_TREE:
+		fs->priv->indexing_tree = g_value_dup_object (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -628,6 +638,9 @@ fs_get_property (GObject    *object,
 		break;
 	case PROP_FILE_ATTRIBUTES:
 		g_value_set_string (value, fs->priv->file_attributes);
+		break;
+	case PROP_INDEXING_TREE:
+		g_value_set_object (value, fs->priv->indexing_tree);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
