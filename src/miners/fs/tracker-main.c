@@ -449,6 +449,7 @@ check_eligible (void)
 	TrackerSparqlConnection *sparql_conn;
 	TrackerMiner *miner_files;
 	TrackerIndexingTree *indexing_tree;
+	TrackerStorage *storage;
 	TrackerDomainOntology *domain_ontology;
 	TrackerConfig *config;
 	GFile *ontology;
@@ -520,11 +521,13 @@ check_eligible (void)
 	}
 
 	indexing_tree = tracker_indexing_tree_new ();
+	storage = tracker_storage_new ();
 
 	/* Create new TrackerMinerFiles object */
 	config = tracker_config_new ();
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
+	                                       storage,
 	                                       config,
 	                                       domain_ontology);
 	g_object_unref (config);
@@ -612,6 +615,7 @@ check_eligible (void)
 	g_object_unref (miner_files);
 	g_object_unref (info);
 	g_object_unref (indexing_tree);
+	g_object_unref (storage);
 
 	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -795,6 +799,7 @@ main (gint argc, gchar *argv[])
 	GDBusConnection *connection;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
+	TrackerStorage *storage;
 	TrackerDomainOntology *domain_ontology;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
@@ -842,6 +847,7 @@ main (gint argc, gchar *argv[])
 	}
 
 	indexing_tree = tracker_indexing_tree_new ();
+	storage = tracker_storage_new ();
 
 	if (eligible) {
 		return check_eligible ();
@@ -919,11 +925,11 @@ main (gint argc, gchar *argv[])
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
+	                                       storage,
 	                                       config,
 	                                       domain_ontology);
 
-	controller = tracker_controller_new (tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner_files)),
-	                                     tracker_miner_files_get_storage (TRACKER_MINER_FILES (miner_files)));
+	controller = tracker_controller_new (indexing_tree, storage);
 
 	proxy = tracker_miner_proxy_new (miner_files, connection, DBUS_PATH, NULL, &error);
 	if (error) {
@@ -1033,6 +1039,7 @@ main (gint argc, gchar *argv[])
 	g_object_unref (sparql_conn);
 
 	g_clear_object (&indexing_tree);
+	g_clear_object (&storage);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);

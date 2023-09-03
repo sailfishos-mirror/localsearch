@@ -88,6 +88,7 @@ enum {
 	PROP_0,
 	PROP_CONFIG,
 	PROP_DOMAIN_ONTOLOGY,
+	PROP_STORAGE,
 };
 
 static void        miner_files_set_property             (GObject              *object,
@@ -198,6 +199,14 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                     NULL, NULL,
 	                                                     TRACKER_TYPE_DOMAIN_ONTOLOGY,
 	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_STORAGE,
+	                                 g_param_spec_object ("storage",
+	                                                      NULL, NULL,
+	                                                      TRACKER_TYPE_STORAGE,
+	                                                      G_PARAM_READWRITE |
+	                                                      G_PARAM_CONSTRUCT_ONLY |
+	                                                      G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -260,8 +269,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 
 	priv = mf->private = TRACKER_MINER_FILES_GET_PRIVATE (mf);
 
-	priv->storage = tracker_storage_new ();
-
 #ifdef HAVE_POWER
 	priv->power = tracker_power_new ();
 
@@ -319,6 +326,9 @@ miner_files_set_property (GObject      *object,
 	case PROP_DOMAIN_ONTOLOGY:
 		priv->domain_ontology = g_value_dup_boxed (value);
 		break;
+	case PROP_STORAGE:
+		priv->storage = g_value_dup_object (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -341,6 +351,9 @@ miner_files_get_property (GObject    *object,
 		break;
 	case PROP_DOMAIN_ONTOLOGY:
 		g_value_set_boxed (value, priv->domain_ontology);
+		break;
+	case PROP_STORAGE:
+		g_value_set_object (value, priv->storage);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1062,6 +1075,7 @@ miner_files_constructed (GObject *object)
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
+                         TrackerStorage           *storage,
                          TrackerConfig            *config,
                          TrackerDomainOntology    *domain_ontology)
 {
@@ -1071,6 +1085,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
+	                     "storage", storage,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
 	                     "file-attributes", FILE_ATTRIBUTES,
