@@ -422,15 +422,6 @@ miner_finished_cb (TrackerMinerFS *fs,
 }
 
 static void
-dummy_log_handler (const gchar    *domain,
-                   GLogLevelFlags  log_level,
-                   const gchar    *message,
-                   gpointer        user_data)
-{
-	return;
-}
-
-static void
 graphs_created_cb (GObject      *source,
                    GAsyncResult *res,
                    gpointer      user_data)
@@ -444,33 +435,20 @@ graphs_created_cb (GObject      *source,
 }
 
 static gint
-check_eligible (void)
+check_eligible (TrackerIndexingTree *indexing_tree,
+                TrackerStorage      *storage)
 {
-	TrackerSparqlConnection *sparql_conn;
-	TrackerMiner *miner_files;
-	TrackerIndexingTree *indexing_tree;
-	TrackerStorage *storage;
-	TrackerDomainOntology *domain_ontology;
-	TrackerConfig *config;
-	GFile *ontology;
+	TrackerController *controller;
 	GFile *file;
 	GFileInfo *info;
 	GError *error = NULL;
 	gchar *path;
-	guint log_handler_id;
 	gboolean exists = TRUE;
 	gboolean indexable;
 	gboolean parents_indexable = TRUE;
 	gboolean is_dir;
 
-	/* Set log handler for library messages */
-	log_handler_id = g_log_set_handler (NULL,
-	                                    G_LOG_LEVEL_MASK | G_LOG_FLAG_FATAL,
-	                                    dummy_log_handler,
-	                                    NULL);
-
-	g_log_set_default_handler (dummy_log_handler, NULL);
-
+	controller = tracker_controller_new (indexing_tree, storage);
 
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
@@ -496,7 +474,6 @@ check_eligible (void)
 		is_dir = FALSE;
 	}
 
-	config = tracker_config_new ();
 	path = g_file_get_path (file);
 
 	g_print (exists ?
@@ -505,32 +482,6 @@ check_eligible (void)
 	         path);
 
 	g_print ("\n");
-
-	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
-	ontology = tracker_domain_ontology_get_ontology (domain_ontology);
-	tracker_domain_ontology_unref (domain_ontology);
-
-	sparql_conn = tracker_sparql_connection_new (0,
-	                                              NULL,
-	                                              ontology,
-	                                              NULL,
-	                                              NULL);
-	if (!sparql_conn) {
-		g_object_unref (info);
-		return EXIT_FAILURE;
-	}
-
-	indexing_tree = tracker_indexing_tree_new ();
-	storage = tracker_storage_new ();
-
-	/* Create new TrackerMinerFiles object */
-	config = tracker_config_new ();
-	miner_files = tracker_miner_files_new (sparql_conn,
-	                                       indexing_tree,
-	                                       storage,
-	                                       config,
-	                                       domain_ontology);
-	g_object_unref (config);
 
 	indexable = tracker_indexing_tree_file_is_indexable (indexing_tree, file, info);
 
@@ -605,17 +556,10 @@ check_eligible (void)
 		         _("File is eligible to be indexed"));
 	}
 
-	if (log_handler_id != 0) {
-		/* Unset log handler */
-		g_log_remove_handler (NULL, log_handler_id);
-	}
-
 	g_free (path);
 	g_object_unref (file);
-	g_object_unref (miner_files);
 	g_object_unref (info);
-	g_object_unref (indexing_tree);
-	g_object_unref (storage);
+	g_object_unref (controller);
 
 	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
@@ -850,7 +794,7 @@ main (gint argc, gchar *argv[])
 	storage = tracker_storage_new ();
 
 	if (eligible) {
-		return check_eligible ();
+		return check_eligible (indexing_tree, storage);
 	}
 
 	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
