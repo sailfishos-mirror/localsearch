@@ -1672,8 +1672,8 @@ tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
 	return fs->priv->throttle;
 }
 
-static const gchar *
-tracker_miner_fs_get_folder_urn (TrackerMinerFS *fs,
+const gchar *
+tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 				 GFile          *file)
 {
 	GFileInfo *info;
@@ -1751,11 +1751,4 @@ tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 
 	return fs->priv->indexing_tree;
-}
-
-const gchar *
-tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
-                                 GFile          *file)
-{
-	return tracker_miner_fs_get_folder_urn (miner, file);
 }
