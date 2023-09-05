@@ -1,3 +1,16 @@
+NEW in 3.6.rc - 2023-09-05
+==========================
+  * Throttle extractor process on battery conditions
+  * Handle deletion of directories no longer configured as
+    indexed.
+  * Lower footprint crawling very large directories
+  * Hint tracker-extract-3 file access with posix_fadvise
+  * Raise file descriptor limit in tracker-miner-fs-3
+  * Test fixes
+  * Build fixes
+
+Translations: fa, ka, tr, sv
+
 NEW in 3.6.beta - 2023-08-11
 ============================
   * Stop indexing applications
