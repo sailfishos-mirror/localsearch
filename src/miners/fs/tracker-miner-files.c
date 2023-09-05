@@ -577,17 +577,13 @@ init_index_roots (TrackerMinerFiles *miner_files)
 
 	for (l = roots; l; l = l->next) {
 		TrackerStorage *storage = miner_files->private->storage;
-		TrackerStorageType type = 0;
-		const gchar *uuid;
+		TrackerStorageType type;
 		GFile *file = l->data;
 
 		if (g_hash_table_contains (handled, file))
 			continue;
 
-		uuid = tracker_storage_get_uuid_for_file (storage, file);
-
-		if (uuid)
-			type = tracker_storage_get_type_for_uuid (storage, uuid);
+		type = tracker_storage_get_type_for_file (storage, file);
 
 		if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
 			set_up_mount_point (miner_files, file, TRUE, NULL);
@@ -898,13 +894,9 @@ indexing_tree_directory_added_cb (TrackerIndexingTree *indexing_tree,
 {
 	TrackerMinerFiles *miner_files = user_data;
 	TrackerStorage *storage = miner_files->private->storage;
-	TrackerStorageType type = 0;
-	const gchar *uuid;
+	TrackerStorageType type;
 
-	uuid = tracker_storage_get_uuid_for_file (storage, directory);
-
-	if (uuid)
-		type = tracker_storage_get_type_for_uuid (storage, uuid);
+	type = tracker_storage_get_type_for_file (storage, directory);
 
 	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
 		set_up_mount_point (miner_files, directory, TRUE, NULL);
@@ -917,17 +909,13 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
 {
 	TrackerMinerFiles *miner_files = user_data;
 	TrackerStorage *storage = miner_files->private->storage;
-	TrackerStorageType type = 0;
+	TrackerStorageType type;
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerBatch) batch = NULL;
 	g_autoptr (GError) error = NULL;
-	const gchar *uuid;
 	gboolean delete = FALSE, update_mount = FALSE;
 
-	uuid = tracker_storage_get_uuid_for_file (storage, directory);
-
-	if (uuid)
-		type = tracker_storage_get_type_for_uuid (storage, uuid);
+	type = tracker_storage_get_type_for_file (storage, directory);
 
 	if ((type & TRACKER_STORAGE_REMOVABLE) != 0) {
 		if (!tracker_config_get_index_removable_devices (miner_files->private->config))

@@ -931,80 +931,27 @@ tracker_storage_get_device_roots (TrackerStorage     *storage,
 	return gr.roots;
 }
 
-/**
- * tracker_storage_get_type_for_uuid:
- * @storage: A #TrackerStorage
- * @uuid: A string pointer to the UUID for the %GVolume.
- *
- * Returns: The type flags for @uuid.
- *
- * Since: 0.10
- **/
 TrackerStorageType
-tracker_storage_get_type_for_uuid (TrackerStorage     *storage,
-                                   const gchar        *uuid)
-{
-	TrackerStoragePrivate *priv;
-	GNode *node;
-	TrackerStorageType type = 0;
-
-	g_return_val_if_fail (TRACKER_IS_STORAGE (storage), 0);
-	g_return_val_if_fail (uuid != NULL, 0);
-
-	priv = tracker_storage_get_instance_private (storage);
-
-	node = g_hash_table_lookup (priv->mounts_by_uuid, uuid);
-
-	if (node) {
-		MountInfo *info;
-
-		info = node->data;
-
-		if (info->removable) {
-			type |= TRACKER_STORAGE_REMOVABLE;
-		}
-		if (info->optical) {
-			type |= TRACKER_STORAGE_OPTICAL;
-		}
-	}
-
-	return type;
-}
-
-/**
- * tracker_storage_get_uuid_for_file:
- * @storage: A #TrackerStorage
- * @file: a file
- *
- * Returns the UUID of the removable device for @file
- *
- * Returns: Returns the UUID of the removable device for @file, this
- * should not be freed.
- *
- * Since: 0.8
- **/
-const gchar *
-tracker_storage_get_uuid_for_file (TrackerStorage *storage,
+tracker_storage_get_type_for_file (TrackerStorage *storage,
                                    GFile          *file)
 {
 	TrackerStoragePrivate *priv;
-	gchar *path;
+	g_autofree gchar *path = NULL;
+	TrackerStorageType type = 0;
 	MountInfo *info;
 
 	g_return_val_if_fail (TRACKER_IS_STORAGE (storage), FALSE);
 
 	path = g_file_get_path (file);
-
-	if (!path) {
-		return NULL;
-	}
+	if (!path)
+		return type;
 
 	/* Normalize all paths to have a / at the end */
 	if (!g_str_has_suffix (path, G_DIR_SEPARATOR_S)) {
 		gchar *norm_path;
 
 		norm_path = g_strconcat (path, G_DIR_SEPARATOR_S, NULL);
-		g_free (path);
+		g_clear_pointer (&path, g_free);
 		path = norm_path;
 	}
 
@@ -1012,16 +959,14 @@ tracker_storage_get_uuid_for_file (TrackerStorage *storage,
 
 	info = mount_info_find (priv->mounts, path);
 
-	if (!info) {
-		g_free (path);
-		return NULL;
-	}
+	if (!info)
+		return type;
 
-	/* g_debug ("Mount for path '%s' is '%s' (UUID:'%s')", */
-	/*          path, info->mount_point, info->uuid); */
+	if (info->removable)
+		type |= TRACKER_STORAGE_REMOVABLE;
+	if (info->optical)
+		type |= TRACKER_STORAGE_OPTICAL;
 
-	g_free (path);
-
-	return info->uuid;
+	return type;
 }
 
