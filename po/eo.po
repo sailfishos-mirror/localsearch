@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2023-09-08 11:09+0000\n"
-"PO-Revision-Date: 2023-09-15 21:52+0200\n"
+"POT-Creation-Date: 2023-09-15 19:53+0000\n"
+"PO-Revision-Date: 2023-09-18 20:01+0200\n"
 "Last-Translator: Kristjan SCHMIDT <kristjan.schmidt@googlemail.com>\n"
 "Language-Team: Esperanto <gnome-eo-list@gnome.org>\n"
 "Language: eo\n"
@@ -37,9 +37,8 @@ msgstr ""
 "Dosiernomaj ŝablonoj por klartekstaj dokumentoj, kiuj devus esti indeksitaj"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:37
-#, fuzzy
 msgid "Wait for FS miner to be done before extracting"
-msgstr "Atendi, ke FS-ministo estu farita antaŭ ol ĉerpi"
+msgstr "Atendu, ke FS-ministo estu preta antaŭ ol ĉerpi"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
@@ -48,10 +47,14 @@ msgid ""
 "environment where it is important to list files as fast as possible and can "
 "wait to get meta-data later."
 msgstr ""
+"Kiam vera, tracker-extract atendos ke tracker-miner-fs estos finita rampado "
+"antaŭ ĉerpi meta-datumojn. Ĉi tiu opcio estas utila en limigitaj medioj, kie "
+"gravas listigi dosierojn kiel eble plej rapide kaj povas atendi por ricevi "
+"metadatumojn poste."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
-msgstr ""
+msgstr "Redukti al gepatraj formoj"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:25
 msgid ""
@@ -82,34 +85,35 @@ msgid "If enabled, numbers will not be indexed."
 msgstr "Se enŝaltite, nombroj ne estos indeksitaj."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
-#, fuzzy
 msgid "Initial sleep"
 msgstr "Komenca dormo"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
 msgid "Initial sleep time, in seconds."
-msgstr ""
+msgstr "Komenca dormtempo, en sekundoj."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
 msgid "Throttle"
-msgstr ""
+msgstr "Akcelilo"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
 msgid "Indexing speed, the higher the slower."
-msgstr ""
+msgstr "Indeksa rapido, des pli alta des pli malrapida."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
 msgid "Low disk space limit"
-msgstr ""
+msgstr "Malalta diskspaco limo"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
 msgid ""
 "Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
+"Diskospacsojlo en procentoj ĉe kiu paŭzi indeksadon, aŭ -1 por malŝalti."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
+#, fuzzy
 msgid "Crawling interval"
-msgstr ""
+msgstr "Rampa intervalo"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
 msgid ""
@@ -120,17 +124,20 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
 msgid "Removable devices’ data permanence threshold"
-msgstr ""
+msgstr "Sojlo de restado de datumoj de forpreneblaj aparatoj"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
+#, fuzzy
 msgid ""
 "Threshold in days after which files from removables devices will be removed "
 "from database if not mounted. 0 means never, maximum is 365."
 msgstr ""
+"Sojlo en tagoj post kiuj dosieroj de forpreneblaj aparatoj estos forigitaj "
+"el datumbazo se ne muntitaj. 0 signifas neniam, maksimumo estas 365."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
 msgid "Enable monitors"
-msgstr ""
+msgstr "Enŝalti monitorojn"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
 msgid "Set to false to completely disable any file monitoring"
@@ -138,7 +145,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
 msgid "Index removable devices"
-msgstr ""
+msgstr "Indeksaj forpreneblaj aparatoj"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
 msgid ""
@@ -201,19 +208,19 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Ignored files"
-msgstr ""
+msgstr "Ignoritaj dosieroj"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
-msgstr ""
+msgstr "Listo de dosierŝablonoj por eviti"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
-msgstr ""
+msgstr "Ignoritaj dosierujoj"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
-msgstr ""
+msgstr "Listo de dosierujoj por eviti"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
@@ -368,18 +375,18 @@ msgstr ""
 
 #: src/miners/fs/tracker-main.c:555
 msgid "Directory is eligible to be indexed"
-msgstr ""
+msgstr "Dosierujo rajtas esti indeksita"
 
 #: src/miners/fs/tracker-main.c:556
 msgid "File is eligible to be indexed"
-msgstr ""
+msgstr "Dosiero rajtas esti indeksita"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/miners/fs/tracker-main.c:776
 msgid "— start the tracker indexer"
-msgstr ""
+msgstr "— lanĉu la spurilon indeksilon"
 
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:45
@@ -392,7 +399,7 @@ msgstr "Retadreso"
 
 #: src/miners/rss/tracker-main.c:49
 msgid "Title to use (must be used with --add-feed)"
-msgstr ""
+msgstr "Uzenda titolo (devas esti uzata kun --add-feed)"
 
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:54
@@ -402,7 +409,7 @@ msgstr "Listo de fontoj"
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:59
 msgid "Delete feed"
-msgstr ""
+msgstr "Forigi fluon"
 
 #: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
 #: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
@@ -452,7 +459,7 @@ msgstr ""
 
 #: src/tracker-extract/tracker-extract.c:697
 msgid "Metadata extraction failed"
-msgstr ""
+msgstr "Eltiro de metadatumoj malsukcesis"
 
 #: src/tracker-extract/tracker-extract.c:776
 msgid "No metadata or extractor modules found to handle this file"
@@ -460,7 +467,7 @@ msgstr ""
 
 #: src/tracker-extract/tracker-main.c:82
 msgid "File to extract metadata for"
-msgstr ""
+msgstr "Dosiero por ĉerpi metadatumojn"
 
 #: src/tracker-extract/tracker-main.c:86
 msgid "MIME type for file (if not provided, this will be guessed)"
@@ -476,7 +483,7 @@ msgstr ""
 
 #: src/tracker-extract/tracker-main.c:91
 msgid "MODULE"
-msgstr ""
+msgstr "MODULO"
 
 #: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
@@ -495,11 +502,11 @@ msgstr ""
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
 #: src/tracker-extract/tracker-main.c:342
 msgid "— Extract file meta data"
-msgstr ""
+msgstr "— Ĉerpi dosierajn metadatenojn"
 
 #: src/tracker-extract/tracker-main.c:357
 msgid "Filename and mime type must be provided together"
-msgstr ""
+msgstr "Dosiernomo kaj mimspeco devas esti provizitaj kune"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -581,7 +588,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:137
 msgid "MINER"
-msgstr ""
+msgstr "MINISTO"
 
 #: src/tracker/tracker-daemon.c:140
 msgid "List all miners currently running"
@@ -605,7 +612,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:156 src/tracker/tracker-daemon.c:159
 msgid "APPS"
-msgstr ""
+msgstr "APLIKAĴOJ"
 
 #: src/tracker/tracker-daemon.c:158
 msgid "Use SIGTERM to stop all miners"
@@ -616,9 +623,9 @@ msgid "Starts miners"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:213
-#, fuzzy, c-format
+#, c-format
 msgid "Could not get status from miner: %s"
-msgstr "Ne eblis akiri staton de: %s"
+msgstr "Ne eblis ricevi statuson de ministo: %s"
 
 #. Translators: %s is a time string
 #: src/tracker/tracker-daemon.c:275
@@ -650,10 +657,9 @@ msgid "Attempting to pause miner “%s” with reason “%s”"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:462 src/tracker/tracker-daemon.c:468
-#, fuzzy, c-format
-#| msgid "Could not open '%s'"
+#, c-format
 msgid "Could not pause miner: %s"
-msgstr "Ne eblis malfermi na '%s'"
+msgstr "Ne eblis paŭzi ministon: %s"
 
 #: src/tracker/tracker-daemon.c:474
 #, c-format
@@ -676,10 +682,9 @@ msgid "Attempting to resume miner %s with cookie %d"
 msgstr ""
 
 #: src/tracker/tracker-daemon.c:522
-#, fuzzy, c-format
-#| msgid "Could not open '%s'"
+#, c-format
 msgid "Could not resume miner: %s"
-msgstr "Ne eblis akiri montro-nomon por X '%s'"
+msgstr "Ne eblis rekomenci ministon: %s"
 
 #: src/tracker/tracker-daemon.c:526
 msgid "Done"
@@ -716,7 +721,7 @@ msgstr ""
 #. Display states
 #: src/tracker/tracker-daemon.c:662 src/tracker/tracker-daemon.c:779
 msgid "Miners"
-msgstr ""
+msgstr "Ministoj"
 
 #: src/tracker/tracker-daemon.c:669
 msgid "Application"
@@ -728,7 +733,7 @@ msgstr "Kialo"
 
 #: src/tracker/tracker-daemon.c:680
 msgid "No miners are paused"
-msgstr ""
+msgstr "Neniuj ministoj estas paŭzitaj"
 
 #: src/tracker/tracker-daemon.c:711
 msgid "Could not get SPARQL connection"
@@ -736,7 +741,7 @@ msgstr "Ne eblis akiri SPARQL-konekton"
 
 #: src/tracker/tracker-daemon.c:722
 msgid "Now listening for resource updates to the database"
-msgstr ""
+msgstr "Nun aŭskultas por resursaj ĝisdatigoj al la datumbazo"
 
 #: src/tracker/tracker-daemon.c:723
 msgid "All nie:plainTextContent properties are omitted"
@@ -752,10 +757,9 @@ msgid "Could not get status, manager could not be created, %s"
 msgstr "Ne eblis ricevi staton, administranto ne povis esti kreita, %s"
 
 #: src/tracker/tracker-daemon.c:787
-#, fuzzy, c-format
-#| msgid "Could not open '%s'"
+#, c-format
 msgid "Could not get display name for miner “%s”"
-msgstr "Ne eblis akiri montro-nomon por X '%s'"
+msgstr "Ne eblis akiri montro-nomon por ministo “%s”"
 
 #: src/tracker/tracker-daemon.c:881
 msgid "You can not use miner pause and resume switches together"
@@ -814,16 +818,12 @@ msgid "Could not get D-Bus connection"
 msgstr "Ne eblis akiri D-Bus-konekton"
 
 #: src/tracker/tracker-dbus.c:62
-#, fuzzy
-#| msgid "Could not get D-Bus connection"
 msgid "Could not create D-Bus proxy to tracker-store"
-msgstr "Ne eblis akiri D-Bus-konekton"
+msgstr ""
 
 #: src/tracker/tracker-extract.c:76
-#, fuzzy
-#| msgid "Could not run query"
 msgid "Could not run tracker-extract: "
-msgstr "Ne eblis ruli informpeton"
+msgstr ""
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -840,7 +840,7 @@ msgstr ""
 #: src/tracker/tracker-index.c:192
 #, c-format
 msgid "“%s” is not a directory"
-msgstr ""
+msgstr "“%s” ne estas dosierujo"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:282
@@ -863,7 +863,7 @@ msgstr "Vojo"
 
 #: src/tracker/tracker-index.c:357
 msgid "Recursive"
-msgstr ""
+msgstr "Rekursiva"
 
 #: src/tracker/tracker-index.c:407
 msgid "Please specify one or more locations to index."
@@ -899,23 +899,23 @@ msgstr ""
 
 #: src/tracker/tracker-info.c:388
 msgid "Error message"
-msgstr ""
+msgstr "Erarmesaĝo"
 
 #: src/tracker/tracker-info.c:471
 msgid "Unable to retrieve URN for URI"
-msgstr ""
+msgstr "Ne eblas preni URN por URI"
 
 #: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
-msgstr ""
+msgstr "Ne eblas preni datumojn por URI"
 
 #: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
-msgstr ""
+msgstr "Neniuj metadatenoj haveblaj por tiu URI"
 
 #: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
-msgstr "Ne eblis akiri elekteblan statuson:"
+msgstr "Ne eblis akiri elekteblan statuson: "
 
 #: src/tracker/tracker-process.c:216
 #, c-format
@@ -925,20 +925,21 @@ msgstr "Ne eblis mortigi procezon %d — “%s”"
 #: src/tracker/tracker-process.c:222
 #, c-format
 msgid "Killed process %d — “%s”"
-msgstr ""
+msgstr "Mortigis procezon %d — “%s”"
 
 #: src/tracker/tracker-reset.c:49
 msgid "Remove filesystem indexer database"
-msgstr ""
+msgstr "Forigi datumbazon de la dosiersistema indeksilo"
 
 #: src/tracker/tracker-reset.c:52
 msgid "Remove RSS indexer database"
-msgstr ""
+msgstr "Forigi datumbazon de RSS-indeksilo"
 
 #: src/tracker/tracker-reset.c:55
 msgid ""
 "Erase indexed information about a file, works recursively for directories"
 msgstr ""
+"Forigi indeksitajn informojn pri dosiero, funkcias rekursie por dosierujoj"
 
 #. Now, delete the element recursively
 #: src/tracker/tracker-reset.c:95
@@ -949,6 +950,8 @@ msgstr "Forigante…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
+"La indeksitaj datumoj por ĉi tiu dosiero estas forigitaj kaj denove estos "
+"reindeksitaj."
 
 #: src/tracker/tracker-search.c:73
 msgid "Search for files"
@@ -996,39 +999,44 @@ msgstr "Serĉi fontojn (--all havas neniun efikon al tio)"
 
 #: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
-msgstr ""
+msgstr "Limigi la nombron de montritaj rezultoj"
 
 #: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
-msgstr ""
+msgstr "Kompensi la rezultojn"
 
 #: src/tracker/tracker-search.c:127
 msgid "Use OR for search terms instead of AND (the default)"
-msgstr ""
+msgstr "Uzu OR por serĉaj terminoj anstataŭ AND (la defaŭlta)"
 
 #: src/tracker/tracker-search.c:131
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
 msgstr ""
+"Montri URN-ojn por rezultoj (ne validas por --music-albums, --music-artists, "
+"--feeds, --software, --software-categories)"
 
 #: src/tracker/tracker-search.c:135
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
+"Redoni ankaŭ ĉiujn neekzistantajn matĉojn (t.e. inkludu nemuntitajn volumojn)"
 
 #: src/tracker/tracker-search.c:139
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
 msgstr ""
+"Malŝalti montri fragmentojn kun rezultoj. Ĉi tio montriĝas nur por kelkaj "
+"kategorioj, ekz. Dokumentoj, Muziko..."
 
 #: src/tracker/tracker-search.c:143
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
-msgstr ""
+msgstr "Malebligu Plentekstan Serĉon (FTS). Implicas --disable-snippets"
 
 #: src/tracker/tracker-search.c:147
 msgid "Disable color when printing snippets and results"
-msgstr ""
+msgstr "Malŝalti koloron dum presado de fragmentoj kaj rezultoj"
 
 #: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:58
 msgid "search terms"
@@ -1106,10 +1114,8 @@ msgid "Show statistics for current index / data set"
 msgstr ""
 
 #: src/tracker/tracker-status.c:106
-#, fuzzy
-#| msgid "Could not get statistics"
 msgid "Could not get Tracker statistics"
-msgstr "Ne eblis akiri statistikojn"
+msgstr "Ne eblis akiri Spuristo-statistikojn"
 
 #: src/tracker/tracker-status.c:113
 msgid "No statistics available"
@@ -1183,12 +1189,12 @@ msgstr ""
 
 #: src/tracker/tracker-status.c:426
 msgid "Data is still being indexed"
-msgstr ""
+msgstr "Datenoj ankoraŭ estas indeksitaj"
 
 #: src/tracker/tracker-status.c:427
 #, c-format
 msgid "Estimated %s left"
-msgstr ""
+msgstr "Restas laŭtaksa %s"
 
 #: src/tracker/tracker-status.c:431
 msgid "All data miners are idle, indexing complete"
