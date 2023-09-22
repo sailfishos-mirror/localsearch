@@ -183,9 +183,6 @@ run_standalone (void)
 		output_format_name = "turtle";
 	}
 
-	/* This makes sure we don't steal all the system's resources */
-	initialize_priority_and_scheduling ();
-
 	/* Look up the output format by name */
 	enum_class = g_type_class_ref (TRACKER_TYPE_SERIALIZATION_FORMAT);
 	enum_value = g_enum_get_value_by_nick (enum_class, output_format_name);
@@ -296,8 +293,8 @@ tracker_main_get_readonly_connection (GError **error)
 	                                      error);
 }
 
-int
-main (int argc, char *argv[])
+static int
+do_main (int argc, char *argv[])
 {
 	GOptionContext *context;
 	GError *error = NULL;
@@ -315,9 +312,6 @@ main (int argc, char *argv[])
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
-
-	/* This makes sure we don't steal all the system's resources */
-	initialize_priority_and_scheduling ();
 
 	/* Translators: this message will appear immediately after the  */
 	/* usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>     */
@@ -490,4 +484,18 @@ main (int argc, char *argv[])
 	g_object_unref (sparql_connection);
 
 	return EXIT_SUCCESS;
+}
+
+int
+main (int argc, char *argv[])
+{
+	/* This function is untouchable! Add things to do_main() */
+
+	/* This makes sure we don't steal all the system's resources */
+	initialize_priority_and_scheduling ();
+
+	if (!tracker_seccomp_init ())
+		g_assert_not_reached ();
+
+	return do_main (argc, argv);
 }
