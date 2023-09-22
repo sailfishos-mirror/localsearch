@@ -30,8 +30,6 @@
 #include <gio/gunixinputstream.h>
 #include <gio/gunixfdlist.h>
 
-#include <libtracker-miners-common/tracker-common.h>
-
 #include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-extract.h"
@@ -537,9 +535,6 @@ get_metadata (TrackerExtractTask *task)
 static gpointer
 single_thread_get_metadata (GAsyncQueue *queue)
 {
-	if (!tracker_seccomp_init ())
-		g_assert_not_reached ();
-
 	while (TRUE) {
 		TrackerExtractTask *task;
 
@@ -710,9 +705,6 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 	task->module = tracker_extract_module_manager_get_module (task->mimetype,
 	                                                          NULL,
 	                                                          &task->func);
-
-	if (!tracker_seccomp_init ())
-		g_assert_not_reached ();
 
 	if (!filter_module (object, task->module) &&
 	    get_file_metadata (task, &info, NULL)) {
