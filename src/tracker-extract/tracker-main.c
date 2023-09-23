@@ -129,46 +129,6 @@ initialize_priority_and_scheduling (void)
 	}
 }
 
-static gboolean
-signal_handler (gpointer user_data)
-{
-	int signo = GPOINTER_TO_INT (user_data);
-
-	static gboolean in_loop = FALSE;
-
-	/* Die if we get re-entrant signals handler calls */
-	if (in_loop) {
-		_exit (EXIT_FAILURE);
-	}
-
-	switch (signo) {
-	case SIGTERM:
-	case SIGINT:
-		in_loop = TRUE;
-		g_main_loop_quit (main_loop);
-
-		/* Fall through */
-	default:
-		if (g_strsignal (signo)) {
-			g_debug ("Received signal:%d->'%s'",
-			         signo,
-			         g_strsignal (signo));
-		}
-		break;
-	}
-
-	return G_SOURCE_CONTINUE;
-}
-
-static void
-initialize_signal_handler (void)
-{
-#ifndef G_OS_WIN32
-	g_unix_signal_add (SIGTERM, signal_handler, GINT_TO_POINTER (SIGTERM));
-	g_unix_signal_add (SIGINT, signal_handler, GINT_TO_POINTER (SIGINT));
-#endif /* G_OS_WIN32 */
-}
-
 static void
 log_option_values (TrackerConfig *config)
 {
@@ -468,8 +428,6 @@ main (int argc, char *argv[])
 	                  main_loop);
 
 	tracker_miner_start (TRACKER_MINER (decorator));
-
-	initialize_signal_handler ();
 
 	g_main_loop_run (main_loop);
 
