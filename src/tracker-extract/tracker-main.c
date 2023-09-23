@@ -129,6 +129,7 @@ initialize_priority_and_scheduling (void)
 	}
 }
 
+#ifndef HAVE_LIBSECCOMP
 static gboolean
 signal_handler (gpointer user_data)
 {
@@ -168,6 +169,7 @@ initialize_signal_handler (void)
 	g_unix_signal_add (SIGINT, signal_handler, GINT_TO_POINTER (SIGINT));
 #endif /* G_OS_WIN32 */
 }
+#endif /* !HAVE_LIBSECCOMP */
 
 static void
 log_option_values (TrackerConfig *config)
@@ -493,7 +495,10 @@ main (int argc, char *argv[])
 
 	tracker_miner_start (TRACKER_MINER (decorator));
 
+#ifndef HAVE_LIBSECCOMP
+	/* Play nice with coverage/valgrind/etc */
 	initialize_signal_handler ();
+#endif
 
 	g_main_loop_run (main_loop);
 
