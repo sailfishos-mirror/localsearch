@@ -330,7 +330,6 @@ main (int argc, char *argv[])
 	TrackerSparqlConnection *sparql_connection;
 	TrackerDomainOntology *domain_ontology;
 	gchar *dbus_name, *miner_dbus_name;
-	GFile *cache_dir;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -394,10 +393,6 @@ main (int argc, char *argv[])
 	}
 
 	tracker_content_identifier_cache_init ();
-
-	cache_dir = get_cache_dir (domain_ontology);
-	tracker_error_report_init (cache_dir);
-	g_object_unref (cache_dir);
 
 	config = tracker_config_new ();
 

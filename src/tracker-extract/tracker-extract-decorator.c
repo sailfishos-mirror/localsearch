@@ -589,7 +589,7 @@ decorator_ignore_file (GFile                   *file,
 	}
 
 	if (hash) {
-		tracker_error_report (file, error_message, extra_info);
+		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		tracker_sparql_statement_bind_string (priv->update_hash, "file", uri);
 		tracker_sparql_statement_bind_string (priv->update_hash, "hash", hash);
@@ -598,10 +598,8 @@ decorator_ignore_file (GFile                   *file,
 	}
 
 	if (!removed_hash) {
-		if (!info_error || g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			tracker_error_report_delete (file);
-		else
-			tracker_error_report (file, info_error->message, NULL);
+		if (info_error && !g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		g_clear_error (&error);
 		tracker_sparql_statement_bind_string (priv->delete_file, "file", uri);

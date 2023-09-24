@@ -36,10 +36,22 @@ struct _TrackerExtractControllerPrivate {
 	GCancellable *cancellable;
 	GDBusConnection *connection;
 	GDBusProxy *index_proxy;
+	guint object_id;
 	guint watch_id;
 	guint progress_signal_id;
 	gint paused;
 };
+
+#define OBJECT_PATH "/org/freedesktop/Tracker3/Extract"
+
+static const gchar *introspection_xml =
+	"<node>"
+	"  <interface name='org.freedesktop.Tracker3.Extract'>"
+	"    <signal name='Error'>"
+	"      <arg type='a{sv}' name='data' direction='out' />"
+	"    </signal>"
+	"  </interface>"
+	"</node>";
 
 static void tracker_extract_controller_initable_iface_init (GInitableIface *iface);
 
@@ -83,7 +95,11 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 {
 	TrackerExtractController *controller;
 	TrackerExtractControllerPrivate *priv;
+	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
 	GDBusConnection *conn;
+	GDBusInterfaceVTable interface_vtable = {
+		NULL, NULL, NULL
+	};
 
 	controller = TRACKER_EXTRACT_CONTROLLER (initable);
 	priv = tracker_extract_controller_get_instance_private (controller);
@@ -103,6 +119,20 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 	g_signal_connect (priv->index_proxy, "g-properties-changed",
 	                  G_CALLBACK (proxy_properties_changed_cb), controller);
 	update_graphs_from_proxy (controller, priv->index_proxy);
+
+	introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, error);
+	if (!introspection_data)
+		return FALSE;
+
+	priv->object_id =
+		g_dbus_connection_register_object (priv->connection,
+						   OBJECT_PATH,
+		                                   introspection_data->interfaces[0],
+		                                   &interface_vtable,
+		                                   initable,
+		                                   NULL, error);
+	if (priv->object_id == 0)
+		return FALSE;
 
 	return TRUE;
 }
@@ -289,6 +319,44 @@ update_wait_for_miner_fs (TrackerExtractController *self)
 }
 
 static void
+decorator_raise_error_cb (TrackerDecorator         *decorator,
+                          GFile                    *file,
+                          gchar                    *msg,
+                          gchar                    *extra,
+                          TrackerExtractController *controller)
+{
+	TrackerExtractControllerPrivate *priv =
+		tracker_extract_controller_get_instance_private (controller);
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *uri = NULL;
+	GVariantBuilder builder;
+
+	uri = g_file_get_uri (file);
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+	g_variant_builder_add (&builder, "{sv}", "uri",
+	                       g_variant_new_string (uri));
+	g_variant_builder_add (&builder, "{sv}", "message",
+	                       g_variant_new_string (msg));
+
+	if (extra) {
+		g_variant_builder_add (&builder, "{sv}", "extra-info",
+		                       g_variant_new_string (extra));
+	}
+
+	g_dbus_connection_emit_signal (priv->connection,
+	                               NULL,
+	                               OBJECT_PATH,
+	                               "org.freedesktop.Tracker3.Extract",
+	                               "Error",
+	                               g_variant_new ("(@a{sv})", g_variant_builder_end (&builder)),
+	                               &error);
+
+	if (error)
+		g_warning ("Could not emit signal: %s\n", error->message);
+}
+
+static void
 tracker_extract_controller_constructed (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
@@ -306,6 +374,9 @@ tracker_extract_controller_constructed (GObject *object)
 	                         G_CALLBACK (update_wait_for_miner_fs),
 	                         self, G_CONNECT_SWAPPED);
 	update_wait_for_miner_fs (self);
+
+	g_signal_connect (priv->decorator, "raise-error",
+	                  G_CALLBACK (decorator_raise_error_cb), object);
 }
 
 static void
@@ -358,6 +429,11 @@ tracker_extract_controller_dispose (GObject *object)
 	TrackerExtractControllerPrivate *priv;
 
 	priv = tracker_extract_controller_get_instance_private (self);
+
+	if (priv->connection && priv->object_id) {
+		g_dbus_connection_unregister_object (priv->connection, priv->object_id);
+		priv->object_id = 0;
+	}
 
 	disconnect_all (self);
 	g_clear_object (&priv->decorator);
