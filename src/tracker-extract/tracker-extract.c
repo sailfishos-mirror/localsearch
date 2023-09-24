@@ -47,6 +47,8 @@ G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 #define DEADLINE_SECONDS 30
 
+#define DEFAULT_MAX_TEXT 1048576
+
 extern gboolean debug;
 
 typedef struct {
@@ -58,6 +60,8 @@ typedef struct {
 typedef struct {
 	GHashTable *statistics_data;
 	GList *running_tasks;
+
+	gint max_text;
 
 	/* used to maintain the running tasks
 	 * and stats from different threads
@@ -84,6 +88,7 @@ typedef struct {
 	gchar *file;
 	gchar *mimetype;
 	const gchar *graph;
+	gint max_text;
 
 	TrackerExtractMetadataFunc func;
 	GModule *module;
@@ -125,6 +130,7 @@ tracker_extract_init (TrackerExtract *object)
 
 	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 	priv->single_thread_extractors = g_hash_table_new (NULL, NULL);
+	priv->max_text = DEFAULT_MAX_TEXT;
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
@@ -288,7 +294,7 @@ get_file_metadata (TrackerExtractTask  *task,
 	*info_out = NULL;
 
 	file = g_file_new_for_uri (task->file);
-	info = tracker_extract_info_new (file, task->mimetype, task->graph);
+	info = tracker_extract_info_new (file, task->mimetype, task->graph, task->max_text);
 	g_object_unref (file);
 
 	if (!task->mimetype || !*task->mimetype) {
@@ -342,6 +348,7 @@ extract_task_new (TrackerExtract *extract,
                   GAsyncResult   *res,
                   GError        **error)
 {
+	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
 	TrackerExtractTask *task;
 	gchar *mimetype_used;
 
@@ -378,6 +385,7 @@ extract_task_new (TrackerExtract *extract,
 	task->file = g_strdup (uri);
 	task->mimetype = mimetype_used;
 	task->extract = extract;
+	task->max_text = priv->max_text;
 
 	if (task->res) {
 		task->deadline =
@@ -789,4 +797,13 @@ tracker_extract_file_finish (TrackerExtract  *extract,
 	g_return_val_if_fail (!error || !*error, NULL);
 
 	return g_task_propagate_pointer (G_TASK (res), error);
+}
+
+void
+tracker_extract_set_max_text (TrackerExtract *extract,
+                              gint            max_text)
+{
+	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+
+	priv->max_text = max_text;
 }
