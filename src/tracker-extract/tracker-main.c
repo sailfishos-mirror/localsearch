@@ -242,15 +242,6 @@ on_decorator_finished (TrackerDecorator *decorator,
 	                                             main_loop);
 }
 
-static GFile *
-get_cache_dir (TrackerDomainOntology *domain_ontology)
-{
-	GFile *cache;
-
-	cache = tracker_domain_ontology_get_cache (domain_ontology);
-	return g_file_get_child (cache, "files");
-}
-
 int
 main (int argc, char *argv[])
 {
@@ -265,7 +256,6 @@ main (int argc, char *argv[])
 	TrackerSparqlConnection *sparql_connection;
 	TrackerDomainOntology *domain_ontology;
 	gchar *dbus_name, *miner_dbus_name;
-	GFile *cache_dir;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -327,10 +317,6 @@ main (int argc, char *argv[])
 		g_error_free (error);
 		return EXIT_FAILURE;
 	}
-
-	cache_dir = get_cache_dir (domain_ontology);
-	tracker_error_report_init (cache_dir);
-	g_object_unref (cache_dir);
 
 	config = tracker_config_new ();
 

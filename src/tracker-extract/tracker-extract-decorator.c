@@ -463,7 +463,7 @@ decorator_ignore_file (GFile                   *file,
 	                          NULL, &error);
 
 	if (info) {
-		tracker_error_report (file, error_message, extra_info);
+		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		mimetype = g_file_info_get_attribute_string (info,
 		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
@@ -477,10 +477,8 @@ decorator_ignore_file (GFile                   *file,
 	} else {
 		g_debug ("Could not get mimetype: %s", error->message);
 
-		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			tracker_error_report_delete (file);
-		else
-			tracker_error_report (file, error->message, NULL);
+		if (error && !g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		g_clear_error (&error);
 		query = g_strdup_printf ("DELETE {"
