@@ -33,10 +33,22 @@ struct TrackerExtractControllerPrivate {
 	TrackerConfig *config;
 	GCancellable *cancellable;
 	GDBusConnection *connection;
+	guint object_id;
 	guint watch_id;
 	guint progress_signal_id;
 	gint paused;
 };
+
+#define OBJECT_PATH "/org/freedesktop/Tracker3/Extract"
+
+static const gchar *introspection_xml =
+	"<node>"
+	"  <interface name='org.freedesktop.Tracker3.Extract'>"
+	"    <signal name='Error'>"
+	"      <arg type='a{sv}' name='data' direction='out' />"
+	"    </signal>"
+	"  </interface>"
+	"</node>";
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerExtractController, tracker_extract_controller, G_TYPE_OBJECT)
 
@@ -195,9 +207,51 @@ update_wait_for_miner_fs (TrackerExtractController *self)
 }
 
 static void
+decorator_raise_error_cb (TrackerDecorator         *decorator,
+                          GFile                    *file,
+                          gchar                    *msg,
+                          gchar                    *extra,
+                          TrackerExtractController *controller)
+{
+	TrackerExtractControllerPrivate *priv =
+		tracker_extract_controller_get_instance_private (controller);
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *uri = NULL;
+	GVariantBuilder builder;
+
+	uri = g_file_get_uri (file);
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+	g_variant_builder_add (&builder, "{sv}", "uri",
+	                       g_variant_new_string (uri));
+	g_variant_builder_add (&builder, "{sv}", "message",
+	                       g_variant_new_string (msg));
+
+	if (extra) {
+		g_variant_builder_add (&builder, "{sv}", "extra-info",
+		                       g_variant_new_string (extra));
+	}
+
+	g_dbus_connection_emit_signal (priv->connection,
+	                               NULL,
+	                               OBJECT_PATH,
+	                               "org.freedesktop.Tracker3.Extract",
+	                               "Error",
+	                               g_variant_new ("(@a{sv})", g_variant_builder_end (&builder)),
+	                               &error);
+
+	if (error)
+		g_warning ("Could not emit signal: %s\n", error->message);
+}
+
+static void
 tracker_extract_controller_constructed (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
+	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
+	GDBusInterfaceVTable interface_vtable = {
+		NULL, NULL, NULL
+	};
 
 	G_OBJECT_CLASS (tracker_extract_controller_parent_class)->constructed (object);
 
@@ -209,6 +263,19 @@ tracker_extract_controller_constructed (GObject *object)
 	                         G_CALLBACK (update_wait_for_miner_fs),
 	                         self, G_CONNECT_SWAPPED);
 	update_wait_for_miner_fs (self);
+
+	g_signal_connect (self->priv->decorator, "raise-error",
+	                  G_CALLBACK (decorator_raise_error_cb), object);
+
+	introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, NULL);
+	g_assert (introspection_data);
+	self->priv->object_id =
+		g_dbus_connection_register_object (self->priv->connection,
+						   OBJECT_PATH,
+		                                   introspection_data->interfaces[0],
+		                                   &interface_vtable,
+		                                   object,
+		                                   NULL, NULL);
 }
 
 static void
@@ -252,6 +319,11 @@ static void
 tracker_extract_controller_dispose (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
+
+	if (self->priv->connection && self->priv->object_id) {
+		g_dbus_connection_unregister_object (self->priv->connection, self->priv->object_id);
+		self->priv->object_id = 0;
+	}
 
 	disconnect_all (self);
 	g_clear_object (&self->priv->decorator);
