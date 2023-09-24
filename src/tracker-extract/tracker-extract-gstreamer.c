@@ -1410,7 +1410,9 @@ tracker_extract_module_init (GError **error)
 	/* Lifted from totem-video-thumbnailer */
 	const gchar *blocklisted[] = {
 		"bcmdec",
-		"fluiddec",
+		"camerabin",
+		"fluidsynthmidi",
+		"libcamera",
 		"vaapi",
 		"video4linux2",
 		"nvmpegvideodec",
@@ -1427,6 +1429,7 @@ tracker_extract_module_init (GError **error)
 	GstRegistry *registry;
 	guint i;
 
+	gst_registry_fork_set_enabled (FALSE);
 	gst_init (NULL, NULL);
 	registry = gst_registry_get ();
 
