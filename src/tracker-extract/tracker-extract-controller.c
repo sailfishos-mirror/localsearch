@@ -23,13 +23,17 @@
 
 #include "tracker-main.h"
 
+#include <gio/gunixfdlist.h>
+
 enum {
 	PROP_DECORATOR = 1,
 	PROP_CONNECTION,
+	PROP_PERSISTENCE,
 };
 
 struct TrackerExtractControllerPrivate {
 	TrackerDecorator *decorator;
+	TrackerExtractPersistence *persistence;
 	GCancellable *cancellable;
 	GDBusConnection *connection;
 	GDBusProxy *miner_proxy;
@@ -95,6 +99,38 @@ miner_properties_changed_cb (GDBusProxy *proxy,
                              gpointer    user_data)
 {
 	update_extract_config (user_data, proxy);
+}
+
+static gboolean
+set_up_persistence (TrackerExtractController  *controller,
+                    GCancellable              *cancellable,
+                    GError                   **error)
+{
+	TrackerExtractControllerPrivate *priv =
+		tracker_extract_controller_get_instance_private (controller);
+	g_autoptr (GUnixFDList) out_fd_list = NULL;
+	g_autoptr (GVariant) variant = NULL;
+	int idx, fd;
+
+	variant = g_dbus_proxy_call_with_unix_fd_list_sync (priv->miner_proxy,
+	                                                    "GetPersistenceStorage",
+	                                                    NULL,
+	                                                    G_DBUS_CALL_FLAGS_NO_AUTO_START,
+	                                                    -1,
+	                                                    NULL,
+	                                                    &out_fd_list,
+	                                                    cancellable,
+	                                                    error);
+	if (!variant)
+		return FALSE;
+
+	g_variant_get (variant, "(h)", &idx);
+	fd = g_unix_fd_list_get (out_fd_list, idx, error);
+	if (fd < 0)
+		return FALSE;
+
+	tracker_extract_persistence_set_fd (priv->persistence, fd);
+	return TRUE;
 }
 
 static void
@@ -173,6 +209,8 @@ tracker_extract_controller_constructed (GObject *object)
 		                  G_CALLBACK (miner_properties_changed_cb), self);
 		update_extract_config (self, self->priv->miner_proxy);
 	}
+
+	set_up_persistence (self, NULL, NULL);
 }
 
 static void
@@ -189,6 +227,12 @@ tracker_extract_controller_get_property (GObject    *object,
 		break;
 	case PROP_CONNECTION:
 		g_value_set_object (value, self->priv->connection);
+		break;
+	case PROP_PERSISTENCE:
+		g_value_set_object (value, self->priv->persistence);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
 	}
 }
@@ -209,6 +253,12 @@ tracker_extract_controller_set_property (GObject      *object,
 	case PROP_CONNECTION:
 		self->priv->connection = g_value_dup_object (value);
 		break;
+	case PROP_PERSISTENCE:
+		self->priv->persistence = g_value_dup_object (value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+		break;
 	}
 }
 
@@ -223,6 +273,7 @@ tracker_extract_controller_dispose (GObject *object)
 	}
 
 	g_clear_object (&self->priv->decorator);
+	g_clear_object (&self->priv->persistence);
 
 	G_OBJECT_CLASS (tracker_extract_controller_parent_class)->dispose (object);
 }
@@ -255,6 +306,14 @@ tracker_extract_controller_class_init (TrackerExtractControllerClass *klass)
 	                                                      G_PARAM_STATIC_STRINGS |
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY));
+	g_object_class_install_property (object_class,
+	                                 PROP_PERSISTENCE,
+	                                 g_param_spec_object ("persistence",
+	                                                      NULL, NULL,
+	                                                      TRACKER_TYPE_EXTRACT_PERSISTENCE,
+	                                                      G_PARAM_STATIC_STRINGS |
+	                                                      G_PARAM_READWRITE |
+	                                                      G_PARAM_CONSTRUCT_ONLY));
 }
 
 static void
@@ -264,13 +323,15 @@ tracker_extract_controller_init (TrackerExtractController *self)
 }
 
 TrackerExtractController *
-tracker_extract_controller_new (TrackerDecorator *decorator,
-                                GDBusConnection  *connection)
+tracker_extract_controller_new (TrackerDecorator          *decorator,
+                                GDBusConnection           *connection,
+                                TrackerExtractPersistence *persistence)
 {
 	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
 
 	return g_object_new (TRACKER_TYPE_EXTRACT_CONTROLLER,
 	                     "decorator", decorator,
 	                     "connection", connection,
+	                     "persistence", persistence,
 	                     NULL);
 }
