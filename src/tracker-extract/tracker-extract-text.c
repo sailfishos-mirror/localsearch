@@ -81,19 +81,17 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	TrackerResource *metadata;
-	TrackerConfig *config;
 	GFile *file;
 	gchar *content = NULL;
 	GError *inner_error = NULL;
 
-	config = tracker_main_get_config ();
 	file = tracker_extract_info_get_file (info);
 
 	metadata = tracker_resource_new (NULL);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PlainTextDocument");
 
 	content = get_file_content (tracker_extract_info_get_file (info),
-	                            tracker_config_get_max_bytes (config),
+	                            tracker_extract_info_get_max_text (info),
 	                            &inner_error);
 
 	if (inner_error != NULL) {
