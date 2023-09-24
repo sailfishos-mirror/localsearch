@@ -68,6 +68,9 @@
 /* Define to 1 if you have the `strnlen' function. */
 #mesondefine HAVE_STRNLEN
 
+/* Define to 1 if you have the `memfd_create' function. */
+#mesondefine HAVE_MEMFD_CREATE
+
 /* Define if we have UPOWER */
 #mesondefine HAVE_UPOWER
 
