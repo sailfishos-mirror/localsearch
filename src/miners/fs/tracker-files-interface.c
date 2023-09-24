@@ -23,12 +23,16 @@
 
 #include "tracker-files-interface.h"
 
+#include <gio/gunixfdlist.h>
+#include <sys/mman.h>
+
 struct _TrackerFilesInterface
 {
 	GObject parent_instance;
 	GDBusConnection *connection;
 	GSettings *settings;
 	guint object_id;
+	int fd;
 };
 
 enum {
@@ -43,6 +47,9 @@ static const gchar *introspection_xml =
 	"<node>"
 	"  <interface name='org.freedesktop.Tracker3.Files'>"
 	"    <property name='ExtractorConfig' type='a{sv}' access='read' />"
+	"    <method name='GetPersistenceStorage'>"
+	"      <arg type='h' direction='out' />"
+	"    </method>"
 	"  </interface>"
 	"</node>";
 
@@ -51,6 +58,66 @@ G_DEFINE_TYPE (TrackerFilesInterface, tracker_files_interface, G_TYPE_OBJECT)
 static void
 tracker_files_interface_init (TrackerFilesInterface *files_interface)
 {
+}
+
+static void
+handle_method_call (GDBusConnection       *connection,
+                    const gchar           *sender,
+                    const gchar           *object_path,
+                    const gchar           *interface_name,
+                    const gchar           *method_name,
+                    GVariant              *parameters,
+                    GDBusMethodInvocation *invocation,
+                    gpointer               user_data)
+{
+	TrackerFilesInterface *files_interface = user_data;
+
+	if (g_strcmp0 (method_name, "GetPersistenceStorage") == 0) {
+		GVariant *out_parameters;
+		g_autoptr (GUnixFDList) fd_list = NULL;
+		g_autoptr (GError) error = NULL;
+		int idx;
+
+		if (files_interface->fd <= 0) {
+#ifdef HAVE_MEMFD_CREATE
+			files_interface->fd = memfd_create ("extract-persistent-storage",
+			                                    MFD_CLOEXEC);
+#else
+			g_autofree gchar *path = NULL;
+
+			path = g_strdup_printf ("%s/tracker-persistence.XXXXXX",
+			                        g_get_tmp_dir ());
+			files_interface->fd = g_mkstemp_full (path, 0, 0600);
+			unlink (path);
+#endif
+
+			if (files_interface->fd < 0) {
+				g_dbus_method_invocation_return_error (invocation,
+				                                       G_IO_ERROR,
+				                                       G_IO_ERROR_FAILED,
+				                                       "Could not create memfd");
+				return;
+			}
+		}
+
+		fd_list = g_unix_fd_list_new ();
+		idx = g_unix_fd_list_append (fd_list, files_interface->fd, &error);
+
+		if (error) {
+			g_dbus_method_invocation_return_gerror (invocation, error);
+		} else {
+			out_parameters = g_variant_new ("(h)", idx);
+			g_dbus_method_invocation_return_value_with_unix_fd_list (invocation,
+			                                                         out_parameters,
+			                                                         fd_list);
+		}
+	} else {
+		g_dbus_method_invocation_return_error (invocation,
+		                                       G_DBUS_ERROR,
+		                                       G_DBUS_ERROR_UNKNOWN_METHOD,
+		                                       "Unknown method %s",
+		                                       method_name);
+	}
 }
 
 static GVariant *
@@ -90,7 +157,7 @@ static void
 tracker_files_interface_constructed (GObject *object)
 {
 	TrackerFilesInterface *files_interface = TRACKER_FILES_INTERFACE (object);
-	GDBusInterfaceVTable vtable = { NULL, handle_get_property, NULL };
+	GDBusInterfaceVTable vtable = { handle_method_call, handle_get_property, NULL };
 	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
 
 	G_OBJECT_CLASS (tracker_files_interface_parent_class)->constructed (object);
@@ -114,6 +181,9 @@ tracker_files_interface_finalize (GObject *object)
 	                                     files_interface->object_id);
 	g_clear_object (&files_interface->connection);
 	g_clear_object (&files_interface->settings);
+
+	if (files_interface->fd)
+		close (files_interface->fd);
 
 	G_OBJECT_CLASS (tracker_files_interface_parent_class)->finalize (object);
 }
