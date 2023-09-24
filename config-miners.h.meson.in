@@ -68,6 +68,9 @@
 /* Define to 1 if you have the `strnlen' function. */
 #mesondefine HAVE_STRNLEN
 
+/* Define to 1 if you have the `memfd_create' function. */
+#mesondefine HAVE_MEMFD_CREATE
+
 /* Define to 1 if you have the `up_client_get_on_low_battery' function. */
 #mesondefine HAVE_UP_CLIENT_GET_ON_LOW_BATTERY
 

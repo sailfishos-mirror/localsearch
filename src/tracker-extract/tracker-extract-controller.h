@@ -45,9 +45,10 @@ struct TrackerExtractControllerClass {
 };
 
 GType                      tracker_extract_controller_get_type (void) G_GNUC_CONST;
-TrackerExtractController * tracker_extract_controller_new (TrackerDecorator  *decorator,
-                                                           GDBusConnection   *connection,
-                                                           GError           **error);
+TrackerExtractController * tracker_extract_controller_new (TrackerDecorator           *decorator,
+                                                           GDBusConnection            *connection,
+                                                           TrackerExtractPersistence  *persistence,
+                                                           GError                    **error);
 
 G_END_DECLS
 
