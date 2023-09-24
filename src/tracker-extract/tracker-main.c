@@ -44,6 +44,7 @@
 #include "tracker-extract.h"
 #include "tracker-extract-controller.h"
 #include "tracker-extract-decorator.h"
+#include "tracker-extract-persistence.h"
 
 #ifdef THREAD_ENABLE_TRACE
 #warning Main thread traces enabled
@@ -232,6 +233,7 @@ main (int argc, char *argv[])
 	GMainLoop *my_main_loop;
 	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
+	TrackerExtractPersistence *persistence;
 	TrackerSparqlConnection *sparql_connection;
 	TrackerDomainOntology *domain_ontology;
 	gchar *dbus_name, *miner_dbus_name;
@@ -322,7 +324,9 @@ main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	decorator = tracker_extract_decorator_new (sparql_connection, extract, NULL, &error);
+	persistence = tracker_extract_persistence_new ();
+
+	decorator = tracker_extract_decorator_new (sparql_connection, extract, persistence, NULL, &error);
 
 	if (error) {
 		g_critical ("Could not start decorator: %s\n", error->message);
@@ -344,7 +348,7 @@ main (int argc, char *argv[])
 
 	tracker_locale_sanity_check ();
 
-	controller = tracker_extract_controller_new (decorator, connection);
+	controller = tracker_extract_controller_new (decorator, connection, persistence);
 
 	/* Request DBus name */
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
@@ -396,6 +400,7 @@ main (int argc, char *argv[])
 	g_object_unref (extract);
 	g_object_unref (decorator);
 	g_object_unref (controller);
+	g_object_unref (persistence);
 	g_object_unref (proxy);
 	g_object_unref (connection);
 	tracker_domain_ontology_unref (domain_ontology);
