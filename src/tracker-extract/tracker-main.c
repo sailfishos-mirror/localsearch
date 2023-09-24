@@ -40,7 +40,6 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 
-#include "tracker-config.h"
 #include "tracker-main.h"
 #include "tracker-extract.h"
 #include "tracker-extract-controller.h"
@@ -73,8 +72,6 @@ static gchar *output_format_name;
 static gboolean version;
 static gchar *domain_ontology_name = NULL;
 static guint shutdown_timeout_id = 0;
-
-static TrackerConfig *config;
 
 static GOptionEntry entries[] = {
 	{ "file", 'f', 0,
@@ -171,26 +168,8 @@ initialize_signal_handler (void)
 }
 #endif /* !HAVE_LIBSECCOMP */
 
-static void
-log_option_values (TrackerConfig *config)
-{
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (CONFIG)) {
-		g_message ("General options:");
-		g_message ("  Max bytes (per file)  .................  %d",
-		           tracker_config_get_max_bytes (config));
-	}
-#endif
-}
-
-TrackerConfig *
-tracker_main_get_config (void)
-{
-	return config;
-}
-
 static int
-run_standalone (TrackerConfig *config)
+run_standalone (void)
 {
 	TrackerExtract *object;
 	GFile *file;
@@ -394,20 +373,14 @@ main (int argc, char *argv[])
 
 	tracker_content_identifier_cache_init ();
 
-	config = tracker_config_new ();
-
-	/* Extractor command line arguments */
-	log_option_values (config);
-
 	/* Set conditions when we use stand alone settings */
 	if (filename) {
-		return run_standalone (config);
+		return run_standalone ();
 	}
 
 	extract = tracker_extract_new (TRUE, force_module);
 
 	if (!extract) {
-		g_object_unref (config);
 		return EXIT_FAILURE;
 	}
 
@@ -432,7 +405,6 @@ main (int argc, char *argv[])
 		g_critical ("Could not create miner DBus proxy: %s\n", error->message);
 		g_error_free (error);
 		g_object_unref (decorator);
-		g_object_unref (config);
 		return EXIT_FAILURE;
 	}
 
@@ -448,7 +420,6 @@ main (int argc, char *argv[])
 		g_critical ("Could not create extraction controller: %s", error->message);
 		g_error_free (error);
 		g_object_unref (decorator);
-		g_object_unref (config);
 		return EXIT_FAILURE;
 	}
 
@@ -512,8 +483,6 @@ main (int argc, char *argv[])
 	tracker_domain_ontology_unref (domain_ontology);
 	tracker_sparql_connection_close (sparql_connection);
 	g_object_unref (sparql_connection);
-
-	g_object_unref (config);
 
 	return EXIT_SUCCESS;
 }
