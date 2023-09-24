@@ -77,6 +77,9 @@ void     tracker_miner_files_writeback_notify     (TrackerMinerFiles *mf,
                                                    GFile             *file,
                                                    const GError      *error);
 
+gboolean tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
+                                                      GFile             *file);
+
 G_END_DECLS
 
 #endif /* __TRACKER_MINER_FS_FILES_H__ */
