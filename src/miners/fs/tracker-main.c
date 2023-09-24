@@ -40,6 +40,7 @@
 
 #include "tracker-config.h"
 #include "tracker-miner-files.h"
+#include "tracker-files-interface.h"
 
 #define ABOUT	  \
 	"Tracker " PACKAGE_VERSION "\n"
@@ -1054,6 +1055,7 @@ main (gint argc, gchar *argv[])
 	GMemoryMonitor *memory_monitor;
 #endif
 	gchar *domain_name, *dbus_name;
+	TrackerFilesInterface *files_interface;
 
 	main_loop = NULL;
 
@@ -1108,6 +1110,8 @@ main (gint argc, gchar *argv[])
 		g_error_free (error);
 		return EXIT_FAILURE;
 	}
+
+	files_interface = tracker_files_interface_new (connection);
 
 	/* Initialize logging */
 	config = tracker_config_new ();
@@ -1281,6 +1285,8 @@ main (gint argc, gchar *argv[])
 	}
 
 	finish_endpoint_thread ();
+
+	g_object_unref (files_interface);
 
 	g_main_loop_unref (main_loop);
 	g_object_unref (config);

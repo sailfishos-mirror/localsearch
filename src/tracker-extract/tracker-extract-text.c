@@ -81,12 +81,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	TrackerResource *metadata;
-	TrackerConfig *config;
 	GFile *file;
 	gchar *content = NULL, *resource_uri;
 	GError *inner_error = NULL;
 
-	config = tracker_main_get_config ();
 	file = tracker_extract_info_get_file (info);
 
 	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
@@ -95,7 +93,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_free (resource_uri);
 
 	content = get_file_content (tracker_extract_info_get_file (info),
-	                            tracker_config_get_max_bytes (config),
+	                            tracker_extract_info_get_max_text (info),
 	                            &inner_error);
 
 	if (inner_error != NULL) {

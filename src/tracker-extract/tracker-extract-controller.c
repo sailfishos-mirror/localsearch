@@ -35,6 +35,7 @@ struct _TrackerExtractControllerPrivate {
 	GCancellable *cancellable;
 	GDBusConnection *connection;
 	GDBusProxy *index_proxy;
+	GDBusProxy *miner_proxy;
 	guint object_id;
 	gint paused;
 };
@@ -85,6 +86,53 @@ proxy_properties_changed_cb (GDBusProxy *proxy,
 	update_graphs_from_proxy (user_data, proxy);
 }
 
+static void
+update_extract_config (TrackerExtractController *controller,
+                       GDBusProxy               *proxy)
+{
+	TrackerExtractControllerPrivate *priv;
+	GVariantIter iter;
+	g_autoptr (GVariant) v = NULL;
+	GVariant *value;
+	gchar *key;
+
+	priv = tracker_extract_controller_get_instance_private (controller);
+
+	v = g_dbus_proxy_get_cached_property (proxy, "ExtractorConfig");
+	if (!v)
+		return;
+
+	g_variant_iter_init (&iter, v);
+
+	while (g_variant_iter_next (&iter, "{sv}", &key, &value)) {
+		if (g_strcmp0 (key, "max-bytes") == 0 &&
+		    g_variant_is_of_type (value, G_VARIANT_TYPE_INT32)) {
+			TrackerExtract *extract = NULL;
+			gint max_bytes;
+
+			max_bytes = g_variant_get_int32 (value);
+			g_object_get (priv->decorator, "extractor", &extract, NULL);
+
+			if (extract) {
+				tracker_extract_set_max_text (extract, max_bytes);
+				g_object_unref (extract);
+			}
+		}
+
+		g_free (key);
+		g_variant_unref (value);
+	}
+}
+
+static void
+miner_properties_changed_cb (GDBusProxy *proxy,
+                             GVariant   *changed_properties,
+                             GStrv       invalidated_properties,
+                             gpointer    user_data)
+{
+	update_extract_config (user_data, proxy);
+}
+
 static gboolean
 tracker_extract_controller_initable_init (GInitable     *initable,
                                           GCancellable  *cancellable,
@@ -101,6 +149,21 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 	controller = TRACKER_EXTRACT_CONTROLLER (initable);
 	priv = tracker_extract_controller_get_instance_private (controller);
 	conn = priv->connection;
+
+	priv->miner_proxy = g_dbus_proxy_new_sync (conn,
+	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+	                                           NULL,
+	                                           "org.freedesktop.Tracker3.Miner.Files",
+	                                           "/org/freedesktop/Tracker3/Files",
+	                                           "org.freedesktop.Tracker3.Files",
+	                                           NULL,
+	                                           error);
+	if (!priv->miner_proxy)
+		return FALSE;
+
+	g_signal_connect (priv->miner_proxy, "g-properties-changed",
+	                  G_CALLBACK (miner_properties_changed_cb), controller);
+	update_extract_config (controller, priv->miner_proxy);
 
 	priv->index_proxy = g_dbus_proxy_new_sync (conn,
 	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
