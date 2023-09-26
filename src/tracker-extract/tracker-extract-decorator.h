@@ -24,6 +24,7 @@
 
 #include "tracker-extract.h"
 #include "tracker-decorator.h"
+#include "tracker-extract-persistence.h"
 
 G_BEGIN_DECLS
 
@@ -47,8 +48,9 @@ struct TrackerExtractDecoratorClass {
 
 GType              tracker_extract_decorator_get_type (void) G_GNUC_CONST;
 
-TrackerDecorator * tracker_extract_decorator_new (TrackerSparqlConnection  *connection,
-                                                  TrackerExtract           *extractor);
+TrackerDecorator * tracker_extract_decorator_new (TrackerSparqlConnection   *connection,
+                                                  TrackerExtract            *extractor,
+                                                  TrackerExtractPersistence *persistence);
 
 G_END_DECLS
 

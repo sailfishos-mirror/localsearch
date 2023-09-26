@@ -12,6 +12,7 @@ miner_fs_resources = gnome.compile_resources(
 
 private_sources = [
     'tracker-file-notifier.c',
+    'tracker-files-interface.c',
     'tracker-indexing-tree.c',
     'tracker-lru.c',
     'tracker-miner-fs.c',

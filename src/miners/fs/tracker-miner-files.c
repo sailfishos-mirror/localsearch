@@ -67,6 +67,9 @@ struct TrackerMinerFilesPrivate {
 
 	TrackerDomainOntology *domain_ontology;
 
+	GSettings *extract_settings;
+	GList *allowed_text_patterns;
+
 	guint disk_space_check_id;
 	gboolean disk_space_pause;
 
@@ -90,6 +93,8 @@ enum {
 	PROP_DOMAIN_ONTOLOGY,
 	PROP_STORAGE,
 };
+
+#define TEXT_ALLOWLIST "text-allowlist"
 
 static void        miner_files_set_property             (GObject              *object,
                                                          guint                 param_id,
@@ -378,6 +383,9 @@ miner_files_finalize (GObject *object)
 		g_source_remove (priv->grace_period_timeout_id);
 		priv->grace_period_timeout_id = 0;
 	}
+
+	g_clear_object (&mf->private->extract_settings);
+	g_list_free_full (mf->private->allowed_text_patterns, (GDestroyNotify) g_pattern_spec_free);
 
 	g_signal_handlers_disconnect_by_func (priv->extract_watchdog,
 	                                      on_extractor_lost,
@@ -1016,6 +1024,28 @@ miner_files_move_file (TrackerMinerFS      *fs,
 }
 
 static void
+text_allowlist_changed_cb (GSettings         *settings,
+                           const gchar       *key,
+                           TrackerMinerFiles *mf)
+{
+	GStrv allow_list;
+	gint i;
+
+	g_list_free_full (mf->private->allowed_text_patterns, (GDestroyNotify) g_pattern_spec_free);
+	mf->private->allowed_text_patterns = NULL;
+
+	allow_list = g_settings_get_strv (settings, TEXT_ALLOWLIST);
+
+	for (i = 0; allow_list[i]; i++) {
+		mf->private->allowed_text_patterns =
+			g_list_prepend (mf->private->allowed_text_patterns,
+			                g_pattern_spec_new (allow_list[i]));
+	}
+
+	g_strfreev (allow_list);
+}
+
+static void
 miner_files_constructed (GObject *object)
 {
 	TrackerMinerFiles *mf = TRACKER_MINER_FILES (object);;
@@ -1058,6 +1088,11 @@ miner_files_constructed (GObject *object)
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",
 	                  G_CALLBACK (on_extractor_status), mf);
+
+	mf->private->extract_settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
+	g_signal_connect (mf->private->extract_settings, "changed::" TEXT_ALLOWLIST,
+	                  G_CALLBACK (text_allowlist_changed_cb), mf);
+	text_allowlist_changed_cb (mf->private->extract_settings, TEXT_ALLOWLIST, mf);
 }
 
 TrackerMiner *
@@ -1385,4 +1420,25 @@ TrackerStorage *
 tracker_miner_files_get_storage (TrackerMinerFiles *mf)
 {
 	return mf->private->storage;
+}
+
+gboolean
+tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
+                                             GFile             *file)
+{
+	g_autofree gchar *basename = NULL;
+	GList *l;
+
+	basename = g_file_get_basename (file);
+
+	for (l = mf->private->allowed_text_patterns; l; l = l->next) {
+#if GLIB_CHECK_VERSION (2, 70, 0)
+		if (g_pattern_spec_match_string (l->data, basename))
+#else
+		if (g_pattern_match_string (l->data, basename))
+#endif
+			return TRUE;
+	}
+
+	return FALSE;
 }

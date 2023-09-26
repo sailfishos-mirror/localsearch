@@ -91,6 +91,7 @@ enum {
 enum {
 	ITEMS_AVAILABLE,
 	FINISHED,
+	RAISE_ERROR,
 	LAST_SIGNAL
 };
 
@@ -290,20 +291,6 @@ retry_synchronously (TrackerDecorator *decorator,
 }
 
 static void
-tag_success (TrackerDecorator *decorator,
-             GPtrArray        *commit_buffer)
-{
-	guint i;
-
-	for (i = 0; i < commit_buffer->len; i++) {
-		TrackerExtractInfo *info;
-
-		info = g_ptr_array_index (commit_buffer, i);
-		tracker_error_report_delete (tracker_extract_info_get_file (info));
-	}
-}
-
-static void
 decorator_commit_cb (GObject      *object,
                      GAsyncResult *result,
                      gpointer      user_data)
@@ -325,8 +312,6 @@ decorator_commit_cb (GObject      *object,
 
 		g_debug ("SPARQL error detected in batch, retrying one by one");
 		retry_synchronously (decorator, priv->commit_buffer);
-	} else {
-		tag_success (decorator, priv->commit_buffer);
 	}
 
 	g_clear_pointer (&priv->commit_buffer, g_ptr_array_unref);
@@ -943,6 +928,16 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 		              G_STRUCT_OFFSET (TrackerDecoratorClass, finished),
 		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 0);
+
+	signals[RAISE_ERROR] =
+		g_signal_new ("raise-error",
+		              G_OBJECT_CLASS_TYPE (object_class),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE, 3,
+			      G_TYPE_FILE,
+			      G_TYPE_STRING,
+			      G_TYPE_STRING);
 }
 
 static void

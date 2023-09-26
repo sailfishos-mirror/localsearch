@@ -136,7 +136,6 @@ extract_resources = gnome.compile_resources(
 )
 
 tracker_extract_sources = [
-  'tracker-config.c',
   'tracker-decorator.c',
   'tracker-extract.c',
   'tracker-extract-controller.c',
