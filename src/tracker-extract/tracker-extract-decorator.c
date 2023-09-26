@@ -26,7 +26,9 @@
 #include "tracker-extract-persistence.h"
 
 enum {
-	PROP_EXTRACTOR = 1
+	PROP_0,
+	PROP_EXTRACTOR,
+	PROP_PERSISTENCE,
 };
 
 typedef struct _TrackerExtractDecoratorPrivate TrackerExtractDecoratorPrivate;
@@ -76,6 +78,12 @@ tracker_extract_decorator_get_property (GObject    *object,
 	case PROP_EXTRACTOR:
 		g_value_set_object (value, priv->extractor);
 		break;
+	case PROP_PERSISTENCE:
+		g_value_set_object (value, priv->persistence);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+		break;
 	}
 }
 
@@ -92,6 +100,12 @@ tracker_extract_decorator_set_property (GObject      *object,
 	switch (param_id) {
 	case PROP_EXTRACTOR:
 		priv->extractor = g_value_dup_object (value);
+		break;
+	case PROP_PERSISTENCE:
+		priv->persistence = g_value_dup_object (value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
 		break;
 	}
 }
@@ -116,15 +130,6 @@ load_statement (TrackerExtractDecorator *decorator,
 }
 
 static void
-persistence_ignore_file (GFile    *file,
-                         gpointer  user_data)
-{
-	TrackerExtractDecorator *decorator = user_data;
-
-	decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
-}
-
-static void
 tracker_extract_decorator_constructed (GObject *object)
 {
 	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (object);
@@ -136,9 +141,6 @@ tracker_extract_decorator_constructed (GObject *object)
 
 	priv->update_hash = load_statement (decorator, "update-hash.rq");
 	priv->delete_file = load_statement (decorator, "delete-file.rq");
-
-	priv->persistence = tracker_extract_persistence_initialize (persistence_ignore_file,
-	                                                            decorator);
 }
 
 static void
@@ -158,6 +160,7 @@ tracker_extract_decorator_finalize (GObject *object)
 
 	g_clear_object (&priv->update_hash);
 	g_clear_object (&priv->delete_file);
+	g_clear_object (&priv->persistence);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -232,7 +235,7 @@ get_metadata_cb (TrackerExtract *extract,
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (data->decorator));
 	info = tracker_extract_file_finish (extract, result, &error);
 
-	tracker_extract_persistence_remove_file (priv->persistence, data->file);
+	tracker_extract_persistence_set_file (priv->persistence, NULL);
 
 	if (data->cancellable && data->signal_id != 0) {
 		g_cancellable_disconnect (data->cancellable, data->signal_id);
@@ -269,7 +272,7 @@ task_cancellable_cancelled_cb (GCancellable *cancellable,
 	 * this as a failed operation.
 	 */
 	priv = tracker_extract_decorator_get_instance_private (TRACKER_EXTRACT_DECORATOR (data->decorator));
-	tracker_extract_persistence_remove_file (priv->persistence, data->file);
+	tracker_extract_persistence_set_file (priv->persistence, NULL);
 	uri = g_file_get_uri (data->file);
 
 	g_debug ("Cancelled task for '%s' was currently being "
@@ -342,7 +345,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	              g_message ("[Decorator] Extracting metadata for '%s'",
 	                         tracker_decorator_info_get_url (info)));
 
-	tracker_extract_persistence_add_file (priv->persistence, data->file);
+	tracker_extract_persistence_set_file (priv->persistence, data->file);
 
 	g_set_object (&data->cancellable, cancellable);
 
@@ -384,6 +387,22 @@ tracker_extract_decorator_resumed (TrackerMiner *miner)
 		g_timer_continue (priv->timer);
 
 	decorator_get_next_file (TRACKER_DECORATOR (miner));
+}
+
+static void
+tracker_extract_decorator_started (TrackerMiner *miner)
+{
+	TrackerExtractDecorator *decorator = TRACKER_EXTRACT_DECORATOR (miner);
+	TrackerExtractDecoratorPrivate *priv =
+		tracker_extract_decorator_get_instance_private (decorator);
+	GFile *file;
+
+	file = tracker_extract_persistence_get_file (priv->persistence);
+
+	if (file)
+		decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
+
+	TRACKER_MINER_CLASS (tracker_extract_decorator_parent_class)->started (miner);
 }
 
 static void
@@ -455,6 +474,7 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 
 	miner_class->paused = tracker_extract_decorator_paused;
 	miner_class->resumed = tracker_extract_decorator_resumed;
+	miner_class->started = tracker_extract_decorator_started;
 
 	decorator_class->items_available = tracker_extract_decorator_items_available;
 	decorator_class->finished = tracker_extract_decorator_finished;
@@ -467,6 +487,14 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 	                                                      "Extractor",
 	                                                      "Extractor",
 	                                                      TRACKER_TYPE_EXTRACT,
+	                                                      G_PARAM_READWRITE |
+	                                                      G_PARAM_CONSTRUCT_ONLY |
+	                                                      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_PERSISTENCE,
+	                                 g_param_spec_object ("persistence",
+	                                                      NULL, NULL,
+	                                                      TRACKER_TYPE_EXTRACT_PERSISTENCE,
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
@@ -504,7 +532,7 @@ decorator_ignore_file (GFile                   *file,
 	}
 
 	if (hash) {
-		tracker_error_report (file, error_message, extra_info);
+		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		tracker_sparql_statement_bind_string (priv->update_hash, "file", uri);
 		tracker_sparql_statement_bind_string (priv->update_hash, "hash", hash);
@@ -513,10 +541,8 @@ decorator_ignore_file (GFile                   *file,
 	}
 
 	if (!removed_hash) {
-		if (!info_error || g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			tracker_error_report_delete (file);
-		else
-			tracker_error_report (file, info_error->message, NULL);
+		if (info_error && !g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
 
 		g_clear_error (&error);
 		tracker_sparql_statement_bind_string (priv->delete_file, "file", uri);
@@ -560,14 +586,16 @@ tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 }
 
 TrackerDecorator *
-tracker_extract_decorator_new (TrackerSparqlConnection  *connection,
-                               TrackerExtract           *extract,
-                               GCancellable             *cancellable,
-                               GError                  **error)
+tracker_extract_decorator_new (TrackerSparqlConnection    *connection,
+                               TrackerExtract             *extract,
+			       TrackerExtractPersistence  *persistence,
+                               GCancellable               *cancellable,
+                               GError                    **error)
 {
 	return g_initable_new (TRACKER_TYPE_EXTRACT_DECORATOR,
 	                       cancellable, error,
 	                       "connection", connection,
 	                       "extractor", extract,
+	                       "persistence", persistence,
 	                       NULL);
 }
