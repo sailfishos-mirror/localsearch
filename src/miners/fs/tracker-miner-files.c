@@ -82,6 +82,9 @@ struct TrackerMinerFilesPrivate {
 	gchar *domain;
 	TrackerDomainOntology *domain_ontology;
 
+	GSettings *extract_settings;
+	GStrv allowed_text_patterns;
+
 	guint disk_space_check_id;
 	gboolean disk_space_pause;
 
@@ -121,6 +124,8 @@ enum {
 	PROP_CONFIG,
 	PROP_DOMAIN,
 };
+
+#define TEXT_ALLOWLIST "text-allowlist"
 
 static void        miner_files_set_property             (GObject              *object,
                                                          guint                 param_id,
@@ -378,6 +383,15 @@ miner_files_initable_iface_init (GInitableIface *iface)
 {
 	miner_files_initable_parent_iface = g_type_interface_peek_parent (iface);
 	iface->init = miner_files_initable_init;
+}
+
+static void
+text_allowlist_changed_cb (GSettings         *settings,
+                           const gchar       *key,
+                           TrackerMinerFiles *mf)
+{
+	g_clear_pointer (&mf->private->allowed_text_patterns, g_strfreev);
+	mf->private->allowed_text_patterns = g_settings_get_strv (settings, TEXT_ALLOWLIST);
 }
 
 static gboolean
@@ -669,6 +683,12 @@ miner_files_initable_init (GInitable     *initable,
 	                  G_CALLBACK (on_extractor_status), mf);
 	g_free (domain_name);
 
+	mf->private->extract_settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
+	g_signal_connect (mf->private->extract_settings, "changed::" TEXT_ALLOWLIST,
+	                  G_CALLBACK (text_allowlist_changed_cb), mf);
+	mf->private->allowed_text_patterns = g_settings_get_strv (mf->private->extract_settings,
+	                                                          TEXT_ALLOWLIST);
+
 	return TRUE;
 }
 
@@ -733,6 +753,9 @@ miner_files_finalize (GObject *object)
 		g_source_remove (priv->grace_period_timeout_id);
 		priv->grace_period_timeout_id = 0;
 	}
+
+	g_clear_object (&mf->private->extract_settings);
+	g_clear_pointer (&mf->private->allowed_text_patterns, g_strfreev);
 
 	g_signal_handlers_disconnect_by_func (priv->extract_watchdog,
 	                                      on_extractor_lost,
@@ -2053,6 +2076,31 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
+static TrackerResource *
+miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
+                                                  GFile             *file,
+                                                  const gchar       *mime_type,
+                                                  gboolean           create)
+{
+	TrackerResource *resource;
+	GStrv rdf_types;
+	const gchar *urn;
+	int i;
+
+	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
+	                                       file, create, TRUE, NULL);
+	resource = tracker_resource_new (urn);
+
+	rdf_types = tracker_extract_module_manager_get_rdf_types (mime_type);
+
+	for (i = 0; rdf_types[i]; i++)
+		tracker_resource_add_uri (resource, "rdf:type", rdf_types[i]);
+
+	g_strfreev (rdf_types);
+
+	return resource;
+}
+
 static void
 miner_files_process_file (TrackerMinerFS      *fs,
                           GFile               *file,
@@ -2162,6 +2210,21 @@ miner_files_process_file (TrackerMinerFS      *fs,
 		time_str = g_date_time_format_iso8601 (modified);
 		tracker_resource_set_string (graph_file, "nfo:fileLastModified", time_str);
 		g_free (time_str);
+
+		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
+		                                                            "nfo:PlainTextDocument") &&
+		    !tracker_miner_files_check_allowed_text_file (TRACKER_MINER_FILES (fs), file)) {
+			TrackerResource *text_file;
+
+			/* We let disallowed text files have a shallow nie:InformationElement */
+			text_file = miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
+			                                                              file, mime_type, create);
+			tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", text_file);
+			tracker_resource_set_uri (text_file, "nie:isStoredAs", uri);
+
+			tracker_resource_set_string (graph_file, "tracker:extractorHash",
+			                             tracker_extract_module_manager_get_hash (mime_type));
+		}
 	}
 
 	if (delete_properties_sparql)
@@ -2936,4 +2999,23 @@ tracker_miner_files_set_mtime_checking (TrackerMinerFiles *mf,
                                         gboolean           mtime_check)
 {
 	mf->private->mtime_check = mtime_check;
+}
+
+gboolean
+tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
+                                             GFile             *file)
+{
+	g_autofree gchar *basename = NULL;
+	GStrv text_patterns;
+	int i;
+
+	basename = g_file_get_basename (file);
+	text_patterns = mf->private->allowed_text_patterns;
+
+	for (i = 0; text_patterns && text_patterns[i]; i++) {
+		if (g_pattern_match_simple (text_patterns[i], basename))
+			return TRUE;
+	}
+
+	return FALSE;
 }

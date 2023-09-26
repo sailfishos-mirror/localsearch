@@ -102,12 +102,15 @@ tracker_seccomp_init (void)
 
 	/* Memory management */
 	ALLOW_RULE (brk);
+	ALLOW_RULE (get_mempolicy);
+	ALLOW_RULE (set_mempolicy);
 	ALLOW_RULE (mmap);
 	ALLOW_RULE (mmap2);
 	ALLOW_RULE (munmap);
 	ALLOW_RULE (mremap);
 	ALLOW_RULE (mprotect);
 	ALLOW_RULE (madvise);
+	ALLOW_RULE (mbind);
 	ERROR_RULE (mlock, EPERM);
 	ERROR_RULE (mlock2, EPERM);
 	ERROR_RULE (munlock, EPERM);
@@ -116,6 +119,7 @@ tracker_seccomp_init (void)
 	/* Process management */
 	ALLOW_RULE (exit_group);
 	ALLOW_RULE (getuid);
+	ALLOW_RULE (getgid);
 	ALLOW_RULE (getuid32);
 	ALLOW_RULE (getegid);
 	ALLOW_RULE (getegid32);
@@ -139,21 +143,27 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (lstat);
 	ALLOW_RULE (lstat64);
 	ALLOW_RULE (statx);
+	ALLOW_RULE (fstatfs);
 	ALLOW_RULE (access);
+	ALLOW_RULE (faccessat);
+	ALLOW_RULE (faccessat2);
 	ALLOW_RULE (getdents);
 	ALLOW_RULE (getdents64);
+	ALLOW_RULE (getcwd);
 	ALLOW_RULE (readlink);
 	ALLOW_RULE (readlinkat);
 	ALLOW_RULE (utime);
 	ALLOW_RULE (time);
 	ALLOW_RULE (fsync);
 	ALLOW_RULE (umask);
+	ERROR_RULE (fchown, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
 	ALLOW_RULE (futex);
 	ALLOW_RULE (futex_time64);
 	ALLOW_RULE (set_robust_list);
+	ALLOW_RULE (rseq);
 	ALLOW_RULE (rt_sigaction);
 	ALLOW_RULE (rt_sigprocmask);
 	ALLOW_RULE (sched_yield);
@@ -176,6 +186,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (pipe);
 	ALLOW_RULE (pipe2);
 	ALLOW_RULE (epoll_create);
+	ALLOW_RULE (epoll_create1);
 	ALLOW_RULE (epoll_ctl);
 	/* System */
 	ALLOW_RULE (uname);
@@ -214,12 +225,31 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (getpeername);
 	ALLOW_RULE (shutdown);
 
+	ERROR_RULE (inotify_init1, EINVAL);
+	ERROR_RULE (inotify_init, EINVAL);
+
+	ERROR_RULE (mkdir, EPERM);
+	ERROR_RULE (rename, EPERM);
+	ERROR_RULE (unlink, EPERM);
+	ERROR_RULE (ioctl, EBADF);
+	ERROR_RULE (bind, EACCES);
+	ERROR_RULE (setsockopt, EBADF);
+	ERROR_RULE (sched_getattr, EPERM);
+
+	/* Allow prlimit64, only if no new limits are being set */
+	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(prlimit64), 1,
+	                      SCMP_CMP(2, SCMP_CMP_EQ, 0)) < 0)
+		goto out;
+
 	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL */
 	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socket), 1,
 	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX)) < 0)
 		goto out;
 	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socket), 1,
 	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL)) < 0)
+		goto out;
+	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(socket), 1,
+	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK)) < 0)
 		goto out;
 	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socketpair), 1,
 	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX)) < 0)
