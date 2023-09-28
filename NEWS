@@ -1,3 +1,10 @@
+NEW in 3.3.2 - 2023-09-28
+=========================
+  * Avoid the special thread in tracker-extract-3, and extend
+    the seccomp jail to the full process.
+
+Translations: ab
+
 NEW in 3.3.1 - 2022-05-31
 =========================
   * Properly fallback to inotify monitors on fanotify failures
