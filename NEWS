@@ -1,3 +1,8 @@
+NEW in 3.5.3 - 2023-09-28
+=========================
+  * Avoid the special thread in tracker-extract-3, and extend
+    the seccomp jail to the full process.
+
 NEW in 3.5.2 - 2023-05-12
 =========================
   * Fix a number of potential crashers
