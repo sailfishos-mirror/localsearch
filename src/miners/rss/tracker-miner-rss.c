@@ -819,13 +819,14 @@ check_feed_items_cb (GObject      *source_object,
 	array = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
 
 	while (!error && tracker_sparql_cursor_next (cursor, NULL, &error)) {
-		const gchar *urn, *url, *date;
+		const gchar *urn, *url;
+		g_autoptr (GDateTime) datetime = NULL;
 		time_t time;
 
 		urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 		url = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-		date = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-		time = (time_t) tracker_string_to_date (date, NULL, NULL);
+		datetime = tracker_sparql_cursor_get_datetime (cursor, 2);
+		time = (time_t) g_date_time_to_unix (datetime);
 
 		item = g_hash_table_lookup (data->items, url);
 
