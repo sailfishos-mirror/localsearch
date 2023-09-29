@@ -405,7 +405,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	creation_date = poppler_document_get_creation_date (document);
 
 	if (creation_date > 0) {
-		pd.creation_date = tracker_date_to_string (creation_date);
+		g_autoptr (GDateTime) datetime = NULL;
+
+		datetime = g_date_time_new_from_unix_local (creation_date);
+		pd.creation_date = g_date_time_format_iso8601 (datetime);
 	}
 
 	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);

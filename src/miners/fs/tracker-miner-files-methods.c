@@ -175,12 +175,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	g_autofree gchar *mime_type = NULL;
 	gboolean is_directory, is_root;
 	g_autoptr (GDateTime) modified = NULL;
-#ifdef GIO_SUPPORTS_CREATION_TIME
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
-#else
-	time_t time_;
-	g_autofree gchar *time_str = NULL;
-#endif
 
 	mime_type = get_content_type (file, file_info);
 	if (!mime_type)
@@ -217,18 +212,17 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 #ifdef GIO_SUPPORTS_CREATION_TIME
 	accessed = g_file_info_get_access_date_time (file_info);
-	if (!accessed)
-		accessed = g_date_time_new_from_unix_utc (0);
-
-	tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
+	if (accessed)
+		tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
 
 	created = g_file_info_get_creation_date_time (file_info);
 	if (created)
 		tracker_resource_set_datetime (resource, "nfo:fileCreated", created);
 #else
 	time_ = (time_t) g_file_info_get_attribute_uint64 (file_info, G_FILE_ATTRIBUTE_TIME_ACCESS);
-	time_str = tracker_date_to_string (time_);
-	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
+	accessed = g_date_time_new_from_unix_local (time_);
+	if (accessed)
+		tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
 #endif
 
 	/* The URL of the DataObject (because IE = DO, this is correct) */
@@ -306,12 +300,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	g_autofree gchar *mime_type = NULL;
 	const gchar *graph;
 	g_autoptr (GDateTime) modified = NULL;
-#ifdef GIO_SUPPORTS_CREATION_TIME
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
-#else
-	g_autofree gchar *time_str = NULL;
-	time_t time_;
-#endif
 
 	mime_type = get_content_type (file, info);
 	if (!mime_type)
@@ -347,8 +336,9 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 		tracker_resource_set_datetime (resource, "nfo:fileCreated", created);
 #else
 	time_ = (time_t) g_file_info_get_attribute_uint64 (info, G_FILE_ATTRIBUTE_TIME_ACCESS);
-	time_str = tracker_date_to_string (time_);
-	tracker_resource_set_string (resource, "nfo:fileLastAccessed", time_str);
+	accessed = g_date_time_new_from_unix_local (time_);
+	if (accessed)
+		tracker_resource_set_datetime (resource, "nfo:fileLastAccessed", accessed);
 #endif
 
 	tracker_sparql_buffer_log_attributes_update (buffer,

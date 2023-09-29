@@ -159,7 +159,7 @@ static void        miner_finished_cb                    (TrackerMinerFS *fs,
                                                          gpointer        user_data);
 
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
-                                                                   const gchar        *date);
+                                                                   GDateTime          *datetime);
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerMinerFiles, tracker_miner_files, TRACKER_TYPE_MINER_FS)
 
@@ -445,10 +445,11 @@ set_up_mount_point (TrackerMinerFiles *miner,
 {
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
-	g_autofree gchar *now = NULL, *uri = NULL;
+	g_autofree gchar *uri = NULL;
+	g_autoptr (GDateTime) now = NULL;
 
 	uri = g_file_get_uri (mount_point);
-	now = tracker_date_to_string (time (NULL));
+	now = g_date_time_new_now_utc ();
 
 	g_debug ("Mount point state (%s) being set in DB for mount_point '%s'",
 	         mounted ? "MOUNTED" : "UNMOUNTED",
@@ -461,12 +462,12 @@ set_up_mount_point (TrackerMinerFiles *miner,
 		tracker_batch_add_statement (batch, stmt,
 		                             "mountPoint", G_TYPE_STRING, uri,
 		                             "mounted", G_TYPE_BOOLEAN, mounted,
-		                             "currentDate", G_TYPE_STRING, now,
+		                             "currentDate", G_TYPE_DATE_TIME, now,
 		                             NULL);
 	} else {
 		tracker_sparql_statement_bind_string (stmt, "mountPoint", uri);
 		tracker_sparql_statement_bind_boolean (stmt, "mounted", mounted);
-		tracker_sparql_statement_bind_string (stmt, "currentDate", now);
+		tracker_sparql_statement_bind_datetime (stmt, "currentDate", now);
 		tracker_sparql_statement_update_async (stmt,
 		                                       NULL,
 		                                       set_up_mount_point_cb,
@@ -607,23 +608,19 @@ static gboolean
 cleanup_stale_removable_volumes_cb (gpointer user_data)
 {
 	TrackerMinerFiles *miner = TRACKER_MINER_FILES (user_data);
+	g_autoptr (GDateTime) now = NULL, n_days_ago = NULL;
 	gint n_days_threshold;
-	time_t n_days_ago;
-	gchar *n_days_ago_as_string;
 
 	n_days_threshold = tracker_config_get_removable_days_threshold (miner->private->config);
 
 	if (n_days_threshold == 0)
 		return TRUE;
 
-	n_days_ago = (time (NULL) - (SECONDS_PER_DAY * n_days_threshold));
-	n_days_ago_as_string = tracker_date_to_string (n_days_ago);
-
 	g_debug ("Running stale volumes check...");
 
-	miner_files_in_removable_media_remove_by_date (miner, n_days_ago_as_string);
-
-	g_free (n_days_ago_as_string);
+	now = g_date_time_new_now_utc ();
+	n_days_ago = g_date_time_add_days (now, -n_days_threshold);
+	miner_files_in_removable_media_remove_by_date (miner, n_days_ago);
 
 	return TRUE;
 }
@@ -1130,20 +1127,27 @@ remove_files_in_removable_media_cb (GObject      *object,
 }
 
 static void
-miner_files_in_removable_media_remove_by_date (TrackerMinerFiles  *miner,
-                                               const gchar        *date)
+miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
+                                               GDateTime         *datetime)
 {
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 
-	g_debug ("  Removing all resources in store from removable or "
-	         "optical devices not mounted after '%s'",
-	         date);
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (CONFIG)) {
+		g_autofree gchar *date;
+
+		date = g_date_time_format_iso8601 (datetime);
+		g_message ("  Removing all resources in store from removable or "
+			   "optical devices not mounted after '%s'",
+			   date);
+	}
+#endif
 
 	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
 	stmt = tracker_load_statement (conn, "delete-mountpoints-by-date.rq", NULL);
 
-	tracker_sparql_statement_bind_string (stmt, "unmountDate", date);
+	tracker_sparql_statement_bind_datetime (stmt, "unmountDate", datetime);
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);

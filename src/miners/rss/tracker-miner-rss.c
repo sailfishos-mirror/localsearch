@@ -473,7 +473,8 @@ feed_channel_changed_timeout_cb (gpointer user_data)
 {
 	TrackerResource *resource;
 	FeedChannelUpdateData *fcud;
-	gchar *uri, *time_str;
+	g_autoptr (GDateTime) datetime = NULL;
+	gchar *uri;
 
 	fcud = user_data;
 	fcud->timeout_id = 0;
@@ -483,9 +484,8 @@ feed_channel_changed_timeout_cb (gpointer user_data)
 	g_message ("Updating mfo:updatedTime for channel '%s'", grss_feed_channel_get_title (fcud->channel));
 
 	resource = tracker_resource_new (uri);
-	time_str = tracker_date_to_string (time (NULL));
-	tracker_resource_set_string (resource, "mfo:updatedTime", time_str);
-	g_free (time_str);
+	datetime = g_date_time_new_now_local ();
+	tracker_resource_set_datetime (resource, "mfo:updatedTime", datetime);
 
 	tracker_sparql_connection_update_async (tracker_miner_get_connection (TRACKER_MINER (fcud->miner)),
 	                                        tracker_resource_print_sparql_update (resource, NULL, NULL),
@@ -664,7 +664,7 @@ feed_message_create_resource (TrackerMinerRSS *miner,
                               const gchar     *item_urn)
 {
 	time_t t;
-	gchar *uri, *time_str;
+	gchar *uri;
 	const gchar *url;
 	GrssPerson *author;
 	gdouble latitude;
@@ -676,6 +676,7 @@ feed_message_create_resource (TrackerMinerRSS *miner,
 	const GList *enclosures;
 	const GList *list, *l;
 	GHashTable *enclosure_urls;
+	g_autoptr (GDateTime) datetime = NULL, published = NULL;
 
 	url = get_message_url (item);
 	g_message ("Inserting feed item for '%s'", url);
@@ -750,15 +751,13 @@ feed_message_create_resource (TrackerMinerRSS *miner,
 		tracker_resource_set_string (resource, "nmo:htmlMessageContent", tmp_string);
 	}
 
-	time_str = tracker_date_to_string (time (NULL));
-	tracker_resource_set_string (resource, "nmo:receivedDate", time_str);
-	tracker_resource_set_string (resource, "mfo:downloadedTime", time_str);
-	g_free (time_str);
+	datetime = g_date_time_new_now_local ();
+	tracker_resource_set_datetime (resource, "nmo:receivedDate", datetime);
+	tracker_resource_set_datetime (resource, "mfo:downloadedTime", datetime);
 
 	t = grss_feed_item_get_publish_time (item);
-	time_str = tracker_date_to_string (t);
-	tracker_resource_set_string (resource, "nie:contentCreated", time_str);
-	g_free (time_str);
+	published = g_date_time_new_from_unix_local (t);
+	tracker_resource_set_datetime (resource, "nie:contentCreated", published);
 
 	tracker_resource_set_boolean (resource, "nmo:isRead", FALSE);
 
@@ -982,7 +981,10 @@ update_feed_channel_info (TrackerMinerRSS *miner,
 	time = grss_feed_channel_get_publish_time (channel);
 
 	if (time != 0) {
-		escaped = tracker_date_to_string (time);
+		g_autoptr (GDateTime) datetime = NULL;
+
+		datetime = g_date_time_new_from_unix_local (time);
+		escaped = g_date_time_format_iso8601 (datetime);
 		g_string_append_printf (update, "<%s> nmo:lastMessageDate \"%s\".", subject, escaped);
 		g_free (escaped);
 	}
