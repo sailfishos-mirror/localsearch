@@ -7,7 +7,6 @@ enums = gnome.mkenums('tracker-miners-enum-types',
 tracker_miners_common_enum_header = enums[1]
 
 tracker_miners_common_sources = [
-  'tracker-date-time.c',
   'tracker-dbus.c',
   'tracker-domain-ontology.c',
   'tracker-debug.c',

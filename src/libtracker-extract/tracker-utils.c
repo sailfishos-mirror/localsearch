@@ -27,7 +27,6 @@
 #include <stdio.h>
 
 #include <libtracker-miners-common/tracker-utils.h>
-#include <libtracker-miners-common/tracker-date-time.h>
 
 #include "tracker-utils.h"
 
@@ -469,26 +468,6 @@ tracker_date_format_to_iso8601 (const gchar *date_string,
 	return result;
 }
 
-static gboolean
-is_int (const gchar *str)
-{
-	gint i, len;
-
-	if (!str || str[0] == '\0') {
-		return FALSE;
-	}
-
-	len = strlen (str);
-
-	for (i = 0; i < len; i++) {
-		if (!g_ascii_isdigit (str[i])) {
-			return FALSE;
-		}
-	}
-
-	return TRUE ;
-}
-
 static gint
 parse_month (const gchar *month)
 {
@@ -533,9 +512,10 @@ parse_month (const gchar *month)
 gchar *
 tracker_date_guess (const gchar *date_string)
 {
-	gchar buf[30];
+	gchar buf[30] = "0000-01-01T00:00:00Z";
 	gint  len;
-	GError *error = NULL;
+	g_autoptr (GDateTime) datetime = NULL;
+	g_autoptr (GTimeZone) tz = NULL;
 
 	if (!date_string) {
 		return NULL;
@@ -550,49 +530,39 @@ tracker_date_guess (const gchar *date_string)
 		return NULL;
 	}
 
+	tz = g_time_zone_new_local ();
+
 	/* Check for year only dates (EG ID3 music tags might have
 	 * Audio.ReleaseDate as 4 digit year)
 	 */
 	if (len == 4) {
-		if (is_int (date_string)) {
-			if (atoi (date_string) == 0) {
-				/* Avoid producing an invalid ISO date '0000-01-01T00:00:00Z' */
-				return NULL;
-			}
+		buf[0] = date_string[0];
+		buf[1] = date_string[1];
+		buf[2] = date_string[2];
+		buf[3] = date_string[3];
+		buf[4] = '-';
+		buf[5] = '0';
+		buf[6] = '1';
+		buf[7] = '-';
+		buf[8] = '0';
+		buf[9] = '1';
+		buf[10] = 'T';
+		buf[11] = '0';
+		buf[12] = '0';
+		buf[13] = ':';
+		buf[14] = '0';
+		buf[15] = '0';
+		buf[16] = ':';
+		buf[17] = '0';
+		buf[18] = '0';
+		buf[19] = 'Z';
+		buf[20] = '\0';
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-			buf[0] = date_string[0];
-			buf[1] = date_string[1];
-			buf[2] = date_string[2];
-			buf[3] = date_string[3];
-			buf[4] = '-';
-			buf[5] = '0';
-			buf[6] = '1';
-			buf[7] = '-';
-			buf[8] = '0';
-			buf[9] = '1';
-			buf[10] = 'T';
-			buf[11] = '0';
-			buf[12] = '0';
-			buf[13] = ':';
-			buf[14] = '0';
-			buf[15] = '0';
-			buf[16] = ':';
-			buf[17] = '0';
-			buf[18] = '0';
-			buf[19] = 'Z';
-			buf[20] = '\0';
-
-			tracker_string_to_date (buf, NULL, &error);
-
-			if (error != NULL) {
-				g_error_free (error);
-				return NULL;
-			}
-
-			return g_strdup (buf);
-		} else {
+		if (!datetime)
 			return NULL;
-		}
+
+		return g_strdup (buf);
 	} else if (len == 10)  {
 		/* Check for date part only YYYY-MM-DD */
 		buf[0] = date_string[0];
@@ -615,13 +585,10 @@ tracker_date_guess (const gchar *date_string)
 		buf[17] = '0';
 		buf[18] = '0';
 		buf[19] = '\0';
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		tracker_string_to_date (buf, NULL, &error);
-
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
 	} else if (len == 14) {
@@ -648,13 +615,10 @@ tracker_date_guess (const gchar *date_string)
 		buf[17] = date_string[12];
 		buf[18] = date_string[13];
 		buf[19] = '\0';
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		tracker_string_to_date (buf, NULL, &error);
-
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
 	} else if (len == 15 && date_string[14] == 'Z') {
@@ -678,14 +642,11 @@ tracker_date_guess (const gchar *date_string)
 		buf[17] = date_string[12];
 		buf[18] = date_string[13];
 		buf[19] = 'Z';
-		buf[20] = '\0';
 
-		tracker_string_to_date (buf, NULL, &error);
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
 	} else if (len == 21 && (date_string[14] == '-' || date_string[14] == '+' )) {
@@ -716,12 +677,10 @@ tracker_date_guess (const gchar *date_string)
 		buf[24] = date_string[19];
 		buf[25] = '\0';
 
-		tracker_string_to_date (buf, NULL, &error);
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
 	} else if ((len == 24) && (date_string[3] == ' ')) {
@@ -772,12 +731,10 @@ tracker_date_guess (const gchar *date_string)
 		buf[18] = date_string[18];
 		buf[19] = '\0';
 
-		tracker_string_to_date (buf, NULL, &error);
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
 	} else if ((len == 19) && (date_string[4] == ':') && (date_string[7] == ':')) {
@@ -803,22 +760,18 @@ tracker_date_guess (const gchar *date_string)
 		buf[18] = date_string[18];
 		buf[19] = '\0';
 
-		tracker_string_to_date (buf, NULL, &error);
+		datetime = g_date_time_new_from_iso8601 (buf, tz);
 
-		if (error != NULL) {
-			g_error_free (error);
+		if (!datetime)
 			return NULL;
-		}
 
 		return g_strdup (buf);
-	} 
-
-	tracker_string_to_date (date_string, NULL, &error);
-
-	if (error != NULL) {
-		g_error_free (error);
-		return NULL;
 	}
+
+	datetime = g_date_time_new_from_iso8601 (date_string, tz);
+
+	if (!datetime)
+		return NULL;
 
 	return g_strdup (date_string);
 }

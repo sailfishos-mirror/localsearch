@@ -32,7 +32,6 @@
 #include "tracker-power.h"
 #endif
 
-#include "tracker-date-time.h"
 #include "tracker-dbus.h"
 #include "tracker-debug.h"
 #include "tracker-domain-ontology.h"
