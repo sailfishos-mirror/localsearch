@@ -48,6 +48,7 @@
 
 #define ALLOW_RULE(call) G_STMT_START { \
 	int allow_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
+	current_syscall = G_STRINGIFY (call); \
 	if (allow_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, SCMP_ACT_ALLOW, allow_rule_syscall_number, 0) < 0) \
 		goto out; \
@@ -55,8 +56,17 @@
 
 #define ERROR_RULE(call, error) G_STMT_START { \
 	int error_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
+	current_syscall = G_STRINGIFY (call); \
 	if (error_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, SCMP_ACT_ERRNO (error), error_rule_syscall_number, 0) < 0) \
+		goto out; \
+} G_STMT_END
+
+#define CUSTOM_RULE(call, action, arg1) G_STMT_START { \
+	int custom_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
+	current_syscall = G_STRINGIFY (call); \
+	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
+	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 1, arg1) < 0) \
 		goto out; \
 } G_STMT_END
 
@@ -96,6 +106,7 @@ gboolean
 tracker_seccomp_init (void)
 {
 	scmp_filter_ctx ctx;
+	const gchar *current_syscall = NULL;
 
 	if (!initialize_sigsys_handler ())
 		return FALSE;
@@ -242,64 +253,35 @@ tracker_seccomp_init (void)
 	ERROR_RULE (sched_getattr, EPERM);
 
 	/* Allow prlimit64, only if no new limits are being set */
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(prlimit64), 1,
-	                      SCMP_CMP(2, SCMP_CMP_EQ, 0)) < 0)
-		goto out;
+	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
 	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL */
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socket), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socket), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(socket), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socketpair), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(socketpair), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL)) < 0)
-		goto out;
+	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
+	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
+	CUSTOM_RULE (socket, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK));
+
+	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
+	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
 
 #ifdef HAVE_BTRFS_IOCTL
 	/* Special requirements for btrfs, allowed for BTRFS_IOC_INO_LOOKUP */
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl), 1,
-	                      SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_INO_LOOKUP)) < 0)
-		goto out;
+	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_INO_LOOKUP));
 #endif
 
 	/* Special requirements for ioctl, allowed on stdout/stderr */
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, 1)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(ioctl), 1,
-	                      SCMP_CMP(0, SCMP_CMP_EQ, 2)) < 0)
-		goto out;
+	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 1));
+	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 2));
 
 	/* Special requirements for open/openat, allow O_RDONLY calls,
          * but fail if write permissions are requested.
 	 */
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(open), 1,
-	                      SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(open), 1,
-	                      SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(open), 1,
-	                      SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR)) < 0)
-		goto out;
+	CUSTOM_RULE (open, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
+	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
-	if (seccomp_rule_add (ctx, SCMP_ACT_ALLOW, SCMP_SYS(openat), 1,
-	                      SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(openat), 1,
-	                      SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY)) < 0)
-		goto out;
-	if (seccomp_rule_add (ctx, SCMP_ACT_ERRNO (EACCES), SCMP_SYS(openat), 1,
-	                      SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR)) < 0)
-		goto out;
+	CUSTOM_RULE (openat, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
+	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
 	/* Syscalls may differ between libcs */
 #if !defined(__GLIBC__)
@@ -318,7 +300,7 @@ tracker_seccomp_init (void)
 	}
 
 out:
-	g_critical ("Failed to load seccomp rules.");
+	g_critical ("Failed to load seccomp rule for syscall '%s'", current_syscall);
 	seccomp_release (ctx);
 	return FALSE;
 }
