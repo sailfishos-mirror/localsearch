@@ -240,11 +240,13 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (getsockname);
 	ALLOW_RULE (getpeername);
 	ALLOW_RULE (shutdown);
+	ALLOW_RULE (name_to_handle_at);
 
 	ERROR_RULE (inotify_init1, EINVAL);
 	ERROR_RULE (inotify_init, EINVAL);
 
 	ERROR_RULE (mkdir, EPERM);
+	ERROR_RULE (mkdirat, EPERM);
 	ERROR_RULE (rename, EPERM);
 	ERROR_RULE (unlink, EPERM);
 	ERROR_RULE (ioctl, EBADF);
