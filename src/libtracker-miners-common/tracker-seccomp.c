@@ -128,8 +128,9 @@ tracker_seccomp_init (void)
 	/* Process management */
 	ALLOW_RULE (exit_group);
 	ALLOW_RULE (getuid);
-	ALLOW_RULE (getgid);
 	ALLOW_RULE (getuid32);
+	ALLOW_RULE (getgid);
+	ALLOW_RULE (getgid32);
 	ALLOW_RULE (getegid);
 	ALLOW_RULE (getegid32);
 	ALLOW_RULE (geteuid);
@@ -153,6 +154,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (lstat64);
 	ALLOW_RULE (statx);
 	ALLOW_RULE (fstatfs);
+	ALLOW_RULE (fstatfs64);
 	ALLOW_RULE (access);
 	ALLOW_RULE (faccessat);
 	ALLOW_RULE (faccessat2);
@@ -165,6 +167,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (time);
 	ALLOW_RULE (fsync);
 	ALLOW_RULE (umask);
+	ALLOW_RULE (chdir);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
@@ -204,6 +207,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (clock_gettime64);
 	ALLOW_RULE (clock_getres);
 	ALLOW_RULE (gettimeofday);
+	ALLOW_RULE (timerfd_create);
 	/* Descriptors */
 	ALLOW_RULE (close);
 	ALLOW_RULE (read);
