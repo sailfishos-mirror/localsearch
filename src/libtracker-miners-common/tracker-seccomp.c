@@ -36,6 +36,8 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
+#include <linux/netlink.h>
+
 #ifdef HAVE_BTRFS_IOCTL
 #include <linux/btrfs.h>
 #endif
@@ -67,6 +69,14 @@
 	current_syscall = #call; \
 	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 1, arg1) < 0) \
+		goto out; \
+} G_STMT_END
+
+#define CUSTOM_RULE_2ARG(call, action, arg1, arg2) G_STMT_START {	  \
+	int custom_rule_syscall_number = seccomp_syscall_resolve_name (#call); \
+	current_syscall = #call; \
+	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
+	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 2, arg1, arg2) < 0) \
 		goto out; \
 } G_STMT_END
 
@@ -260,10 +270,14 @@ tracker_seccomp_init (void)
 	/* Allow prlimit64, only if no new limits are being set */
 	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
-	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL */
+	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL,
+	 * and AF_NETLINK/NETLINK_KOBJECT_UEVENT for udev.
+	 */
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
-	CUSTOM_RULE (socket, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK));
+	CUSTOM_RULE_2ARG (socket, SCMP_ACT_ALLOW,
+	                  SCMP_CMP (0, SCMP_CMP_EQ, AF_NETLINK),
+	                  SCMP_CMP (2, SCMP_CMP_EQ, NETLINK_KOBJECT_UEVENT));
 
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
