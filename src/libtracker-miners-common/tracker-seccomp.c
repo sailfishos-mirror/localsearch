@@ -295,11 +295,15 @@ tracker_seccomp_init (void)
 	/* Special requirements for open/openat, allow O_RDONLY calls,
          * but fail if write permissions are requested.
 	 */
-	CUSTOM_RULE (open, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (open, SCMP_ACT_ALLOW,
+	             SCMP_CMP (1, SCMP_CMP_MASKED_EQ,
+	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
 	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
 	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
-	CUSTOM_RULE (openat, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (openat, SCMP_ACT_ALLOW,
+	             SCMP_CMP (2, SCMP_CMP_MASKED_EQ,
+	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
