@@ -228,7 +228,9 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (gettimeofday);
 	ALLOW_RULE (timerfd_create);
 	/* Descriptors */
-	ALLOW_RULE (close);
+	CUSTOM_RULE (close, SCMP_ACT_ALLOW, SCMP_CMP (0, SCMP_CMP_GT, STDERR_FILENO));
+	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
+	CUSTOM_RULE (dup3, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
 	ALLOW_RULE (read);
 	ALLOW_RULE (lseek);
 	ALLOW_RULE (_llseek);
@@ -238,8 +240,6 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (write);
 	ALLOW_RULE (writev);
 	ALLOW_RULE (dup);
-	ALLOW_RULE (dup2);
-	ALLOW_RULE (dup3);
 	/* Needed by some GStreamer modules doing crazy stuff, less
 	 * scary thanks to the restriction below about sockets being
 	 * local.
