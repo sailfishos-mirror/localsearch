@@ -47,24 +47,24 @@
 #endif
 
 #define ALLOW_RULE(call) G_STMT_START { \
-	int allow_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
-	current_syscall = G_STRINGIFY (call); \
+	int allow_rule_syscall_number = seccomp_syscall_resolve_name (#call); \
+	current_syscall = #call; \
 	if (allow_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, SCMP_ACT_ALLOW, allow_rule_syscall_number, 0) < 0) \
 		goto out; \
 } G_STMT_END
 
 #define ERROR_RULE(call, error) G_STMT_START { \
-	int error_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
-	current_syscall = G_STRINGIFY (call); \
+	int error_rule_syscall_number = seccomp_syscall_resolve_name (#call); \
+	current_syscall = #call; \
 	if (error_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, SCMP_ACT_ERRNO (error), error_rule_syscall_number, 0) < 0) \
 		goto out; \
 } G_STMT_END
 
 #define CUSTOM_RULE(call, action, arg1) G_STMT_START { \
-	int custom_rule_syscall_number = seccomp_syscall_resolve_name (G_STRINGIFY (call)); \
-	current_syscall = G_STRINGIFY (call); \
+	int custom_rule_syscall_number = seccomp_syscall_resolve_name (#call); \
+	current_syscall = #call; \
 	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 1, arg1) < 0) \
 		goto out; \
