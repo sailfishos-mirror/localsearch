@@ -204,6 +204,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (waitid);
 	ALLOW_RULE (waitpid);
 	ALLOW_RULE (wait4);
+	ALLOW_RULE (restart_syscall);
 	/* Main loops */
 	ALLOW_RULE (poll);
 	ALLOW_RULE (ppoll);
