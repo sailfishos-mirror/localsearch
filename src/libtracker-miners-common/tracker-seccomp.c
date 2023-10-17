@@ -264,23 +264,7 @@ tracker_seccomp_init (void)
 	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL */
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
-
-	/* Check that the socket syscall is not implemented over the
-	 * multiplexing socketcall() syscall, this happens on some
-	 * architectures (i386, s390, ppc ...).
-	 */
-	if (seccomp_syscall_resolve_name ("socket") > 0) {
-		/* Due to limitations in the syscall interface, libseccomp
-		 * cannot actually check the arguments of pseudo syscalls
-		 * relying on multiplexed syscalls, so the following rule
-		 * will be seen as contradicting and raise an error.
-		 *
-		 * We currently only need this for the icamerasrc gstreamer
-		 * plugin causing udev access on gst_init(), this should
-		 * be moot on those architectures.
-		 */
-		CUSTOM_RULE (socket, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK));
-	}
+	CUSTOM_RULE (socket, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK));
 
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
