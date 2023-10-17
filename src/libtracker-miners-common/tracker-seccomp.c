@@ -267,6 +267,9 @@ tracker_seccomp_init (void)
 	ERROR_RULE (setsockopt, EBADF);
 	ERROR_RULE (sched_getattr, EPERM);
 
+	/* Allow tgkill on self, for abort() and friends */
+	CUSTOM_RULE (tgkill, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, getpid()));
+
 	/* Allow prlimit64, only if no new limits are being set */
 	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
