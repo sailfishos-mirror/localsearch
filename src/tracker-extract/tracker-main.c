@@ -327,6 +327,9 @@ do_main (int argc, char *argv[])
 
 	tracker_content_identifier_cache_init ();
 
+	tracker_extract_module_manager_init ();
+	tracker_module_manager_load_modules ();
+
 	/* Set conditions when we use stand alone settings */
 	if (filename) {
 		return run_standalone ();
@@ -337,8 +340,6 @@ do_main (int argc, char *argv[])
 	if (!extract) {
 		return EXIT_FAILURE;
 	}
-
-	tracker_module_manager_load_modules ();
 
 	miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
 	                                                      MINER_FS_NAME_SUFFIX);
