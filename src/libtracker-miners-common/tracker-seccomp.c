@@ -292,10 +292,6 @@ tracker_seccomp_init (void)
 	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_INO_LOOKUP));
 #endif
 
-	/* Special requirements for ioctl, allowed on stdout/stderr */
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 1));
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 2));
-
 	/* Special requirements for open/openat, allow O_RDONLY calls,
          * but fail if write permissions are requested.
 	 */
