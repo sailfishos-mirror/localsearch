@@ -36,6 +36,8 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
+#include <linux/netlink.h>
+
 #ifdef HAVE_BTRFS_IOCTL
 #include <linux/btrfs.h>
 #endif
@@ -67,6 +69,14 @@
 	current_syscall = #call; \
 	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
 	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 1, arg1) < 0) \
+		goto out; \
+} G_STMT_END
+
+#define CUSTOM_RULE_2ARG(call, action, arg1, arg2) G_STMT_START {	  \
+	int custom_rule_syscall_number = seccomp_syscall_resolve_name (#call); \
+	current_syscall = #call; \
+	if (custom_rule_syscall_number == __NR_SCMP_ERROR || \
+	    seccomp_rule_add (ctx, action, custom_rule_syscall_number, 2, arg1, arg2) < 0) \
 		goto out; \
 } G_STMT_END
 
@@ -135,8 +145,9 @@ tracker_seccomp_init (void)
 	/* Process management */
 	ALLOW_RULE (exit_group);
 	ALLOW_RULE (getuid);
-	ALLOW_RULE (getgid);
 	ALLOW_RULE (getuid32);
+	ALLOW_RULE (getgid);
+	ALLOW_RULE (getgid32);
 	ALLOW_RULE (getegid);
 	ALLOW_RULE (getegid32);
 	ALLOW_RULE (geteuid);
@@ -160,6 +171,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (lstat64);
 	ALLOW_RULE (statx);
 	ALLOW_RULE (fstatfs);
+	ALLOW_RULE (fstatfs64);
 	ALLOW_RULE (access);
 	ALLOW_RULE (faccessat);
 	ALLOW_RULE (faccessat2);
@@ -172,6 +184,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (time);
 	ALLOW_RULE (fsync);
 	ALLOW_RULE (umask);
+	ALLOW_RULE (chdir);
 	ERROR_RULE (fchown, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
@@ -191,6 +204,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (waitid);
 	ALLOW_RULE (waitpid);
 	ALLOW_RULE (wait4);
+	ALLOW_RULE (restart_syscall);
 	/* Main loops */
 	ALLOW_RULE (poll);
 	ALLOW_RULE (ppoll);
@@ -213,8 +227,11 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (clock_gettime64);
 	ALLOW_RULE (clock_getres);
 	ALLOW_RULE (gettimeofday);
+	ALLOW_RULE (timerfd_create);
 	/* Descriptors */
-	ALLOW_RULE (close);
+	CUSTOM_RULE (close, SCMP_ACT_ALLOW, SCMP_CMP (0, SCMP_CMP_GT, STDERR_FILENO));
+	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
+	CUSTOM_RULE (dup3, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
 	ALLOW_RULE (read);
 	ALLOW_RULE (lseek);
 	ALLOW_RULE (_llseek);
@@ -224,8 +241,6 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (write);
 	ALLOW_RULE (writev);
 	ALLOW_RULE (dup);
-	ALLOW_RULE (dup2);
-	ALLOW_RULE (dup3);
 	/* Needed by some GStreamer modules doing crazy stuff, less
 	 * scary thanks to the restriction below about sockets being
 	 * local.
@@ -254,29 +269,20 @@ tracker_seccomp_init (void)
 	ERROR_RULE (setsockopt, EBADF);
 	ERROR_RULE (sched_getattr, EPERM);
 
+	/* Allow tgkill on self, for abort() and friends */
+	CUSTOM_RULE (tgkill, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, getpid()));
+
 	/* Allow prlimit64, only if no new limits are being set */
 	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
-	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL */
+	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL,
+	 * and AF_NETLINK/NETLINK_KOBJECT_UEVENT for udev.
+	 */
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
-
-	/* Check that the socket syscall is not implemented over the
-	 * multiplexing socketcall() syscall, this happens on some
-	 * architectures (i386, s390, ppc ...).
-	 */
-	if (seccomp_syscall_resolve_name ("socket") > 0) {
-		/* Due to limitations in the syscall interface, libseccomp
-		 * cannot actually check the arguments of pseudo syscalls
-		 * relying on multiplexed syscalls, so the following rule
-		 * will be seen as contradicting and raise an error.
-		 *
-		 * We currently only need this for the icamerasrc gstreamer
-		 * plugin causing udev access on gst_init(), this should
-		 * be moot on those architectures.
-		 */
-		CUSTOM_RULE (socket, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(0, SCMP_CMP_EQ, AF_NETLINK));
-	}
+	CUSTOM_RULE_2ARG (socket, SCMP_ACT_ALLOW,
+	                  SCMP_CMP (0, SCMP_CMP_EQ, AF_NETLINK),
+	                  SCMP_CMP (2, SCMP_CMP_EQ, NETLINK_KOBJECT_UEVENT));
 
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
@@ -286,18 +292,18 @@ tracker_seccomp_init (void)
 	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_INO_LOOKUP));
 #endif
 
-	/* Special requirements for ioctl, allowed on stdout/stderr */
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 1));
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, 2));
-
 	/* Special requirements for open/openat, allow O_RDONLY calls,
          * but fail if write permissions are requested.
 	 */
-	CUSTOM_RULE (open, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (open, SCMP_ACT_ALLOW,
+	             SCMP_CMP (1, SCMP_CMP_MASKED_EQ,
+	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
 	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
 	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
-	CUSTOM_RULE (openat, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY | O_RDWR, 0));
+	CUSTOM_RULE (openat, SCMP_ACT_ALLOW,
+	             SCMP_CMP (2, SCMP_CMP_MASKED_EQ,
+	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
