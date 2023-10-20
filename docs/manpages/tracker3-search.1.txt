@@ -7,57 +7,55 @@ tracker3-search - Search for content by type or across all types
 
 == SYNOPSIS
 
-*tracker3 search* [_options_...] [[_expression1_] ...]
+*tracker3 search* [_options_...] [_resource-type_] <search-terms>
 
 == DESCRIPTION
 
-*tracker3 search* searches all indexed content for _expression_. The
-resource in which _expression_ matches must exist (see *--all* for more
-information). All results are returned in ascending order. In all cases,
-if no _expression_ is given for an argument (like *--folders* for
-example) then ALL items in that category are returned instead.
+*tracker3 search* searches all indexed content for the given search terms. Results are returned in ascending order.
 
-_expression_::
-  One or more terms to search. The default operation is a logical AND.
-  For logical OR operations, see -r.
+_<search-terms>_::
+  One or more words to search for. When multiple terms are provided,
+  the default operation is a logical AND. For logical OR operations,
+  see *-r*.
++
+If no search terms are supplied but a _resource-type_ is given (like
+*--folders* for example), then ALL items in that category are
+returned.
 
-== OPTIONS
+Only resources which currently exist will be returned by this command
+(see *--all* for more information).
+
+== RESOURCE TYPES
 
 *-f, --files*::
-  Search for files of any type matching _expression_ (optional).
+  Search for files of any type matching _search-terms_.
 *-s, --folders*::
-  Search for folders matching _expression_ (optional).
+  Search for folders matching _search-terms_.
 *-m, --music*::
-  Search for music files matching _expression_ (optional).
+  Search for music files matching _search-terms_.
 *--music-albums*::
-  Search for music albums matching _expression_ (optional).
+  Search for music albums matching _search-terms_.
 *--music-artists*::
-  Search for music artists matching _expression_ (optional).
+  Search for music artists matching _search-terms_.
 *-i, --images*::
-  Search for images matching _expression_ (optional).
+  Search for images matching _search-terms_.
 *-v, --videos*::
-  Search for videos matching _expression_ (optional).
+  Search for videos matching _search-terms_.
 *-t, --documents*::
-  Search for documents matching _expression_ (optional).
-*-e, --emails*::
-  Search for emails matching _expression_ (optional). Returns a list of
-  subjects for emails found.
-*-c, --contacts*::
-  Search for contacts matching _expression_ (optional). Returns a list
-  of names and email addresses found.
+  Search for documents matching _search-terms_.
 *--software*::
-  Search for software installed matching _expression_ (optional).
+  Search for software installed matching _search-terms_.
   Returns a list of desktop files and application titles found.
 *--software-categories*::
-  Search for software categories matching _expression_ (optional).
+  Search for software categories matching _search-terms_.
   Returns a list of urns and their categories (e.g. Settings, Video,
   Utility, etc).
 *--feeds*::
-  Search through RSS feed information matching _expression_ (optional).
+  Search through RSS feed information matching _search-terms_.
   Returns a list of those found.
-*-b, --bookmarks*::
-  Search through bookmarks matching _expression_ (optional). Returns a
-  list titles and links for each bookmark found.
+
+== OPTIONS
+
 *-l, --limit=<__limit__>*::
   Limit search to _limit_ results. The default is 10 or 512 with
   --disable-snippets.
@@ -73,7 +71,8 @@ _expression_::
   Show results which might not be available. This might bebecause a
   removable media is not mounted for example. Without this option,
   resources are only shown if they exist. This option applies to all
-  command line switches except
+  resource types except for `--music-artists`, `--software`,
+  `--software-categories` and `--feeds`.
 *--disable-snippets*::
   Results are shown with snippets. Snippets are context around the word
   that was searched for in the first place. This gives some idea of if
