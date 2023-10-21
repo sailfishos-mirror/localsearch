@@ -154,6 +154,16 @@ handle_get_property (GDBusConnection  *connection,
 }
 
 static void
+tracker_files_interface_emit_changed (TrackerFilesInterface *files_interface)
+{
+	g_dbus_connection_emit_signal (files_interface->connection,
+	                               NULL,
+	                               "/org/freedesktop/Tracker3/Files",
+	                               "org.freedesktop.DBus.Properties",
+	                               "PropertiesChanged", NULL, NULL);
+}
+
+static void
 tracker_files_interface_constructed (GObject *object)
 {
 	TrackerFilesInterface *files_interface = TRACKER_FILES_INTERFACE (object);
@@ -170,6 +180,8 @@ tracker_files_interface_constructed (GObject *object)
 		                                   &vtable, object, NULL, NULL);
 
 	files_interface->settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
+	g_signal_connect_swapped (files_interface->settings, "changed::max-bytes",
+	                          G_CALLBACK (tracker_files_interface_emit_changed), object);
 }
 
 static void
