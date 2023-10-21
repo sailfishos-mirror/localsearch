@@ -52,6 +52,9 @@ TrackerDecorator * tracker_extract_decorator_new (TrackerSparqlConnection   *con
                                                   TrackerExtract            *extractor,
                                                   TrackerExtractPersistence *persistence);
 
+void tracker_extract_decorator_set_throttled (TrackerExtractDecorator *decorator,
+                                              gboolean                 throttled);
+
 G_END_DECLS
 
 #endif /* __TRACKER_EXTRACT_DECORATOR_H__ */

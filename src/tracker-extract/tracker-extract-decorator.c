@@ -48,7 +48,6 @@ struct _TrackerExtractDecoratorPrivate {
 	TrackerExtract *extractor;
 	GTimer *timer;
 	gboolean extracting;
-	gboolean paused_on_low_battery;
 
 	TrackerSparqlStatement *update_hash;
 	TrackerSparqlStatement *delete_file;
@@ -57,10 +56,7 @@ struct _TrackerExtractDecoratorPrivate {
 	GVolumeMonitor *volume_monitor;
 
 	guint throttle_id;
-
-#ifdef HAVE_POWER
-	TrackerPower *power;
-#endif /* HAVE_POWER */
+	guint throttled : 1;
 };
 
 static void decorator_get_next_file (TrackerDecorator *decorator);
@@ -138,26 +134,6 @@ load_statement (TrackerExtractDecorator *decorator,
 	                                                                NULL);
 }
 
-#ifdef HAVE_POWER
-static void
-low_battery_cb (TrackerExtractDecorator *extract_decorator)
-{
-	TrackerExtractDecoratorPrivate *priv =
-		tracker_extract_decorator_get_instance_private (extract_decorator);
-	gboolean on_low_battery;
-
-	on_low_battery = tracker_power_get_on_low_battery (priv->power);
-
-	if (on_low_battery && !priv->paused_on_low_battery) {
-		tracker_miner_pause (TRACKER_MINER (extract_decorator));
-		priv->paused_on_low_battery = TRUE;
-	} else if (!on_low_battery && priv->paused_on_low_battery) {
-		tracker_miner_resume (TRACKER_MINER (extract_decorator));
-		priv->paused_on_low_battery = FALSE;
-	}
-}
-#endif /* HAVE_POWER */
-
 static void
 tracker_extract_decorator_constructed (GObject *object)
 {
@@ -170,15 +146,6 @@ tracker_extract_decorator_constructed (GObject *object)
 
 	priv->update_hash = load_statement (decorator, "update-hash.rq");
 	priv->delete_file = load_statement (decorator, "delete-file.rq");
-
-#ifdef HAVE_POWER
-	priv->power = tracker_power_new ();
-	if (priv->power) {
-		g_signal_connect_swapped (priv->power, "notify::on-low-battery",
-		                          G_CALLBACK (low_battery_cb),
-		                          object);
-	}
-#endif /* HAVE_POWER */
 }
 
 static void
@@ -202,10 +169,6 @@ tracker_extract_decorator_finalize (GObject *object)
 	g_clear_object (&priv->update_hash);
 	g_clear_object (&priv->delete_file);
 	g_clear_object (&priv->persistence);
-
-#ifdef HAVE_POWER
-	g_clear_object (&priv->power);
-#endif /* HAVE_POWER */
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -290,15 +253,12 @@ throttle_next_item (TrackerDecorator *decorator)
 	TrackerExtractDecoratorPrivate *priv =
 		tracker_extract_decorator_get_instance_private (extract_decorator);
 
-#ifdef HAVE_POWER
-	if (priv->power && tracker_power_get_on_battery (priv->power)) {
+	if (priv->throttled) {
 		priv->throttle_id =
 			g_timeout_add (THROTTLED_TIMEOUT_MS,
 				       throttle_next_item_cb,
 				       decorator);
-	} else
-#endif
-	{
+	} else {
 		priv->throttle_id =
 			g_idle_add (throttle_next_item_cb,
 				    decorator);
@@ -680,4 +640,15 @@ tracker_extract_decorator_new (TrackerSparqlConnection   *connection,
 			     "extractor", extract,
 	                     "persistence", persistence,
 			     NULL);
+}
+
+void
+tracker_extract_decorator_set_throttled (TrackerExtractDecorator *decorator,
+                                         gboolean                 throttled)
+{
+	TrackerExtractDecoratorPrivate *priv;
+
+	priv = tracker_extract_decorator_get_instance_private (decorator);
+
+	priv->throttled = !!throttled;
 }

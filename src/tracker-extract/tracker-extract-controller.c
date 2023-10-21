@@ -41,7 +41,7 @@ struct _TrackerExtractControllerPrivate {
 	GDBusProxy *index_proxy;
 	GDBusProxy *miner_proxy;
 	guint object_id;
-	gint paused;
+	gboolean paused;
 };
 
 #define OBJECT_PATH "/org/freedesktop/Tracker3/Extract"
@@ -91,6 +91,24 @@ proxy_properties_changed_cb (GDBusProxy *proxy,
 }
 
 static void
+update_paused_state (TrackerExtractController *controller,
+                     gboolean                  pause)
+{
+	TrackerExtractControllerPrivate *priv =
+		tracker_extract_controller_get_instance_private (controller);
+
+	if (!!pause == !!priv->paused)
+		return;
+
+	if (pause)
+		tracker_miner_pause (TRACKER_MINER (priv->decorator));
+	else
+		tracker_miner_resume (TRACKER_MINER (priv->decorator));
+
+	priv->paused = pause;
+}
+
+static void
 update_extract_config (TrackerExtractController *controller,
                        GDBusProxy               *proxy)
 {
@@ -121,6 +139,13 @@ update_extract_config (TrackerExtractController *controller,
 				tracker_extract_set_max_text (extract, max_bytes);
 				g_object_unref (extract);
 			}
+		} else if (g_strcmp0 (key, "on-battery") == 0 &&
+		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
+			tracker_extract_decorator_set_throttled (TRACKER_EXTRACT_DECORATOR (priv->decorator),
+			                                         g_variant_get_boolean (value));
+		} else if (g_strcmp0 (key, "on-low-battery") == 0 &&
+		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
+			update_paused_state (controller, g_variant_get_boolean (value));
 		}
 
 		g_free (key);
