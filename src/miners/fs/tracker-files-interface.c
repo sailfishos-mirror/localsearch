@@ -302,9 +302,10 @@ tracker_files_interface_set_priority_graphs (TrackerFilesInterface *files_interf
 {
 	gboolean changed = FALSE;
 
-	if (!graphs ||
-	    !files_interface->priority_graphs ||
-	    g_variant_compare (graphs, files_interface->priority_graphs) != 0)
+	if (!!graphs != !!files_interface->priority_graphs)
+		changed = TRUE;
+	else if (graphs && files_interface->priority_graphs &&
+	         !g_variant_equal (graphs, files_interface->priority_graphs))
 		changed = TRUE;
 
 	g_clear_pointer (&files_interface->priority_graphs, g_variant_unref);

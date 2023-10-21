@@ -64,33 +64,6 @@ G_DEFINE_TYPE_WITH_CODE (TrackerExtractController,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_extract_controller_initable_iface_init))
 
 static void
-update_graphs_from_proxy (TrackerExtractController *controller,
-                          GDBusProxy               *proxy)
-{
-	TrackerExtractControllerPrivate *priv;
-	const gchar **graphs = NULL;
-	GVariant *v;
-
-	priv = tracker_extract_controller_get_instance_private (controller);
-
-	v = g_dbus_proxy_get_cached_property (proxy, "Graphs");
-	if (v)
-		graphs = g_variant_get_strv (v, NULL);
-
-	tracker_decorator_set_priority_graphs (priv->decorator, graphs);
-	g_free (graphs);
-}
-
-static void
-proxy_properties_changed_cb (GDBusProxy *proxy,
-                             GVariant   *changed_properties,
-                             GStrv       invalidated_properties,
-                             gpointer    user_data)
-{
-	update_graphs_from_proxy (user_data, proxy);
-}
-
-static void
 update_paused_state (TrackerExtractController *controller,
                      gboolean                  pause)
 {
@@ -146,6 +119,13 @@ update_extract_config (TrackerExtractController *controller,
 		} else if (g_strcmp0 (key, "on-low-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
 			update_paused_state (controller, g_variant_get_boolean (value));
+		} else if (g_strcmp0 (key, "priority-graphs") == 0 &&
+		           g_variant_is_of_type (value, G_VARIANT_TYPE_STRING_ARRAY)) {
+			const gchar **graphs = NULL;
+
+			graphs = g_variant_get_strv (value, NULL);
+			tracker_decorator_set_priority_graphs (priv->decorator, graphs);
+			g_free (graphs);
 		}
 
 		g_free (key);
@@ -228,21 +208,6 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 
 	if (!set_up_persistence (controller, cancellable, error))
 		return FALSE;
-
-	priv->index_proxy = g_dbus_proxy_new_sync (conn,
-	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-	                                           NULL,
-	                                           "org.freedesktop.Tracker3.Miner.Files.Control",
-	                                           "/org/freedesktop/Tracker3/Miner/Files/Proxy",
-	                                           "org.freedesktop.Tracker3.Miner.Files.Proxy",
-	                                           NULL,
-	                                           error);
-	if (!priv->index_proxy)
-		return FALSE;
-
-	g_signal_connect (priv->index_proxy, "g-properties-changed",
-	                  G_CALLBACK (proxy_properties_changed_cb), controller);
-	update_graphs_from_proxy (controller, priv->index_proxy);
 
 	introspection_data = g_dbus_node_info_new_for_xml (introspection_xml, error);
 	if (!introspection_data)
