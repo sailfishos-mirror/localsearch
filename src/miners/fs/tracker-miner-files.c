@@ -75,8 +75,6 @@ struct TrackerMinerFilesPrivate {
 
 	gboolean low_battery_pause;
 
-	gboolean start_extractor;
-
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
@@ -219,10 +217,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 static void
 tracker_miner_files_check_unextracted (TrackerMinerFiles *mf)
 {
-	if (!mf->private->start_extractor)
-		return;
-
-	mf->private->start_extractor = FALSE;
 	g_debug ("Starting extractor");
 	tracker_extract_watchdog_ensure_started (mf->private->extract_watchdog);
 }
@@ -955,9 +949,6 @@ miner_files_process_file (TrackerMinerFS       *fs,
                           TrackerSparqlBuffer  *buffer,
                           gboolean              create)
 {
-	TrackerMinerFilesPrivate *priv = TRACKER_MINER_FILES (fs)->private;
-
-	priv->start_extractor = TRUE;
 	tracker_miner_files_process_file (fs, file, info, buffer, create);
 }
 
@@ -1080,7 +1071,8 @@ miner_files_constructed (GObject *object)
 	disk_space_check_start (mf);
 
 	domain_name = tracker_domain_ontology_get_domain (mf->private->domain_ontology, NULL);
-	mf->private->extract_watchdog = tracker_extract_watchdog_new (domain_name);
+	mf->private->extract_watchdog =
+		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)));
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",

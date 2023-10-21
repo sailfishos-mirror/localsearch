@@ -255,6 +255,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (getsockname);
 	ALLOW_RULE (getpeername);
 	ALLOW_RULE (shutdown);
+	ALLOW_RULE (getsockopt);
 	ALLOW_RULE (name_to_handle_at);
 
 	ERROR_RULE (inotify_init1, EINVAL);

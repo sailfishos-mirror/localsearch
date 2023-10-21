@@ -21,7 +21,13 @@
 
 #include "tracker-extract-watchdog.h"
 
+#include "tracker-files-interface.h"
 #include <libtracker-miners-common/tracker-common.h>
+
+#include <sys/socket.h>
+
+#define REMOTE_FD_NUMBER 3
+#define MINER_FS_NAME "org.freedesktop.Tracker3.Miner.Files"
 
 enum {
 	STATUS,
@@ -31,36 +37,28 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-struct _TrackerExtractWatchdog {
-	GObject parent_class;
-	GDBusConnection *conn;
-	gchar *domain;
-	guint extractor_watchdog_id;
-	guint progress_signal_id;
-	guint error_signal_id;
-	gboolean initializing;
+enum {
+	PROP_0,
+	PROP_SPARQL_CONN,
+	N_PROPS,
 };
 
-static void extract_watchdog_start (TrackerExtractWatchdog *watchdog,
-				    gboolean                autostart);
+static GParamSpec *props[N_PROPS] = { 0, };
+
+struct _TrackerExtractWatchdog {
+	GObject parent_class;
+	TrackerSparqlConnection *sparql_conn;
+	GSubprocessLauncher *launcher;
+	GSubprocess *extract_process;
+	GCancellable *cancellable;
+	GDBusConnection *conn;
+	TrackerEndpoint *endpoint;
+	TrackerFilesInterface *files_interface;
+	guint progress_signal_id;
+	guint error_signal_id;
+};
 
 G_DEFINE_TYPE (TrackerExtractWatchdog, tracker_extract_watchdog, G_TYPE_OBJECT)
-
-static void
-extract_watchdog_stop (TrackerExtractWatchdog *watchdog)
-{
-	if (watchdog->conn && watchdog->progress_signal_id) {
-		g_dbus_connection_signal_unsubscribe (watchdog->conn,
-		                                      watchdog->progress_signal_id);
-		watchdog->progress_signal_id = 0;
-		watchdog->conn = NULL;
-	}
-
-	if (watchdog->extractor_watchdog_id) {
-		g_bus_unwatch_name (watchdog->extractor_watchdog_id);
-		watchdog->extractor_watchdog_id = 0;
-	}
-}
 
 static void
 on_extract_progress_cb (GDBusConnection *conn,
@@ -124,97 +122,29 @@ on_extract_error_cb (GDBusConnection *conn,
 }
 
 static void
-extract_watchdog_name_appeared (GDBusConnection *conn,
-				const gchar     *name,
-				const gchar     *name_owner,
-				gpointer         user_data)
+clear_process_state (TrackerExtractWatchdog *watchdog)
 {
-	TrackerExtractWatchdog *watchdog = user_data;
+	if (watchdog->cancellable)
+		g_cancellable_cancel (watchdog->cancellable);
 
-	if (watchdog->initializing)
-		watchdog->initializing = FALSE;
-
-	watchdog->conn = conn;
-	watchdog->progress_signal_id =
-		g_dbus_connection_signal_subscribe (watchdog->conn,
-		                                    "org.freedesktop.Tracker3.Miner.Extract",
-		                                    "org.freedesktop.Tracker3.Miner",
-		                                    "Progress",
-		                                    "/org/freedesktop/Tracker3/Miner/Extract",
-		                                    NULL,
-		                                    G_DBUS_SIGNAL_FLAGS_NONE,
-		                                    on_extract_progress_cb,
-		                                    watchdog,
-		                                    NULL);
-	watchdog->error_signal_id =
-		g_dbus_connection_signal_subscribe (watchdog->conn,
-		                                    "org.freedesktop.Tracker3.Miner.Extract",
-		                                    "org.freedesktop.Tracker3.Extract",
-		                                    "Error",
-		                                    "/org/freedesktop/Tracker3/Extract",
-		                                    NULL,
-		                                    G_DBUS_SIGNAL_FLAGS_NONE,
-		                                    on_extract_error_cb,
-		                                    watchdog,
-		                                    NULL);
-}
-
-static void
-extract_watchdog_name_vanished (GDBusConnection *conn,
-				const gchar     *name,
-				gpointer         user_data)
-{
-	TrackerExtractWatchdog *watchdog = user_data;
-
-	/* If connection is lost, there's not much we can startup */
-	if (conn == NULL)
-		return;
-
-	/* Close the name watch, so we'll create another one that will
-	 * autostart the service if it not already running.
-	 */
-	extract_watchdog_stop (watchdog);
-
-	/* We will ignore the first call after initialization, as we
-	 * don't want to autostart tracker-extract in this case (useful
-	 * for debugging purposes).
-	 */
-	if (watchdog->initializing) {
-		watchdog->initializing = FALSE;
-		return;
+	if (watchdog->conn && watchdog->progress_signal_id) {
+		g_dbus_connection_signal_unsubscribe (watchdog->conn,
+		                                      watchdog->progress_signal_id);
+		watchdog->progress_signal_id = 0;
 	}
 
-	g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
-	g_signal_emit (watchdog, signals[LOST], 0);
-}
-
-static void
-extract_watchdog_start (TrackerExtractWatchdog *watchdog,
-			gboolean                autostart)
-{
-	const gchar *domain_name = watchdog->domain;
-	gchar *tracker_extract_dbus_name;
-
-	if (domain_name == NULL) {
-		tracker_extract_dbus_name = g_strdup (TRACKER_MINER_DBUS_NAME_PREFIX "Extract");
-	} else {
-		tracker_extract_dbus_name = g_strconcat (domain_name, ".Tracker3.Miner.Extract", NULL);
+	if (watchdog->conn && watchdog->error_signal_id) {
+		g_dbus_connection_signal_unsubscribe (watchdog->conn,
+		                                      watchdog->error_signal_id);
+		watchdog->error_signal_id = 0;
 	}
 
-	g_debug ("Setting up watch on tracker-extract at %s (autostart: %s)",
-		 tracker_extract_dbus_name, autostart ? "yes" : "no");
-
-	watchdog->extractor_watchdog_id =
-		g_bus_watch_name (TRACKER_IPC_BUS,
-				  tracker_extract_dbus_name,
-				  (autostart ?
-				   G_BUS_NAME_WATCHER_FLAGS_AUTO_START :
-				   G_BUS_NAME_WATCHER_FLAGS_NONE),
-				  extract_watchdog_name_appeared,
-				  extract_watchdog_name_vanished,
-				  watchdog, NULL);
-
-	g_free (tracker_extract_dbus_name);
+	g_clear_object (&watchdog->cancellable);
+	g_clear_object (&watchdog->extract_process);
+	g_clear_object (&watchdog->files_interface);
+	g_clear_object (&watchdog->endpoint);
+	g_clear_object (&watchdog->launcher);
+	g_clear_object (&watchdog->conn);
 }
 
 static void
@@ -222,10 +152,30 @@ tracker_extract_watchdog_finalize (GObject *object)
 {
 	TrackerExtractWatchdog *watchdog = TRACKER_EXTRACT_WATCHDOG (object);
 
-	extract_watchdog_stop (watchdog);
-	g_free (watchdog->domain);
+	if (watchdog->extract_process)
+		g_subprocess_send_signal (watchdog->extract_process, SIGTERM);
+
+	clear_process_state (watchdog);
 
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
+}
+
+static void
+tracker_extract_watchdog_set_property (GObject      *object,
+                                       guint         prop_id,
+                                       const GValue *value,
+                                       GParamSpec   *pspec)
+{
+	TrackerExtractWatchdog *watchdog = TRACKER_EXTRACT_WATCHDOG (object);
+
+	switch (prop_id) {
+	case PROP_SPARQL_CONN:
+		watchdog->sparql_conn = g_value_dup_object (value);
+		break;
+	default:
+		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+		break;
+	}
 }
 
 static void
@@ -234,6 +184,7 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = tracker_extract_watchdog_finalize;
+	object_class->set_property = tracker_extract_watchdog_set_property;
 
 	signals[STATUS] = g_signal_new ("status",
 	                                G_OBJECT_CLASS_TYPE (object_class),
@@ -248,31 +199,185 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 	                              G_SIGNAL_RUN_LAST,
 	                              0, NULL, NULL, NULL,
 	                              G_TYPE_NONE, 0);
+
+	props[PROP_SPARQL_CONN] =
+		g_param_spec_object ("sparql-conn",
+		                     NULL, NULL,
+		                     TRACKER_TYPE_SPARQL_CONNECTION,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
 static void
 tracker_extract_watchdog_init (TrackerExtractWatchdog *watchdog)
 {
+	watchdog->cancellable = g_cancellable_new ();
 }
 
 TrackerExtractWatchdog *
-tracker_extract_watchdog_new (const gchar *domain)
+tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn)
 {
-	TrackerExtractWatchdog *watchdog;
+	return g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
+	                     "sparql-conn", sparql_conn,
+	                     NULL);
+}
 
-	watchdog = g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
-	                         NULL);
+static void
+on_new_connection_cb (GObject      *object,
+                      GAsyncResult *res,
+                      gpointer      user_data)
+{
+	TrackerExtractWatchdog *watchdog = user_data;
+	g_autoptr (GError) error = NULL;
 
-	watchdog->initializing = TRUE;
-	watchdog->domain = g_strdup (domain);
-	extract_watchdog_start (watchdog, FALSE);
+	watchdog->conn = g_dbus_connection_new_finish (res, &error);
+	if (!watchdog->conn) {
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			g_warning ("Could not create peer-to-peer D-Bus connection: %s", error->message);
+		return;
+	}
 
-	return watchdog;
+	/* Create an endpoint for this peer-to-peer connection */
+	watchdog->endpoint =
+		TRACKER_ENDPOINT (tracker_endpoint_dbus_new (watchdog->sparql_conn,
+		                                             watchdog->conn,
+		                                             NULL, NULL,
+		                                             &error));
+	if (error) {
+		g_warning ("Could not create endpoint for metadata extractor: %s", error->message);
+		return;
+	}
+
+	watchdog->progress_signal_id =
+		g_dbus_connection_signal_subscribe (watchdog->conn,
+		                                    NULL,
+		                                    "org.freedesktop.Tracker3.Miner",
+		                                    "Progress",
+		                                    "/org/freedesktop/Tracker3/Miner/Extract",
+		                                    NULL,
+		                                    G_DBUS_SIGNAL_FLAGS_NONE,
+		                                    on_extract_progress_cb,
+		                                    watchdog,
+		                                    NULL);
+	watchdog->error_signal_id =
+		g_dbus_connection_signal_subscribe (watchdog->conn,
+		                                    NULL,
+		                                    "org.freedesktop.Tracker3.Extract",
+		                                    "Error",
+		                                    "/org/freedesktop/Tracker3/Extract",
+		                                    NULL,
+		                                    G_DBUS_SIGNAL_FLAGS_NONE,
+		                                    on_extract_error_cb,
+		                                    watchdog,
+		                                    NULL);
+
+	watchdog->files_interface = tracker_files_interface_new (watchdog->conn);
+}
+
+static void
+wait_check_async_cb (GObject      *object,
+                     GAsyncResult *res,
+                     gpointer      user_data)
+{
+	TrackerExtractWatchdog *watchdog = user_data;
+	g_autoptr (GError) error = NULL;
+
+	if (!g_subprocess_wait_check_finish (watchdog->extract_process,
+	                                     res, &error)) {
+		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+			return;
+
+		g_warning ("Extractor subprocess died unexpectedly: %s", error->message);
+		g_signal_emit (watchdog, signals[LOST], 0);
+	}
+
+	clear_process_state (watchdog);
+
+	g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
+}
+
+static gboolean
+setup_context (TrackerExtractWatchdog  *watchdog,
+               GError                 **error)
+{
+	g_autoptr (GSocket) socket = NULL;
+	g_autoptr (GIOStream) stream = NULL;
+	g_autofree gchar *guid = NULL;
+	int fd_pair[2];
+
+	clear_process_state (watchdog);
+
+	watchdog->cancellable = g_cancellable_new ();
+
+	if (socketpair (AF_LOCAL, SOCK_STREAM, 0, fd_pair)) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_FAILED,
+		             "socketpair failed: %m");
+		return FALSE;
+	}
+
+	watchdog->launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
+	g_subprocess_launcher_take_fd (watchdog->launcher, fd_pair[1], REMOTE_FD_NUMBER);
+
+	socket = g_socket_new_from_fd (fd_pair[0], error);
+	if (!socket) {
+		close (fd_pair[0]);
+		return FALSE;
+	}
+
+	stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
+
+	guid = g_dbus_generate_guid ();
+
+	g_dbus_connection_new (stream,
+	                       guid,
+	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER |
+	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS |
+	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER,
+	                       NULL, watchdog->cancellable,
+	                       on_new_connection_cb, watchdog);
+
+	return TRUE;
 }
 
 void
 tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 {
-	if (!watchdog->extractor_watchdog_id)
-		extract_watchdog_start (watchdog, TRUE);
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *current_dir = NULL;
+	const gchar *extract_path;
+
+	if (watchdog->extract_process)
+		return;
+
+	if (!setup_context (watchdog, &error)) {
+		g_critical ("Could not setup context to spawn metadata extractor: %s", error->message);
+		return;
+	}
+
+	current_dir = g_get_current_dir ();
+
+	if (g_strcmp0 (current_dir, BUILDROOT) == 0)
+		extract_path = BUILD_EXTRACTDIR "/tracker-extract-3";
+	else
+		extract_path = LIBEXECDIR "/tracker-extract-3";
+
+	watchdog->extract_process =
+		g_subprocess_launcher_spawn (watchdog->launcher,
+		                             &error,
+		                             extract_path,
+		                             "--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),
+		                             NULL);
+
+	if (watchdog->extract_process) {
+		g_subprocess_wait_check_async (watchdog->extract_process,
+		                               watchdog->cancellable,
+		                               wait_check_async_cb, watchdog);
+	} else {
+		g_warning ("Could not launch metadata extractor: %s", error->message);
+	}
 }

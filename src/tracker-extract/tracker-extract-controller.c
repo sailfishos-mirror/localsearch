@@ -182,19 +182,17 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 	TrackerExtractController *controller;
 	TrackerExtractControllerPrivate *priv;
 	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
-	GDBusConnection *conn;
 	GDBusInterfaceVTable interface_vtable = {
 		NULL, NULL, NULL
 	};
 
 	controller = TRACKER_EXTRACT_CONTROLLER (initable);
 	priv = tracker_extract_controller_get_instance_private (controller);
-	conn = priv->connection;
 
-	priv->miner_proxy = g_dbus_proxy_new_sync (conn,
+	priv->miner_proxy = g_dbus_proxy_new_sync (priv->connection,
 	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
 	                                           NULL,
-	                                           "org.freedesktop.Tracker3.Miner.Files",
+	                                           NULL,
 	                                           "/org/freedesktop/Tracker3/Files",
 	                                           "org.freedesktop.Tracker3.Files",
 	                                           NULL,
