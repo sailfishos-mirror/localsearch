@@ -251,8 +251,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (recvfrom);
 	ALLOW_RULE (getsockname);
 	ALLOW_RULE (getpeername);
-	ALLOW_RULE (shutdown);
 	ALLOW_RULE (getsockopt);
+	ERROR_RULE (socket, EPERM);
 	ALLOW_RULE (name_to_handle_at);
 
 	ERROR_RULE (inotify_init1, EINVAL);
@@ -273,17 +273,8 @@ tracker_seccomp_init (void)
 	/* Allow prlimit64, only if no new limits are being set */
 	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
-	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL,
-	 * and AF_NETLINK/NETLINK_KOBJECT_UEVENT for udev.
-	 */
-	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
-	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
-	CUSTOM_RULE_2ARG (socket, SCMP_ACT_ALLOW,
-	                  SCMP_CMP (0, SCMP_CMP_EQ, AF_NETLINK),
-	                  SCMP_CMP (2, SCMP_CMP_EQ, NETLINK_KOBJECT_UEVENT));
-
+	/* Special requirements for socketpair, only on AF_UNIX */
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
-	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
 
 #ifdef HAVE_BTRFS_IOCTL
 	/* Special requirements for btrfs, allowed for BTRFS_IOC_INO_LOOKUP */
