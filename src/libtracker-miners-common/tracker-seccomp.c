@@ -158,6 +158,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (exit);
 	ALLOW_RULE (getrusage);
 	ALLOW_RULE (getrlimit);
+	ERROR_RULE (sched_getattr, EPERM);
 	/* Basic filesystem access */
 	ALLOW_RULE (fstat);
 	ALLOW_RULE (fstat64);
@@ -186,6 +187,10 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (umask);
 	ALLOW_RULE (chdir);
 	ERROR_RULE (fchown, EPERM);
+	ERROR_RULE (mkdir, EPERM);
+	ERROR_RULE (mkdirat, EPERM);
+	ERROR_RULE (rename, EPERM);
+	ERROR_RULE (unlink, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
@@ -228,6 +233,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (clock_getres);
 	ALLOW_RULE (gettimeofday);
 	ALLOW_RULE (timerfd_create);
+	ERROR_RULE (ioctl, EBADF);
 	/* Descriptors */
 	CUSTOM_RULE (close, SCMP_ACT_ALLOW, SCMP_CMP (0, SCMP_CMP_GT, STDERR_FILENO));
 	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
@@ -253,19 +259,12 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (getpeername);
 	ALLOW_RULE (getsockopt);
 	ERROR_RULE (socket, EPERM);
+	ERROR_RULE (setsockopt, EBADF);
+	ERROR_RULE (bind, EACCES);
+	/* File monitors */
 	ALLOW_RULE (name_to_handle_at);
-
 	ERROR_RULE (inotify_init1, EINVAL);
 	ERROR_RULE (inotify_init, EINVAL);
-
-	ERROR_RULE (mkdir, EPERM);
-	ERROR_RULE (mkdirat, EPERM);
-	ERROR_RULE (rename, EPERM);
-	ERROR_RULE (unlink, EPERM);
-	ERROR_RULE (ioctl, EBADF);
-	ERROR_RULE (bind, EACCES);
-	ERROR_RULE (setsockopt, EBADF);
-	ERROR_RULE (sched_getattr, EPERM);
 
 	/* Allow tgkill on self, for abort() and friends */
 	CUSTOM_RULE (tgkill, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, getpid()));
