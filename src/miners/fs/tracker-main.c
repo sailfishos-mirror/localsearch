@@ -451,7 +451,7 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 	gboolean parents_indexable = TRUE;
 	gboolean is_dir;
 
-	controller = tracker_controller_new (indexing_tree, storage);
+	controller = tracker_controller_new (indexing_tree, storage, NULL);
 
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
@@ -884,7 +884,7 @@ main (gint argc, gchar *argv[])
 	                                       config,
 	                                       domain_ontology);
 
-	controller = tracker_controller_new (indexing_tree, storage);
+	controller = tracker_controller_new (indexing_tree, storage, files_interface);
 
 	proxy = tracker_miner_proxy_new (miner_files, connection, DBUS_PATH, NULL, &error);
 	if (error) {

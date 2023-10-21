@@ -5,14 +5,16 @@
 
 #include "tracker-indexing-tree.h"
 #include "tracker-storage.h"
+#include "tracker-files-interface.h"
 
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_CONTROLLER (tracker_controller_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerController, tracker_controller, TRACKER, CONTROLLER, GObject)
 
-TrackerController * tracker_controller_new (TrackerIndexingTree *tree,
-                                            TrackerStorage      *storage);
+TrackerController * tracker_controller_new (TrackerIndexingTree   *tree,
+                                            TrackerStorage        *storage,
+                                            TrackerFilesInterface *files_interface);
 
 G_END_DECLS
 

@@ -33,6 +33,7 @@ struct _TrackerFilesInterface
 	GObject parent_instance;
 	GDBusConnection *connection;
 	GSettings *settings;
+	GVariant *priority_graphs;
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif
@@ -149,6 +150,9 @@ handle_get_property (GDBusConnection  *connection,
 		g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
 		g_variant_builder_add (&builder, "{sv}", "max-bytes",
 		                       g_settings_get_value (files_interface->settings, "max-bytes"));
+
+		if (files_interface->priority_graphs)
+			g_variant_builder_add (&builder, "{sv}", "priority-graphs", files_interface->priority_graphs);
 
 #ifdef HAVE_POWER
 		if (files_interface->power) {
@@ -290,4 +294,23 @@ tracker_files_interface_new (GDBusConnection *connection)
 	return g_object_new (TRACKER_TYPE_FILES_INTERFACE,
 	                     "connection", connection,
 	                     NULL);
+}
+
+void
+tracker_files_interface_set_priority_graphs (TrackerFilesInterface *files_interface,
+                                             GVariant              *graphs)
+{
+	gboolean changed = FALSE;
+
+	if (!graphs ||
+	    !files_interface->priority_graphs ||
+	    g_variant_compare (graphs, files_interface->priority_graphs) != 0)
+		changed = TRUE;
+
+	g_clear_pointer (&files_interface->priority_graphs, g_variant_unref);
+	if (graphs)
+		files_interface->priority_graphs = g_variant_ref_sink (graphs);
+
+	if (changed)
+		tracker_files_interface_emit_changed (files_interface);
 }
