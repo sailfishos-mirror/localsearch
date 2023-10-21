@@ -23,6 +23,8 @@
 
 #include "tracker-files-interface.h"
 
+#include <libtracker-miners-common/tracker-common.h>
+
 #include <gio/gunixfdlist.h>
 #include <sys/mman.h>
 
@@ -31,6 +33,9 @@ struct _TrackerFilesInterface
 	GObject parent_instance;
 	GDBusConnection *connection;
 	GSettings *settings;
+#ifdef HAVE_POWER
+	TrackerPower *power;
+#endif
 	guint object_id;
 	int fd;
 };
@@ -145,6 +150,15 @@ handle_get_property (GDBusConnection  *connection,
 		g_variant_builder_add (&builder, "{sv}", "max-bytes",
 		                       g_settings_get_value (files_interface->settings, "max-bytes"));
 
+#ifdef HAVE_POWER
+		if (files_interface->power) {
+			g_variant_builder_add (&builder, "{sv}", "on-battery",
+			                       g_variant_new_boolean (tracker_power_get_on_battery (files_interface->power)));
+			g_variant_builder_add (&builder, "{sv}", "on-low-battery",
+			                       g_variant_new_boolean (tracker_power_get_on_low_battery (files_interface->power)));
+		}
+#endif
+
 		return g_variant_builder_end (&builder);
 	} else {
 		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
@@ -182,6 +196,16 @@ tracker_files_interface_constructed (GObject *object)
 	files_interface->settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
 	g_signal_connect_swapped (files_interface->settings, "changed::max-bytes",
 	                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+
+#ifdef HAVE_POWER
+	files_interface->power = tracker_power_new ();
+	if (files_interface->power) {
+		g_signal_connect_swapped (files_interface->power, "notify::on-battery",
+		                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+		g_signal_connect_swapped (files_interface->power, "notify::on-low-battery",
+		                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+	}
+#endif
 }
 
 static void
@@ -193,6 +217,9 @@ tracker_files_interface_finalize (GObject *object)
 	                                     files_interface->object_id);
 	g_clear_object (&files_interface->connection);
 	g_clear_object (&files_interface->settings);
+#ifdef HAVE_POWER
+	g_clear_object (&files_interface->power);
+#endif
 
 	if (files_interface->fd)
 		close (files_interface->fd);
