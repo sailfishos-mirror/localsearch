@@ -241,11 +241,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (write);
 	ALLOW_RULE (writev);
 	ALLOW_RULE (dup);
-	/* Needed by some GStreamer modules doing crazy stuff, less
-	 * scary thanks to the restriction below about sockets being
-	 * local.
-	 */
-	ALLOW_RULE (connect);
+	/* Peer to peer D-Bus communication */
+	ERROR_RULE (connect, EACCES);
 	ALLOW_RULE (send);
 	ALLOW_RULE (sendto);
 	ALLOW_RULE (sendmsg);
