@@ -1,5 +1,12 @@
 #!/usr/bin/bash
 
+fetch() {
+  local remote=$1
+  local ref=$2
+
+  git fetch --quiet --depth=1 $remote $ref 2>/dev/null
+}
+
 tracker_target=
 
 mkdir subprojects
@@ -28,10 +35,17 @@ if [ "$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" ]; then
 fi
 
 if [ -z "$tracker_target" ]; then
-  tracker_target=$(git branch -r -l origin/$CI_COMMIT_REF_NAME)
-  tracker_target=${tracker_target:-origin/master}
-  echo Using $tracker_target instead
+  ref_remote=${CI_PROJECT_URL//tracker-miners/tracker}
+  echo -n Looking for $CI_COMMIT_REF_NAME on remote...
+  if fetch $ref_remote $CI_COMMIT_REF_NAME; then
+    echo \ found
+    tracker_target=FETCH_HEAD
+  else
+    echo \ not found
+    tracker_target=$(git branch -r -l origin/$CI_COMMIT_REF_NAME)
+    tracker_target=${tracker_target:-origin/master}
+    echo Using $tracker_target instead
+  fi
 fi
 
 git checkout -q $tracker_target
-
