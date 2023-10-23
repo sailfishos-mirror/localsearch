@@ -36,6 +36,8 @@
 #include <glib-object.h>
 #include <glib/gi18n.h>
 
+#include <gst/gst.h>
+
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
 
@@ -771,6 +773,11 @@ main (gint argc, gchar *argv[])
 	 * are many concurrently running queries through the endpoint.
 	 */
 	raise_file_descriptor_limit ();
+
+	/* Preempt possible registry updates, before tracker-extract-3 deals
+	 * with gstreamer plugins.
+	 */
+	gst_init (NULL, NULL);
 
 	/* Translators: this messagge will apper immediately after the
 	 * usage string - Usage: COMMAND <THIS_MESSAGE>
