@@ -54,9 +54,10 @@ sources = [
 ]
 
 tracker_miner_fs_deps = [
-     tracker_miners_common_dep,
-     tracker_miner_dep,
-     tracker_extract_dep
+    tracker_miners_common_dep,
+    tracker_miner_dep,
+    tracker_extract_dep,
+    gstreamer,
 ]
 
 executable('tracker-miner-fs-@0@'.format(tracker_api_major),

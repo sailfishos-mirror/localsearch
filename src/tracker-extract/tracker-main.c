@@ -309,6 +309,8 @@ do_main (int argc, char *argv[])
 	TrackerDomainOntology *domain_ontology;
 	gchar *dbus_name, *miner_dbus_name;
 
+	g_setenv ("GST_REGISTRY_UPDATE", "no", TRUE);
+
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
