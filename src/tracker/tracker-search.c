@@ -55,6 +55,9 @@ static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
 
+static const char *help_summary =
+	N_("Search for content matching TERMS, by type or across all types.");
+
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
 	 feeds || \
@@ -67,7 +70,7 @@ static gboolean software_categories;
 	 folders || \
 	 (terms && g_strv_length (terms) > 0))
 
-static GOptionEntry entries[] = {
+static GOptionEntry entries_resource_type[] = {
 	/* Search types */
 	{ "files", 'f', 0, G_OPTION_ARG_NONE, &files,
 	  N_("Search for files"),
@@ -113,7 +116,10 @@ static GOptionEntry entries[] = {
 	  N_("Search for feeds (--all has no effect on this)"),
 	  NULL
 	},
+	{ NULL }
+};
 
+static GOptionEntry entries[] = {
 	/* Semantic options */
 	{ "limit", 'l', 0, G_OPTION_ARG_INT, &limit,
 	  N_("Limit the number of results shown"),
@@ -152,7 +158,7 @@ static GOptionEntry entries[] = {
 	{ G_OPTION_REMAINING, 0, 0,
 	  G_OPTION_ARG_STRING_ARRAY, &terms,
 	  N_("search terms"),
-	  N_("EXPRESSION")
+	  N_("TERMS")
 	},
 	{ NULL }
 };
@@ -1504,14 +1510,30 @@ search_run (void)
 	return EXIT_FAILURE;
 }
 
+static GOptionContext *
+search_option_context_new (void)
+{
+	GOptionContext *context;
+        GOptionGroup *resource_type;
+	context = g_option_context_new (NULL);
+        g_option_context_set_summary (context, help_summary);
+        resource_type = g_option_group_new ("resource-type",
+		"Resource Type Options:",
+		"Show help for resource type options",
+		NULL, NULL);
+	g_option_context_add_main_entries (context, entries, NULL);
+        g_option_context_add_group (context, resource_type);
+        g_option_group_add_entries (resource_type, entries_resource_type);
+        return context;
+}
+
 static int
 search_run_default (void)
 {
 	GOptionContext *context;
 	gchar *help;
 
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
+        context = search_option_context_new ();
 	help = g_option_context_get_help (context, FALSE, NULL);
 	g_option_context_free (context);
 	g_printerr ("%s\n", help);
@@ -1538,8 +1560,7 @@ main (int argc, const char **argv)
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
+	context = search_option_context_new ();
 
 	argv[0] = "tracker search";
 
