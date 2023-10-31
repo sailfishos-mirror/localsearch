@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
 "POT-Creation-Date: 2023-09-28 20:13+0000\n"
-"PO-Revision-Date: 2023-10-13 22:44+0200\n"
+"PO-Revision-Date: 2023-10-31 05:51+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.4\n"
+"X-Generator: Poedit 3.4.1\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -98,6 +98,8 @@ msgstr "დისკის ადგილის მინიმუმის ზ
 msgid ""
 "Disk space threshold in percent at which to pause indexing, or -1 to disable."
 msgstr ""
+"დისკზე არსებული ადგილის ზღვარი პროცენტებში, რომლის შემდეგაც დაინდექსება "
+"შეწყდება. ან, გასათიშად, -1 მიუთითეთ."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
 msgid "Crawling interval"
@@ -126,7 +128,7 @@ msgstr "მონიტორების ჩართვა"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
 msgid "Set to false to completely disable any file monitoring"
-msgstr ""
+msgstr "დააყენეთ ცრუზე ფაილების მონიტორინგის სრულად გასათიშად"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
 msgid "Index removable devices"
@@ -136,6 +138,8 @@ msgstr "მოხსნადი მოწყობილობების დ�
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
+"დააყენეთ ჭეშმარიტზე, რათა მოხსნადი მოწყობილობების მიმაგრებული საქაღალდეების "
+"დაინდექსება ჩართოთ."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index optical discs"
@@ -162,6 +166,8 @@ msgstr "ელემენტზე მუშაობისას, მხოლ
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
 msgid "Set to true to index while running on battery for the first time only"
 msgstr ""
+"თუ ეს ჭეშმარიტია, ელემენტზე ყოფნისას, თუ ეს პირველად ხდება, დაინდექსება "
+"მაინც მოხდება"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 msgid "Directories to index recursively"
@@ -287,6 +293,8 @@ msgstr "საწყისი ძილის დრო წამებში 0-
 #: src/miners/fs/tracker-main.c:85
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
+"გაშვებულია, სანამ არ მოხდება ყველა მორგებული მდებარეობის დაინდექსება, შემდეგ "
+"კი დაასრულებს მუშაობას"
 
 #: src/miners/fs/tracker-main.c:89 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
@@ -303,7 +311,7 @@ msgstr "ფაილი"
 #: src/miners/fs/tracker-main.c:93 src/miners/rss/tracker-main.c:63
 #: src/tracker-extract/tracker-main.c:95
 msgid "Runs for a specific domain ontology"
-msgstr ""
+msgstr "გაუშვებს სპეციფიკურ დომენის ონტოლოგიას"
 
 #: src/miners/fs/tracker-main.c:97
 msgid "Avoids changes in the filesystem"
@@ -327,19 +335,19 @@ msgstr "მონაცემის ობიექტი \"%s\" ამჟამ
 
 #: src/miners/fs/tracker-main.c:492
 msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "საქაღალდის დაინდექსება არ მოხდება (ფილტრების გამო)"
 
 #: src/miners/fs/tracker-main.c:496
 msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "ფაილი დაინდექსება არ მოხდება (ფილტრების გამო)"
 
 #: src/miners/fs/tracker-main.c:499
 msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr ""
+msgstr "ფაილი დაინდექსება არ მოხდება (ფაილი დამალულია)"
 
 #: src/miners/fs/tracker-main.c:501
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr ""
+msgstr "ფაილი დაინდექსება არ მოხდება (ინდექსირებად საქაღალდეში არაა)"
 
 #: src/miners/fs/tracker-main.c:525
 #, c-format
@@ -371,7 +379,7 @@ msgstr "ფაილის დაინდექსება შეუძლე�
 #.
 #: src/miners/fs/tracker-main.c:778
 msgid "— start the tracker indexer"
-msgstr ""
+msgstr "— ტრეკერის ინდექსერის გაშვება"
 
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:45
@@ -433,14 +441,14 @@ msgstr "ლენტები სიის გამოტანის შეც
 #.
 #: src/miners/rss/tracker-main.c:422
 msgid "— start the feeds indexer"
-msgstr ""
+msgstr "— ლენტების ინდექსერის გაშვება"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-control/tracker-main.c:136
 msgid "— start the tracker index proxy"
-msgstr ""
+msgstr "— ტრეკერის ინდექსერის პროქსის გაშვება"
 
 #: src/tracker-extract/tracker-extract.c:700
 msgid "Metadata extraction failed"
@@ -449,6 +457,7 @@ msgstr "მეტამონაცემების გამოღება �
 #: src/tracker-extract/tracker-extract.c:776
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
+"ამ ფაილიდან მეტამონაცემების ან ინფორმაციის გამოღებისთვის მოდული ვერ ვიპოვე"
 
 #: src/tracker-extract/tracker-main.c:80
 msgid "File to extract metadata for"
@@ -491,7 +500,7 @@ msgstr "— ფაილის მეტამონაცემების გ
 
 #: src/tracker-extract/tracker-main.c:333
 msgid "Filename and mime type must be provided together"
-msgstr ""
+msgstr "ფაილის სახელი და MIME ტიპი ერთად უნდა შეიყვანოთ"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -538,6 +547,8 @@ msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
+"ბაზაში ცვლილებების რეალურ დროში აღმოჩენა (მაგ: რესურსების ან ფაილების "
+"დამატება)"
 
 #: src/tracker/tracker-daemon.c:119
 msgid "List common statuses for miners"
@@ -730,7 +741,7 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:723
 msgid "All nie:plainTextContent properties are omitted"
-msgstr ""
+msgstr "ყველა nie:plainTextContent თვისება გამოტოვებულია"
 
 #: src/tracker/tracker-daemon.c:740
 msgid "Common statuses include"
@@ -816,7 +827,7 @@ msgstr "მითითებული ფაილის, როგორც �
 
 #: src/tracker/tracker-index.c:53
 msgid "Removes FILE from indexed locations"
-msgstr ""
+msgstr "მითითებული ფაილის წაშლა დაინდექსებული მდებარეობებიდან"
 
 #: src/tracker/tracker-index.c:56
 msgid "Makes indexing recursive"
@@ -860,7 +871,7 @@ msgstr ""
 
 #: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
-msgstr ""
+msgstr "რესურსებისთვის, თუ ხელმისაწვდომია, უბრალო ტექსტის შემცველობის ჩვენება"
 
 #. To translators:
 #. * IRI (International Resource Identifier) is a generalization
@@ -876,7 +887,7 @@ msgstr ""
 
 #: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
-msgstr ""
+msgstr "შედეგების, ფორმატში Turtle, RDF-ში გატანა"
 
 #: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
@@ -989,7 +1000,7 @@ msgstr "შედეგების წანაცვლება"
 
 #: src/tracker/tracker-search.c:127
 msgid "Use OR for search terms instead of AND (the default)"
-msgstr ""
+msgstr "'და' (ნაგულისხმევი) პირობის მაგიერ ძებნისას 'ან'-ის გამოყენება"
 
 #: src/tracker/tracker-search.c:131
 msgid ""
@@ -1088,7 +1099,7 @@ msgstr "შედეგები"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
-msgstr ""
+msgstr "მიმდინარე ინდექსის / მონაცემების ნაკრების სტატისტიკის ჩვენება"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
@@ -1215,7 +1226,7 @@ msgstr ""
 
 #: src/tracker/tracker-tag.c:67
 msgid "Description for a tag (this is only used with --add)"
-msgstr ""
+msgstr "ჭდის აღწერა (გამოიყენება, მხოლოდ --add-თან ერთად)"
 
 #: src/tracker/tracker-tag.c:68
 msgid "STRING"
