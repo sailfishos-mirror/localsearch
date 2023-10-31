@@ -1,3 +1,9 @@
+NEW in 3.4.6 - 2023-10-31
+=========================
+  * Improvements to the seccomp jail, and fixes for spurious SIGSYS
+    positives.
+  * Backport crash fix
+
 NEW in 3.4.5 - 2023-09-28
 =========================
   * Avoid the special thread in tracker-extract-3, and extend
