@@ -1,3 +1,8 @@
+NEW in 3.3.3 - 2023-10-31
+=========================
+  * Improvements to the seccomp jail, and fixes for spurious SIGSYS
+    positives.
+
 NEW in 3.3.2 - 2023-09-28
 =========================
   * Avoid the special thread in tracker-extract-3, and extend
