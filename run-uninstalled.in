@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env python3
 #
 # Copyright (C) 2019 Sam Thursfield <sam@afuera.me.uk>
 #
@@ -55,5 +55,5 @@ env['TRACKER_MINER_SERVICES_DIR'] = "@tracker_uninstalled_miner_services_dir@"
 env['TRACKER_TEST_DOMAIN_ONTOLOGY_RULE'] = "@tracker_uninstalled_domain_rule@"
 env['TRACKER_WRITEBACK_MODULES_DIR'] = "@tracker_uninstalled_writeback_modules_dir@"
 
-args = [sys.executable, '-m', 'trackertestutils', '--dbus-config', dbus_config] + sys.argv[1:]
+args = [sys.argv[0], '-m', 'trackertestutils', '--dbus-config', dbus_config] + sys.argv[1:]
 os.execve(sys.executable, args, env)
