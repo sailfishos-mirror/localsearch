@@ -13,6 +13,7 @@ struct _TrackerController
 	TrackerIndexingTree *indexing_tree;
 	TrackerStorage *storage;
 	TrackerConfig *config;
+	TrackerFilesInterface *files_interface;
 	GVolumeMonitor *volume_monitor;
 
 	GDBusProxy *control_proxy;
@@ -33,6 +34,7 @@ enum {
 	PROP_0,
 	PROP_INDEXING_TREE,
 	PROP_STORAGE,
+	PROP_FILES_INTERFACE,
 	N_PROPS,
 };
 
@@ -54,6 +56,9 @@ tracker_controller_set_property (GObject      *object,
 		break;
 	case PROP_STORAGE:
 		controller->storage = g_value_dup_object (value);
+		break;
+	case PROP_FILES_INTERFACE:
+		controller->files_interface = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -717,12 +722,23 @@ update_indexed_files_from_proxy (TrackerController *controller,
 }
 
 static void
+update_priority_graphs_from_proxy (TrackerController *controller,
+                                   GDBusProxy        *proxy)
+{
+	GVariant *value;
+
+	value = g_dbus_proxy_get_cached_property (proxy, "Graphs");
+	tracker_files_interface_set_priority_graphs (controller->files_interface, value);
+}
+
+static void
 proxy_properties_changed_cb (GDBusProxy *proxy,
                              GVariant   *changed_properties,
                              GStrv       invalidated_properties,
                              gpointer    user_data)
 {
 	update_indexed_files_from_proxy (user_data, proxy);
+	update_priority_graphs_from_proxy (user_data, proxy);
 }
 
 static void
@@ -824,6 +840,7 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->storage);
 	g_clear_object (&controller->config);
 	g_clear_object (&controller->volume_monitor);
+	g_clear_object (&controller->files_interface);
 
 	g_slist_free_full (controller->config_single_directories, g_free);
 	g_slist_free_full (controller->config_recursive_directories, g_free);
@@ -857,6 +874,13 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_FILES_INTERFACE] =
+		g_param_spec_object ("files-interface",
+		                     NULL, NULL,
+		                     TRACKER_TYPE_FILES_INTERFACE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -869,11 +893,13 @@ tracker_controller_init (TrackerController *controller)
 }
 
 TrackerController *
-tracker_controller_new (TrackerIndexingTree *tree,
-                        TrackerStorage      *storage)
+tracker_controller_new (TrackerIndexingTree   *tree,
+                        TrackerStorage        *storage,
+                        TrackerFilesInterface *files_interface)
 {
 	return g_object_new (TRACKER_TYPE_CONTROLLER,
 			     "indexing-tree", tree,
 	                     "storage", storage,
+	                     "files-interface", files_interface,
 			     NULL);
 }

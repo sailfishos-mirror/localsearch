@@ -32,4 +32,7 @@ G_DECLARE_FINAL_TYPE (TrackerFilesInterface,
 
 TrackerFilesInterface * tracker_files_interface_new (GDBusConnection *connection);
 
+void tracker_files_interface_set_priority_graphs (TrackerFilesInterface *files_interface,
+                                                  GVariant              *graphs);
+
 #endif /* __TRACKER_FILES_INTERFACE_H__ */

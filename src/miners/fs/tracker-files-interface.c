@@ -23,6 +23,8 @@
 
 #include "tracker-files-interface.h"
 
+#include <libtracker-miners-common/tracker-common.h>
+
 #include <gio/gunixfdlist.h>
 #include <sys/mman.h>
 
@@ -31,6 +33,10 @@ struct _TrackerFilesInterface
 	GObject parent_instance;
 	GDBusConnection *connection;
 	GSettings *settings;
+	GVariant *priority_graphs;
+#ifdef HAVE_POWER
+	TrackerPower *power;
+#endif
 	guint object_id;
 	int fd;
 };
@@ -145,12 +151,34 @@ handle_get_property (GDBusConnection  *connection,
 		g_variant_builder_add (&builder, "{sv}", "max-bytes",
 		                       g_settings_get_value (files_interface->settings, "max-bytes"));
 
+		if (files_interface->priority_graphs)
+			g_variant_builder_add (&builder, "{sv}", "priority-graphs", files_interface->priority_graphs);
+
+#ifdef HAVE_POWER
+		if (files_interface->power) {
+			g_variant_builder_add (&builder, "{sv}", "on-battery",
+			                       g_variant_new_boolean (tracker_power_get_on_battery (files_interface->power)));
+			g_variant_builder_add (&builder, "{sv}", "on-low-battery",
+			                       g_variant_new_boolean (tracker_power_get_on_low_battery (files_interface->power)));
+		}
+#endif
+
 		return g_variant_builder_end (&builder);
 	} else {
 		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
 		             "Unknown property");
 		return NULL;
 	}
+}
+
+static void
+tracker_files_interface_emit_changed (TrackerFilesInterface *files_interface)
+{
+	g_dbus_connection_emit_signal (files_interface->connection,
+	                               NULL,
+	                               "/org/freedesktop/Tracker3/Files",
+	                               "org.freedesktop.DBus.Properties",
+	                               "PropertiesChanged", NULL, NULL);
 }
 
 static void
@@ -170,6 +198,18 @@ tracker_files_interface_constructed (GObject *object)
 		                                   &vtable, object, NULL, NULL);
 
 	files_interface->settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
+	g_signal_connect_swapped (files_interface->settings, "changed::max-bytes",
+	                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+
+#ifdef HAVE_POWER
+	files_interface->power = tracker_power_new ();
+	if (files_interface->power) {
+		g_signal_connect_swapped (files_interface->power, "notify::on-battery",
+		                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+		g_signal_connect_swapped (files_interface->power, "notify::on-low-battery",
+		                          G_CALLBACK (tracker_files_interface_emit_changed), object);
+	}
+#endif
 }
 
 static void
@@ -181,6 +221,9 @@ tracker_files_interface_finalize (GObject *object)
 	                                     files_interface->object_id);
 	g_clear_object (&files_interface->connection);
 	g_clear_object (&files_interface->settings);
+#ifdef HAVE_POWER
+	g_clear_object (&files_interface->power);
+#endif
 
 	if (files_interface->fd)
 		close (files_interface->fd);
@@ -251,4 +294,24 @@ tracker_files_interface_new (GDBusConnection *connection)
 	return g_object_new (TRACKER_TYPE_FILES_INTERFACE,
 	                     "connection", connection,
 	                     NULL);
+}
+
+void
+tracker_files_interface_set_priority_graphs (TrackerFilesInterface *files_interface,
+                                             GVariant              *graphs)
+{
+	gboolean changed = FALSE;
+
+	if (!!graphs != !!files_interface->priority_graphs)
+		changed = TRUE;
+	else if (graphs && files_interface->priority_graphs &&
+	         !g_variant_equal (graphs, files_interface->priority_graphs))
+		changed = TRUE;
+
+	g_clear_pointer (&files_interface->priority_graphs, g_variant_unref);
+	if (graphs)
+		files_interface->priority_graphs = g_variant_ref_sink (graphs);
+
+	if (changed)
+		tracker_files_interface_emit_changed (files_interface);
 }

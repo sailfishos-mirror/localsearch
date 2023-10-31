@@ -165,32 +165,6 @@ executable('tracker-extract-@0@'.format(tracker_api_major),
   install_dir: join_paths(get_option('prefix'), get_option('libexecdir')),
   install_rpath: tracker_internal_libs_dir)
 
-# This file allows starting the service with D-Bus autoactivation.
-# It's also used by tracker-control to identify the miner.
-tmp_conf = configuration_data()
-tmp_conf.merge_from(conf)
-if get_option('domain_prefix') == 'org.freedesktop'
-  tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=tracker-extract-3.service')
-else
-  tmp_conf.set ('SYSTEMD_SERVICE', '')
-endif
-dbus_service_file = configure_file(
-  input: 'org.freedesktop.Tracker3.Miner.Extract.service.in',
-  output: get_option('domain_prefix') + '.Tracker3.Miner.Extract.service',
-  configuration: tmp_conf,
-  install: true,
-  install_dir: dbus_services_dir)
-
-if get_option('systemd_user_services')
-  # This file allows starting the service as a systemd user service.
-  configure_file(
-    input: 'tracker-extract.service.in',
-    output: 'tracker-extract-@0@.service'.format(tracker_api_major),
-    configuration: conf,
-    install: true,
-    install_dir: systemd_user_services_dir)
-endif
-
 # Populate a directory inside the build tree with the extract rules that are
 # enabled in this build configuration.
 setup_extract_rules = join_paths(meson.current_source_dir(), 'setup-extract-rules.sh')

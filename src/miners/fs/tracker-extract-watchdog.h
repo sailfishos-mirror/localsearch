@@ -20,7 +20,7 @@
 #ifndef __TRACKER_EXTRACT_WATCHDOG_H__
 #define __TRACKER_EXTRACT_WATCHDOG_H__
 
-#include <glib-object.h>
+#include <libtracker-sparql/tracker-sparql.h>
 
 G_BEGIN_DECLS
 
@@ -31,7 +31,7 @@ G_DECLARE_FINAL_TYPE (TrackerExtractWatchdog,
 		      TRACKER, EXTRACT_WATCHDOG,
 		      GObject)
 
-TrackerExtractWatchdog * tracker_extract_watchdog_new (const gchar *domain);
+TrackerExtractWatchdog * tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn);
 
 void tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog);
 

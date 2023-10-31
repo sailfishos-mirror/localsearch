@@ -73,6 +73,7 @@ static gchar *output_format_name;
 static gboolean version;
 static gchar *domain_ontology_name = NULL;
 static guint shutdown_timeout_id = 0;
+static int socket_fd;
 
 static GOptionEntry entries[] = {
 	{ "file", 'f', 0,
@@ -94,6 +95,10 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_STRING, &domain_ontology_name,
 	  N_("Runs for a specific domain ontology"),
 	  NULL },
+	{ "socket-fd", 's', 0,
+	  G_OPTION_ARG_INT, &socket_fd,
+	  N_("Socket file descriptor for peer-to-peer communication"),
+	  N_("FD") },
 	{ "version", 'V', 0,
 	  G_OPTION_ARG_NONE, &version,
 	  N_("Displays version information"),
@@ -216,15 +221,6 @@ run_standalone (void)
 }
 
 static void
-on_domain_vanished (GDBusConnection *connection,
-                    const gchar     *name,
-                    gpointer         user_data)
-{
-	GMainLoop *loop = user_data;
-	g_main_loop_quit (loop);
-}
-
-static void
 on_decorator_items_available (TrackerDecorator *decorator)
 {
 	if (shutdown_timeout_id) {
@@ -302,12 +298,12 @@ do_main (int argc, char *argv[])
 	TrackerDecorator *decorator;
 	TrackerExtractController *controller;
 	GMainLoop *my_main_loop;
-	GDBusConnection *connection;
 	TrackerMinerProxy *proxy;
+	GDBusConnection *connection = NULL;
 	TrackerExtractPersistence *persistence;
 	TrackerSparqlConnection *sparql_connection;
 	TrackerDomainOntology *domain_ontology;
-	gchar *dbus_name, *miner_dbus_name;
+	gchar *miner_dbus_name;
 
 	g_setenv ("GST_REGISTRY_UPDATE", "no", TRUE);
 
@@ -361,14 +357,6 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	connection = g_bus_get_sync (TRACKER_IPC_BUS, NULL, &error);
-	if (error) {
-		g_critical ("Could not create DBus connection: %s\n",
-		            error->message);
-		g_error_free (error);
-		return EXIT_FAILURE;
-	}
-
 	tracker_content_identifier_cache_init ();
 
 	tracker_extract_module_manager_init ();
@@ -379,16 +367,42 @@ do_main (int argc, char *argv[])
 		return run_standalone ();
 	}
 
+	if (socket_fd) {
+		g_autoptr (GSocket) socket = NULL;
+		g_autoptr (GIOStream) stream = NULL;
+
+		socket = g_socket_new_from_fd (socket_fd, &error);
+		miner_dbus_name = NULL;
+
+		if (socket) {
+			stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
+			connection = g_dbus_connection_new_sync (stream,
+			                                         NULL,
+			                                         G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_CLIENT,
+			                                         NULL, NULL, &error);
+		}
+	} else {
+		connection = g_bus_get_sync (TRACKER_IPC_BUS, NULL, &error);
+		miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
+		                                                      MINER_FS_NAME_SUFFIX);
+	}
+
+	if (!connection) {
+		g_critical ("Could not create DBus connection: %s\n",
+		            error->message);
+		g_error_free (error);
+		return EXIT_FAILURE;
+	}
+
 	extract = tracker_extract_new (TRUE, force_module);
 
 	if (!extract) {
 		return EXIT_FAILURE;
 	}
 
-	miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
-	                                                      MINER_FS_NAME_SUFFIX);
 	sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name,
-	                                                       NULL, NULL, &error);
+	                                                       NULL, connection,
+	                                                       &error);
 
 	if (error) {
 		g_critical ("Could not connect to filesystem miner endpoint: %s",
@@ -424,34 +438,8 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* Request DBus name */
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
-
-	if (tracker_term_is_tty ()) {
-		g_debug ("tracker-extract-3 running as %s", dbus_name);
-	} else {
-		g_debug ("tracker-extract-3 running as %s. The service will exit when %s "
-		         "disappears from the bus.", dbus_name, miner_dbus_name);
-	}
-
-	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
-		g_critical ("Could not request DBus name '%s': %s",
-		            dbus_name, error->message);
-		g_error_free (error);
-		g_free (dbus_name);
-		return EXIT_FAILURE;
-	}
-
-	g_free (dbus_name);
-
 	/* Main loop */
 	main_loop = g_main_loop_new (NULL, FALSE);
-
-	g_bus_watch_name_on_connection (connection, miner_dbus_name,
-	                                G_BUS_NAME_WATCHER_FLAGS_NONE,
-	                                NULL, on_domain_vanished,
-	                                main_loop, NULL);
-	g_free (miner_dbus_name);
 
 	g_signal_connect (decorator, "finished",
 	                  G_CALLBACK (on_decorator_finished),

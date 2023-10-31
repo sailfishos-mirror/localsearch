@@ -158,6 +158,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (exit);
 	ALLOW_RULE (getrusage);
 	ALLOW_RULE (getrlimit);
+	ERROR_RULE (sched_getattr, EPERM);
 	/* Basic filesystem access */
 	ALLOW_RULE (fstat);
 	ALLOW_RULE (fstat64);
@@ -186,6 +187,10 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (umask);
 	ALLOW_RULE (chdir);
 	ERROR_RULE (fchown, EPERM);
+	ERROR_RULE (mkdir, EPERM);
+	ERROR_RULE (mkdirat, EPERM);
+	ERROR_RULE (rename, EPERM);
+	ERROR_RULE (unlink, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
@@ -228,6 +233,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (clock_getres);
 	ALLOW_RULE (gettimeofday);
 	ALLOW_RULE (timerfd_create);
+	ERROR_RULE (ioctl, EBADF);
 	/* Descriptors */
 	CUSTOM_RULE (close, SCMP_ACT_ALLOW, SCMP_CMP (0, SCMP_CMP_GT, STDERR_FILENO));
 	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
@@ -241,11 +247,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (write);
 	ALLOW_RULE (writev);
 	ALLOW_RULE (dup);
-	/* Needed by some GStreamer modules doing crazy stuff, less
-	 * scary thanks to the restriction below about sockets being
-	 * local.
-	 */
-	ALLOW_RULE (connect);
+	/* Peer to peer D-Bus communication */
+	ERROR_RULE (connect, EACCES);
 	ALLOW_RULE (send);
 	ALLOW_RULE (sendto);
 	ALLOW_RULE (sendmsg);
@@ -254,20 +257,14 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (recvfrom);
 	ALLOW_RULE (getsockname);
 	ALLOW_RULE (getpeername);
-	ALLOW_RULE (shutdown);
+	ALLOW_RULE (getsockopt);
+	ERROR_RULE (socket, EPERM);
+	ERROR_RULE (setsockopt, EBADF);
+	ERROR_RULE (bind, EACCES);
+	/* File monitors */
 	ALLOW_RULE (name_to_handle_at);
-
 	ERROR_RULE (inotify_init1, EINVAL);
 	ERROR_RULE (inotify_init, EINVAL);
-
-	ERROR_RULE (mkdir, EPERM);
-	ERROR_RULE (mkdirat, EPERM);
-	ERROR_RULE (rename, EPERM);
-	ERROR_RULE (unlink, EPERM);
-	ERROR_RULE (ioctl, EBADF);
-	ERROR_RULE (bind, EACCES);
-	ERROR_RULE (setsockopt, EBADF);
-	ERROR_RULE (sched_getattr, EPERM);
 
 	/* Allow tgkill on self, for abort() and friends */
 	CUSTOM_RULE (tgkill, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, getpid()));
@@ -275,17 +272,8 @@ tracker_seccomp_init (void)
 	/* Allow prlimit64, only if no new limits are being set */
 	CUSTOM_RULE (prlimit64, SCMP_ACT_ALLOW, SCMP_CMP(2, SCMP_CMP_EQ, 0));
 
-	/* Special requirements for socket/socketpair, only on AF_UNIX/AF_LOCAL,
-	 * and AF_NETLINK/NETLINK_KOBJECT_UEVENT for udev.
-	 */
-	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
-	CUSTOM_RULE (socket, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
-	CUSTOM_RULE_2ARG (socket, SCMP_ACT_ALLOW,
-	                  SCMP_CMP (0, SCMP_CMP_EQ, AF_NETLINK),
-	                  SCMP_CMP (2, SCMP_CMP_EQ, NETLINK_KOBJECT_UEVENT));
-
+	/* Special requirements for socketpair, only on AF_UNIX */
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
-	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_LOCAL));
 
 #ifdef HAVE_BTRFS_IOCTL
 	/* Special requirements for btrfs, allowed for BTRFS_IOC_INO_LOOKUP */
