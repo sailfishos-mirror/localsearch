@@ -28,10 +28,8 @@ struct _TrackerDomainOntology {
 	gint ref_count;
 	/* DomainOntologies section */
 	GFile *cache_location;
-	GFile *ontology_location;
 	gchar *name;
 	gchar *domain;
-	gchar *ontology_name;
 	gchar **miners;
 };
 
@@ -62,8 +60,6 @@ struct {
 
 #define CACHE_KEY "CacheLocation"
 #define JOURNAL_KEY "JournalLocation"
-#define ONTOLOGY_KEY "OntologyLocation"
-#define ONTOLOGY_NAME_KEY "OntologyName"
 #define DOMAIN_KEY "Domain"
 #define MINERS_KEY "Miners"
 
@@ -85,8 +81,6 @@ tracker_domain_ontology_unref (TrackerDomainOntology *domain_ontology)
 		return;
 
 	g_clear_object (&domain_ontology->cache_location);
-	g_clear_object (&domain_ontology->ontology_location);
-	g_free (domain_ontology->ontology_name);
 	g_free (domain_ontology->name);
 	g_free (domain_ontology->domain);
 	g_strfreev (domain_ontology->miners);
@@ -289,43 +283,8 @@ tracker_domain_ontology_new (const gchar   *domain_name,
 	if (inner_error)
 		goto end;
 
-	domain_ontology->ontology_location =
-		key_file_get_location (key_file, DOMAIN_ONTOLOGY_SECTION,
-		                       ONTOLOGY_KEY, FALSE, TRUE, &inner_error);
-	if (inner_error)
-		goto end;
-
-	domain_ontology->ontology_name = g_key_file_get_string (key_file, DOMAIN_ONTOLOGY_SECTION,
-	                                                        ONTOLOGY_NAME_KEY, NULL);
 	domain_ontology->miners = g_key_file_get_string_list (key_file, DOMAIN_ONTOLOGY_SECTION,
 	                                                      MINERS_KEY, NULL, NULL);
-
-	/* Consistency check, we need one of OntologyLocation and OntologyName,
-	 * no more, no less.
-	 */
-	if ((domain_ontology->ontology_name && domain_ontology->ontology_location) ||
-	    (!domain_ontology->ontology_name && !domain_ontology->ontology_location)) {
-		inner_error = g_error_new (G_KEY_FILE_ERROR,
-		                           G_KEY_FILE_ERROR_INVALID_VALUE,
-		                           "One of OntologyLocation and OntologyName must be provided");
-	}
-
-	/* Build ontology location from name if necessary */
-	if (!domain_ontology->ontology_location) {
-		gchar *ontology_path;
-
-		ontology_path = g_build_filename (ONTOLOGIESDIR,
-		                                  domain_ontology->ontology_name, NULL);
-
-		if (!g_file_test (ontology_path, G_FILE_TEST_IS_DIR)) {
-			g_error ("Unable to find ontologies in the configured location %s", ontology_path);
-		}
-
-		domain_ontology->ontology_location = g_file_new_for_path (ontology_path);
-
-		g_free (ontology_path);
-	}
-
 end:
 	if (key_file)
 		g_key_file_free (key_file);
@@ -343,12 +302,6 @@ GFile *
 tracker_domain_ontology_get_cache (TrackerDomainOntology *domain_ontology)
 {
 	return domain_ontology->cache_location;
-}
-
-GFile *
-tracker_domain_ontology_get_ontology (TrackerDomainOntology *domain_ontology)
-{
-	return domain_ontology->ontology_location;
 }
 
 gchar *
