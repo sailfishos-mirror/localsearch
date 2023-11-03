@@ -31,9 +31,7 @@ if get_option('tracker_core') == 'system'
   # having it as a subproject, these 'uninstalled' locations point to the actual
   # installed locations.
   tracker_uninstalled_cli_dir = join_paths (tracker_sparql.get_variable(pkgconfig: 'exec_prefix'), 'bin')
-  tracker_uninstalled_nepomuk_ontologies_dir = join_paths(tracker_sparql.get_variable(pkgconfig: 'ontologies_dir'), 'nepomuk')
   tracker_uninstalled_testutils_dir = tracker_testutils.get_variable(pkgconfig: 'python_path')
-  tracker_ontologies_dir = tracker_sparql.get_variable(pkgconfig: 'ontologies_dir')
 
   tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
 else
@@ -42,9 +40,7 @@ else
   tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
 
   tracker_uninstalled_cli_dir = tracker_subproject.get_variable('tracker_uninstalled_cli_dir')
-  tracker_uninstalled_nepomuk_ontologies_dir = tracker_subproject.get_variable('tracker_uninstalled_nepomuk_ontologies_dir')
   tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
-  tracker_ontologies_dir = tracker_subproject.get_variable('tracker_ontologies_dir')
 
   tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
 endif
