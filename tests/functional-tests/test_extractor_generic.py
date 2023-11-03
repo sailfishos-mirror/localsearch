@@ -77,11 +77,11 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
 
         """
         cancellable = None
-        ontology_path = Gio.File.new_for_uri(cfg.nepomuk_path())
+        ontology = Tracker.sparql_get_ontology_nepomuk()
         db = Tracker.SparqlConnection.new(
             Tracker.SparqlConnectionFlags.NONE,
             None,  # create in-memory database,
-            ontology_path,
+            ontology,
             cancellable,
         )
         db.update(sparql, cancellable)

@@ -71,12 +71,6 @@ def tap_protocol_enabled():
     return config["TEST_TAP_ENABLED"]
 
 
-def nepomuk_path():
-    parser = configparser.ConfigParser()
-    parser.read(config["TEST_DOMAIN_ONTOLOGY_RULE"])
-    return parser.get("DomainOntology", "OntologyLocation")
-
-
 # This path is used for test data for tests which expect filesystem monitoring
 # to work. For this reason we must avoid it being on a tmpfs filesystem. Note
 # that this MUST NOT be a hidden directory, as Tracker is hardcoded to ignore
