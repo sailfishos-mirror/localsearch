@@ -247,7 +247,7 @@ fixture_setup (TrackerMinerFSTestFixture *fixture,
 	fixture->test_root = g_file_new_for_path (fixture->test_root_path);
 
 	db = g_file_get_child (fixture->test_root, ".db");
-	ontology = g_file_new_for_path (TEST_ONTOLOGIES_DIR);
+	ontology = tracker_sparql_get_ontology_nepomuk ();
 	fixture->connection = tracker_sparql_connection_new (0, db, ontology, NULL, &error);
 	g_assert_no_error (error);
 	g_object_unref (ontology);
