@@ -5,7 +5,6 @@ env = environment()
 # Needed to run the examples from the source tree, instead of
 # relying on host-installed Tracker Miners.
 env.prepend('LD_LIBRARY_PATH', tracker_sparql_uninstalled_dir)
-env.set('TEST_ONTOLOGIES_DIR', tracker_uninstalled_nepomuk_ontologies_dir)
 
 # Tell endpoint example to quit.
 env.set('TRACKER_EXAMPLES_AUTOMATED_TEST', '1')

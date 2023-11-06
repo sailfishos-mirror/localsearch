@@ -722,13 +722,14 @@ setup_connection (TrackerDomainOntology  *domain,
 
 	if (!dry_run)
 		store = get_cache_dir (domain);
-	ontology = tracker_domain_ontology_get_ontology (domain);
+	ontology = tracker_sparql_get_ontology_nepomuk ();
 	sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
 	                                             store,
 	                                             ontology,
 	                                             NULL,
 	                                             error);
 	g_clear_object (&store);
+	g_clear_object (&ontology);
 
 	return sparql_conn;
 }

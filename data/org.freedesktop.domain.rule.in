@@ -6,10 +6,6 @@
 # Location for the Tracker database
 CacheLocation=@MINER_FS_CACHE_LOCATION@
 
-# Name of the ontology to use, must be one located in
-# $(sharedir)/tracker/ontologies
-OntologyName=nepomuk
-
 # DBus name for the owner (not optional). Tracker will use
 # the domain as the prefix of the DBus name for all the
 # services related to this domain ontology.

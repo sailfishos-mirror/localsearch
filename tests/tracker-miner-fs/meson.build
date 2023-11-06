@@ -15,7 +15,6 @@ libtracker_miner_test_c_args = [
   '-DTEST',
   '-DTEST_DATA_DIR="@0@/data"'.format(meson.current_source_dir()),
   '-DTEST_MINERS_DIR="@0@/mock-miners"'.format(meson.current_source_dir()),
-  '-DTEST_ONTOLOGIES_DIR="@0@"'.format(tracker_uninstalled_nepomuk_ontologies_dir),
 ]
 
 libtracker_miner_test_environment = environment()
