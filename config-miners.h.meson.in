@@ -80,6 +80,9 @@
 /* Define if btrfs has the necessary ioctl()s */
 #mesondefine HAVE_BTRFS_IOCTL
 
+/* Define if landlock is available */
+#mesondefine HAVE_LANDLOCK
+
 /* Define to the address where bug reports for this package should be sent. */
 #mesondefine PACKAGE_BUGREPORT
 

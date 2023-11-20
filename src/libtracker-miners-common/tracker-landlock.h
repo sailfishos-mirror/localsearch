@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016, Red Hat Inc.
+ * Copyright (C) 2023, Red Hat Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -15,29 +15,15 @@
  * License along with this library; if not, write to the
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA  02110-1301, USA.
+ *
+ * Author: Carlos Garnacho <carlosg@gnome.org>
  */
 
-#ifndef __TRACKER_EXTRACT_WATCHDOG_H__
-#define __TRACKER_EXTRACT_WATCHDOG_H__
+#ifndef __TRACKER_LANDLOCK_H__
+#define __TRACKER_LANDLOCK_H__
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <glib.h>
 
-#include "tracker-indexing-tree.h"
+gboolean tracker_landlock_init (const gchar * const *allowed_paths);
 
-G_BEGIN_DECLS
-
-#define TRACKER_TYPE_EXTRACT_WATCHDOG (tracker_extract_watchdog_get_type ())
-
-G_DECLARE_FINAL_TYPE (TrackerExtractWatchdog,
-		      tracker_extract_watchdog,
-		      TRACKER, EXTRACT_WATCHDOG,
-		      GObject)
-
-TrackerExtractWatchdog * tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
-                                                       TrackerIndexingTree     *indexing_tree);
-
-void tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog);
-
-G_END_DECLS
-
-#endif /* __TRACKER_EXTRACT_WATCHDOG_H__ */
+#endif /* __TRACKER_LANDLOCK_H__ */

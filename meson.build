@@ -181,6 +181,12 @@ else
   have_btrfs_ioctl = false
 endif
 
+##########################################
+# Check for landlock
+##########################################
+
+have_landlock = cc.has_header('linux/landlock.h')
+
 ####################################################################
 # This section is for tracker-extract dependencies
 ####################################################################
@@ -367,6 +373,7 @@ conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#inclu
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
 conf.set('HAVE_STRNLEN', cc.has_function('strnlen', prefix : '#include <string.h>'))
 conf.set('HAVE_MEMFD_CREATE', cc.has_function('memfd_create', prefix : '#define _GNU_SOURCE\n#include <sys/mman.h>'))
+conf.set('HAVE_LANDLOCK', have_landlock)
 
 conf.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
 conf.set_quoted('SHAREDIR', get_option('prefix') / get_option('datadir'))
@@ -479,6 +486,7 @@ summary = [
   '    Domain prefix:                          ' + get_option('domain_prefix'),
   '\nFeature Support:',
   '    File monitoring:                        @0@glib'.format(have_fanotify ? 'fanotify ' : ''),
+  '    Landlock:                               ' + have_landlock.to_string(),
   '    BTRFS subvolumes:                       ' + have_btrfs_ioctl.to_string(),
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),
