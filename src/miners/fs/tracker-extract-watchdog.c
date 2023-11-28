@@ -56,6 +56,7 @@ struct _TrackerExtractWatchdog {
 	TrackerFilesInterface *files_interface;
 	guint progress_signal_id;
 	guint error_signal_id;
+	int persistence_fd;
 };
 
 G_DEFINE_TYPE (TrackerExtractWatchdog, tracker_extract_watchdog, G_TYPE_OBJECT)
@@ -157,6 +158,9 @@ tracker_extract_watchdog_finalize (GObject *object)
 
 	clear_process_state (watchdog);
 
+	if (watchdog->persistence_fd)
+		close (watchdog->persistence_fd);
+
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
 }
 
@@ -215,6 +219,7 @@ static void
 tracker_extract_watchdog_init (TrackerExtractWatchdog *watchdog)
 {
 	watchdog->cancellable = g_cancellable_new ();
+	watchdog->persistence_fd = -1;
 }
 
 TrackerExtractWatchdog *
@@ -274,7 +279,16 @@ on_new_connection_cb (GObject      *object,
 		                                    watchdog,
 		                                    NULL);
 
-	watchdog->files_interface = tracker_files_interface_new (watchdog->conn);
+	if (watchdog->persistence_fd >= 0) {
+		watchdog->files_interface =
+			tracker_files_interface_new_with_fd (watchdog->conn,
+			                                     watchdog->persistence_fd);
+	} else {
+		watchdog->files_interface =
+			tracker_files_interface_new (watchdog->conn);
+		watchdog->persistence_fd =
+			tracker_files_interface_dup_fd (watchdog->files_interface);
+	}
 }
 
 static void
