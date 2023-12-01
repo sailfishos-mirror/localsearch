@@ -185,7 +185,7 @@ endif
 # Check for landlock
 ##########################################
 
-have_landlock = cc.has_header('linux/landlock.h')
+have_landlock = cc.has_header('linux/landlock.h', required: get_option('landlock'))
 
 ####################################################################
 # This section is for tracker-extract dependencies
@@ -541,6 +541,12 @@ endif
 
 message('\n'.join(summary))
 
-if not get_option('seccomp')
-  warning('Sandboxing is disabled. Run at your own risk. Distribution is discouraged.')
+if not get_option('seccomp') or get_option('landlock').disabled()
+  if not get_option('seccomp')
+    warning('Seccomp sandboxing is disabled.')
+  endif
+  if get_option('landlock').disabled()
+    warning('Landlock sandboxing is disabled.')
+  endif
+  warning('Run at your own risk. Distribution is discouraged.')
 endif
