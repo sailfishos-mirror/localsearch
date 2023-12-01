@@ -22,7 +22,7 @@ stages:
   - code-review
   - build
   - test
-  - seccomp
+  - sandbox
   - analysis
   - docs
 
@@ -227,7 +227,7 @@ build-ubuntu-rolling@x86_64:
     - .gitlab-ci/checkout-tracker.sh
     - cd build
     - ninja clean
-    - meson configure -Db_coverage=true -Dseccomp=false
+    - meson configure -Db_coverage=true -Dseccomp=false -Dlandlock=disabled
     - ninja
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
@@ -313,8 +313,8 @@ test-docs:
   needs:
     - build-fedora-container@x86_64
 
-.seccomp_template: &seccomp
-  stage: seccomp
+.sandbox_template: &sandbox
+  stage: sandbox
 
   script:
     - .gitlab-ci/checkout-tracker.sh
@@ -334,39 +334,39 @@ test-docs:
     reports:
       junit: "build/meson-logs/testlog.junit.xml"
 
-seccomp-fedora@x86_64:
+sandbox-fedora@x86_64:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:36@x86_64
   needs:
     - build-fedora@x86_64
-  <<: *seccomp
+  <<: *sandbox
 
-seccomp-fedora-rawhide@x86_64:
+sandbox-fedora-rawhide@x86_64:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:rawhide@x86_64
   needs:
     - build-fedora-rawhide@x86_64
   allow_failure: true
-  <<: *seccomp
+  <<: *sandbox
 
-seccomp-fedora@aarch64:
+sandbox-fedora@aarch64:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:36@aarch64
   needs:
     - build-fedora@aarch64
   allow_failure: true
-  <<: *seccomp
+  <<: *sandbox
 
-seccomp-ubuntu@x86_64:
+sandbox-ubuntu@x86_64:
   extends:
     - .fdo.distribution-image@ubuntu
     - .tracker-miners.ubuntu:rolling@x86_64
   needs:
     - build-ubuntu-rolling@x86_64
-  <<: *seccomp
+  <<: *sandbox
 
 coverage:
   extends:
