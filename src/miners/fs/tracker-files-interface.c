@@ -44,6 +44,7 @@ struct _TrackerFilesInterface
 enum {
 	PROP_0,
 	PROP_CONNECTION,
+	PROP_PERSISTENCE_FD,
 	N_PROPS,
 };
 
@@ -64,6 +65,7 @@ G_DEFINE_TYPE (TrackerFilesInterface, tracker_files_interface, G_TYPE_OBJECT)
 static void
 tracker_files_interface_init (TrackerFilesInterface *files_interface)
 {
+	files_interface->fd = -1;
 }
 
 static void
@@ -84,26 +86,12 @@ handle_method_call (GDBusConnection       *connection,
 		g_autoptr (GError) error = NULL;
 		int idx;
 
-		if (files_interface->fd <= 0) {
-#ifdef HAVE_MEMFD_CREATE
-			files_interface->fd = memfd_create ("extract-persistent-storage",
-			                                    MFD_CLOEXEC);
-#else
-			g_autofree gchar *path = NULL;
-
-			path = g_strdup_printf ("%s/tracker-persistence.XXXXXX",
-			                        g_get_tmp_dir ());
-			files_interface->fd = g_mkstemp_full (path, 0, 0600);
-			unlink (path);
-#endif
-
-			if (files_interface->fd < 0) {
-				g_dbus_method_invocation_return_error (invocation,
-				                                       G_IO_ERROR,
-				                                       G_IO_ERROR_FAILED,
-				                                       "Could not create memfd");
-				return;
-			}
+		if (files_interface->fd < 0) {
+			g_dbus_method_invocation_return_error (invocation,
+			                                       G_IO_ERROR,
+			                                       G_IO_ERROR_FAILED,
+			                                       "Could not create memfd");
+			return;
 		}
 
 		fd_list = g_unix_fd_list_new ();
@@ -210,6 +198,20 @@ tracker_files_interface_constructed (GObject *object)
 		                          G_CALLBACK (tracker_files_interface_emit_changed), object);
 	}
 #endif
+
+	if (files_interface->fd < 0) {
+#ifdef HAVE_MEMFD_CREATE
+		files_interface->fd = memfd_create ("extract-persistent-storage",
+		                                    MFD_CLOEXEC);
+#else
+		g_autofree gchar *path = NULL;
+
+		path = g_strdup_printf ("%s/tracker-persistence.XXXXXX",
+		                        g_get_tmp_dir ());
+		files_interface->fd = g_mkstemp_full (path, 0, 0600);
+		unlink (path);
+#endif
+	}
 }
 
 static void
@@ -242,6 +244,9 @@ tracker_files_interface_set_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_CONNECTION:
 		files_interface->connection = g_value_dup_object (value);
+		break;
+	case PROP_PERSISTENCE_FD:
+		files_interface->fd = dup (g_value_get_int (value));
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -284,6 +289,13 @@ tracker_files_interface_class_init (TrackerFilesInterfaceClass *klass)
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_PERSISTENCE_FD] =
+		g_param_spec_int ("persistence-fd",
+		                  NULL, NULL,
+		                  G_MININT, G_MAXINT, -1,
+		                  G_PARAM_WRITABLE |
+		                  G_PARAM_CONSTRUCT_ONLY |
+		                  G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -294,6 +306,22 @@ tracker_files_interface_new (GDBusConnection *connection)
 	return g_object_new (TRACKER_TYPE_FILES_INTERFACE,
 	                     "connection", connection,
 	                     NULL);
+}
+
+TrackerFilesInterface *
+tracker_files_interface_new_with_fd (GDBusConnection *connection,
+                                     int              fd)
+{
+	return g_object_new (TRACKER_TYPE_FILES_INTERFACE,
+	                     "connection", connection,
+	                     "persistence-fd", fd,
+	                     NULL);
+}
+
+int
+tracker_files_interface_dup_fd (TrackerFilesInterface *files_interface)
+{
+	return dup (files_interface->fd);
 }
 
 void
