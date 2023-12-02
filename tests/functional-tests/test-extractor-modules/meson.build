@@ -1,1 +1,2 @@
+subdir('malice')
 subdir('misbehavior')

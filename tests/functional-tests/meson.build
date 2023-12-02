@@ -145,6 +145,17 @@ misbehavior_tests = [
   'misbehavior/wrong-sparql',
 ]
 
+if libseccomp.found() and have_landlock
+  misbehavior_tests += [
+    'malice/dbus-access',
+    'malice/exec',
+    'malice/fs-read',
+    'malice/fs-read-trunc',
+    'malice/fs-write',
+    'malice/net-access',
+  ]
+endif
+
 functional_tests = [
   'test_cli',
   'test_extractor_decorator',
