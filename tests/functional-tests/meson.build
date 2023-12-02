@@ -1,6 +1,7 @@
 python = find_program('python3')
 
 subdir('mockvolumemonitor')
+subdir('test-extractor-modules')
 
 # Configure functional tests to run completely from source tree.
 testconf = configuration_data()
@@ -136,6 +137,14 @@ if libgxps.found()
    extractor_tests += 'office/xps-doc-1'
 endif
 
+misbehavior_tests = [
+  'misbehavior/exit',
+  'misbehavior/no-data',
+  'misbehavior/no-error',
+  'misbehavior/stall',
+  'misbehavior/wrong-sparql',
+]
+
 functional_tests = [
   'test_cli',
   'test_extractor_decorator',
@@ -218,4 +227,22 @@ foreach t: functional_tests
     protocol: test_protocol,
     suite: ['functional'],
     timeout: 120)
+endforeach
+
+foreach t: misbehavior_tests
+  rules = meson.current_source_dir() / 'test-extractor-modules'
+  data = meson.current_build_dir() / 'test-extractor-modules' / t
+  test_parts = t.split('/')
+  test_name = test_parts[1]
+  test_suite = test_parts[0]
+  test_env.set('TRACKER_EXTRACT_DEADLINE', '5')
+  test(test_name, python,
+    args: [
+      meson.current_source_dir() / 'test_misbehavior_generic.py',
+      rules,
+      data,
+    ],
+    env: test_env,
+    protocol: test_protocol,
+    suite: ['extractor', test_suite])
 endforeach
