@@ -256,6 +256,10 @@ on_new_connection_cb (GObject      *object,
 		return;
 	}
 
+	/* Disallow access to further endpoints */
+	tracker_endpoint_set_allowed_services (watchdog->endpoint,
+	                                       (const gchar *[]) { NULL });
+
 	watchdog->progress_signal_id =
 		g_dbus_connection_signal_subscribe (watchdog->conn,
 		                                    NULL,
