@@ -47,6 +47,18 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
+static void
+extractor_child_setup (gpointer user_data)
+{
+#ifdef HAVE_LANDLOCK
+	g_autofree gchar *folder = NULL;
+
+	folder = g_path_get_dirname (user_data);
+
+	if (!tracker_landlock_init ((const gchar*[]) { folder, NULL }))
+		g_assert_not_reached ();
+#endif
+}
 
 static gint
 extract_files (char *output_format)
@@ -69,7 +81,9 @@ extract_files (char *output_format)
 		                "--output-format", output_format,
 		                "--file", *p, NULL };
 
-		g_spawn_sync(NULL, argv, NULL, G_SPAWN_DEFAULT, NULL, NULL, NULL, NULL, NULL, &error);
+		g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT,
+		              extractor_child_setup, *p,
+		              NULL, NULL, NULL, &error);
 
 		if (error) {
 			g_printerr ("%s: %s\n",
