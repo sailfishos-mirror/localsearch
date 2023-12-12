@@ -29,6 +29,8 @@
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 
+#include "tracker-debug.h"
+
 /* Compensate for these syscalls not being wrapped in libc */
 #define CREATE_RULESET(attr, flags) \
 	syscall (SYS_landlock_create_ruleset, (attr), \
@@ -106,6 +108,8 @@ add_rule (int          landlock_fd,
 	struct landlock_path_beneath_attr attr = { 0, };
 	int fd;
 	int result;
+
+	TRACKER_NOTE (SANDBOX, g_message ("Adding Landlock rule for '%s', flags %" G_GINT64_MODIFIER "x", path, flags));
 
 	if (!g_file_test (path, G_FILE_TEST_EXISTS)) {
 		g_debug ("Path %s does not exist in filesystem", path);
@@ -298,6 +302,7 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 	          LANDLOCK_ACCESS_FS_READ_FILE);
 #endif
 
+	TRACKER_NOTE (SANDBOX, g_message ("Applying Landlock ruleset to PID %d", getpid ()));
 	retval = apply_ruleset (landlock_fd);
 	close (landlock_fd);
 
