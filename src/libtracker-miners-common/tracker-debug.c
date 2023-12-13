@@ -27,6 +27,7 @@ static const GDebugKey tracker_miners_debug_keys[] = {
   { "decorator", TRACKER_DEBUG_DECORATOR },
   { "miner-fs-events", TRACKER_DEBUG_MINER_FS_EVENTS },
   { "monitors", TRACKER_DEBUG_MONITORS },
+  { "sandbox", TRACKER_DEBUG_SANDBOX },
   { "statistics", TRACKER_DEBUG_STATISTICS },
   { "status", TRACKER_DEBUG_STATUS },
 };
