@@ -40,6 +40,7 @@ static guint signals[N_SIGNALS] = { 0, };
 enum {
 	PROP_0,
 	PROP_SPARQL_CONN,
+	PROP_INDEXING_TREE,
 	N_PROPS,
 };
 
@@ -54,6 +55,7 @@ struct _TrackerExtractWatchdog {
 	GDBusConnection *conn;
 	TrackerEndpoint *endpoint;
 	TrackerFilesInterface *files_interface;
+	TrackerIndexingTree *indexing_tree;
 	guint progress_signal_id;
 	guint error_signal_id;
 	int persistence_fd;
@@ -161,6 +163,9 @@ tracker_extract_watchdog_finalize (GObject *object)
 	if (watchdog->persistence_fd)
 		close (watchdog->persistence_fd);
 
+	g_clear_object (&watchdog->sparql_conn);
+	g_clear_object (&watchdog->indexing_tree);
+
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
 }
 
@@ -175,6 +180,9 @@ tracker_extract_watchdog_set_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_SPARQL_CONN:
 		watchdog->sparql_conn = g_value_dup_object (value);
+		break;
+	case PROP_INDEXING_TREE:
+		watchdog->indexing_tree = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -211,6 +219,12 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_INDEXING_TREE] =
+		g_param_spec_object ("indexing-tree", NULL, NULL,
+		                     TRACKER_TYPE_INDEXING_TREE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -223,10 +237,12 @@ tracker_extract_watchdog_init (TrackerExtractWatchdog *watchdog)
 }
 
 TrackerExtractWatchdog *
-tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn)
+tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
+                              TrackerIndexingTree     *indexing_tree)
 {
 	return g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
 	                     "sparql-conn", sparql_conn,
+	                     "indexing-tree", indexing_tree,
 	                     NULL);
 }
 
@@ -317,6 +333,38 @@ wait_check_async_cb (GObject      *object,
 	g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
 }
 
+static GStrv
+get_indexed_folders (TrackerExtractWatchdog *watchdog)
+{
+	GArray *array;
+	GList *roots, *l;
+
+	array = g_array_new (TRUE, FALSE, sizeof (gchar*));
+	roots = tracker_indexing_tree_list_roots (watchdog->indexing_tree);
+
+	for (l = roots; l; l = l->next) {
+		GFile *file = l->data;
+		gchar *path = NULL;
+
+		path = g_file_get_path (file);
+		if (path)
+			g_array_append_val (array, path);
+	}
+
+	return (GStrv) g_array_free (array, FALSE);
+}
+
+static void
+extractor_child_setup (gpointer user_data)
+{
+#ifdef HAVE_LANDLOCK
+	const gchar * const *indexed_folders = user_data;
+
+	if (!tracker_landlock_init (indexed_folders))
+		g_assert_not_reached ();
+#endif
+}
+
 static gboolean
 setup_context (TrackerExtractWatchdog  *watchdog,
                GError                 **error)
@@ -340,6 +388,11 @@ setup_context (TrackerExtractWatchdog  *watchdog,
 
 	watchdog->launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
 	g_subprocess_launcher_take_fd (watchdog->launcher, fd_pair[1], REMOTE_FD_NUMBER);
+
+	g_subprocess_launcher_set_child_setup (watchdog->launcher,
+	                                       extractor_child_setup,
+	                                       get_indexed_folders (watchdog),
+	                                       (GDestroyNotify) g_strfreev);
 
 	socket = g_socket_new_from_fd (fd_pair[0], error);
 	if (!socket) {

@@ -40,6 +40,11 @@
 #include "tracker-file-utils.h"
 #include "tracker-fts-config.h"
 #include "tracker-ioprio.h"
+
+#ifdef HAVE_LANDLOCK
+#include "tracker-landlock.h"
+#endif
+
 #include "tracker-miner.h"
 #include "tracker-miner-proxy.h"
 #include "tracker-sched.h"

@@ -25,6 +25,10 @@ tracker_miners_common_sources = [
   enums[0], enums[1],
 ]
 
+if have_landlock
+  tracker_miners_common_sources += 'tracker-landlock.c'
+endif
+
 tracker_miners_common_dependencies = [glib, gio, gio_unix, libmath, tracker_sparql]
 
 if battery_detection_library_name == 'upower'
@@ -49,7 +53,13 @@ libtracker_miners_common = static_library('tracker-miners-common',
   tracker_miners_common_sources,
   dependencies: tracker_miners_common_dependencies + tracker_miners_common_private_dependencies,
   c_args: tracker_c_args + [
-      '-DTRACKERSHAREDIR="@0@"'.format(tracker_versioned_name),
+    '-DTRACKERSHAREDIR="@0@"'.format(tracker_versioned_name),
+    '-DLIBDIR="@0@"'.format(get_option ('libdir')),
+    '-DDATADIR="@0@"'.format(get_option ('datadir')),
+    '-DPREFIX="@0@"'.format(get_option ('prefix')),
+    '-DBUILDROOT="@0@"'.format(meson.build_root()),
+    '-DSRCROOT="@0@"'.format(meson.source_root()),
+    '-DLIBEXECDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('libexecdir'))),
   ],
   include_directories: [configinc, srcinc],
 )
