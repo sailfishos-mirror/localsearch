@@ -187,6 +187,28 @@ endif
 
 have_landlock = cc.has_header('linux/landlock.h', required: get_option('landlock'))
 
+if have_landlock and not get_option('landlock').disabled()
+  landlock_check = cc.run('''
+      #include <fcntl.h>
+      #include <linux/landlock.h>
+      #include <sys/syscall.h>
+      #include <unistd.h>
+
+      int main (int argc, char *argv[]) {
+        /* Get supported landlock ABI */
+        int abi = syscall (SYS_landlock_create_ruleset, NULL, 0, LANDLOCK_CREATE_RULESET_VERSION);
+        return abi < 0 ? 1 : 0;
+      }
+  ''',
+  name: 'landlock is enabled in kernel')
+
+  landlock_enabled = (landlock_check.compiled() and landlock_check.returncode() == 0)
+
+  if get_option('landlock').enabled() and not landlock_enabled
+    error('Landlock was enabled in build options, but is disabled in the kernel')
+  endif
+endif
+
 ####################################################################
 # This section is for tracker-extract dependencies
 ####################################################################
@@ -373,7 +395,7 @@ conf.set('HAVE_POSIX_FADVISE', cc.has_function('posix_fadvise', prefix : '#inclu
 conf.set('HAVE_STATVFS64', cc.has_header_symbol('sys/statvfs.h', 'statvfs64', args: '-D_LARGEFILE64_SOURCE'))
 conf.set('HAVE_STRNLEN', cc.has_function('strnlen', prefix : '#include <string.h>'))
 conf.set('HAVE_MEMFD_CREATE', cc.has_function('memfd_create', prefix : '#define _GNU_SOURCE\n#include <sys/mman.h>'))
-conf.set('HAVE_LANDLOCK', have_landlock)
+conf.set('HAVE_LANDLOCK', have_landlock and landlock_enabled)
 
 conf.set_quoted('LOCALEDIR', get_option('prefix') / get_option('localedir'))
 conf.set_quoted('SHAREDIR', get_option('prefix') / get_option('datadir'))
@@ -486,7 +508,7 @@ summary = [
   '    Domain prefix:                          ' + get_option('domain_prefix'),
   '\nFeature Support:',
   '    File monitoring:                        @0@glib'.format(have_fanotify ? 'fanotify ' : ''),
-  '    Landlock:                               ' + have_landlock.to_string(),
+  '    Landlock:                               ' + (have_landlock and landlock_enabled).to_string(),
   '    BTRFS subvolumes:                       ' + have_btrfs_ioctl.to_string(),
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Support for network status detection:   ' + have_network_manager.to_string(),
@@ -541,12 +563,20 @@ endif
 
 message('\n'.join(summary))
 
-if not get_option('seccomp') or get_option('landlock').disabled()
-  if not get_option('seccomp')
-    warning('Seccomp sandboxing is disabled.')
-  endif
-  if get_option('landlock').disabled()
-    warning('Landlock sandboxing is disabled.')
-  endif
+unsafe = false
+if not get_option('seccomp')
+  warning('Seccomp sandboxing is disabled.')
+  unsafe = true
+endif
+if get_option('landlock').disabled()
+  warning('Landlock sandboxing is disabled.')
+  unsafe = true
+endif
+if have_landlock and not landlock_enabled
+  warning('Landlock sandboxing is disabled by kernel configuration.')
+  unsafe = true
+endif
+
+if unsafe
   warning('Run at your own risk. Distribution is discouraged.')
 endif
