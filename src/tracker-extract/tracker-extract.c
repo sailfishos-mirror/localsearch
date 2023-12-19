@@ -43,9 +43,11 @@
 
 G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
-#define DEADLINE_SECONDS 30
+#define DEFAULT_DEADLINE_SECONDS 5
 
 #define DEFAULT_MAX_TEXT 1048576
+
+static gint deadline_seconds = -1;
 
 extern gboolean debug;
 
@@ -386,8 +388,18 @@ extract_task_new (TrackerExtract *extract,
 	task->max_text = priv->max_text;
 
 	if (task->res) {
+		if (deadline_seconds < 0) {
+			const gchar *deadline_envvar;
+
+			deadline_envvar = g_getenv ("TRACKER_EXTRACT_DEADLINE");
+			if (deadline_envvar)
+				deadline_seconds = atoi (deadline_envvar);
+			else
+				deadline_seconds = DEFAULT_DEADLINE_SECONDS;
+		}
+
 		task->deadline =
-			g_timeout_source_new_seconds (DEADLINE_SECONDS);
+			g_timeout_source_new_seconds (deadline_seconds);
 		g_source_set_callback (task->deadline, task_deadline_cb, task, NULL);
 		g_source_attach (task->deadline,
 		                 g_task_get_context (G_TASK (task->res)));
