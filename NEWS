@@ -1,3 +1,15 @@
+NEW in 3.7.alpha - 2024-01-08
+=============================
+
+  * Use Landlock kernel API to control file access
+  * Use private D-Bus connection for communication between
+    tracker-extract-3 and tracker-miner-fs-3
+  * Further tightened seccomp sandbox
+  * CLI man page improvements
+  * CI, build and test improvements
+
+Translations: ro, ru, uk
+
 NEW in 3.6.1 - 2023-10-31
 =========================
   * Improvements to the seccomp jail, and fixes for spurious SIGSYS
