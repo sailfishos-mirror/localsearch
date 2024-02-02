@@ -776,7 +776,13 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 			 */
 			tracker_resource_set_identifier (resource, uri);
 
+			/* We are using "deprecated" API here as the pretty printed output is
+			 * nicer than with `tracker_resource_print_rdf()`, which uses the
+			 * generic serializer.
+			 */
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 			json = tracker_resource_print_jsonld (resource, NULL);
+			G_GNUC_END_IGNORE_DEPRECATIONS
 			if (json) {
 				g_print ("%s\n", json);
 				g_free (json);
