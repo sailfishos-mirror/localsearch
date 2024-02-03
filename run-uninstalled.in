@@ -48,7 +48,7 @@ env['PYTHONPATH'] = ':'.join([testutils_dir] + pythonpath)
 
 env['GSETTINGS_SCHEMA_DIR'] = '@uninstalled_gsettings_schema_dir@'
 
-env['TRACKER_CLI_SUBCOMMANDS_DIR'] = "@tracker_uninstalled_cli_subcommands_dir@"
+env['TRACKER_CLI_DIR'] = "@tracker_uninstalled_cli_dir@"
 env['TRACKER_EXTRACTOR_RULES_DIR'] = "@tracker_uninstalled_extract_rules_dir@"
 env['TRACKER_EXTRACTORS_DIR'] = "@tracker_uninstalled_extractors_dir@"
 env['TRACKER_MINER_SERVICES_DIR'] = "@tracker_uninstalled_miner_services_dir@"
