@@ -710,7 +710,7 @@ class TrackerCommandLineTestCase(TrackerMinerTest):
 
         path = self.env.get("PATH", []).split(":")
         self.env["PATH"] = ":".join([cfg.cli_dir()] + path)
-        self.env["TRACKER_CLI_SUBCOMMANDS_DIR"] = cfg.cli_subcommands_dir()
+        self.env["TRACKER_CLI_DIR"] = cfg.cli_dir()
 
     @contextlib.contextmanager
     def tmpdir(self):
