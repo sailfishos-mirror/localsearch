@@ -4,13 +4,13 @@
 #
 # Mykola Tkach <Stuartlittle1970@gmail.com>, 2014.
 # Daniel Korostil <ted.korostiled@gmail.com>, 2014.
-# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2023-10-31 18:38+0000\n"
-"PO-Revision-Date: 2023-10-31 21:12+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
+"POT-Creation-Date: 2024-02-11 19:14+0000\n"
+"PO-Revision-Date: 2024-02-12 23:28+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=n==1 ? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
-"X-Generator: Lokalize 20.12.0\n"
+"X-Generator: Lokalize 23.04.1\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -420,7 +420,7 @@ msgstr "Файл може бути проіндексований"
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:785
+#: src/miners/fs/tracker-main.c:786
 msgid "— start the tracker indexer"
 msgstr "— запустити індексатор tracker"
 
@@ -493,11 +493,11 @@ msgstr "— запустити індексатор стрічок"
 msgid "— start the tracker index proxy"
 msgstr "— запустити проксі індексатора tracker"
 
-#: src/tracker-extract/tracker-extract.c:700
+#: src/tracker-extract/tracker-extract.c:712
 msgid "Metadata extraction failed"
 msgstr "Витягти метадані не вдалося"
 
-#: src/tracker-extract/tracker-extract.c:776
+#: src/tracker-extract/tracker-extract.c:794
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Для цього файлу не вдалося знайти відповідний модуль метаданих або модуль "
@@ -553,6 +553,24 @@ msgstr "— Видобути з файла метадані"
 #: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
 msgstr "Ім’я файлу і тип MIME повинні бути вказані одночасно"
+
+#: src/tracker-writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr ""
+"Журналювання (0 = лише помилки, 1 = мінімально, 2 = детально і 3 = "
+"налагодження (типово — 0))"
+
+#: src/tracker-writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "Не вимикати після 30 секунд простоювання"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— запустити службу зворотного запису tracker"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -872,12 +890,24 @@ msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "Якщо аргументів не надано, буде показано стан засобів видобування даних"
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:138
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
 #: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
 #: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
 #: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
 msgid "Unrecognized options"
 msgstr "Невідомий параметр"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-daemon.desktop.in:6
+msgid "daemon"
+msgstr "daemon"
+
+#: src/tracker/tracker-daemon.desktop.in:7
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr ""
+"Запуск, зупинення, перезапуск та показ списку фонових служб, які"
+" відповідають "
+"за індексування даних"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -887,9 +917,19 @@ msgstr "Не вдалося отримати з'єднання D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Не вдалося створити проксі D-Bus до tracker-store"
 
-#: src/tracker/tracker-extract.c:76
+#: src/tracker/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "Не вдалося запустити tracker-extract: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-extract.desktop.in:6
+msgid "extract"
+msgstr "extract"
+
+#: src/tracker/tracker-extract.desktop.in:7
+#| msgid "File to extract metadata for"
+msgid "Extract metadata from a file"
+msgstr "Видобути метадані з файла"
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -934,6 +974,17 @@ msgstr "Рекурсивно"
 #: src/tracker/tracker-index.c:407
 msgid "Please specify one or more locations to index."
 msgstr "Будь ласка, вкажіть одне або декілька місць для індексування."
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-index.desktop.in:6
+msgid "index"
+msgstr "index"
+
+#: src/tracker/tracker-index.desktop.in:7
+msgid "Index content using the Tracker filesystem miner"
+msgstr ""
+"Індексувати дані за допомогою засобу видобування даних з файлової системи"
+" Tracker"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -988,6 +1039,15 @@ msgstr "Для цієї адреси немає доступних метада�
 msgid "Could not get eligible status: "
 msgstr "Не вдалося отримати прийнятний стан: "
 
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-info.desktop.in:6
+msgid "info"
+msgstr "info"
+
+#: src/tracker/tracker-info.desktop.in:7
+msgid "Retrieve all information available for a certain file"
+msgstr "Отримати усі доступні дані щодо певного файла"
+
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1022,6 +1082,15 @@ msgid ""
 msgstr ""
 "Індексовані дані щодо цього файла було вилучено. Його індексування буде "
 "виконано повторно."
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-reset.desktop.in:6
+msgid "reset"
+msgstr "reset"
+
+#: src/tracker/tracker-reset.desktop.in:7
+msgid "Reset the index and configuration"
+msgstr "Скинути покажчик та налаштування до початкових"
 
 #: src/tracker/tracker-search.c:59
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1184,6 +1253,17 @@ msgstr "За запитом нічого не знайдено"
 msgid "Results"
 msgstr "Результати"
 
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-search.desktop.in:6
+#| msgid "search terms"
+msgid "search"
+msgstr "search"
+
+#: src/tracker/tracker-search.desktop.in:7
+#| msgid "Search for content matching TERMS, by type or across all types."
+msgid "Search for content by type or across all types"
+msgstr "Шукати дані за типом або для усіх типів"
+
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Показати статистику щодо поточного покажчика та набору даних"
@@ -1295,6 +1375,15 @@ msgstr[3] "Записано %d помилку"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Звітів не знайдено"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-status.desktop.in:6
+msgid "status"
+msgstr "status"
+
+#: src/tracker/tracker-status.desktop.in:7
+msgid "Provide status and statistics on the data indexed"
+msgstr "Показати дані щодо стану та статистики індексованих даних"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1465,23 +1554,14 @@ msgstr "Дії з додавання та вилучення не можна в�
 msgid "The --description option can only be used with --add"
 msgstr "Ключ --description можна використовувати лише з ключем --add"
 
-#: src/tracker-writeback/tracker-main.c:54
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr ""
-"Журналювання (0 = лише помилки, 1 = мінімально, 2 = детально і 3 = "
-"налагодження (типово — 0))"
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-tag.desktop.in:6
+msgid "tag"
+msgstr "tag"
 
-#: src/tracker-writeback/tracker-main.c:61
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "Не вимикати після 30 секунд простоювання"
-
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:93
-msgid "— start the tracker writeback service"
-msgstr "— запустити службу зворотного запису tracker"
+#: src/tracker/tracker-tag.desktop.in:7
+msgid "Add, remove and list tags"
+msgstr "Додати, вилучити і показати список міток"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Ігнорувати стопові слова"
