@@ -1,3 +1,10 @@
+NEW in 3.7.beta - 2024-02-13
+============================
+  * Install CLI subcommands as expected by Tracker 3.7.beta
+  * Add build option for Landlock
+
+Translations: ka, uk
+
 NEW in 3.7.alpha - 2024-01-08
 =============================
 
