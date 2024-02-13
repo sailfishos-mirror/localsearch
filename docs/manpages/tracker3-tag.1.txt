@@ -58,7 +58,7 @@ $ tracker3-tag -t foo bar baz
 *-o, --offset=N*::
   Offset the search results by N. For example, start at item number 10
   in the results. The default is 0.
-*-r, --and-operator*::
+*-n, --and-operator*::
   Use AND operator for search terms instead of OR (the default). For
   example:
 
