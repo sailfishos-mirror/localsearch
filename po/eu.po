@@ -4,13 +4,13 @@
 #
 # Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014, 2015, 2016, 2017.
 # Edurne Labaka <elabaka@uzei.com>, 2015.
-# Asier Sarasua Garmendia  <asiersarasua@ni.eus>, 2019, 2020, 2021, 2022.
+# Asier Sarasua Garmendia  <asiersarasua@ni.eus>, 2019, 2020, 2021, 2022, 2024.
 #
 msgid ""
 msgstr "Project-Id-Version: tracker master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2022-08-07 13:15+0000\n"
-"PO-Revision-Date: 2022-08-16 10:00+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
+"POT-Creation-Date: 2024-02-11 19:14+0000\n"
+"PO-Revision-Date: 2024-02-18 10:00+0100\n"
 "Last-Translator: Asier Sarasua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -74,16 +74,6 @@ msgstr "Ez ikusi egin zenbakiei"
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 msgid "If enabled, numbers will not be indexed."
 msgstr "Gaituta dagoenean zenbakiak ez dira indexatuko."
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:42
-msgid "Ignore stop words"
-msgstr "Ez ikusi hitz hutsei"
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
-msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common "
-"words like “the”, “yes”, “no”, etc."
-msgstr "Gaitzen denean hitz hutsen zerrendan dauden hitzei ez ikusi egingo zaie. Adibidez, “bai“, “zein“, “eta“, bezalako hitzak."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
@@ -203,38 +193,36 @@ msgid ""
 msgstr "Azpikarpetak aztertu gabe indexatuko diren direktorioen zerrenda. Balio bereziak: ’&DESKTOP’, ’&DOCUMENTS’, ’&DOWNLOAD’, ’&MUSIC’, ’&PICTURES’, ’&PUBLIC_SHARE’, ’&TEMPLATES’, ’&VIDEOS’. See /etc/xdg/user-dirs.defaults eta $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
-msgid "Index applications installed on the system"
-msgstr "Indexatu sisteman instalatutako aplikazioak"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
-msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files "
-"in the standard XDG system and user data directories."
-msgstr "Aukera hau gaituta badago, fitxategi-sistemaren biltzaileak .desktop fitxategiak bilatuko ditu XDG sistema estandarrean eta erabiltzaile-datuen direktorioetan."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Baztertutako fitxategiak"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
 msgstr "Fitxategien ereduen zerrenda saihesteko"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
 msgstr "Baztertutako direktorioak"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
 msgstr "Direktorioen zerrenda saihesteko"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
 msgstr "Baztertutako direktorioak edukiekin"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Saihestu hemen blokeatutako fitxategi bat duen edozein direktorio"
+
+#: src/libtracker-miners-common/tracker-miner-proxy.c:349
+msgid "Cookie not recognized to resume paused miner"
+msgstr "'Cookie'a ez da ezaguna pausatutako biltzaileak jarraitzeko"
+
+#: src/libtracker-miners-common/tracker-miner-proxy.c:406
+msgid "Pause application and reason match an already existing pause request"
+msgstr "Aplikazioa eta pausuaren zergatia pausatzeko eskaera bati dagokio"
 
 #: src/libtracker-miners-common/tracker-utils.c:101
 #: src/libtracker-miners-common/tracker-utils.c:152
@@ -293,109 +281,96 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " segundo %2.2d"
 msgstr[1] " %2.2d segundo"
 
-#: src/libtracker-miner/tracker-data-provider.c:108
-#: src/libtracker-miner/tracker-data-provider.c:168
-msgid "Operation not supported"
-msgstr "Eragiketa ez dago onartuta"
-
-#: src/libtracker-miner/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "'Cookie'a ez da ezaguna pausatutako biltzaileak jarraitzeko"
-
-#: src/libtracker-miner/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "Aplikazioa eta pausuaren zergatia pausatzeko eskaera bati dagokio"
-
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:82
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Hasierako pausaren iraupena (segundotan). 0 -> 1000 (lehenetsia=15)"
 
-#: src/miners/fs/tracker-main.c:86
+#: src/miners/fs/tracker-main.c:87
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Konfiguratutako kokaleku guztiak indexatu arte exekutatzen da, eta gero irten egiten da"
 
-#: src/miners/fs/tracker-main.c:90 src/tracker/tracker-info.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "FITXATEGIA indexatzeko hautagaia den egiaztatzen du konfigurazioaren arabera"
 
-#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
-#: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
+#: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
+#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
-#: src/tracker/tracker-info.c:86 src/tracker/tracker-info.c:87
+#: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FITXATEGIA"
 
-#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:95 src/miners/rss/tracker-main.c:63
+#: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Domeinu zehatzaren ontologia batentzako exekutatzen du"
 
-#: src/miners/fs/tracker-main.c:98
+#: src/miners/fs/tracker-main.c:99
 msgid "Avoids changes in the filesystem"
 msgstr "Saihestu fitxategi-sistemaren aldaketak"
 
-#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:101
-#: src/tracker-writeback/tracker-main.c:48
+#: src/miners/fs/tracker-main.c:103 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:104
+#: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Bertsioari buruzko informazioa bistaratzen du"
 
-#: src/miners/fs/tracker-main.c:624
+#: src/miners/fs/tracker-main.c:483
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” objektuaren datuak badaude"
 
-#: src/miners/fs/tracker-main.c:625
+#: src/miners/fs/tracker-main.c:484
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” objektuaren datuak ez daude"
 
-#: src/miners/fs/tracker-main.c:663
+#: src/miners/fs/tracker-main.c:494
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Direktorioa EZ da hautagaia indexatua izateko (iragazkietan oinarrituta)"
 
-#: src/miners/fs/tracker-main.c:667
+#: src/miners/fs/tracker-main.c:498
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Fitxategia EZ da hautagaia indexatua izateko (iragazkietan oinarrituta)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:501
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Fitxategia EZ da hautagaia indexatua izateko (ezkutuko fitxategia)"
 
-#: src/miners/fs/tracker-main.c:672
+#: src/miners/fs/tracker-main.c:503
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Fitxategia EZ da hautagaia indexatua izateko (ez da indexatutako karpeta)"
 
-#: src/miners/fs/tracker-main.c:696
+#: src/miners/fs/tracker-main.c:527
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "“%s” direktorio gurasoa EZ da hautagaia indexatua izateko (iragazkietan oinarrituta)"
 
-#: src/miners/fs/tracker-main.c:702
+#: src/miners/fs/tracker-main.c:533
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "“%s” direktorio gurasoa EZ da hautagaia indexatua izateko (ezkutuko fitxategia)"
 
-#: src/miners/fs/tracker-main.c:710
+#: src/miners/fs/tracker-main.c:539
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "“%s” direktorio gurasoa EZ da hautagaia indexatua izateko (eduki-iragazkietan oinarrituta)"
 
-#: src/miners/fs/tracker-main.c:731
+#: src/miners/fs/tracker-main.c:558
 msgid "Directory is eligible to be indexed"
 msgstr "Direktoria indexatua izateko hautagaia da"
 
-#: src/miners/fs/tracker-main.c:732
+#: src/miners/fs/tracker-main.c:559
 msgid "File is eligible to be indexed"
 msgstr "Fitxategia indexatua izateko hautagaia da"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:988
+#: src/miners/fs/tracker-main.c:786
 msgid "— start the tracker indexer"
 msgstr "— abiarazi tracker-en indexatzailea"
 
@@ -422,42 +397,42 @@ msgstr "Zerrendatu jarioak"
 msgid "Delete feed"
 msgstr "Ezabatu jarioa"
 
-#: src/miners/rss/tracker-main.c:164 src/miners/rss/tracker-main.c:216
-#: src/miners/rss/tracker-main.c:253 src/tracker/tracker-info.c:446
-#: src/tracker/tracker-search.c:1254 src/tracker/tracker-status.c:92
-#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
+#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
+#: src/tracker/tracker-search.c:1377 src/tracker/tracker-status.c:92
+#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "Ezin izan da Tracker-ekin konektatu"
 
-#: src/miners/rss/tracker-main.c:165 src/miners/rss/tracker-main.c:217
-#: src/miners/rss/tracker-main.c:254 src/tracker/tracker-daemon.c:448
+#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
+#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:448
 #: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1255 src/tracker/tracker-status.c:93
+#: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
+#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:93
 #: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
-#: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
 msgid "No error given"
 msgstr "Ez da errorerik eman"
 
-#: src/miners/rss/tracker-main.c:190
+#: src/miners/rss/tracker-main.c:188
 msgid "Could not add feed"
 msgstr "Ezin izan da jarioa gehitu"
 
-#: src/miners/rss/tracker-main.c:228
+#: src/miners/rss/tracker-main.c:226
 msgid "Could not remove feed"
 msgstr "Ezin izan da jarioa kendu"
 
-#: src/miners/rss/tracker-main.c:296
+#: src/miners/rss/tracker-main.c:294
 msgid "Could not list feeds"
 msgstr "Ezin izan dira jarioak zerrendatu"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/rss/tracker-main.c:424
+#: src/miners/rss/tracker-main.c:422
 msgid "— start the feeds indexer"
 msgstr "— abiarazi jarioen indexatzailea"
 
@@ -468,56 +443,80 @@ msgstr "— abiarazi jarioen indexatzailea"
 msgid "— start the tracker index proxy"
 msgstr "— abiarazi aztarnariaren indize-proxya"
 
-#: src/tracker-extract/tracker-extract.c:695
+#: src/tracker-extract/tracker-extract.c:712
 msgid "Metadata extraction failed"
 msgstr "Huts egin du metadatuak erauztean"
 
-#: src/tracker-extract/tracker-extract.c:770
+#: src/tracker-extract/tracker-extract.c:794
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Ez da metadatuen edo erauzlearen modulurik aurkitu fitxategi hau kudeatzeko"
 
-#: src/tracker-extract/tracker-main.c:82
+#: src/tracker-extract/tracker-main.c:81
 msgid "File to extract metadata for"
 msgstr "Fitxategia metadatuak erauzteko"
 
-#: src/tracker-extract/tracker-main.c:86
+#: src/tracker-extract/tracker-main.c:85
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Fitxategiaren MIME mota (ez bada ematen, asmatu egingo da)"
 
-#: src/tracker-extract/tracker-main.c:87
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
-#: src/tracker-extract/tracker-main.c:90
+#: src/tracker-extract/tracker-main.c:89
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr "Behartu modulu bat erabiltzera erauzteko (adib. “lelo” erabili “lelo.so” adierazteko)"
 
-#: src/tracker-extract/tracker-main.c:91
+#: src/tracker-extract/tracker-main.c:90
 msgid "MODULE"
 msgstr "MODULUA"
 
-#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:39
+#: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Irteerako emaitzaren formatua: “sparql”, “turtle” edo “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:94 src/tracker/tracker-extract.c:40
+#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:43
 msgid "FORMAT"
 msgstr "FORMATUA"
 
-#: src/tracker-extract/tracker-main.c:212
+#: src/tracker-extract/tracker-main.c:100
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "Socket fitxategiaren deskriptorea parez pareko komunikaziorako"
+
+#: src/tracker-extract/tracker-main.c:101
+msgid "FD"
+msgstr "FD"
+
+#: src/tracker-extract/tracker-main.c:196
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "“%s” serializazio-formatua onartu gabe\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:319
+#: src/tracker-extract/tracker-main.c:316
 msgid "— Extract file meta data"
 msgstr "— Erauzi fitxategiaren metadatuak"
 
-#: src/tracker-extract/tracker-main.c:334
+#: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
 msgstr "Fitxategia eta MIME mota elkarrekin eman behar dira"
+
+#: src/tracker-writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr "Erregistroa: 0 = erroreak soilik, 1 = gutxienekoa, 2 = xehea eta 3 = arazketa (lehenetsia=0)"
+
+#: src/tracker-writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "Desgaitu itzaltzea 30 segundotako inaktibitatearen ondoren"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -817,12 +816,21 @@ msgstr "agian desgaitutako plugin bat?"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Ez bada argumenturik ematen, datuen biltzaileen egoera erakutsiko da."
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1430
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
+#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
 msgid "Unrecognized options"
 msgstr "Aukera ezezagunak"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-daemon.desktop.in:6
+msgid "daemon"
+msgstr "daemona"
+
+#: src/tracker/tracker-daemon.desktop.in:7
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr "Abiarazi, gelditu, berrabiarazi eta zerrendatu edukia indexatzen dituzten daemonak"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -832,9 +840,18 @@ msgstr "Ezin izan da D-Bus konexioa lortu"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Ezin izan da tracker biltegirako D-Bus proxya sortu"
 
-#: src/tracker/tracker-extract.c:68
+#: src/tracker/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "Ezin izan da 'tracker-extract' exekutatu: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-extract.desktop.in:6
+msgid "extract"
+msgstr "erauzi"
+
+#: src/tracker/tracker-extract.desktop.in:7
+msgid "Extract metadata from a file"
+msgstr "Erauzi metadatuak fitxategi batetik"
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -880,11 +897,20 @@ msgstr "Errekurtsiboa"
 msgid "Please specify one or more locations to index."
 msgstr "Zehaztu indexatuko den kokaleku bat edo gehiago."
 
-#: src/tracker/tracker-info.c:57
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-index.desktop.in:6
+msgid "index"
+msgstr "indexatu"
+
+#: src/tracker/tracker-index.desktop.in:7
+msgid "Index content using the Tracker filesystem miner"
+msgstr "Indexatu edukia Tracker-en fitxategi-sistemen biltzailea"
+
+#: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr "Erakutsi izen-espazio osoa (adib. ez erabili nie:title, erabili URL osoak)"
 
-#: src/tracker/tracker-info.c:61
+#: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
 msgstr "Erakutsi testu soileko edukia baliabideentzako eskuragarri egonez gero"
 
@@ -894,55 +920,48 @@ msgstr "Erakutsi testu soileko edukia baliabideentzako eskuragarri egonez gero"
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
 #.
-#: src/tracker/tracker-info.c:71
+#: src/tracker/tracker-info.c:79
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
 "(e.g. <file:///path/to/some/file.txt>)"
 msgstr "Fitxategi-izen bat bilatu beharrean, tratatu FILE argumentuak benetako IRI gisa (adib. <file:///path/to/some/file.txt>)"
 
-#: src/tracker/tracker-info.c:75
+#: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
 msgstr "Erakutsi emaitzak RDF gisa Turtle formatuan"
 
-#: src/tracker/tracker-info.c:79
+#: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
 msgstr "URL gisa erabiliko den RDF propietatea (adibidez “nie:url”)"
 
-#: src/tracker/tracker-info.c:160
-msgid "Unable to retrieve namespace prefixes"
-msgstr "Ezin dira izen-espazioaren aurrizkiak eskuratu"
-
-#: src/tracker/tracker-info.c:168
-msgid "No namespace prefixes were returned"
-msgstr "Ez da izen-espazioaren aurrizkirik itzuli"
-
-#: src/tracker/tracker-info.c:230 src/tracker/tracker-search.c:1184
-msgid "Results"
-msgstr "Emaitzak"
-
-#: src/tracker/tracker-info.c:414
+#: src/tracker/tracker-info.c:388
 msgid "Error message"
 msgstr "Errore-mezua"
 
 #: src/tracker/tracker-info.c:471
-msgid "Querying information for entity"
-msgstr "Entitatearen informazioa kontsultatzen"
-
-#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "Ezin da URIaren URNa eskuratu"
 
-#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
+#: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
 msgstr "Ezin da URIaren daturik eskuratu"
 
-#: src/tracker/tracker-info.c:562
+#: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
 msgstr "Ez dago URIaren meta-daturik eskuragarri"
 
-#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
+#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
 msgstr "Ezin izan da eskuratu hautagaitasun-egoera: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-info.desktop.in:6
+msgid "info"
+msgstr "info"
+
+#: src/tracker/tracker-info.desktop.in:7
+msgid "Retrieve all information available for a certain file"
+msgstr "Eskuratu fitxategi jakin baterako dagoen informazio guztia"
 
 #: src/tracker/tracker-process.c:216
 #, c-format
@@ -977,156 +996,186 @@ msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "Fitxategi honen indexatutako datuak ezabatu egin dira eta berriro indexatuko dira."
 
-#: src/tracker/tracker-search.c:73
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-reset.desktop.in:6
+msgid "reset"
+msgstr "berrezarri"
+
+#: src/tracker/tracker-reset.desktop.in:7
+msgid "Reset the index and configuration"
+msgstr "Berrezarri indizea eta konfigurazioa"
+
+#: src/tracker/tracker-search.c:59
+msgid "Search for content matching TERMS, by type or across all types."
+msgstr "Bilatu TERMINOAK parametroarekin bat datorren edukia, motaren arabera edo mota guztietan."
+
+#: src/tracker/tracker-search.c:76
 msgid "Search for files"
 msgstr "Bilatu fitxategiak"
 
-#: src/tracker/tracker-search.c:77
+#: src/tracker/tracker-search.c:80
 msgid "Search for folders"
 msgstr "Bilatu karpetak"
 
-#: src/tracker/tracker-search.c:81
+#: src/tracker/tracker-search.c:84
 msgid "Search for music files"
 msgstr "Bilatu abestiak"
 
-#: src/tracker/tracker-search.c:85
+#: src/tracker/tracker-search.c:88
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "Bilatu album musikalak (--all ez dio honi eragiten)"
 
-#: src/tracker/tracker-search.c:89
+#: src/tracker/tracker-search.c:92
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "Bilatu artista musikalak (--all ez dio honi eragiten)"
 
-#: src/tracker/tracker-search.c:93
+#: src/tracker/tracker-search.c:96
 msgid "Search for image files"
 msgstr "Bilatu irudiak"
 
-#: src/tracker/tracker-search.c:97
+#: src/tracker/tracker-search.c:100
 msgid "Search for video files"
 msgstr "Bilatu bideoak"
 
-#: src/tracker/tracker-search.c:101
+#: src/tracker/tracker-search.c:104
 msgid "Search for document files"
 msgstr "Bilatu dokumentuak"
 
-#: src/tracker/tracker-search.c:105
+#: src/tracker/tracker-search.c:108
 msgid "Search for software (--all has no effect on this)"
 msgstr "Bilatu softwareak (--all ez dio honi eragiten)"
 
-#: src/tracker/tracker-search.c:109
+#: src/tracker/tracker-search.c:112
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "Bilatu softwareen kategoriak (--all ez dio honi eragiten)"
 
-#: src/tracker/tracker-search.c:113
+#: src/tracker/tracker-search.c:116
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "Bilatu jarioak (--all ez dio honi eragiten)"
 
-#: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
+#: src/tracker/tracker-search.c:125 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "Mugatu erakutsitako emaitzen kopurua"
 
-#: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
+#: src/tracker/tracker-search.c:129 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "Desplazatu emaitzak"
 
-#: src/tracker/tracker-search.c:127
+#: src/tracker/tracker-search.c:133
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "Erabili OR (edo) bilaketako terminoetan AND (lehenetsia) ordez"
 
-#: src/tracker/tracker-search.c:131
+#: src/tracker/tracker-search.c:137
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
 msgstr "Erakutsi emaitzen URNak (ez die --music-albums, --music-artists, --feeds, --software, --software-categories argumentuei aplikatzen)"
 
-#: src/tracker/tracker-search.c:135
+#: src/tracker/tracker-search.c:141
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "Itzuli bat ez datozen guztiak ere (adib. desmuntatutako bolumenak)"
 
-#: src/tracker/tracker-search.c:139
+#: src/tracker/tracker-search.c:145
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
 msgstr "Desgaitu kode-zatiak emaitzekin erakustea. Hau soilik kategoria batzuetan erakusten da, adib. Dokumentuak, Musika…"
 
-#: src/tracker/tracker-search.c:143
+#: src/tracker/tracker-search.c:149
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr "Desgaitu testu osoen bilaketa. --disable-snippets inplikatzen du"
 
-#: src/tracker/tracker-search.c:147
+#: src/tracker/tracker-search.c:153
 msgid "Disable color when printing snippets and results"
 msgstr "Desgaitu kolorea kode-zatiak eta emaitzak erakustean"
 
-#: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:58
+#: src/tracker/tracker-search.c:160 src/tracker/tracker-status.c:58
 msgid "search terms"
 msgstr "bilaketaren terminoak"
 
-#: src/tracker/tracker-search.c:155 src/tracker/tracker-status.c:59
-msgid "EXPRESSION"
-msgstr "ADIERAZPENA"
+#: src/tracker/tracker-search.c:161
+msgid "TERMS"
+msgstr "TERMINOAK"
 
-#: src/tracker/tracker-search.c:245 src/tracker/tracker-search.c:591
-#: src/tracker/tracker-search.c:683 src/tracker/tracker-search.c:775
-#: src/tracker/tracker-search.c:862 src/tracker/tracker-search.c:947
-#: src/tracker/tracker-search.c:1171
+#: src/tracker/tracker-search.c:251 src/tracker/tracker-search.c:641
+#: src/tracker/tracker-search.c:737 src/tracker/tracker-search.c:829
+#: src/tracker/tracker-search.c:918 src/tracker/tracker-search.c:1007
+#: src/tracker/tracker-search.c:1294
 msgid "Could not get search results"
 msgstr "Ezin izan dira bilaketaren emaitzak eskuratu"
 
-#: src/tracker/tracker-search.c:254
+#: src/tracker/tracker-search.c:260
 msgid "No files were found"
 msgstr "Ez da fitxategirik aurkitu"
 
-#: src/tracker/tracker-search.c:258 src/tracker/tracker-tag.c:436
+#: src/tracker/tracker-search.c:264 src/tracker/tracker-tag.c:426
 msgid "Files"
 msgstr "Fitxategiak"
 
-#: src/tracker/tracker-search.c:600
+#: src/tracker/tracker-search.c:650
 msgid "No artists were found"
 msgstr "Ez da artistarik aurkitu"
 
-#: src/tracker/tracker-search.c:604
+#: src/tracker/tracker-search.c:654
 msgid "Artists"
 msgstr "Artistak"
 
-#: src/tracker/tracker-search.c:692
+#: src/tracker/tracker-search.c:746
 msgid "No music was found"
 msgstr "Ez da abestirik aurkitu"
 
-#: src/tracker/tracker-search.c:696
+#: src/tracker/tracker-search.c:750
 msgid "Albums"
 msgstr "Albumak"
 
-#: src/tracker/tracker-search.c:784
+#: src/tracker/tracker-search.c:838
 msgid "No feeds were found"
 msgstr "Ez da jariorik aurkitu"
 
-#: src/tracker/tracker-search.c:788
+#: src/tracker/tracker-search.c:842
 msgid "Feeds"
 msgstr "Jarioak"
 
-#: src/tracker/tracker-search.c:871
+#: src/tracker/tracker-search.c:927
 msgid "No software was found"
 msgstr "Ez da softwarerik aurkitu"
 
-#: src/tracker/tracker-search.c:875
+#: src/tracker/tracker-search.c:931
 msgid "Software"
 msgstr "Softwarea"
 
-#: src/tracker/tracker-search.c:956
+#: src/tracker/tracker-search.c:1016
 msgid "No software categories were found"
 msgstr "Ez da softwareen kategoriarik aurkitu"
 
-#: src/tracker/tracker-search.c:960
+#: src/tracker/tracker-search.c:1020
 msgid "Software Categories"
 msgstr "Softwareen kategoriak"
 
-#: src/tracker/tracker-search.c:1180
+#: src/tracker/tracker-search.c:1303
 msgid "No results were found matching your query"
 msgstr "Ez da zure kontsultarekin bat datorren emaitzarik aurkitu"
+
+#: src/tracker/tracker-search.c:1307
+msgid "Results"
+msgstr "Emaitzak"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-search.desktop.in:6
+msgid "search"
+msgstr "bilatu"
+
+#: src/tracker/tracker-search.desktop.in:7
+msgid "Search for content by type or across all types"
+msgstr "Bilatu motaren arabera edo mota guztietan"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Erakutsi uneko indizearen/bildutako datuen estatistikak"
+
+#: src/tracker/tracker-status.c:59
+msgid "EXPRESSION"
+msgstr "ADIERAZPENA"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
@@ -1166,9 +1215,9 @@ msgstr "Estatistikak:"
 #. *     None
 #. *
 #.
-#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:320
-#: src/tracker/tracker-tag.c:452 src/tracker/tracker-tag.c:574
-#: src/tracker/tracker-tag.c:953
+#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:310
+#: src/tracker/tracker-tag.c:442 src/tracker/tracker-tag.c:564
+#: src/tracker/tracker-tag.c:924
 msgid "None"
 msgstr "Bat ere ez"
 
@@ -1184,7 +1233,7 @@ msgstr "Mezua"
 msgid "Currently indexed"
 msgstr "Unean indexatutakoa"
 
-#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:556
+#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:546
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
@@ -1225,6 +1274,15 @@ msgstr[1] "Erregistratutako %d hutsegite"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Ez da txostenik aurkitu"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-status.desktop.in:6
+msgid "status"
+msgstr "egoera"
+
+#: src/tracker/tracker-status.desktop.in:7
+msgid "Provide status and statistics on the data indexed"
+msgstr "Eman indexatutako datuen egoera eta estatistikak"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1280,127 +1338,153 @@ msgstr "OHARRA: mugara iritsi da, hemen zerrendatu ez diren elementu gehiago dau
 msgid "Could not get file URNs"
 msgstr "Ezin izan da fitxategiaren URNrik eskuratu"
 
-#: src/tracker/tracker-tag.c:311
+#: src/tracker/tracker-tag.c:301
 msgid "Could not get files related to tag"
 msgstr "Ezin izan dira etiketarekin zerikusia duten fitxategirik eskuratu"
 
-#: src/tracker/tracker-tag.c:378
+#: src/tracker/tracker-tag.c:368
 msgid "Could not get all tags in the database"
 msgstr "Ezin izan dira datu-baseko etiketa guztiak eskuratu"
 
-#: src/tracker/tracker-tag.c:388
+#: src/tracker/tracker-tag.c:378
 msgid "No files have been tagged"
 msgstr "Ez da fitxategirik etiketatu"
 
-#: src/tracker/tracker-tag.c:423
+#: src/tracker/tracker-tag.c:413
 msgid "Could not get files for matching tags"
 msgstr "Ezin izan da etiketekin bat datozen fitxategirik eskuratu"
 
-#: src/tracker/tracker-tag.c:432
+#: src/tracker/tracker-tag.c:422
 msgid "No files were found matching ALL of those tags"
 msgstr "Ez da etiketa horiekin guztiekin bat datorren fitxategirik aurkitu"
 
-#: src/tracker/tracker-tag.c:511 src/tracker/tracker-tag.c:927
+#: src/tracker/tracker-tag.c:501 src/tracker/tracker-tag.c:898
 msgid "Could not get all tags"
 msgstr "Ezin izan dira etiketa guztiak eskuratu"
 
-#: src/tracker/tracker-tag.c:520 src/tracker/tracker-tag.c:936
+#: src/tracker/tracker-tag.c:510 src/tracker/tracker-tag.c:907
 msgid "No tags were found"
 msgstr "Ez da etiketarik aurkitu"
 
-#: src/tracker/tracker-tag.c:524
+#: src/tracker/tracker-tag.c:514
 msgid "Tags (shown by name)"
 msgstr "Etiketak (izenaren arabera erakutsita)"
 
-#: src/tracker/tracker-tag.c:598
+#: src/tracker/tracker-tag.c:589
 msgid "No files were modified"
 msgstr "Ez da fitxategirik aldatu"
 
-#: src/tracker/tracker-tag.c:648 src/tracker/tracker-tag.c:656
+#: src/tracker/tracker-tag.c:633 src/tracker/tracker-tag.c:641
 msgid "Files do not exist or aren’t indexed"
 msgstr "Fitxategiak ez dira existitzen, edo ez daude indexatuta"
 
-#: src/tracker/tracker-tag.c:706
+#: src/tracker/tracker-tag.c:682
 msgid "Could not add tag"
 msgstr "Ezin izan da etiketa gehitu"
 
-#: src/tracker/tracker-tag.c:722
+#: src/tracker/tracker-tag.c:694
 msgid "Tag was added successfully"
 msgstr "Etiketa ongi gehitu da"
 
-#: src/tracker/tracker-tag.c:751
+#: src/tracker/tracker-tag.c:724
 msgid "Could not add tag to files"
 msgstr "Ezin izan da etiketa fitxategiei gehitu"
 
-#: src/tracker/tracker-tag.c:761
+#: src/tracker/tracker-tag.c:735
 msgid "Tagged"
 msgstr "Etiketatuta"
 
-#: src/tracker/tracker-tag.c:762
+#: src/tracker/tracker-tag.c:736
 msgid "Not tagged, file is not indexed"
 msgstr "Ez da etiketatu, fitxategia ez dago indexatuta"
 
-#: src/tracker/tracker-tag.c:808
+#: src/tracker/tracker-tag.c:778
 msgid "Could not get tag by label"
 msgstr "Ezin izan da etiketarik eskuratu"
 
-#: src/tracker/tracker-tag.c:819
+#: src/tracker/tracker-tag.c:789
 msgid "No tags were found by that name"
 msgstr "Ez da etiketarik aurkitu izen horren arabera"
 
-#: src/tracker/tracker-tag.c:836
+#: src/tracker/tracker-tag.c:807
 msgid "None of the files had this tag set"
 msgstr "Ez dago etiketa hau duen fitxategirik"
 
-#: src/tracker/tracker-tag.c:882
+#: src/tracker/tracker-tag.c:854
 msgid "Could not remove tag"
 msgstr "Ezin izan da etiketa kendu"
 
-#: src/tracker/tracker-tag.c:890
+#: src/tracker/tracker-tag.c:862
 msgid "Tag was removed successfully"
 msgstr "Etiketa ongi kendu da"
 
-#: src/tracker/tracker-tag.c:894
+#: src/tracker/tracker-tag.c:866
 msgid "Untagged"
 msgstr "Etiketa kenduta"
 
-#: src/tracker/tracker-tag.c:895
+#: src/tracker/tracker-tag.c:867
 msgid "File not indexed or already untagged"
 msgstr "Fitxategia indexatu gabe, edo jadanik etiketa gabe"
 
-#: src/tracker/tracker-tag.c:1093
+#: src/tracker/tracker-tag.c:1064
 msgid "The --list option is required for --show-files"
 msgstr "--list aukera behar da --show-files aukerarekin"
 
-#: src/tracker/tracker-tag.c:1095
+#: src/tracker/tracker-tag.c:1066
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr "--and-operator aukera soilik --list aukerarekin eta etiketaren argumentuarekin erabil daiteke"
 
-#: src/tracker/tracker-tag.c:1097
+#: src/tracker/tracker-tag.c:1068
 msgid "Add and delete actions can not be used together"
 msgstr "Gehitu eta ezabatu ekintzak ezin dira batera erabili"
 
-#: src/tracker/tracker-tag.c:1099
+#: src/tracker/tracker-tag.c:1070
 msgid "The --description option can only be used with --add"
 msgstr "--description aukera soilik --add aukerarekin erabil daiteke"
 
-#: src/tracker-writeback/tracker-main.c:52
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr "Erregistroa: 0 = erroreak soilik, 1 = gutxienekoa, 2 = xehea eta 3 = arazketa (lehenetsia=0)"
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-tag.desktop.in:6
+msgid "tag"
+msgstr "etiketa"
 
-#: src/tracker-writeback/tracker-main.c:59
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "Desgaitu itzaltzea 30 segundotako inaktibitatearen ondoren"
+#: src/tracker/tracker-tag.desktop.in:7
+msgid "Add, remove and list tags"
+msgstr "Gehitu, kendu eta zerrendatu etiketak"
 
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:85
-msgid "— start the tracker writeback service"
-msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
+#~ msgid "Ignore stop words"
+#~ msgstr "Ez ikusi hitz hutsei"
+
+#~ msgid ""
+#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
+#~ "common words like “the”, “yes”, “no”, etc."
+#~ msgstr ""
+#~ "Gaitzen denean hitz hutsen zerrendan dauden hitzei ez ikusi egingo zaie. "
+#~ "Adibidez, “bai“, “zein“, “eta“, bezalako hitzak."
+
+#~ msgid "Index applications installed on the system"
+#~ msgstr "Indexatu sisteman instalatutako aplikazioak"
+
+#~ msgid ""
+#~ "If this option is enabled, the filesystem miner will look for .desktop "
+#~ "files in the standard XDG system and user data directories."
+#~ msgstr ""
+#~ "Aukera hau gaituta badago, fitxategi-sistemaren biltzaileak .desktop "
+#~ "fitxategiak bilatuko ditu XDG sistema estandarrean eta erabiltzaile-"
+#~ "datuen direktorioetan."
+
+#~ msgid "Operation not supported"
+#~ msgstr "Eragiketa ez dago onartuta"
+
+#~ msgid "Unable to retrieve namespace prefixes"
+#~ msgstr "Ezin dira izen-espazioaren aurrizkiak eskuratu"
+
+#~ msgid "No namespace prefixes were returned"
+#~ msgstr "Ez da izen-espazioaren aurrizkirik itzuli"
+
+#~ msgid "Querying information for entity"
+#~ msgstr "Entitatearen informazioa kontsultatzen"
 
 #~ msgid "unknown time"
 #~ msgstr "ordu ezezaguna"
@@ -1594,17 +1678,11 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgid "Fetch RSS/ATOM feeds"
 #~ msgstr "Eskuratu RSS/ATOM jarioak"
 
-#~ msgid "Extractor"
-#~ msgstr "Erauzlea"
-
 #~ msgid "Metadata extractor"
 #~ msgstr "Metadatuen erauzlea"
 
 #~ msgid "Tracker Metadata Extractor"
 #~ msgstr "Tracker metadatuen erauzlea"
-
-#~ msgid "Extracts metadata from local files"
-#~ msgstr "Lokaleko fitxategietatik metadatuak erauzten ditu"
 
 #~ msgid ""
 #~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
@@ -1800,9 +1878,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgid "yes"
 #~ msgstr "bai"
 
-#~ msgid "Resetting existing configuration…"
-#~ msgstr "Dagoen konfigurazioa leheneratzen…"
-
 #~ msgid "Search term “%s” is a stop word."
 #~ msgstr "Bilaketaren “%s” terminoa hitz huts bat da."
 
@@ -1993,14 +2068,8 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ "Bilatu bilaketaren irizpidea fitxategien etiketetan soilik (komaz "
 #~ "bereiztuta)"
 
-#~ msgid "_Search:"
-#~ msgstr "_Bilatu:"
-
 #~ msgid "Show tagging panel which allows editing tags of selected results"
 #~ msgstr "Erakutsi etiketen panela, hautatutako emaitzen etiketak editatzeko"
-
-#~ msgid "Show statistics about the data stored"
-#~ msgstr "Erakutsi bildutako datuen estatistikak"
 
 #~ msgid "_Set the tags you want to associate with the %d selected items:"
 #~ msgstr "_Ezarri etiketak hautatutako %d elementuei esleitzeko:"
@@ -2032,11 +2101,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgstr ""
 #~ "Hemen azaldutako estatistikek ez du haien erabilgarritasuna adierazten, "
 #~ "guztira gordetako datuak baizik:"
-
-#~ msgid "Tag"
-#~ msgid_plural "Tags"
-#~ msgstr[0] "Etiketa"
-#~ msgstr[1] "Etiketak"
 
 #~ msgid "Contact"
 #~ msgid_plural "Contacts"
@@ -2239,9 +2303,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ "Aukera honek Tracker-ek atzeko planora eramaten du, PUZaren denbora berak "
 #~ "bakarrik ez jateko, batiz bat merezi duen beste aplikazio bat hortik "
 #~ "egonez gero."
-
-#~ msgid "Index content in the background:"
-#~ msgstr "Indexatu edukia atzeko planoan:"
 
 #~ msgid "O_nly when computer is not being used"
 #~ msgstr "_Soilik ordenagailua ez denean erabiltzen"
@@ -2466,12 +2527,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgstr ""
 #~ "Ikus “tracker help <komandoa>“ azpikomando zehatz bati buruz irakurtzeko."
 
-#~ msgid ""
-#~ "Start, stop, pause and list processes responsible for indexing content"
-#~ msgstr ""
-#~ "Abiarazi, gelditu, pausatu eta zerrendatu edukia indexatzen dituzten "
-#~ "prozesuak"
-
 #~ msgid "Extract information from a file"
 #~ msgstr "Erauzi informazioa fitxategitik"
 
@@ -2494,9 +2549,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgstr ""
 #~ "Berrezarri edo kendu indizea eta alderantzikatu konfigurazioak "
 #~ "lehenetsietara"
-
-#~ msgid "Search for content indexed or show content by type"
-#~ msgstr "Bilatu indexatutako edukia edo erakutsi edukia motaren arabera"
 
 #~ msgid ""
 #~ "Query and update the index using SPARQL or search, list and tree the "
@@ -2788,9 +2840,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgid "Would you like to reindex now?"
 #~ msgstr "Berrindexatu nahi duzu orain?"
 
-#~ msgid "Reindex"
-#~ msgstr "Berrindexatu"
-
 #~ msgid "Do nothing"
 #~ msgstr "Ez egin ezer"
 
@@ -2868,9 +2917,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgid "One or more files have not been specified"
 #~ msgstr "Fitxategi bat edo gehiago ez dira zehaztu"
 
-#~ msgid "- Get all information about one or more files"
-#~ msgstr "- Lortu fitxategi bat edo gehiagori buruzko informazio guztia"
-
 #~ msgid "- Search for terms in all data"
 #~ msgstr "- Bilatu terminoak datu guztietan"
 
@@ -2906,9 +2952,6 @@ msgstr "— abiarazi atzerapeneko idazketa zerbitzua"
 #~ msgid " - Show statistics for all Nepomuk defined ontology classes"
 #~ msgstr ""
 #~ " - Erakutsi Nepomuk-ek definitutako klase ontologiko guztien estatistikak"
-
-#~ msgid "Add, remove or list tags"
-#~ msgstr "Gehitu, kendu edo zerrendatu etiketak"
 
 #~ msgid "No arguments were provided"
 #~ msgstr "Ez da argumenturik eman"
