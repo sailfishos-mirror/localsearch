@@ -1,14 +1,14 @@
 # Persian translation for tracker-miners.
 # Copyright (C) 2023 tracker-miners's COPYRIGHT HOLDER
 # This file is distributed under the same license as the tracker-miners package.
-# Danial Behzadi <dani.behzi@ubuntu.com>, 2023.
+# Danial Behzadi <dani.behzi@ubuntu.com>, 2023-2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-02-18 07:47+0000\n"
-"PO-Revision-Date: 2024-02-19 18:16+0330\n"
+"POT-Creation-Date: 2024-02-19 14:47+0000\n"
+"PO-Revision-Date: 2024-02-19 18:59+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
@@ -19,9 +19,202 @@ msgstr ""
 "X-Generator: Poedit 3.4.2\n"
 "X-DamnedLies-Scope: partial\n"
 
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:23
+msgid "Max bytes to extract"
+msgstr "بیشینهٔ بایت برای استخراج"
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:24
+msgid "Maximum number of UTF-8 bytes to extract."
+msgstr "بیشینهٔ بایت UTF-8 برای استخراج."
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:30
+msgid "Text file allowlist"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+msgid "Filename patterns for plain text documents that should be indexed"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:37
+msgid "Wait for FS miner to be done before extracting"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:38
+msgid ""
+"When true, tracker-extract will wait for tracker-miner-fs to be done "
+"crawling before extracting meta-data. This option is useful on constrained "
+"environment where it is important to list files as fast as possible and can "
+"wait to get meta-data later."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:24
+msgid "Enable stemmer"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:25
+msgid ""
+"Simplify the words to their root to provide more results. E.g. “shelves” and "
+"“shelf” to “shel”"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:30
+msgid "Enable unaccent"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
+msgid ""
+"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
+"“Idea” for improved matching."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:36
+msgid "Ignore numbers"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+msgid "If enabled, numbers will not be indexed."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
+msgid "Initial sleep"
+msgstr ""
+
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
 msgid "Initial sleep time, in seconds."
 msgstr "زمان خواب نخستین به ثانیه."
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
+msgid "Throttle"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
+msgid "Indexing speed, the higher the slower."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
+msgid "Low disk space limit"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
+msgid ""
+"Disk space threshold in percent at which to pause indexing, or -1 to disable."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
+msgid "Crawling interval"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
+msgid ""
+"Interval in days to check whether the filesystem is up to date in the "
+"database. 0 forces crawling anytime, -1 forces it only after unclean "
+"shutdowns, and -2 disables it entirely."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
+msgid "Removable devices’ data permanence threshold"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
+msgid ""
+"Threshold in days after which files from removables devices will be removed "
+"from database if not mounted. 0 means never, maximum is 365."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
+msgid "Enable monitors"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
+msgid "Set to false to completely disable any file monitoring"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
+msgid "Index removable devices"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
+msgid ""
+"Set to true to enable indexing mounted directories for removable devices."
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
+msgid "Index optical discs"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
+msgid ""
+"Set to true to enable indexing CDs, DVDs, and generally optical media (if "
+"removable devices are not indexed, optical discs won’t be either)"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
+msgid "Index when running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
+msgid "Set to true to index while running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
+msgid "Perform initial indexing when running on battery"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
+msgid "Set to true to index while running on battery for the first time only"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
+msgid "Directories to index recursively"
+msgstr ""
+
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+msgid ""
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
+msgid "Directories to index non-recursively"
+msgstr ""
+
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+msgid ""
+"List of directories to index without inspecting subfolders, Special values "
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
+msgid "Ignored files"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
+msgid "List of file patterns to avoid"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+msgid "Ignored directories"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
+msgid "List of directories to avoid"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+msgid "Ignored directories with content"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr ""
 
 #: src/libtracker-miners-common/tracker-miner-proxy.c:349
 msgid "Cookie not recognized to resume paused miner"
@@ -288,7 +481,7 @@ msgstr "FORMAT"
 
 #: src/tracker-extract/tracker-main.c:100
 msgid "Socket file descriptor for peer-to-peer communication"
-msgstr ""
+msgstr "توصیفگر پروندهٔ سوکت برای ارتباطات نظیر به نظیر"
 
 #: src/tracker-extract/tracker-main.c:101
 msgid "FD"
@@ -307,23 +500,25 @@ msgstr "— استخراج فرادادهٔ پرونده"
 
 #: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
-msgstr ""
+msgstr "نام پرونده و گونهٔ mime باید با هم فراهم شوند"
 
 #: src/tracker-writeback/tracker-main.c:54
 msgid ""
 "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
 msgstr ""
+"گزارش‌دهی, 0 = فقط خطاها, 1 = کمینه, 2 = باجزییات و 3 = اشکال‌زدایی "
+"(پیش‌گزیده=0)"
 
 #: src/tracker-writeback/tracker-main.c:61
 msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr ""
+msgstr "از کار انداختن خاموشی پس از ۳۰ ثانیه غیرفعّال بودن"
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/tracker-writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
-msgstr ""
+msgstr "— آغاز خدمت بازنویسی ردیاب"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -332,26 +527,26 @@ msgstr "ناموجود"
 #. generic
 #: src/tracker/tracker-daemon.c:99
 msgid "Initializing"
-msgstr ""
+msgstr "مقدار دهی نخستین"
 
 #: src/tracker/tracker-daemon.c:100
 msgid "Processing…"
-msgstr ""
+msgstr "پردازش کردن…"
 
 #: src/tracker/tracker-daemon.c:101
 msgid "Fetching…"
-msgstr ""
+msgstr "واکشیدن…"
 
 #. miner/rss
 #: src/tracker/tracker-daemon.c:102
 #, c-format
 msgid "Crawling single directory “%s”"
-msgstr ""
+msgstr "خزیدن به تک شاخهٔ «%s»"
 
 #: src/tracker/tracker-daemon.c:103
 #, c-format
 msgid "Crawling recursively directory “%s”"
-msgstr ""
+msgstr "خزیدن بازگشتی به شاخهٔ «%s»"
 
 #: src/tracker/tracker-daemon.c:104
 msgid "Paused"
@@ -359,90 +554,96 @@ msgstr "مکث شده"
 
 #: src/tracker/tracker-daemon.c:105
 msgid "Idle"
-msgstr ""
+msgstr "بی‌کار"
 
 #: src/tracker/tracker-daemon.c:111
 msgid "Follow status changes as they happen"
-msgstr ""
+msgstr "پیروی از دگرگونی‌های وضعیت به محض رخ داد"
 
 #: src/tracker/tracker-daemon.c:115
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
+"نگریستن به دگرگونی‌های پایگاه داده در زمان واقعی (نمونه افزوده شدن منبع‌ها یا "
+"پرونده‌ها)"
 
 #: src/tracker/tracker-daemon.c:119
 msgid "List common statuses for miners"
-msgstr ""
+msgstr "سیاهه کردن وضعیت‌های معمول برای معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:124
 msgid "Pause a miner (you must use this with --miner)"
-msgstr ""
+msgstr "مکث معدن‌کاو (باید با ‪--miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:125 src/tracker/tracker-daemon.c:129
 msgid "REASON"
-msgstr ""
+msgstr "REASON"
 
 #: src/tracker/tracker-daemon.c:128
 msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must "
 "use this with --miner)"
 msgstr ""
+"مکث معدن‌کاو هنگام زنده بودن فرایند فراخواننده یا تا زمان از سر گیری (باید با "
+"‪--miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:132
 msgid "Resume a miner (you must use this with --miner)"
-msgstr ""
+msgstr "از سر گیری معدن‌کاو (باید با ‪--miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:133
 msgid "COOKIE"
-msgstr ""
+msgstr "COOKIE"
 
 #: src/tracker/tracker-daemon.c:136
 msgid ""
 "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
 "Applications)"
 msgstr ""
+"معدن‌کاو استفاده شده با ‪--resume‬ یا ‪--pause‬ (می‌توان از پسوندهایی چون Files یا "
+"Applications استفاده کرد)"
 
 #: src/tracker/tracker-daemon.c:137
 msgid "MINER"
-msgstr ""
+msgstr "MINER"
 
 #: src/tracker/tracker-daemon.c:140
 msgid "List all miners currently running"
-msgstr ""
+msgstr "سیاهه کردن همهٔ معدن‌کاوهای در حال اجرا"
 
 #: src/tracker/tracker-daemon.c:144
 msgid "List all miners installed"
-msgstr ""
+msgstr "سیاهه کردن همهٔ معدن‌کاوهای نصب شده"
 
 #: src/tracker/tracker-daemon.c:148
 msgid "List pause reasons"
-msgstr ""
+msgstr "سیاهه کردن دلیل‌های مکث"
 
 #: src/tracker/tracker-daemon.c:153
 msgid "List all Tracker processes"
-msgstr ""
+msgstr "سیاهه کردن همهٔ فرایندهای ردیاب"
 
 #: src/tracker/tracker-daemon.c:155
 msgid "Use SIGKILL to stop all miners"
-msgstr ""
+msgstr "استفاده از SIGKILL برای توقّف همهٔ معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:156 src/tracker/tracker-daemon.c:159
 msgid "APPS"
-msgstr ""
+msgstr "APPS"
 
 #: src/tracker/tracker-daemon.c:158
 msgid "Use SIGTERM to stop all miners"
-msgstr ""
+msgstr "استفاده از SIGTERM برای توقّف همهٔ معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:161
 msgid "Starts miners"
-msgstr ""
+msgstr "معدون‌کاوها را آغاز می‌کند"
 
 #: src/tracker/tracker-daemon.c:213
 #, c-format
 msgid "Could not get status from miner: %s"
-msgstr ""
+msgstr "نتوانست وضعیت را از معدن‌کاو بگیرد: %s"
 
 #. Translators: %s is a time string
 #: src/tracker/tracker-daemon.c:275
@@ -452,46 +653,46 @@ msgstr "%s مانده"
 
 #: src/tracker/tracker-daemon.c:278
 msgid "unknown time left"
-msgstr ""
+msgstr "زمان نامعلومی مانده"
 
 #. Work out lengths for output spacing
 #: src/tracker/tracker-daemon.c:291 src/tracker/tracker-daemon.c:769
 msgid "PAUSED"
-msgstr ""
+msgstr "PAUSED"
 
 #: src/tracker/tracker-daemon.c:308
 msgid "Not running or is a disabled plugin"
-msgstr ""
+msgstr "اجرا نشده یا افزایه‌ای از کار افتاده"
 
 #: src/tracker/tracker-daemon.c:447
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست معدن‌کاو را مکث کند. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:454
 #, c-format
 msgid "Attempting to pause miner “%s” with reason “%s”"
-msgstr ""
+msgstr "تلاش کردن برای مکث معدن‌کاو «%s» با دلیل «%s»"
 
 #: src/tracker/tracker-daemon.c:462 src/tracker/tracker-daemon.c:468
 #, c-format
 msgid "Could not pause miner: %s"
-msgstr ""
+msgstr "نتوانست معدن‌کاو را مکث کند: %s"
 
 #: src/tracker/tracker-daemon.c:474
 #, c-format
 msgid "Cookie is %d"
-msgstr ""
+msgstr "کلوچک %Id است"
 
 #: src/tracker/tracker-daemon.c:481 src/tracker/tracker-daemon.c:724
 #: src/tracker/tracker-daemon.c:841
 msgid "Press Ctrl+C to stop"
-msgstr ""
+msgstr "برای توقّف مهار-C را بزنید."
 
 #: src/tracker/tracker-daemon.c:508
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست معدن‌کاو را از سر بگیرد. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:515
 #, c-format
