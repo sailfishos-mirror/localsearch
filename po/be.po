@@ -6,9 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2023-02-15 13:55+0000\n"
-"PO-Revision-Date: 2023-02-23 18:44+0300\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
+"POT-Creation-Date: 2024-02-11 19:14+0000\n"
+"PO-Revision-Date: 2024-02-22 05:01+0300\n"
 "Last-Translator: Yuras Shumovich <shumovichy@gmail.com>\n"
 "Language-Team: Belarusian\n"
 "Language: be\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"X-Generator: Poedit 3.2.2\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -83,18 +83,6 @@ msgstr "Ігнараваць лікі"
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 msgid "If enabled, numbers will not be indexed."
 msgstr "Калі ўключана, лікі не будуць індэксавацца."
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:42
-msgid "Ignore stop words"
-msgstr "Ігнараваць стоп-словы"
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
-msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common "
-"words like “the”, “yes”, “no”, etc."
-msgstr ""
-"Калі ўключана, словы са спіса stop-words будуць ігнаравацца. Напрыклад, "
-"найбольш ужывальныя словы накшталт «так», «не», «новы» і іншыя."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
@@ -238,39 +226,26 @@ msgstr ""
 "user-dirs.defaults і $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
-msgid "Index applications installed on the system"
-msgstr "Індэксаваць усталяваныя ў сістэме праграмы"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
-msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files "
-"in the standard XDG system and user data directories."
-msgstr ""
-"Калі гэты параметр уключаны, індэксатар файлавай сістэмы будзе шукаць файлы ."
-"desktop у стандартных сістэмных каталогах XDG і каталогах даных "
-"карыстальніка."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "Файлы для ігнаравання"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
 msgstr "Спіс шаблонаў для файлаў, якія трэба ігнараваць"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
 msgstr "Каталогі для ігнаравання"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
 msgstr "Спіс каталогаў, якія трэба ігнараваць"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
 msgstr "Каталогі са змесцівам, якое ігнаруецца"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Не апрацоўваць каталогі, якія змяшчаюць файлы з гэтага чорнага спіса"
 
@@ -345,86 +320,81 @@ msgstr[0] " %2.2d секунда"
 msgstr[1] " %2.2d секунды"
 msgstr[2] " %2.2d секунд"
 
-#: src/miners/fs/tracker-data-provider.c:108
-#: src/miners/fs/tracker-data-provider.c:168
-msgid "Operation not supported"
-msgstr "Аперацыя не падтрымліваецца"
-
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:82
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Час сна пры запуску, у секундах, 0->1000 (прадвызначана=15)"
 
-#: src/miners/fs/tracker-main.c:85
+#: src/miners/fs/tracker-main.c:87
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Запушчаны, пакуль не праіндэксуюцца ўсе размяшчэнні з налад, а потым "
 "выходзіць"
 
-#: src/miners/fs/tracker-main.c:89 src/tracker/tracker-info.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Правярае ці прымальны ФАЙЛ для індэксаванння на аснове налад"
 
-#: src/miners/fs/tracker-main.c:90 src/tracker-extract/tracker-main.c:83
-#: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
+#: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
+#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
-#: src/tracker/tracker-info.c:86 src/tracker/tracker-info.c:87
+#: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/miners/fs/tracker-main.c:93 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:95 src/miners/rss/tracker-main.c:63
+#: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Выконваецца для асобнай анталогіі дамена"
 
-#: src/miners/fs/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:99
 msgid "Avoids changes in the filesystem"
 msgstr "Пазбягае змен у файлавай сістэме"
 
-#: src/miners/fs/tracker-main.c:101 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:101
+#: src/miners/fs/tracker-main.c:103 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:104
 #: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Паказвае інфармацыю пра версію"
 
-#: src/miners/fs/tracker-main.c:638
+#: src/miners/fs/tracker-main.c:483
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Аб'ект даных «%s» ужо існуе"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:484
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Аб'ект даных «%s» зараз не існуе"
 
-#: src/miners/fs/tracker-main.c:677
+#: src/miners/fs/tracker-main.c:494
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Каталог НЕ падлягае індэксаванню (заснавана на фільтрах)"
 
-#: src/miners/fs/tracker-main.c:681
+#: src/miners/fs/tracker-main.c:498
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Файл НЕ падлягае індэксаванню (заснавана на фільтрах)"
 
-#: src/miners/fs/tracker-main.c:684
+#: src/miners/fs/tracker-main.c:501
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Файл НЕ падлягае індэксаванню (схаваны файл)"
 
-#: src/miners/fs/tracker-main.c:686
+#: src/miners/fs/tracker-main.c:503
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Файл НЕ падлягае індэксаванню (папка не індэксуецца)"
 
-#: src/miners/fs/tracker-main.c:710
+#: src/miners/fs/tracker-main.c:527
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Бацькоўскі каталог «%s» НЕ падлягае індэксаванню (заснавана на фільтрах)"
 
-#: src/miners/fs/tracker-main.c:716
+#: src/miners/fs/tracker-main.c:533
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Бацькоўскі каталог «%s» НЕ падлягае індэксаванню (схаваны файл)"
 
-#: src/miners/fs/tracker-main.c:724
+#: src/miners/fs/tracker-main.c:539
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -433,18 +403,18 @@ msgstr ""
 "Бацькоўскі каталог «%s» НЕ падлягае індэксаванню (заснавана на кантэкстных "
 "фільтрах)"
 
-#: src/miners/fs/tracker-main.c:745
+#: src/miners/fs/tracker-main.c:558
 msgid "Directory is eligible to be indexed"
 msgstr "Каталог падлягае індэксаваннню"
 
-#: src/miners/fs/tracker-main.c:746
+#: src/miners/fs/tracker-main.c:559
 msgid "File is eligible to be indexed"
 msgstr "Файл падлягае індэксаваннню"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:1073
+#: src/miners/fs/tracker-main.c:786
 msgid "— start the tracker indexer"
 msgstr "— запусціць індэксатар tracker"
 
@@ -472,42 +442,42 @@ msgstr "Вывесці спіс каналаў"
 msgid "Delete feed"
 msgstr "Выдаліць канал"
 
-#: src/miners/rss/tracker-main.c:164 src/miners/rss/tracker-main.c:216
-#: src/miners/rss/tracker-main.c:253 src/tracker/tracker-info.c:446
-#: src/tracker/tracker-search.c:1371 src/tracker/tracker-status.c:92
+#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
+#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
+#: src/tracker/tracker-search.c:1377 src/tracker/tracker-status.c:92
 #: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "Не ўдалося ўсталяваць злучэнне з Tracker"
 
-#: src/miners/rss/tracker-main.c:165 src/miners/rss/tracker-main.c:217
-#: src/miners/rss/tracker-main.c:254 src/tracker/tracker-daemon.c:448
+#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
+#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:448
 #: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1372 src/tracker/tracker-status.c:93
+#: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
+#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:93
 #: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
 #: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
 msgid "No error given"
 msgstr "Памылка не ўказана"
 
-#: src/miners/rss/tracker-main.c:190
+#: src/miners/rss/tracker-main.c:188
 msgid "Could not add feed"
 msgstr "Не ўдалося дадаць канал"
 
-#: src/miners/rss/tracker-main.c:228
+#: src/miners/rss/tracker-main.c:226
 msgid "Could not remove feed"
 msgstr "Не ўдалося выдаліць канал"
 
-#: src/miners/rss/tracker-main.c:296
+#: src/miners/rss/tracker-main.c:294
 msgid "Could not list feeds"
 msgstr "Не ўдалося вывесці спіс каналаў"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/rss/tracker-main.c:424
+#: src/miners/rss/tracker-main.c:422
 msgid "— start the feeds indexer"
 msgstr "— запусціць індэксатар каналаў"
 
@@ -519,59 +489,85 @@ msgstr "— запусціць індэксатар каналаў"
 msgid "— start the tracker index proxy"
 msgstr "— запусціць проксі tracker index"
 
-#: src/tracker-extract/tracker-extract.c:697
+#: src/tracker-extract/tracker-extract.c:712
 msgid "Metadata extraction failed"
 msgstr "Не ўдалося выняць метаданыя"
 
-#: src/tracker-extract/tracker-extract.c:776
+#: src/tracker-extract/tracker-extract.c:794
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Не знойдзены модуль метаданых або модуль вымання, каб апрацаваць гэты файл"
 
-#: src/tracker-extract/tracker-main.c:82
+#: src/tracker-extract/tracker-main.c:81
 msgid "File to extract metadata for"
 msgstr "Файл для вымання метаданых"
 
-#: src/tracker-extract/tracker-main.c:86
+#: src/tracker-extract/tracker-main.c:85
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "MIME-тып для файла (калі не ўказана, будзе падабраны)"
 
-#: src/tracker-extract/tracker-main.c:87
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
-#: src/tracker-extract/tracker-main.c:90
+#: src/tracker-extract/tracker-main.c:89
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr ""
 "Модуль, які будзе прымусова выкарыстоўвацца для вымання (напрыклад, «foo» "
 "для «foo.so»)"
 
-#: src/tracker-extract/tracker-main.c:91
+#: src/tracker-extract/tracker-main.c:90
 msgid "MODULE"
 msgstr "МОДУЛЬ"
 
-#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:39
+#: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Фармат вываду вынікаў: «sparql», «turtle» або «json-ld»"
 
-#: src/tracker-extract/tracker-main.c:94 src/tracker/tracker-extract.c:40
+#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:43
 msgid "FORMAT"
 msgstr "ФАРМАТ"
 
-#: src/tracker-extract/tracker-main.c:212
+#: src/tracker-extract/tracker-main.c:100
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "Файлавы дэскрыптар сокета для аднарангавага ўзаемадзеяння"
+
+#: src/tracker-extract/tracker-main.c:101
+msgid "FD"
+msgstr "ФД"
+
+#: src/tracker-extract/tracker-main.c:196
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Фармат серыялізацыі «%s» не падтрымліваецца\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:342
+#: src/tracker-extract/tracker-main.c:316
 msgid "— Extract file meta data"
 msgstr "— Выняць метаданыя файла"
 
-#: src/tracker-extract/tracker-main.c:357
+#: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
 msgstr "Назва файла і MIME-тып павінны быць пададзены разам"
+
+#: src/tracker-writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr ""
+"Вядзенне журнала, 0 = толькі памылкі, 1 = мінімальна, 2 = падрабязна, 3 = "
+"адладка (прадвызначана=0)"
+
+#: src/tracker-writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "Не выключаць пасля 30 секунд бяздзейнасці"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— запусціць сэрвіс зваротнага запісу"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -888,12 +884,23 @@ msgstr "магчыма, адключаны плагін?"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Калі аргументы не ўказаны, паказваецца статус індэксатараў даных"
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1547
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
 #: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
 msgid "Unrecognized options"
 msgstr "Нераспазнаныя параметры"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-daemon.desktop.in:6
+msgid "daemon"
+msgstr "daemon"
+
+#: src/tracker/tracker-daemon.desktop.in:7
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr ""
+"Запуск, спыненне і вывад спіса дэманаў, якія адказваюць за індэксаванне "
+"змесціва"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -903,9 +910,18 @@ msgstr "Не ўдалося атрымаць злучэнне D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Не ўдалося стварыць проксі D-Bus для tracker-store"
 
-#: src/tracker/tracker-extract.c:68
+#: src/tracker/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "Не ўдалося выканаць tracker-extract: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-extract.desktop.in:6
+msgid "extract"
+msgstr "extract"
+
+#: src/tracker/tracker-extract.desktop.in:7
+msgid "Extract metadata from a file"
+msgstr "Выняць метаданыя з файла"
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -951,13 +967,22 @@ msgstr "Рэкурсіўна"
 msgid "Please specify one or more locations to index."
 msgstr "Укажыце адно або некалькі размяшчэнняў для індэксавання."
 
-#: src/tracker/tracker-info.c:57
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-index.desktop.in:6
+msgid "index"
+msgstr "index"
+
+#: src/tracker/tracker-index.desktop.in:7
+msgid "Index content using the Tracker filesystem miner"
+msgstr "Індэксаванне змесціва праз індэксатар файлавай сістэмы Tracker"
+
+#: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Паказваць поўныя прасторы назваў (то-бок выкарыстоўваць не nie:title, а "
 "поўныя URL)"
 
-#: src/tracker/tracker-info.c:61
+#: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
 msgstr "Калі магчыма, паказваць змесціва рэсурсаў як звычайны тэкст"
 
@@ -967,7 +992,7 @@ msgstr "Калі магчыма, паказваць змесціва рэсур�
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
 #.
-#: src/tracker/tracker-info.c:71
+#: src/tracker/tracker-info.c:79
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
 "(e.g. <file:///path/to/some/file.txt>)"
@@ -975,49 +1000,42 @@ msgstr ""
 "Замест пошуку назвы файла, разглядаць аргументы ФАЙЛ як ідэнтыфікатары IRI "
 "(напрыклад, <file:///path/to/some/file.txt>)"
 
-#: src/tracker/tracker-info.c:75
+#: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
 msgstr "Выводзіць вынікі як RDF у фармаце Turtle"
 
-#: src/tracker/tracker-info.c:79
+#: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
 msgstr "Уласцівасць RDF якую трэба разглядаць як URL (напрыклад, «nie:url»)"
 
-#: src/tracker/tracker-info.c:160
-msgid "Unable to retrieve namespace prefixes"
-msgstr "Немагчыма атрымаць прэфіксы прасторы назваў"
-
-#: src/tracker/tracker-info.c:168
-msgid "No namespace prefixes were returned"
-msgstr "Не вернута ніводнага прэфікса прасторы назваў"
-
-#: src/tracker/tracker-info.c:230 src/tracker/tracker-search.c:1301
-msgid "Results"
-msgstr "Вынікі"
-
-#: src/tracker/tracker-info.c:414
+#: src/tracker/tracker-info.c:388
 msgid "Error message"
 msgstr "Паведамленне пра памылку"
 
 #: src/tracker/tracker-info.c:471
-msgid "Querying information for entity"
-msgstr "Запытваецца інфармацыя для аб'екта"
-
-#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "Немагчыма атрымаць URN для URI"
 
-#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
+#: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
 msgstr "Немагчыма атрымаць даныя для URI"
 
-#: src/tracker/tracker-info.c:562
+#: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
 msgstr "Няма даступных метаданых для гэтага URI"
 
-#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
+#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
 msgstr "Не ўдалося атрымаць статус прымальнасці для індэксавання: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-info.desktop.in:6
+msgid "info"
+msgstr "info"
+
+#: src/tracker/tracker-info.desktop.in:7
+msgid "Retrieve all information available for a certain file"
+msgstr "Атрыманне ўсёй даступнай інфармацыі для пэўнага файла"
 
 #: src/tracker/tracker-process.c:216
 #, c-format
@@ -1055,63 +1073,76 @@ msgid ""
 msgstr ""
 "Даныя індэксавання для гэтага файла выдалены і будуць праіндэксаваны зноў."
 
-#: src/tracker/tracker-search.c:73
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-reset.desktop.in:6
+msgid "reset"
+msgstr "reset"
+
+#: src/tracker/tracker-reset.desktop.in:7
+msgid "Reset the index and configuration"
+msgstr "Скінуць індэкс і канфігурацыю"
+
+#: src/tracker/tracker-search.c:59
+msgid "Search for content matching TERMS, by type or across all types."
+msgstr "Пошук змесціва адпаведнага ЗАПЫТам, па тыпу або па ўсіх тыпах"
+
+#: src/tracker/tracker-search.c:76
 msgid "Search for files"
 msgstr "Пошук файлаў"
 
-#: src/tracker/tracker-search.c:77
+#: src/tracker/tracker-search.c:80
 msgid "Search for folders"
 msgstr "Пошук папак"
 
-#: src/tracker/tracker-search.c:81
+#: src/tracker/tracker-search.c:84
 msgid "Search for music files"
 msgstr "Пошук музыкі"
 
-#: src/tracker/tracker-search.c:85
+#: src/tracker/tracker-search.c:88
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "Пошук альбомаў (--all не ўплывае на вынік)"
 
-#: src/tracker/tracker-search.c:89
+#: src/tracker/tracker-search.c:92
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "Пошук выканаўцаў (--all не ўплывае на вынік)"
 
-#: src/tracker/tracker-search.c:93
+#: src/tracker/tracker-search.c:96
 msgid "Search for image files"
 msgstr "Пошук выяў"
 
-#: src/tracker/tracker-search.c:97
+#: src/tracker/tracker-search.c:100
 msgid "Search for video files"
 msgstr "Пошук відэафайлаў"
 
-#: src/tracker/tracker-search.c:101
+#: src/tracker/tracker-search.c:104
 msgid "Search for document files"
 msgstr "Пошук дакументаў"
 
-#: src/tracker/tracker-search.c:105
+#: src/tracker/tracker-search.c:108
 msgid "Search for software (--all has no effect on this)"
 msgstr "Пошук праграм (--all не ўплывае на вынік)"
 
-#: src/tracker/tracker-search.c:109
+#: src/tracker/tracker-search.c:112
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "Пошук катэгорый праграм (--all не ўплывае на вынік)"
 
-#: src/tracker/tracker-search.c:113
+#: src/tracker/tracker-search.c:116
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "Пошук каналаў (--all не ўплывае на вынік)"
 
-#: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
+#: src/tracker/tracker-search.c:125 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "Абмежаваць колькасць вынікаў, якія будуць паказвацца"
 
-#: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
+#: src/tracker/tracker-search.c:129 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "Зрух вынікаў"
 
-#: src/tracker/tracker-search.c:127
+#: src/tracker/tracker-search.c:133
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "Выкарыстоўваць у пошукавых запытах «АБО» замест «І» (прадвызначана)"
 
-#: src/tracker/tracker-search.c:131
+#: src/tracker/tracker-search.c:137
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
@@ -1119,12 +1150,12 @@ msgstr ""
 "Паказаць для вынікаў URN (не ўжываецца да --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
 
-#: src/tracker/tracker-search.c:135
+#: src/tracker/tracker-search.c:141
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Вярнуць таксама ўсе супадзенні, якія не існуюць (то-бок з адмантаваных тамоў)"
 
-#: src/tracker/tracker-search.c:139
+#: src/tracker/tracker-search.c:145
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
@@ -1132,86 +1163,105 @@ msgstr ""
 "Адключыць паказ фрагментаў у выніках. Паказваецца толькі для асобных "
 "катэгорый, напрыклад, Documents, Music…"
 
-#: src/tracker/tracker-search.c:143
+#: src/tracker/tracker-search.c:149
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr ""
 "Адключыць паўнатэкставы пошук (FTS). Маецца на ўвазе --disable-snippets"
 
-#: src/tracker/tracker-search.c:147
+#: src/tracker/tracker-search.c:153
 msgid "Disable color when printing snippets and results"
 msgstr "Адключыць выкарыстанне колераў пры вывадзе фрагментаў і вынікаў"
 
 # магчыма гэта пра "тэрм", логікавыя функцыі, выкарыстоўваць АБО ці І
-#: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:58
+#: src/tracker/tracker-search.c:160 src/tracker/tracker-status.c:58
 msgid "search terms"
 msgstr "пошукавыя запыты"
 
-#: src/tracker/tracker-search.c:155 src/tracker/tracker-status.c:59
-msgid "EXPRESSION"
-msgstr "ВЫРАЗ"
+#: src/tracker/tracker-search.c:161
+msgid "TERMS"
+msgstr "ЗАПЫТЫ"
 
-#: src/tracker/tracker-search.c:245 src/tracker/tracker-search.c:635
-#: src/tracker/tracker-search.c:731 src/tracker/tracker-search.c:823
-#: src/tracker/tracker-search.c:912 src/tracker/tracker-search.c:1001
-#: src/tracker/tracker-search.c:1288
+#: src/tracker/tracker-search.c:251 src/tracker/tracker-search.c:641
+#: src/tracker/tracker-search.c:737 src/tracker/tracker-search.c:829
+#: src/tracker/tracker-search.c:918 src/tracker/tracker-search.c:1007
+#: src/tracker/tracker-search.c:1294
 msgid "Could not get search results"
 msgstr "Не ўдалося атрымаць вынікі пошуку"
 
-#: src/tracker/tracker-search.c:254
+#: src/tracker/tracker-search.c:260
 msgid "No files were found"
 msgstr "Файлы не знойдзены"
 
-#: src/tracker/tracker-search.c:258 src/tracker/tracker-tag.c:426
+#: src/tracker/tracker-search.c:264 src/tracker/tracker-tag.c:426
 msgid "Files"
 msgstr "Файлы"
 
-#: src/tracker/tracker-search.c:644
+#: src/tracker/tracker-search.c:650
 msgid "No artists were found"
 msgstr "Выканаўцы не знойдзены"
 
-#: src/tracker/tracker-search.c:648
+#: src/tracker/tracker-search.c:654
 msgid "Artists"
 msgstr "Выканаўцы"
 
-#: src/tracker/tracker-search.c:740
+#: src/tracker/tracker-search.c:746
 msgid "No music was found"
 msgstr "Музыка не знойдзена"
 
-#: src/tracker/tracker-search.c:744
+#: src/tracker/tracker-search.c:750
 msgid "Albums"
 msgstr "Альбомы"
 
-#: src/tracker/tracker-search.c:832
+#: src/tracker/tracker-search.c:838
 msgid "No feeds were found"
 msgstr "Каналы не знойдзены"
 
-#: src/tracker/tracker-search.c:836
+#: src/tracker/tracker-search.c:842
 msgid "Feeds"
 msgstr "Каналы"
 
-#: src/tracker/tracker-search.c:921
+#: src/tracker/tracker-search.c:927
 msgid "No software was found"
 msgstr "Праграмы не знойдзены"
 
-#: src/tracker/tracker-search.c:925
+#: src/tracker/tracker-search.c:931
 msgid "Software"
 msgstr "Праграмы"
 
-#: src/tracker/tracker-search.c:1010
+#: src/tracker/tracker-search.c:1016
 msgid "No software categories were found"
 msgstr "Катэгорыі праграм не знойдзены"
 
-#: src/tracker/tracker-search.c:1014
+#: src/tracker/tracker-search.c:1020
 msgid "Software Categories"
 msgstr "Катэгорыі праграм"
 
-#: src/tracker/tracker-search.c:1297
+#: src/tracker/tracker-search.c:1303
 msgid "No results were found matching your query"
 msgstr "Не знойдзена вынікаў, якія б адпавядалі вашаму запыту"
+
+#: src/tracker/tracker-search.c:1307
+msgid "Results"
+msgstr "Вынікі"
+
+# магчыма гэта пра "тэрм", логікавыя функцыі, выкарыстоўваць АБО ці І
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-search.desktop.in:6
+#| msgid "search terms"
+msgid "search"
+msgstr "search"
+
+#: src/tracker/tracker-search.desktop.in:7
+msgid "Search for content by type or across all types"
+msgstr "Пошук змесціва па тыпу або па ўсіх тыпах"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Паказаць статыстыку для бягучых індэксаў / набораў даных"
+
+#: src/tracker/tracker-status.c:59
+msgid "EXPRESSION"
+msgstr "ВЫРАЗ"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
@@ -1313,6 +1363,15 @@ msgstr[2] "%d запісаных няўдач"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Справаздачы не знойдзены"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-status.desktop.in:6
+msgid "status"
+msgstr "status"
+
+#: src/tracker/tracker-status.desktop.in:7
+msgid "Provide status and statistics on the data indexed"
+msgstr "Паказ стану і статыстыкі праіндэксаваных даных"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1485,20 +1544,44 @@ msgstr "Нельга выконваць разам выдаленне і дад�
 msgid "The --description option can only be used with --add"
 msgstr "Параметр --description можа выкарыстоўвацца толькі з --add"
 
-#: src/tracker-writeback/tracker-main.c:54
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr ""
-"Вядзенне журнала, 0 = толькі памылкі, 1 = мінімальна, 2 = падрабязна, 3 = "
-"адладка (прадвызначана=0)"
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-tag.desktop.in:6
+msgid "tag"
+msgstr "tag"
 
-#: src/tracker-writeback/tracker-main.c:61
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "Не выключаць пасля 30 секунд бяздзейнасці"
+#: src/tracker/tracker-tag.desktop.in:7
+msgid "Add, remove and list tags"
+msgstr "Дадаванне, выдаленне, вывад спіса цэтлікаў"
 
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:93
-msgid "— start the tracker writeback service"
-msgstr "— запусціць сэрвіс зваротнага запісу"
+#~ msgid "Ignore stop words"
+#~ msgstr "Ігнараваць стоп-словы"
+
+#~ msgid ""
+#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
+#~ "common words like “the”, “yes”, “no”, etc."
+#~ msgstr ""
+#~ "Калі ўключана, словы са спіса stop-words будуць ігнаравацца. Напрыклад, "
+#~ "найбольш ужывальныя словы накшталт «так», «не», «новы» і іншыя."
+
+#~ msgid "Index applications installed on the system"
+#~ msgstr "Індэксаваць усталяваныя ў сістэме праграмы"
+
+#~ msgid ""
+#~ "If this option is enabled, the filesystem miner will look for .desktop "
+#~ "files in the standard XDG system and user data directories."
+#~ msgstr ""
+#~ "Калі гэты параметр уключаны, індэксатар файлавай сістэмы будзе шукаць "
+#~ "файлы .desktop у стандартных сістэмных каталогах XDG і каталогах даных "
+#~ "карыстальніка."
+
+#~ msgid "Operation not supported"
+#~ msgstr "Аперацыя не падтрымліваецца"
+
+#~ msgid "Unable to retrieve namespace prefixes"
+#~ msgstr "Немагчыма атрымаць прэфіксы прасторы назваў"
+
+#~ msgid "No namespace prefixes were returned"
+#~ msgstr "Не вернута ніводнага прэфікса прасторы назваў"
+
+#~ msgid "Querying information for entity"
+#~ msgstr "Запытваецца інфармацыя для аб'екта"
