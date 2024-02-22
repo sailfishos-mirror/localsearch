@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
 "POT-Creation-Date: 2024-02-11 19:14+0000\n"
-"PO-Revision-Date: 2024-02-16 20:44+0100\n"
+"PO-Revision-Date: 2024-02-22 05:21+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -45,6 +45,11 @@ msgid ""
 "environment where it is important to list files as fast as possible and can "
 "wait to get meta-data later."
 msgstr ""
+"როცა ჭეშმარიტია, tracker-extract დაელოდება tracker-miner-fs-ს, დაასრულოს "
+"დათვალიერება, სანამ მეტამონაცემების გამოღებას შეეცდება. ეს პარამეტრ "
+"სასარგებლოა შეზღუდულ გარემოში, სადაც მნიშვნელოვანია, ფაილების ჩამონათვალი "
+"რაც შეიძლება, სწრაფად მივიღოთ და მეტამონაცემების დალოდების გადადება "
+"შესაძლებელია."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
@@ -55,6 +60,8 @@ msgid ""
 "Simplify the words to their root to provide more results. E.g. “shelves” and "
 "“shelf” to “shel”"
 msgstr ""
+"მიუთითეთ სიტყვების ფუძე, რომ მეტი შედეგი მიიღოთ. მაგ: \"shelves\" და "
+"\"shelf\" მოძებნეთ, როგორც \"shel\""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
 msgid "Enable unaccent"
@@ -65,6 +72,8 @@ msgid ""
 "Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
 "“Idea” for improved matching."
 msgstr ""
+"მახვილიანი სიმბოლოების გადაყვანა არამახვილიანის ეკვივალენტურად. მაგ “Idéa” "
+"და “Idea”, მეტი შედეგისთვის."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
 msgid "Ignore numbers"
@@ -111,6 +120,9 @@ msgid ""
 "database. 0 forces crawling anytime, -1 forces it only after unclean "
 "shutdowns, and -2 disables it entirely."
 msgstr ""
+"ინტერვალი დღეებში, როცა ფაილური სისტემისა და ბაზის განახლების შემოწმება "
+"მოხდება. 0 დააყენებს გადავლას ნებისმიერ დროს, -1, მხოლოდ, თუ გათიშვა "
+"ავარიულად მოხდა და -2 მთლიანად გამორთავს მას."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
 msgid "Removable devices’ data permanence threshold"
@@ -121,6 +133,9 @@ msgid ""
 "Threshold in days after which files from removables devices will be removed "
 "from database if not mounted. 0 means never, maximum is 365."
 msgstr ""
+"ზღვარი დღეებში, რომლის შემდეგაც მოხსნად მოწყობილობებზე მდებარე ფაილები "
+"ბაზიდან წაიშლება, თუ მას არ მიამაგრებთ. 0 ნიშნავს არასოდეს. მაქსიმალური "
+"მნიშვნელობაა 365."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
 msgid "Enable monitors"
@@ -150,6 +165,9 @@ msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 "removable devices are not indexed, optical discs won’t be either)"
 msgstr ""
+"დააყენეთ ჭეშმარიტზე, რომ ჩართოთ CD/DVD/სხვა ოპტიკური მედიის დაინდექსება (თუ "
+"მოხსნადი მოწყობილობების დაინდექსება არ ხდება, არც ოპტიკური დისკები "
+"დაინდექსდება)"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
 msgid "Index when running on battery"
@@ -182,6 +200,10 @@ msgid ""
 "‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
 "and $HOME/.config/user-dirs.default"
 msgstr ""
+"რეკურსიულად დასაინდექსებელი საქაღალდეების სია. სპეციალური მნიშვნელობებია: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. იხილეთ /etc/xdg/user-dirs.defaults "
+"და $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
@@ -196,6 +218,10 @@ msgid ""
 "‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
 "and $HOME/.config/user-dirs.default"
 msgstr ""
+"საქაღალდეების სია, რომელშიც ქვესაქაღალდეების სკანირება არ მოხდება. "
+"სპეციალური მნიშვნელობებია: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, "
+"‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. იხილეთ /etc/xdg/user-"
+"dirs.defaults და $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Ignored files"
@@ -228,6 +254,7 @@ msgstr "ამ ქუქის შეჩერებული ინდექს
 #: src/libtracker-miners-common/tracker-miner-proxy.c:406
 msgid "Pause application and reason match an already existing pause request"
 msgstr ""
+"აპლიკაციის შეჩერება და მიზეზი ემთხვევა უკვე არსებულ შეჩერების მოთხოვნას"
 
 #: src/libtracker-miners-common/tracker-utils.c:101
 #: src/libtracker-miners-common/tracker-utils.c:152
@@ -299,6 +326,8 @@ msgstr ""
 #: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
+"ამოწმებს, არის თუ არა მითითებული ფაილი დაინდექსებული, კონფიგურაციაზე "
+"დაყრდნობით"
 
 #: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
 #: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
@@ -352,12 +381,12 @@ msgstr "ფაილი დაინდექსება არ მოხდე
 #: src/miners/fs/tracker-main.c:527
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (ფილტრების გამო)"
 
 #: src/miners/fs/tracker-main.c:533
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr ""
+msgstr "მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (დამალული ფაილი)"
 
 #: src/miners/fs/tracker-main.c:539
 #, c-format
@@ -365,6 +394,7 @@ msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr ""
+"მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (შემცველობის ფილტრების გამო)"
 
 #: src/miners/fs/tracker-main.c:558
 msgid "Directory is eligible to be indexed"
@@ -474,6 +504,8 @@ msgstr "MIME"
 #: src/tracker-extract/tracker-main.c:89
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr ""
+"გამოღებისთვის მოდულის ნაძალადევი გამოყენება (მაგ: \"foo\" მოდულისთვის \"foo."
+"so\")"
 
 #: src/tracker-extract/tracker-main.c:90
 msgid "MODULE"
@@ -594,6 +626,8 @@ msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must "
 "use this with --miner)"
 msgstr ""
+"ინდექსატორის შეჩერება, როცა გამომძახებელი პროცესი ცოცხალია ან სანამ "
+"გაგრძელდება (უნდა გამოიყენოთ --miner-თან ერთად)"
 
 #: src/tracker/tracker-daemon.c:132
 msgid "Resume a miner (you must use this with --miner)"
