@@ -185,6 +185,7 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 	TrackerLandlockRule stock_rules[] = {
 		/* Allow access to the executable itself */
 		{ LIBEXECDIR "/tracker-extract-3",
+		  LANDLOCK_ACCESS_FS_READ_FILE |
 		  LANDLOCK_ACCESS_FS_EXECUTE },
 		/* Library dirs, as we shockingly use libraries. Extends to /usr */
 		{ PREFIX "/" LIBDIR,
