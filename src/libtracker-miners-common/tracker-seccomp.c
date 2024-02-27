@@ -203,6 +203,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (rseq);
 	ALLOW_RULE (rt_sigaction);
 	ALLOW_RULE (rt_sigprocmask);
+	ALLOW_RULE (rt_sigreturn);
 	ALLOW_RULE (sched_yield);
 	ALLOW_RULE (sched_getaffinity);
 	ALLOW_RULE (sched_setattr);
@@ -301,7 +302,6 @@ tracker_seccomp_init (void)
 
 	/* Syscalls may differ between libcs */
 #if !defined(__GLIBC__)
-	ALLOW_RULE (rt_sigreturn);
 	ALLOW_RULE (readv);
 #else
 	ALLOW_RULE (pread64);
