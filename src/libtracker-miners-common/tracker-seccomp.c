@@ -93,6 +93,9 @@ sigsys_handler (gint       signal,
 		                                                 info->si_syscall);
 		g_printerr ("Disallowed syscall \"%s\" caught in sandbox\n", syscall_name);
 		free (syscall_name);
+
+		/* Ensure to propagate SIGSYS to generate a core file */
+		tgkill (gettid(), getpid(), SIGSYS);
 	}
 }
 
@@ -200,6 +203,7 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (rseq);
 	ALLOW_RULE (rt_sigaction);
 	ALLOW_RULE (rt_sigprocmask);
+	ALLOW_RULE (rt_sigreturn);
 	ALLOW_RULE (sched_yield);
 	ALLOW_RULE (sched_getaffinity);
 	ALLOW_RULE (sched_setattr);
@@ -298,7 +302,6 @@ tracker_seccomp_init (void)
 
 	/* Syscalls may differ between libcs */
 #if !defined(__GLIBC__)
-	ALLOW_RULE (rt_sigreturn);
 	ALLOW_RULE (readv);
 #else
 	ALLOW_RULE (pread64);
