@@ -190,6 +190,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (umask);
 	ALLOW_RULE (chdir);
 	ERROR_RULE (fchown, EPERM);
+	ERROR_RULE (fchmod, EPERM);
+	ERROR_RULE (chmod, EPERM);
 	ERROR_RULE (mkdir, EPERM);
 	ERROR_RULE (mkdirat, EPERM);
 	ERROR_RULE (rename, EPERM);
