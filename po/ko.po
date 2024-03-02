@@ -2,22 +2,22 @@
 # Copyright(C) 2007 THE tracker'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the tracker package.
 # Namhyung Kim <namhyung@gmail.com>, 2007.
-# Seong-ho Cho <shcho@gnome.org>, 2013-2022.
+# Seong-ho Cho <shcho@gnome.org>, 2013-2022, 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2022-08-07 13:15+0000\n"
-"PO-Revision-Date: 2022-08-28 20:31+0900\n"
-"Last-Translator: Seong-ho Cho <shcho@gnome.org>\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
+"POT-Creation-Date: 2024-02-11 19:14+0000\n"
+"PO-Revision-Date: 2024-03-02 03:27+0900\n"
+"Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Gnome Korea <gnome-kr@googlegroups.com>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 2.3.1\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -82,18 +82,6 @@ msgstr "숫자 무시"
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 msgid "If enabled, numbers will not be indexed."
 msgstr "이 항목을 활성화 하면 숫자는 색인 기록하지 않음."
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:42
-msgid "Ignore stop words"
-msgstr "정지 단어 무시"
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:43
-msgid ""
-"If enabled, the words listed in the stop-words list are ignored. E.g. common "
-"words like “the”, “yes”, “no”, etc."
-msgstr ""
-"이 항목을 활성화 하면, 정지 단어 목록에 있는 단어는 무시합니다. 예: 일반적인 "
-"단어 “the”, “yes”, “no”, 등."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
@@ -234,40 +222,36 @@ msgstr ""
 "$HOME/.config/user-dirs.default를 참조하십시오"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
-msgid "Index applications installed on the system"
-msgstr "설치한 프로그램 정보를 색인 기록합니다"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
-msgid ""
-"If this option is enabled, the filesystem miner will look for .desktop files "
-"in the standard XDG system and user data directories."
-msgstr ""
-"이 옵션을 활성화하면, 파일 시스템 수집기에서 표준 XDG 시스템과 사용자 데이터 "
-"디렉터리에서 .desktop 파일을 찾습니다."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:136
 msgid "Ignored files"
 msgstr "무시할 파일"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:137
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
 msgstr "무시할 파일 패턴의 목록입니다"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:142
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
 msgstr "무시한 디렉터리"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:143
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
 msgstr "무시할 디렉터리의 목록입니다"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:148
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
 msgstr "내용과 함께 무시한 디렉터리"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:149
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "이곳 차단 목록에 있는 파일이 들어간 디렉터리는 회피합니다"
+
+#: src/libtracker-miners-common/tracker-miner-proxy.c:349
+msgid "Cookie not recognized to resume paused miner"
+msgstr "잠시 멈춘 수집기 동작을 재개하기 위한 쿠키를 인식할 수 없습니다"
+
+#: src/libtracker-miners-common/tracker-miner-proxy.c:406
+msgid "Pause application and reason match an already existing pause request"
+msgstr "이미 존재하는 일시정지 요청에 일치하는 프로그램과 원인을 멈춥니다"
 
 #: src/libtracker-miners-common/tracker-utils.c:101
 #: src/libtracker-miners-common/tracker-utils.c:152
@@ -322,109 +306,96 @@ msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d초"
 
-#: src/libtracker-miner/tracker-data-provider.c:108
-#: src/libtracker-miner/tracker-data-provider.c:168
-msgid "Operation not supported"
-msgstr "동작을 지원하지 않습니다"
-
-#: src/libtracker-miner/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "잠시 멈춘 수집기 동작을 재개하기 위한 쿠키를 인식할 수 없습니다"
-
-#: src/libtracker-miner/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "이미 존재하는 일시정지 요청에 일치하는 프로그램과 원인을 멈춥니다"
-
-#: src/miners/fs/tracker-main.c:81
+#: src/miners/fs/tracker-main.c:82
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "초 단위 초기 대기시간, 0->1000(기본값=15)"
 
-#: src/miners/fs/tracker-main.c:86
+#: src/miners/fs/tracker-main.c:87
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "설정한 모든 위치를 색인 기록하기까지 실행하고 나갑니다"
 
-#: src/miners/fs/tracker-main.c:90 src/tracker/tracker-info.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "설정 내용을 기반으로 수집할 <파일>의 조건이 맞는지 확인합니다"
 
-#: src/miners/fs/tracker-main.c:91 src/tracker-extract/tracker-main.c:83
-#: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
+#: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
+#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
-#: src/tracker/tracker-info.c:86 src/tracker/tracker-info.c:87
+#: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "<파일>"
 
-#: src/miners/fs/tracker-main.c:94 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:95 src/miners/rss/tracker-main.c:63
+#: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "지정 도메인 온톨로지를 대상으로 실행합니다"
 
-#: src/miners/fs/tracker-main.c:98
+#: src/miners/fs/tracker-main.c:99
 msgid "Avoids changes in the filesystem"
 msgstr "파일 시스템의 바뀐 부분을 회피합니다"
 
-#: src/miners/fs/tracker-main.c:102 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:101
-#: src/tracker-writeback/tracker-main.c:48
+#: src/miners/fs/tracker-main.c:103 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:104
+#: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "버전 정보를 표시합니다"
 
-#: src/miners/fs/tracker-main.c:624
+#: src/miners/fs/tracker-main.c:483
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” 데이터 객체가 있습니다"
 
-#: src/miners/fs/tracker-main.c:625
+#: src/miners/fs/tracker-main.c:484
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” 데이터 객체가 없습니다"
 
-#: src/miners/fs/tracker-main.c:663
+#: src/miners/fs/tracker-main.c:494
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "디렉터리가 색인 기록에 적합하비 않습니다(규칙 기반)"
 
-#: src/miners/fs/tracker-main.c:667
+#: src/miners/fs/tracker-main.c:498
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "파일이 색인 기록에 적합하지 않습니다(규칙 기반)"
 
-#: src/miners/fs/tracker-main.c:670
+#: src/miners/fs/tracker-main.c:501
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "파일이 색인 기록에 적합하지 않습니다(숨김 파일)"
 
-#: src/miners/fs/tracker-main.c:672
+#: src/miners/fs/tracker-main.c:503
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "파일이 색인 기록에 적합하지 않습니다(색인 기록하지 않은 폴더)"
 
-#: src/miners/fs/tracker-main.c:696
+#: src/miners/fs/tracker-main.c:527
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "“%s” 상위 디렉터리가 색인 기록에 적합하지 않습니다(규칙 기반)"
 
-#: src/miners/fs/tracker-main.c:702
+#: src/miners/fs/tracker-main.c:533
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "“%s” 상위 디렉터리가 색인 기록에 적합하지 않습니다(숨김 파일)"
 
-#: src/miners/fs/tracker-main.c:710
+#: src/miners/fs/tracker-main.c:539
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "“%s” 상위 디렉터리가 색인 기록에 적합하지 않습니다(내용 규칙 기반)"
 
-#: src/miners/fs/tracker-main.c:731
+#: src/miners/fs/tracker-main.c:558
 msgid "Directory is eligible to be indexed"
 msgstr "디렉터리가 색인 기록에 적합합니다"
 
-#: src/miners/fs/tracker-main.c:732
+#: src/miners/fs/tracker-main.c:559
 msgid "File is eligible to be indexed"
 msgstr "파일이 색인 기록에 적합합니다"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:988
+#: src/miners/fs/tracker-main.c:786
 msgid "— start the tracker indexer"
 msgstr "— 트래커 인덱서를 시작합니다"
 
@@ -451,42 +422,42 @@ msgstr "피드 조회"
 msgid "Delete feed"
 msgstr "피드 삭제"
 
-#: src/miners/rss/tracker-main.c:164 src/miners/rss/tracker-main.c:216
-#: src/miners/rss/tracker-main.c:253 src/tracker/tracker-info.c:446
-#: src/tracker/tracker-search.c:1254 src/tracker/tracker-status.c:92
-#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:975
+#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
+#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
+#: src/tracker/tracker-search.c:1377 src/tracker/tracker-status.c:92
+#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "트래커로 연결을 수립할 수 없습니다"
 
-#: src/miners/rss/tracker-main.c:165 src/miners/rss/tracker-main.c:217
-#: src/miners/rss/tracker-main.c:254 src/tracker/tracker-daemon.c:448
+#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
+#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:448
 #: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1255 src/tracker/tracker-status.c:93
+#: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
+#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:93
 #: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
-#: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:976
+#: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
 msgid "No error given"
 msgstr "발생한 오류가 없습니다"
 
-#: src/miners/rss/tracker-main.c:190
+#: src/miners/rss/tracker-main.c:188
 msgid "Could not add feed"
 msgstr "피드를 추가할 수 없습니다"
 
-#: src/miners/rss/tracker-main.c:228
+#: src/miners/rss/tracker-main.c:226
 msgid "Could not remove feed"
 msgstr "피드를 제거할 수 없습니다"
 
-#: src/miners/rss/tracker-main.c:296
+#: src/miners/rss/tracker-main.c:294
 msgid "Could not list feeds"
 msgstr "피드를 조회할 수 없습니다"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/rss/tracker-main.c:424
+#: src/miners/rss/tracker-main.c:422
 msgid "— start the feeds indexer"
 msgstr "— 피드 인덱서를 시작합니다"
 
@@ -497,56 +468,80 @@ msgstr "— 피드 인덱서를 시작합니다"
 msgid "— start the tracker index proxy"
 msgstr "— 트래커 색인 대행자를 시작합니다"
 
-#: src/tracker-extract/tracker-extract.c:695
+#: src/tracker-extract/tracker-extract.c:712
 msgid "Metadata extraction failed"
 msgstr "메타데이터 추출에 실패했습니다"
 
-#: src/tracker-extract/tracker-extract.c:770
+#: src/tracker-extract/tracker-extract.c:794
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "이 파일을 처리할 메타데이터나 추출모듈이 없습니다"
 
-#: src/tracker-extract/tracker-main.c:82
+#: src/tracker-extract/tracker-main.c:81
 msgid "File to extract metadata for"
 msgstr "메타데이터를 추출할 파일"
 
-#: src/tracker-extract/tracker-main.c:86
+#: src/tracker-extract/tracker-main.c:85
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "파일에 대한 MIME 형식입니다(제공하지 않으면, 추측합니다)"
 
-#: src/tracker-extract/tracker-main.c:87
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "<MIME>"
 
-#: src/tracker-extract/tracker-main.c:90
+#: src/tracker-extract/tracker-main.c:89
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr "추출을 위해 사용할 모듈 강제(예: “foo.so”의 “foo”)"
 
-#: src/tracker-extract/tracker-main.c:91
+#: src/tracker-extract/tracker-main.c:90
 msgid "MODULE"
 msgstr "<모듈>"
 
-#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:39
+#: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "출력 결과 형식: “sparql”, “turtle”, “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:94 src/tracker/tracker-extract.c:40
+#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:43
 msgid "FORMAT"
 msgstr "<형식>"
 
-#: src/tracker-extract/tracker-main.c:212
+#: src/tracker-extract/tracker-main.c:100
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "피어간 통신용 소켓 파일 서술자"
+
+#: src/tracker-extract/tracker-main.c:101
+msgid "FD"
+msgstr "<파일서술자>"
+
+#: src/tracker-extract/tracker-main.c:196
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "지원하지 않는 “%s” 직렬화 형식\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:319
+#: src/tracker-extract/tracker-main.c:316
 msgid "— Extract file meta data"
 msgstr "— 파일 메타데이터를 추출합니다"
 
-#: src/tracker-extract/tracker-main.c:334
+#: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
 msgstr "파일 이름과 MIME 형식을 함께 제공해야 합니다"
+
+#: src/tracker-writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr "로그, 0 = 오류만, 1 = 최소, 2 = 자세히, 3 = 디버깅(기본값=0)"
+
+#: src/tracker-writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "30초 동안 아무런 반응이 없으면 시스템 종료를 비활성화"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— 트래커 라이트백 서비스를 시작합니다"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -760,7 +755,7 @@ msgstr "일시 정지 세부 사항을 가져올 수 없어, 관리자를 만들
 
 #: src/tracker/tracker-daemon.c:622
 msgid "No miners are running"
-msgstr "실행중인 수집기가 없습니다"
+msgstr "실행 중인 수집기가 없습니다"
 
 #. Display states
 #: src/tracker/tracker-daemon.c:662 src/tracker/tracker-daemon.c:779
@@ -850,12 +845,21 @@ msgstr "플러그인을 비활성화 했습니까?"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "인자가 없으면, 데이터 수집기 상태가 나타납니다"
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1430
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1084
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
+#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
 msgid "Unrecognized options"
 msgstr "인식할 수 없는 옵션"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-daemon.desktop.in:6
+msgid "daemon"
+msgstr "daemon"
+
+#: src/tracker/tracker-daemon.desktop.in:7
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr "각 내용을 색인처리하는 데몬을 시작, 정지, 다시시작, 상태조회 합니다"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -865,9 +869,18 @@ msgstr "D-Bus에 연결할 수 없습니다"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "tracker-store의 D-Bus 프록시를 만들 수 없습니다"
 
-#: src/tracker/tracker-extract.c:68
+#: src/tracker/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "tracker-extract를 실행할 수 없음: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-extract.desktop.in:6
+msgid "extract"
+msgstr "extract"
+
+#: src/tracker/tracker-extract.desktop.in:7
+msgid "Extract metadata from a file"
+msgstr "파일에서 메타데이터 추출"
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -913,11 +926,20 @@ msgstr "재귀"
 msgid "Please specify one or more locations to index."
 msgstr "색인 기록할 하나 이상의 위치를 지정하십시오."
 
-#: src/tracker/tracker-info.c:57
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-index.desktop.in:6
+msgid "index"
+msgstr "index"
+
+#: src/tracker/tracker-index.desktop.in:7
+msgid "Index content using the Tracker filesystem miner"
+msgstr "트래커 파일 시스템 수집기로 각 내용을 색인 처리합니다"
+
+#: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr "전체 이름공간 표시(예: nie:title을 사용하지 않고, 완전한 URL을 사용)"
 
-#: src/tracker/tracker-info.c:61
+#: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
 msgstr "자원으로 사용할 수 있을 경우 플레인 텍스트 내용 표시"
 
@@ -927,57 +949,50 @@ msgstr "자원으로 사용할 수 있을 경우 플레인 텍스트 내용 표�
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
 #.
-#: src/tracker/tracker-info.c:71
+#: src/tracker/tracker-info.c:79
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
 "(e.g. <file:///path/to/some/file.txt>)"
 msgstr ""
-"파일 이름을 찾기보다는 실제 IRI로  FILE 인자를 취급합니다(예: <file:///path/"
+"파일 이름을 찾기보다는 실제 IRI로 <파일> 인자를 취급합니다(예: <file:///path/"
 "to/some/file.txt> )"
 
-#: src/tracker/tracker-info.c:75
+#: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
 msgstr "Turtle 형식의 RDF로 결과를 출력합니다"
 
-#: src/tracker/tracker-info.c:79
+#: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
 msgstr "URL로 취급할 RDF 속성(예: “nie:url”)"
 
-#: src/tracker/tracker-info.c:160
-msgid "Unable to retrieve namespace prefixes"
-msgstr "이름 공간 접두어를 가져올 수 없습니다"
-
-#: src/tracker/tracker-info.c:168
-msgid "No namespace prefixes were returned"
-msgstr "반환한 이름공간 접두어가 없습니다"
-
-#: src/tracker/tracker-info.c:230 src/tracker/tracker-search.c:1184
-msgid "Results"
-msgstr "결과"
-
-#: src/tracker/tracker-info.c:414
+#: src/tracker/tracker-info.c:388
 msgid "Error message"
 msgstr "오류 메시지"
 
 #: src/tracker/tracker-info.c:471
-msgid "Querying information for entity"
-msgstr "엔티티에 대한 질의문 정보"
-
-#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "URI에 대한 URN을 가져올 수 없습니다"
 
-#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
+#: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
 msgstr "URI에 대한 데이터를 가져올 수 없습니다"
 
-#: src/tracker/tracker-info.c:562
+#: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
 msgstr "URI에 대해 사용할 수 있는 메타데이터가 없습니다"
 
-#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
+#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
 msgstr "적절한 상태 정보를 가져올 수 없습니다: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-info.desktop.in:6
+msgid "info"
+msgstr "info"
+
+#: src/tracker/tracker-info.desktop.in:7
+msgid "Retrieve all information available for a certain file"
+msgstr "각 파일의 모든 가용 정보를 가져옵니다"
 
 #: src/tracker/tracker-process.c:216
 #, c-format
@@ -1012,63 +1027,76 @@ msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "이 파일의 색인 데이터를 삭제하고 다시 색인 작업을 진행합니다."
 
-#: src/tracker/tracker-search.c:73
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-reset.desktop.in:6
+msgid "reset"
+msgstr "reset"
+
+#: src/tracker/tracker-reset.desktop.in:7
+msgid "Reset the index and configuration"
+msgstr "색인과 설정 정보를 초기화합니다"
+
+#: src/tracker/tracker-search.c:59
+msgid "Search for content matching TERMS, by type or across all types."
+msgstr "<용어>에 일치하는 내용을 형식별 또는 모든 형식을 대상으로 검색합니다."
+
+#: src/tracker/tracker-search.c:76
 msgid "Search for files"
 msgstr "파일 검색"
 
-#: src/tracker/tracker-search.c:77
+#: src/tracker/tracker-search.c:80
 msgid "Search for folders"
 msgstr "폴더 검색"
 
-#: src/tracker/tracker-search.c:81
+#: src/tracker/tracker-search.c:84
 msgid "Search for music files"
 msgstr "음악 파일 검색"
 
-#: src/tracker/tracker-search.c:85
+#: src/tracker/tracker-search.c:88
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "음악 앨범 검색(--all 옵션은 동작하지 않습니다)"
 
-#: src/tracker/tracker-search.c:89
+#: src/tracker/tracker-search.c:92
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "음악가 검색(--all옵션은 동작하지 않습니다)"
 
-#: src/tracker/tracker-search.c:93
+#: src/tracker/tracker-search.c:96
 msgid "Search for image files"
 msgstr "이미지 파일 검색"
 
-#: src/tracker/tracker-search.c:97
+#: src/tracker/tracker-search.c:100
 msgid "Search for video files"
 msgstr "동영상 파일 검색"
 
-#: src/tracker/tracker-search.c:101
+#: src/tracker/tracker-search.c:104
 msgid "Search for document files"
 msgstr "문서 파일 검색"
 
-#: src/tracker/tracker-search.c:105
+#: src/tracker/tracker-search.c:108
 msgid "Search for software (--all has no effect on this)"
 msgstr "프로그램 검색(--all 옵션은 동작하지 않습니다)"
 
-#: src/tracker/tracker-search.c:109
+#: src/tracker/tracker-search.c:112
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "프로그램 분류 검색(--all옵션은 동작하지 않습니다)"
 
-#: src/tracker/tracker-search.c:113
+#: src/tracker/tracker-search.c:116
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "피드 검색(--all 옵션은 동작하지 않습니다)"
 
-#: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
+#: src/tracker/tracker-search.c:125 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "표시할 결과값 갯수 제한"
 
-#: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
+#: src/tracker/tracker-search.c:129 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "결과 오프셋"
 
-#: src/tracker/tracker-search.c:127
+#: src/tracker/tracker-search.c:133
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "AND 대신 검색 단어에 OR 사용(기본값)"
 
-#: src/tracker/tracker-search.c:131
+#: src/tracker/tracker-search.c:137
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
@@ -1076,11 +1104,11 @@ msgstr ""
 "결과에 URN 표시(--music-albums, --music-artists, --feeds, --software, --"
 "software-categories에 적용하지 않음)"
 
-#: src/tracker/tracker-search.c:135
+#: src/tracker/tracker-search.c:141
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "없는 일치 요소도 반환합니다(예를 들어 마운트하지 않은 볼륨 포함)"
 
-#: src/tracker/tracker-search.c:139
+#: src/tracker/tracker-search.c:145
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
@@ -1088,85 +1116,102 @@ msgstr ""
 "결과 일부의 표시를 비활성화 합니다. 이 옵션으로는 문서, 음악과 같은 일부 분류"
 "에 대해서만 보여줍니다…"
 
-#: src/tracker/tracker-search.c:143
+#: src/tracker/tracker-search.c:149
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr ""
 "전문 검색을 비활성화 합니다(FTS). --disable-snippets가 생략되어 있습니다"
 
-#: src/tracker/tracker-search.c:147
+#: src/tracker/tracker-search.c:153
 msgid "Disable color when printing snippets and results"
 msgstr "내용 부분이나 결과를 출력할 때 색상 비활성화"
 
-#: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:58
+#: src/tracker/tracker-search.c:160 src/tracker/tracker-status.c:58
 msgid "search terms"
 msgstr "검색 단어"
 
-#: src/tracker/tracker-search.c:155 src/tracker/tracker-status.c:59
-msgid "EXPRESSION"
-msgstr "<표현식>"
+#: src/tracker/tracker-search.c:161
+msgid "TERMS"
+msgstr "<용어>"
 
-#: src/tracker/tracker-search.c:245 src/tracker/tracker-search.c:591
-#: src/tracker/tracker-search.c:683 src/tracker/tracker-search.c:775
-#: src/tracker/tracker-search.c:862 src/tracker/tracker-search.c:947
-#: src/tracker/tracker-search.c:1171
+#: src/tracker/tracker-search.c:251 src/tracker/tracker-search.c:641
+#: src/tracker/tracker-search.c:737 src/tracker/tracker-search.c:829
+#: src/tracker/tracker-search.c:918 src/tracker/tracker-search.c:1007
+#: src/tracker/tracker-search.c:1294
 msgid "Could not get search results"
 msgstr "검색 결과를 가져올 수 없습니다"
 
-#: src/tracker/tracker-search.c:254
+#: src/tracker/tracker-search.c:260
 msgid "No files were found"
 msgstr "파일을 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:258 src/tracker/tracker-tag.c:436
+#: src/tracker/tracker-search.c:264 src/tracker/tracker-tag.c:426
 msgid "Files"
 msgstr "파일"
 
-#: src/tracker/tracker-search.c:600
+#: src/tracker/tracker-search.c:650
 msgid "No artists were found"
 msgstr "음악가를 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:604
+#: src/tracker/tracker-search.c:654
 msgid "Artists"
 msgstr "음악가"
 
-#: src/tracker/tracker-search.c:692
+#: src/tracker/tracker-search.c:746
 msgid "No music was found"
 msgstr "음악을 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:696
+#: src/tracker/tracker-search.c:750
 msgid "Albums"
 msgstr "앨범"
 
-#: src/tracker/tracker-search.c:784
+#: src/tracker/tracker-search.c:838
 msgid "No feeds were found"
 msgstr "피드를 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:788
+#: src/tracker/tracker-search.c:842
 msgid "Feeds"
 msgstr "피드"
 
-#: src/tracker/tracker-search.c:871
+#: src/tracker/tracker-search.c:927
 msgid "No software was found"
 msgstr "프로그램을 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:875
+#: src/tracker/tracker-search.c:931
 msgid "Software"
 msgstr "프로그램"
 
-#: src/tracker/tracker-search.c:956
+#: src/tracker/tracker-search.c:1016
 msgid "No software categories were found"
 msgstr "프로그램 분류를 찾지 못했습니다"
 
-#: src/tracker/tracker-search.c:960
+#: src/tracker/tracker-search.c:1020
 msgid "Software Categories"
 msgstr "프로그램 분류"
 
-#: src/tracker/tracker-search.c:1180
+#: src/tracker/tracker-search.c:1303
 msgid "No results were found matching your query"
 msgstr "질의에 일치하는 결과를 찾지 못했습니다"
+
+#: src/tracker/tracker-search.c:1307
+msgid "Results"
+msgstr "결과"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-search.desktop.in:6
+msgid "search"
+msgstr "search"
+
+#: src/tracker/tracker-search.desktop.in:7
+msgid "Search for content by type or across all types"
+msgstr "모든 형식에 대해 또는 형식별 내용 검색"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "현재 인덱스 / 데이터 셋의 통계 표시"
+
+#: src/tracker/tracker-status.c:59
+msgid "EXPRESSION"
+msgstr "<표현식>"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
@@ -1206,9 +1251,9 @@ msgstr "통계:"
 #. *     None
 #. *
 #.
-#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:320
-#: src/tracker/tracker-tag.c:452 src/tracker/tracker-tag.c:574
-#: src/tracker/tracker-tag.c:953
+#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:310
+#: src/tracker/tracker-tag.c:442 src/tracker/tracker-tag.c:564
+#: src/tracker/tracker-tag.c:924
 msgid "None"
 msgstr "없음"
 
@@ -1224,7 +1269,7 @@ msgstr "메시지"
 msgid "Currently indexed"
 msgstr "현재 색인 기록함"
 
-#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:556
+#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:546
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
@@ -1262,6 +1307,15 @@ msgstr[0] "%d건을 실패로 기록했습니다"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "보고서를 찾지 못했습니다"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-status.desktop.in:6
+msgid "status"
+msgstr "status"
+
+#: src/tracker/tracker-status.desktop.in:7
+msgid "Provide status and statistics on the data indexed"
+msgstr "색인 처리한 데이터의 상태 및 통계를 제공합니다"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1324,128 +1378,153 @@ msgstr ""
 msgid "Could not get file URNs"
 msgstr "파일 URN을 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:311
+#: src/tracker/tracker-tag.c:301
 msgid "Could not get files related to tag"
 msgstr "태그와 관련된 파일을 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:378
+#: src/tracker/tracker-tag.c:368
 msgid "Could not get all tags in the database"
 msgstr "데이터베이스에서 모든 태그를 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:388
+#: src/tracker/tracker-tag.c:378
 msgid "No files have been tagged"
 msgstr "태그를 붙인 파일이 없습니다"
 
-#: src/tracker/tracker-tag.c:423
+#: src/tracker/tracker-tag.c:413
 msgid "Could not get files for matching tags"
 msgstr "태그와 일치하는 파일을 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:432
+#: src/tracker/tracker-tag.c:422
 msgid "No files were found matching ALL of those tags"
 msgstr "이 태그에 완전히 일치하는 파일이 없습니다"
 
-#: src/tracker/tracker-tag.c:511 src/tracker/tracker-tag.c:927
+#: src/tracker/tracker-tag.c:501 src/tracker/tracker-tag.c:898
 msgid "Could not get all tags"
 msgstr "모든 태그를 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:520 src/tracker/tracker-tag.c:936
+#: src/tracker/tracker-tag.c:510 src/tracker/tracker-tag.c:907
 msgid "No tags were found"
 msgstr "찾은 태그가 없습니다"
 
-#: src/tracker/tracker-tag.c:524
+#: src/tracker/tracker-tag.c:514
 msgid "Tags (shown by name)"
 msgstr "태그(이름으로 표시)"
 
-#: src/tracker/tracker-tag.c:598
+#: src/tracker/tracker-tag.c:589
 msgid "No files were modified"
 msgstr "수정한 파일이 없습니다"
 
-#: src/tracker/tracker-tag.c:648 src/tracker/tracker-tag.c:656
+#: src/tracker/tracker-tag.c:633 src/tracker/tracker-tag.c:641
 msgid "Files do not exist or aren’t indexed"
 msgstr "파일이 없거나 색인 기록하지 않았습니다"
 
-#: src/tracker/tracker-tag.c:706
+#: src/tracker/tracker-tag.c:682
 msgid "Could not add tag"
 msgstr "태그를 추가할 수 없습니다"
 
-#: src/tracker/tracker-tag.c:722
+#: src/tracker/tracker-tag.c:694
 msgid "Tag was added successfully"
 msgstr "태그를 성공적으로 추가했습니다"
 
-#: src/tracker/tracker-tag.c:751
+#: src/tracker/tracker-tag.c:724
 msgid "Could not add tag to files"
 msgstr "파일에 태그를 추가할 수 없습니다"
 
-#: src/tracker/tracker-tag.c:761
+#: src/tracker/tracker-tag.c:735
 msgid "Tagged"
 msgstr "태그됨"
 
-#: src/tracker/tracker-tag.c:762
+#: src/tracker/tracker-tag.c:736
 msgid "Not tagged, file is not indexed"
 msgstr "태그 안됨, 파일을 색인 기록하지 않음"
 
-#: src/tracker/tracker-tag.c:808
+#: src/tracker/tracker-tag.c:778
 msgid "Could not get tag by label"
 msgstr "레이블에서 태그를 가져올 수 없습니다"
 
-#: src/tracker/tracker-tag.c:819
+#: src/tracker/tracker-tag.c:789
 msgid "No tags were found by that name"
 msgstr "이름에서 태그를 찾을 수 없습니다"
 
-#: src/tracker/tracker-tag.c:836
+#: src/tracker/tracker-tag.c:807
 msgid "None of the files had this tag set"
 msgstr "이 태그를 설정한 파일이 없습니다"
 
-#: src/tracker/tracker-tag.c:882
+#: src/tracker/tracker-tag.c:854
 msgid "Could not remove tag"
 msgstr "태그를 제거할 수 없습니다"
 
-#: src/tracker/tracker-tag.c:890
+#: src/tracker/tracker-tag.c:862
 msgid "Tag was removed successfully"
 msgstr "태그를 성공적으로 제거했습니다"
 
-#: src/tracker/tracker-tag.c:894
+#: src/tracker/tracker-tag.c:866
 msgid "Untagged"
 msgstr "태그 안됨"
 
-#: src/tracker/tracker-tag.c:895
+#: src/tracker/tracker-tag.c:867
 msgid "File not indexed or already untagged"
 msgstr "파일을 색인 기록하지 않았거나 이미 태그를 해제했습니다"
 
-#: src/tracker/tracker-tag.c:1093
+#: src/tracker/tracker-tag.c:1064
 msgid "The --list option is required for --show-files"
 msgstr "--show-files 사용에 --list 옵션이 필요합니다"
 
-#: src/tracker/tracker-tag.c:1095
+#: src/tracker/tracker-tag.c:1066
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
 "--and-operator 옵션은 --list와 태그 레이블 인자하고만 사용할 수 있습니다"
 
-#: src/tracker/tracker-tag.c:1097
+#: src/tracker/tracker-tag.c:1068
 msgid "Add and delete actions can not be used together"
 msgstr "추가 삭제 동작은 함께 사용할 수 없습니다"
 
-#: src/tracker/tracker-tag.c:1099
+#: src/tracker/tracker-tag.c:1070
 msgid "The --description option can only be used with --add"
 msgstr "--description 옵션은 --add하고만 사용할 수 있습니다"
 
-#: src/tracker-writeback/tracker-main.c:52
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr "로그, 0 = 오류만, 1 = 최소, 2 = 자세히, 3 = 디버깅(기본값=0)"
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-tag.desktop.in:6
+msgid "tag"
+msgstr "tag"
 
-#: src/tracker-writeback/tracker-main.c:59
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "30초 동안 아무런 반응이 없으면 시스템 종료를 비활성화"
+#: src/tracker/tracker-tag.desktop.in:7
+msgid "Add, remove and list tags"
+msgstr "태그를 추가, 제거, 나열합니다"
 
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:85
-msgid "— start the tracker writeback service"
-msgstr "— 트래커 라이트백 서비스를 시작합니다"
+#~ msgid "Ignore stop words"
+#~ msgstr "정지 단어 무시"
+
+#~ msgid ""
+#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
+#~ "common words like “the”, “yes”, “no”, etc."
+#~ msgstr ""
+#~ "이 항목을 활성화 하면, 정지 단어 목록에 있는 단어는 무시합니다. 예: 일반적"
+#~ "인 단어 “the”, “yes”, “no”, 등."
+
+#~ msgid "Index applications installed on the system"
+#~ msgstr "설치한 프로그램 정보를 색인 기록합니다"
+
+#~ msgid ""
+#~ "If this option is enabled, the filesystem miner will look for .desktop "
+#~ "files in the standard XDG system and user data directories."
+#~ msgstr ""
+#~ "이 옵션을 활성화하면, 파일 시스템 수집기에서 표준 XDG 시스템과 사용자 데이"
+#~ "터 디렉터리에서 .desktop 파일을 찾습니다."
+
+#~ msgid "Operation not supported"
+#~ msgstr "동작을 지원하지 않습니다"
+
+#~ msgid "Unable to retrieve namespace prefixes"
+#~ msgstr "이름 공간 접두어를 가져올 수 없습니다"
+
+#~ msgid "No namespace prefixes were returned"
+#~ msgstr "반환한 이름공간 접두어가 없습니다"
+
+#~ msgid "Querying information for entity"
+#~ msgstr "엔티티에 대한 질의문 정보"
 
 #~ msgid "unknown time"
 #~ msgstr "알 수 없는 시간"
