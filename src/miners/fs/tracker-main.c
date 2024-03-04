@@ -36,7 +36,9 @@
 #include <glib-object.h>
 #include <glib/gi18n.h>
 
+#if defined(HAVE_GSTREAMER)
 #include <gst/gst.h>
+#endif
 
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-sparql/tracker-sparql.h>
@@ -778,7 +780,9 @@ main (gint argc, gchar *argv[])
 	/* Preempt possible registry updates, before tracker-extract-3 deals
 	 * with gstreamer plugins.
 	 */
+#if defined(HAVE_GSTREAMER)
 	gst_init (NULL, NULL);
+#endif
 
 	/* Translators: this messagge will apper immediately after the
 	 * usage string - Usage: COMMAND <THIS_MESSAGE>
