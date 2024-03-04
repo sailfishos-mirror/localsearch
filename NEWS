@@ -1,3 +1,14 @@
+NEW in 3.7.rc - 2024-03-04
+==========================
+  * Fix execution permissions of `tracker-extract-3` executable
+    under Landlock
+  * Further syscall rules in the seccomp sandbox
+  * Fix build with several combinations of options
+  * Update `tracker3 tag` man page
+
+Translations: be, cs, en_GB, es, eu, fa, fr, gl, he, hu, id, ka, kk,
+  ko, lt, lv, pl, ru, sl, tr, zh_CN
+
 NEW in 3.7.beta - 2024-02-13
 ============================
   * Install CLI subcommands as expected by Tracker 3.7.beta
