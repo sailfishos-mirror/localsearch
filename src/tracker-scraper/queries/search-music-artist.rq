@@ -1,0 +1,26 @@
+# SPDX-FileCopyrightText: 2024 Carlos Garnacho <carlosg@gnome.org>
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+SELECT ?remoteArtist ?remoteDesc {
+  SERVICE <https://query.wikidata.org/sparql> {
+    # Invoke search service
+    SERVICE wikibase:mwapi {
+      bd:serviceParam wikibase:endpoint "www.wikidata.org" ;
+        wikibase:api "EntitySearch" ;
+        mwapi:search ~localName ;
+        mwapi:language "en" . # FIXME
+
+      ?remoteArtist wikibase:apiOutputItem mwapi:item.
+      ?remoteDesc wikibase:apiOutput "display/description/@value".
+    }
+
+    {
+      # Artist is an instance of (a subclass of) musical group
+      ?remoteArtist wdt:P31/wdt:P279* wd:Q215380 .
+    } UNION {
+      # Artist's occupation is composer
+      ?remoteArtist wdt:P106 wd:Q36834 .
+    }
+  }
+}

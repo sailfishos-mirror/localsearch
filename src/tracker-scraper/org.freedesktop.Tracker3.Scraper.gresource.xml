@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/freedesktop/Tracker3/Scraper">
+    <file>queries/complete-music-artist.rq</file>
+    <file>queries/local-music-artists.rq</file>
+    <file>queries/search-music-artist.rq</file>
   </gresource>
 </gresources>

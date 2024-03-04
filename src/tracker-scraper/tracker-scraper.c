@@ -67,10 +67,12 @@ static void next_item (TrackerScraper *scraper);
 static void next_operation (TrackerScraper *scraper);
 
 enum {
+	MUSIC_ARTISTS,
 	N_OPERATIONS,
 };
 
 Operation operations[] = {
+	{ "local-music-artists.rq", NULL, "search-music-artist.rq", "complete-music-artist.rq" },
 };
 
 G_STATIC_ASSERT (G_N_ELEMENTS (operations) == N_OPERATIONS);

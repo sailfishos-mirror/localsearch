@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2024 Carlos Garnacho <carlosg@gnome.org>
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+DELETE {
+  GRAPH tracker:Audio {
+    ~resource tracker:hasExternalReference ?extRef ;
+      nfo:depiction ?depiction ;
+      nco:websiteUrl ?websiteUrl .
+
+    ?extRef a rdfs:Resource .
+    ?depiction a rdfs:Resource .
+    ?websiteUrl a rdfs:Resource .
+  }
+} INSERT {
+  GRAPH tracker:Audio {
+    ~resource tracker:hasExternalReference [
+        a tracker:ExternalReference ;
+        tracker:referenceSource <https://www.wikidata.org/wiki/> ;
+        tracker:referenceIdentifier ~remoteArtist
+      ] ;
+      nfo:depiction [ a nfo:Image ; nie:isStoredAs ?image ] ;
+      nco:websiteUrl ?website ;
+      nie:description ~remoteDesc .
+  }
+} WHERE {
+  SERVICE <https://query.wikidata.org/sparql> {
+    BIND (URI(~remoteArtist) AS ?artist) .
+    # Website
+    OPTIONAL { ?artist wdt:P856 ?website } .
+    # Image
+    OPTIONAL { ?artist wdt:P18 ?image } .
+  }
+}

@@ -1,0 +1,9 @@
+# SPDX-FileCopyrightText: 2024 Carlos Garnacho <carlosg@gnome.org>
+#
+# SPDX-License-Identifier: LGPL-2.1-or-later
+
+SELECT ?resource ?localName {
+  ?resource a nmm:Artist ;
+    nmm:artistName ?localName .
+  FILTER (! EXISTS { ?resource tracker:hasExternalReference [ tracker:referenceSource <https://www.wikidata.org/wiki/> ]})
+}
