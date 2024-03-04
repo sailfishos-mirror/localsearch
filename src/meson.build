@@ -4,6 +4,7 @@ subdir('libtracker-extract')
 
 # Public miners
 subdir('miners')
+subdir('tracker-scraper')
 
 # Public data extract tool & modules
 if get_option('extract')
