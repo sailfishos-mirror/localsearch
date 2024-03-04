@@ -64,7 +64,7 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2021-08-04.1'
+    BASE_TAG: '2023-03-04.2'
     FDO_UPSTREAM_REPO: GNOME/tracker
     FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
@@ -77,7 +77,7 @@ check-merge-request:
 
 .tracker-miners.ubuntu@common:
   variables:
-    BASE_TAG: '2021-08-04.0'
+    BASE_TAG: '2023-03-04.2'
     FDO_UPSTREAM_REPO: GNOME/tracker
     FDO_DISTRIBUTION_PACKAGES: 'python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
     FDO_DISTRIBUTION_EXEC: |
