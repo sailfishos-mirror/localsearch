@@ -9,9 +9,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker-miners/issues\n"
-"POT-Creation-Date: 2023-07-14 09:05+0000\n"
-"PO-Revision-Date: 2023-08-17 14:27+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
+"POT-Creation-Date: 2024-02-11 19:14+0000\n"
+"PO-Revision-Date: 2024-03-05 22:37+0100\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -19,7 +19,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.3.2\n"
+"X-Generator: Poedit 3.4.2\n"
 "X-Project-Style: gnome\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -314,87 +314,82 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d sekund"
 msgstr[1] " %2.2d sekunder"
 
-#: src/miners/fs/tracker-data-provider.c:108
-#: src/miners/fs/tracker-data-provider.c:168
-msgid "Operation not supported"
-msgstr "Åtgärd stöds ej"
-
-#: src/miners/fs/tracker-main.c:80
+#: src/miners/fs/tracker-main.c:82
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Initial sovtid i sekunder, 0->1000 (standard=15)"
 
-#: src/miners/fs/tracker-main.c:85
+#: src/miners/fs/tracker-main.c:87
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Körs till alla konfigurerade platser är indexerade och avslutar sedan"
 
-#: src/miners/fs/tracker-main.c:89 src/tracker/tracker-info.c:83
+#: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Kontrollerar om FIL är lämplig för att insamlas baserad på konfiguration"
 
-#: src/miners/fs/tracker-main.c:90 src/tracker-extract/tracker-main.c:83
-#: src/tracker/tracker-extract.c:42 src/tracker/tracker-extract.c:43
+#: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
+#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
 #: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
-#: src/tracker/tracker-info.c:86 src/tracker/tracker-info.c:87
+#: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FIL"
 
-#: src/miners/fs/tracker-main.c:93 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:95 src/miners/rss/tracker-main.c:63
+#: src/tracker-extract/tracker-main.c:96
 msgid "Runs for a specific domain ontology"
 msgstr "Körs för en specifik domänontologi"
 
-#: src/miners/fs/tracker-main.c:97
+#: src/miners/fs/tracker-main.c:99
 msgid "Avoids changes in the filesystem"
 msgstr "Undviker ändringar på filsystemet"
 
-#: src/miners/fs/tracker-main.c:101 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:101
+#: src/miners/fs/tracker-main.c:103 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:104
 #: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Visar versionsinformation"
 
-#: src/miners/fs/tracker-main.c:638
+#: src/miners/fs/tracker-main.c:483
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Dataobjektet ”%s” finns för tillfället"
 
-#: src/miners/fs/tracker-main.c:639
+#: src/miners/fs/tracker-main.c:484
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Dataobjektet ”%s” finns inte för tillfället"
 
-#: src/miners/fs/tracker-main.c:677
+#: src/miners/fs/tracker-main.c:494
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Katalogen kvalificerar INTE till att indexeras (baserat på filter)"
 
-#: src/miners/fs/tracker-main.c:681
+#: src/miners/fs/tracker-main.c:498
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Filen kvalificerar INTE till att indexeras (baserat på filter)"
 
-#: src/miners/fs/tracker-main.c:684
+#: src/miners/fs/tracker-main.c:501
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Filen kvalificerar INTE till att indexeras (dold fil)"
 
-#: src/miners/fs/tracker-main.c:686
+#: src/miners/fs/tracker-main.c:503
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Filen kvalificerar INTE till att indexeras (inte en indexerad mapp)"
 
-#: src/miners/fs/tracker-main.c:710
+#: src/miners/fs/tracker-main.c:527
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (baserat på "
 "filter)"
 
-#: src/miners/fs/tracker-main.c:716
+#: src/miners/fs/tracker-main.c:533
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (dold fil)"
 
-#: src/miners/fs/tracker-main.c:724
+#: src/miners/fs/tracker-main.c:539
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -403,18 +398,18 @@ msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (baserat på "
 "innehållsfilter)"
 
-#: src/miners/fs/tracker-main.c:745
+#: src/miners/fs/tracker-main.c:558
 msgid "Directory is eligible to be indexed"
 msgstr "Katalogen kvalificerar till att indexeras"
 
-#: src/miners/fs/tracker-main.c:746
+#: src/miners/fs/tracker-main.c:559
 msgid "File is eligible to be indexed"
 msgstr "Filen kvalificerar till att indexeras"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:1073
+#: src/miners/fs/tracker-main.c:786
 msgid "— start the tracker indexer"
 msgstr "— starta tracker-indexeraren"
 
@@ -442,8 +437,8 @@ msgid "Delete feed"
 msgstr "Ta bort flöde"
 
 #: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
-#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:446
-#: src/tracker/tracker-search.c:1371 src/tracker/tracker-status.c:92
+#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
+#: src/tracker/tracker-search.c:1377 src/tracker/tracker-status.c:92
 #: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "Kunde inte etablera en anslutning till Tracker"
@@ -454,8 +449,8 @@ msgstr "Kunde inte etablera en anslutning till Tracker"
 #: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:447 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1372 src/tracker/tracker-status.c:93
+#: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
+#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:93
 #: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
 #: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
 msgid "No error given"
@@ -487,57 +482,83 @@ msgstr "— starta webbflödesindexeraren"
 msgid "— start the tracker index proxy"
 msgstr "— starta proxy för tracker-indexeraren"
 
-#: src/tracker-extract/tracker-extract.c:697
+#: src/tracker-extract/tracker-extract.c:712
 msgid "Metadata extraction failed"
 msgstr "Misslyckades med extrahering av metadata"
 
-#: src/tracker-extract/tracker-extract.c:776
+#: src/tracker-extract/tracker-extract.c:794
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Fann inga metadata- eller extraherarmoduler som kan hantera denna fil"
 
-#: src/tracker-extract/tracker-main.c:82
+#: src/tracker-extract/tracker-main.c:81
 msgid "File to extract metadata for"
 msgstr "Fil att extrahera metadata för"
 
-#: src/tracker-extract/tracker-main.c:86
+#: src/tracker-extract/tracker-main.c:85
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "MIME-typ för filen (kommer att gissas om inte angivet)"
 
-#: src/tracker-extract/tracker-main.c:87
+#: src/tracker-extract/tracker-main.c:86
 msgid "MIME"
 msgstr "MIME"
 
-#: src/tracker-extract/tracker-main.c:90
+#: src/tracker-extract/tracker-main.c:89
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr ""
 "Tvinga en modul att användas för extrahering (t.ex. ”foo” för ”foo.so”)"
 
-#: src/tracker-extract/tracker-main.c:91
+#: src/tracker-extract/tracker-main.c:90
 msgid "MODULE"
 msgstr "MODUL"
 
-#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:39
+#: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Format för utdataresultat: ”sparql”, ”turtle” eller ”json-ld”"
 
-#: src/tracker-extract/tracker-main.c:94 src/tracker/tracker-extract.c:40
+#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:43
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/tracker-extract/tracker-main.c:212
+#: src/tracker-extract/tracker-main.c:100
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "Filhandtag för uttag för P2P-kommunikation"
+
+#: src/tracker-extract/tracker-main.c:101
+msgid "FD"
+msgstr "FD"
+
+#: src/tracker-extract/tracker-main.c:196
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Serialiseringsformatet ”%s” stöds inte\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:342
+#: src/tracker-extract/tracker-main.c:316
 msgid "— Extract file meta data"
 msgstr "— Extrahera filmetadata"
 
-#: src/tracker-extract/tracker-main.c:357
+#: src/tracker-extract/tracker-main.c:331
 msgid "Filename and mime type must be provided together"
 msgstr "Filnamn och mime-typ måste anges tillsammans"
+
+#: src/tracker-writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr ""
+"Loggning, 0 = endast fel, 1 = minimal, 2 = detaljerad samt 3 = felsökning "
+"(standard=0)"
+
+#: src/tracker-writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "Inaktivera avstängning efter 30 sekunders inaktivitet"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/tracker-writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— starta trackers skrivtjänst"
 
 #: src/tracker/tracker-daemon.c:98
 msgid "Unavailable"
@@ -843,12 +864,23 @@ msgstr "kanske en inaktiverad insticksmodul?"
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Om inga argument ges visas statusen för datainsamlarna"
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:128
-#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:645
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1547
+#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
+#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
+#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
 #: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
 msgid "Unrecognized options"
 msgstr "Okända flaggor"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-daemon.desktop.in:6
+msgid "daemon"
+msgstr "daemon"
+
+#: src/tracker/tracker-daemon.desktop.in:7
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr ""
+"Starta, stoppa, starta om och lista demoner ansvariga för att indexera "
+"innehåll"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -858,9 +890,19 @@ msgstr "Kunde inte etablera en D-Bus-anslutning"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Kunde inte etablera en D-Bus-proxy till tracker-store"
 
-#: src/tracker/tracker-extract.c:68
+#: src/tracker/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "Kunde inte köra tracker-extract: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-extract.desktop.in:6
+#| msgid "Extractor"
+msgid "extract"
+msgstr "extract"
+
+#: src/tracker/tracker-extract.desktop.in:7
+msgid "Extract metadata from a file"
+msgstr "Extrahera metadata från en fil"
 
 #: src/tracker/tracker-index.c:50
 msgid "Adds FILE as an indexed location"
@@ -906,13 +948,23 @@ msgstr "Rekursiv"
 msgid "Please specify one or more locations to index."
 msgstr "Ange en eller flera platser att indexera."
 
-#: src/tracker/tracker-info.c:57
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-index.desktop.in:6
+#| msgid "Reindex"
+msgid "index"
+msgstr "index"
+
+#: src/tracker/tracker-index.desktop.in:7
+msgid "Index content using the Tracker filesystem miner"
+msgstr "Indexera innehåll med filsystemsdatainsamlaren Tracker"
+
+#: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Visa fullständiga namnrymder (använd alltså inte nie:title, använd "
 "fullständiga URL:er)"
 
-#: src/tracker/tracker-info.c:61
+#: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
 msgstr "Visa textinnehåll om tillgängligt för resurser"
 
@@ -922,7 +974,7 @@ msgstr "Visa textinnehåll om tillgängligt för resurser"
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
 #.
-#: src/tracker/tracker-info.c:71
+#: src/tracker/tracker-info.c:79
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs "
 "(e.g. <file:///path/to/some/file.txt>)"
@@ -930,49 +982,42 @@ msgstr ""
 "I stället för att slå upp ett filnamn, behandla FIL-argument som IRI:er (t."
 "ex. <file:///sökväg/till/någon/fil.txt>)"
 
-#: src/tracker/tracker-info.c:75
+#: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
 msgstr "Visa resultat som RDF i Turtle-format"
 
-#: src/tracker/tracker-info.c:79
+#: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
 msgstr "RDF-egenskap att behandla som URL (t.ex. ”nie:url”)"
 
-#: src/tracker/tracker-info.c:160
-msgid "Unable to retrieve namespace prefixes"
-msgstr "Kunde inte hämta namnrymdsprefix"
-
-#: src/tracker/tracker-info.c:168
-msgid "No namespace prefixes were returned"
-msgstr "Inga namnrymdsprefix returnerades"
-
-#: src/tracker/tracker-info.c:230 src/tracker/tracker-search.c:1301
-msgid "Results"
-msgstr "Resultat"
-
-#: src/tracker/tracker-info.c:414
+#: src/tracker/tracker-info.c:388
 msgid "Error message"
 msgstr "Felmeddelande"
 
 #: src/tracker/tracker-info.c:471
-msgid "Querying information for entity"
-msgstr "Frågar efter information för entiteten"
-
-#: src/tracker/tracker-info.c:495
 msgid "Unable to retrieve URN for URI"
 msgstr "Kunde inte hämta URN för URI"
 
-#: src/tracker/tracker-info.c:505 src/tracker/tracker-info.c:539
+#: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
 msgstr "Kunde inte hämta data för URI"
 
-#: src/tracker/tracker-info.c:562
+#: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
 msgstr "Inget metadata tillgänglig för denna URI"
 
-#: src/tracker/tracker-info.c:567 src/tracker/tracker-info.c:601
+#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
 msgstr "Kunde inte få tag på lämplighetsstatus: "
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-info.desktop.in:6
+msgid "info"
+msgstr "info"
+
+#: src/tracker/tracker-info.desktop.in:7
+msgid "Retrieve all information available for a certain file"
+msgstr "Erhåll all information som finns tillgänglig för en tillgänglig fil"
 
 #: src/tracker/tracker-process.c:216
 #, c-format
@@ -1009,63 +1054,76 @@ msgid ""
 msgstr ""
 "Indexerade data för denna fil har tagits bort och kommer att omindexeras."
 
-#: src/tracker/tracker-search.c:73
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-reset.desktop.in:6
+msgid "reset"
+msgstr "reset"
+
+#: src/tracker/tracker-reset.desktop.in:7
+msgid "Reset the index and configuration"
+msgstr "Återställer index och konfiguration"
+
+#: src/tracker/tracker-search.c:59
+msgid "Search for content matching TERMS, by type or across all types."
+msgstr "Sök efter innehåll som matchar TERMER, efter typ eller i alla typer."
+
+#: src/tracker/tracker-search.c:76
 msgid "Search for files"
 msgstr "Sök efter filer"
 
-#: src/tracker/tracker-search.c:77
+#: src/tracker/tracker-search.c:80
 msgid "Search for folders"
 msgstr "Sök efter mappar"
 
-#: src/tracker/tracker-search.c:81
+#: src/tracker/tracker-search.c:84
 msgid "Search for music files"
 msgstr "Sök efter musikfiler"
 
-#: src/tracker/tracker-search.c:85
+#: src/tracker/tracker-search.c:88
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "Sök efter musikalbum (--all har ingen effekt på denna)"
 
-#: src/tracker/tracker-search.c:89
+#: src/tracker/tracker-search.c:92
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "Sök efter musikartister (--all har ingen effekt på denna)"
 
-#: src/tracker/tracker-search.c:93
+#: src/tracker/tracker-search.c:96
 msgid "Search for image files"
 msgstr "Sök efter bildfiler"
 
-#: src/tracker/tracker-search.c:97
+#: src/tracker/tracker-search.c:100
 msgid "Search for video files"
 msgstr "Sök efter videofiler"
 
-#: src/tracker/tracker-search.c:101
+#: src/tracker/tracker-search.c:104
 msgid "Search for document files"
 msgstr "Sök efter dokumentfiler"
 
-#: src/tracker/tracker-search.c:105
+#: src/tracker/tracker-search.c:108
 msgid "Search for software (--all has no effect on this)"
 msgstr "Sök efter program (--all har ingen effekt på denna)"
 
-#: src/tracker/tracker-search.c:109
+#: src/tracker/tracker-search.c:112
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "Sök efter programkategorier (--all har ingen effekt på denna)"
 
-#: src/tracker/tracker-search.c:113
+#: src/tracker/tracker-search.c:116
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "Sök efter webbflöden (--all har ingen effekt på denna)"
 
-#: src/tracker/tracker-search.c:119 src/tracker/tracker-tag.c:71
+#: src/tracker/tracker-search.c:125 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "Begränsa antalet visade resultat"
 
-#: src/tracker/tracker-search.c:123 src/tracker/tracker-tag.c:75
+#: src/tracker/tracker-search.c:129 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "Positionera resultat"
 
-#: src/tracker/tracker-search.c:127
+#: src/tracker/tracker-search.c:133
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "Använd OR för söktermer i stället för AND (standard)"
 
-#: src/tracker/tracker-search.c:131
+#: src/tracker/tracker-search.c:137
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
@@ -1073,13 +1131,13 @@ msgstr ""
 "Visa URN:er för resultat (gäller inte för --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
 
-#: src/tracker/tracker-search.c:135
+#: src/tracker/tracker-search.c:141
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Returnera även alla icke-existerande matchningar (inkludera alltså "
 "avmonterade volymer)"
 
-#: src/tracker/tracker-search.c:139
+#: src/tracker/tracker-search.c:145
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
@@ -1087,84 +1145,102 @@ msgstr ""
 "Inaktivera att visa textsnuttar med resultat. Detta visas endast för vissa "
 "kategorier, t.ex. dokument, musik…"
 
-#: src/tracker/tracker-search.c:143
+#: src/tracker/tracker-search.c:149
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr "Inaktivera fulltextsökning (FTS). Implicerar --disable-snippets"
 
-#: src/tracker/tracker-search.c:147
+#: src/tracker/tracker-search.c:153
 msgid "Disable color when printing snippets and results"
 msgstr "Inaktivera färg vid utskrift av textsnuttar och resultat"
 
-#: src/tracker/tracker-search.c:154 src/tracker/tracker-status.c:58
+#: src/tracker/tracker-search.c:160 src/tracker/tracker-status.c:58
 msgid "search terms"
 msgstr "sökvillkor"
 
-#: src/tracker/tracker-search.c:155 src/tracker/tracker-status.c:59
-msgid "EXPRESSION"
-msgstr "UTTRYCK"
+#: src/tracker/tracker-search.c:161
+msgid "TERMS"
+msgstr "TERMER"
 
-#: src/tracker/tracker-search.c:245 src/tracker/tracker-search.c:635
-#: src/tracker/tracker-search.c:731 src/tracker/tracker-search.c:823
-#: src/tracker/tracker-search.c:912 src/tracker/tracker-search.c:1001
-#: src/tracker/tracker-search.c:1288
+#: src/tracker/tracker-search.c:251 src/tracker/tracker-search.c:641
+#: src/tracker/tracker-search.c:737 src/tracker/tracker-search.c:829
+#: src/tracker/tracker-search.c:918 src/tracker/tracker-search.c:1007
+#: src/tracker/tracker-search.c:1294
 msgid "Could not get search results"
 msgstr "Kunde inte få tag på sökresultaten"
 
-#: src/tracker/tracker-search.c:254
+#: src/tracker/tracker-search.c:260
 msgid "No files were found"
 msgstr "Inga filer hittades"
 
-#: src/tracker/tracker-search.c:258 src/tracker/tracker-tag.c:426
+#: src/tracker/tracker-search.c:264 src/tracker/tracker-tag.c:426
 msgid "Files"
 msgstr "Filer"
 
-#: src/tracker/tracker-search.c:644
+#: src/tracker/tracker-search.c:650
 msgid "No artists were found"
 msgstr "Inga artister hittades"
 
-#: src/tracker/tracker-search.c:648
+#: src/tracker/tracker-search.c:654
 msgid "Artists"
 msgstr "Artister"
 
-#: src/tracker/tracker-search.c:740
+#: src/tracker/tracker-search.c:746
 msgid "No music was found"
 msgstr "Ingen musik hittades"
 
-#: src/tracker/tracker-search.c:744
+#: src/tracker/tracker-search.c:750
 msgid "Albums"
 msgstr "Album"
 
-#: src/tracker/tracker-search.c:832
+#: src/tracker/tracker-search.c:838
 msgid "No feeds were found"
 msgstr "Inga webbflöden hittades"
 
-#: src/tracker/tracker-search.c:836
+#: src/tracker/tracker-search.c:842
 msgid "Feeds"
 msgstr "Webbflöden"
 
-#: src/tracker/tracker-search.c:921
+#: src/tracker/tracker-search.c:927
 msgid "No software was found"
 msgstr "Inga program hittades"
 
-#: src/tracker/tracker-search.c:925
+#: src/tracker/tracker-search.c:931
 msgid "Software"
 msgstr "Program"
 
-#: src/tracker/tracker-search.c:1010
+#: src/tracker/tracker-search.c:1016
 msgid "No software categories were found"
 msgstr "Inga programkategorier hittades"
 
-#: src/tracker/tracker-search.c:1014
+#: src/tracker/tracker-search.c:1020
 msgid "Software Categories"
 msgstr "Programkategorier"
 
-#: src/tracker/tracker-search.c:1297
+#: src/tracker/tracker-search.c:1303
 msgid "No results were found matching your query"
 msgstr "Inga resultat hittades som matchade din sökfråga"
+
+#: src/tracker/tracker-search.c:1307
+msgid "Results"
+msgstr "Resultat"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-search.desktop.in:6
+#| msgid "_Search:"
+msgid "search"
+msgstr "search"
+
+#: src/tracker/tracker-search.desktop.in:7
+msgid "Search for content by type or across all types"
+msgstr "Sök efter innehåll efter typ eller i alla typer"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Visa statistik om aktuellt index/ data"
+
+#: src/tracker/tracker-status.c:59
+msgid "EXPRESSION"
+msgstr "UTTRYCK"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
@@ -1263,6 +1339,15 @@ msgstr[1] "%d dokumenterade fel"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Inga rapporter hittades"
+
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-status.desktop.in:6
+msgid "status"
+msgstr "status"
+
+#: src/tracker/tracker-status.desktop.in:7
+msgid "Provide status and statistics on the data indexed"
+msgstr "Tillhandahåll status och statistik om indexerade data"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1430,23 +1515,28 @@ msgstr "Åtgärder för att lägga till och ta bort kan inte användas samtidigt
 msgid "The --description option can only be used with --add"
 msgstr "Flaggan --description kan endast användas med --add"
 
-#: src/tracker-writeback/tracker-main.c:54
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr ""
-"Loggning, 0 = endast fel, 1 = minimal, 2 = detaljerad samt 3 = felsökning "
-"(standard=0)"
+#. Translators: This is a CLI command name that should not be translated.
+#: src/tracker/tracker-tag.desktop.in:6
+#| msgid "Tag"
+#| msgid_plural "Tags"
+msgid "tag"
+msgstr "tag"
 
-#: src/tracker-writeback/tracker-main.c:61
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "Inaktivera avstängning efter 30 sekunders inaktivitet"
+#: src/tracker/tracker-tag.desktop.in:7
+msgid "Add, remove and list tags"
+msgstr "Lägg till, ta bort och lista taggar"
 
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:93
-msgid "— start the tracker writeback service"
-msgstr "— starta trackers skrivtjänst"
+#~ msgid "Operation not supported"
+#~ msgstr "Åtgärd stöds ej"
+
+#~ msgid "Unable to retrieve namespace prefixes"
+#~ msgstr "Kunde inte hämta namnrymdsprefix"
+
+#~ msgid "No namespace prefixes were returned"
+#~ msgstr "Inga namnrymdsprefix returnerades"
+
+#~ msgid "Querying information for entity"
+#~ msgstr "Frågar efter information för entiteten"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Ignorera stoppord"
@@ -1554,17 +1644,11 @@ msgstr "— starta trackers skrivtjänst"
 #~ msgid "Fetch RSS/ATOM feeds"
 #~ msgstr "Hämta RSS/ATOM-flöden"
 
-#~ msgid "Extractor"
-#~ msgstr "Extraherare"
-
 #~ msgid "Metadata extractor"
 #~ msgstr "Metadataextraherare"
 
 #~ msgid "Tracker Metadata Extractor"
 #~ msgstr "Tracker metadataextraherare"
-
-#~ msgid "Extracts metadata from local files"
-#~ msgstr "Extraherar metadata från lokala filer"
 
 #~ msgid ""
 #~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
@@ -1772,9 +1856,6 @@ msgstr "— starta trackers skrivtjänst"
 
 #~ msgid "yes"
 #~ msgstr "ja"
-
-#~ msgid "Resetting existing configuration…"
-#~ msgstr "Återställer existerande konfigurationer…"
 
 #~ msgid "Search for emails"
 #~ msgstr "Sök efter e-postmeddelanden"
@@ -2022,16 +2103,10 @@ msgstr "— starta trackers skrivtjänst"
 #~ msgid "Find search criteria in file tags only (separated by comma)"
 #~ msgstr "Hitta sökkriterier endast i filtaggar (kommaseparerade)"
 
-#~ msgid "_Search:"
-#~ msgstr "_Sök:"
-
 #~ msgid "Show tagging panel which allows editing tags of selected results"
 #~ msgstr ""
 #~ "Visa taggpanel som gör det möjligt att redigera taggar för markerade "
 #~ "resultat"
-
-#~ msgid "Show statistics about the data stored"
-#~ msgstr "Visa statistik om lagrat data"
 
 #~ msgid "_Set the tags you want to associate with the %d selected items:"
 #~ msgstr ""
@@ -2064,11 +2139,6 @@ msgstr "— starta trackers skrivtjänst"
 #~ msgstr ""
 #~ "Statistiken här representerar inte deras tillgänglighet utan snarare "
 #~ "total mängd lagrad data:"
-
-#~ msgid "Tag"
-#~ msgid_plural "Tags"
-#~ msgstr[0] "Tagg"
-#~ msgstr[1] "Taggar"
 
 #~ msgid "Contact"
 #~ msgid_plural "Contacts"
@@ -2271,9 +2341,6 @@ msgstr "— starta trackers skrivtjänst"
 #~ "Detta alternativ kommer att göra att Tracker hamnar i bakgrunden och inte "
 #~ "tar för mycket processorkraft om du har andra program som behöver den "
 #~ "bättre."
-
-#~ msgid "Index content in the background:"
-#~ msgstr "Indexera innehåll i bakgrunden:"
 
 #~ msgid "O_nly when computer is not being used"
 #~ msgstr "E_ndast när datorn inte används"
@@ -2488,12 +2555,6 @@ msgstr "— starta trackers skrivtjänst"
 #~ msgstr ""
 #~ "Se ”tracker help <kommando>” för att läsa om ett specifikt underkommando."
 
-#~ msgid ""
-#~ "Start, stop, pause and list processes responsible for indexing content"
-#~ msgstr ""
-#~ "Starta, stoppa, pausa och lista processer ansvariga för att indexera "
-#~ "innehåll"
-
 #~ msgid "Extract information from a file"
 #~ msgstr "Extrahera information från en fil"
 
@@ -2511,9 +2572,6 @@ msgstr "— starta trackers skrivtjänst"
 #~ msgid "Reset or remove index and revert configurations to defaults"
 #~ msgstr ""
 #~ "Återställ eller ta bort index och återställ konfigurationer till standard"
-
-#~ msgid "Search for content indexed or show content by type"
-#~ msgstr "Sök efter indexerat innehåll eller visa innehåll efter typ"
 
 #~ msgid ""
 #~ "Query and update the index using SPARQL or search, list and tree the "
@@ -2793,9 +2851,6 @@ msgstr "— starta trackers skrivtjänst"
 
 #~ msgid "Would you like to reindex now?"
 #~ msgstr "Vill du indexera om nu?"
-
-#~ msgid "Reindex"
-#~ msgstr "Indexera om"
 
 #~ msgid "Do nothing"
 #~ msgstr "Gör ingenting"
