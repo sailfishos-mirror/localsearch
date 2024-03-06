@@ -346,23 +346,15 @@ miner_start (TrackerMiner  *miner,
 	                                           miner);
 }
 
+static void
+release_heap_memory (void)
+{
 #ifdef HAVE_MALLOC_TRIM
-
-static void
-release_heap_memory (void)
-{
 	malloc_trim (0);
-}
-
 #else
-
-static void
-release_heap_memory (void)
-{
 	g_debug ("release_heap_memory(): Doing nothing as malloc_trim() is not available on this platform.");
-}
-
 #endif
+}
 
 static gboolean
 cleanup_cb (gpointer user_data)
@@ -372,6 +364,19 @@ cleanup_cb (gpointer user_data)
 	cleanup_id = 0;
 
 	return G_SOURCE_REMOVE;
+}
+
+static void
+start_cleanup_timeout (void)
+{
+	if (cleanup_id == 0)
+		cleanup_id = g_timeout_add_seconds (30, cleanup_cb, NULL);
+}
+
+static void
+stop_cleanup_timeout (void)
+{
+	g_clear_handle_id (&cleanup_id, g_source_remove);
 }
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
@@ -388,10 +393,7 @@ on_low_memory (GMemoryMonitor            *monitor,
 static void
 miner_started_cb (TrackerMinerFS *fs)
 {
-	if (cleanup_id) {
-		g_source_remove (cleanup_id);
-		cleanup_id = 0;
-	}
+	stop_cleanup_timeout ();
 }
 
 static void
@@ -415,8 +417,6 @@ miner_finished_cb (TrackerMinerFS *fs,
 							 TRUE);
 	}
 
-	cleanup_id = g_timeout_add_seconds (30, cleanup_cb, NULL);
-
 	/* We're not sticking around for file updates, so stop
 	 * the mainloop and exit.
 	 */
@@ -424,6 +424,18 @@ miner_finished_cb (TrackerMinerFS *fs,
 		/* FIXME: wait for extractor to finish */
 		g_main_loop_quit (main_loop);
 	}
+}
+
+static void
+miner_status_cb (TrackerMinerFS *fs)
+{
+	g_autofree gchar *status = NULL;
+
+	g_object_get (G_OBJECT (fs), "status", &status, NULL);
+	if (g_strcmp0 (status, "Idle") == 0)
+		start_cleanup_timeout ();
+	else
+		stop_cleanup_timeout ();
 }
 
 static void
@@ -953,6 +965,9 @@ main (gint argc, gchar *argv[])
 	g_signal_connect (miner_files, "finished",
 			  G_CALLBACK (miner_finished_cb),
 			  NULL);
+	g_signal_connect (miner_files, "notify::status",
+	                  G_CALLBACK (miner_status_cb),
+	                  NULL);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	memory_monitor = g_memory_monitor_dup_default ();
