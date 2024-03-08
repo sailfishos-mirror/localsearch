@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-02-11 19:14+0000\n"
-"PO-Revision-Date: 2024-02-25 21:38+0200\n"
+"POT-Creation-Date: 2024-02-25 19:39+0000\n"
+"PO-Revision-Date: 2024-03-08 23:27+0200\n"
 "Last-Translator: Rūdolfs Mazurs <rudolfs.mazurs@gmail.com>\n"
 "Language-Team: Latvian <lata-l10n@googlegroups.com>\n"
 "Language: lv\n"
@@ -190,7 +190,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 msgid "Directories to index recursively"
-msgstr "Direktorijas, ko indeksēt rekursīvi"
+msgstr "Direktoriji, ko indeksēt rekursīvi"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
@@ -201,7 +201,7 @@ msgid ""
 "‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
 "and $HOME/.config/user-dirs.default"
 msgstr ""
-"Saraksts ar direktorijām, ko indeksēt rekursīvi, īpašās vērtības iekļauj "
+"Saraksts ar direktorijiem, ko indeksēt rekursīvi, īpašās vērtības iekļauj "
 "“&DESKTOP”, “&DOCUMENTS”, “&DOWNLOAD”, “&MUSIC”, “&PICTURES”, "
 "“&PUBLIC_SHARE”, “&TEMPLATES”, “&VIDEOS”.\n"
 "\n"
@@ -209,7 +209,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
-msgstr "Direktorijas, ko indeksēt ne-rekursīvi"
+msgstr "Direktoriji, ko indeksēt ne-rekursīvi"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
@@ -220,7 +220,7 @@ msgid ""
 "‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
 "and $HOME/.config/user-dirs.default"
 msgstr ""
-"Saraksts ar direktorijām, ko indeksēt, neskatot apakšmapes, īpašās vērtības "
+"Saraksts ar direktorijiem, ko indeksēt, neskatot apakšmapes, īpašās vērtības "
 "iekļauj “&DESKTOP, “&DOCUMENTS, “&DOWNLOAD, “&MUSIC, “&PICTURES”, "
 "“&PUBLIC_SHARE”, “&TEMPLATES”, “&VIDEOS”.\n"
 "\n"
@@ -236,20 +236,20 @@ msgstr "Saraksts ar datņu rakstu, ko izlaist"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
-msgstr "Ignorētās direktorijas"
+msgstr "Ignorētie direktoriji"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
-msgstr "Saraksts ar direktorijām, no kurām jāizvairās"
+msgstr "Saraksts ar direktorijiem, no kurām jāizvairās"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
-msgstr "Ignorētās direktorijas ar saturu"
+msgstr "Ignorētie direktoriji ar saturu"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr ""
-"Izvairīties no visām direktorijām, kurās ir datne, kas ir bloķēto vienumu "
+"Izvairīties no visiem direktorijiem, kuros ir datne, kas ir bloķēto vienumu "
 "sarakstā"
 
 #: src/libtracker-miners-common/tracker-miner-proxy.c:349
@@ -584,12 +584,12 @@ msgstr "Saņem…"
 #: src/tracker/tracker-daemon.c:102
 #, c-format
 msgid "Crawling single directory “%s”"
-msgstr "Apstaigā vienu mapi “%s”"
+msgstr "Apstaigā vienu direktoriju “%s”"
 
 #: src/tracker/tracker-daemon.c:103
 #, c-format
 msgid "Crawling recursively directory “%s”"
-msgstr "Apstaigā rekursīvi mapi “%s”"
+msgstr "Apstaigā rekursīvi direktoriju “%s”"
 
 #: src/tracker/tracker-daemon.c:104
 msgid "Paused"
@@ -885,13 +885,10 @@ msgid "daemon"
 msgstr "daemon"
 
 #: src/tracker/tracker-daemon.desktop.in:7
-#| msgid ""
-#| "Start, stop, pause and list processes responsible for indexing content"
 msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Palaist, apturēt, pārstartēt un uzskaitīt dēmonus, kas ir atbildīgi par"
-" satura "
-"indeksēšanu"
+"Palaist, apturēt, pārstartēt un uzskaitīt dēmonus, kas ir atbildīgi par "
+"satura indeksēšanu"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -907,12 +904,10 @@ msgstr "Nevarēja palaist tracker-extract:"
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-extract.desktop.in:6
-#| msgid "Extractor"
 msgid "extract"
 msgstr "extract"
 
 #: src/tracker/tracker-extract.desktop.in:7
-#| msgid "Extracts metadata from local files"
 msgid "Extract metadata from a file"
 msgstr "Izvilkt metadatus no datnēm"
 
@@ -931,7 +926,7 @@ msgstr "Padara indeksēšanu rekursīvu"
 #: src/tracker/tracker-index.c:192
 #, c-format
 msgid "“%s” is not a directory"
-msgstr "“%s” nav direktorija"
+msgstr "“%s” nav direktorijs"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:282
@@ -962,12 +957,10 @@ msgstr "Lūdzu, norādiet vienu vai vairākas vietas, kuras indeksēt."
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-index.desktop.in:6
-#| msgid "Reindex"
 msgid "index"
 msgstr "index"
 
 #: src/tracker/tracker-index.desktop.in:7
-#| msgid "Index content in the background:"
 msgid "Index content using the Tracker filesystem miner"
 msgstr "Indeksē saturu, izmantojot Tracker datņu sistēmas racēju"
 
@@ -1053,7 +1046,7 @@ msgstr "Izņemt RSS indeksētāju datubāzi"
 msgid ""
 "Erase indexed information about a file, works recursively for directories"
 msgstr ""
-"Izdzēst indeksēto informāciju par datni, darboas rekursīvi direktorijiem"
+"Izdzēst indeksēto informāciju par datni, darbojas rekursīvi direktorijiem"
 
 #. Now, delete the element recursively
 #: src/tracker/tracker-reset.c:95
@@ -1071,12 +1064,10 @@ msgid "reset"
 msgstr "reset"
 
 #: src/tracker/tracker-reset.desktop.in:7
-#| msgid "Resetting existing configuration…"
 msgid "Reset the index and configuration"
 msgstr "Pārstartē indeksēšanu un konfigurāciju"
 
 #: src/tracker/tracker-search.c:59
-#| msgid "Search for content indexed or show content by type"
 msgid "Search for content matching TERMS, by type or across all types."
 msgstr "Meklēt saturu, kas atbilst TERMIEM, pēc kāda tipa vai visiem tipiem."
 
@@ -1239,12 +1230,10 @@ msgstr "Rezultāti"
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-search.desktop.in:6
-#| msgid "_Search:"
 msgid "search"
 msgstr "search"
 
 #: src/tracker/tracker-search.desktop.in:7
-#| msgid "Search for content indexed or show content by type"
 msgid "Search for content by type or across all types"
 msgstr "Meklēt saturu, pēc kāda tipa vai visiem tipiem"
 
@@ -1363,7 +1352,6 @@ msgid "status"
 msgstr "status"
 
 #: src/tracker/tracker-status.desktop.in:7
-#| msgid "Show statistics about the data stored"
 msgid "Provide status and statistics on the data indexed"
 msgstr "Sniedz statusu un statistiku par indeksētajiem datiem"
 
@@ -1536,8 +1524,6 @@ msgstr "--description opciju var izmantot tikai ar --add"
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-tag.desktop.in:6
-#| msgid "Tag"
-#| msgid_plural "Tags"
 msgid "tag"
 msgstr "tag"
 
