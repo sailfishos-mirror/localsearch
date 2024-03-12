@@ -220,6 +220,10 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		/* Necessary for g_get_user_name() */
 		{ "/etc/passwd",
 		  LANDLOCK_ACCESS_FS_READ_FILE },
+		/* Necessary for fontconfig */
+		{ "/etc/fonts/",
+		  LANDLOCK_ACCESS_FS_READ_FILE |
+		  LANDLOCK_ACCESS_FS_READ_DIR },
 	};
 	TrackerLandlockRule homedir_rules[] = {
 		/* Disable file access to sensitive folders the extractor has
