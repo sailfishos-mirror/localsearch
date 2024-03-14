@@ -1,6 +1,7 @@
 [Unit]
 Description=Tracker file system data miner
 ConditionUser=!root
+ConditionUser=!gnome-initial-setup
 After=gnome-session.target
 
 [Service]
