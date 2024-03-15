@@ -146,6 +146,7 @@ typedef enum {
 enum {
 	FINISHED,
 	FINISHED_ROOT,
+	CORRUPT,
 	LAST_SIGNAL
 };
 
@@ -341,6 +342,12 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_TYPE_NONE,
 		              1,
 		              G_TYPE_FILE);
+
+	signals[CORRUPT] = g_signal_new ("corrupt",
+					 G_TYPE_FROM_CLASS (object_class),
+					 G_SIGNAL_RUN_LAST, 0,
+					 NULL, NULL, NULL,
+					 G_TYPE_NONE, 0);
 
 	quark_last_queue_event = g_quark_from_static_string ("tracker-last-queue-event");
 }
@@ -848,6 +855,11 @@ sparql_buffer_flush_cb (GObject      *object,
 
 	if (error) {
 		g_warning ("Could not execute sparql: %s", error->message);
+
+		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
+			g_signal_emit (fs, signals[CORRUPT], 0);
+			return;
+		}
 	}
 
 	for (i = 0; i < tasks->len; i++) {

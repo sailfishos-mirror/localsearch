@@ -77,6 +77,7 @@ static gboolean dry_run = FALSE;
 
 static gboolean slept = TRUE;
 static gboolean graphs_ready = FALSE;
+static gboolean corrupted = FALSE;
 
 static GOptionEntry entries[] = {
 	{ "initial-sleep", 's', 0,
@@ -436,6 +437,14 @@ miner_status_cb (TrackerMinerFS *fs)
 		start_cleanup_timeout ();
 	else
 		stop_cleanup_timeout ();
+}
+
+static void
+miner_corrupt_cb (TrackerMinerFS *fs)
+{
+	g_warning ("Database corruption detected, bailing out");
+	corrupted = TRUE;
+	g_main_loop_quit (main_loop);
 }
 
 static void
@@ -995,6 +1004,9 @@ main (gint argc, gchar *argv[])
 	g_signal_connect (miner_files, "notify::status",
 	                  G_CALLBACK (miner_status_cb),
 	                  NULL);
+	g_signal_connect (miner_files, "corrupt",
+			  G_CALLBACK (miner_corrupt_cb),
+			  NULL);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	memory_monitor = g_memory_monitor_dup_default ();
@@ -1050,7 +1062,5 @@ main (gint argc, gchar *argv[])
 	g_object_unref (memory_monitor);
 #endif
 
-	g_print ("\nOK\n\n");
-
-	return EXIT_SUCCESS;
+	return corrupted ? EXIT_FAILURE : EXIT_SUCCESS;
 }
