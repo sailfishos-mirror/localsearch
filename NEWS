@@ -1,3 +1,17 @@
+NEW in 3.7.0 - 2024-03-16
+=========================
+  * Call malloc_trim more timely after extraction
+  * Further syscall rules in the seccomp sandbox
+  * Further landlock rules
+  * Disallow indexer for gnome-initial-setup user
+  * Add -Dsandbox_tests option to disable sandbox tests
+
+Translations: da, de, lv, sv
+
+  Highlighted changes since 3.6.0:
+  * Use Landlock kernel API to control file access
+  * Improved sandbox
+
 NEW in 3.7.rc - 2024-03-04
 ==========================
   * Fix execution permissions of `tracker-extract-3` executable
