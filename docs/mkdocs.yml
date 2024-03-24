@@ -11,6 +11,7 @@ nav:
   - SPARQL Endpoint: 'endpoint.md'
   - Miscellaneous D-Bus API: 'dbus-api.md'
   - Command Line: 'commandline.md'
+  - Handling of corrupted databases: 'corruption.md'
 
 theme:
   name: readthedocs

@@ -77,6 +77,7 @@ static gboolean dry_run = FALSE;
 
 static gboolean slept = TRUE;
 static gboolean graphs_ready = FALSE;
+static gboolean corrupted = FALSE;
 
 static GOptionEntry entries[] = {
 	{ "initial-sleep", 's', 0,
@@ -439,6 +440,14 @@ miner_status_cb (TrackerMinerFS *fs)
 }
 
 static void
+miner_corrupt_cb (TrackerMinerFS *fs)
+{
+	g_warning ("Database corruption detected, bailing out");
+	corrupted = TRUE;
+	g_main_loop_quit (main_loop);
+}
+
+static void
 graphs_created_cb (GObject      *source,
                    GAsyncResult *res,
                    gpointer      user_data)
@@ -732,18 +741,45 @@ setup_connection (TrackerDomainOntology  *domain,
                   GError                **error)
 {
 	TrackerSparqlConnection *sparql_conn;
-	GFile *store = NULL, *ontology;
+	g_autoptr (GFile) store = NULL, ontology = NULL;
+	GError *internal_error = NULL;
 
 	if (!dry_run)
 		store = get_cache_dir (domain);
 	ontology = tracker_sparql_get_ontology_nepomuk ();
+
 	sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
 	                                             store,
 	                                             ontology,
 	                                             NULL,
-	                                             error);
-	g_clear_object (&store);
-	g_clear_object (&ontology);
+	                                             &internal_error);
+
+	if (store && g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
+		g_autoptr (GFile) backup_location = NULL, parent = NULL;
+		g_autofree gchar *filename = NULL;
+
+		/* Move the database directory away, for possible forensics */
+		parent = g_file_get_parent (store);
+		filename = g_strdup_printf ("files.%" G_GINT64_FORMAT, g_get_monotonic_time ());
+		backup_location = g_file_get_child (parent, filename);
+
+		if (g_file_move (store, backup_location,
+		                 G_FILE_COPY_NONE,
+		                 NULL, NULL, NULL, NULL)) {
+			g_autofree gchar *path = NULL;
+
+			path = g_file_get_path (backup_location);
+			g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
+			sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
+			                                             store,
+			                                             ontology,
+			                                             NULL,
+			                                             &internal_error);
+		}
+	}
+
+	if (internal_error)
+		g_propagate_error (error, internal_error);
 
 	return sparql_conn;
 }
@@ -968,6 +1004,9 @@ main (gint argc, gchar *argv[])
 	g_signal_connect (miner_files, "notify::status",
 	                  G_CALLBACK (miner_status_cb),
 	                  NULL);
+	g_signal_connect (miner_files, "corrupt",
+			  G_CALLBACK (miner_corrupt_cb),
+			  NULL);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	memory_monitor = g_memory_monitor_dup_default ();
@@ -1023,7 +1062,5 @@ main (gint argc, gchar *argv[])
 	g_object_unref (memory_monitor);
 #endif
 
-	g_print ("\nOK\n\n");
-
-	return EXIT_SUCCESS;
+	return corrupted ? EXIT_FAILURE : EXIT_SUCCESS;
 }
