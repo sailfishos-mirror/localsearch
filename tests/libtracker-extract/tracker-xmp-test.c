@@ -44,7 +44,7 @@
 "         <dc:contributor>A honest contributor</dc:contributor>" \
 "         <dc:type>PhysicalObject</dc:type>" \
 "         <dc:identifier>12345</dc:identifier>" \
-"         <dc:source>My dirty mind</dc:source>" \
+"         <dc:source>http://example.com/source</dc:source>" \
 "         <dc:language>Spanglish</dc:language>" \
 "         <dc:relation>Single</dc:relation>" \
 "         <dc:coverage>Pretty high after this test</dc:coverage>" \
@@ -137,7 +137,7 @@ get_example_expected (void)
 	data->type = NULL ;
 	data->format = g_strdup ("application/pdf");
 	data->identifier = g_strdup ("12345");
-	data->source = g_strdup ("My dirty mind");
+	data->source = g_strdup ("http://example.com/source");
 	data->language = g_strdup ("Spanglish");
 	data->relation = g_strdup ("Single");
 	data->coverage = g_strdup ("Pretty high after this test");
