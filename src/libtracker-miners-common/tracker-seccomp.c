@@ -208,6 +208,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (rt_sigreturn);
 	ALLOW_RULE (sched_yield);
 	ALLOW_RULE (sched_getaffinity);
+	ALLOW_RULE (sched_get_priority_max);
+	ALLOW_RULE (sched_get_priority_min);
 	ALLOW_RULE (sched_setattr);
 	ALLOW_RULE (nanosleep);
 	ALLOW_RULE (clock_nanosleep);
