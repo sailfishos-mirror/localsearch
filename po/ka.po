@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-02-21 20:01+0000\n"
-"PO-Revision-Date: 2024-03-19 08:49+0100\n"
+"POT-Creation-Date: 2024-03-19 07:50+0000\n"
+"PO-Revision-Date: 2024-03-25 05:55+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -326,6 +326,8 @@ msgstr ""
 #: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
+"ამოწმებს, არის თუ არა მითითებული ფაილი დაინდექსებული, კონფიგურაციაზე "
+"დაყრდნობით"
 
 #: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:81
 #: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
