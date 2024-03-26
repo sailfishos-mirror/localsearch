@@ -388,6 +388,9 @@ setup_context (TrackerExtractWatchdog  *watchdog,
 
 	watchdog->launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
 	g_subprocess_launcher_take_fd (watchdog->launcher, fd_pair[1], REMOTE_FD_NUMBER);
+	g_subprocess_launcher_setenv (watchdog->launcher,
+	                              "GVFS_REMOTE_VOLUME_MONITOR_IGNORE", "1",
+	                              TRUE);
 
 	g_subprocess_launcher_set_child_setup (watchdog->launcher,
 	                                       extractor_child_setup,
