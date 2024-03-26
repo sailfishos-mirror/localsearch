@@ -232,6 +232,8 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (epoll_create1);
 	ALLOW_RULE (epoll_ctl);
 	ALLOW_RULE (epoll_wait);
+	ALLOW_RULE (epoll_pwait);
+	ALLOW_RULE (epoll_pwait2);
 	/* System */
 	ALLOW_RULE (uname);
 	ALLOW_RULE (sysinfo);
