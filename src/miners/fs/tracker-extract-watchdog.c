@@ -309,6 +309,8 @@ on_new_connection_cb (GObject      *object,
 		watchdog->persistence_fd =
 			tracker_files_interface_dup_fd (watchdog->files_interface);
 	}
+
+	g_dbus_connection_start_message_processing (watchdog->conn);
 }
 
 static void
@@ -388,6 +390,9 @@ setup_context (TrackerExtractWatchdog  *watchdog,
 
 	watchdog->launcher = g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
 	g_subprocess_launcher_take_fd (watchdog->launcher, fd_pair[1], REMOTE_FD_NUMBER);
+	g_subprocess_launcher_setenv (watchdog->launcher,
+	                              "GVFS_REMOTE_VOLUME_MONITOR_IGNORE", "1",
+	                              TRUE);
 
 	g_subprocess_launcher_set_child_setup (watchdog->launcher,
 	                                       extractor_child_setup,
@@ -406,6 +411,7 @@ setup_context (TrackerExtractWatchdog  *watchdog,
 
 	g_dbus_connection_new (stream,
 	                       guid,
+	                       G_DBUS_CONNECTION_FLAGS_DELAY_MESSAGE_PROCESSING |
 	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER |
 	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS |
 	                       G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER,
