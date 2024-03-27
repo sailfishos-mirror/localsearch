@@ -362,8 +362,11 @@ extractor_child_setup (gpointer user_data)
 #ifdef HAVE_LANDLOCK
 	const gchar * const *indexed_folders = user_data;
 
-	if (!tracker_landlock_init (indexed_folders))
-		g_assert_not_reached ();
+	if (!tracker_landlock_init (indexed_folders)) {
+		g_critical ("Refusing to extract file data since Landlock could not be enabled. "
+		            "Update your kernel to fix this warning.");
+		_exit (0);
+	}
 #endif
 }
 
