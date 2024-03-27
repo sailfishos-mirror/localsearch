@@ -489,7 +489,14 @@ iterate_simple (const gchar    *uri,
 		} else if (!data->identifier && g_ascii_strcasecmp (name, "identifier") == 0) {
 			data->identifier = g_strdup (value);
 		} else if (!data->source && g_ascii_strcasecmp (name, "source") == 0) {
-			data->source = g_strdup (value);
+			gchar *uri_scheme;
+
+			uri_scheme = g_uri_parse_scheme (value);
+			if (uri_scheme != NULL) {
+				/* Source seems to be a full URI */
+				data->source = g_strdup (value);
+				g_free (uri_scheme);
+			}
 		} else if (!data->language && g_ascii_strcasecmp (name, "language") == 0) {
 			data->language = g_strdup (value);
 		} else if (!data->relation && g_ascii_strcasecmp (name, "relation") == 0) {
