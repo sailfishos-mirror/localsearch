@@ -515,7 +515,7 @@ check_is_directory (TrackerMonitorGlib *monitor,
 {
 	GFileType file_type;
 
-	file_type = g_file_query_file_type (file, G_FILE_QUERY_INFO_NONE, NULL);
+	file_type = g_file_query_file_type (file, G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS, NULL);
 
 	if (file_type == G_FILE_TYPE_DIRECTORY)
 		return TRUE;
