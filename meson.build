@@ -154,22 +154,7 @@ endif
 # Check for Fanotify support
 ##########################################
 
-result = cc.run('''
-    #include <sys/fanotify.h>
-    #include <fcntl.h>
-
-    int main (int argc, char *argv[]) {
-      int fd = fanotify_init (FAN_CLOEXEC|FAN_CLASS_NOTIF|FAN_REPORT_DFID_NAME, O_RDONLY);
-      return fd < 0 ? 1 : 0;
-    }
-  ''',
-  name: 'fanotify works without additional capabilities')
-
-if result.compiled() and result.returncode() == 0
-  have_fanotify = true
-else
-  have_fanotify = false
-endif
+have_fanotify = cc.has_header('sys/fanotify.h', required: get_option('fanotify'))
 
 ##########################################
 # Check for btrfs ioctls

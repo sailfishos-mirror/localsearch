@@ -512,8 +512,10 @@ tracker_monitor_fanotify_finalize (GObject *object)
 {
 	TrackerMonitorFanotify *monitor = TRACKER_MONITOR_FANOTIFY (object);
 
-	g_source_destroy (monitor->source);
-	g_source_unref (monitor->source);
+	if (monitor->source) {
+		g_source_destroy (monitor->source);
+		g_source_unref (monitor->source);
+	}
 
 	g_hash_table_unref (monitor->monitored_dirs);
 	g_hash_table_unref (monitor->handles);
