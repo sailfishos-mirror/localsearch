@@ -251,7 +251,19 @@ handle_monitor_events (TrackerMonitorFanotify *monitor,
 		if (is_directory) {
 			emit_event (monitor, EVENT_CREATE, file, NULL, is_directory);
 		} else {
-			cache_event (monitor, EVENT_CREATE, file, is_directory);
+			GFileType file_type;
+
+			file_type = g_file_query_file_type (file,
+							    G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+							    NULL);
+
+			if (file_type == G_FILE_TYPE_SYMBOLIC_LINK ||
+			    file_type == G_FILE_TYPE_SPECIAL) {
+				/* We will not get FAN_CLOSE for these file types */
+				emit_event (monitor, EVENT_CREATE, file, NULL, is_directory);
+			} else if (file_type != G_FILE_TYPE_UNKNOWN) {
+				cache_event (monitor, EVENT_CREATE, file, is_directory);
+			}
 		}
 	}
 

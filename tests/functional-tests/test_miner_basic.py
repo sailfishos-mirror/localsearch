@@ -504,6 +504,35 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         unpacked_result = [r[0] for r in result]
         self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
 
+    def test_15_monitor_nofollow_symlinks(self):
+        """
+        Insert a file triggering parent to be hidden
+        """
+        source = self.path("test-no-monitored")
+        dest = self.path("test-monitored/folder")
+        deleted = self.path("test-monitored/file1.txt")
+        deleted_id = self.tracker.get_content_resource_id(self.uri(deleted))
+
+        with self.tracker.await_delete(
+            fixtures.DOCUMENTS_GRAPH, deleted_id, timeout=cfg.AWAIT_TIMEOUT
+        ):
+            os.symlink(source, dest)
+            os.remove(deleted)
+
+        result = self.__get_text_documents()
+        self.assertEqual(len(result), 2)
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/dir1/file2.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
+
+        query = "ASK { <%s> a nfo:FileDataObject }" % self.uri(dest)
+        result = self.tracker.query(query)
+        self.assertEqual(result[0][0], "true")
+
+        query = "ASK { ?u nie:isStoredAs <%s> }" % self.uri(dest)
+        result = self.tracker.query(query)
+        self.assertEqual(result[0][0], "false")
+
 
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
