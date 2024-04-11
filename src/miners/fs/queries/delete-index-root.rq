@@ -1,5 +1,8 @@
 # Inputs: ~rootFolder
 DELETE {
+  GRAPH tracker:FileSystem {
+    ?f a rdfs:Resource
+  }
   GRAPH ?g {
     ?f a rdfs:Resource .
     ?ie a rdfs:Resource
@@ -11,6 +14,9 @@ DELETE {
     ?f nie:dataSource ?root .
   }
   GRAPH ?g {
-    ?ie nie:isStoredAs ?f
+    ?f a nie:DataObject .
+    OPTIONAL {
+      ?ie nie:isStoredAs ?f
+    }
   }
 }
