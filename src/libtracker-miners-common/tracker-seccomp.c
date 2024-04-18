@@ -94,8 +94,11 @@ sigsys_handler (gint       signal,
 		g_printerr ("Disallowed syscall \"%s\" caught in sandbox\n", syscall_name);
 		free (syscall_name);
 
-		/* Ensure to propagate SIGSYS to generate a core file */
-		tgkill (gettid(), getpid(), SIGSYS);
+		/* Ensure to propagate SIGSYS to generate a core file.
+		 * Use syscall instead of tgkill because not all libc's
+		 * implement the wrappers
+		 */
+		syscall (SYS_tgkill, gettid(), getpid(), SIGSYS);
 	}
 }
 
