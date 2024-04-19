@@ -804,6 +804,32 @@ setup_connection (TrackerDomainOntology  *domain,
 	return sparql_conn;
 }
 
+#ifdef HAVE_GSTREAMER
+static void
+init_gstreamer (void)
+{
+	int pid, status;
+
+	pid = fork ();
+
+	/* How to initialize GStreamer for the extractor process, and
+	 * avoid using ~2MB in the indexer resident memory forever.
+	 */
+	if (pid == 0) {
+		gst_init (NULL, NULL);
+		exit (EXIT_SUCCESS);
+	} else if (pid > 0) {
+		waitpid (pid, &status, 0);
+
+		if (WIFSIGNALED (status) || WCOREDUMP (status)) {
+			g_warning ("Failed to initialize GStreamer");
+		}
+	} else {
+		g_warning ("Could not initialize GStreamer");
+	}
+}
+#endif
+
 int
 main (gint argc, gchar *argv[])
 {
@@ -849,7 +875,7 @@ main (gint argc, gchar *argv[])
 	 * with gstreamer plugins.
 	 */
 #if defined(HAVE_GSTREAMER)
-	gst_init (NULL, NULL);
+	init_gstreamer ();
 #endif
 
 	/* Translators: this messagge will apper immediately after the
