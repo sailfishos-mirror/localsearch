@@ -120,6 +120,7 @@ if libgsf.found()
     'office/ps-doc',
     'office/ps-doc-atend',
     'office/pptx-presentation-1',
+    'office/xls-spreadsheet-1',
     'office/xlsx-spreadsheet-1',
   ]
 endif
