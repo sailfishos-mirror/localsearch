@@ -339,7 +339,7 @@ task_deadline_cb (gpointer user_data)
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
 
-	_exit (EXIT_FAILURE);
+	exit (EXIT_FAILURE);
 }
 
 static TrackerExtractTask *
