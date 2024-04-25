@@ -23,9 +23,12 @@ testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
 subdir('config')
 
 extractor_tests = [
-  'audio/mp3-id3v2.4-1',
+  'audio/mp3-id3v2.2-1',
   'audio/mp3-id3v2.3-empty-artist-album',
+  'audio/mp3-id3v2.3-vbr-1',
+  'audio/mp3-id3v2.4-1',
   'audio/mp3-id3v2.4-2',
+  'audio/mp3-id3v2.4-vbr-1',
   'desktop/application',
   'desktop/application-broken-1',
   'desktop/application-broken-2',
