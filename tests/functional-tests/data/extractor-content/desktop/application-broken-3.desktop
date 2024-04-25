@@ -1,0 +1,8 @@
+# Typo in section name
+[Desktop Entr]
+Name=Foo
+Comment=my awesome application
+Type=Application
+Icon=foo
+Exec=/usr/bin/foo
+Categories=Network;GNOME;
