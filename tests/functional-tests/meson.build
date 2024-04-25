@@ -27,6 +27,7 @@ extractor_tests = [
   'audio/mp3-id3v2.3-empty-artist-album',
   'audio/mp3-id3v2.4-2',
   'desktop/application',
+  'desktop/application-hidden',
   'desktop/link-wikipedia-tracker',
   'images/bmp-basic-1',
   'images/bmp-corrupt-1',
