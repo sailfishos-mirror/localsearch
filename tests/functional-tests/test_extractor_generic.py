@@ -98,15 +98,27 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
         tmpdir = tempfile.mkdtemp(prefix="tracker-extract-test-")
         try:
             extra_env = cfg.test_environment(tmpdir)
-            jsonld = fixtures.get_tracker_extract_output(
-                extra_env, self.file_to_extract, output_format="json-ld"
-            )
-            self.__assert_extraction_ok(jsonld)
+            if "metadata" in self.spec:
+                jsonld = fixtures.get_tracker_extract_output(
+                    extra_env, self.file_to_extract, output_format="json-ld"
+                )
+                self.__assert_extraction_ok(jsonld)
 
-            sparql = fixtures.get_tracker_extract_output(
-                extra_env, self.file_to_extract, output_format="sparql"
-            )
-            self.validate_sparql_update(sparql)
+                sparql = fixtures.get_tracker_extract_output(
+                    extra_env, self.file_to_extract, output_format="sparql"
+                )
+                self.validate_sparql_update(sparql)
+            else:
+                # No output data is expected for this file
+                jsonld = None
+                try:
+                    jsonld = fixtures.get_tracker_extract_output(
+                        extra_env, self.file_to_extract, output_format="json-ld"
+                    )
+                except RuntimeError as re:
+                    print ('# Got expected error message: %s' % str(re).replace('\n', '\\n'))
+                finally:
+                    self.assertIsNone(jsonld)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
