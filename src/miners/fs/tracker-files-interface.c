@@ -115,6 +115,30 @@ handle_method_call (GDBusConnection       *connection,
 }
 
 static GVariant *
+create_extractor_config_variant (TrackerFilesInterface *files_interface)
+{
+	GVariantBuilder builder;
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+	g_variant_builder_add (&builder, "{sv}", "max-bytes",
+	                       g_settings_get_value (files_interface->settings, "max-bytes"));
+
+	if (files_interface->priority_graphs)
+		g_variant_builder_add (&builder, "{sv}", "priority-graphs", files_interface->priority_graphs);
+
+#ifdef HAVE_POWER
+	if (files_interface->power) {
+		g_variant_builder_add (&builder, "{sv}", "on-battery",
+		                       g_variant_new_boolean (tracker_power_get_on_battery (files_interface->power)));
+		g_variant_builder_add (&builder, "{sv}", "on-low-battery",
+		                       g_variant_new_boolean (tracker_power_get_on_low_battery (files_interface->power)));
+	}
+#endif
+
+	return g_variant_builder_end (&builder);
+}
+
+static GVariant *
 handle_get_property (GDBusConnection  *connection,
                      const gchar      *sender,
                      const gchar      *object_path,
@@ -133,25 +157,7 @@ handle_get_property (GDBusConnection  *connection,
 	}
 
 	if (g_strcmp0 (property_name, "ExtractorConfig") == 0) {
-		GVariantBuilder builder;
-
-		g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
-		g_variant_builder_add (&builder, "{sv}", "max-bytes",
-		                       g_settings_get_value (files_interface->settings, "max-bytes"));
-
-		if (files_interface->priority_graphs)
-			g_variant_builder_add (&builder, "{sv}", "priority-graphs", files_interface->priority_graphs);
-
-#ifdef HAVE_POWER
-		if (files_interface->power) {
-			g_variant_builder_add (&builder, "{sv}", "on-battery",
-			                       g_variant_new_boolean (tracker_power_get_on_battery (files_interface->power)));
-			g_variant_builder_add (&builder, "{sv}", "on-low-battery",
-			                       g_variant_new_boolean (tracker_power_get_on_low_battery (files_interface->power)));
-		}
-#endif
-
-		return g_variant_builder_end (&builder);
+		return create_extractor_config_variant (files_interface);
 	} else {
 		g_set_error (error, G_IO_ERROR, G_IO_ERROR_INVALID_DATA,
 		             "Unknown property");
@@ -162,11 +168,24 @@ handle_get_property (GDBusConnection  *connection,
 static void
 tracker_files_interface_emit_changed (TrackerFilesInterface *files_interface)
 {
+	GVariantBuilder builder;
+	GVariant *properties;
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+	g_variant_builder_add (&builder, "{sv}", "ExtractorConfig",
+	                       create_extractor_config_variant (files_interface));
+	properties = g_variant_builder_end (&builder);
+
 	g_dbus_connection_emit_signal (files_interface->connection,
 	                               NULL,
 	                               "/org/freedesktop/Tracker3/Files",
 	                               "org.freedesktop.DBus.Properties",
-	                               "PropertiesChanged", NULL, NULL);
+	                               "PropertiesChanged",
+	                               g_variant_new ("(s@a{sv}@as)",
+	                                              "org.freedesktop.Tracker3.Files",
+	                                              properties,
+	                                              g_variant_new_array (G_VARIANT_TYPE ("s"), NULL, 0)),
+	                               NULL);
 }
 
 static void
