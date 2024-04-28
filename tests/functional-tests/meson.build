@@ -82,6 +82,7 @@ if libgif.found()
 
   if exempi.found()
     extractor_tests += 'images/gif-xmp'
+    extractor_tests += 'images/gif-xmp-sidecar-1'
   endif
 endif
 
