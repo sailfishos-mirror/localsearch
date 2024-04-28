@@ -87,8 +87,15 @@ endif
 
 if libpng.found()
   extractor_tests += 'images/png-basic'
+  extractor_tests += 'images/png-photo-1'
+  extractor_tests += 'images/png-screenshot-1'
+
+  if gexiv2.found()
+    extractor_tests += 'images/png-exif-old-1'
+  endif
 
   if exempi.found()
+    extractor_tests += 'images/png-photo-with-sidecar-1'
     extractor_tests += 'images/png-region-of-interest'
   endif
 endif
