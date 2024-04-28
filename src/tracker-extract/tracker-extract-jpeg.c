@@ -139,10 +139,10 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	struct jpeg_decompress_struct cinfo;
+	struct jpeg_decompress_struct cinfo = { 0, };
 	struct tej_error_mgr tejerr;
 	struct jpeg_marker_struct *marker;
-	TrackerResource *metadata;
+	TrackerResource *metadata = NULL;
 	TrackerXmpData *xd = NULL;
 	TrackerExifData *ed = NULL;
 	TrackerIptcData *id = NULL;
@@ -590,17 +590,17 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
 	}
 
-	jpeg_destroy_decompress (&cinfo);
-
-	tracker_exif_free (ed);
-	tracker_xmp_free (xd);
-	tracker_iptc_free (id);
-	g_free (comment);
-
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
 
 fail:
+	jpeg_destroy_decompress (&cinfo);
+
+	g_clear_pointer (&ed, tracker_exif_free);
+	g_clear_pointer (&xd, tracker_xmp_free);
+	g_clear_pointer (&id, tracker_iptc_free);
+	g_clear_pointer (&comment, g_free);
+	g_clear_object (&metadata);
+
 	tracker_file_close (f, FALSE);
 	g_free (uri);
 
