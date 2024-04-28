@@ -99,6 +99,7 @@ endif
 
 if libtiff.found()
   extractor_tests += 'images/tiff-basic'
+  extractor_tests += 'images/tiff-photo-1'
 endif
 
 if totem_plparser.found()
