@@ -138,6 +138,7 @@ if libgsf.found()
     'office/pdf-doc',
     'office/pdf-encrypted',
     'office/ps-doc',
+    'office/ps-doc-2',
     'office/ps-doc-atend',
     'office/pptx-presentation-1',
     'office/xls-spreadsheet-1',
