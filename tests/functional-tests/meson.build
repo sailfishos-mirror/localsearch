@@ -121,6 +121,9 @@ if libgsf.found()
   extractor_tests += [
     'office/epub-doc-1',
     'office/oasis-doc',
+    'office/odg-drawing-1',
+    'office/odp-presentation-1',
+    'office/ods-spreadsheet-1',
     'office/office-doc',
     'office/office-xml-doc-1',
     'office/powerpoint',
