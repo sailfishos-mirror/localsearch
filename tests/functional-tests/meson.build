@@ -145,6 +145,12 @@ if libgsf.found()
     'office/xls-spreadsheet-1',
     'office/xlsx-spreadsheet-1',
   ]
+
+  if exempi.found()
+    extractor_tests += [
+      'office/pdf-doc-with-sidecar-1',
+    ]
+  endif
 endif
 
 if get_option('unzip_ps_gz_files')
