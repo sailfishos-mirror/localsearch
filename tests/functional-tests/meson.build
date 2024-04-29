@@ -116,6 +116,7 @@ endif
 
 if libcue.found()
   extractor_tests += 'disc-images/psx-game-image-1'
+  extractor_tests += 'disc-images/turbografx-game-image-1'
 endif
 
 if libosinfo.found()
