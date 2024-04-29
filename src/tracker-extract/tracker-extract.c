@@ -266,10 +266,12 @@ notify_task_finish (TrackerExtractTask *task,
 		if (task->module) {
 			stats_data = g_hash_table_lookup (priv->statistics_data,
 			                                  task->module);
-			stats_data->extracted_count++;
+			if (stats_data) {
+				stats_data->extracted_count++;
 
-			if (!success) {
-				stats_data->failed_count++;
+				if (!success) {
+					stats_data->failed_count++;
+				}
 			}
 		} else {
 			priv->unhandled_count++;
