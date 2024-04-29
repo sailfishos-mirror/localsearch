@@ -129,6 +129,7 @@ endif
 if libgsf.found()
   extractor_tests += [
     'office/epub-doc-1',
+    'office/epub-doc-2',
     'office/oasis-doc',
     'office/odg-drawing-1',
     'office/odp-presentation-1',
