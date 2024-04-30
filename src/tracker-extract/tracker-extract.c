@@ -32,6 +32,8 @@
 
 #include <libtracker-extract/tracker-extract.h>
 
+#include <libtracker-miners-common/valgrind.h>
+
 #include "tracker-extract.h"
 #include "tracker-main.h"
 
@@ -387,7 +389,7 @@ extract_task_new (TrackerExtract *extract,
 	task->extract = extract;
 	task->max_text = priv->max_text;
 
-	if (task->res) {
+	if (task->res && !RUNNING_ON_VALGRIND) {
 		if (deadline_seconds < 0) {
 			const gchar *deadline_envvar;
 

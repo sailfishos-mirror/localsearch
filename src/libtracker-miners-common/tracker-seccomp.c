@@ -44,6 +44,8 @@
 
 #include <seccomp.h>
 
+#include <libtracker-miners-common/valgrind.h>
+
 #ifndef SYS_SECCOMP
 #define SYS_SECCOMP 1
 #endif
@@ -123,6 +125,11 @@ tracker_seccomp_init (void)
 {
 	scmp_filter_ctx ctx;
 	const gchar *current_syscall = NULL;
+
+	if (RUNNING_ON_VALGRIND) {
+		g_message ("Running under Valgrind, Seccomp was disabled");
+		return TRUE;
+	}
 
 	if (!initialize_sigsys_handler ())
 		return FALSE;

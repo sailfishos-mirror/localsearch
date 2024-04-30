@@ -29,7 +29,8 @@
 #include <sys/prctl.h>
 #include <sys/syscall.h>
 
-#include "tracker-debug.h"
+#include <libtracker-miners-common/valgrind.h>
+#include <libtracker-miners-common/tracker-debug.h>
 
 /* Compensate for these syscalls not being wrapped in libc */
 #define CREATE_RULESET(attr, flags) \
@@ -239,6 +240,11 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 	const gchar *ld_library_path = NULL;
 	int i, landlock_fd;
 	gboolean retval;
+
+	if (RUNNING_ON_VALGRIND) {
+		g_message ("Running under valgrind, Landlock was disabled");
+		return TRUE;
+	}
 
 	if (!create_ruleset (&landlock_fd))
 		return FALSE;
