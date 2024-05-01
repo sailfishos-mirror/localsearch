@@ -103,6 +103,24 @@ class MinerFTSBasicTest(fixtures.TrackerMinerFTSTest):
         results = self.search_word("123123")
         self.assertEqual(len(results), 0)
 
+    def test_11_utf16(self):
+        TEXT = '你好'
+        self.set_text(TEXT, 'utf-16')
+        results = self.search_word(TEXT)
+        self.assertEqual(len(results), 1)
+        self.assertIn(self.uri(self.testfile), results)
+
+    def test_12_windows1252(self):
+        TEXT = 'Cañamón'
+        self.set_text(TEXT, 'WINDOWS-1252')
+        results = self.search_word(TEXT)
+        self.assertEqual(len(results), 1)
+        self.assertIn(self.uri(self.testfile), results)
+
+    def test_13_long_text(self):
+        TEXT = 'Hola caracola ' * 1000
+        self.basic_test(TEXT, "hola")
+
 
 class MinerFTSWAllowlistTest(fixtures.TrackerMinerFTSTest):
     """

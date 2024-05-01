@@ -5,3 +5,4 @@ Type=Application
 Icon=foo
 Exec=/usr/bin/foo
 Categories=Network;GNOME;
+Hidden=true

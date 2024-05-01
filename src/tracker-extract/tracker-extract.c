@@ -266,10 +266,12 @@ notify_task_finish (TrackerExtractTask *task,
 		if (task->module) {
 			stats_data = g_hash_table_lookup (priv->statistics_data,
 			                                  task->module);
-			stats_data->extracted_count++;
+			if (stats_data) {
+				stats_data->extracted_count++;
 
-			if (!success) {
-				stats_data->failed_count++;
+				if (!success) {
+					stats_data->failed_count++;
+				}
 			}
 		} else {
 			priv->unhandled_count++;
@@ -339,7 +341,7 @@ task_deadline_cb (gpointer user_data)
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
 
-	_exit (EXIT_FAILURE);
+	exit (EXIT_FAILURE);
 }
 
 static TrackerExtractTask *

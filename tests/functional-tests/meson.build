@@ -23,10 +23,19 @@ testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
 subdir('config')
 
 extractor_tests = [
-  'audio/mp3-id3v2.4-1',
+  'audio/mp3-id3v2.2-1',
   'audio/mp3-id3v2.3-empty-artist-album',
+  'audio/mp3-id3v2.3-vbr-1',
+  'audio/mp3-id3v2.4-1',
   'audio/mp3-id3v2.4-2',
+  'audio/mp3-id3v2.4-vbr-1',
   'desktop/application',
+  'desktop/application-broken-1',
+  'desktop/application-broken-2',
+  'desktop/application-broken-3',
+  'desktop/application-broken-4',
+  'desktop/application-hidden',
+  'desktop/link-broken-1',
   'desktop/link-wikipedia-tracker',
   'images/bmp-basic-1',
   'images/bmp-corrupt-1',
@@ -55,6 +64,7 @@ if libjpeg.found() and exempi.found() and libexif.found()
     'images/jpeg-basic',
     'images/jpeg-region-of-interest',
     'images/jpeg-gps-location',
+    'images/jpeg-xmp-sidecar-1',
   ]
 
   if libiptcdata.found()
@@ -73,13 +83,21 @@ if libgif.found()
 
   if exempi.found()
     extractor_tests += 'images/gif-xmp'
+    extractor_tests += 'images/gif-xmp-sidecar-1'
   endif
 endif
 
 if libpng.found()
   extractor_tests += 'images/png-basic'
+  extractor_tests += 'images/png-photo-1'
+  extractor_tests += 'images/png-screenshot-1'
+
+  if gexiv2.found()
+    extractor_tests += 'images/png-exif-old-1'
+  endif
 
   if exempi.found()
+    extractor_tests += 'images/png-photo-with-sidecar-1'
     extractor_tests += 'images/png-region-of-interest'
   endif
 endif
@@ -90,6 +108,8 @@ endif
 
 if libtiff.found()
   extractor_tests += 'images/tiff-basic'
+  extractor_tests += 'images/tiff-photo-1'
+  extractor_tests += 'images/tiff-xmp-sidecar-1'
 endif
 
 if totem_plparser.found()
@@ -98,6 +118,7 @@ endif
 
 if libcue.found()
   extractor_tests += 'disc-images/psx-game-image-1'
+  extractor_tests += 'disc-images/turbografx-game-image-1'
 endif
 
 if libosinfo.found()
@@ -111,17 +132,29 @@ endif
 if libgsf.found()
   extractor_tests += [
     'office/epub-doc-1',
+    'office/epub-doc-2',
     'office/oasis-doc',
+    'office/odg-drawing-1',
+    'office/odp-presentation-1',
+    'office/ods-spreadsheet-1',
     'office/office-doc',
     'office/office-xml-doc-1',
     'office/powerpoint',
     'office/pdf-doc',
     'office/pdf-encrypted',
     'office/ps-doc',
+    'office/ps-doc-2',
     'office/ps-doc-atend',
     'office/pptx-presentation-1',
+    'office/xls-spreadsheet-1',
     'office/xlsx-spreadsheet-1',
   ]
+
+  if exempi.found()
+    extractor_tests += [
+      'office/pdf-doc-with-sidecar-1',
+    ]
+  endif
 endif
 
 if get_option('unzip_ps_gz_files')
@@ -209,6 +242,8 @@ endif
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_EXTRACT_DEADLINE', '30')
+test_env.set('TZ', 'Europe/Amsterdam')
+test_env.set('TRACKER_DEBUG', 'statistics')
 
 foreach t: extractor_tests
   data = meson.current_source_dir() / 'data/extractor-content' / t + '.expected.json'

@@ -1,7 +1,8 @@
 [Desktop Entry]
 Name=Foo
 Comment=my awesome application
-Type=Application
+# Typo in "Type"
+Typo=Application
 Icon=foo
 Exec=/usr/bin/foo
 Categories=Network;GNOME;

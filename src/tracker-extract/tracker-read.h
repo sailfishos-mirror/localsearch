@@ -25,10 +25,6 @@
 
 G_BEGIN_DECLS
 
-gchar *tracker_read_text_from_stream (GInputStream *stream,
-                                      gsize         max_bytes,
-                                      GError      **error);
-
 gchar *tracker_read_text_from_fd (gint     fd,
                                   gsize    max_bytes,
                                   GError **error);

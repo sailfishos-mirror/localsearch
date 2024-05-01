@@ -6,10 +6,18 @@
     "metadata": {
         "@graph": [
 	    {
-		"@type": "nmm:Video",
-		"nie:title": "MYTITLE",
-		"nfo:height": "1080",
-		"nfo:width": "1920"
+                "@type": "nmm:Video",
+                "nfo:genre": "genre",
+                "nfo:frameRate": 30.0,
+                "nfo:channels": 2,
+                "nie:generator": "Lavf60.16.100",
+                "nfo:sampleRate": 48000,
+                "nfo:width": 1080,
+                "nie:title": "title",
+                "nie:contentCreated": "2024-04-25T12:36:46+00:00",
+                "nfo:aspectRatio": 1.0,
+                "nfo:duration": 2,
+                "nfo:height": 1080
 	    }
 	]
     }
