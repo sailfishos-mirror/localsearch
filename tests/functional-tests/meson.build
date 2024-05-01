@@ -64,6 +64,7 @@ if libjpeg.found() and exempi.found() and libexif.found()
     'images/jpeg-basic',
     'images/jpeg-region-of-interest',
     'images/jpeg-gps-location',
+    'images/jpeg-xmp-sidecar-1',
   ]
 
   if libiptcdata.found()
