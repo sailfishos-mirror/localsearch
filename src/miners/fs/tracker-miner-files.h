@@ -70,9 +70,6 @@ gboolean tracker_miner_files_get_need_mtime_check (TrackerMinerFiles *mf);
 void     tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
                                                    gboolean           needed);
 
-void     tracker_miner_files_set_mtime_checking   (TrackerMinerFiles *miner,
-                                                   gboolean           mtime_checking);
-
 TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
 
 gboolean tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,

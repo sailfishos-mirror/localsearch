@@ -992,7 +992,6 @@ main (gint argc, gchar *argv[])
 	 */
 	if (!dry_run) {
 		tracker_miner_files_set_need_mtime_check (TRACKER_MINER_FILES (miner_files), TRUE);
-		tracker_miner_files_set_mtime_checking (TRACKER_MINER_FILES (miner_files), do_mtime_checking);
 	}
 
 	g_signal_connect (miner_files, "started",

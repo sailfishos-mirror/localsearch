@@ -80,8 +80,6 @@ struct TrackerMinerFilesPrivate {
 #endif /* HAVE_POWER) */
 	gulong finished_handler;
 
-	gboolean mtime_check;
-
 	guint stale_volumes_check_id;
 };
 
@@ -284,8 +282,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	priv->finished_handler = g_signal_connect_after (mf, "finished",
 	                                                 G_CALLBACK (miner_finished_cb),
 	                                                 NULL);
-
-	priv->mtime_check = TRUE;
 }
 
 static void
@@ -1404,13 +1400,6 @@ tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
 	}
 
 	g_free (filename);
-}
-
-void
-tracker_miner_files_set_mtime_checking (TrackerMinerFiles *mf,
-                                        gboolean           mtime_check)
-{
-	mf->private->mtime_check = mtime_check;
 }
 
 TrackerStorage *
