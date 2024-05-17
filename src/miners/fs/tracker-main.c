@@ -239,8 +239,7 @@ raise_file_descriptor_limit (void)
 
 static gboolean
 should_crawl (TrackerMinerFiles *miner_files,
-              TrackerConfig     *config,
-              gboolean          *forced)
+              TrackerConfig     *config)
 {
 	gint crawling_interval;
 
@@ -256,11 +255,6 @@ should_crawl (TrackerMinerFiles *miner_files,
 		return TRUE;
 	} else if (crawling_interval == 0) {
 		TRACKER_NOTE (CONFIG, g_message ("  Forced"));
-
-		if (forced) {
-			*forced = TRUE;
-		}
-
 		return TRUE;
 	} else {
 		guint64 then, now;
@@ -755,7 +749,6 @@ main (gint argc, gchar *argv[])
 	TrackerMiner *miner_files;
 	GOptionContext *context;
 	GError *error = NULL;
-	gboolean force_mtime_checking = FALSE;
 	TrackerMinerProxy *proxy;
 	GDBusConnection *connection;
 	TrackerSparqlConnection *sparql_conn;
@@ -927,13 +920,7 @@ main (gint argc, gchar *argv[])
 	/* Check if we should crawl and if we should force mtime
 	 * checking based on the config.
 	 */
-	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files),
-	                            config, &force_mtime_checking);
-
-	TRACKER_NOTE (CONFIG, g_message ("Checking whether to force mtime checking during crawling (based on last clean shutdown):"));
-
-	TRACKER_NOTE (CONFIG, g_message ("  %s",
-	                      force_mtime_checking ? "(forced from config)" : ""));
+	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files), config);
 
 	g_signal_connect (miner_files, "started",
 			  G_CALLBACK (miner_started_cb),
