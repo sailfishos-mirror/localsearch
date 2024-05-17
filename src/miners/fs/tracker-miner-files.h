@@ -55,13 +55,10 @@ TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,
                                         TrackerStorage          *storage,
                                         TrackerConfig           *config,
-                                        TrackerDomainOntology   *domain);
+                                        TrackerDomainOntology   *domain,
+                                        gboolean                 initial_index);
 
 /* Global functions to handle timestamp files */
-gboolean tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-                                                   gboolean           done);
-
 guint64  tracker_miner_files_get_last_crawl_done  (TrackerMinerFiles *mf);
 void     tracker_miner_files_set_last_crawl_done  (TrackerMinerFiles *mf,
                                                    gboolean           done);

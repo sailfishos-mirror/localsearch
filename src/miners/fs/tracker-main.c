@@ -761,6 +761,7 @@ main (gint argc, gchar *argv[])
 #endif
 	gchar *domain_name, *dbus_name;
 	TrackerFilesInterface *files_interface;
+	gboolean initial_index = TRUE;
 
 	main_loop = NULL;
 
@@ -864,6 +865,8 @@ main (gint argc, gchar *argv[])
 
 	if (!dry_run) {
 		GFile *store = get_cache_dir (domain_ontology);
+
+		initial_index = !g_file_query_exists (store, NULL);
 		tracker_error_report_init (store);
 		g_object_unref (store);
 	}
@@ -891,7 +894,8 @@ main (gint argc, gchar *argv[])
 	                                       indexing_tree,
 	                                       storage,
 	                                       config,
-	                                       domain_ontology);
+	                                       domain_ontology,
+	                                       initial_index);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);
 

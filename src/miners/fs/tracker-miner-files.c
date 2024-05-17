@@ -36,7 +36,6 @@
 #define SECONDS_PER_DAY 86400
 
 /* Stamp files to know crawling/indexing state */
-#define FIRST_INDEX_FILENAME          "first-index.txt"
 #define LAST_CRAWL_FILENAME           "last-crawl.txt"
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
@@ -73,6 +72,7 @@ struct TrackerMinerFilesPrivate {
 	gboolean disk_space_pause;
 
 	gboolean low_battery_pause;
+	gboolean initial_index;
 
 #ifdef HAVE_POWER
 	TrackerPower *power;
@@ -87,6 +87,7 @@ enum {
 	PROP_CONFIG,
 	PROP_DOMAIN_ONTOLOGY,
 	PROP_STORAGE,
+	PROP_INITIAL_INDEX,
 };
 
 #define TEXT_ALLOWLIST "text-allowlist"
@@ -207,6 +208,13 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_INITIAL_INDEX,
+	                                 g_param_spec_boolean ("initial-index",
+	                                                       NULL, NULL, FALSE,
+	                                                       G_PARAM_WRITABLE |
+	                                                       G_PARAM_CONSTRUCT_ONLY |
+	                                                       G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -322,6 +330,9 @@ miner_files_set_property (GObject      *object,
 		break;
 	case PROP_STORAGE:
 		priv->storage = g_value_dup_object (value);
+		break;
+	case PROP_INITIAL_INDEX:
+		priv->initial_index = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -687,7 +698,7 @@ check_battery_status (TrackerMinerFiles *mf)
 			if (!tracker_config_get_index_on_battery_first_time (mf->private->config)) {
 				g_message ("Running on battery, but not enabled, pausing");
 				should_pause = TRUE;
-			} else if (tracker_miner_files_get_first_index_done (mf)) {
+			} else if (!mf->private->initial_index) {
 				g_debug ("Running on battery and first-time index "
 				         "already done, pausing");
 				should_pause = TRUE;
@@ -752,11 +763,6 @@ miner_finished_cb (TrackerMinerFS *fs,
                    gpointer        user_data)
 {
 	TrackerMinerFiles *mf = TRACKER_MINER_FILES (fs);
-
-	/* Create stamp file if not already there */
-	if (!tracker_miner_files_get_first_index_done (mf)) {
-		tracker_miner_files_set_first_index_done (mf, TRUE);
-	}
 
 	/* And remove the signal handler so that it's not
 	 *  called again */
@@ -1085,7 +1091,8 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
                          TrackerStorage           *storage,
                          TrackerConfig            *config,
-                         TrackerDomainOntology    *domain_ontology)
+                         TrackerDomainOntology    *domain_ontology,
+                         gboolean                  initial_index)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
@@ -1097,6 +1104,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
 	                     "file-attributes", FILE_ATTRIBUTES,
+	                     "initial-index", initial_index,
 	                     NULL);
 }
 
@@ -1139,86 +1147,6 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);
-}
-
-inline static gchar *
-get_first_index_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         FIRST_INDEX_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_first_index_done:
- *
- * Check if first full index of files was already done.
- *
- * Returns: %TRUE if a first full index have been done, %FALSE otherwise.
- **/
-gboolean
-tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf)
-{
-	gboolean exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-	g_free (filename);
-
-	return exists;
-}
-
-/**
- * tracker_miner_files_set_first_index_done:
- *
- * Set the status of the first full index of files. Should be set to
- *  %FALSE if the index was never done or if a reindex is needed. When
- *  the index is completed, should be set to %TRUE.
- **/
-void
-tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-					  gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done && !already_exists) {
-		GError *error = NULL;
-
-		/* If done, create stamp file if not already there */
-		if (!g_file_set_contents (filename, PACKAGE_VERSION, -1, &error)) {
-			g_warning ("  Could not create file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  First index file:'%s' created", filename);
-		}
-	} else if (!done && already_exists) {
-		/* If NOT done, remove stamp file */
-		g_info ("  Removing first index file:'%s'", filename);
-
-		if (g_remove (filename)) {
-			g_warning ("    Could not remove file:'%s': %m",
-			           filename);
-		}
-	}
-
-	g_free (filename);
 }
 
 static inline gchar *
