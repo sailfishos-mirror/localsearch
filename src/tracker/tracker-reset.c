@@ -132,7 +132,7 @@ error:
 }
 
 static void
-delete_location_content (GFile *dir)
+delete_location (GFile *dir)
 {
 	GFileEnumerator *enumerator;
 	GError *error = NULL;
@@ -168,6 +168,13 @@ delete_location_content (GFile *dir)
 	}
 
 	g_object_unref (enumerator);
+
+	if (!g_file_delete (dir, NULL, &error)) {
+		g_critical ("Failed to delete '%s': %s",
+		            g_file_info_get_name (info),
+		            error->message);
+		g_error_free (error);
+	}
 }
 
 static gint
@@ -195,13 +202,13 @@ reset_run (void)
 
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
 		location = g_file_new_for_path (dir);
-		delete_location_content (location);
+		delete_location (location);
 		g_object_unref (location);
 		g_free (dir);
 
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
 		location = g_file_new_for_path (dir);
-		delete_location_content (location);
+		delete_location (location);
 		g_object_unref (location);
 		g_free (dir);
 	}
@@ -212,7 +219,7 @@ reset_run (void)
 
 		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "rss", NULL);
 		cache_location = g_file_new_for_path (dir);
-		delete_location_content (cache_location);
+		delete_location (cache_location);
 		g_object_unref (cache_location);
 		g_free (dir);
 	}
