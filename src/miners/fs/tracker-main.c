@@ -63,6 +63,8 @@
 #define DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
 
+#define LAST_CRAWL_FILENAME "last-crawl.txt"
+
 static GMainLoop *main_loop;
 static guint cleanup_id;
 
@@ -154,6 +156,65 @@ get_cache_dir (TrackerDomainOntology *domain_ontology)
 
 	cache = tracker_domain_ontology_get_cache (domain_ontology);
 	return g_file_get_child (cache, "files");
+}
+
+static gchar *
+get_last_crawl_filename (TrackerMinerFiles *mf)
+{
+	g_autoptr (GFile) file = NULL, child = NULL;
+	TrackerDomainOntology *domain_ontology;
+
+	g_object_get (G_OBJECT (mf), "domain-ontology", &domain_ontology, NULL);
+	file = get_cache_dir (domain_ontology);
+	child = g_file_get_child (file, LAST_CRAWL_FILENAME);
+	tracker_domain_ontology_unref (domain_ontology);
+
+	return g_file_get_path (child);
+}
+
+guint64
+get_last_crawl_done (TrackerMinerFiles *mf)
+{
+	g_autofree gchar *filename = NULL, *content = NULL;
+	guint64 then;
+
+	filename = get_last_crawl_filename (mf);
+
+	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
+		g_info ("  No previous timestamp, crawling forced");
+		return 0;
+	}
+
+	then = g_ascii_strtoull (content, NULL, 10);
+
+	return then;
+}
+
+void
+set_last_crawl_done (TrackerMinerFiles *mf,
+                     gboolean           done)
+{
+	g_autofree gchar *filename = NULL;
+
+	filename = get_last_crawl_filename (mf);
+
+	if (done) {
+		g_autoptr (GError) error = NULL;
+		g_autofree gchar *content = NULL;
+
+		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
+		g_info ("  Updating last crawl file:'%s'", filename);
+		/* Create/update time stamp file */
+		if (!g_file_set_contents (filename, content, -1, &error)) {
+			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
+			           filename,
+			           error->message);
+		} else {
+			g_info ("  Last crawl file:'%s' updated", filename);
+		}
+	} else {
+		g_info ("  Crawl not done yet, doesn't update last crawl file.");
+	}
 }
 
 static gboolean
@@ -259,7 +320,7 @@ should_crawl (TrackerMinerFiles *miner_files,
 	} else {
 		guint64 then, now;
 
-		then = tracker_miner_files_get_last_crawl_done (miner_files);
+		then = get_last_crawl_done (miner_files);
 
 		if (then < 1) {
 			return TRUE;
@@ -401,8 +462,7 @@ miner_finished_cb (TrackerMinerFS *fs,
 	        total_files_found);
 
 	if (do_crawling && !dry_run) {
-		tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs),
-							 TRUE);
+		set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
 	}
 
 	/* We're not sticking around for file updates, so stop

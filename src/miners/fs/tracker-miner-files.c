@@ -35,9 +35,6 @@
 #define DISK_SPACE_CHECK_FREQUENCY 10
 #define SECONDS_PER_DAY 86400
 
-/* Stamp files to know crawling/indexing state */
-#define LAST_CRAWL_FILENAME           "last-crawl.txt"
-
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
 #define FILE_ATTRIBUTES	  \
@@ -970,8 +967,6 @@ miner_files_finished (TrackerMinerFS *fs,
                       gint            files_found,
                       gint            files_ignored)
 {
-	tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
-
 	tracker_miner_files_check_unextracted (TRACKER_MINER_FILES (fs));
 }
 
@@ -1147,92 +1142,6 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);
-}
-
-static inline gchar *
-get_last_crawl_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         LAST_CRAWL_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_last_crawl_done:
- *
- * Check when last crawl was performed.
- *
- * Returns: time_t() value when last crawl occurred, otherwise 0.
- **/
-guint64
-tracker_miner_files_get_last_crawl_done (TrackerMinerFiles *mf)
-{
-	gchar *filename;
-	gchar *content;
-	guint64 then;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
-		g_info ("  No previous timestamp, crawling forced");
-		return 0;
-	}
-
-	then = g_ascii_strtoull (content, NULL, 10);
-	g_free (content);
-
-	return then;
-}
-
-/**
- * tracker_miner_files_set_last_crawl_done:
- *
- * Set the time stamp of the last full index of files.
- **/
-void
-tracker_miner_files_set_last_crawl_done (TrackerMinerFiles *mf,
-					 gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_last_crawl_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done) {
-		GError *error = NULL;
-		gchar *content;
-		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
-		if (already_exists) {
-			g_info ("  Overwriting last crawl file:'%s'", filename);
-		} else {
-			g_info ("  Creating last crawl file:'%s'", filename);
-		}
-		/* Create/update time stamp file */
-		if (!g_file_set_contents (filename, content, -1, &error)) {
-			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  Last crawl file:'%s' updated", filename);
-		}
-
-		g_free (content);
-	} else {
-		g_info ("  Crawl not done yet, doesn't update last crawl file.");
-	}
-	g_free (filename);
 }
 
 TrackerStorage *

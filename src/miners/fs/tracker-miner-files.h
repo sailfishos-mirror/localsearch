@@ -58,11 +58,6 @@ TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerDomainOntology   *domain,
                                         gboolean                 initial_index);
 
-/* Global functions to handle timestamp files */
-guint64  tracker_miner_files_get_last_crawl_done  (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_last_crawl_done  (TrackerMinerFiles *mf,
-                                                   gboolean           done);
-
 TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
 
 gboolean tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
