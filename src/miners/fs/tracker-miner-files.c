@@ -38,7 +38,6 @@
 /* Stamp files to know crawling/indexing state */
 #define FIRST_INDEX_FILENAME          "first-index.txt"
 #define LAST_CRAWL_FILENAME           "last-crawl.txt"
-#define NEED_MTIME_CHECK_FILENAME     "no-need-mtime-check.txt"
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
@@ -1305,100 +1304,6 @@ tracker_miner_files_set_last_crawl_done (TrackerMinerFiles *mf,
 	} else {
 		g_info ("  Crawl not done yet, doesn't update last crawl file.");
 	}
-	g_free (filename);
-}
-
-inline static gchar *
-get_need_mtime_check_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         NEED_MTIME_CHECK_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_need_mtime_check:
- *
- * Check if the miner-fs was cleanly shutdown or not.
- *
- * Returns: %TRUE if we need to check mtimes for directories against
- * the database on the next start for the miner-fs, %FALSE otherwise.
- **/
-gboolean
-tracker_miner_files_get_need_mtime_check (TrackerMinerFiles *mf)
-{
-	gboolean exists;
-	gchar *filename;
-
-	filename = get_need_mtime_check_filename (mf);
-	exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-	g_free (filename);
-
-	/* Existence of the file means we cleanly shutdown before and
-	 * don't need to do the mtime check again on this start.
-	 */
-	return !exists;
-}
-
-/**
- * tracker_miner_files_set_need_mtime_check:
- * @needed: a #gboolean
- *
- * If the next start of miner-fs should perform a full mtime check
- * against each directory found and those in the database (for
- * complete synchronisation), then @needed should be #TRUE, otherwise
- * #FALSE.
- *
- * Creates a file in $HOME/.cache/tracker/ if an mtime check is not
- * needed. The idea behind this is that a check is forced if the file
- * is not cleaned up properly on shutdown (i.e. due to a crash or any
- * other uncontrolled shutdown reason).
- **/
-void
-tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
-					  gboolean           needed)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_need_mtime_check_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	/* !needed = add file
-	 *  needed = remove file
-	 */
-	if (!needed && !already_exists) {
-		GError *error = NULL;
-
-		/* Create stamp file if not already there */
-		if (!g_file_set_contents (filename, PACKAGE_VERSION, -1, &error)) {
-			g_warning ("  Could not create file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  Need mtime check file:'%s' created", filename);
-		}
-	} else if (needed && already_exists) {
-		/* Remove stamp file */
-		g_info ("  Removing need mtime check file:'%s'", filename);
-
-		if (g_remove (filename)) {
-			g_warning ("    Could not remove file:'%s': %m",
-			           filename);
-		}
-	}
-
 	g_free (filename);
 }
 
