@@ -35,11 +35,6 @@
 #define DISK_SPACE_CHECK_FREQUENCY 10
 #define SECONDS_PER_DAY 86400
 
-/* Stamp files to know crawling/indexing state */
-#define FIRST_INDEX_FILENAME          "first-index.txt"
-#define LAST_CRAWL_FILENAME           "last-crawl.txt"
-#define NEED_MTIME_CHECK_FILENAME     "no-need-mtime-check.txt"
-
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
 #define FILE_ATTRIBUTES	  \
@@ -74,13 +69,12 @@ struct TrackerMinerFilesPrivate {
 	gboolean disk_space_pause;
 
 	gboolean low_battery_pause;
+	gboolean initial_index;
 
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
 	gulong finished_handler;
-
-	gboolean mtime_check;
 
 	guint stale_volumes_check_id;
 };
@@ -90,6 +84,7 @@ enum {
 	PROP_CONFIG,
 	PROP_DOMAIN_ONTOLOGY,
 	PROP_STORAGE,
+	PROP_INITIAL_INDEX,
 };
 
 #define TEXT_ALLOWLIST "text-allowlist"
@@ -210,6 +205,13 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_property (object_class,
+	                                 PROP_INITIAL_INDEX,
+	                                 g_param_spec_boolean ("initial-index",
+	                                                       NULL, NULL, FALSE,
+	                                                       G_PARAM_WRITABLE |
+	                                                       G_PARAM_CONSTRUCT_ONLY |
+	                                                       G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -284,8 +286,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	priv->finished_handler = g_signal_connect_after (mf, "finished",
 	                                                 G_CALLBACK (miner_finished_cb),
 	                                                 NULL);
-
-	priv->mtime_check = TRUE;
 }
 
 static void
@@ -327,6 +327,9 @@ miner_files_set_property (GObject      *object,
 		break;
 	case PROP_STORAGE:
 		priv->storage = g_value_dup_object (value);
+		break;
+	case PROP_INITIAL_INDEX:
+		priv->initial_index = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -692,7 +695,7 @@ check_battery_status (TrackerMinerFiles *mf)
 			if (!tracker_config_get_index_on_battery_first_time (mf->private->config)) {
 				g_message ("Running on battery, but not enabled, pausing");
 				should_pause = TRUE;
-			} else if (tracker_miner_files_get_first_index_done (mf)) {
+			} else if (!mf->private->initial_index) {
 				g_debug ("Running on battery and first-time index "
 				         "already done, pausing");
 				should_pause = TRUE;
@@ -757,11 +760,6 @@ miner_finished_cb (TrackerMinerFS *fs,
                    gpointer        user_data)
 {
 	TrackerMinerFiles *mf = TRACKER_MINER_FILES (fs);
-
-	/* Create stamp file if not already there */
-	if (!tracker_miner_files_get_first_index_done (mf)) {
-		tracker_miner_files_set_first_index_done (mf, TRUE);
-	}
 
 	/* And remove the signal handler so that it's not
 	 *  called again */
@@ -969,8 +967,6 @@ miner_files_finished (TrackerMinerFS *fs,
                       gint            files_found,
                       gint            files_ignored)
 {
-	tracker_miner_files_set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
-
 	tracker_miner_files_check_unextracted (TRACKER_MINER_FILES (fs));
 }
 
@@ -1090,7 +1086,8 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
                          TrackerStorage           *storage,
                          TrackerConfig            *config,
-                         TrackerDomainOntology    *domain_ontology)
+                         TrackerDomainOntology    *domain_ontology,
+                         gboolean                  initial_index)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
@@ -1102,6 +1099,7 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "config", config,
 	                     "domain-ontology", domain_ontology,
 	                     "file-attributes", FILE_ATTRIBUTES,
+	                     "initial-index", initial_index,
 	                     NULL);
 }
 
@@ -1144,273 +1142,6 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);
-}
-
-inline static gchar *
-get_first_index_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         FIRST_INDEX_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_first_index_done:
- *
- * Check if first full index of files was already done.
- *
- * Returns: %TRUE if a first full index have been done, %FALSE otherwise.
- **/
-gboolean
-tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf)
-{
-	gboolean exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-	g_free (filename);
-
-	return exists;
-}
-
-/**
- * tracker_miner_files_set_first_index_done:
- *
- * Set the status of the first full index of files. Should be set to
- *  %FALSE if the index was never done or if a reindex is needed. When
- *  the index is completed, should be set to %TRUE.
- **/
-void
-tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-					  gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_first_index_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done && !already_exists) {
-		GError *error = NULL;
-
-		/* If done, create stamp file if not already there */
-		if (!g_file_set_contents (filename, PACKAGE_VERSION, -1, &error)) {
-			g_warning ("  Could not create file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  First index file:'%s' created", filename);
-		}
-	} else if (!done && already_exists) {
-		/* If NOT done, remove stamp file */
-		g_info ("  Removing first index file:'%s'", filename);
-
-		if (g_remove (filename)) {
-			g_warning ("    Could not remove file:'%s': %m",
-			           filename);
-		}
-	}
-
-	g_free (filename);
-}
-
-static inline gchar *
-get_last_crawl_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         LAST_CRAWL_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_last_crawl_done:
- *
- * Check when last crawl was performed.
- *
- * Returns: time_t() value when last crawl occurred, otherwise 0.
- **/
-guint64
-tracker_miner_files_get_last_crawl_done (TrackerMinerFiles *mf)
-{
-	gchar *filename;
-	gchar *content;
-	guint64 then;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
-		g_info ("  No previous timestamp, crawling forced");
-		return 0;
-	}
-
-	then = g_ascii_strtoull (content, NULL, 10);
-	g_free (content);
-
-	return then;
-}
-
-/**
- * tracker_miner_files_set_last_crawl_done:
- *
- * Set the time stamp of the last full index of files.
- **/
-void
-tracker_miner_files_set_last_crawl_done (TrackerMinerFiles *mf,
-					 gboolean           done)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_last_crawl_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	if (done) {
-		GError *error = NULL;
-		gchar *content;
-		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
-		if (already_exists) {
-			g_info ("  Overwriting last crawl file:'%s'", filename);
-		} else {
-			g_info ("  Creating last crawl file:'%s'", filename);
-		}
-		/* Create/update time stamp file */
-		if (!g_file_set_contents (filename, content, -1, &error)) {
-			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  Last crawl file:'%s' updated", filename);
-		}
-
-		g_free (content);
-	} else {
-		g_info ("  Crawl not done yet, doesn't update last crawl file.");
-	}
-	g_free (filename);
-}
-
-inline static gchar *
-get_need_mtime_check_filename (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gchar *prefix, *path;
-
-	file = get_cache_dir (mf);
-	prefix = g_file_get_path (file);
-
-	path = g_build_filename (prefix,
-	                         NEED_MTIME_CHECK_FILENAME,
-	                         NULL);
-	g_free (prefix);
-	g_object_unref (file);
-
-	return path;
-}
-
-/**
- * tracker_miner_files_get_need_mtime_check:
- *
- * Check if the miner-fs was cleanly shutdown or not.
- *
- * Returns: %TRUE if we need to check mtimes for directories against
- * the database on the next start for the miner-fs, %FALSE otherwise.
- **/
-gboolean
-tracker_miner_files_get_need_mtime_check (TrackerMinerFiles *mf)
-{
-	gboolean exists;
-	gchar *filename;
-
-	filename = get_need_mtime_check_filename (mf);
-	exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-	g_free (filename);
-
-	/* Existence of the file means we cleanly shutdown before and
-	 * don't need to do the mtime check again on this start.
-	 */
-	return !exists;
-}
-
-/**
- * tracker_miner_files_set_need_mtime_check:
- * @needed: a #gboolean
- *
- * If the next start of miner-fs should perform a full mtime check
- * against each directory found and those in the database (for
- * complete synchronisation), then @needed should be #TRUE, otherwise
- * #FALSE.
- *
- * Creates a file in $HOME/.cache/tracker/ if an mtime check is not
- * needed. The idea behind this is that a check is forced if the file
- * is not cleaned up properly on shutdown (i.e. due to a crash or any
- * other uncontrolled shutdown reason).
- **/
-void
-tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
-					  gboolean           needed)
-{
-	gboolean already_exists;
-	gchar *filename;
-
-	filename = get_need_mtime_check_filename (mf);
-	already_exists = g_file_test (filename, G_FILE_TEST_EXISTS);
-
-	/* !needed = add file
-	 *  needed = remove file
-	 */
-	if (!needed && !already_exists) {
-		GError *error = NULL;
-
-		/* Create stamp file if not already there */
-		if (!g_file_set_contents (filename, PACKAGE_VERSION, -1, &error)) {
-			g_warning ("  Could not create file:'%s' failed, %s",
-			           filename,
-			           error->message);
-			g_error_free (error);
-		} else {
-			g_info ("  Need mtime check file:'%s' created", filename);
-		}
-	} else if (needed && already_exists) {
-		/* Remove stamp file */
-		g_info ("  Removing need mtime check file:'%s'", filename);
-
-		if (g_remove (filename)) {
-			g_warning ("    Could not remove file:'%s': %m",
-			           filename);
-		}
-	}
-
-	g_free (filename);
-}
-
-void
-tracker_miner_files_set_mtime_checking (TrackerMinerFiles *mf,
-                                        gboolean           mtime_check)
-{
-	mf->private->mtime_check = mtime_check;
 }
 
 TrackerStorage *

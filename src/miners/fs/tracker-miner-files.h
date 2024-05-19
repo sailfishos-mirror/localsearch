@@ -55,23 +55,8 @@ TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,
                                         TrackerStorage          *storage,
                                         TrackerConfig           *config,
-                                        TrackerDomainOntology   *domain);
-
-/* Global functions to handle timestamp files */
-gboolean tracker_miner_files_get_first_index_done (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_first_index_done (TrackerMinerFiles *mf,
-                                                   gboolean           done);
-
-guint64  tracker_miner_files_get_last_crawl_done  (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_last_crawl_done  (TrackerMinerFiles *mf,
-                                                   gboolean           done);
-
-gboolean tracker_miner_files_get_need_mtime_check (TrackerMinerFiles *mf);
-void     tracker_miner_files_set_need_mtime_check (TrackerMinerFiles *mf,
-                                                   gboolean           needed);
-
-void     tracker_miner_files_set_mtime_checking   (TrackerMinerFiles *miner,
-                                                   gboolean           mtime_checking);
+                                        TrackerDomainOntology   *domain,
+                                        gboolean                 initial_index);
 
 TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
 
