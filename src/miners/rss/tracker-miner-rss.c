@@ -25,7 +25,7 @@
 #include <libgrss.h>
 
 #include <libtracker-miners-common/tracker-dbus.h>
-#include <libtracker-sparql/tracker-ontologies.h>
+#include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-miners-common/tracker-common.h>
 
 #include <glib/gi18n.h>
