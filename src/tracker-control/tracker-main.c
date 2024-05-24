@@ -174,6 +174,15 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
+	if (!tracker_dbus_request_name (connection,
+	                                "org.freedesktop.LocalSearch3.Control",
+	                                &error)) {
+		g_critical ("Could not request DBus name: %s",
+		            error->message);
+		g_error_free (error);
+		return EXIT_FAILURE;
+	}
+
 	initialize_signal_handler ();
 
 	/* Go, go, go! */
