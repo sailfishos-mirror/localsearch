@@ -53,6 +53,7 @@ typedef struct {
 	GDBusNodeInfo *introspection_data;
 	guint registration_id;
 	guint bus_name_id;
+	guint old_bus_name_id;
 
 	GList *ongoing_tasks;
 
@@ -69,9 +70,10 @@ typedef struct {
 	WritebackData *current;
 } TrackerControllerPrivate;
 
+#define WRITEBACK_SERVICE "org.freedesktop.LocalSearch3.Writeback"
+
 #define TRACKER_WRITEBACK_SERVICE   "org.freedesktop.Tracker3.Writeback"
 #define TRACKER_WRITEBACK_PATH      "/org/freedesktop/Tracker3/Writeback"
-#define TRACKER_WRITEBACK_INTERFACE "org.freedesktop.Tracker3.Writeback"
 
 static const gchar *introspection_xml =
 	"<node>"
@@ -600,6 +602,20 @@ tracker_controller_dbus_start (TrackerController   *controller,
 
 	priv->bus_name_id =
 		g_bus_own_name_on_connection (priv->d_connection,
+		                              WRITEBACK_SERVICE,
+		                              G_BUS_NAME_OWNER_FLAGS_NONE,
+		                              bus_name_acquired_cb,
+		                              bus_name_vanished_cb,
+		                              controller, NULL);
+
+	if (err) {
+		g_propagate_prefixed_error (error, err,
+		                            "Could not own the D-Bus name " WRITEBACK_SERVICE);
+		return FALSE;
+	}
+
+	priv->old_bus_name_id =
+		g_bus_own_name_on_connection (priv->d_connection,
 		                              TRACKER_WRITEBACK_SERVICE,
 		                              G_BUS_NAME_OWNER_FLAGS_NONE,
 		                              bus_name_acquired_cb,
@@ -607,9 +623,8 @@ tracker_controller_dbus_start (TrackerController   *controller,
 		                              controller, NULL);
 
 	if (err) {
-		g_critical ("Could not own the D-Bus name "TRACKER_WRITEBACK_SERVICE", %s",
-		            err ? err->message : "no error given.");
-		g_propagate_error (error, err);
+		g_propagate_prefixed_error (error, err,
+		                            "Could not own the D-Bus name " TRACKER_WRITEBACK_SERVICE);
 		return FALSE;
 	}
 
@@ -630,6 +645,10 @@ tracker_controller_dbus_stop (TrackerController *controller)
 
 	if (priv->bus_name_id != 0) {
 		g_bus_unown_name (priv->bus_name_id);
+	}
+
+	if (priv->old_bus_name_id != 0) {
+		g_bus_unown_name (priv->old_bus_name_id);
 	}
 
 	if (priv->introspection_data) {
