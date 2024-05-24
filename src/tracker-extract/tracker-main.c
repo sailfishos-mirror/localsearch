@@ -61,7 +61,7 @@
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
 #define DBUS_NAME_SUFFIX "Tracker3.Miner.Extract"
-#define MINER_FS_NAME_SUFFIX "Tracker3.Miner.Files"
+#define MINER_FS_NAME_SUFFIX "LocalSearch3"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Extract"
 
 static GMainLoop *main_loop;
