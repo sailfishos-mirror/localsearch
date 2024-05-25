@@ -30,7 +30,6 @@ if get_option('tracker_core') == 'system'
   # If we are building against an installed version of tracker core rather than
   # having it as a subproject, these 'uninstalled' locations point to the actual
   # installed locations.
-  tracker_core_cli_commands_dir = join_paths (tracker_sparql.get_variable(pkgconfig: 'exec_prefix'), 'bin')
   tracker_uninstalled_testutils_dir = tracker_testutils.get_variable(pkgconfig: 'python_path')
 
   tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
@@ -39,7 +38,6 @@ else
 
   tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
 
-  tracker_core_cli_commands_dir = tracker_subproject.get_variable('tracker_uninstalled_cli_dir')
   tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
 
   tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
