@@ -347,9 +347,9 @@ output_eligible_status_for_file (gchar   *path,
 
 	if (inside_build_tree) {
 		/* Developer convienence - use uninstalled version if running from build tree */
-		tracker_miner_fs_path = g_build_filename (BUILDROOT, "src", "miners", "fs", "tracker-miner-fs-3", NULL);
+		tracker_miner_fs_path = g_build_filename (BUILDROOT, "src", "miners", "fs", "localsearch-3", NULL);
 	} else {
-		tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "tracker-miner-fs-3", NULL);
+		tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "localsearch-3", NULL);
 	}
 
 	{
