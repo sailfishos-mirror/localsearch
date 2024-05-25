@@ -1,6 +1,6 @@
 daemon_manpages = [
-    ['tracker-miner-fs-3', 1],
-    ['tracker-writeback-3', 1],
+    ['localsearch-3', 1],
+    ['localsearch-writeback-3', 1],
 ]
 
 if have_tracker_miner_rss
@@ -8,14 +8,14 @@ if have_tracker_miner_rss
 endif
 
 cli_manpages = [
-  ['tracker3-daemon', 1],
-  ['tracker3-extract', 1],
-  ['tracker3-index', 1],
-  ['tracker3-info', 1],
-  ['tracker3-reset', 1],
-  ['tracker3-search', 1],
-  ['tracker3-status', 1],
-  ['tracker3-tag', 1],
+  ['localsearch3-daemon', 1],
+  ['localsearch3-extract', 1],
+  ['localsearch3-index', 1],
+  ['localsearch3-info', 1],
+  ['localsearch3-reset', 1],
+  ['localsearch3-search', 1],
+  ['localsearch3-status', 1],
+  ['localsearch3-tag', 1],
 ]
 
 foreach m : daemon_manpages + cli_manpages
@@ -26,9 +26,9 @@ foreach m : daemon_manpages + cli_manpages
 
   xml = custom_target(manpage,
     command: [a2x,
-              '--attribute=author=The Tracker developers',
+              '--attribute=author=The LocalSearch developers',
               '--attribute=manversion=@0@'.format(meson.project_version()),
-              '--attribute=manmanual=Tracker manual',
+              '--attribute=manmanual=LocalSearch manual',
               '--doctype=manpage',
               '--format=manpage',
               '--no-xmllint',

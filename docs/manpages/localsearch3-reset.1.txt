@@ -1,13 +1,13 @@
-tracker3-reset(1)
-=================
+localsearch3-reset(1)
+=====================
 
 == NAME
 
-tracker3-reset - Reset the index and configuration
+localsearch3-reset - Reset the index and configuration
 
 == SYNOPSIS
 
-*tracker3 reset* [--filesystem | --rss] [--file _FILE_]
+*localsearch3 reset* [--filesystem | --rss] [--file _FILE_]
 
 == DESCRIPTION
 
@@ -38,4 +38,4 @@ hard reset option. This behaves as if Tracker was just installed.
 
 == SEE ALSO
 
-*tracker3-daemon*(1). *tracker-miner-fs-3*(1), *tracker-miner-rss-3*(1).
+*localsearch3-daemon*(1). *localsearch-3*(1).

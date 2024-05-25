@@ -1,17 +1,17 @@
-tracker3-info(1)
-================
+localsearch3-info(1)
+====================
 
 == NAME
 
-tracker3-info - Retrieve all information available for a certain file.
+localsearch3-info - Retrieve all information available for a certain file.
 
 == SYNOPSIS
 
-*tracker3 info* [_options_...] <__file1__> [[_file2_] ...]
+*localsearch3 info* [_options_...] <__file1__> [[_file2_] ...]
 
 == DESCRIPTION
 
-*tracker3 info* asks for all the known metadata available for the given
+*localsearch3 info* asks for all the known metadata available for the given
 _file_.
 
 Multiple _file_ arguments can be provided to retrieve information about
@@ -38,14 +38,14 @@ not have to be an absolute path.
   In most cases, the _file_ argument supplied points to a URL or PATH
   which is queried for according to the resource associated with it by
   _nie:url_. However, in cases where the _file_ specified turns out to
-  be the actual URN itself, this argument is required to tell "tracker3
+  be the actual URN itself, this argument is required to tell "localsearch3
   info" not to do the extra step of looking up the URN related by
   _nie:url_.
 
 For example, consider that you store URNs by the actual URL itself and
 use the unique nie:url in another resource (which is quite reasonable
 when using containers and multi-resource conditions), you would need
-this argument to tell "tracker3 info" that the _file_ supplied is
+this argument to tell "localsearch3 info" that the _file_ supplied is
 actually a URN not URL.
 
 *-t, --turtle*::
