@@ -9,7 +9,7 @@ cc = meson.get_compiler('c')
 # This is the X.Y used in -llibtracker-FOO-X.Y
 tracker_api_version = '3.0'
 tracker_api_major = tracker_api_version.split('.')[0]
-tracker_versioned_name = 'tracker@0@-miners'.format(tracker_api_major)
+tracker_versioned_name = 'localsearch@0@'.format(tracker_api_major)
 
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
