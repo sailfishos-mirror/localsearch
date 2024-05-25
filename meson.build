@@ -1,4 +1,4 @@
-project('tracker-miners', 'c',
+project('localsearch', 'c',
         version: '3.7.3',
         meson_version: '>=0.51')
 
