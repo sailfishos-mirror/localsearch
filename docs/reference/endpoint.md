@@ -2,26 +2,26 @@
 
 ## Introduction
 
-The filesystem indexer SPARQL endpoint can be contacted at the
-`org.freedesktop.Tracker3.Miner.Files` D-Bus name, use the
-Tracker SPARQL library to set up a connection to it.
+The LocalSearch SPARQL endpoint can be contacted at the
+`org.freedesktop.LocalSearch3` D-Bus name, use the
+TinySPARQL library to set up a connection to it.
 
 ```python
 #!/bin/env python3
 import gi
-gi.require_version('Tracker', '3.0')
-from gi.repository import Tracker
-conn = Tracker.SparqlConnection.bus_new('org.freedesktop.Tracker3.Miner.Files')
+gi.require_version('Tsparql', '3.0')
+from gi.repository import Tsparql
+conn = Tsparql.SparqlConnection.bus_new('org.freedesktop.LocalSearch3')
 ```
 
 ```bash
-$ tracker3 sparql -b org.freedesktop.Tracker3.Miner.Files -q \
+$ tinysparql3 sparql -b org.freedesktop.LocalSearch3 -q \
     "SELECT ('hello world' AS ?str) { }"
 ```
 
 You should not provide access within flatpaks to this D-Bus name.
 Access from within the sandbox is handled through the
-[Tracker portal](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html).
+[TinySPARQL portal](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html).
 
 Data is offered in the format of the Nepomuk ontology, see
 the [Nepomuk documentation](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/ontologies.html#nepomuk)
@@ -39,7 +39,7 @@ The filesystem indexer uses the following graphs to store data:
 - `tracker:Pictures`
 - `tracker:Software`
 
-See how the Tracker portal [uses graphs](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html#how-it-works)
+See how the TinySPARQL portal [uses graphs](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html#how-it-works)
 as the data units to perform isolation between clients.
 
 The `tracker:FileSystem` graph contains all nfo:FileDataObject
