@@ -68,7 +68,11 @@ check-merge-request:
     FDO_UPSTREAM_REPO: GNOME/tracker
     FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
-      dnf install -y 'dnf-command(builddep)' &&
+      if [ -z $(command -v dnf5) ]; then
+        dnf install -y 'dnf-command(builddep)' 'dnf-command(download)';
+      else
+        dnf install -y 'dnf5-command(builddep)' 'dnf5-command(download)';
+      fi &&
       dnf builddep -y tracker tracker-miners --setopt=install_weak_deps=False &&
       dnf clean all &&
       pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py meson &&
