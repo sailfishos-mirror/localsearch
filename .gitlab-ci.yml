@@ -1,7 +1,7 @@
 include:
   - remote: "https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/ci-fairy.yml"
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/fedora.yml'
-  - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/ubuntu.yml'
+  - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/debian.yml'
   - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
 variables:
@@ -75,14 +75,14 @@ check-merge-request:
       dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
       dnf install -y --setopt=install_weak_deps=False gstreamer1-libav
 
-.tracker-miners.ubuntu@common:
+.tracker-miners.debian@common:
   variables:
-    BASE_TAG: '2023-03-04.2'
+    BASE_TAG: '2024-06-06.2'
     FDO_UPSTREAM_REPO: GNOME/tracker
-    FDO_DISTRIBUTION_PACKAGES: 'python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
-      sed -Ei 's/^# deb-src /deb-src /' /etc/apt/sources.list &&
+      sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&
       apt-get -yq update && apt-get -yq upgrade &&
       apt-get -yq build-dep tracker tracker-miners
 
@@ -106,10 +106,10 @@ check-merge-request:
   tags:
     - aarch64
 
-.tracker-miners.ubuntu:rolling@x86_64:
-  extends: .tracker-miners.ubuntu@common
+.tracker-miners.debian:stable@x86_64:
+  extends: .tracker-miners.debian@common
   variables:
-    FDO_DISTRIBUTION_VERSION: rolling
+    FDO_DISTRIBUTION_VERSION: stable
     FDO_DISTRIBUTION_TAG: "x86_64-${BASE_TAG}"
 
 build-fedora-container@x86_64:
@@ -146,10 +146,10 @@ build-fedora-container@aarch64:
     - check-commit-log
     - check-merge-request
 
-build-ubuntu-container@x86_64:
+build-debian-container@x86_64:
   extends:
-    - .fdo.container-build@ubuntu
-    - .tracker-miners.ubuntu:rolling@x86_64
+    - .fdo.container-build@debian
+    - .tracker-miners.debian:stable@x86_64
   stage: prepare
   variables:
     GIT_STRATEGY: none
@@ -213,12 +213,12 @@ build-fedora@aarch64:
   allow_failure: true
   <<: *build
 
-build-ubuntu-rolling@x86_64:
+build-debian-stable@x86_64:
   extends:
-    - .fdo.distribution-image@ubuntu
-    - .tracker-miners.ubuntu:rolling@x86_64
+    - .fdo.distribution-image@debian
+    - .tracker-miners.debian:stable@x86_64
   needs:
-    - build-ubuntu-container@x86_64
+    - build-debian-container@x86_64
   allow_failure: true
   <<: *build
 
@@ -292,12 +292,12 @@ test-fedora@aarch64:
   allow_failure: true
   <<: *test
 
-test-ubuntu@x86_64:
+test-debian@x86_64:
   extends:
-    - .fdo.distribution-image@ubuntu
-    - .tracker-miners.ubuntu:rolling@x86_64
+    - .fdo.distribution-image@debian
+    - .tracker-miners.debian:stable@x86_64
   needs:
-    - build-ubuntu-rolling@x86_64
+    - build-debian-stable@x86_64
   allow_failure: true
   <<: *test
 
@@ -363,12 +363,12 @@ sandbox-fedora@aarch64:
   allow_failure: true
   <<: *sandbox
 
-sandbox-ubuntu@x86_64:
+sandbox-debian@x86_64:
   extends:
-    - .fdo.distribution-image@ubuntu
-    - .tracker-miners.ubuntu:rolling@x86_64
+    - .fdo.distribution-image@debian
+    - .tracker-miners.debian:stable@x86_64
   needs:
-    - build-ubuntu-rolling@x86_64
+    - build-debian-stable@x86_64
   allow_failure: true
   <<: *sandbox
 
@@ -401,7 +401,7 @@ coverage:
     - test-fedora@x86_64
     - test-fedora-rawhide@x86_64
     - test-fedora@aarch64
-    - test-ubuntu@x86_64
+    - test-debian@x86_64
 
 coverity:
   extends:
@@ -474,8 +474,8 @@ rebuild-fedora-container@aarch64:
     - .tracker-miners.fedora:36@aarch64
   <<: *container_rebuild
 
-rebuild-ubuntu-container@x86_64:
+rebuild-debian-container@x86_64:
   extends:
-    - .fdo.container-build@ubuntu
-    - .tracker-miners.ubuntu:rolling@x86_64
+    - .fdo.container-build@debian
+    - .tracker-miners.debian:stable@x86_64
   <<: *container_rebuild
