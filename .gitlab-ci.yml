@@ -64,7 +64,7 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2023-03-04.2'
+    BASE_TAG: '2024-06-06.1'
     FDO_UPSTREAM_REPO: GNOME/tracker
     FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
@@ -86,10 +86,10 @@ check-merge-request:
       apt-get -yq update && apt-get -yq upgrade &&
       apt-get -yq build-dep tracker tracker-miners
 
-.tracker-miners.fedora:36@x86_64:
+.tracker-miners.fedora:latest@x86_64:
   extends: .tracker-miners.fedora@common
   variables:
-    FDO_DISTRIBUTION_VERSION: 36
+    FDO_DISTRIBUTION_VERSION: latest
     FDO_DISTRIBUTION_TAG: "x86_64-${BASE_TAG}"
 
 .tracker-miners.fedora:rawhide@x86_64:
@@ -98,10 +98,10 @@ check-merge-request:
     FDO_DISTRIBUTION_VERSION: rawhide
     FDO_DISTRIBUTION_TAG: "x86_64-${BASE_TAG}"
 
-.tracker-miners.fedora:36@aarch64:
+.tracker-miners.fedora:latest@aarch64:
   extends: .tracker-miners.fedora@common
   variables:
-    FDO_DISTRIBUTION_VERSION: 36
+    FDO_DISTRIBUTION_VERSION: latest
     FDO_DISTRIBUTION_TAG: "aarch64-${BASE_TAG}"
   tags:
     - aarch64
@@ -115,7 +115,7 @@ check-merge-request:
 build-fedora-container@x86_64:
   extends:
     - .fdo.container-build@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   stage: prepare
   variables:
     GIT_STRATEGY: none
@@ -138,10 +138,11 @@ build-fedora-rawhide-container@x86_64:
 build-fedora-container@aarch64:
   extends:
     - .fdo.container-build@fedora
-    - .tracker-miners.fedora:36@aarch64
+    - .tracker-miners.fedora:latest@aarch64
   stage: prepare
   variables:
     GIT_STRATEGY: none
+  allow_failure: true
   needs:
     - check-commit-log
     - check-merge-request
@@ -161,7 +162,7 @@ build-debian-container@x86_64:
 check-code-style:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   needs:
     - build-fedora-container@x86_64
   stage: code-review
@@ -190,7 +191,7 @@ check-code-style:
 build-fedora@x86_64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   needs:
     - build-fedora-container@x86_64
   <<: *build
@@ -207,7 +208,7 @@ build-fedora-rawhide@x86_64:
 build-fedora@aarch64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@aarch64
+    - .tracker-miners.fedora:latest@aarch64
   needs:
     - build-fedora-container@aarch64
   allow_failure: true
@@ -269,7 +270,7 @@ build-debian-stable@x86_64:
 test-fedora@x86_64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   needs:
     - build-fedora@x86_64
   <<: *test
@@ -286,7 +287,7 @@ test-fedora-rawhide@x86_64:
 test-fedora@aarch64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@aarch64
+    - .tracker-miners.fedora:latest@aarch64
   needs:
     - build-fedora@aarch64
   allow_failure: true
@@ -304,7 +305,7 @@ test-debian@x86_64:
 test-docs:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   stage: test
   script:
     - ./docs/reference/build.py --output=website --man-pages ./docs/manpages/localsearch3-*.txt
@@ -340,7 +341,7 @@ test-docs:
 sandbox-fedora@x86_64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   needs:
     - build-fedora@x86_64
   <<: *sandbox
@@ -357,7 +358,7 @@ sandbox-fedora-rawhide@x86_64:
 sandbox-fedora@aarch64:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@aarch64
+    - .tracker-miners.fedora:latest@aarch64
   needs:
     - build-fedora@aarch64
   allow_failure: true
@@ -375,7 +376,7 @@ sandbox-debian@x86_64:
 coverage:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   stage: analysis
   allow_failure: true
   script:
@@ -406,7 +407,7 @@ coverage:
 coverity:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   stage: analysis
   allow_failure: true
   script:
@@ -434,7 +435,7 @@ coverity:
 pages:
   extends:
     - .fdo.distribution-image@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   stage: docs
   script:
     - mv website public
@@ -459,7 +460,7 @@ pages:
 rebuild-fedora-container@x86_64:
   extends:
     - .fdo.container-build@fedora
-    - .tracker-miners.fedora:36@x86_64
+    - .tracker-miners.fedora:latest@x86_64
   <<: *container_rebuild
 
 rebuild-fedora-rawhide-container@x86_64:
@@ -471,7 +472,7 @@ rebuild-fedora-rawhide-container@x86_64:
 rebuild-fedora-container@aarch64:
   extends:
     - .fdo.container-build@fedora
-    - .tracker-miners.fedora:36@aarch64
+    - .tracker-miners.fedora:latest@aarch64
   <<: *container_rebuild
 
 rebuild-debian-container@x86_64:
