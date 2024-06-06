@@ -1,4 +1,4 @@
-project('tracker-miners', 'c',
+project('localsearch', 'c',
         version: '3.7.3',
         meson_version: '>=0.51')
 
@@ -9,7 +9,7 @@ cc = meson.get_compiler('c')
 # This is the X.Y used in -llibtracker-FOO-X.Y
 tracker_api_version = '3.0'
 tracker_api_major = tracker_api_version.split('.')[0]
-tracker_versioned_name = 'tracker@0@-miners'.format(tracker_api_major)
+tracker_versioned_name = 'localsearch@0@'.format(tracker_api_major)
 
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
@@ -30,7 +30,6 @@ if get_option('tracker_core') == 'system'
   # If we are building against an installed version of tracker core rather than
   # having it as a subproject, these 'uninstalled' locations point to the actual
   # installed locations.
-  tracker_core_cli_commands_dir = join_paths (tracker_sparql.get_variable(pkgconfig: 'exec_prefix'), 'bin')
   tracker_uninstalled_testutils_dir = tracker_testutils.get_variable(pkgconfig: 'python_path')
 
   tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
@@ -39,7 +38,6 @@ else
 
   tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
 
-  tracker_core_cli_commands_dir = tracker_subproject.get_variable('tracker_uninstalled_cli_dir')
   tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
 
   tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
@@ -426,7 +424,7 @@ build_root = meson.current_build_dir()
 
 # We use tracker-miners-3.0 rather than tracker3-miners inside the lib64
 # directory, following the existing convention in that directory.
-tracker_api_versioned_name = 'tracker-miners-@0@'.format(tracker_api_version)
+tracker_api_versioned_name = 'localsearch-@0@'.format(tracker_api_version)
 tracker_internal_libs_dir = join_paths(get_option('prefix'), get_option('libdir'), tracker_api_versioned_name)
 
 tracker_extract_modules_dir = join_paths(get_option('prefix'), get_option('libdir'), tracker_api_versioned_name, 'extract-modules')
@@ -437,7 +435,7 @@ tracker_miner_services_dir = join_paths(get_option('prefix'), get_option('datadi
 tracker_uninstalled_cli_dir = meson.current_build_dir() / 'src' / 'tracker'
 tracker_uninstalled_extract_rules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-extract', 'uninstalled-rules')
 tracker_uninstalled_writeback_modules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-writeback')
-uninstalled_tracker_extract_path = join_paths(meson.current_build_dir(), 'src', 'tracker-extract', 'tracker-extract-3')
+uninstalled_tracker_extract_path = join_paths(meson.current_build_dir(), 'src', 'tracker-extract', 'localsearch-extractor-3')
 
 gsettings_schema_dir = join_paths(get_option('prefix'), get_option('datadir'), 'glib-2.0', 'schemas')
 po_dir = join_paths(meson.current_source_dir(), 'po')

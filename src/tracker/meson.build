@@ -1,5 +1,5 @@
 commands_dir = get_option('bindir')
-command_metadata_dir = get_option('prefix') / get_option('datadir') / 'tracker3' / 'commands'
+command_metadata_dir = get_option('prefix') / get_option('datadir') / 'localsearch3' / 'commands'
 po_dir = join_paths(meson.project_source_root(), 'po')
 
 commands = [
@@ -13,12 +13,28 @@ commands = [
   { 'name': 'tag', 'sources': 'tracker-tag.c', 'extra_deps': [] },
 ]
 
+main_command_name = 'localsearch@0@'.format(tracker_api_major)
+
+executable(main_command_name,
+    'main.c',
+    c_args: tracker_c_args + [
+        '-DCLI_METADATA_DIR="@0@"'.format(command_metadata_dir),
+        '-DMANDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('datadir'), 'man')),
+        '-DBINDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('bindir'))),
+    ],
+    install: true,
+    install_dir: get_option('bindir'),
+    dependencies: [tracker_sparql, tracker_miners_common_dep],
+    include_directories: [commoninc, configinc, srcinc],
+)
+
 foreach c: commands
-    command_name = 'tracker@0@-@1@'.format(tracker_api_major, c['name'])
+    command_name = 'localsearch@0@-@1@'.format(tracker_api_major, c['name'])
     sources = c['sources']
 
     executable(command_name, sources,
         c_args: tracker_c_args + [
+            '-DMAIN_COMMAND_NAME=@0@'.format(main_command_name),
             '-DLIBEXECDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('libexecdir'))),
             '-DBUILDROOT="@0@"'.format(build_root),
         ],
@@ -38,9 +54,3 @@ foreach c: commands
         type: 'desktop'
     )
 endforeach
-
-# The `tracker3` CLI loads all commands from one directory.
-# We link the core tracke3 commands into our build tree so we can
-# then set TRACKER_CLI_DIR to one location which has everything.
-run_command('./link-core-cli-commands.sh', tracker_core_cli_commands_dir,
-              check: true)

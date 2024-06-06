@@ -60,7 +60,7 @@ tracker_miner_fs_deps = [
     gstreamer,
 ]
 
-executable('tracker-miner-fs-@0@'.format(tracker_api_major),
+executable('localsearch-@0@'.format(tracker_api_major),
     sources,
     miner_fs_resources[0], miner_fs_resources[1],
     miner_fs_enums[0], miner_fs_enums[1],
@@ -80,15 +80,27 @@ executable('tracker-miner-fs-@0@'.format(tracker_api_major),
 # It's also used by tracker-control to identify the miner.
 tmp_conf = configuration_data()
 tmp_conf.merge_from(conf)
+tmp_conf.set ('dbusname', 'LocalSearch3')
 if get_option('domain_prefix') == 'org.freedesktop'
-  tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=tracker-miner-fs-3.service')
+  tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=localsearch-3.service')
 else
   tmp_conf.set ('SYSTEMD_SERVICE', '')
 endif
 dbus_service_file = configure_file(
     input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
-    output: get_option('domain_prefix') + '.Tracker3.Miner.Files.service',
+    output: get_option('domain_prefix') + '.LocalSearch3.service',
     configuration: tmp_conf,
+    install: true,
+    install_dir: dbus_services_dir,
+)
+
+legacy_conf = configuration_data()
+legacy_conf.merge_from(conf)
+legacy_conf.set ('dbusname', 'Tracker3.Miner.Files')
+legacy_dbus_service_file = configure_file(
+    input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
+    output: get_option('domain_prefix') + '.Tracker3.Miner.Files.service',
+    configuration: legacy_conf,
     install: true,
     install_dir: dbus_services_dir,
 )
@@ -97,7 +109,7 @@ dbus_service_file = configure_file(
 # systemd user service activation is preferred if available.
 desktop_file = configure_file(
     input: 'tracker-miner-fs.desktop.in',
-    output: 'tracker-miner-fs-@0@.desktop'.format(tracker_api_major),
+    output: 'localsearch-@0@.desktop'.format(tracker_api_major),
     configuration: conf,
     install: true,
     install_dir: xdg_autostart_dir)
@@ -106,7 +118,7 @@ if get_option('systemd_user_services')
   # This file allows starting the service as a systemd user service.
   configure_file(
       input: 'tracker-miner-fs.service.in',
-      output: 'tracker-miner-fs-@0@.service'.format(tracker_api_major),
+      output: 'localsearch-@0@.service'.format(tracker_api_major),
       configuration: conf,
       install: true,
       install_dir: systemd_user_services_dir)

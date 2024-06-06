@@ -442,9 +442,9 @@ tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 	current_dir = g_get_current_dir ();
 
 	if (g_strcmp0 (current_dir, BUILDROOT) == 0)
-		extract_path = BUILD_EXTRACTDIR "/tracker-extract-3";
+		extract_path = BUILD_EXTRACTDIR "/localsearch-extractor-3";
 	else
-		extract_path = LIBEXECDIR "/tracker-extract-3";
+		extract_path = LIBEXECDIR "/localsearch-extractor-3";
 
 	watchdog->extract_process =
 		g_subprocess_launcher_spawn (watchdog->launcher,

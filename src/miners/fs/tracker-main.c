@@ -60,7 +60,8 @@
 
 #define SECONDS_PER_DAY 60 * 60 * 24
 
-#define DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
+#define DBUS_NAME_SUFFIX "LocalSearch3"
+#define LEGACY_DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
 
 #define LAST_CRAWL_FILENAME "last-crawl.txt"
@@ -968,11 +969,21 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* Request DBus name */
+	/* Request DBus names */
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
 
 	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
 		g_critical ("Could not request DBus name '%s': %s",
+		            dbus_name, error->message);
+		g_error_free (error);
+		g_free (dbus_name);
+		return EXIT_FAILURE;
+	}
+
+	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, LEGACY_DBUS_NAME_SUFFIX);
+
+	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
+		g_critical ("Could not request legacy DBus name '%s': %s",
 		            dbus_name, error->message);
 		g_error_free (error);
 		g_free (dbus_name);

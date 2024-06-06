@@ -1,25 +1,25 @@
-tracker3-daemon(1)
-==================
+localsearch3-daemon(1)
+======================
 
 == NAME
 
-tracker3-daemon - Start, stop, restart and list daemons responsible for
+localsearch3-daemon - Start, stop, restart and list daemons responsible for
 indexing content
 
 == SYNOPSIS
 
 ....
-tracker3 daemon [options...]
-tracker3 daemon -s | -t [daemons] | -k [daemons] | -l
-tracker3 daemon -f | -w [ontology]
-tracker3 daemon --miner <miner> --pause[-for-process] <reason>
-tracker3 daemon --miner <miner> --resume <cookie>
+localsearch3 daemon [options...]
+localsearch3 daemon -s | -t [daemons] | -k [daemons] | -l
+localsearch3 daemon -f | -w [ontology]
+localsearch3 daemon --miner <miner> --pause[-for-process] <reason>
+localsearch3 daemon --miner <miner> --resume <cookie>
 ....
 
 == DESCRIPTION
 
 Tracker indexes content with daemon processes that run in the background.
-The *tracker3 daemon* command allows for control of these components.
+The *localsearch3 daemon* command allows for control of these components.
 This ranges from starting, stopping and killing processes to pausing and
 resuming them.
 
@@ -64,7 +64,7 @@ be a comma separated list of shorthand or long hand ontology properties.
 For example:
 
 ....
-    $ tracker3 daemon -w nie:url,nie:mimeType,nfo:fileSize,nie:dataSource
+    $ localsearch3 daemon -w nie:url,nie:mimeType,nfo:fileSize,nie:dataSource
     Now listening for resource updates to the database
     All nie:plainTextContent properties are omitted
 

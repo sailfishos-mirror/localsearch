@@ -5,7 +5,7 @@ offers other miscellaneous services for control and additional
 features. Access to these services may be allowed from Flatpak
 sandboxes.
 
-## org.freedesktop.Tracker3.Files.Control
+## org.freedesktop.LocalSearch3.Control
 
 This service allows a certain amount of control on the
 indexed locations. This service offers the following two
@@ -51,7 +51,7 @@ these properties.
 
 See the definition of [this interface](https://gitlab.gnome.org/GNOME/tracker-miners/blob/master/src/tracker-control/org.freedesktop.Tracker3.Miner.Files.Proxy.xml).
 
-## org.freedesktop.Tracker3.Writeback
+## org.freedesktop.LocalSearch3.Writeback
 
 This service allows performing changes to the metadata
 contained in files out the metadata descriptions in RDF. This service

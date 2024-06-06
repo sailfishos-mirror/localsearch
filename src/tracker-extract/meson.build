@@ -155,7 +155,7 @@ if libgsf.found()
   tracker_extract_dependencies += libgsf
 endif
 
-executable('tracker-extract-@0@'.format(tracker_api_major),
+executable('localsearch-extractor-@0@'.format(tracker_api_major),
   tracker_extract_sources,
   # Manually add the root dir to work around https://github.com/mesonbuild/meson/issues/1387
   c_args: tracker_c_args + ['-I' + meson.build_root()],

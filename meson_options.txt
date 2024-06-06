@@ -13,7 +13,7 @@ option('man', type: 'boolean', value: true,
        description: 'Install man pages')
 option('miner_fs', type: 'boolean', value: true,
        description: 'Enable the Tracker filesystem miner')
-option('miner_rss', type: 'boolean', value: true,
+option('miner_rss', type: 'boolean', value: false,
        description: 'Enable the Tracker RSS miner')
 option('writeback', type: 'boolean', value: true,
        description: 'Enable Tracker writeback feature')

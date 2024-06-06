@@ -60,9 +60,7 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define DBUS_NAME_SUFFIX "Tracker3.Miner.Extract"
-#define MINER_FS_NAME_SUFFIX "Tracker3.Miner.Files"
-#define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Extract"
+#define MINER_FS_NAME_SUFFIX "LocalSearch3"
 
 static GMainLoop *main_loop;
 
@@ -298,7 +296,6 @@ do_main (int argc, char *argv[])
 	TrackerDecorator *decorator;
 	TrackerExtractController *controller;
 	GMainLoop *my_main_loop;
-	TrackerMinerProxy *proxy;
 	GDBusConnection *connection = NULL;
 	TrackerExtractPersistence *persistence;
 	TrackerSparqlConnection *sparql_connection;
@@ -415,14 +412,6 @@ do_main (int argc, char *argv[])
 
 	decorator = tracker_extract_decorator_new (sparql_connection, extract, persistence);
 
-	proxy = tracker_miner_proxy_new (TRACKER_MINER (decorator), connection, DBUS_PATH, NULL, &error);
-	if (error) {
-		g_critical ("Could not create miner DBus proxy: %s\n", error->message);
-		g_error_free (error);
-		g_object_unref (decorator);
-		return EXIT_FAILURE;
-	}
-
 #ifdef THREAD_ENABLE_TRACE
 	g_debug ("Thread:%p (Main) --- Waiting for extract requests...",
 	         g_thread_self ());
@@ -468,7 +457,6 @@ do_main (int argc, char *argv[])
 	g_object_unref (decorator);
 	g_object_unref (controller);
 	g_object_unref (persistence);
-	g_object_unref (proxy);
 	g_object_unref (connection);
 	tracker_domain_ontology_unref (domain_ontology);
 	tracker_sparql_connection_close (sparql_connection);

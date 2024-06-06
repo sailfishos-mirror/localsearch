@@ -71,9 +71,9 @@ extract_files (char *output_format)
 
 	if (inside_build_tree) {
 		/* Developer convienence - use uninstalled version if running from build tree */
-		tracker_extract_path = g_build_filename(BUILDROOT, "src", "tracker-extract", "tracker-extract-3", NULL);
+		tracker_extract_path = g_build_filename(BUILDROOT, "src", "tracker-extract", "localsearch-extractor-3", NULL);
 	} else {
-		tracker_extract_path = g_build_filename(LIBEXECDIR, "tracker-extract-3", NULL);
+		tracker_extract_path = g_build_filename(LIBEXECDIR, "localsearch-extractor-3", NULL);
 	}
 
 	for (p = filenames; *p; p++) {

@@ -1,17 +1,17 @@
-tracker3-search(1)
-==================
+localsearch3-search(1)
+======================
 
 == NAME
 
-tracker3-search - Search for content by type or across all types
+localsearch3-search - Search for content by type or across all types
 
 == SYNOPSIS
 
-*tracker3 search* [_options_...] [_resource-type_] <search-terms>
+*localsearch3 search* [_options_...] [_resource-type_] <search-terms>
 
 == DESCRIPTION
 
-*tracker3 search* searches all indexed content for the given search terms. Results are returned in ascending order.
+*localsearch3 search* searches all indexed content for the given search terms. Results are returned in ascending order.
 
 _<search-terms>_::
   One or more words to search for. When multiple terms are provided,
@@ -93,4 +93,4 @@ Only resources which currently exist will be returned by this command
 
 == SEE ALSO
 
-*tracker3-status*(1), *tracker3-tag*(1), *tracker3-info*(1).
+*localsearch3-status*(1), *localsearch3-tag*(1), *localsearch3-info*(1).
