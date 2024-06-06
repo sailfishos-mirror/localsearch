@@ -83,7 +83,7 @@ check-merge-request:
   variables:
     BASE_TAG: '2024-06-06.2'
     FDO_UPSTREAM_REPO: GNOME/tracker
-    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev gcovr'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&
