@@ -13,6 +13,10 @@ commands = [
   { 'name': 'tag', 'sources': 'tracker-tag.c', 'extra_deps': [] },
 ]
 
+python_commands = [
+  { 'name': 'test-sandbox', 'source': 'tracker-sandbox.in' },
+]
+
 main_command_name = 'localsearch@0@'.format(tracker_api_major)
 
 executable(main_command_name,
@@ -43,6 +47,31 @@ foreach c: commands
         dependencies: [tracker_sparql, tracker_miners_common_dep] + c['extra_deps'],
         include_directories: [commoninc, configinc, srcinc],
     )
+
+    command_desktop_file = 'tracker-@0@.desktop'.format(c['name'])
+    command_desktop = i18n.merge_file(
+        input: command_desktop_file + '.in',
+        output: command_desktop_file,
+        install: true,
+        install_dir: command_metadata_dir,
+        po_dir: po_dir,
+        type: 'desktop'
+    )
+endforeach
+
+script_conf = configuration_data()
+script_conf.set('typelibdir', typelib_dir)
+script_conf.set('prefix', get_option('prefix'))
+script_conf.set('testutils_dir', testutils_dir)
+
+foreach c: python_commands
+    command_name = 'localsearch@0@-@1@'.format(tracker_api_major, c['name'])
+
+    configure_file(
+      input: c['source'],
+      output: command_name,
+      configuration: script_conf,
+      install_dir: get_option('prefix') / get_option('bindir'))
 
     command_desktop_file = 'tracker-@0@.desktop'.format(c['name'])
     command_desktop = i18n.merge_file(
