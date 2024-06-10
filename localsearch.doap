@@ -14,7 +14,7 @@ Tracker is a central repository of user information, that provides two
 big benefits for the user; shared data between applications and
 information which is relational to other information (for example:
 mixing contacts with files, locations, activities and etc.).</description>
-  <homepage rdf:resource="https://wiki.gnome.org/Projects/Tracker" />
+  <homepage rdf:resource="https://gnome.pages.gitlab.gnome.org/localsearch/" />
   <developer-forum rdf:resource="https://discourse.gnome.org/tag/tracker" />
   <download-page rdf:resource="http://download.gnome.org/sources/localsearch/" />
   <bug-database rdf:resource="https://gitlab.gnome.org/GNOME/localsearch/issues/" />

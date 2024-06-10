@@ -65,7 +65,7 @@ check-merge-request:
 .tracker-miners.fedora@common:
   variables:
     BASE_TAG: '2024-06-06.1'
-    FDO_UPSTREAM_REPO: GNOME/tracker
+    FDO_UPSTREAM_REPO: GNOME/localsearch
     FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
       if [ -z $(command -v dnf5) ]; then
@@ -82,7 +82,7 @@ check-merge-request:
 .tracker-miners.debian@common:
   variables:
     BASE_TAG: '2024-06-06.2'
-    FDO_UPSTREAM_REPO: GNOME/tracker
+    FDO_UPSTREAM_REPO: GNOME/localsearch
     FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev gcovr'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
@@ -171,7 +171,7 @@ check-code-style:
     - build-fedora-container@x86_64
   stage: code-review
   script:
-    - git fetch origin master;
+    - git fetch origin main;
       export common_parent_sha=$(diff --old-line-format='' --new-line-format='' <(git rev-list --first-parent "origin/${CI_MERGE_REQUEST_TARGET_BRANCH_NAME:-${CI_DEFAULT_BRANCH}}") <(git rev-list --first-parent HEAD) | head -1) ;
       python3 -u ./check-style.py --dry-run --sha $common_parent_sha ;
   allow_failure: true
@@ -182,10 +182,10 @@ check-code-style:
     # We can build and test tracker-miners against tracker just by building
     # tracker as a submodule.
     - .gitlab-ci/checkout-tracker.sh
-    - echo "Building tracker.git commit $(git -C ./subprojects/tracker rev-parse HEAD)"
+    - echo "Building tinysparql.git commit $(git -C ./subprojects/tinysparql rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Dtests_tap_protocol=true -Dtracker:docs=false --auto-features=enabled -Dtracker:avahi=disabled
+    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql:docs=false --auto-features=enabled -Dtinysparql:avahi=disabled
     - ninja
   artifacts:
     expire_in: 1 day
@@ -260,7 +260,7 @@ build-debian-stable@x86_64:
       echo "TRACKER_DEBUG: ${TRACKER_DEBUG}"
       echo "MESON_TEST_EXTRA_ARGS: ${MESON_TEST_EXTRA_ARGS}"
       echo
-      echo "These values can be set at https://gitlab.gnome.org/GNOME/tracker/pipelines/new"
+      echo "These values can be set at https://gitlab.gnome.org/GNOME/localsearch/pipelines/new"
 
   artifacts:
     expire_in: 1 day
@@ -423,7 +423,7 @@ coverity:
     # tracker code to be included in the coverity reports for tracker-miners.
     - .gitlab-ci/checkout-tracker.sh
     - export INSTALL=`pwd`/install
-    - pushd subprojects/tracker; meson build --libdir lib --prefix $INSTALL -Ddocs=false; pushd build; ninja install; popd; popd
+    - pushd subprojects/tinysparql; meson build --libdir lib --prefix $INSTALL -Ddocs=false; pushd build; ninja install; popd; popd
     - curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=tracker-miners" --output /tmp/coverity_tool.tgz
     - tar zxf /tmp/coverity_tool.tgz
     - mkdir coverity-build
@@ -438,7 +438,7 @@ coverity:
       --form file=@coverity-build/cov-int.tar.gz --form version="`git describe --tags`"
       --form description="gitlab CI build"
   only:
-    - master
+    - main
 
 pages:
   extends:
@@ -453,7 +453,7 @@ pages:
   needs:
     - test-docs
   only:
-    - master
+    - main
 
 # Triggered from a scheduled job
 

@@ -1,9 +1,9 @@
-site_name: Tracker Miners
-site_description: Tracker Miners API reference
+site_name: LocalSearch
+site_description: LocalSearch API reference
 docs_dir: ./reference
-site_url: https://gnome.pages.gitlab.gnome.org/tracker-miners/
-repo_url: https://gitlab.gnome.org/GNOME/tracker-miners/
-edit_uri: blob/master/docs/reference
+site_url: https://gnome.pages.gitlab.gnome.org/localsearch/
+repo_url: https://gitlab.gnome.org/GNOME/localsearch/
+edit_uri: blob/main/docs/reference
 use_directory_urls: false
 
 nav:

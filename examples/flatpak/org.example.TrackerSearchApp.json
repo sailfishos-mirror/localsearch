@@ -27,7 +27,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://gitlab.gnome.org/GNOME/tracker-miners.git"
+                    "url": "https://gitlab.gnome.org/GNOME/localsearch.git"
                 }
             ]
         },
