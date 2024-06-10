@@ -69,7 +69,7 @@ class Manpages():
         self.run([xmlto, 'xhtml-nochunks', '-o', out_path, in_path])
 
     def generate_toplevel_markdown(self, in_path, out_path, html_files):
-        """Generate the master commandline.md page."""
+        """Generate the main commandline.md page."""
 
         includes = []
         for path in sorted(html_files):
