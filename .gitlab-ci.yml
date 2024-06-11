@@ -107,9 +107,9 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2024-06-06.1'
+    BASE_TAG: '2024-06-11.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
+    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
       if [ -z $(command -v dnf5) ]; then
         dnf install -y 'dnf-command(builddep)' 'dnf-command(download)';
@@ -118,20 +118,21 @@ check-merge-request:
       fi &&
       dnf builddep -y tracker tracker-miners --setopt=install_weak_deps=False &&
       dnf clean all &&
-      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py meson &&
+      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py gcovr meson &&
       dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
       dnf install -y --setopt=install_weak_deps=False gstreamer1-libav
 
 .tracker-miners.debian@common:
   variables:
-    BASE_TAG: '2024-06-06.2'
+    BASE_TAG: '2024-06-11.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev gcovr'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&
       apt-get -yq update && apt-get -yq upgrade &&
-      apt-get -yq build-dep tracker tracker-miners
+      apt-get -yq build-dep tracker tracker-miners &&
+      pip3 install gcovr
 
 .tracker-miners.fedora:latest@x86_64:
   extends: .tracker-miners.fedora@common
@@ -449,11 +450,7 @@ coverage:
     - test-fedora@x86_64
     - test-fedora@aarch64
     - test-debian@x86_64
-    # As of 2024-06-06, Fedora Rawhide has gcovr 7.2, other distros have
-    # 6.0. The "format_version" in the JSON output is "0.6" for gcovr 7.2,
-    # and "0.5" for older versions. This produces an incompatibility error
-    # when merging, so we temporarily exclude rawhide from coverage.
-    #- test-fedora-rawhide@x86_64
+    - test-fedora-rawhide@x86_64
 
 coverity:
   extends:
