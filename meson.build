@@ -19,26 +19,18 @@ tracker_required = '3.7'
 
 if get_option('tracker_core') == 'system'
   tracker_sparql = dependency('tracker-sparql-3.0', version: '>=' + tracker_required, required: false)
-  tracker_testutils = dependency('tracker-testutils-3.0', required: false)
 
-  if not tracker_sparql.found() or not tracker_testutils.found()
+  if not tracker_sparql.found()
     error('Did not find the required versions of the Tracker core libraries ' +
           'installed in the system. Please ensure they are installed, or ' +
           'use the -Dtracker_core=subproject option to build from Git.')
   endif
-
-  # If we are building against an installed version of tracker core rather than
-  # having it as a subproject, these 'uninstalled' locations point to the actual
-  # installed locations.
-  tracker_uninstalled_testutils_dir = tracker_testutils.get_variable(pkgconfig: 'python_path')
 
   tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
 else
   tracker_subproject = subproject('tinysparql')
 
   tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
-
-  tracker_uninstalled_testutils_dir = tracker_subproject.get_variable('tracker_uninstalled_testutils_dir')
 
   tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
 endif
@@ -51,6 +43,7 @@ gio_unix = dependency('gio-unix-2.0', version: '>=' + glib_required)
 glib = dependency('glib-2.0', version: '>=' + glib_required)
 gmodule = dependency('gmodule-2.0', version: '>=' + glib_required)
 gobject = dependency('gobject-2.0', version: '>=' + glib_required)
+gobject_introspection = dependency('gobject-introspection-1.0')
 gstreamer = dependency('gstreamer-1.0', required: false)
 gstreamer_audio = dependency('gstreamer-audio-1.0', required: false)
 gstreamer_tag = dependency('gstreamer-tag-1.0', required: false)
@@ -127,6 +120,11 @@ elif optimization in ['2', '3', 's']
 endif
 
 add_project_arguments(debug_cflags, language: 'c')
+
+if gobject_introspection.found()
+  typelib_dir = gobject_introspection.get_variable(pkgconfig: 'typelibdir',
+                                                   pkgconfig_define: [ 'libdir', libdir ])
+endif
 
 ##################################################################
 # Check for libtracker-common: battery/mains power detection
@@ -444,6 +442,7 @@ xdg_autostart_dir = join_paths(get_option('sysconfdir'), 'xdg', 'autostart')
 glib_compile_schemas = find_program('glib-compile-schemas')
 glib_mkenums = find_program('glib-mkenums')
 
+subdir('utils')
 subdir('src')
 subdir('data')
 subdir('docs')
