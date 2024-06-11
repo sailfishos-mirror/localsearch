@@ -2,7 +2,6 @@ include:
   - remote: "https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/ci-fairy.yml"
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/fedora.yml'
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/debian.yml'
-  - template: 'Workflows/MergeRequest-Pipelines.gitlab-ci.yml'
 
 variables:
   MESON_TEST_TIMEOUT_MULTIPLIER: 3
@@ -17,6 +16,7 @@ variables:
   TRACKER_TESTS_AWAIT_TIMEOUT: 60
 
 stages:
+  - check
   - review
   - prepare
   - code-review
@@ -25,6 +25,35 @@ stages:
   - sandbox
   - analysis
   - docs
+
+workflow:
+  rules:
+    # Allow to switch from branch pipelines to MR pipelines seamlessly
+    # https://docs.gitlab.com/ee/ci/jobs/job_control.html#avoid-duplicate-pipelines
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS && $CI_PIPELINE_SOURCE == "push"
+      when: never
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    # Don't trigger a branch pipeline if there is an open MR
+    - if: $CI_COMMIT_BRANCH && $CI_OPEN_MERGE_REQUESTS
+      when: never
+    - if: '$CI_COMMIT_BRANCH'
+    - if: '$CI_COMMIT_TAG'
+
+.manual-pipeline-guard:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_COMMIT_TAG'
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH =~ /^tracker-miners-[0-9-]\.[0-9-]+$/'
+    - if: '$CI_COMMIT_BRANCH =~ /^localsearch-[0-9-]\.[0-9-]+$/'
+    # Avoid catchall `when: manual` rule which might
+    # cause duplicate pipelines to be triggered.
+    # https://docs.gitlab.com/ee/ci/jobs/job_control.html#avoid-duplicate-pipelines
+    #
+    # Also make it so pipelines without MR need to be started
+    # manually, since their state will most likely be WIP
+    - if: '$CI_COMMIT_BRANCH'
+      when: 'manual'
 
 .check-template: &check
   extends:
@@ -35,6 +64,20 @@ stages:
       - check-junit-report.xml
     reports:
       junit: check-junit-report.xml
+
+repo-sanity:
+  stage: check
+  script:
+    - >
+      if [[ -z "$CI_REGISTRY_IMAGE" ]] ;
+      then
+        .gitlab-ci/simple-junit-report.sh check-junit-report.xml \
+          repo-sanity "The container registry should be enabled in the project general settings panel at $CI_PROJECT_URL/edit" ;
+        exit 1 ;
+      fi
+  rules:
+    - !reference [.manual-pipeline-guard, rules]
+  <<: *check
 
 check-commit-log:
   variables:
@@ -64,9 +107,9 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2024-06-06.1'
+    BASE_TAG: '2024-06-11.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer gcovr git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
+    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
       if [ -z $(command -v dnf5) ]; then
         dnf install -y 'dnf-command(builddep)' 'dnf-command(download)';
@@ -75,20 +118,21 @@ check-merge-request:
       fi &&
       dnf builddep -y tracker tracker-miners --setopt=install_weak_deps=False &&
       dnf clean all &&
-      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py meson &&
+      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py gcovr meson &&
       dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
       dnf install -y --setopt=install_weak_deps=False gstreamer1-libav
 
 .tracker-miners.debian@common:
   variables:
-    BASE_TAG: '2024-06-06.2'
+    BASE_TAG: '2024-06-11.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap umockdev libumockdev-dev upower asciidoc-base git libgrss-dev gcovr'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libgrss-dev'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&
       apt-get -yq update && apt-get -yq upgrade &&
-      apt-get -yq build-dep tracker tracker-miners
+      apt-get -yq build-dep tracker tracker-miners &&
+      pip3 install gcovr
 
 .tracker-miners.fedora:latest@x86_64:
   extends: .tracker-miners.fedora@common
@@ -406,11 +450,7 @@ coverage:
     - test-fedora@x86_64
     - test-fedora@aarch64
     - test-debian@x86_64
-    # As of 2024-06-06, Fedora Rawhide has gcovr 7.2, other distros have
-    # 6.0. The "format_version" in the JSON output is "0.6" for gcovr 7.2,
-    # and "0.5" for older versions. This produces an incompatibility error
-    # when merging, so we temporarily exclude rawhide from coverage.
-    #- test-fedora-rawhide@x86_64
+    - test-fedora-rawhide@x86_64
 
 coverity:
   extends:
