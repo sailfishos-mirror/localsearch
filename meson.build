@@ -25,14 +25,10 @@ if get_option('tracker_core') == 'system'
           'installed in the system. Please ensure they are installed, or ' +
           'use the -Dtracker_core=subproject option to build from Git.')
   endif
-
-  tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
 else
   tracker_subproject = subproject('tinysparql')
 
   tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
-
-  tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
 endif
 
 dbus = dependency('dbus-1', version: '>= 1.3.1')
@@ -461,7 +457,6 @@ endif
 subdir('tests')
 
 run_uninstalled_conf = configuration_data()
-run_uninstalled_conf.set('tracker_sparql_uninstalled_dir', tracker_sparql_uninstalled_dir)
 run_uninstalled_conf.set('tracker_uninstalled_cli_dir', tracker_uninstalled_cli_dir)
 run_uninstalled_conf.set('tracker_uninstalled_domain_rule', meson.current_build_dir() / 'tests' / 'functional-tests' / 'config' / 'test-domain.rule')
 run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninstalled_extract_rules_dir)

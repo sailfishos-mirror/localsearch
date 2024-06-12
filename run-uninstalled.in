@@ -26,7 +26,6 @@ import pathlib
 import sys
 
 cli_dir = "@tracker_uninstalled_cli_dir@"
-tracker_sparql_dir = "@tracker_sparql_uninstalled_dir@"
 testutils_dir = "@tracker_uninstalled_testutils_dir@"
 
 build_directory = pathlib.Path(__file__).parent
@@ -37,10 +36,6 @@ env = os.environ
 # Add the `tracker` CLI to PATH.
 path = env.get('PATH', '').split(':')
 env['PATH'] = ':'.join([cli_dir] + path)
-
-# Add GObject typelib to GI_TYPELIB_PATH
-gipath = env.get('GI_TYPELIB_PATH', '').split(':')
-env['GI_TYPELIB_PATH'] = ':'.join([tracker_sparql_dir] + gipath)
 
 # Add trackertestutils module to PYTHONPATH
 pythonpath = env.get('PYTHONPATH', '').split(':')
