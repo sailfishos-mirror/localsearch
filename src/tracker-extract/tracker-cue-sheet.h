@@ -25,8 +25,7 @@
 #include <glib.h>
 #include <gst/gst.h>
 #include <gst/tag/tag.h>
-
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 G_BEGIN_DECLS
 

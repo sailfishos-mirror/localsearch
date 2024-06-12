@@ -32,8 +32,9 @@
 #include <glib/gprintf.h>
 #include <locale.h>
 
+#include <tinysparql.h>
+
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-process.h"
 #include "tracker-dbus.h"

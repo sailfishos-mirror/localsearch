@@ -20,7 +20,7 @@
 #ifndef __TRACKER_EXTRACT_WATCHDOG_H__
 #define __TRACKER_EXTRACT_WATCHDOG_H__
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 #include "tracker-indexing-tree.h"
 

@@ -19,11 +19,12 @@
 
 #include "config-miners.h"
 
-#include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
+
+#include <tinysparql.h>
 
 #define THROTTLED_TIMEOUT_MS 10
 

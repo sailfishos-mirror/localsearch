@@ -21,10 +21,9 @@
 
 #include "config-miners.h"
 
-#include <libtracker-sparql/tracker-sparql.h>
-#include "libtracker-miners-common/tracker-debug.h"
-
 #include "tracker-sparql-buffer.h"
+
+#include "libtracker-miners-common/tracker-debug.h"
 
 #include "tracker-utils.h"
 

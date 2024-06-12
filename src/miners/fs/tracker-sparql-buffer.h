@@ -24,8 +24,7 @@
 
 #include <glib-object.h>
 #include <gio/gio.h>
-
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 #include "tracker-task-pool.h"
 

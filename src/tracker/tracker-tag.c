@@ -28,7 +28,7 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 #define TAG_OPTIONS_ENABLED() \
 	(resources || \

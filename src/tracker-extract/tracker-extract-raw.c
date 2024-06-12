@@ -25,7 +25,6 @@
 
 #include <libtracker-extract/tracker-extract.h>
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-main.h"
 

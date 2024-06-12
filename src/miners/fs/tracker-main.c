@@ -41,12 +41,13 @@
 #endif
 
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-config.h"
 #include "tracker-controller.h"
 #include "tracker-miner-files.h"
 #include "tracker-files-interface.h"
+
+#include <tinysparql.h>
 
 #define ABOUT	  \
 	"Tracker " PACKAGE_VERSION "\n"

@@ -21,8 +21,8 @@
 #include <locale.h>
 
 #include <glib.h>
+#include <tinysparql.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-extract/tracker-guarantee.h>
 
 typedef struct {

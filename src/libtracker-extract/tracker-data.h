@@ -24,7 +24,7 @@
 #error "only <libtracker-extract/tracker-extract.h> must be included directly."
 #endif
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 #include "tracker-module-manager.h"
 #include "tracker-extract-info.h"
 

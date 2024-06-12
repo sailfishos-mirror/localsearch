@@ -15,10 +15,10 @@ libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.62.0'
-tracker_required = '3.7'
+tinysparql_required = '3.8'
 
 if get_option('tracker_core') == 'system'
-  tracker_sparql = dependency('tracker-sparql-3.0', version: '>=' + tracker_required, required: false)
+  tracker_sparql = dependency('tinysparql-3.0', version: '>=' + tinysparql_required, required: false)
 
   if not tracker_sparql.found()
     error('Did not find the required versions of the Tracker core libraries ' +
