@@ -223,10 +223,6 @@ check-code-style:
 .build-template: &build
   stage: build
   script:
-    # We can build and test tracker-miners against tracker just by building
-    # tracker as a submodule.
-    - .gitlab-ci/checkout-tracker.sh
-    - echo "Building tinysparql.git commit $(git -C ./subprojects/tinysparql rev-parse HEAD)"
     - mkdir build
     - cd build
     - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:avahi=disabled
@@ -275,7 +271,6 @@ build-debian-stable@x86_64:
   stage: test
 
   script:
-    - .gitlab-ci/checkout-tracker.sh
     - cd build
     - ninja clean
     - meson configure -Db_coverage=true -Dseccomp=false -Dlandlock=disabled
@@ -369,7 +364,6 @@ test-docs:
   stage: sandbox
 
   script:
-    - .gitlab-ci/checkout-tracker.sh
     - cd build
     - |
       # Remove the many "CI_" variables from the environment. Meson dumps the
@@ -461,9 +455,7 @@ coverity:
   script:
     # Build tracker, we must go out the subproject route as we don't want
     # tracker code to be included in the coverity reports for tracker-miners.
-    - .gitlab-ci/checkout-tracker.sh
     - export INSTALL=`pwd`/install
-    - pushd subprojects/tinysparql; meson build --libdir lib --prefix $INSTALL -Ddocs=false; pushd build; ninja install; popd; popd
     - curl https://scan.coverity.com/download/linux64 --data "token=$COVERITY_TOKEN&project=tracker-miners" --output /tmp/coverity_tool.tgz
     - tar zxf /tmp/coverity_tool.tgz
     - mkdir coverity-build
