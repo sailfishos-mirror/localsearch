@@ -229,7 +229,7 @@ check-code-style:
     - echo "Building tinysparql.git commit $(git -C ./subprojects/tinysparql rev-parse HEAD)"
     - mkdir build
     - cd build
-    - meson .. --prefix=/usr -Dtracker_core=subproject -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql:docs=false --auto-features=enabled -Dtinysparql:avahi=disabled
+    - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:avahi=disabled
     - ninja
   artifacts:
     expire_in: 1 day

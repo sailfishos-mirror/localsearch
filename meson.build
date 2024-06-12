@@ -15,22 +15,8 @@ libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.62.0'
-tinysparql_required = '3.8'
 
-if get_option('tracker_core') == 'system'
-  tracker_sparql = dependency('tinysparql-3.0', version: '>=' + tinysparql_required, required: false)
-
-  if not tracker_sparql.found()
-    error('Did not find the required versions of the Tracker core libraries ' +
-          'installed in the system. Please ensure they are installed, or ' +
-          'use the -Dtracker_core=subproject option to build from Git.')
-  endif
-else
-  tracker_subproject = subproject('tinysparql')
-
-  tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
-endif
-
+tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
 gexiv2 = dependency('gexiv2', required: get_option('raw'))
