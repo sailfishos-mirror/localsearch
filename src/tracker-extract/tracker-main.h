@@ -21,7 +21,7 @@
 #ifndef __TRACKER_MAIN_H__
 #define __TRACKER_MAIN_H__
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 G_BEGIN_DECLS
 

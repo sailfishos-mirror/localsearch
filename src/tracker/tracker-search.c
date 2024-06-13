@@ -29,8 +29,9 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
+#include <tinysparql.h>
+
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-color.h"
 

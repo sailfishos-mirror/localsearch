@@ -30,8 +30,8 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <gio/gunixoutputstream.h>
+#include <tinysparql.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
 #include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-cli-utils.h"

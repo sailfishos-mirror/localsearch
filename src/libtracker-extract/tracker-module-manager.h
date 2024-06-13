@@ -27,7 +27,6 @@
 #include <glib.h>
 #include <gmodule.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
 #include "tracker-extract-info.h"
 
 G_BEGIN_DECLS

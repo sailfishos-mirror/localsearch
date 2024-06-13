@@ -28,7 +28,7 @@
 #include <glib/gi18n.h>
 #include <gio/gio.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
+#include <tinysparql.h>
 
 #include "tracker-writeback-file.h"
 

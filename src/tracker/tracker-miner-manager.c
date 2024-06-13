@@ -22,13 +22,12 @@
 
 #include <gio/gio.h>
 #include <string.h>
+#include <tinysparql.h>
 
 #include <libtracker-miners-common/tracker-dbus.h>
 #include <libtracker-miners-common/tracker-enums.h>
 #include <libtracker-miners-common/tracker-type-utils.h>
 #include <libtracker-miners-common/tracker-domain-ontology.h>
-
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-miner-manager.h"
 

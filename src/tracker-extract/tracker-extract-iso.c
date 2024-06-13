@@ -30,7 +30,6 @@
 
 #include <libtracker-extract/tracker-extract.h>
 #include <libtracker-miners-common/tracker-file-utils.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info_,

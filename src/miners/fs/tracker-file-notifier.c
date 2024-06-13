@@ -23,11 +23,12 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-file-notifier.h"
 #include "tracker-monitor-glib.h"
 #include "tracker-utils.h"
+
+#include <tinysparql.h>
 
 enum {
 	PROP_0,

@@ -20,7 +20,6 @@
 #include "config-miners.h"
 
 #include <libtracker-miners-common/tracker-common.h>
-#include <libtracker-sparql/tracker-sparql.h>
 
 #include "tracker-dbus-files-index.h"
 #include "tracker-dbus-files-proxy.h"

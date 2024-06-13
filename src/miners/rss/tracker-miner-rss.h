@@ -23,8 +23,6 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 
-#include <libtracker-sparql/tracker-sparql.h>
-
 #include "tracker-miner-online.h"
 
 G_BEGIN_DECLS

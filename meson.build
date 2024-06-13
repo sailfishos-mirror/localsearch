@@ -15,26 +15,8 @@ libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.62.0'
-tracker_required = '3.7'
 
-if get_option('tracker_core') == 'system'
-  tracker_sparql = dependency('tracker-sparql-3.0', version: '>=' + tracker_required, required: false)
-
-  if not tracker_sparql.found()
-    error('Did not find the required versions of the Tracker core libraries ' +
-          'installed in the system. Please ensure they are installed, or ' +
-          'use the -Dtracker_core=subproject option to build from Git.')
-  endif
-
-  tracker_sparql_uninstalled_dir = tracker_sparql.get_variable(pkgconfig: 'libdir')
-else
-  tracker_subproject = subproject('tinysparql')
-
-  tracker_sparql = tracker_subproject.get_variable('tracker_sparql_dep')
-
-  tracker_sparql_uninstalled_dir = tracker_subproject.get_variable('tracker_sparql_uninstalled_dir')
-endif
-
+tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
 gexiv2 = dependency('gexiv2', required: get_option('raw'))
@@ -461,7 +443,6 @@ endif
 subdir('tests')
 
 run_uninstalled_conf = configuration_data()
-run_uninstalled_conf.set('tracker_sparql_uninstalled_dir', tracker_sparql_uninstalled_dir)
 run_uninstalled_conf.set('tracker_uninstalled_cli_dir', tracker_uninstalled_cli_dir)
 run_uninstalled_conf.set('tracker_uninstalled_domain_rule', meson.current_build_dir() / 'tests' / 'functional-tests' / 'config' / 'test-domain.rule')
 run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninstalled_extract_rules_dir)
