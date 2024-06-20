@@ -80,7 +80,7 @@ executable('localsearch-@0@'.format(tracker_api_major),
 # It's also used by tracker-control to identify the miner.
 tmp_conf = configuration_data()
 tmp_conf.merge_from(conf)
-tmp_conf.set ('dbusname', 'LocalSearch3')
+tmp_conf.set ('DBUS_NAME', 'LocalSearch3')
 if get_option('domain_prefix') == 'org.freedesktop'
   tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=localsearch-3.service')
 else
@@ -96,7 +96,7 @@ dbus_service_file = configure_file(
 
 legacy_conf = configuration_data()
 legacy_conf.merge_from(conf)
-legacy_conf.set ('dbusname', 'Tracker3.Miner.Files')
+legacy_conf.set ('DBUS_NAME', 'Tracker3.Miner.Files')
 legacy_dbus_service_file = configure_file(
     input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
     output: get_option('domain_prefix') + '.Tracker3.Miner.Files.service',
