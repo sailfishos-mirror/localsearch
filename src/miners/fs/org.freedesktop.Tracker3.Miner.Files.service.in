@@ -1,5 +1,5 @@
 [D-BUS Service]
-Name=@DOMAIN_PREFIX@.Tracker3.Miner.Files
+Name=@DOMAIN_PREFIX@.@DBUS_NAME@
 Exec=@libexecdir@/localsearch-3 @DOMAIN_ONTOLOGY_OPTIONS@ @MINER_FILES_INITIAL_SLEEP@
 @SYSTEMD_SERVICE@
 
