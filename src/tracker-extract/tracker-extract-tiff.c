@@ -399,7 +399,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			ed->metering_mode = get_metering_mode (image);
 			ed->flash = get_flash (image);
-			ed->focal_length = tag_to_string (image, EXIFTAG_DATETIMEORIGINAL, TAG_TYPE_DOUBLE);
+			ed->focal_length = tag_to_string (image, EXIFTAG_FOCALLENGTH, TAG_TYPE_DOUBLE);
 			ed->white_balance = get_white_balance (image);
 			/* ed->software = tag_to_string (image, EXIFTAG_SOFTWARE, TAG_TYPE_STRING); */
 		}
