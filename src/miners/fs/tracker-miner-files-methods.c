@@ -272,7 +272,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 			tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", text_file);
 			tracker_resource_set_uri (text_file, "nie:isStoredAs", uri);
 
-			tracker_resource_set_string (graph_file, "tracker:extractorHash",
+			tracker_resource_set_string (resource, "tracker:extractorHash",
 			                             tracker_extract_module_manager_get_hash (mime_type));
 		}
 	}
