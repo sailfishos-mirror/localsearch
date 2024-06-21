@@ -25,9 +25,9 @@ directory (containing xxx.expected files)
 
 import gi
 
-gi.require_version("Tracker", "3.0")
+gi.require_version("Tsparql", "3.0")
 from gi.repository import Gio
-from gi.repository import Tracker
+from gi.repository import Tsparql
 
 import json
 import os
@@ -77,9 +77,9 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
 
         """
         cancellable = None
-        ontology = Tracker.sparql_get_ontology_nepomuk()
-        db = Tracker.SparqlConnection.new(
-            Tracker.SparqlConnectionFlags.NONE,
+        ontology = Tsparql.sparql_get_ontology_nepomuk()
+        db = Tsparql.SparqlConnection.new(
+            Tsparql.SparqlConnectionFlags.NONE,
             None,  # create in-memory database,
             ontology,
             cancellable,

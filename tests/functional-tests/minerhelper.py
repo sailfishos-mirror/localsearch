@@ -20,9 +20,9 @@
 
 import gi
 
-gi.require_version("Tracker", "3.0")
+gi.require_version("Tsparql", "3.0")
 from gi.repository import Gio, GLib
-from gi.repository import Tracker
+from gi.repository import Tsparql
 
 import logging
 
@@ -82,7 +82,7 @@ class MinerFsHelper:
         self.miner_fs.Stop()
 
     def get_sparql_connection(self):
-        return Tracker.SparqlConnection.bus_new(
+        return Tsparql.SparqlConnection.bus_new(
             "org.freedesktop.Tracker3.Miner.Files", None, self.bus
         )
 

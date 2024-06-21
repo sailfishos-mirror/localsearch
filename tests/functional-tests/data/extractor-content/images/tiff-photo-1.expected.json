@@ -44,7 +44,7 @@
                     "@type" : "nfo:Equipment",
                     "nfo:manufacturer" : "Apple"
                 },
-                "nmm:focalLength" : "0.000000",
+                "nmm:focalLength" : "4.120000",
                 "nmm:flash" : {
                     "@id" : "nmm:flash-off"
                 },

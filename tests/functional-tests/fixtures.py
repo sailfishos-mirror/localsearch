@@ -25,10 +25,10 @@ Fixtures used by the tracker-miners functional-tests.
 import gi
 
 gi.require_version("Gst", "1.0")
-gi.require_version("Tracker", "3.0")
+gi.require_version("Tsparql", "3.0")
 gi.require_version("Gio", "2.0")
 from gi.repository import GLib, Gio
-from gi.repository import Tracker
+from gi.repository import Tsparql
 
 import contextlib
 import errno
@@ -182,7 +182,7 @@ class TrackerMinerTest(ut.TestCase):
         ]
 
         if content:
-            content_escaped = Tracker.sparql_escape_string(content)
+            content_escaped = Tsparql.sparql_escape_string(content)
             expected += [f'nie:plainTextContent "{content_escaped}"']
 
         return self.tracker.await_insert(
@@ -205,7 +205,7 @@ class TrackerMinerTest(ut.TestCase):
         ]
 
         if content:
-            content_escaped = Tracker.sparql_escape_string(content)
+            content_escaped = Tsparql.sparql_escape_string(content)
             expected += [f'nie:plainTextContent "{content_escaped}"']
 
         return self.tracker.ensure_resource(
@@ -264,11 +264,11 @@ class TrackerMinerFTSTest(TrackerMinerTest):
         self.testfile = "test-monitored/miner-fts-test.txt"
 
     def set_text(self, text, encoding=None):
-        text_escaped = Tracker.sparql_escape_string(text)
+        text_escaped = Tsparql.sparql_escape_string(text)
         path = pathlib.Path(self.path(self.testfile))
 
         if path.exists() and text != '':
-            old_text_escaped = Tracker.sparql_escape_string(path.read_text())
+            old_text_escaped = Tsparql.sparql_escape_string(path.read_text())
             resource_id = self.tracker.get_content_resource_id(self.uri(self.testfile))
             with self.tracker.await_content_update(
                 DOCUMENTS_GRAPH,
@@ -282,7 +282,7 @@ class TrackerMinerFTSTest(TrackerMinerTest):
                 else:
                     path.write_text(text)
         elif path.exists() and text == '':
-            old_text_escaped = Tracker.sparql_escape_string(path.read_text())
+            old_text_escaped = Tsparql.sparql_escape_string(path.read_text())
             resource_id = self.tracker.get_content_resource_id(self.uri(self.testfile))
             with self.tracker.await_delete(DOCUMENTS_GRAPH,
                                            resource_id,
