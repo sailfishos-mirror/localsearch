@@ -1,3 +1,12 @@
+NEW in 3.8.alpha - 2024-07-04
+=============================
+  * Rename project to LocalSearch
+  * Adopt test utilities from the former Tracker project,
+    now available as `localsearch3 test-sandbox`
+  * Avoid use of some ancillary files in the cache dir
+
+Translations: ca, hi
+
 NEW in 3.7.3 - 2024-05-02
 =========================
   * Fix possible crashes handling live changes to extractor
