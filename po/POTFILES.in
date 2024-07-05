@@ -14,6 +14,7 @@ src/tracker-control/tracker-main.c
 src/tracker-extract/tracker-extract.c
 src/tracker-extract/tracker-main.c
 src/tracker-writeback/tracker-main.c
+src/tracker/main.c
 src/tracker/tracker-daemon.c
 src/tracker/tracker-daemon.desktop.in
 src/tracker/tracker-dbus.c
