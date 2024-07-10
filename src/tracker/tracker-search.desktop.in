@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type = Application
-NoDisplay = true
-# Translators: This is a CLI command name that should not be translated.
-Name = search
-Comment = Search for content by type or across all types

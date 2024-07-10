@@ -62,7 +62,7 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
-const struct {
+static const struct {
 	const gchar *symbol;
 	GUserDirectory user_dir;
 } special_dirs[] = {
@@ -374,7 +374,8 @@ list_index_roots (void)
 }
 
 int
-main (int argc, const char **argv)
+tracker_index (int          argc,
+               const char **argv)
 {
 	GOptionContext *context;
 	GError *error = NULL;
