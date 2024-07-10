@@ -17,7 +17,7 @@ python_commands = [
   { 'name': 'test-sandbox', 'source': 'tracker-sandbox.in' },
 ]
 
-main_command_name = 'localsearch@0@'.format(tracker_api_major)
+main_command_name = 'localsearch'
 
 executable(main_command_name,
     'main.c',

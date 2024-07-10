@@ -31,8 +31,8 @@
 #include <libtracker-miners-common/tracker-common.h>
 
 const char usage_string[] =
-	"localsearch3 [--version] [--help]\n"
-	"                <command> [<args>]";
+	"localsearch [--version] [--help]\n"
+	"            <command> [<args>]";
 
 const char about[] =
 	"LocalSearch " PACKAGE_VERSION "\n"
@@ -120,7 +120,7 @@ print_usage_list_cmds (void)
 		g_warning ("Failed to list commands: %s", error->message);
 	}
 
-	puts (_("Available localsearch3 commands are:"));
+	puts (_("Available localsearch commands are:"));
 
 	if (commands) {
 		commands = g_list_sort (commands, (GCompareFunc) compare_app_info);
@@ -152,7 +152,7 @@ print_usage (void)
 {
 	g_print ("usage: %s\n\n", usage_string);
 	print_usage_list_cmds ();
-	g_print ("\n%s\n", _("See “localsearch3 help <command>” to read about a specific subcommand."));
+	g_print ("\n%s\n", _("See “localsearch help <command>” to read about a specific subcommand."));
 }
 
 int
@@ -205,7 +205,7 @@ main (int argc, char *argv[])
 		argv[1] = path;
 		execv (path, &argv[1]);
 	} else {
-		g_printerr (_("“%s” is not a localsearch3 command. See “localsearch3 --help”"), subcommand);
+		g_printerr (_("“%s” is not a localsearch command. See “localsearch --help”"), subcommand);
 		g_printerr ("\n");
 	}
 
