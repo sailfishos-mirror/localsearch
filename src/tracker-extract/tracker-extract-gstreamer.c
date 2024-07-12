@@ -1464,6 +1464,7 @@ tracker_extract_module_init (GError **error)
 		"fluidsynthmidi",
 		"libcamera",
 		"vaapi",
+		"va",
 		"video4linux2",
 		"nvcodec",
 		"ges",
