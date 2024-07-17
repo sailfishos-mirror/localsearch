@@ -1,17 +1,17 @@
-localsearch3-tag(1)
-===================
+localsearch-tag(1)
+==================
 
 == NAME
 
-localsearch3-tag - Add, remove and list tags.
+localsearch-tag - Add, remove and list tags.
 
 == SYNOPSIS
 
 ....
-localsearch3 tag FILE1 [FILE2 ...] [-l <limit>] [-o <offset>] [-r]
-localsearch3 tag -t [[TAG1] [TAG2] ...] [-s] [-r]
-localsearch3 tag -a <TAG> [-e <description>]
-localsearch3 tag -d <TAG>
+localsearch tag FILE1 [FILE2 ...] [-l <limit>] [-o <offset>] [-r]
+localsearch tag -t [[TAG1] [TAG2] ...] [-s] [-r]
+localsearch tag -a <TAG> [-e <description>]
+localsearch tag -d <TAG>
 ....
 
 == DESCRIPTION
@@ -36,7 +36,7 @@ are listed (OR condition). For example, this will match any tags named
 either _foo_, _bar_ or _baz_:
 
 ....
-$ localsearch3-tag -t foo bar baz
+$ localsearch tag -t foo bar baz
 ....
 
 *-s, --show-files*::
@@ -63,7 +63,7 @@ $ localsearch3-tag -t foo bar baz
   example:
 
 ....
-$ localsearch3-tag -s -t sliff sloff
+$ localsearch tag -s -t sliff sloff
 ....
 
 Should show files in the database that have both the _sliff_ and _sloff_
@@ -71,4 +71,4 @@ tags.
 
 == SEE ALSO
 
-*localsearch3-search*(1), *localsearch3-info*(1).
+*localsearch search*(1), *localsearch info*(1).

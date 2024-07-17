@@ -1,16 +1,16 @@
-localsearch3-index(1)
-=====================
+localsearch-index(1)
+====================
 
 == NAME
 
-localsearch3-index - Index content using the Tracker filesystem miner
+localsearch-index - Index content using the Tracker filesystem miner
 
 == SYNOPSIS
 
 ....
-localsearch3 index
-localsearch3 index --add [--recursive] <dir> [[dir] ...]
-localsearch3 index --remove <path> [[dir] ...]
+localsearch index
+localsearch index --add [--recursive] <dir> [[dir] ...]
+localsearch index --remove <path> [[dir] ...]
 ....
 
 == DESCRIPTION

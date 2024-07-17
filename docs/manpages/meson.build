@@ -8,14 +8,14 @@ if have_tracker_miner_rss
 endif
 
 cli_manpages = [
-  ['localsearch3-daemon', 1],
-  ['localsearch3-extract', 1],
-  ['localsearch3-index', 1],
-  ['localsearch3-info', 1],
-  ['localsearch3-reset', 1],
-  ['localsearch3-search', 1],
-  ['localsearch3-status', 1],
-  ['localsearch3-tag', 1],
+  ['localsearch-daemon', 1],
+  ['localsearch-extract', 1],
+  ['localsearch-index', 1],
+  ['localsearch-info', 1],
+  ['localsearch-reset', 1],
+  ['localsearch-search', 1],
+  ['localsearch-status', 1],
+  ['localsearch-tag', 1],
 ]
 
 foreach m : daemon_manpages + cli_manpages

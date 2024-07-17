@@ -30,9 +30,18 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 
+#include "tracker-daemon.h"
+#include "tracker-extract.h"
+#include "tracker-index.h"
+#include "tracker-info.h"
+#include "tracker-reset.h"
+#include "tracker-search.h"
+#include "tracker-status.h"
+#include "tracker-tag.h"
+
 const char usage_string[] =
-	"localsearch3 [--version] [--help]\n"
-	"                <command> [<args>]";
+	"localsearch [--version] [--help]\n"
+	"            <command> [<args>]";
 
 const char about[] =
 	"LocalSearch " PACKAGE_VERSION "\n"
@@ -44,7 +53,48 @@ const char about[] =
 	"  http://www.gnu.org/licenses/gpl.txt"
 	"\n";
 
+struct cmd_struct {
+	const char *cmd;
+	int (*fn)(int, const char **);
+	const char *help;
+};
+
+static int launch_external_command (int argc, const char **argv);
+
 static void print_usage (void);
+
+static struct cmd_struct commands[] = {
+	{ "daemon", tracker_daemon, N_("Start, stop, restart and list daemons responsible for indexing content") },
+	{ "extract", tracker_extract, N_("Extract metadata from a file") },
+	{ "index", tracker_index, N_("Trigger content indexing of a location") },
+	{ "info", tracker_info, N_("Retrieve all information available for a certain file") },
+	{ "reset", tracker_reset, N_("Reset the index and configuration") },
+	{ "search", tracker_search, N_("Search for content") },
+	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },
+	{ "tag", tracker_tag, N_("Add, remove and list tags") },
+	{ "test-sandbox", launch_external_command, N_("Sandbox for a testing environment") },
+};
+
+static int
+launch_external_command (int          argc,
+                         const char **argv)
+{
+	const char *execdir, *subcommand;
+	char *path, *basename;
+
+	execdir = g_getenv ("LOCALSEARCH_CLI_PATH");
+	if (!execdir)
+		execdir = PYTHON_UTILS_DIR;
+
+	/* Execute subcommand binary */
+	subcommand = argv[0];
+	basename = g_strdup_printf("localsearch3-%s", subcommand);
+	path = g_build_filename (execdir, basename, NULL);
+
+	/* Manipulate argv in place, in order to launch subcommand */
+	argv[0] = path;
+	return execv (path, (char * const *) argv);
+}
 
 static int
 print_version (void)
@@ -61,16 +111,26 @@ mput_char (char c, unsigned int num)
       }
 }
 
-static int
-compare_app_info (GAppInfo *a,
-                  GAppInfo *b)
-{
-	return g_strcmp0 (g_app_info_get_name (a), g_app_info_get_name (b));
-}
-
 static void
 print_usage_list_cmds (void)
 {
+        guint longest = 0;
+        guint i;
+
+        puts (_("Available localsearch commands are:"));
+
+        for (i = 0; i < G_N_ELEMENTS (commands); i++) {
+                if (longest < strlen (commands[i].cmd))
+                        longest = strlen (commands[i].cmd);
+        }
+
+        for (i = 0; i < G_N_ELEMENTS (commands); i++) {
+                g_print ("   %s   ", commands[i].cmd);
+                mput_char (' ', longest - strlen (commands[i].cmd));
+                puts (_(commands[i].help));
+        }
+
+#if 0
 	guint longest = 0;
 	GList *commands = NULL;
 	GList *c;
@@ -120,7 +180,7 @@ print_usage_list_cmds (void)
 		g_warning ("Failed to list commands: %s", error->message);
 	}
 
-	puts (_("Available localsearch3 commands are:"));
+	puts (_("Available localsearch commands are:"));
 
 	if (commands) {
 		commands = g_list_sort (commands, (GCompareFunc) compare_app_info);
@@ -145,6 +205,7 @@ print_usage_list_cmds (void)
 
 		g_list_free_full (commands, g_object_unref);
 	}
+#endif
 }
 
 static void
@@ -152,13 +213,15 @@ print_usage (void)
 {
 	g_print ("usage: %s\n\n", usage_string);
 	print_usage_list_cmds ();
-	g_print ("\n%s\n", _("See “localsearch3 help <command>” to read about a specific subcommand."));
+	g_print ("\n%s\n", _("See “localsearch help <command>” to read about a specific subcommand."));
 }
 
 int
 main (int argc, char *argv[])
 {
-	const gchar *bin_dir;
+        int (* func) (int, const char *[]) = NULL;
+        const gchar *subcommand = argv[1];
+	int i;
 
 	setlocale (LC_ALL, "");
 
@@ -166,22 +229,11 @@ main (int argc, char *argv[])
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	bin_dir = g_getenv ("TRACKER_CLI_DIR");
-
-	if (!bin_dir) {
-		bin_dir = BINDIR;
-	}
-
 	if (argc == 1) {
 		/* The user didn't specify a command; give them help */
 		print_usage ();
 		exit (EXIT_SUCCESS);
 	}
-
-	/* Look up and exec the subcommand. */
-	const gchar *subcommand = argv[1];
-	gchar *subcommand_binary = NULL;
-	gchar *path = NULL;
 
 	if (g_strcmp0 (subcommand, "--version") == 0) {
 		print_version ();
@@ -196,21 +248,18 @@ main (int argc, char *argv[])
 		exit (EXIT_SUCCESS);
 	}
 
-	/* Execute subcommand binary */
-	subcommand_binary = g_strdup_printf("localsearch3-%s", subcommand);
-	path = g_build_filename (bin_dir, subcommand_binary, NULL);
-
-	if (g_file_test (path, G_FILE_TEST_EXISTS)) {
-		/* Manipulate argv in place, in order to launch subcommand */
-		argv[1] = path;
-		execv (path, &argv[1]);
-	} else {
-		g_printerr (_("“%s” is not a localsearch3 command. See “localsearch3 --help”"), subcommand);
-		g_printerr ("\n");
+	for (i = 0; i < G_N_ELEMENTS (commands); i++) {
+		if (g_strcmp0 (commands[i].cmd, subcommand) == 0)
+			func = commands[i].fn;
 	}
 
-	g_free (path);
-	g_free (subcommand_binary);
+        if (func) {
+                return func (argc - 1, (const char **) &argv[1]);
+        } else {
+                g_printerr (_("“%s” is not a localsearch command. See “localsearch --help”"), subcommand);
+                g_printerr ("\n");
+                return EXIT_FAILURE;
+        }
 
 	return EXIT_FAILURE;
 }

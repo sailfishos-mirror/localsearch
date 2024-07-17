@@ -1,6 +1,0 @@
-[Desktop Entry]
-Type = Application
-NoDisplay = true
-# Translators: This is a CLI command name that should not be translated.
-Name = info
-Comment = Retrieve all information available for a certain file

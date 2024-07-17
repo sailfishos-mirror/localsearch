@@ -58,12 +58,12 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # FIXME: the --all should NOT be needed.
         # See: https://gitlab.gnome.org/GNOME/tracker-miners/-/issues/116
-        output = self.run_cli(["localsearch3", "search", "--all", "banana"])
+        output = self.run_cli(["localsearch", "search", "--all", "banana"])
         self.assertIn(target1.as_uri(), output)
         self.assertNotIn(target2.as_uri(), output)
 
         folder_output = self.run_cli(
-            ["localsearch3", "search", "--folders", "test-monitored"]
+            ["localsearch", "search", "--folders", "test-monitored"]
         )
         self.assertIn(self.indexed_dir, folder_output)
         self.assertNotIn(folder_path.as_uri(), folder_output)
@@ -78,7 +78,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         target2 = pathlib.Path(os.path.join(self.indexed_dir, "Document 2.txt"))
 
-        search_output = self.run_cli(["localsearch3", "search", "mango"])
+        search_output = self.run_cli(["localsearch", "search", "mango"])
         self.assertIn(target1.as_uri(), search_output)
         self.assertNotIn(target2.as_uri(), search_output)
 
@@ -92,9 +92,9 @@ class TagInfo:
 
 
 class TrackerTagOutputParser:
-    """Manual parsing of the human-readable `localsearch3 tag --list` output."""
+    """Manual parsing of the human-readable `localsearch tag --list` output."""
 
-    # Adding a `--output-format=json` option to `localsearch3 tag` would allow
+    # Adding a `--output-format=json` option to `localsearch tag` would allow
     # us to simplify this.
 
     def _validate_header(self, header_line):
@@ -150,13 +150,13 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         parser = TrackerTagOutputParser()
 
         # We should have no tags yet.
-        output = self.run_cli(["localsearch3", "tag", "--list"])
+        output = self.run_cli(["localsearch", "tag", "--list"])
         parser.assert_tag_list_empty(output)
 
         # Create a tag
         output = self.run_cli(
             [
-                "localsearch3",
+                "localsearch",
                 "tag",
                 target1,
                 "--add=test_tag_1",
@@ -165,14 +165,14 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         )
 
         # Assert tag is in the list.
-        output = self.run_cli(["localsearch3", "tag", "--list"])
+        output = self.run_cli(["localsearch", "tag", "--list"])
         tag_infos = parser.parse_tag_list(output)
         assert len(tag_infos) == 1
         assert tag_infos[0].name == "test_tag_1"
         assert tag_infos[0].description == "This is my new favourite tag."
         assert tag_infos[0].file_count == 1
 
-        output = self.run_cli(["localsearch3", "tag", "--list", "--show-files"])
+        output = self.run_cli(["localsearch", "tag", "--list", "--show-files"])
         tag_infos = parser.parse_tag_list_with_files(output)
         assert len(tag_infos) == 1
         assert tag_infos[0].name == "test_tag_1"
@@ -182,7 +182,7 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         # Delete the tag from the file
         output = self.run_cli(
             [
-                "localsearch3",
+                "localsearch",
                 "tag",
                 target1,
                 "--delete=test_tag_1",
@@ -190,7 +190,7 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         )
 
 	# The tag should still exist, but be assigned to no files
-        output = self.run_cli(["localsearch3", "tag", "--list"])
+        output = self.run_cli(["localsearch", "tag", "--list"])
         tag_infos = parser.parse_tag_list(output)
         assert len(tag_infos) == 1
         assert tag_infos[0].name == "test_tag_1"
@@ -200,14 +200,14 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         # Delete the tag entirely
         output = self.run_cli(
             [
-                "localsearch3",
+                "localsearch",
                 "tag",
                 "--delete=test_tag_1",
             ]
         )
 
         # We should have no tags again.
-        output = self.run_cli(["localsearch3", "tag", "--list"])
+        output = self.run_cli(["localsearch", "tag", "--list"])
         parser.assert_tag_list_empty(output)
 
 

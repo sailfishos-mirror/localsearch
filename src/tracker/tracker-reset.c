@@ -250,7 +250,8 @@ reset_options_enabled (void)
 }
 
 int
-main (int argc, const char **argv)
+tracker_reset (int          argc,
+               const char **argv)
 {
 	GOptionContext *context;
 	GError *error = NULL;
