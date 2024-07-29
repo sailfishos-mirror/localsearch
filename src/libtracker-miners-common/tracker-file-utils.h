@@ -44,11 +44,6 @@ gboolean tracker_file_is_hidden                             (GFile       *file);
 gint     tracker_file_cmp                                   (GFile       *file_a,
                                                              GFile       *file_b);
 
-void     tracker_content_identifier_cache_init              (void);
-gchar *  tracker_file_get_content_identifier                (GFile       *file,
-                                                             GFileInfo   *info,
-                                                             const gchar *suffix);
-
 /* Path utils */
 gboolean tracker_path_is_in_path                            (const gchar *path,
                                                              const gchar *in_path);
