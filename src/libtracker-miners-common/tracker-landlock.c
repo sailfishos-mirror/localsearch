@@ -225,9 +225,6 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		{ "/etc/fonts/",
 		  LANDLOCK_ACCESS_FS_READ_FILE |
 		  LANDLOCK_ACCESS_FS_READ_DIR },
-		/* Necessary for blkid_get_cache() */
-		{ "/run/blkid/blkid.tab",
-		  LANDLOCK_ACCESS_FS_READ_FILE },
 	};
 	TrackerLandlockRule homedir_rules[] = {
 		/* Disable file access to sensitive folders the extractor has
