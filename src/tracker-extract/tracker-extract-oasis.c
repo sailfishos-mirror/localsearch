@@ -191,7 +191,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 
 	file = tracker_extract_info_get_file (extract_info);
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (extract_info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	mime_used = tracker_extract_info_get_mimetype (extract_info);
 	g_free (resource_uri);

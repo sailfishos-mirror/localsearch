@@ -824,7 +824,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 
 	g_debug ("Extracting MsOffice XML format...");
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (extract_info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");
 	g_free (resource_uri);

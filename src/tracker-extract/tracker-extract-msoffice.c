@@ -1660,7 +1660,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		return FALSE;
 	}
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");

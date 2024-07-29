@@ -100,13 +100,14 @@ typedef struct {
 	} G_STMT_END
 
 static TrackerResource *
-build_basic_resource (GFile *cue,
-                      GFile *image)
+build_basic_resource (TrackerExtractInfo *info,
+                      GFile              *cue,
+                      GFile              *image)
 {
 	TrackerResource *metadata, *child;
 	gchar *uri, *resource_uri;
 
-	resource_uri = tracker_file_get_content_identifier (cue, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:GameImage");
 	tracker_resource_set_string (metadata, "nie:mimeType", "application/x-cue");
@@ -365,9 +366,10 @@ try_open_mapped_file (const gchar  *image_path,
 }
 
 static TrackerResource *
-get_playstation_image_data (const gchar  *image_path,
-                            GFile        *cue,
-                            GError      **error)
+get_playstation_image_data (const gchar         *image_path,
+                            TrackerExtractInfo  *info,
+                            GFile               *cue,
+                            GError             **error)
 {
 	GMappedFile *mapped_file;
 	GBytes *bytes;
@@ -385,7 +387,7 @@ get_playstation_image_data (const gchar  *image_path,
 
 	if (check_is_playstation_image (content, length)) {
 		g_debug ("Image is a Playstation game");
-		metadata = build_basic_resource (cue, image);
+		metadata = build_basic_resource (info, cue, image);
 	}
 
 	g_bytes_unref (bytes);
@@ -396,9 +398,10 @@ get_playstation_image_data (const gchar  *image_path,
 }
 
 static TrackerResource *
-get_turbografx_image_data (const gchar  *image_path,
-                           GFile        *cue,
-                           GError      **error)
+get_turbografx_image_data (const gchar         *image_path,
+                           TrackerExtractInfo  *info,
+                           GFile               *cue,
+                           GError             **error)
 {
 	GMappedFile *mapped_file;
 	GBytes *bytes;
@@ -420,7 +423,7 @@ get_turbografx_image_data (const gchar  *image_path,
 	if (magic_position < length - magic_len &&
 	    strncmp (&content[magic_position], magic_string, magic_len) == 0) {
 		g_debug ("Image is a Turbografx game");
-		metadata = build_basic_resource (cue, image);
+		metadata = build_basic_resource (info, cue, image);
 	}
 
 	g_bytes_unref (bytes);
@@ -469,6 +472,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	    track_get_mode (track) == MODE_MODE2_RAW) {
 		g_debug ("Checking whether image is a Playstation game");
 		metadata = get_playstation_image_data (track_get_filename (track),
+		                                       info,
 		                                       file,
 		                                       &inner_error);
 		if (metadata || inner_error)
@@ -483,6 +487,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		    track_get_mode (track) == MODE_MODE1_RAW) {
 			g_debug ("Checking whether image is a Turbografx game");
 			metadata = get_turbografx_image_data (track_get_filename (track),
+			                                      info,
 			                                      file,
 			                                      &inner_error);
 			if (metadata || inner_error)
