@@ -58,6 +58,7 @@ tracker_miner_fs_deps = [
     tracker_miner_dep,
     tracker_extract_dep,
     gstreamer,
+    gudev,
 ]
 
 executable('localsearch-@0@'.format(tracker_api_major),

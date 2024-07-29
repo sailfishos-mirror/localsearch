@@ -20,6 +20,8 @@
 
 #include "config-miners.h"
 
+#include <gio/gunixmounts.h>
+
 #include "tracker-miner-files-methods.h"
 
 #include <libtracker-extract/tracker-extract.h>
@@ -370,4 +372,54 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	                                             graph,
 	                                             resource,
 	                                             graph_file);
+}
+
+static gchar *
+lookup_filesystem_id (TrackerMinerFiles *files,
+                      GFile             *file)
+{
+	const gchar *id = NULL, *devname = NULL;
+	GUnixMountEntry *mount;
+	GUdevClient *udev_client;
+	g_autoptr (GUdevDevice) udev_device = NULL;
+
+	mount = g_unix_mount_for (g_file_peek_path (file), NULL);
+	if (mount)
+		devname = g_unix_mount_get_device_path (mount);
+
+	if (devname) {
+		udev_client = tracker_miner_files_get_udev_client (files);
+		udev_device = g_udev_client_query_by_device_file (udev_client, devname);
+		if (udev_device) {
+			id = g_udev_device_get_property (udev_device, "ID_FS_UUID_SUB");
+			if (!id)
+				id = g_udev_device_get_property (udev_device, "ID_FS_UUID");
+		}
+	}
+
+	return g_strdup (id);
+}
+
+gchar *
+tracker_miner_files_get_content_identifier (TrackerMinerFiles *mf,
+                                            GFile             *file,
+                                            GFileInfo         *info)
+{
+	g_autofree gchar *inode = NULL, *str = NULL, *id = NULL;
+
+	id = lookup_filesystem_id (mf, file);
+
+	if (!id) {
+		id = g_strdup (g_file_info_get_attribute_string (info,
+		                                                 G_FILE_ATTRIBUTE_ID_FILESYSTEM));
+	}
+
+	inode = g_file_info_get_attribute_as_string (info, G_FILE_ATTRIBUTE_UNIX_INODE);
+
+	/* Format:
+	 * 'urn:fileid:' [uuid] ':' [inode]
+	 */
+	str = g_strconcat ("urn:fileid:", id, ":", inode, NULL);
+
+	return g_steal_pointer (&str);
 }

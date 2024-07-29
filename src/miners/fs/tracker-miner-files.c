@@ -71,6 +71,7 @@ struct TrackerMinerFilesPrivate {
 	gboolean low_battery_pause;
 	gboolean initial_index;
 
+	GUdevClient *udev_client;
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
@@ -163,6 +164,15 @@ miner_files_started (TrackerMiner *miner)
 	init_index_roots (TRACKER_MINER_FILES (miner));
 }
 
+static gchar *
+miner_files_get_content_identifier (TrackerMinerFS *fs,
+				    GFile          *file,
+				    GFileInfo      *info)
+{
+	return tracker_miner_files_get_content_identifier (TRACKER_MINER_FILES (fs),
+	                                                   file, info);
+}
+
 static void
 tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 {
@@ -183,6 +193,7 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	miner_fs_class->remove_file = miner_files_remove_file;
 	miner_fs_class->remove_children = miner_files_remove_children;
 	miner_fs_class->move_file = miner_files_move_file;
+	miner_fs_class->get_content_identifier = miner_files_get_content_identifier;
 
 	g_object_class_install_property (object_class,
 	                                 PROP_CONFIG,
@@ -286,6 +297,7 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	priv->finished_handler = g_signal_connect_after (mf, "finished",
 	                                                 G_CALLBACK (miner_finished_cb),
 	                                                 NULL);
+	priv->udev_client = g_udev_client_new (NULL);
 }
 
 static void
@@ -405,6 +417,7 @@ miner_files_finalize (GObject *object)
 #endif /* HAVE_POWER */
 
 	tracker_domain_ontology_unref (priv->domain_ontology);
+	g_clear_pointer (&priv->udev_client, g_object_unref);
 
 	if (priv->storage) {
 		g_object_unref (priv->storage);
@@ -1169,4 +1182,10 @@ tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
 	}
 
 	return FALSE;
+}
+
+GUdevClient *
+tracker_miner_files_get_udev_client (TrackerMinerFiles *mf)
+{
+	return mf->private->udev_client;
 }

@@ -1715,7 +1715,7 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 		return NULL;
 	}
 
-	str = tracker_file_get_content_identifier (file, info, NULL);
+	str = TRACKER_MINER_FS_GET_CLASS (fs)->get_content_identifier (fs, file, info);
 	tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), str);
 	g_object_unref (info);
 
