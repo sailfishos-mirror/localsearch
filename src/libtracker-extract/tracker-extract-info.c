@@ -42,6 +42,7 @@ struct _TrackerExtractInfo
 	TrackerResource *resource;
 
 	GFile *file;
+	gchar *content_id;
 	gchar *mimetype;
 	gchar *graph;
 
@@ -67,6 +68,7 @@ G_DEFINE_BOXED_TYPE (TrackerExtractInfo, tracker_extract_info,
  **/
 TrackerExtractInfo *
 tracker_extract_info_new (GFile       *file,
+                          const gchar *content_id,
                           const gchar *mimetype,
                           const gchar *graph,
                           gint         max_text)
@@ -74,9 +76,11 @@ tracker_extract_info_new (GFile       *file,
 	TrackerExtractInfo *info;
 
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
+	g_return_val_if_fail (content_id && *content_id, NULL);
 
 	info = g_slice_new0 (TrackerExtractInfo);
 	info->file = g_object_ref (file);
+	info->content_id = g_strdup (content_id);
 	info->mimetype = g_strdup (mimetype);
 	info->graph = g_strdup (graph);
 	info->max_text = max_text;
@@ -124,6 +128,7 @@ tracker_extract_info_unref (TrackerExtractInfo *info)
 
 	if (g_atomic_int_dec_and_test (&info->ref_count)) {
 		g_object_unref (info->file);
+		g_free (info->content_id);
 		g_free (info->mimetype);
 		g_free (info->graph);
 
@@ -151,6 +156,18 @@ tracker_extract_info_get_file (TrackerExtractInfo *info)
 	g_return_val_if_fail (info != NULL, NULL);
 
 	return info->file;
+}
+
+gchar *
+tracker_extract_info_get_content_id (TrackerExtractInfo *info,
+                                     const gchar        *suffix)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+
+	if (suffix)
+		return g_strconcat (info->content_id, "/", suffix, NULL);
+	else
+		return g_strdup (info->content_id);
 }
 
 /**

@@ -87,6 +87,7 @@ typedef struct {
 	TrackerExtract *extract;
 	GCancellable *cancellable;
 	GAsyncResult *res;
+	gchar *content_id;
 	gchar *file;
 	gchar *mimetype;
 	const gchar *graph;
@@ -298,7 +299,7 @@ get_file_metadata (TrackerExtractTask  *task,
 	*info_out = NULL;
 
 	file = g_file_new_for_uri (task->file);
-	info = tracker_extract_info_new (file, task->mimetype, task->graph, task->max_text);
+	info = tracker_extract_info_new (file, task->content_id, task->mimetype, task->graph, task->max_text);
 	g_object_unref (file);
 
 	if (!task->mimetype || !*task->mimetype) {
@@ -347,6 +348,7 @@ task_deadline_cb (gpointer user_data)
 static TrackerExtractTask *
 extract_task_new (TrackerExtract *extract,
                   const gchar    *uri,
+                  const gchar    *content_id,
                   const gchar    *mimetype,
                   GCancellable   *cancellable,
                   GAsyncResult   *res,
@@ -387,6 +389,7 @@ extract_task_new (TrackerExtract *extract,
 	task->cancellable = (cancellable) ? g_object_ref (cancellable) : NULL;
 	task->res = (res) ? g_object_ref (res) : NULL;
 	task->file = g_strdup (uri);
+	task->content_id = g_strdup (content_id);
 	task->mimetype = mimetype_used;
 	task->extract = extract;
 	task->max_text = priv->max_text;
@@ -432,6 +435,7 @@ extract_task_free (TrackerExtractTask *task)
 
 	g_free (task->mimetype);
 	g_free (task->file);
+	g_free (task->content_id);
 
 	g_slice_free (TrackerExtractTask, task);
 }
@@ -645,6 +649,7 @@ dispatch_task_cb (TrackerExtractTask *task)
 void
 tracker_extract_file (TrackerExtract      *extract,
                       const gchar         *file,
+                      const gchar         *content_id,
                       const gchar         *mimetype,
                       GCancellable        *cancellable,
                       GAsyncReadyCallback  cb,
@@ -666,7 +671,7 @@ tracker_extract_file (TrackerExtract      *extract,
 
 	async_task = g_task_new (extract, cancellable, cb, user_data);
 
-	task = extract_task_new (extract, file, mimetype, cancellable,
+	task = extract_task_new (extract, file, content_id, mimetype, cancellable,
 	                         G_ASYNC_RESULT (async_task), &error);
 
 	if (error) {
@@ -709,7 +714,7 @@ tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
 
 	g_return_if_fail (uri != NULL);
 
-	task = extract_task_new (object, uri, mime, NULL, NULL, &error);
+	task = extract_task_new (object, uri, "_:content", mime, NULL, NULL, &error);
 
 	if (error) {
 		g_printerr ("%s, %s\n",
