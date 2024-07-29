@@ -142,6 +142,21 @@ miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
+static TrackerResource *
+miner_files_create_empty_information_element (TrackerMinerFiles *miner,
+                                              GFile             *file)
+{
+	TrackerResource *resource;
+	const gchar *urn;
+
+	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
+	                                       file);
+	resource = tracker_resource_new (urn);
+	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
+
+	return resource;
+}
+
 gchar *
 get_content_type (GFile     *file,
 		  GFileInfo *file_info)
@@ -245,6 +260,8 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	if (graph && g_file_info_get_size (file_info) > 0) {
+		TrackerResource *information_element;
+
 		/* This mimetype will be extracted by some module, pre-fill the
 		 * nfo:FileDataObject in that graph.
 		 * Empty files skipped as mime-type for those cannot be trusted.
@@ -264,17 +281,24 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
 		                                                            "nfo:PlainTextDocument") &&
 		    !tracker_miner_files_check_allowed_text_file (TRACKER_MINER_FILES (fs), file)) {
-			TrackerResource *text_file;
-
-			/* We let disallowed text files have a shallow nie:InformationElement */
-			text_file = miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
-			                                                              file, mime_type);
-			tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", text_file);
-			tracker_resource_set_uri (text_file, "nie:isStoredAs", uri);
+			/* We let disallowed text files have a shallow document nie:InformationElement */
+			information_element =
+				miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
+				                                                  file, mime_type);
 
 			tracker_resource_set_string (resource, "tracker:extractorHash",
 			                             tracker_extract_module_manager_get_hash (mime_type));
+		} else {
+			/* Insert only the base nie:InformationElement class, for the extractor to get
+			 * the suitable content identifier.
+			 */
+			information_element =
+				miner_files_create_empty_information_element (TRACKER_MINER_FILES (fs),
+				                                              file);
 		}
+
+		tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", information_element);
+		tracker_resource_set_uri (information_element, "nie:isStoredAs", uri);
 	}
 
 	if (is_directory) {
