@@ -33,4 +33,8 @@ void tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
                                                   GFileInfo           *info,
                                                   TrackerSparqlBuffer *buffer);
 
+gchar * tracker_miner_files_get_content_identifier (TrackerMinerFiles *files,
+                                                    GFile             *file,
+                                                    GFileInfo         *info);
+
 #endif /* __TRACKER_MINER_FILES_METHODS_H__ */

@@ -354,8 +354,6 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	tracker_content_identifier_cache_init ();
-
 	tracker_extract_module_manager_init ();
 	tracker_module_manager_load_modules ();
 

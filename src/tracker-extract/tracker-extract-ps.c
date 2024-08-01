@@ -95,8 +95,9 @@ date_to_iso8601 (const gchar *date)
 }
 
 static TrackerResource *
-extract_ps_from_inputstream (GInputStream *stream,
-                             GFile        *file)
+extract_ps_from_inputstream (GInputStream       *stream,
+                             GFile              *file,
+                             TrackerExtractInfo *info)
 {
 	TrackerResource *metadata;
 	g_autoptr(GDataInputStream) data_stream = NULL;
@@ -106,7 +107,7 @@ extract_ps_from_inputstream (GInputStream *stream,
 	gboolean header_finished = FALSE;
 	g_autoptr(GError) error = NULL;
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");
 	g_free (resource_uri);
@@ -164,7 +165,8 @@ extract_ps_from_inputstream (GInputStream *stream,
 }
 
 static TrackerResource *
-extract_ps (const gchar *uri)
+extract_ps (TrackerExtractInfo *info,
+            const gchar        *uri)
 {
 	g_autoptr(GFile) file = NULL;
 	g_autoptr(GInputStream) stream = NULL;
@@ -180,13 +182,14 @@ extract_ps (const gchar *uri)
 		return NULL;
 	}
 
-	return extract_ps_from_inputstream (stream, file);
+	return extract_ps_from_inputstream (stream, file, info);
 }
 
 #ifdef USING_UNZIPPSFILES
 
 static TrackerResource *
-extract_ps_gz (const gchar *uri)
+extract_ps_gz (TrackerExtractInfo *info,
+               const gchar        *uri)
 {
 	g_autoptr(GFile) file = NULL;
 	g_autoptr(GInputStream) stream = NULL, cstream = NULL;
@@ -206,7 +209,7 @@ extract_ps_gz (const gchar *uri)
 	converter = G_CONVERTER (g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP));
 	cstream = g_converter_input_stream_new (stream, converter);
 
-	return extract_ps_from_inputstream (cstream, file);
+	return extract_ps_from_inputstream (cstream, file, info);
 }
 
 #endif /* USING_UNZIPPSFILES */
@@ -226,12 +229,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	if (strcmp (mimetype, "application/x-gzpostscript") == 0) {
 #ifdef USING_UNZIPPSFILES
-		metadata = extract_ps_gz (uri);
+		metadata = extract_ps_gz (info, uri);
 #else
 		metadata = NULL;
 #endif /* USING_UNZIPPSFILES */
 	} else {
-		metadata = extract_ps (uri);
+		metadata = extract_ps (info, uri);
 	}
 
 	if (metadata) {

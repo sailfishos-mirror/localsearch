@@ -21,6 +21,7 @@
 #define __TRACKER_MINER_FS_FILES_H__
 
 #include <gio/gio.h>
+#include <gudev/gudev.h>
 
 #include "tracker-config.h"
 
@@ -62,6 +63,8 @@ TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
 
 gboolean tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
                                                       GFile             *file);
+
+GUdevClient * tracker_miner_files_get_udev_client (TrackerMinerFiles *mf);
 
 G_END_DECLS
 

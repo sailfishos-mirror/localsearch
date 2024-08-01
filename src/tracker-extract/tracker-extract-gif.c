@@ -103,9 +103,10 @@ static inline void print_gif_error()
 #endif
 
 static TrackerResource *
-read_metadata (GifFileType          *gifFile,
-               GFile                *file,
-               const gchar          *uri)
+read_metadata (GifFileType        *gifFile,
+               GFile              *file,
+               const gchar        *uri,
+               TrackerExtractInfo *info)
 {
 	TrackerResource *metadata;
 	GifRecordType RecordType;
@@ -253,7 +254,7 @@ read_metadata (GifFileType          *gifFile,
 	md.date = tracker_coalesce_strip (2, xd->date, xd->time_original);
 	md.artist = tracker_coalesce_strip (2, xd->artist, xd->contributor);
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
@@ -523,7 +524,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	uri = g_file_get_uri (file);
 
-	metadata = read_metadata (gifFile, file, uri);
+	metadata = read_metadata (gifFile, file, uri, info);
 
 	g_free (uri);
 

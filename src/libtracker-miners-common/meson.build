@@ -39,7 +39,7 @@ elif battery_detection_library_name == 'hal'
   tracker_miners_common_dependencies += hal
 endif
 
-tracker_miners_common_private_dependencies = [charset_library, blkid]
+tracker_miners_common_private_dependencies = [charset_library]
 if libseccomp.found()
   tracker_miners_common_private_dependencies += [libseccomp]
 endif

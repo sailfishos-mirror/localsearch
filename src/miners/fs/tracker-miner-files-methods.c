@@ -20,6 +20,8 @@
 
 #include "config-miners.h"
 
+#include <gio/gunixmounts.h>
+
 #include "tracker-miner-files-methods.h"
 
 #include <libtracker-extract/tracker-extract.h>
@@ -142,6 +144,21 @@ miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
 	return resource;
 }
 
+static TrackerResource *
+miner_files_create_empty_information_element (TrackerMinerFiles *miner,
+                                              GFile             *file)
+{
+	TrackerResource *resource;
+	const gchar *urn;
+
+	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
+	                                       file);
+	resource = tracker_resource_new (urn);
+	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
+
+	return resource;
+}
+
 gchar *
 get_content_type (GFile     *file,
 		  GFileInfo *file_info)
@@ -245,6 +262,8 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	if (graph && g_file_info_get_size (file_info) > 0) {
+		TrackerResource *information_element;
+
 		/* This mimetype will be extracted by some module, pre-fill the
 		 * nfo:FileDataObject in that graph.
 		 * Empty files skipped as mime-type for those cannot be trusted.
@@ -264,17 +283,24 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
 		                                                            "nfo:PlainTextDocument") &&
 		    !tracker_miner_files_check_allowed_text_file (TRACKER_MINER_FILES (fs), file)) {
-			TrackerResource *text_file;
-
-			/* We let disallowed text files have a shallow nie:InformationElement */
-			text_file = miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
-			                                                              file, mime_type);
-			tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", text_file);
-			tracker_resource_set_uri (text_file, "nie:isStoredAs", uri);
+			/* We let disallowed text files have a shallow document nie:InformationElement */
+			information_element =
+				miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
+				                                                  file, mime_type);
 
 			tracker_resource_set_string (resource, "tracker:extractorHash",
 			                             tracker_extract_module_manager_get_hash (mime_type));
+		} else {
+			/* Insert only the base nie:InformationElement class, for the extractor to get
+			 * the suitable content identifier.
+			 */
+			information_element =
+				miner_files_create_empty_information_element (TRACKER_MINER_FILES (fs),
+				                                              file);
 		}
+
+		tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", information_element);
+		tracker_resource_set_uri (information_element, "nie:isStoredAs", uri);
 	}
 
 	if (is_directory) {
@@ -346,4 +372,54 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	                                             graph,
 	                                             resource,
 	                                             graph_file);
+}
+
+static gchar *
+lookup_filesystem_id (TrackerMinerFiles *files,
+                      GFile             *file)
+{
+	const gchar *id = NULL, *devname = NULL;
+	GUnixMountEntry *mount;
+	GUdevClient *udev_client;
+	g_autoptr (GUdevDevice) udev_device = NULL;
+
+	mount = g_unix_mount_for (g_file_peek_path (file), NULL);
+	if (mount)
+		devname = g_unix_mount_get_device_path (mount);
+
+	if (devname) {
+		udev_client = tracker_miner_files_get_udev_client (files);
+		udev_device = g_udev_client_query_by_device_file (udev_client, devname);
+		if (udev_device) {
+			id = g_udev_device_get_property (udev_device, "ID_FS_UUID_SUB");
+			if (!id)
+				id = g_udev_device_get_property (udev_device, "ID_FS_UUID");
+		}
+	}
+
+	return g_strdup (id);
+}
+
+gchar *
+tracker_miner_files_get_content_identifier (TrackerMinerFiles *mf,
+                                            GFile             *file,
+                                            GFileInfo         *info)
+{
+	g_autofree gchar *inode = NULL, *str = NULL, *id = NULL;
+
+	id = lookup_filesystem_id (mf, file);
+
+	if (!id) {
+		id = g_strdup (g_file_info_get_attribute_string (info,
+		                                                 G_FILE_ATTRIBUTE_ID_FILESYSTEM));
+	}
+
+	inode = g_file_info_get_attribute_as_string (info, G_FILE_ATTRIBUTE_UNIX_INODE);
+
+	/* Format:
+	 * 'urn:fileid:' [uuid] ':' [inode]
+	 */
+	str = g_strconcat ("urn:fileid:", id, ":", inode, NULL);
+
+	return g_steal_pointer (&str);
 }

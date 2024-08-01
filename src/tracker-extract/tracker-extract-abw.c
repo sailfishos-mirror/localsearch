@@ -243,7 +243,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		gchar *resource_uri;
 
 		data.uri = g_file_get_uri (f);
-		resource_uri = tracker_file_get_content_identifier (f, NULL, NULL);
+		resource_uri = tracker_extract_info_get_content_id (info, NULL);
 		data.resource = tracker_resource_new (resource_uri);
 		g_free (resource_uri);
 

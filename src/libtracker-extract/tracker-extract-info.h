@@ -36,12 +36,15 @@ typedef struct _TrackerExtractInfo TrackerExtractInfo;
 GType                 tracker_extract_info_get_type               (void) G_GNUC_CONST;
 
 TrackerExtractInfo *  tracker_extract_info_new                    (GFile              *file,
+                                                                   const gchar        *content_id,
                                                                    const gchar        *mimetype,
                                                                    const gchar        *graph,
                                                                    gint                max_text);
 TrackerExtractInfo *  tracker_extract_info_ref                    (TrackerExtractInfo *info);
 void                  tracker_extract_info_unref                  (TrackerExtractInfo *info);
 GFile *               tracker_extract_info_get_file               (TrackerExtractInfo *info);
+gchar *               tracker_extract_info_get_content_id         (TrackerExtractInfo *info,
+                                                                   const gchar        *suffix);
 const gchar *         tracker_extract_info_get_mimetype           (TrackerExtractInfo *info);
 const gchar *         tracker_extract_info_get_graph              (TrackerExtractInfo *info);
 

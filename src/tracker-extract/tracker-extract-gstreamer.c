@@ -848,8 +848,9 @@ end:
 }
 
 static TrackerResource *
-extract_metadata (MetadataExtractor      *extractor,
-                  const gchar            *file_url)
+extract_metadata (MetadataExtractor  *extractor,
+                  TrackerExtractInfo *info,
+                  const gchar        *file_url)
 {
 	TrackerResource *resource;
 	gchar *resource_uri;
@@ -858,7 +859,7 @@ extract_metadata (MetadataExtractor      *extractor,
 	g_return_val_if_fail (extractor != NULL, NULL);
 
 	file = g_file_new_for_uri (file_url);
-	resource_uri = tracker_file_get_content_identifier (file, NULL, "1");
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	resource = tracker_resource_new (resource_uri);
 	g_free (resource_uri);
 
@@ -989,7 +990,7 @@ extract_metadata (MetadataExtractor      *extractor,
 
 						suffix = g_strdup_printf ("%d", g_list_position (extractor->toc->entry_list,
 						                                                 node) + 1);
-						resource_uri = tracker_file_get_content_identifier (file, NULL, suffix);
+						resource_uri = tracker_extract_info_get_content_id (info, suffix);
 						track = tracker_resource_new (resource_uri);
 						g_free (resource_uri);
 						g_free (suffix);
@@ -1377,7 +1378,7 @@ tracker_extract_gstreamer (const gchar          *uri,
 			extractor->toc = translate_discoverer_toc (extractor->gst_toc);
 		}
 
-		main_resource = extract_metadata (extractor, uri);
+		main_resource = extract_metadata (extractor, info, uri);
 	}
 
 	/* Clean up */

@@ -55,7 +55,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		return FALSE;
 	}
 
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	resource = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:PaginatedTextDocument");
 	tracker_resource_set_int64 (resource, "nfo:pageCount", gxps_document_get_n_pages (document));

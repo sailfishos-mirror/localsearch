@@ -109,6 +109,9 @@ typedef struct {
 	                                       GFile                *source,
 	                                       TrackerSparqlBuffer  *buffer,
 	                                       gboolean              recursive);
+	gchar * (* get_content_identifier)    (TrackerMinerFS       *fs,
+					       GFile                *file,
+	                                       GFileInfo            *info);
 } TrackerMinerFSClass;
 
 GType                 tracker_miner_fs_get_type              (void) G_GNUC_CONST;

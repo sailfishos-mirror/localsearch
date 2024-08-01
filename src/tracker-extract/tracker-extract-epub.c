@@ -630,7 +630,7 @@ extract_opf (TrackerExtractInfo *info,
 	g_debug ("Extracting OPF file contents from EPUB '%s'", uri);
 
 	file = g_file_new_for_uri (uri);
-	resource_uri = tracker_file_get_content_identifier (file, NULL, NULL);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	ebook = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (ebook, "rdf:type", "nfo:EBook");
 	g_free (resource_uri);

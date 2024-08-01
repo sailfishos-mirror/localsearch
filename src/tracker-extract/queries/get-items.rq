@@ -1,35 +1,36 @@
 # Inputs: documentsHigh, documentsLow, picturesHigh, picturesLow,
 #   audioHigh, audioLow, videoHigh, videoLow, softwareHigh, softwareLow
-# Outputs: urn, id
+# Outputs: urn, id, ie
 SELECT
   ?urn
-  tracker:id(?urn) ?AS ?id
+  (tracker:id(?urn) AS ?id)
+  ?ie
 {
   {
     # Data from high priority graphs
     {
-      SELECT ?urn { GRAPH tracker:Documents { ?urn a nfo:FileDataObject } } LIMIT ~documentsHigh
+      SELECT ?urn ?ie { GRAPH tracker:Documents { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~documentsHigh
     } UNION {
-      SELECT ?urn { GRAPH tracker:Pictures { ?urn a nfo:FileDataObject } } LIMIT ~picturesHigh
+      SELECT ?urn ?ie { GRAPH tracker:Pictures { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~picturesHigh
     } UNION {
-      SELECT ?urn { GRAPH tracker:Audio { ?urn a nfo:FileDataObject } } LIMIT ~audioHigh
+      SELECT ?urn ?ie { GRAPH tracker:Audio { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~audioHigh
     } UNION {
-      SELECT ?urn { GRAPH tracker:Video { ?urn a nfo:FileDataObject } } LIMIT ~videoHigh
+      SELECT ?urn ?ie { GRAPH tracker:Video { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~videoHigh
     } UNION {
-      SELECT ?urn { GRAPH tracker:Software { ?urn a nfo:FileDataObject } } LIMIT ~softwareHigh
+      SELECT ?urn ?ie { GRAPH tracker:Software { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~softwareHigh
     }
   } UNION {
     # Data from regular priority graphs
     {
-      SELECT ?urn { GRAPH tracker:Documents { ?urn a nfo:FileDataObject } } LIMIT ~documentsLow
+      SELECT ?urn ?ie { GRAPH tracker:Documents { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~documentsLow
     } UNION {
-      SELECT ?urn { GRAPH tracker:Pictures { ?urn a nfo:FileDataObject } } LIMIT ~picturesLow
+      SELECT ?urn ?ie { GRAPH tracker:Pictures { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~picturesLow
     } UNION {
-      SELECT ?urn { GRAPH tracker:Audio { ?urn a nfo:FileDataObject } } LIMIT ~audioLow
+      SELECT ?urn ?ie { GRAPH tracker:Audio { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~audioLow
     } UNION {
-      SELECT ?urn { GRAPH tracker:Video { ?urn a nfo:FileDataObject } } LIMIT ~videoLow
+      SELECT ?urn ?ie { GRAPH tracker:Video { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~videoLow
     } UNION {
-      SELECT ?urn { GRAPH tracker:Software { ?urn a nfo:FileDataObject } } LIMIT ~softwareLow
+      SELECT ?urn ?ie { GRAPH tracker:Software { ?urn a nfo:FileDataObject ; nie:interpretedAs ?ie } } LIMIT ~softwareLow
     }
   }
 

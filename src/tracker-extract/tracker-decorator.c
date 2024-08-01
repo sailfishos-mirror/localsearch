@@ -53,6 +53,7 @@ typedef struct _ClassInfo ClassInfo;
 struct _TrackerDecoratorInfo {
 	GTask *task;
 	gchar *url;
+	gchar *content_id;
 	gint id;
 	gint ref_count;
 };
@@ -129,6 +130,7 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info = g_slice_new0 (TrackerDecoratorInfo);
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
+	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 	info->ref_count = 1;
 
 	info->task = g_task_new (decorator,
@@ -174,6 +176,7 @@ tracker_decorator_info_unref (TrackerDecoratorInfo *info)
 	if (info->task)
 		g_object_unref (info->task);
 	g_free (info->url);
+	g_free (info->content_id);
 	g_slice_free (TrackerDecoratorInfo, info);
 }
 
@@ -1037,6 +1040,13 @@ tracker_decorator_info_get_url (TrackerDecoratorInfo *info)
 {
 	g_return_val_if_fail (info != NULL, NULL);
 	return info->url;
+}
+
+const gchar *
+tracker_decorator_info_get_content_id (TrackerDecoratorInfo *info)
+{
+	g_return_val_if_fail (info != NULL, NULL);
+	return info->content_id;
 }
 
 GCancellable *

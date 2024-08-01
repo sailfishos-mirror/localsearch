@@ -24,50 +24,50 @@
 static void
 test_extract_info_setters (void)
 {
-        TrackerExtractInfo *info, *info_ref;
-        GFile *file;
+	TrackerExtractInfo *info, *info_ref;
+	GFile *file;
 
-        file = g_file_new_for_path ("./imaginary-file-2");
+	file = g_file_new_for_path ("./imaginary-file-2");
 
-        info = tracker_extract_info_new (file, "imaginary/mime", NULL, 100);
-        info_ref = tracker_extract_info_ref (info);
+	info = tracker_extract_info_new (file, "_:a", "imaginary/mime", NULL, 100);
+	info_ref = tracker_extract_info_ref (info);
 
-        g_assert_true (g_file_equal (file, tracker_extract_info_get_file (info)));
+	g_assert_true (g_file_equal (file, tracker_extract_info_get_file (info)));
 
-        g_assert_cmpstr (tracker_extract_info_get_mimetype (info), ==, "imaginary/mime");
+	g_assert_cmpstr (tracker_extract_info_get_mimetype (info), ==, "imaginary/mime");
 
-        tracker_extract_info_unref (info_ref);
-        tracker_extract_info_unref (info);
+	tracker_extract_info_unref (info_ref);
+	tracker_extract_info_unref (info);
 
-        g_object_unref (file);
+	g_object_unref (file);
 }
 
 static void
 test_extract_info_empty_objects (void)
 {
-        TrackerExtractInfo *info, *info_ref;
-        GFile *file;
+	TrackerExtractInfo *info, *info_ref;
+	GFile *file;
 
-        file = g_file_new_for_path ("./imaginary-file");
+	file = g_file_new_for_path ("./imaginary-file");
 
-        info = tracker_extract_info_new (file, "imaginary/mime", NULL, 100);
-        info_ref = tracker_extract_info_ref (info);
+	info = tracker_extract_info_new (file, "_:a", "imaginary/mime", NULL, 100);
+	info_ref = tracker_extract_info_ref (info);
 
-        tracker_extract_info_unref (info_ref);
-        tracker_extract_info_unref (info);
+	tracker_extract_info_unref (info_ref);
+	tracker_extract_info_unref (info);
 
-        g_object_unref (file);
+	g_object_unref (file);
 }
 
 int
 main (int argc, char **argv)
 {
-        g_test_init (&argc, &argv, NULL);
+	g_test_init (&argc, &argv, NULL);
 
-        g_test_add_func ("/libtracker-extract/extract-info/empty_objects",
-                         test_extract_info_empty_objects);
-        g_test_add_func ("/libtracker-extract/extract-info/setters",
-                         test_extract_info_setters);
+	g_test_add_func ("/libtracker-extract/extract-info/empty_objects",
+	                 test_extract_info_empty_objects);
+	g_test_add_func ("/libtracker-extract/extract-info/setters",
+	                 test_extract_info_setters);
 
-        return g_test_run ();
+	return g_test_run ();
 }
