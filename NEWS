@@ -1,3 +1,12 @@
+NEW in 3.8.beta - 2024-08-09
+============================
+  * Use udev to retrieve filesystem/subvolume UUID, for more stable content
+    identifiers.
+  * Blocked the "va" gstreamer module
+  * Renamed command line tool
+
+Translations: he, hi, ro, ru, sl, zh_TW
+
 NEW in 3.8.alpha - 2024-07-04
 =============================
   * Rename project to LocalSearch
