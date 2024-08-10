@@ -33,7 +33,7 @@ executable(main_command_name,
     ],
     install: true,
     install_dir: get_option('bindir'),
-    dependencies: [tracker_sparql, tracker_miners_common_dep],
+    dependencies: [tracker_sparql, tracker_miners_common_dep, gstreamer],
     include_directories: [commoninc, configinc, srcinc],
 )
 
