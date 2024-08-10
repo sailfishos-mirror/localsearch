@@ -73,7 +73,7 @@ def tap_protocol_enabled():
 # those. The 'ignore-files' configuration option can be changed, but the
 # 'filter-hidden' property of TrackerIndexingTree is hardwired to be True at
 # present :/
-_TEST_MONITORED_TMP_DIR = os.path.join(os.environ["HOME"], "tracker-tests")
+_TEST_MONITORED_TMP_DIR = os.path.join(config["TEST_ROOT"], "tracker-tests")
 if _TEST_MONITORED_TMP_DIR.startswith("/tmp"):
     if "REAL_HOME" in os.environ:
         _TEST_MONITORED_TMP_DIR = os.path.join(os.environ["REAL_HOME"], "tracker-tests")
