@@ -1,5 +1,5 @@
 [wrap-git]
 directory = tinysparql
 url = https://gitlab.gnome.org/GNOME/tinysparql.git
-revision = 59c06aac8a8323bbba8366c7d9de01489bb72253
+revision = 3.8.beta
 depth = 1
