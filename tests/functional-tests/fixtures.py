@@ -419,23 +419,19 @@ def get_tracker_extract_output(
     Runs `tracker-extract --file` to extract metadata from a file.
     """
 
-    tracker_extract = os.path.join(cfg.TRACKER_EXTRACT_PATH)
+    localsearch = os.path.join(cfg.cli_dir(), "localsearch")
     command = [
-        tracker_extract,
+        localsearch,
+        "extract",
         "--output-format",
         output_format,
-        "--file",
         str(filename),
     ]
-    if mime_type is not None:
-        command.extend(["--mime", mime_type])
 
     # We depend on parsing the output, so we must avoid the GLib log handler
     # writing stuff to stdout.
     extra_env["G_MESSAGES_DEBUG"] = ""
 
-    # Tell GStreamer not to fork to create the registry
-    extra_env["GST_REGISTRY_FORK"] = "no"
     log.debug(
         "Adding to environment: %s",
         " ".join("%s=%s" % (k, v) for k, v in extra_env.items()),

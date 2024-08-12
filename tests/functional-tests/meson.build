@@ -10,6 +10,7 @@ config_json_full_path = meson.current_build_dir() / 'config' / 'configuration.js
 tracker_extractors_dir = meson.current_build_dir() / '..' / '..' / 'src' / 'tracker-extract'
 
 testconf.set('MOCK_VOLUME_MONITOR_DIR', meson.current_build_dir() / 'mockvolumemonitor')
+testconf.set('TEST_ROOT', meson.current_build_dir())
 testconf.set('TEST_CLI_DIR', tracker_uninstalled_cli_dir)
 testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', build_root / 'tests' / 'test-bus.conf')
 testconf.set('TEST_DOMAIN_ONTOLOGY_RULE', meson.current_build_dir() / 'config' / 'test-domain.rule')

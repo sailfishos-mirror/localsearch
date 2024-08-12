@@ -235,7 +235,7 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		{ ".pki", LANDLOCK_ACCESS_FS_READ_DIR },
 		{ ".gnupg", LANDLOCK_ACCESS_FS_READ_DIR },
 	};
-	g_autofree gchar *current_dir = NULL, *cache_dir = NULL;
+	g_autofree gchar *current_dir = NULL, *cache_dir = NULL, *gst_registry_location = NULL;
 	g_auto (GStrv) library_paths = NULL;
 	const gchar *ld_library_path = NULL;
 	int i, landlock_fd;
@@ -312,6 +312,13 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 	add_rule (landlock_fd, cache_dir,
 	          LANDLOCK_ACCESS_FS_READ_FILE);
 #endif
+
+	/* Access GST registry file */
+	gst_registry_location = g_strdup (g_getenv ("GST_REGISTRY_1_0"));
+	if (!gst_registry_location)
+		gst_registry_location = g_build_filename (g_get_user_cache_dir (), "gstreamer-1.0", NULL);
+	add_rule (landlock_fd, gst_registry_location,
+	          LANDLOCK_ACCESS_FS_READ_FILE);
 
 	TRACKER_NOTE (SANDBOX, g_message ("Applying Landlock ruleset to PID %d", getpid ()));
 	retval = apply_ruleset (landlock_fd);

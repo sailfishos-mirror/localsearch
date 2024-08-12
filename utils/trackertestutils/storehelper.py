@@ -97,7 +97,7 @@ class await_insert():
         if self._check_inserted:
             query_check = ' '.join([
                 'SELECT ?urn tracker:id(?urn) ',
-                f' FROM NAMED <{self.graph}> ',
+                f' FROM <{self.graph}> ',
                 ' WHERE { ',
                 '   ?urn a rdfs:Resource ; ',
                 self.predicates,
@@ -109,7 +109,7 @@ class await_insert():
 
         query_filtered = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            f' FROM NAMED <{self.graph}> ' ,
+            f' FROM <{self.graph}> ' ,
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
             self.predicates,
@@ -187,7 +187,7 @@ class await_property_update():
 
         query_before = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            f' FROM NAMED <{self.graph}> ',
+            f' FROM <{self.graph}> ',
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
             self.before_predicates,
@@ -203,7 +203,7 @@ class await_property_update():
 
         query_after = ' '.join([
             'SELECT ?urn tracker:id(?urn) '
-            f' FROM NAMED <{self.graph}> ',
+            f' FROM <{self.graph}> ',
             ' WHERE { '
            '   ?urn a rdfs:Resource ; ',
             self.after_predicates,
@@ -273,7 +273,7 @@ class await_content_update():
 
         query_before = ' '.join([
             'SELECT nie:isStoredAs(?urn) ?urn tracker:id(?urn) '
-            f' FROM NAMED <{self.graph}> ',
+            f' FROM <{self.graph}> ',
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
             self.before_predicates,
@@ -289,7 +289,7 @@ class await_content_update():
 
         query_after = ' '.join([
             'SELECT ?urn tracker:id(?urn) '
-            f' FROM NAMED <{self.graph}> ',
+            f' FROM <{self.graph}> ',
             ' WHERE { '
             '   ?urn a rdfs:Resource ; ',
             f'      nie:isStoredAs <{file_url}> ; ',
@@ -367,7 +367,7 @@ class await_delete():
 
         query_check = ' '.join([
             'SELECT ?urn tracker:id(?urn) ',
-            f'FROM NAMED <{self.graph}> ',
+            f'FROM <{self.graph}> ',
             ' WHERE { ',
             '   ?urn a rdfs:Resource ; ',
             '   . FILTER (tracker:id(?urn) = ~id) '
@@ -456,7 +456,7 @@ class StoreHelper():
             # Check if the data was committed *before* the function was called.
             query_initial = ' '.join([
                 'SELECT ?urn tracker:id(?urn) '
-                f' FROM NAMED <{graph}>',
+                f' FROM <{graph}>',
                 ' WHERE { '
                 '   ?urn a rdfs:Resource ; ',
                 predicates,
