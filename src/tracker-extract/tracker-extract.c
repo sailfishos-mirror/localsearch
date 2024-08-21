@@ -70,10 +70,10 @@ typedef struct {
 	 */
 	GMutex task_mutex;
 
-	/* module -> async queue hashtable
-	 * for single-threaded extractors
-	 */
-	GHashTable *single_thread_extractors;
+	GMainContext *thread_context;
+	GMainLoop *thread_loop;
+
+	GThread *task_thread;
 
 	gboolean disable_shutdown;
 
@@ -132,7 +132,7 @@ tracker_extract_init (TrackerExtract *object)
 	TrackerExtractPrivate *priv;
 
 	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
-	priv->single_thread_extractors = g_hash_table_new (NULL, NULL);
+
 	priv->max_text = DEFAULT_MAX_TEXT;
 
 #ifdef G_ENABLE_DEBUG
@@ -156,8 +156,6 @@ tracker_extract_finalize (GObject *object)
 
 	tracker_module_manager_shutdown_modules ();
 
-	g_hash_table_destroy (priv->single_thread_extractors);
-
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
 		log_statistics (object);
@@ -167,6 +165,17 @@ tracker_extract_finalize (GObject *object)
 #endif
 
 	g_mutex_clear (&priv->task_mutex);
+
+	if (priv->thread_loop) {
+		g_main_loop_quit (priv->thread_loop);
+		g_main_loop_unref (priv->thread_loop);
+	}
+
+	if (priv->task_thread)
+		g_thread_join (priv->task_thread);
+
+	if (priv->thread_context)
+		g_main_context_unref (priv->thread_context);
 
 	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);
 }
@@ -554,19 +563,33 @@ get_metadata (TrackerExtractTask *task)
 	return FALSE;
 }
 
-static gpointer
-single_thread_get_metadata (GAsyncQueue *queue)
+static gboolean
+handle_task_in_thread (gpointer user_data)
 {
-	while (TRUE) {
-		TrackerExtractTask *task;
+	TrackerExtractTask *task = user_data;
 
-		task = g_async_queue_pop (queue);
 #ifdef THREAD_ENABLE_TRACE
-		g_debug ("Thread:%p --> '%s': Dispatching in dedicated thread",
-		         g_thread_self(), task->file);
+	g_debug ("Thread:%p --> '%s': Dispatching in thread",
+	         g_thread_self(), task->file);
 #endif /* THREAD_ENABLE_TRACE */
-		get_metadata (task);
-	}
+	get_metadata (task);
+
+	return G_SOURCE_REMOVE;
+}
+
+
+static gpointer
+metadata_thread_func (GMainLoop *loop)
+{
+	GMainContext *context;
+
+	context = g_main_loop_get_context (loop);
+	g_main_context_push_thread_default (context);
+
+	g_main_loop_run (loop);
+
+	g_main_context_pop_thread_default (context);
+	g_main_loop_unref (loop);
 
 	return NULL;
 }
@@ -580,7 +603,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 {
 	TrackerExtractPrivate *priv;
 	GError *error = NULL;
-	GAsyncQueue *async_queue;
 
 #ifdef THREAD_ENABLE_TRACE
 	g_debug ("Thread:%p (Main) <-- '%s': Handling task...\n",
@@ -614,34 +636,26 @@ dispatch_task_cb (TrackerExtractTask *task)
 		                                                          &task->func);
 	}
 
-	async_queue = g_hash_table_lookup (priv->single_thread_extractors,
-	                                   task->module);
+	if (!priv->task_thread) {
+		priv->thread_context = g_main_context_new ();
+		priv->thread_loop = g_main_loop_new (priv->thread_context, FALSE);
 
-	if (!async_queue) {
-		GThread *thread;
-
-		/* No thread created yet for this module, create it
-		 * together with the async queue used to pass data to it
-		 */
-		async_queue = g_async_queue_new ();
-		thread = g_thread_try_new ("single",
-		                           (GThreadFunc) single_thread_get_metadata,
-		                           g_async_queue_ref (async_queue),
-		                           &error);
-		if (!thread) {
+		priv->task_thread =
+			g_thread_try_new ("single",
+					  (GThreadFunc) metadata_thread_func,
+					  g_main_loop_ref (priv->thread_loop),
+					  &error);
+		if (!priv->task_thread) {
 			g_task_return_error (G_TASK (task->res), error);
 			extract_task_free (task);
 			return FALSE;
 		}
 
-		/* We won't join the thread, so just unref it here */
-		g_thread_unref (thread);
-
-		g_hash_table_insert (priv->single_thread_extractors, task->module, async_queue);
 	}
 
-	g_async_queue_push (async_queue, task);
-
+	g_main_context_invoke (priv->thread_context,
+			       handle_task_in_thread,
+			       task);
 	return FALSE;
 }
 
