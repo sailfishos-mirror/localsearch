@@ -67,7 +67,7 @@ typedef struct {
 	/* used to maintain the running tasks
 	 * and stats from different threads
 	 */
-	GMutex task_mutex;
+	GMutex stats_mutex;
 
 	GMainContext *thread_context;
 	GMainLoop *thread_loop;
@@ -140,10 +140,9 @@ tracker_extract_init (TrackerExtract *object)
 		g_timer_stop (priv->total_elapsed);
 		priv->statistics_data = g_hash_table_new_full (NULL, NULL, NULL,
 		                                               (GDestroyNotify) statistics_data_free);
+		g_mutex_init (&priv->stats_mutex);
 	}
 #endif
-
-	g_mutex_init (&priv->task_mutex);
 }
 
 static void
@@ -160,10 +159,9 @@ tracker_extract_finalize (GObject *object)
 		log_statistics (object);
 		g_hash_table_destroy (priv->statistics_data);
 		g_timer_destroy (priv->total_elapsed);
+		g_mutex_clear (&priv->stats_mutex);
 	}
 #endif
-
-	g_mutex_clear (&priv->task_mutex);
 
 	if (priv->thread_loop) {
 		g_main_loop_quit (priv->thread_loop);
@@ -191,7 +189,7 @@ log_statistics (GObject *object)
 
 		priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 
-		g_mutex_lock (&priv->task_mutex);
+		g_mutex_lock (&priv->stats_mutex);
 
 		g_message ("--------------------------------------------------");
 		g_message ("Statistics:");
@@ -227,7 +225,7 @@ log_statistics (GObject *object)
 
 		g_message ("--------------------------------------------------");
 
-		g_mutex_unlock (&priv->task_mutex);
+		g_mutex_unlock (&priv->stats_mutex);
 	}
 #endif
 }
@@ -268,10 +266,10 @@ notify_task_finish (TrackerExtractTask *task,
 	/* Reports and ongoing tasks may be
 	 * accessed from other threads.
 	 */
-	g_mutex_lock (&priv->task_mutex);
-
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		g_mutex_lock (&priv->stats_mutex);
+
 		if (task->module) {
 			stats_data = g_hash_table_lookup (priv->statistics_data,
 			                                  task->module);
@@ -285,10 +283,10 @@ notify_task_finish (TrackerExtractTask *task,
 		} else {
 			priv->unhandled_count++;
 		}
+
+		g_mutex_unlock (&priv->stats_mutex);
 	}
 #endif
-
-	g_mutex_unlock (&priv->task_mutex);
 }
 
 static gboolean
