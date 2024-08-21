@@ -136,8 +136,6 @@ tracker_extract_finalize (GObject *object)
 	TrackerExtractPrivate *priv =
 		tracker_extract_get_instance_private (extract);
 
-	tracker_module_manager_shutdown_modules ();
-
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
 		log_statistics (object);
@@ -219,10 +217,6 @@ tracker_extract_new (const gchar *force_module)
 {
 	TrackerExtract *object;
 	TrackerExtractPrivate *priv;
-
-	if (!tracker_extract_module_manager_init ()) {
-		return NULL;
-	}
 
 	/* Set extractors */
 	object = g_object_new (TRACKER_TYPE_EXTRACT, NULL);
