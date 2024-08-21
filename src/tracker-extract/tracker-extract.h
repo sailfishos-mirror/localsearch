@@ -24,16 +24,13 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#define TRACKER_EXTRACT_ERROR          (tracker_extract_error_quark ())
-#define TRACKER_TYPE_EXTRACT           (tracker_extract_get_type ())
-#define TRACKER_EXTRACT(object)        (G_TYPE_CHECK_INSTANCE_CAST ((object), TRACKER_TYPE_EXTRACT, TrackerExtract))
-#define TRACKER_EXTRACT_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST ((klass), TRACKER_TYPE_EXTRACT, TrackerExtractClass))
-#define TRACKER_IS_EXTRACT(object)     (G_TYPE_CHECK_INSTANCE_TYPE ((object), TRACKER_TYPE_EXTRACT))
-#define TRACKER_IS_EXTRACT_CLASS(klass)(G_TYPE_CHECK_CLASS_TYPE ((klass), TRACKER_TYPE_EXTRACT))
-#define TRACKER_EXTRACT_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), TRACKER_TYPE_EXTRACT, TrackerExtractClass))
+#define TRACKER_TYPE_EXTRACT (tracker_extract_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerExtract,
+		      tracker_extract,
+		      TRACKER, EXTRACT,
+		      GObject)
 
-typedef struct TrackerExtract      TrackerExtract;
-typedef struct TrackerExtractClass TrackerExtractClass;
+#define TRACKER_EXTRACT_ERROR (tracker_extract_error_quark ())
 
 typedef enum {
 	TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
@@ -41,16 +38,7 @@ typedef enum {
 	TRACKER_EXTRACT_ERROR_IO_ERROR,
 } TrackerExtractError;
 
-struct TrackerExtract {
-	GObject parent;
-};
-
-struct TrackerExtractClass {
-	GObjectClass parent;
-};
-
 GQuark          tracker_extract_error_quark             (void);
-GType           tracker_extract_get_type                (void);
 TrackerExtract *tracker_extract_new                     (const gchar *force_module);
 
 void            tracker_extract_file                    (TrackerExtract         *extract,

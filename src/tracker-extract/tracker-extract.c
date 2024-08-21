@@ -46,6 +46,10 @@ typedef struct {
 	gint failed_count;
 } StatisticsData;
 
+struct _TrackerExtract {
+	GObject parent_instance;
+};
+
 typedef struct {
 	GHashTable *statistics_data;
 
