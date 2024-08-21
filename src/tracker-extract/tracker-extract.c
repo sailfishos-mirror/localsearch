@@ -32,8 +32,6 @@
 #warning Main thread traces enabled
 #endif /* THREAD_ENABLE_TRACE */
 
-#define TRACKER_EXTRACT_GET_PRIVATE(obj) (tracker_extract_get_instance_private (TRACKER_EXTRACT (obj)))
-
 G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 #define DEFAULT_DEADLINE_SECONDS 5
@@ -119,9 +117,8 @@ statistics_data_free (StatisticsData *data)
 static void
 tracker_extract_init (TrackerExtract *object)
 {
-	TrackerExtractPrivate *priv;
-
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (object);
 
 	priv->max_text = DEFAULT_MAX_TEXT;
 
@@ -139,9 +136,9 @@ tracker_extract_init (TrackerExtract *object)
 static void
 tracker_extract_finalize (GObject *object)
 {
-	TrackerExtractPrivate *priv;
-
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
+	TrackerExtract *extract = TRACKER_EXTRACT (object);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 
 	tracker_module_manager_shutdown_modules ();
 
@@ -173,12 +170,12 @@ log_statistics (GObject *object)
 {
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		TrackerExtractPrivate *priv;
+		TrackerExtract *extract = TRACKER_EXTRACT (object);
+		TrackerExtractPrivate *priv =
+			tracker_extract_get_instance_private (extract);
 		GHashTableIter iter;
 		gpointer key, value;
 		gdouble total_elapsed;
-
-		priv = TRACKER_EXTRACT_GET_PRIVATE (object);
 
 		g_mutex_lock (&priv->stats_mutex);
 
@@ -235,7 +232,7 @@ tracker_extract_new (gboolean     disable_shutdown,
 	/* Set extractors */
 	object = g_object_new (TRACKER_TYPE_EXTRACT, NULL);
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
+	priv = tracker_extract_get_instance_private (object);
 
 	priv->disable_shutdown = disable_shutdown;
 	priv->force_module = g_strdup (force_module);
@@ -252,7 +249,7 @@ notify_task_finish (TrackerExtractTask *task,
 	StatisticsData *stats_data;
 
 	extract = task->extract;
-	priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	priv = tracker_extract_get_instance_private (extract);
 
 	/* Reports and ongoing tasks may be
 	 * accessed from other threads.
@@ -346,7 +343,8 @@ extract_task_new (TrackerExtract *extract,
                   GAsyncResult   *res,
                   GError        **error)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 	TrackerExtractTask *task;
 	gchar *mimetype_used;
 
@@ -444,7 +442,7 @@ filter_module (TrackerExtract *extract,
 		return FALSE;
 	}
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	priv = tracker_extract_get_instance_private (extract);
 
 	if (!priv->force_module) {
 		return FALSE;
@@ -482,7 +480,8 @@ filter_module (TrackerExtract *extract,
 static gboolean
 get_metadata (TrackerExtractTask *task)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (task->extract);
 	TrackerExtractInfo *info;
 	GError *error = NULL;
 
@@ -593,7 +592,7 @@ dispatch_task_cb (TrackerExtractTask *task)
 	         task->file);
 #endif /* THREAD_ENABLE_TRACE */
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
+	priv = tracker_extract_get_instance_private (task->extract);
 
 	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
 	if (!task->graph) {
@@ -677,7 +676,7 @@ tracker_extract_file (TrackerExtract      *extract,
 	} else {
 		TrackerExtractPrivate *priv;
 
-		priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
+		priv = tracker_extract_get_instance_private (task->extract);
 
 #ifdef G_ENABLE_DEBUG
 		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
@@ -822,7 +821,8 @@ void
 tracker_extract_set_max_text (TrackerExtract *extract,
                               gint            max_text)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 
 	priv->max_text = max_text;
 }
