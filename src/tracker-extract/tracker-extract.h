@@ -24,12 +24,6 @@
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
-#define TRACKER_EXTRACT_SERVICE        "org.freedesktop.Tracker3.Extract"
-#define TRACKER_EXTRACT_PATH           "/org/freedesktop/Tracker3/Extract"
-#define TRACKER_EXTRACT_INTERFACE      "org.freedesktop.Tracker3.Extract"
-
-G_BEGIN_DECLS
-
 #define TRACKER_EXTRACT_ERROR          (tracker_extract_error_quark ())
 #define TRACKER_TYPE_EXTRACT           (tracker_extract_get_type ())
 #define TRACKER_EXTRACT(object)        (G_TYPE_CHECK_INSTANCE_CAST ((object), TRACKER_TYPE_EXTRACT, TrackerExtract))
@@ -71,9 +65,6 @@ TrackerExtractInfo *
                                                          GAsyncResult           *res,
                                                          GError                **error);
 
-void            tracker_extract_dbus_start              (TrackerExtract         *extract);
-void            tracker_extract_dbus_stop               (TrackerExtract         *extract);
-
 void            tracker_extract_set_max_text            (TrackerExtract *extract,
                                                          gint            max_text);
 
@@ -82,7 +73,5 @@ void            tracker_extract_get_metadata_by_cmdline (TrackerExtract         
                                                          const gchar                *path,
                                                          const gchar                *mime,
                                                          TrackerSerializationFormat  output_format);
-
-G_END_DECLS
 
 #endif /* __TRACKERD_EXTRACT_H__ */
