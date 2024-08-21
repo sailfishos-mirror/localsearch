@@ -57,8 +57,7 @@ struct TrackerExtractClass {
 
 GQuark          tracker_extract_error_quark             (void);
 GType           tracker_extract_get_type                (void);
-TrackerExtract *tracker_extract_new                     (gboolean                disable_shutdown,
-                                                         const gchar            *force_module);
+TrackerExtract *tracker_extract_new                     (const gchar *force_module);
 
 void            tracker_extract_file                    (TrackerExtract         *extract,
                                                          const gchar            *file,

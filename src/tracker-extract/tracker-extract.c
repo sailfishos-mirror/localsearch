@@ -61,8 +61,6 @@ typedef struct {
 
 	GThread *task_thread;
 
-	gboolean disable_shutdown;
-
 	gchar *force_module;
 	GTimer *total_elapsed;
 
@@ -217,8 +215,7 @@ log_statistics (GObject *object)
 }
 
 TrackerExtract *
-tracker_extract_new (gboolean     disable_shutdown,
-                     const gchar *force_module)
+tracker_extract_new (const gchar *force_module)
 {
 	TrackerExtract *object;
 	TrackerExtractPrivate *priv;
@@ -232,7 +229,6 @@ tracker_extract_new (gboolean     disable_shutdown,
 
 	priv = tracker_extract_get_instance_private (object);
 
-	priv->disable_shutdown = disable_shutdown;
 	priv->force_module = g_strdup (force_module);
 
 	return object;

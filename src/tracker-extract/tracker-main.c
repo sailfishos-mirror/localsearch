@@ -201,7 +201,7 @@ run_standalone (void)
 	file = g_file_new_for_commandline_arg (filename);
 	uri = g_file_get_uri (file);
 
-	object = tracker_extract_new (TRUE, force_module);
+	object = tracker_extract_new (force_module);
 
 	if (!object) {
 		g_object_unref (file);
@@ -389,7 +389,7 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	extract = tracker_extract_new (TRUE, force_module);
+	extract = tracker_extract_new (force_module);
 
 	if (!extract) {
 		return EXIT_FAILURE;
