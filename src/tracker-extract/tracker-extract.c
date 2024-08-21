@@ -40,8 +40,6 @@ G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 static gint deadline_seconds = -1;
 
-extern gboolean debug;
-
 typedef struct {
 	GTimer *elapsed;
 	gint extracted_count;
