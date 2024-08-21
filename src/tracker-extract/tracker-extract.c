@@ -19,16 +19,7 @@
 
 #include "config-miners.h"
 
-#include <string.h>
-#include <unistd.h>
-
-#include <gmodule.h>
 #include <glib/gi18n.h>
-#include <gio/gio.h>
-
-#include <gio/gunixoutputstream.h>
-#include <gio/gunixinputstream.h>
-#include <gio/gunixfdlist.h>
 
 #include <libtracker-extract/tracker-extract.h>
 
