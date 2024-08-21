@@ -61,7 +61,6 @@ typedef struct {
 
 typedef struct {
 	GHashTable *statistics_data;
-	GList *running_tasks;
 
 	gint max_text;
 
@@ -286,13 +285,8 @@ notify_task_finish (TrackerExtractTask *task,
 		} else {
 			priv->unhandled_count++;
 		}
-
-		if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
-			g_timer_stop (priv->total_elapsed);
 	}
 #endif
-
-	priv->running_tasks = g_list_remove (priv->running_tasks, task);
 
 	g_mutex_unlock (&priv->task_mutex);
 }
@@ -696,17 +690,11 @@ tracker_extract_file (TrackerExtract      *extract,
 
 		priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
 
-		g_mutex_lock (&priv->task_mutex);
-		priv->running_tasks = g_list_prepend (priv->running_tasks, task);
-
 #ifdef G_ENABLE_DEBUG
 		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-			if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
-				g_timer_continue (priv->total_elapsed);
+			g_timer_continue (priv->total_elapsed);
 		}
 #endif
-
-		g_mutex_unlock (&priv->task_mutex);
 
 		g_idle_add ((GSourceFunc) dispatch_task_cb, task);
 	}
@@ -828,6 +816,15 @@ tracker_extract_file_finish (TrackerExtract  *extract,
 	g_return_val_if_fail (TRACKER_IS_EXTRACT (extract), NULL);
 	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		TrackerExtractPrivate *priv =
+			tracker_extract_get_instance_private (extract);
+
+		g_timer_stop (priv->total_elapsed);
+	}
+#endif
 
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
