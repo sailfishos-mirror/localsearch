@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
 "POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-18 15:53+0330\n"
+"PO-Revision-Date: 2024-08-27 16:30+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
@@ -215,7 +215,7 @@ msgstr ""
 
 #: src/libtracker-miners-common/tracker-miner-proxy.c:349
 msgid "Cookie not recognized to resume paused miner"
-msgstr "کلوچک برای از سر گیری کاوش مکث شده شناخته نشد"
+msgstr "کلوچک برای از سر گیری معدن‌کاوی مکث شده شناخته نشد"
 
 #: src/libtracker-miners-common/tracker-miner-proxy.c:406
 msgid "Pause application and reason match an already existing pause request"
@@ -288,7 +288,7 @@ msgstr "اجرا تا نمایه شدن همهٔ مکان‌های پیکربن�
 
 #: src/miners/fs/tracker-main.c:98 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
-msgstr "بررسی واجد شرایط کاوش شدن FILE بر پایهٔ پیکربندی"
+msgstr "بررسی واجد شرایط معدن‌کاوی شدن FILE بر پایهٔ پیکربندی"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
 #: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
@@ -356,11 +356,11 @@ msgstr ""
 
 #: src/miners/fs/tracker-main.c:630
 msgid "Directory is eligible to be indexed"
-msgstr "شاخه واجد شرایط کاوش است"
+msgstr "شاخه واجد شرایط معدن‌کاوی است"
 
 #: src/miners/fs/tracker-main.c:631
 msgid "File is eligible to be indexed"
-msgstr "پرونده واجد شرایط کاوش است"
+msgstr "پرونده واجد شرایط معدن‌کاوی است"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
@@ -372,7 +372,7 @@ msgstr "— آغاز نمایه‌گذار ردیاب"
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:45
 msgid "Add feed"
-msgstr "افزودن خوراک"
+msgstr "افزودن خوراک:"
 
 #: src/miners/rss/tracker-main.c:46 src/miners/rss/tracker-main.c:60
 msgid "URL"
@@ -575,11 +575,11 @@ msgstr ""
 
 #: src/tracker/tracker-daemon.c:120
 msgid "List common statuses for miners"
-msgstr "سیاهه کردن وضعیت‌های معمول برای کاونده‌ها"
+msgstr "سیاهه کردن وضعیت‌های معمول برای معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:125
 msgid "Pause a miner (you must use this with --miner)"
-msgstr "مکث کاونده (باید با ‪--miner‬ استفاده شود)"
+msgstr "مکث معدن‌کاو (باید با ‪--miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:126 src/tracker/tracker-daemon.c:130
 msgid "REASON"
@@ -590,12 +590,12 @@ msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must use "
 "this with --miner)"
 msgstr ""
-"مکث کاونده هنگام زنده بودن فرایند فراخواننده یا تا زمان از سر گیری (باید با ‪--"
+"مکث معدن‌کاو هنگام زنده بودن فرایند فراخواننده یا تا زمان از سر گیری (باید با ‪--"
 "miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:133
 msgid "Resume a miner (you must use this with --miner)"
-msgstr "از سر گیری کاونده (باید با ‪--miner‬ استفاده شود)"
+msgstr "از سر گیری معدن‌کاو (باید با ‪--miner‬ استفاده شود)"
 
 #: src/tracker/tracker-daemon.c:134
 msgid "COOKIE"
@@ -606,7 +606,7 @@ msgid ""
 "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
 "Applications)"
 msgstr ""
-"کاونده استفاده شده با ‪--resume‬ یا ‪--pause‬ (می‌توان از پسوندهایی چون Files یا "
+"معدن‌کاو استفاده شده با ‪--resume‬ یا ‪--pause‬ (می‌توان از پسوندهایی چون Files یا "
 "Applications استفاده کرد)"
 
 #: src/tracker/tracker-daemon.c:138
@@ -615,11 +615,11 @@ msgstr "MINER"
 
 #: src/tracker/tracker-daemon.c:141
 msgid "List all miners currently running"
-msgstr "سیاهه کردن همهٔ کاونده‌های در حال اجرا"
+msgstr "سیاهه کردن همهٔ معدن‌کاوهای در حال اجرا"
 
 #: src/tracker/tracker-daemon.c:145
 msgid "List all miners installed"
-msgstr "سیاهه کردن همهٔ کاونده‌های نصب شده"
+msgstr "سیاهه کردن همهٔ معدن‌کاوهای نصب شده"
 
 #: src/tracker/tracker-daemon.c:149
 msgid "List pause reasons"
@@ -631,7 +631,7 @@ msgstr "سیاهه کردن همهٔ فرایندهای ردیاب"
 
 #: src/tracker/tracker-daemon.c:156
 msgid "Use SIGKILL to stop all miners"
-msgstr "استفاده از SIGKILL برای توقّف همهٔ کاونده‌ها"
+msgstr "استفاده از SIGKILL برای توقّف همهٔ معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:157 src/tracker/tracker-daemon.c:160
 msgid "APPS"
@@ -639,7 +639,7 @@ msgstr "APPS"
 
 #: src/tracker/tracker-daemon.c:159
 msgid "Use SIGTERM to stop all miners"
-msgstr "استفاده از SIGTERM برای توقّف همهٔ کاونده‌ها"
+msgstr "استفاده از SIGTERM برای توقّف همهٔ معدن‌کاوها"
 
 #: src/tracker/tracker-daemon.c:162
 msgid "Starts miners"
@@ -648,7 +648,7 @@ msgstr "معدون‌کاوها را آغاز می‌کند"
 #: src/tracker/tracker-daemon.c:214
 #, c-format
 msgid "Could not get status from miner: %s"
-msgstr "نتوانست وضعیت را از کاونده بگیرد: %s"
+msgstr "نتوانست وضعیت را از معدن‌کاو بگیرد: %s"
 
 #. Translators: %s is a time string
 #: src/tracker/tracker-daemon.c:276
@@ -672,17 +672,17 @@ msgstr "اجرا نشده یا افزایه‌ای از کار افتاده"
 #: src/tracker/tracker-daemon.c:448
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
-msgstr "نتوانست کاونده را مکث کند. مدیر نتوانست ایجاد شود. %s"
+msgstr "نتوانست معدن‌کاو را مکث کند. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:455
 #, c-format
 msgid "Attempting to pause miner “%s” with reason “%s”"
-msgstr "تلاش کردن برای مکث کاونده «%s» با دلیل «%s»"
+msgstr "تلاش کردن برای مکث معدن‌کاو «%s» با دلیل «%s»"
 
 #: src/tracker/tracker-daemon.c:463 src/tracker/tracker-daemon.c:469
 #, c-format
 msgid "Could not pause miner: %s"
-msgstr "نتوانست کاونده را مکث کند: %s"
+msgstr "نتوانست معدن‌کاو را مکث کند: %s"
 
 #: src/tracker/tracker-daemon.c:475
 #, c-format
@@ -692,12 +692,12 @@ msgstr "کلوچک %Id است"
 #: src/tracker/tracker-daemon.c:482 src/tracker/tracker-daemon.c:725
 #: src/tracker/tracker-daemon.c:842
 msgid "Press Ctrl+C to stop"
-msgstr "زدن مهار-C برای توقّف"
+msgstr "برای توقّف مهار-C را بزنید."
 
 #: src/tracker/tracker-daemon.c:509
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
-msgstr "نتوانست کاونده را از سر بگیرد. مدیر نتوانست ایجاد شود. %s"
+msgstr "نتوانست معدن‌کاو را از سر بگیرد. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:516
 #, c-format
