@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
 "POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-27 16:30+0330\n"
+"PO-Revision-Date: 2024-08-27 16:45+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
@@ -372,7 +372,7 @@ msgstr "— آغاز نمایه‌گذار ردیاب"
 #. Translators: this is a "feed" as in RSS
 #: src/miners/rss/tracker-main.c:45
 msgid "Add feed"
-msgstr "افزودن خوراک:"
+msgstr "افزودن خوراک"
 
 #: src/miners/rss/tracker-main.c:46 src/miners/rss/tracker-main.c:60
 msgid "URL"
@@ -692,7 +692,7 @@ msgstr "کلوچک %Id است"
 #: src/tracker/tracker-daemon.c:482 src/tracker/tracker-daemon.c:725
 #: src/tracker/tracker-daemon.c:842
 msgid "Press Ctrl+C to stop"
-msgstr "برای توقّف مهار-C را بزنید."
+msgstr "زدن مهار+C برای توقّف"
 
 #: src/tracker/tracker-daemon.c:509
 #, c-format
@@ -1102,22 +1102,22 @@ msgstr ""
 
 #: src/tracker/tracker-search.c:161 src/tracker/tracker-status.c:58
 msgid "search terms"
-msgstr ""
+msgstr "جست‌وجوی عبارت‌ها"
 
 #: src/tracker/tracker-search.c:162
 msgid "TERMS"
-msgstr ""
+msgstr "TERMS"
 
 #: src/tracker/tracker-search.c:252 src/tracker/tracker-search.c:642
 #: src/tracker/tracker-search.c:738 src/tracker/tracker-search.c:830
 #: src/tracker/tracker-search.c:919 src/tracker/tracker-search.c:1008
 #: src/tracker/tracker-search.c:1295
 msgid "Could not get search results"
-msgstr ""
+msgstr "نتوانست نتیجه‌های جست‌وجو را بگیرد"
 
 #: src/tracker/tracker-search.c:261
 msgid "No files were found"
-msgstr ""
+msgstr "هیچ پرونده‌ای پیدا نشد"
 
 #: src/tracker/tracker-search.c:265 src/tracker/tracker-tag.c:426
 msgid "Files"
@@ -1125,7 +1125,7 @@ msgstr "پرونده‌ها"
 
 #: src/tracker/tracker-search.c:651
 msgid "No artists were found"
-msgstr ""
+msgstr "هیچ هنرمندی پیدا نشد"
 
 #: src/tracker/tracker-search.c:655
 msgid "Artists"
@@ -1133,7 +1133,7 @@ msgstr "هنرمندان"
 
 #: src/tracker/tracker-search.c:747
 msgid "No music was found"
-msgstr ""
+msgstr "هیچ آهنگی پیدا نشد"
 
 #: src/tracker/tracker-search.c:751
 msgid "Albums"
@@ -1141,7 +1141,7 @@ msgstr "آلبوم‌ها"
 
 #: src/tracker/tracker-search.c:839
 msgid "No feeds were found"
-msgstr ""
+msgstr "هیچ خوراکی پیدا نشد"
 
 #: src/tracker/tracker-search.c:843
 msgid "Feeds"
@@ -1149,7 +1149,7 @@ msgstr "خوراک‌ها"
 
 #: src/tracker/tracker-search.c:928
 msgid "No software was found"
-msgstr ""
+msgstr "هیچ نرم‌افزای پیدا نشد"
 
 #: src/tracker/tracker-search.c:932
 msgid "Software"
@@ -1157,15 +1157,15 @@ msgstr "نرم‌افزارها"
 
 #: src/tracker/tracker-search.c:1017
 msgid "No software categories were found"
-msgstr ""
+msgstr "هیچ دستهٔ نرم‌افزاری پیدا نشد"
 
 #: src/tracker/tracker-search.c:1021
 msgid "Software Categories"
-msgstr ""
+msgstr "دسته‌های نرم‌افزار"
 
 #: src/tracker/tracker-search.c:1304
 msgid "No results were found matching your query"
-msgstr ""
+msgstr "هیچ نتیجه‌‌ای مطابق با پرس‌وجویتان پیدا نشد"
 
 #: src/tracker/tracker-search.c:1308
 msgid "Results"
@@ -1178,30 +1178,30 @@ msgstr "جست‌وجو"
 
 #: src/tracker/tracker-search.desktop.in:7
 msgid "Search for content by type or across all types"
-msgstr ""
+msgstr "جست‌وجوی محتوا با نوشتن یا از میان همهٔ گونه‌ها"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
-msgstr ""
+msgstr "نمایش آمار برای مجموعه داده یا اندیس کنونی"
 
 #: src/tracker/tracker-status.c:59
 msgid "EXPRESSION"
-msgstr ""
+msgstr "EXPRESSION"
 
 #: src/tracker/tracker-status.c:106
 msgid "Could not get Tracker statistics"
-msgstr ""
+msgstr "نتوانست آمار ردیاب را بگیرد"
 
 #: src/tracker/tracker-status.c:113
 msgid "No statistics available"
-msgstr ""
+msgstr "هیچ آماری موجود نیست"
 
 #. To translators: This is to say there are no
 #. * statistics found. We use a "Statistics:
 #. * None" with multiple print statements
 #: src/tracker/tracker-status.c:154
 msgid "Statistics:"
-msgstr ""
+msgstr "آمار:"
 
 #. To translators: This is to say there are no
 #. * tags found with a particular unique ID.
@@ -1234,7 +1234,7 @@ msgstr "هیچ‌کدام"
 
 #: src/tracker/tracker-status.c:226 src/tracker/tracker-status.c:251
 msgid "Could not get basic status for Tracker"
-msgstr ""
+msgstr "نتوانست وضعیت پایهٔ ردیاب را بگیرد"
 
 #: src/tracker/tracker-status.c:332 src/tracker/tracker-status.c:499
 msgid "Message"
@@ -1242,49 +1242,49 @@ msgstr "پیام"
 
 #: src/tracker/tracker-status.c:391
 msgid "Currently indexed"
-msgstr ""
+msgstr "اندیس شده"
 
 #: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:546
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%Id پرونده"
+msgstr[1] "%Id پرونده"
 
 #: src/tracker/tracker-status.c:400
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%Id شاخه"
+msgstr[1] "%Id شاخه"
 
 #: src/tracker/tracker-status.c:414
 msgid "Remaining space on database partition"
-msgstr ""
+msgstr "فضای مانده روی افراز پایگاه داده"
 
 #: src/tracker/tracker-status.c:426
 msgid "Data is still being indexed"
-msgstr ""
+msgstr "داده هنوز در حال اندیس شدن است"
 
 #: src/tracker/tracker-status.c:427
 #, c-format
 msgid "Estimated %s left"
-msgstr ""
+msgstr "حدود %s مانده"
 
 #: src/tracker/tracker-status.c:431
 msgid "All data miners are idle, indexing complete"
-msgstr ""
+msgstr "همهٔ داده‌کاوها بی‌کارند. اندیس گذاری کامل شد"
 
 #: src/tracker/tracker-status.c:438
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%Id شکست ثبت شده"
+msgstr[1] "%Id شکست ثبت شده"
 
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
-msgstr ""
+msgstr "هیچ گزارشی پیدا نشد"
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-status.desktop.in:6
@@ -1293,35 +1293,37 @@ msgstr "وضعیت"
 
 #: src/tracker/tracker-status.desktop.in:7
 msgid "Provide status and statistics on the data indexed"
-msgstr ""
+msgstr "فراهم کردن وضعیت و آمار روی داده‌ّای اندیس شده"
 
 #: src/tracker/tracker-tag.c:51
 msgid "List all tags (using FILTER if specified; FILTER always uses logical OR)"
 msgstr ""
+"سیاهه کردن همهٔ برچسب‌ها (استفاده از FILTER در صورت مشخّص شدن. FILTER همواره از یای "
+"منطقی استفاده می‌کند)"
 
 #: src/tracker/tracker-tag.c:52
 msgid "FILTER"
-msgstr ""
+msgstr "FILTER"
 
 #: src/tracker/tracker-tag.c:55
 msgid "Show files associated with each tag (this is only used with --list)"
-msgstr ""
+msgstr "نمایش پرونده‌های مربوط به هر برچسب (فقط با ‪--list‬ استفاده می‌شود)"
 
 #: src/tracker/tracker-tag.c:59
 msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
-msgstr ""
+msgstr "افزودن برچسب (اگر FILEs خالی باشد، TAG با هیچ پرونده‌ای جور نخواهد شد)"
 
 #: src/tracker/tracker-tag.c:60 src/tracker/tracker-tag.c:64
 msgid "TAG"
-msgstr ""
+msgstr "TAG"
 
 #: src/tracker/tracker-tag.c:63
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
-msgstr ""
+msgstr "حذف برچسب (اگر FILEs خالی باشد، TAG از همهٔ پرونده‌ها حذف خواهد شد)"
 
 #: src/tracker/tracker-tag.c:67
 msgid "Description for a tag (this is only used with --add)"
-msgstr ""
+msgstr "شرح برچسب (فقط با ‪--add‬ استفاده می‌شود)"
 
 #: src/tracker/tracker-tag.c:68
 msgid "STRING"
@@ -1329,7 +1331,7 @@ msgstr "STRING"
 
 #: src/tracker/tracker-tag.c:79
 msgid "Use AND for search terms instead of OR (the default)"
-msgstr ""
+msgstr "استفاده از AND برای عبارت‌های جست‌وجو به جای OR (پیش‌گزیده)"
 
 #: src/tracker/tracker-tag.c:84
 msgid "FILE…"
@@ -1337,59 +1339,60 @@ msgstr "پرونده…"
 
 #: src/tracker/tracker-tag.c:85
 msgid "FILE [FILE…]"
-msgstr ""
+msgstr "FILE [FILE…]"
 
 #: src/tracker/tracker-tag.c:101
 msgid "NOTE: Limit was reached, there are more items in the database not listed here"
 msgstr ""
+"توجّه: به کران رسید.و موارد بیش‌تری در پایگاه داده هستند که این‌جا سیاهه نشده‌اند"
 
 #: src/tracker/tracker-tag.c:247
 msgid "Could not get file URNs"
-msgstr ""
+msgstr "نتوانست URNs پرونده را بگیرد"
 
 #: src/tracker/tracker-tag.c:301
 msgid "Could not get files related to tag"
-msgstr ""
+msgstr "نتوانست پرونده‌های مربوط به برچسب را بگیرد"
 
 #: src/tracker/tracker-tag.c:368
 msgid "Could not get all tags in the database"
-msgstr ""
+msgstr "نتوانست همهٔ برچسب‌ها در پایگاه داده را بگیرد"
 
 #: src/tracker/tracker-tag.c:378
 msgid "No files have been tagged"
-msgstr ""
+msgstr "هیچ پرونده‌ای برچسب نخورده"
 
 #: src/tracker/tracker-tag.c:413
 msgid "Could not get files for matching tags"
-msgstr ""
+msgstr "نتوانست پرونده‌ها را برای برچسب‌های مطابق بگیرد"
 
 #: src/tracker/tracker-tag.c:422
 msgid "No files were found matching ALL of those tags"
-msgstr ""
+msgstr "هیچ پرونده‌ای که با همهٔ برچسب‌ها مطابق باشد پیدا نشد"
 
 #: src/tracker/tracker-tag.c:501 src/tracker/tracker-tag.c:898
 msgid "Could not get all tags"
-msgstr ""
+msgstr "نتوانست همهٔ برچسب‌ها را بگیرد"
 
 #: src/tracker/tracker-tag.c:510 src/tracker/tracker-tag.c:907
 msgid "No tags were found"
-msgstr ""
+msgstr "هیچ برچسبی پیدا نشد"
 
 #: src/tracker/tracker-tag.c:514
 msgid "Tags (shown by name)"
-msgstr ""
+msgstr "برچسب‌ها (نشان داده با نام)"
 
 #: src/tracker/tracker-tag.c:589
 msgid "No files were modified"
-msgstr ""
+msgstr "هیچ پرونده ای دستکاری نشد"
 
 #: src/tracker/tracker-tag.c:633 src/tracker/tracker-tag.c:641
 msgid "Files do not exist or aren’t indexed"
-msgstr ""
+msgstr "پرونده‌ها وجود نداشته یا اندیس نشده‌اند"
 
 #: src/tracker/tracker-tag.c:682
 msgid "Could not add tag"
-msgstr ""
+msgstr "نتوانست برچسب بیفزاید"
 
 #: src/tracker/tracker-tag.c:694
 msgid "Tag was added successfully"
