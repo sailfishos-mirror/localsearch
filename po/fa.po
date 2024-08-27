@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
 "POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-27 17:19+0330\n"
+"PO-Revision-Date: 2024-08-27 17:50+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
@@ -33,7 +33,7 @@ msgstr "سیاهه‌ٔ مجاز پروندهٔ متنی"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:31
 msgid "Filename patterns for plain text documents that should be indexed"
-msgstr ""
+msgstr "الگوهای نام پرونده برای مستندات متن خامی که باید اندیس شوند"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:37
 msgid "Wait for FS miner to be done before extracting"
@@ -46,6 +46,9 @@ msgid ""
 "it is important to list files as fast as possible and can wait to get meta-data "
 "later."
 msgstr ""
+"هنگام درست بودن tracker-extract پیش از استخراج فراداده منتظر اتمام کار tracker-"
+"miner-fs می‌شود. این گزینه در محیط‌هایی که سیاهه کردن سریع پرونده‌ها مهم بوده و "
+"می‌تواند بعداً برای گرفتن فراداده صبر کند مفید است."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
@@ -56,6 +59,8 @@ msgid ""
 "Simplify the words to their root to provide more results. E.g. “shelves” and "
 "“shelf” to “shel”"
 msgstr ""
+"ساده کردن واژه‌ها به ریشه‌هایشان برای فراهم کردن نتیجه‌های بیش‌تر. مثلاً shelves و shelf "
+"به shel"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
 msgid "Enable unaccent"
@@ -66,6 +71,7 @@ msgid ""
 "Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” "
 "for improved matching."
 msgstr ""
+"ترجمهٔ نویسه‌های لهجه دار به معادل بی‌لهجه‌شان. مثلاً Idéa به Idea برای بهبود تطابق"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
 msgid "Ignore numbers"
@@ -73,7 +79,7 @@ msgstr "چشم‌پوشی از اعداد"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:37
 msgid "If enabled, numbers will not be indexed."
-msgstr ""
+msgstr "اگر به کار بیفتد،‌شماره‌ها اندیس نخواهند شد."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
@@ -89,7 +95,7 @@ msgstr "کندسازی"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
 msgid "Indexing speed, the higher the slower."
-msgstr ""
+msgstr "سرعت اندیس گذاری. بیش‌تر کندتر است."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
 msgid "Low disk space limit"
@@ -97,7 +103,7 @@ msgstr "کران فضای دیسک کم"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
 msgid "Disk space threshold in percent at which to pause indexing, or -1 to disable."
-msgstr ""
+msgstr "آستانهٔ فضای دیسک به درصد برای مکث اندیس گذاری یا -1 برای از کار انداختن."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
 msgid "Crawling interval"
@@ -109,16 +115,21 @@ msgid ""
 "forces crawling anytime, -1 forces it only after unclean shutdowns, and -2 disables "
 "it entirely."
 msgstr ""
+"دوره به روز برای بررسی این که سامانه‌پرونده در پایگاه داده به روز است یا نه. 0 خزش "
+"در هر زمانی را اجبار می‌کند. -1 تنها پس از خاموشی‌های کثیف اجبارش کرده و -2 به کل از "
+"کار می‌اندازدش."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
 msgid "Removable devices’ data permanence threshold"
-msgstr ""
+msgstr "آستانهٔ ماندگاری داده‌های افزاره‌های برداشتنی"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
 msgid ""
 "Threshold in days after which files from removables devices will be removed from "
 "database if not mounted. 0 means never, maximum is 365."
 msgstr ""
+"دوره به روز که پس از آن پرونده‌های افزاره‌های برداشتنی در صورت سوار نبودن از پایگاه "
+"داده برداشته خواهند شد. 0 یعنی هرگز. بیشینه 365 است."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
 msgid "Enable monitors"
@@ -126,7 +137,7 @@ msgstr "به کار انداختن پایشگرها"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
 msgid "Set to false to completely disable any file monitoring"
-msgstr ""
+msgstr "تنظیم روی غلط برای به کلی از کار انداختن هر پایش پرونده‌ای"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
 msgid "Index removable devices"
@@ -135,6 +146,8 @@ msgstr "نمایه کردن افزاره‌های برداشتنی"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
 msgid "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
+"تنظیم روی درست برای به کار انداختن اندیس کردن شاخه‌های سوار شده برای افزاره‌های "
+"بداشتنی."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
 msgid "Index optical discs"
@@ -145,6 +158,8 @@ msgid ""
 "Set to true to enable indexing CDs, DVDs, and generally optical media (if removable "
 "devices are not indexed, optical discs won’t be either)"
 msgstr ""
+"تنظیم روی درست برای به کار انداختن اندیس کردن سی‌دی‌ها، دی‌وی‌دی‌ها و به طور کلی "
+"رسانه‌های نوری (اگر افزاره‌های برداشتنی اندیس نشوند، دیسک‌های نوری نیز نخواهند شد)"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
 msgid "Index when running on battery"
@@ -152,7 +167,7 @@ msgstr "نمایه کردن هنگام بودن روی باتری"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Set to true to index while running on battery"
-msgstr ""
+msgstr "تنظیم روی درست برای اندیس کردن روی باتری"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
 msgid "Perform initial indexing when running on battery"
@@ -160,11 +175,11 @@ msgstr "اجرای نمایه سازی نخستین هنگام بودن روی �
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
 msgid "Set to true to index while running on battery for the first time only"
-msgstr ""
+msgstr "تنظیم روی درست برای اندیس کردن روی باتری تنها برای نخستین بار"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
 msgid "Directories to index recursively"
-msgstr "شاخه‌ّا برای نمایه سازی بازگشتی"
+msgstr "شاخه‌ها برای نمایه سازی بازگشتی"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
@@ -181,7 +196,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
-msgstr "شاخه‌ّا برای نمایه سازی غیربازگشتی"
+msgstr "شاخه‌ها برای نمایه سازی غیربازگشتی"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
@@ -723,7 +738,7 @@ msgstr "انجام شد"
 #: src/tracker/tracker-daemon.c:544
 #, c-format
 msgid "Could not list miners, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست کاونده‌ها را سیاهه کند. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:558
 #, c-format
@@ -742,7 +757,7 @@ msgstr[1] "تعداد %Id کاوندهٔ در حال اجرا پیدا شد"
 #: src/tracker/tracker-daemon.c:613
 #, c-format
 msgid "Could not get pause details, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست جزییات مکث را بگیرد. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:623
 msgid "No miners are running"
@@ -771,41 +786,41 @@ msgstr "نتوانست اتّصال SPARQL را بگیرد"
 
 #: src/tracker/tracker-daemon.c:723
 msgid "Now listening for resource updates to the database"
-msgstr ""
+msgstr "اکنون برای به‌روز رسامی‌های منابع در پایگاه داده شنود می‌کند"
 
 #: src/tracker/tracker-daemon.c:724
 msgid "All nie:plainTextContent properties are omitted"
-msgstr ""
+msgstr "همهٔ ویژگی‌های nie:plainTextContent حذف می‌شوند"
 
 #: src/tracker/tracker-daemon.c:741
 msgid "Common statuses include"
-msgstr ""
+msgstr "شامل وضعیت‌های معمول"
 
 #: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:280
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست وضعیت را بگیرد. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:788
 #, c-format
 msgid "Could not get display name for miner “%s”"
-msgstr ""
+msgstr "نتوانست نام نمایشی را برای کاوندهٔ «%s» بگیرد."
 
 #: src/tracker/tracker-daemon.c:882
 msgid "You can not use miner pause and resume switches together"
-msgstr ""
+msgstr "نمی‌توانید گزینه‌های مکث و از سر گیری کاونده را با هم استفاده کنید"
 
 #: src/tracker/tracker-daemon.c:888
 msgid "You must provide the miner for pause or resume commands"
-msgstr ""
+msgstr "برای فرمان‌های مکث یا از سر گیری باید کاونده را فراهم کنید"
 
 #: src/tracker/tracker-daemon.c:894
 msgid "You must provide a pause or resume command for the miner"
-msgstr ""
+msgstr "باید برای کاونده فرمان مکث یا از سر گیری را فراهم کنید"
 
 #: src/tracker/tracker-daemon.c:928
 msgid "You can not use the --kill and --terminate arguments together"
-msgstr ""
+msgstr "نمی‌توانید آرگومان‌های ‪--kill‬ و ‪--terminate‬ را با هم استفاده کنید"
 
 #: src/tracker/tracker-daemon.c:939 src/tracker/tracker-process.c:197
 #, c-format
@@ -826,7 +841,7 @@ msgstr "آغازیدن کاونده‌ها…"
 #: src/tracker/tracker-daemon.c:980
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
-msgstr ""
+msgstr "نتوانست کاونده‌ها را آغاز کند. مدیر نتوانست ایجاد شود. %s"
 
 #: src/tracker/tracker-daemon.c:1005
 msgid "perhaps a disabled plugin?"
@@ -834,7 +849,7 @@ msgstr "شاید افزایه‌ای از کار افتاده؟"
 
 #: src/tracker/tracker-daemon.c:1055
 msgid "If no arguments are given, the status of the data miners is shown"
-msgstr ""
+msgstr "اگر هیچ آرگومانی داده نشود، وضعیت کاونده‌های داده نشان داده می‌شود"
 
 #: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
 #: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
@@ -850,7 +865,7 @@ msgstr "خدمت"
 
 #: src/tracker/tracker-daemon.desktop.in:7
 msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
+msgstr "خدمت‌های آغاز، توقّف و آغاز دوبارهٔ مسئول اندیس کردن محتوا"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -875,35 +890,35 @@ msgstr "استخراج فراداده از پرونده"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
-msgstr ""
+msgstr "به مکان‌های اندیس شده FILE را می‌افزاید"
 
 #: src/tracker/tracker-index.c:54
 msgid "Removes FILE from indexed locations"
-msgstr ""
+msgstr "از مکان‌های اندیس شده FILE را برمی‌دارد"
 
 #: src/tracker/tracker-index.c:57
 msgid "Makes indexing recursive"
-msgstr ""
+msgstr "اندیس کردن را بازگشتی می‌کند"
 
 #: src/tracker/tracker-index.c:193
 #, c-format
 msgid "“%s” is not a directory"
-msgstr ""
+msgstr "«%s» شاخه نیست"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:283
 msgid "Either --add or --remove must be provided"
-msgstr ""
+msgstr "باید ‪--add‬ یا ‪--remove‬ فراهم شود"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:287
 msgid "--add and --remove are mutually exclusive"
-msgstr ""
+msgstr "گزینه‌های ‪--add‬ و ‪--remove‬ با هم به کار نمی‌روند"
 
 #. TRANSLATORS: These are commandline options
 #: src/tracker/tracker-index.c:297
 msgid "--recursive requires --add"
-msgstr ""
+msgstr "گزینهٔ ‪--recursive‬ نیازمند ‪--add‬ است"
 
 #: src/tracker/tracker-index.c:357 src/tracker/tracker-status.c:331
 msgid "Path"
@@ -915,7 +930,7 @@ msgstr "بازگشتی"
 
 #: src/tracker/tracker-index.c:408
 msgid "Please specify one or more locations to index."
-msgstr ""
+msgstr "لطفاً مکانی برای اندیس کردن مشخّص کنید."
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-index.desktop.in:6
@@ -924,15 +939,15 @@ msgstr "نمایه"
 
 #: src/tracker/tracker-index.desktop.in:7
 msgid "Index content using the Tracker filesystem miner"
-msgstr ""
+msgstr "محتوای اندیس با استفاده از کاوندهٔ سامانه‌پروندهٔ ردیاب"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
-msgstr ""
+msgstr "نمایش فضانام‌های کامل (استفاده نکردن از nie:title و استفاده از نشانی‌های کامل)"
 
 #: src/tracker/tracker-info.c:69
 msgid "Show plain text content if available for resources"
-msgstr ""
+msgstr "نمایش محتوای متن خام برای منابع در صورت امکان"
 
 #. To translators:
 #. * IRI (International Resource Identifier) is a generalization
@@ -945,14 +960,16 @@ msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. "
 "<file:///path/to/some/file.txt>)"
 msgstr ""
+"به جای گشتن به دنبال نام پرونده، با آرگومان FILE مثل شناساگر منبع جهانی (چون "
+"‪<file:///path/to/some/file.txt>‬) رفتار شود"
 
 #: src/tracker/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
-msgstr ""
+msgstr "نتیجه‌های خروجیبه شکل RDF در قالب Turtle"
 
 #: src/tracker/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
-msgstr ""
+msgstr "ویژگی RDF برای رفتار به عنوان نشانی (چون nie:url)"
 
 #: src/tracker/tracker-info.c:388
 msgid "Error message"
@@ -960,19 +977,19 @@ msgstr "پیام خطتا"
 
 #: src/tracker/tracker-info.c:471
 msgid "Unable to retrieve URN for URI"
-msgstr ""
+msgstr "ناتوان در بازپس‌گیری URN برای نشانی"
 
 #: src/tracker/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
-msgstr ""
+msgstr "ناتوان در بازپس‌گیری داده برای نشانی"
 
 #: src/tracker/tracker-info.c:515
 msgid "No metadata available for that URI"
-msgstr ""
+msgstr "هیچ فراداده‌ای برای آن نشانی موجود نیست"
 
 #: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
 msgid "Could not get eligible status: "
-msgstr ""
+msgstr "نتوانست وضعیت مطلوب را بگیرد: "
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-info.desktop.in:6
@@ -981,12 +998,12 @@ msgstr "اطّلاعات"
 
 #: src/tracker/tracker-info.desktop.in:7
 msgid "Retrieve all information available for a certain file"
-msgstr ""
+msgstr "جمع کردن همهٔ اطّلاعات موجوپ برای پرونده‌ای خاص"
 
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
-msgstr ""
+msgstr "نتوانست فرایند %Id را بکشد — «%s»"
 
 #: src/tracker/tracker-process.c:222
 #, c-format
@@ -1004,6 +1021,7 @@ msgstr "برداشتن پایگاه دادهٔ نمایه ساز RSS"
 #: src/tracker/tracker-reset.c:55
 msgid "Erase indexed information about a file, works recursively for directories"
 msgstr ""
+"پاک کردن اطّلاعات اندیس شده دربارهٔ پرونده. برای شاخه‌ها به صورت بازگشتی کار می‌کند"
 
 #. Now, delete the element recursively
 #: src/tracker/tracker-reset.c:95
@@ -1012,7 +1030,7 @@ msgstr "حذف کردن…"
 
 #: src/tracker/tracker-reset.c:115
 msgid "The indexed data for this file has been deleted and will be reindexed again."
-msgstr "داده‌ّای اندیس شده برای این پرونده حذف شده و دوباره اندیس گذاری خواهد شد."
+msgstr "داده‌های اندیس شده برای این پرونده حذف شده و دوباره اندیس گذاری خواهد شد."
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-reset.desktop.in:6
@@ -1093,7 +1111,7 @@ msgstr ""
 
 #: src/tracker/tracker-search.c:142
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
-msgstr "برگرداندن همهٔ مطابقت‌ّای ناموجود (مثلاً شامل حجم‌های سوار نشده)"
+msgstr "برگرداندن همهٔ مطابقت‌های ناموجود (مثلاً شامل حجم‌های سوار نشده)"
 
 #: src/tracker/tracker-search.c:146
 msgid ""
@@ -1304,7 +1322,7 @@ msgstr "وضعیت"
 
 #: src/tracker/tracker-status.desktop.in:7
 msgid "Provide status and statistics on the data indexed"
-msgstr "فراهم کردن وضعیت و آمار روی داده‌ّای اندیس شده"
+msgstr "فراهم کردن وضعیت و آمار روی داده‌های اندیس شده"
 
 #: src/tracker/tracker-tag.c:51
 msgid "List all tags (using FILTER if specified; FILTER always uses logical OR)"
