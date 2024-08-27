@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
 "POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-27 16:45+0330\n"
+"PO-Revision-Date: 2024-08-27 17:19+0330\n"
 "Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
@@ -42,9 +42,9 @@ msgstr "انتظار برای کاوندهٔ FS برای اتمام پیش از 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done crawling "
-"before extracting meta-data. This option is useful on constrained environment "
-"where it is important to list files as fast as possible and can wait to get meta-"
-"data later."
+"before extracting meta-data. This option is useful on constrained environment where "
+"it is important to list files as fast as possible and can wait to get meta-data "
+"later."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
@@ -106,8 +106,8 @@ msgstr "دورهٔ خزش"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
 msgid ""
 "Interval in days to check whether the filesystem is up to date in the database. 0 "
-"forces crawling anytime, -1 forces it only after unclean shutdowns, and -2 "
-"disables it entirely."
+"forces crawling anytime, -1 forces it only after unclean shutdowns, and -2 disables "
+"it entirely."
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
@@ -142,8 +142,8 @@ msgstr "نمایه کردن افزاره‌های نوری"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
 msgid ""
-"Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-"removable devices are not indexed, optical discs won’t be either)"
+"Set to true to enable indexing CDs, DVDs, and generally optical media (if removable "
+"devices are not indexed, optical discs won’t be either)"
 msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
@@ -174,6 +174,10 @@ msgid ""
 "‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, "
 "‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-dirs.default"
 msgstr ""
+"سیاههٔ شاخه‌ها برای اندیس کردن بازگشی. مقدارهای خاص عبارتند از: «&DESKTOP»، "
+"«&DOCUMENTS’»، «&DOWNLOAD»، «&MUSIC»، «&PICTURES»، «&PUBLIC_SHARE»، «&TEMPLATES» و "
+"«&VIDEOS». می‌توانید ‪/etc/xdg/user-dirs.defaults‬ و ‪$HOME/.config/user-dirs.default‬ "
+"را ببینید"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
 msgid "Directories to index non-recursively"
@@ -183,11 +187,15 @@ msgstr "شاخه‌ّا برای نمایه سازی غیربازگشتی"
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid ""
-"List of directories to index without inspecting subfolders, Special values "
-"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and "
-"$HOME/.config/user-dirs.default"
+"List of directories to index without inspecting subfolders, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
+"‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/user-"
+"dirs.default"
 msgstr ""
+"سیاههٔ شاخه‌ها برای اندیس کردن بدون بازرسی زیرشاخه‌ها. مقدارهای خاص عبارتند از: "
+"«&DESKTOP»، «&DOCUMENTS’»، «&DOWNLOAD»، «&MUSIC»، «&PICTURES»، «&PUBLIC_SHARE»، "
+"«&TEMPLATES» و «&VIDEOS». می‌توانید ‪/etc/xdg/user-dirs.defaults‬ و ‪$HOME/.config/user-"
+"dirs.default‬ را ببینید"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
 msgid "Ignored files"
@@ -195,7 +203,7 @@ msgstr "پرونده‌های چشم‌پوشیده"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "List of file patterns to avoid"
-msgstr ""
+msgstr "سیاههٔ الگوهای پرونده برای پرهیز"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
 msgid "Ignored directories"
@@ -203,7 +211,7 @@ msgstr "شاخه‌های چشم‌پوشیده"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
-msgstr ""
+msgstr "سیاههٔ شاخه‌ها برای پرهیز"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
@@ -211,7 +219,7 @@ msgstr "شاخه‌های چشم‌پوشیده با محتوا"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
 msgid "Avoid any directory containing a file blocklisted here"
-msgstr ""
+msgstr "پرهیز از هر شاخهٔ دارای پرونده‌ای که در فهرست سیاه این‌جاست"
 
 #: src/libtracker-miners-common/tracker-miner-proxy.c:349
 msgid "Cookie not recognized to resume paused miner"
@@ -315,44 +323,43 @@ msgstr "نمایش اطّلاعات نگارش"
 #: src/miners/fs/tracker-main.c:555
 #, c-format
 msgid "Data object “%s” currently exists"
-msgstr ""
+msgstr "شی داده‌ای «%s» هم‌اکنون وجود دارد"
 
 #: src/miners/fs/tracker-main.c:556
 #, c-format
 msgid "Data object “%s” currently does not exist"
-msgstr ""
+msgstr "شی داده‌ای «%s» هم‌اکنون وجود ندارد"
 
 #: src/miners/fs/tracker-main.c:566
 msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "شاخه واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
 
 #: src/miners/fs/tracker-main.c:570
 msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "پرونده واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
 
 #: src/miners/fs/tracker-main.c:573
 msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr ""
+msgstr "پرونده واجد اندیس شدن نیست (پروندهٔ نهفته)"
 
 #: src/miners/fs/tracker-main.c:575
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr ""
+msgstr "پرونده واجد اندیس شدن نیست (شاخهٔ اندیس نشده)"
 
 #: src/miners/fs/tracker-main.c:599
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr ""
+msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
 
 #: src/miners/fs/tracker-main.c:605
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr ""
+msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (پروندهٔ نهفته)"
 
 #: src/miners/fs/tracker-main.c:611
 #, c-format
-msgid ""
-"Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
-msgstr ""
+msgid "Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
+msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (بر اساس پالایه‌های محتوایی)"
 
 #: src/miners/fs/tracker-main.c:630
 msgid "Directory is eligible to be indexed"
@@ -460,7 +467,7 @@ msgstr "MIME"
 
 #: src/tracker-extract/tracker-main.c:87
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-msgstr ""
+msgstr "اجبار پیمانه‌ای به استفاده برای استخراج (مثلا foo برای foo.so)"
 
 #: src/tracker-extract/tracker-main.c:88
 msgid "MODULE"
@@ -468,7 +475,7 @@ msgstr "MODULE"
 
 #: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
-msgstr ""
+msgstr "قالب نتیجه‌های خروجی: «sparql»، ‏«turtle»‌ یا «json-ld»"
 
 #: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
 msgid "FORMAT"
@@ -515,16 +522,16 @@ msgstr "— آغاز خدمت بازنویسی ردیاب"
 
 #: src/tracker/main.c:123
 msgid "Available localsearch3 commands are:"
-msgstr ""
+msgstr "فرمان‌های موجود localsearch3 عبارتند از:"
 
 #: src/tracker/main.c:155
 msgid "See “localsearch3 help <command>” to read about a specific subcommand."
-msgstr ""
+msgstr "برای خواند دربارهٔ زیرفرمانی خاص «localsearch3 help <command>» را ببینید"
 
 #: src/tracker/main.c:208
 #, c-format
 msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr ""
+msgstr "«%s» دستور localsearch3 نیست. «localsearch3 --help»‌ را ببینید"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -702,7 +709,7 @@ msgstr "نتوانست معدن‌کاو را از سر بگیرد. مدیر ن�
 #: src/tracker/tracker-daemon.c:516
 #, c-format
 msgid "Attempting to resume miner %s with cookie %d"
-msgstr ""
+msgstr "تلاش برای از سر گیری کاوندهٔ %s با کلوچک %Id"
 
 #: src/tracker/tracker-daemon.c:523
 #, c-format
@@ -1005,7 +1012,7 @@ msgstr "حذف کردن…"
 
 #: src/tracker/tracker-reset.c:115
 msgid "The indexed data for this file has been deleted and will be reindexed again."
-msgstr ""
+msgstr "داده‌ّای اندیس شده برای این پرونده حذف شده و دوباره اندیس گذاری خواهد شد."
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-reset.desktop.in:6
@@ -1018,7 +1025,7 @@ msgstr "بازنشانی نمایه و پیکربندی"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
-msgstr ""
+msgstr "جست‌وجوی محتوای مطابق با TERMS بر اساس گونه یا از میان همهٔ گونه‌ها."
 
 #: src/tracker/tracker-search.c:77
 msgid "Search for files"
@@ -1042,63 +1049,67 @@ msgstr "جست‌وجوی هنرمندهای آهنگ (‪--all‬ تأثیری 
 
 #: src/tracker/tracker-search.c:97
 msgid "Search for image files"
-msgstr ""
+msgstr "جست‌وجوی پرونده‌های تصویری"
 
 #: src/tracker/tracker-search.c:101
 msgid "Search for video files"
-msgstr ""
+msgstr "جست‌وجوی پرونده‌های ویدیویی"
 
 #: src/tracker/tracker-search.c:105
 msgid "Search for document files"
-msgstr ""
+msgstr "جست‌وجوی پرونده‌های مستند"
 
 #: src/tracker/tracker-search.c:109
 msgid "Search for software (--all has no effect on this)"
-msgstr ""
+msgstr "جست‌وجوی نرم‌افزارها (‪--all‬تأثیری رویش ندارد)"
 
 #: src/tracker/tracker-search.c:113
 msgid "Search for software categories (--all has no effect on this)"
-msgstr ""
+msgstr "جست‌وجوی دسته‌های نرم‌افزار (‪--all‬تأثیری رویش ندارد)"
 
 #: src/tracker/tracker-search.c:117
 msgid "Search for feeds (--all has no effect on this)"
-msgstr ""
+msgstr "جست‌وجوی خوراک‌ها (‪--all‬تأثیری رویش ندارد)"
 
 #: src/tracker/tracker-search.c:126 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
-msgstr ""
+msgstr "محدودیت شمار نتیجه‌های نمایشی"
 
 #: src/tracker/tracker-search.c:130 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
-msgstr ""
+msgstr "عرض از مبدأ نتایج"
 
 #: src/tracker/tracker-search.c:134
 msgid "Use OR for search terms instead of AND (the default)"
-msgstr ""
+msgstr "استفاده از OR برای عبارت‌های جست‌وجو به جای AND (پیش‌گزیده)"
 
 #: src/tracker/tracker-search.c:138
 msgid ""
-"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, "
-"--software, --software-categories)"
+"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --"
+"software, --software-categories)"
 msgstr ""
+"نمایش URNs برای نتیجه‌ها (به ‪--music-albums, --music-artists, --feeds, --software, --"
+"software-categories‬ اعمال نمی‌شود)"
 
 #: src/tracker/tracker-search.c:142
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
-msgstr ""
+msgstr "برگرداندن همهٔ مطابقت‌ّای ناموجود (مثلاً شامل حجم‌های سوار نشده)"
 
 #: src/tracker/tracker-search.c:146
 msgid ""
-"Disable showing snippets with results. This is only shown for some categories, e."
-"g. Documents, Music…"
+"Disable showing snippets with results. This is only shown for some categories, e.g. "
+"Documents, Music…"
 msgstr ""
+"از کار انداختن نمایش قطعه‌ها با نتیجه‌ها. فقط برای برخی دسته‌ها چون سندها و آهنگ‌ها "
+"نشان داده می‌شود…"
 
 #: src/tracker/tracker-search.c:150
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
-msgstr ""
+msgstr "از کار انداختن جست‌وجی متن کامل (FTS). دلالت بر ‪--disable-snippets"
 
 #: src/tracker/tracker-search.c:154
 msgid "Disable color when printing snippets and results"
-msgstr ""
+msgstr "از کار انداختن رنگ هنگام چاپ قطعه‌ها و نتیجه‌ها"
 
 #: src/tracker/tracker-search.c:161 src/tracker/tracker-status.c:58
 msgid "search terms"
@@ -1178,7 +1189,7 @@ msgstr "جست‌وجو"
 
 #: src/tracker/tracker-search.desktop.in:7
 msgid "Search for content by type or across all types"
-msgstr "جست‌وجوی محتوا با نوشتن یا از میان همهٔ گونه‌ها"
+msgstr "جست‌وجوی محتوا بر اساس گونه یا از میان همهٔ گونه‌ها"
 
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
@@ -1343,8 +1354,7 @@ msgstr "FILE [FILE…]"
 
 #: src/tracker/tracker-tag.c:101
 msgid "NOTE: Limit was reached, there are more items in the database not listed here"
-msgstr ""
-"توجّه: به کران رسید.و موارد بیش‌تری در پایگاه داده هستند که این‌جا سیاهه نشده‌اند"
+msgstr "توجّه: به کران رسید.و موارد بیش‌تری در پایگاه داده هستند که این‌جا سیاهه نشده‌اند"
 
 #: src/tracker/tracker-tag.c:247
 msgid "Could not get file URNs"
@@ -1396,39 +1406,39 @@ msgstr "نتوانست برچسب بیفزاید"
 
 #: src/tracker/tracker-tag.c:694
 msgid "Tag was added successfully"
-msgstr ""
+msgstr "برچسب با موفّقیت افزوده شد"
 
 #: src/tracker/tracker-tag.c:724
 msgid "Could not add tag to files"
-msgstr ""
+msgstr "نتوانست برچسب را به پرونده بیفزاید"
 
 #: src/tracker/tracker-tag.c:735
 msgid "Tagged"
-msgstr ""
+msgstr "برچسب خورده"
 
 #: src/tracker/tracker-tag.c:736
 msgid "Not tagged, file is not indexed"
-msgstr ""
+msgstr "برچسب نخورده. پرونده اندیس نشده"
 
 #: src/tracker/tracker-tag.c:778
 msgid "Could not get tag by label"
-msgstr ""
+msgstr "نتوانست برچسب را با علامت بگیرد"
 
 #: src/tracker/tracker-tag.c:789
 msgid "No tags were found by that name"
-msgstr ""
+msgstr "هیچ برچسبی با آن نام پیدا نشد"
 
 #: src/tracker/tracker-tag.c:807
 msgid "None of the files had this tag set"
-msgstr ""
+msgstr "هیچ پرونده‌ای این مجموعه برچسب را نداشت"
 
 #: src/tracker/tracker-tag.c:854
 msgid "Could not remove tag"
-msgstr ""
+msgstr "نتوانست برچسب را بردارد"
 
 #: src/tracker/tracker-tag.c:862
 msgid "Tag was removed successfully"
-msgstr ""
+msgstr "برجسب با موفّقیت برداشته شد"
 
 #: src/tracker/tracker-tag.c:866
 msgid "Untagged"
@@ -1436,24 +1446,23 @@ msgstr "بی‌برچسب"
 
 #: src/tracker/tracker-tag.c:867
 msgid "File not indexed or already untagged"
-msgstr ""
+msgstr "پرونده اندیس نشده یا از برچسبش از پیش برداشته شده"
 
 #: src/tracker/tracker-tag.c:1064
 msgid "The --list option is required for --show-files"
-msgstr ""
+msgstr "گزینهٔ ‪--list‬ برای ‪--show-files‬ لازم است"
 
 #: src/tracker/tracker-tag.c:1066
-msgid ""
-"The --and-operator option can only be used with --list and tag label arguments"
-msgstr ""
+msgid "The --and-operator option can only be used with --list and tag label arguments"
+msgstr "عملگر ‪--and-operator‬ تنها می‌تواند با ‪--list‬ و آرگومان علامت برچسب استفاده شود"
 
 #: src/tracker/tracker-tag.c:1068
 msgid "Add and delete actions can not be used together"
-msgstr ""
+msgstr "کنش‌های افزودن و حذف نمی‌توانند با هم استفاده شوند"
 
 #: src/tracker/tracker-tag.c:1070
 msgid "The --description option can only be used with --add"
-msgstr ""
+msgstr "گزینهٔ ‪--description‬ تنها می‌تواند با ‪--add‬ استفاده شود"
 
 #. Translators: This is a CLI command name that should not be translated.
 #: src/tracker/tracker-tag.desktop.in:6
