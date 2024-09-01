@@ -115,10 +115,9 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
                     jsonld = fixtures.get_tracker_extract_output(
                         extra_env, self.file_to_extract, output_format="json-ld"
                     )
+                    self.assertEqual(jsonld["@graph"], [])
                 except RuntimeError as re:
                     print ('# Got expected error message: %s' % str(re).replace('\n', '\\n'))
-                finally:
-                    self.assertIsNone(jsonld)
         finally:
             shutil.rmtree(tmpdir, ignore_errors=True)
 
