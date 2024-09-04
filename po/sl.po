@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-07-10 15:19+0200\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-04 16:03+0200\n"
 "Last-Translator: Martin Srebotnjak <miles@filmsi.net>\n"
 "Language-Team: Slovenian GNOME Translation Team <gnome-si@googlegroups.com>\n"
 "Language: sl\n"
@@ -346,7 +346,7 @@ msgstr ""
 "nastavitev"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -495,11 +495,11 @@ msgstr "– začne pripravljalnik kazala virov"
 msgid "— start the tracker index proxy"
 msgstr "– zažene ozadnji program tracker"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Preučevanje metapodatkov je spodletelo"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Ni najdenih modulov proučevanja in metapodatkov za razreševanje datoteke"
@@ -524,11 +524,11 @@ msgstr "Vsili modul, uporabljen za razširitev (na primer »foo« za »foo.so«)
 msgid "MODULE"
 msgstr "MODUL"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Zapis odvoda zadetkov: »sparql«, »turtle« ali »json-ld«"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "ZAPIS"
 
@@ -574,20 +574,58 @@ msgstr "Onemogoči izklop po 30 sekundah nedejavnosti"
 msgid "— start the tracker writeback service"
 msgstr "– zažene program s podporo zamika zapisovanja"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Na voljo so ukazi programa localsearch3:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Glejte »localsearch3 help <ukaz>«, kjer si lahko preberete o posameznem "
+"Zagon, zaustavitev, prekinitev in izpis opravil, ki izvajajo indeksiranje "
+"vsebine"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Razširjanje metapodatkov krajevnih datotek"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Sproži indeksiranje vsebine mesta"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Pridobivanje razpoložljivih podrobnosti za določeno datoteko"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Ponastavljanje kazala in nastavitve"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "Iskanje vsebine"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Pokaže stanje in statistiko indeksiranih podatkov"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Dodajanje, odstranjevanje in izpisovanje oznak"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Peskovnik za preskusno okolje"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Na voljo so ukazi programa localsearch:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Glejte »localsearch help <ukaz>«, kjer si lahko preberete o posameznem "
 "podukazu."
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "»%s« ni ukaz programa localsearch3. Glejte »localsearch3 --help«"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "»%s« ni ukaz programa localsearch. Glejte »localsearch --help«"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -910,27 +948,16 @@ msgstr ""
 msgid "perhaps a disabled plugin?"
 msgstr "morda onemogočen vstavek?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Če ni podanega argumenta, se prikaže stanje rudarjev podatkov"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Nepoznane možnosti"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "ozadnji program"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Zagon, zaustavitev, prekinitev in izpis opravil, ki izvajajo indeksiranje "
-"vsebine"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -940,18 +967,9 @@ msgstr "Ni mogoče pridobiti povezave vodila D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Ni mogoče ustvariti posredniškega vodila D-Bus za tracker-store"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Ni mogoče zagnati ukaza tracker-extract: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "razširi"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Razširjanje metapodatkov krajevnih datotek"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -994,18 +1012,9 @@ msgstr "Pot"
 msgid "Recursive"
 msgstr "Po strukturi map"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Določiti je treba enega ali več mest za ustvarjanje kazala."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "kazalo"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Indeksiranje vsebino z uporabo rudarnika Tracker datotečnega sistema"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1059,15 +1068,6 @@ msgstr "Za URI ni razpoložljivih metapodakov"
 msgid "Could not get eligible status: "
 msgstr "Ni mogoče pridobiti stanja: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "podrobnosti"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Pridobivanje razpoložljivih podrobnosti za določeno datoteko"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1100,15 +1100,6 @@ msgstr "Poteka brisanje …"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "Podatki kazala za to datoteko so izbrisani in bodo ponovno prebrani."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "ponastavi"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Ponastavljanje kazala in nastavitve"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1272,15 +1263,6 @@ msgstr "Ni zadetkov, ki bi se skladali s poizvedbo"
 msgid "Results"
 msgstr "Rezultati"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "poišči"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Iskanje vsebine po vrsti in ne glede na vrsto"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Pokaži statistiko za trenutno kazalo/nabor podatkov"
@@ -1393,15 +1375,6 @@ msgstr[3] "Zabeležena so %d spodletela opravila"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Ni najdenih poročil"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "stanje"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Pokaže stanje in statistiko indeksiranih podatkov"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1553,11 +1526,11 @@ msgstr "Neoznačeno"
 msgid "File not indexed or already untagged"
 msgstr "Datoteka ni uporabljena za pripravo kazala ali pa je bila odznačena"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "Možnost --list je zahtevana za --show-files"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1565,19 +1538,10 @@ msgstr ""
 "Možnost --and-operator je mogoče uporabiti le skupaj z možnostjo --list in "
 "argumenti oznak"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Dejanj dodajanja in brisanja ni mogoče uporabljati skupaj"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "Možnost --description je mogoče uporabiti le skupaj z --add"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "oznaka"
-
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Dodajanje, odstranjevanje in izpisovanje oznak"
