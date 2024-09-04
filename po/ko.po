@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-29 20:17+0900\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-04 21:37+0900\n"
 "Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
 "Language-Team: Gnome Korea <gnome-kr@googlegroups.com>\n"
 "Language: ko\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.5\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -319,7 +319,7 @@ msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "설정 내용을 기반으로 수집할 <파일>의 조건이 맞는지 확인합니다"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -468,11 +468,11 @@ msgstr "— 피드 인덱서를 시작합니다"
 msgid "— start the tracker index proxy"
 msgstr "— 트래커 색인 대행자를 시작합니다"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "메타데이터 추출에 실패했습니다"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "이 파일을 처리할 메타데이터나 추출모듈이 없습니다"
 
@@ -496,11 +496,11 @@ msgstr "추출을 위해 사용할 모듈 강제(예: “foo.so”의 “foo”)
 msgid "MODULE"
 msgstr "<모듈>"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "출력 결과 형식: “sparql”, “turtle”, “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "<형식>"
 
@@ -543,22 +543,58 @@ msgstr "30초 동안 아무런 반응이 없으면 시스템 종료를 비활성
 msgid "— start the tracker writeback service"
 msgstr "— 트래커 라이트백 서비스를 시작합니다"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "사용할 수 있는 localsearch3 명령:"
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr "각 내용을 색인처리하는 데몬을 시작, 정지, 다시시작, 상태조회 합니다"
 
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "파일에서 메타데이터 추출"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "내용 위치를 인덱싱하는 트리거"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "각 파일의 모든 가용 정보를 가져옵니다"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "색인과 설정 정보를 초기화합니다"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "내용 검색"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "색인 처리한 데이터의 상태 및 통계를 제공합니다"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "태그를 추가, 제거, 나열합니다"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "시험 환경용 샌드박스"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "사용할 수 있는 localsearch 명령:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
 msgstr ""
-"해당 하위 명령 도움말을 살펴보려면 “localsearch3 help <명령>” 명령 출력을 참"
-"고하십시오."
+"해당 하위 명령 도움말을 살펴보려면 “localsearch help <명령>” 명령 출력을 참고"
+"하십시오."
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr ""
-"“%s”은(는) localsearch3 명령이 아닙니다. “localsearch3 --help” 명령 출력을 참"
-"고하십시오"
+"“%s”은(는) localsearch 명령이 아닙니다. “localsearch --help” 명령 출력을 참고"
+"하십시오"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -858,25 +894,16 @@ msgstr "수집기를 시작할 수 없어, 관리자를 만들 수 없습니다,
 msgid "perhaps a disabled plugin?"
 msgstr "플러그인을 비활성화 했습니까?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "인자가 없으면, 데이터 수집기 상태가 나타납니다"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "인식할 수 없는 옵션"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr "각 내용을 색인처리하는 데몬을 시작, 정지, 다시시작, 상태조회 합니다"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -886,18 +913,9 @@ msgstr "D-Bus에 연결할 수 없습니다"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "tracker-store의 D-Bus 프록시를 만들 수 없습니다"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "tracker-extract를 실행할 수 없음: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "파일에서 메타데이터 추출"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -939,18 +957,9 @@ msgstr "경로"
 msgid "Recursive"
 msgstr "재귀"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "색인 기록할 하나 이상의 위치를 지정하십시오."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "트래커 파일 시스템 수집기로 각 내용을 색인 처리합니다"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1002,15 +1011,6 @@ msgstr "URI에 대해 사용할 수 있는 메타데이터가 없습니다"
 msgid "Could not get eligible status: "
 msgstr "적절한 상태 정보를 가져올 수 없습니다: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "각 파일의 모든 가용 정보를 가져옵니다"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1043,15 +1043,6 @@ msgstr "삭제 중…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "이 파일의 색인 데이터를 삭제하고 다시 색인 작업을 진행합니다."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "색인과 설정 정보를 초기화합니다"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1213,15 +1204,6 @@ msgstr "질의에 일치하는 결과를 찾지 못했습니다"
 msgid "Results"
 msgstr "결과"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "모든 형식에 대해 또는 형식별 내용 검색"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "현재 인덱스 / 데이터 셋의 통계 표시"
@@ -1324,15 +1306,6 @@ msgstr[0] "%d건을 실패로 기록했습니다"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "보고서를 찾지 못했습니다"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "색인 처리한 데이터의 상태 및 통계를 제공합니다"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1483,33 +1456,54 @@ msgstr "태그 안됨"
 msgid "File not indexed or already untagged"
 msgstr "파일을 색인 기록하지 않았거나 이미 태그를 해제했습니다"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "--show-files 사용에 --list 옵션이 필요합니다"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
 "--and-operator 옵션은 --list와 태그 레이블 인자하고만 사용할 수 있습니다"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "추가 삭제 동작은 함께 사용할 수 없습니다"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "--description 옵션은 --add하고만 사용할 수 있습니다"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "태그를 추가, 제거, 나열합니다"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "트래커 파일 시스템 수집기로 각 내용을 색인 처리합니다"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "모든 형식에 대해 또는 형식별 내용 검색"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "정지 단어 무시"
