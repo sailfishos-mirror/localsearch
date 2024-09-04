@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-24 12:14+0800\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-04 20:47+0800\n"
 "Last-Translator: lumingzh <lumingzh@qq.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -316,7 +316,7 @@ msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "检查文件是否适宜基于配置的挖掘"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -465,11 +465,11 @@ msgstr "— 启动订阅索引器"
 msgid "— start the tracker index proxy"
 msgstr "— 启动 tracker 索引代理服务器"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "元数据提取失败"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "没有找到处理此文件的原数据或提取器模块"
 
@@ -493,11 +493,11 @@ msgstr "强制将一个模块用来解压（比如，“foo”代替“foo.so”
 msgid "MODULE"
 msgstr "模块"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "输出结果格式：“sparql”“turtle”或“json-ld”"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "格式"
 
@@ -540,18 +540,54 @@ msgstr "闲置 30 秒之后禁用关闭"
 msgid "— start the tracker writeback service"
 msgstr "— 启动 tracker 回写服务"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "可用的 localsearch3 命令有："
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr "开始、停止、重启与列出处理索引内容的守护进程"
 
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
-msgstr "请查阅“localsearch3 help <命令>”以了解特定子命令的信息。"
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "从文件提取元数据"
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "触发某个位置的内容索引"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "获取特定文件的所有可用信息"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "重置索引和配置"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "搜索内容"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "提供状态和索引数据的统计"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "添加、移除和列出标签"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "用于测试环境的沙箱"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "可用的 localsearch 命令有："
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr "请查阅“localsearch help <命令>”以阅读特定子命令的信息。"
+
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "“%s”不是 localsearch3 命令。请查阅“localsearch3 --help”"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "“%s”不是 localsearch 命令。请查阅“localsearch --help”"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -846,25 +882,16 @@ msgstr "无法启动挖掘器，无法创建管理器，%s"
 msgid "perhaps a disabled plugin?"
 msgstr "可能是一个禁用的插件？"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "如果没有指定参数，就会显示数据挖掘器的状态"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "无法识别的选项"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr "开始、停止、重启与列出处理索引内容的守护进程"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -874,18 +901,9 @@ msgstr "无法获取 D-Bus 的连接"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "无法创建到 tracker-store 的 D-Bus 代理"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "无法运行 tracker-extract："
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "从文件提取元数据"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -927,18 +945,9 @@ msgstr "路径"
 msgid "Recursive"
 msgstr "递归"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "请指定一个或多个要索引的位置。"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "使用 Tracker 文件系统采掘器索引内容"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -989,15 +998,6 @@ msgstr "没有那个 URI 可用的元数据"
 msgid "Could not get eligible status: "
 msgstr "不能获得适宜的状态："
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "获取特定文件的所有可用信息"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1030,15 +1030,6 @@ msgstr "正在删除…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "这个文件的索引数据已被删除并将再次重新索引。"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "重置索引和配置"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1197,15 +1188,6 @@ msgstr "没有找到满足您的查询的结果"
 msgid "Results"
 msgstr "结果"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "按类型或不限类型搜索内容"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "显示关于目前索引 / 数据集的统计"
@@ -1308,15 +1290,6 @@ msgstr[0] "%d 个已记录的错误"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "没有找到报告"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "提供状态和索引数据的统计"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1460,32 +1433,53 @@ msgstr "未加标签"
 msgid "File not indexed or already untagged"
 msgstr "文件未被索引或者未加标签"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "--show-files 需要 --list 选项配合使用"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr "--and-operator 选项只能与 --list 及标签参数同时使用"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "添加和删除动作不能同时使用"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "--description 选项只能与 --add 同时使用"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "添加、移除和列出标签"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "使用 Tracker 文件系统采掘器索引内容"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "按类型或不限类型搜索内容"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "忽略停止词"
@@ -1583,9 +1577,6 @@ msgstr "添加、移除和列出标签"
 
 #~ msgid "Search for emails"
 #~ msgstr "搜索电子邮件"
-
-#~ msgid "Search for contacts"
-#~ msgstr "搜索联系人"
 
 #~ msgid "Search for bookmarks (--all has no effect on this)"
 #~ msgstr "搜索书签(--all 参数对此无效)"
