@@ -8,15 +8,15 @@
 # Kaan Özdinçer <kaanozdincer@gmail.com>, 2015.
 # Muhammet Kara <muhammetk@gmail.com>, 2014, 2015.
 # Çağatay Yiğit Şahin <cyigitsahin@outlook.com>, 2017.
-# Emin Tufan Çetin <etcetin@gmail.com>, 2018, 2019, 2020, 2024.
 # Sabri Ünal <yakushabb@gmail.com>, 2024.
+# Emin Tufan Çetin <etcetin@gmail.com>, 2018, 2019, 2020, 2024.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: LocalSearch master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-00 08:44+0300\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-05 08:00+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <takim@gnome.org.tr>\n"
 "Language: tr\n"
@@ -330,7 +330,7 @@ msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "FILE değişkeninin yapılandırmaya uygun yaranmışlığını denetler"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -479,11 +479,11 @@ msgstr "— besleme dizinleyicisini çalıştır"
 msgid "— start the tracker index proxy"
 msgstr "— tracker dizin vekilini çalıştır"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Üst veri ayıklama başarısız"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Bu dosyayı işleyecek üst veri veya ayıklayıcı modül bulunamadı"
 
@@ -507,11 +507,11 @@ msgstr "Ayıklama için bir modül kullanımını zorla (örn. “foo.so” içi
 msgid "MODULE"
 msgstr "MODÜL"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Çıktı sonuçları biçimi: “sparql”, “turtle” veya “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "BİÇİM"
 
@@ -557,20 +557,58 @@ msgstr "30 saniye hareketsizlikten sonra kapatmayı devre dışı bırak"
 msgid "— start the tracker writeback service"
 msgstr "— tracker geri yazma hizmetini başlat"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Kullanılabilir localsearch3 komutları:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Bir alt komutla ilgili bilgi almak için “localsearch3 help <command>” "
-"komutunu kullanın."
+"İçerik dizinlemeden sorumlu art alan hizmetlerini başlat, durdur, yeniden "
+"başlat ve listele"
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Dosyadan üst verileri ayıkla"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Konumun içerik dizinlemesini tetikle"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Belirli bir dosya için tüm bilgileri al"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Dizinlemeyi ve yapılandırmayı sıfırla"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "İçerik ara"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Dizinlenen verilerle ilgili durum ve istatistikler sağla"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Etiketleri ekle, kaldır ve listele"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Sınama ortamı için kum havuzu"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Kullanılabilir localsearch komutları:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Bir alt komutla ilgili bilgi almak için “localsearch help <komut>” "
+"kullanın."
+
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "“%s” bir localsearch3 komutu değildir. Bakınız: “localsearch3 --help”"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "“%s” bir localsearch komutu değildir. Bakınız: “localsearch --help”"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -870,27 +908,16 @@ msgstr "Madenciler başlatılamadı, yönetici oluşturulamadı, %s"
 msgid "perhaps a disabled plugin?"
 msgstr "bir eklenti devre dışı olabilir mi?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Verilmiş bir değişken yoksa, veri madencilerinin durumu gözükür"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Tanınmayan seçenekler"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"İçerik dizinlemeden sorumlu art alan hizmetlerini başlat, durdur, yeniden "
-"başlat ve listele"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -900,18 +927,9 @@ msgstr "D-Bus bağlantısı alınamadı"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "tracker-store için D-Bus vekili oluşturulamadı"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "tracker-extract çalıştırılamadı: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Dosyadan üst verileri ayıkla"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -953,18 +971,9 @@ msgstr "Yol"
 msgid "Recursive"
 msgstr "Özyinele"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Lütfen dizinlenecek bir ya da daha çok konum belirtin."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Tracker dosya sistemi madencisini kullanarak içeriği dizinle"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1016,15 +1025,6 @@ msgstr "Bu URI için bir üst veri kullanılabilir değil"
 msgid "Could not get eligible status: "
 msgstr "Uygun durum alınamadı: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Belirli bir dosya için tüm bilgileri al"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1058,15 +1058,6 @@ msgstr "Siliniyor…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "Bu dosya için dizinlenmiş veri silindi ve yeniden dizinlenecek."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Dizinlemeyi ve yapılandırmayı sıfırla"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1227,15 +1218,6 @@ msgstr "Sorgunuzla eşleşen hiçbir sonuç bulunamadı"
 msgid "Results"
 msgstr "Sonuçlar"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "İçeriği türe göre ya da tüm türler arasında ara"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Var olan dizinleme / veri kümesi için istatistikleri göster"
@@ -1338,15 +1320,6 @@ msgstr[0] "%d kayıtlı başarısızlık"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Herhangi bir rapor bulunamadı"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Dizinlenen verilerle ilgili durum ve istatistikler sağla"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1499,11 +1472,11 @@ msgstr "Etiketsiz"
 msgid "File not indexed or already untagged"
 msgstr "Dosya dizinlenmemiş ya da zaten etiketi kaldırılmış"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "--show-files için --list seçeneği gereklidir"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1511,19 +1484,40 @@ msgstr ""
 "--and-operator seçeneği yalnızca --list ile birlikte ve etiket başlığı "
 "değişkenleriyle kullanılabilir"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Ekle ve sil eylemleri birlikte kullanılamaz"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "--description seçeneği yalnızca --add ile birlikte kullanılabilir"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Etiketleri ekle, kaldır ve listele"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "Tracker dosya sistemi madencisini kullanarak içeriği dizinle"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "İçeriği türe göre ya da tüm türler arasında ara"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
