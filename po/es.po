@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-09-03 10:40+0200\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-05 14:09+0200\n"
 "Last-Translator: Daniel Mustieles García <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -335,7 +335,7 @@ msgstr ""
 "Comprueba si el ARCHIVO es elegible para ser escrutado según la configuración"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -487,11 +487,11 @@ msgstr "- iniciar el indexador de proveedores"
 msgid "— start the tracker index proxy"
 msgstr "- iniciar el proxy del indexador de tracker"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Falló la extracción de metadatos"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "No se han encontrado metadatos o módulos del extractor para manejar este "
@@ -517,11 +517,11 @@ msgstr "Forzar el uso de un módulo para extracción (ej. «foo» para «foo.so�
 msgid "MODULE"
 msgstr "MÓDULO"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Formato de resultados de salida: «sparql», «turtle» o «json-ld»"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "FORMATO"
 
@@ -566,20 +566,58 @@ msgstr "Desactivar el apagado después de 30 segundos de inactividad"
 msgid "— start the tracker writeback service"
 msgstr "- iniciar el servicio de escritura en diferido"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Los comandos de localsearch3 disponibles son:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Consulte «localsearch3 help <command>» para leer sobre un subcomando "
+"Iniciar, detener, pausar y listar procesos responsables del indexado del "
+"contenido"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Extraer metadatos de un archivo"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Activar la indexación de contenido de una ubicación"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Obtener toda la información de un archivo"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Restablecer el índice y la configuración"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "Buscar contenido"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Mostrar el estado y estadísticas de los datos indexados"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Añadir, quitar y listar etiquetas"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Entorno seguro para probar un entorno"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Los comandos de localsearch disponibles son:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Consulte «localsearch help <command>» para leer sobre un subcomando "
 "específico."
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "«%s» no es un comando de localsearch3. Consulte «localsearch3 --help»"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "«%s» no es un comando de localsearch. Consulte «localsearch --help»"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -882,29 +920,18 @@ msgstr "No se pudieron iniciar los mineros, no se pudo crear el gestor, %s"
 msgid "perhaps a disabled plugin?"
 msgstr "¿quizá es un complemento desactivado?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "Si no se proporcionan argumentos, se muestra el estado de los mineros de "
 "datos"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "No se reconocieron las opciones"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Iniciar, detener, pausar y listar procesos responsables del indexado del "
-"contenido"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -914,18 +941,9 @@ msgstr "No se pudo obtener una conexión a D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "No se pudo crear un proxu de D-Bus a tracker-store"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "No se pudo ejecutar tracker-extract: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Extraer metadatos de un archivo"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -967,18 +985,9 @@ msgstr "Ruta"
 msgid "Recursive"
 msgstr "Recursiva"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Indique una o más ubicaciones que indexar."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Indexar contenido usando el minero del sistema de archivos de Tracker"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1033,15 +1042,6 @@ msgstr "No existen metadatos disponibles para ese URI"
 msgid "Could not get eligible status: "
 msgstr "No se pudo obtener el estado elegible: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Obtener toda la información de un archivo"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1078,15 +1078,6 @@ msgid ""
 msgstr ""
 "Se han eliminado los datos indexados para este archivo y se reindexará de "
 "nuevo."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Restablecer el índice y la configuración"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1252,15 +1243,6 @@ msgstr "No se encontró ningún resultado coincidente con su consulta"
 msgid "Results"
 msgstr "Resultados"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Buscar por tipo de contenido o en todos los tipos"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Mostrar estadísticas del índice actual o del conjunto de datos"
@@ -1366,15 +1348,6 @@ msgstr[1] "%d fallos registrados"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "No se encontraron informes"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Mostrar el estado y estadísticas de los datos indexados"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1527,11 +1500,11 @@ msgstr "Sin etiquetar"
 msgid "File not indexed or already untagged"
 msgstr "El archivo no está indexado o ya se ha desetiquetado"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "Se requiere la opción «--list» para «--show-files»"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1539,22 +1512,44 @@ msgstr ""
 "La opción «--and-operator» sólo se puede usar con «--list» y argumentos de "
 "etiqueta"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Añadir y borrar acciones que no se pueden usar conjuntamente"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "La opción «--description» sólo se puede usar con «--add»"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Añadir, quitar y listar etiquetas"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr ""
+#~ "Indexar contenido usando el minero del sistema de archivos de Tracker"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "Buscar por tipo de contenido o en todos los tipos"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Ignorar palabras de parada"
@@ -1662,9 +1657,6 @@ msgstr "Añadir, quitar y listar etiquetas"
 
 #~ msgid "Search for emails"
 #~ msgstr "Buscar correos-e"
-
-#~ msgid "Search for contacts"
-#~ msgstr "Buscar contactos"
 
 #~ msgid "Search for bookmarks (--all has no effect on this)"
 #~ msgstr "Buscar marcadores («--all» no tiene efecto sobre esto) "
