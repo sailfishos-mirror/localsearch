@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-30 23:49+0300\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-05 11:11+0300\n"
 "Last-Translator: Yuras Shumovich <shumovichy@gmail.com>\n"
 "Language-Team: Belarusian\n"
 "Language: be\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "n%10<=4 && (n%100<12 || n%100>14) ? 1 : 2);\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.5\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -335,7 +335,7 @@ msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Правярае ці прымальны ФАЙЛ для індэксаванння на аснове налад"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -489,11 +489,11 @@ msgstr "— запусціць індэксатар каналаў"
 msgid "— start the tracker index proxy"
 msgstr "— запусціць проксі tracker index"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Не ўдалося выняць метаданыя"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Не знойдзены модуль метаданых або модуль вымання, каб апрацаваць гэты файл"
@@ -520,11 +520,11 @@ msgstr ""
 msgid "MODULE"
 msgstr "МОДУЛЬ"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Фармат вываду вынікаў: «sparql», «turtle» або «json-ld»"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "ФАРМАТ"
 
@@ -569,19 +569,58 @@ msgstr "Не выключаць пасля 30 секунд бяздзейнас�
 msgid "— start the tracker writeback service"
 msgstr "— запусціць сэрвіс зваротнага запісу"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Даступныя каманды localsearch3:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Глядзіце «localsearch3 help <каманда>», каб пачытаць пра пэўную падкаманду."
+"Запуск, спыненне і вывад спіса дэманаў, якія адказваюць за індэксаванне "
+"змесціва"
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Выняць метаданыя з файла"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Запуск індэксавання змесціва ў размяшчэнні"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Атрыманне ўсёй даступнай інфармацыі для пэўнага файла"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Скінуць індэкс і канфігурацыю"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "Пошук змесціва"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Паказ стану і статыстыкі праіндэксаваных даных"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Дадаванне, выдаленне, вывад спіса цэтлікаў"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "«Пясочніца» для выпрабавання асяроддзя"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Даступныя каманды localsearch:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Глядзіце «localsearch help <каманда>», каб пачытаць пра пэўную падкаманду."
+
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "«%s» не з'яўляецца камандай localsearch3 . Глядзіце «tracker --help»"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr ""
+"«%s» не з'яўляецца камандай localsearch . Глядзіце «localsearch --help»"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -894,27 +933,16 @@ msgstr "Не ўдалося запусціць індэксатары, бо не
 msgid "perhaps a disabled plugin?"
 msgstr "магчыма, адключаны плагін?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Калі аргументы не ўказаны, паказваецца статус індэксатараў даных"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Нераспазнаныя параметры"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Запуск, спыненне і вывад спіса дэманаў, якія адказваюць за індэксаванне "
-"змесціва"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -924,18 +952,9 @@ msgstr "Не ўдалося атрымаць злучэнне D-Bus"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Не ўдалося стварыць проксі D-Bus для tracker-store"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Не ўдалося выканаць tracker-extract: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Выняць метаданыя з файла"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -977,18 +996,9 @@ msgstr "Шлях"
 msgid "Recursive"
 msgstr "Рэкурсіўна"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Укажыце адно або некалькі размяшчэнняў для індэксавання."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Індэксаванне змесціва праз індэксатар файлавай сістэмы Tracker"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1042,15 +1052,6 @@ msgstr "Няма даступных метаданых для гэтага URI"
 msgid "Could not get eligible status: "
 msgstr "Не ўдалося атрымаць статус прымальнасці для індэксавання: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Атрыманне ўсёй даступнай інфармацыі для пэўнага файла"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1087,18 +1088,9 @@ msgid ""
 msgstr ""
 "Даныя індэксавання для гэтага файла выдалены і будуць праіндэксаваны зноў."
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Скінуць індэкс і канфігурацыю"
-
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
-msgstr "Пошук змесціва адпаведнага ЗАПЫТам, па тыпу або па ўсіх тыпах"
+msgstr "Пошук змесціва адпаведнага ЗАПЫТам, па тыпу або па ўсіх тыпах."
 
 #: src/tracker/tracker-search.c:77
 msgid "Search for files"
@@ -1258,16 +1250,6 @@ msgstr "Не знойдзена вынікаў, якія б адпавядалі
 msgid "Results"
 msgstr "Вынікі"
 
-# магчыма гэта пра "тэрм", логікавыя функцыі, выкарыстоўваць АБО ці І
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Пошук змесціва па тыпу або па ўсіх тыпах"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Паказаць статыстыку для бягучых індэксаў / набораў даных"
@@ -1376,15 +1358,6 @@ msgstr[2] "%d запісаных няўдач"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Справаздачы не знойдзены"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Паказ стану і статыстыкі праіндэксаваных даных"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1537,11 +1510,11 @@ msgstr "Без цэтліка"
 msgid "File not indexed or already untagged"
 msgstr "Файл не праіндэксаваны або ўжо не мае цэтліка"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "Для --show-files патрабуецца параметр --list"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1549,22 +1522,44 @@ msgstr ""
 "Параметр --and-operator можа выкарыстоўвацца толькі з --list і назвамі "
 "цэтлікаў у якасці аргументаў"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Нельга выконваць разам выдаленне і дадаванне"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "Параметр --description можа выкарыстоўвацца толькі з --add"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Дадаванне, выдаленне, вывад спіса цэтлікаў"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "Індэксаванне змесціва праз індэксатар файлавай сістэмы Tracker"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+# магчыма гэта пра "тэрм", логікавыя функцыі, выкарыстоўваць АБО ці І
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "Пошук змесціва па тыпу або па ўсіх тыпах"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Ігнараваць стоп-словы"
