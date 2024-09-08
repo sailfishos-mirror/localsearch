@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: HEAD\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-09-01 19:48+0300\n"
+"POT-Creation-Date: 2024-09-08 14:50+0000\n"
+"PO-Revision-Date: 2024-09-08 21:54+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -335,7 +335,7 @@ msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Tikrina, ar FAILAS yra tinkamas apdorojimui pagal nustatymus"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -484,11 +484,11 @@ msgstr "– paleisti sklaidos kanalų indeksavimo programą"
 msgid "— start the tracker index proxy"
 msgstr "– paleisti tracker indeksavimo programą"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Metaduomenų išgavavimas nepavyko"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Nerasta metaduomenų išgavėjo modulių šio failo apdorojimui"
 
@@ -512,11 +512,11 @@ msgstr "Priverstinai naudoti modulį rinkimui (pvz., „foo“ reiškia „foo.s
 msgid "MODULE"
 msgstr "MODULIS"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Išvesties rezultatų formatas: „sparql“, „turtle“ arba „json-ld“"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "FORMATAS"
 
@@ -561,20 +561,57 @@ msgstr "Uždrausti išjungimą po 30 sekundžių neaktyvumo"
 msgid "— start the tracker writeback service"
 msgstr "– paleisti tracker rašymo posistemę"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Galimos localsearch3 komandos yra:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Daugiau apie šią po-komandą galite perskaityti įvykdę „localsearch3 help "
+"Paleisti, sustabdyti, perleisti bei išvardinti turinio indeksavimo tarnybas"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Išgauti metaduomenis iš failų"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Sukelia turinio indeksavimą vietoje"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Gauti visą informaciją apie konkretų failą"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Atstatyti indeksą bei konfigūracija"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "Ieškoti turinio"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Rodyti būseną bei statistiką apie indeksuojamus duomenis"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Pridėti, šalinti arba išvardinti žymas"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Smėlio dėžė testavimo aplinkai"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Galimos localsearch komandos yra:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Daugiau apie šią po-komandą galite perskaityti įvykdę „localsearch help "
 "<komanda>“"
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "„%s“ nėra localsearch3 komanda. Žiūrėti „localsearch3 --help“"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "„%s“ nėra localsearch komanda. Žiūrėti „localsearch --help“"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -880,26 +917,16 @@ msgstr "Nepavyko paleisti gavėjų, nepavyko sukurti tvarkytuvės, %s"
 msgid "perhaps a disabled plugin?"
 msgstr "galbūt išjungtas įskiepis?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Jei nepateikiami argumentai, rodomi gavėjai ir saugyklos duomenys"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Neatpažinti parametrai"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Paleisti, sustabdyti, perleisti bei išvardinti turinio indeksavimo tarnybas"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -909,18 +936,9 @@ msgstr "Nepavyko užmegzti D-Bus ryšio"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Nepavyko sukurti D-Bus tarpininko tracker-store sistemai"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Nepavyko paleisti tracker-extract: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Išgauti metaduomenis iš failų"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -962,18 +980,9 @@ msgstr "Kelias"
 msgid "Recursive"
 msgstr "Rekursyviai"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Nurodykite vieną ar daugiau vietų indeksavimui."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Indeksuoti turinį naudojant Tracker failų sistemos išgavėją"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1026,15 +1035,6 @@ msgstr "Nėra metaduomenų šiam URI"
 msgid "Could not get eligible status: "
 msgstr "Nepavyko gauti galimybės būsenos: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "into"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Gauti visą informaciją apie konkretų failą"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1069,15 +1069,6 @@ msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
 "Indeksuoti šio failo duomenys buvo ištrinti ir bus suindeksuoti iš naujo."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Atstatyti indeksą bei konfigūracija"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1240,15 +1231,6 @@ msgstr "Užklausos atitinkančių rezultatų nerasta"
 msgid "Results"
 msgstr "Rezultatai"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Ieškoti turinio pagal tipą arba visuose tipuose"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Rodyti statistiką dabartiniam indeksui / duomenims"
@@ -1357,15 +1339,6 @@ msgstr[2] "%d įrašytų klaidų"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Nėra įrašų"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Rodyti būseną bei statistiką apie indeksuojamus duomenis"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1512,33 +1485,54 @@ msgstr "Atžymėta"
 msgid "File not indexed or already untagged"
 msgstr "Failas neindeksuojamas arba jau atžymėtas"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "Parametras --list yra privalomas su --show-files"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
 msgstr ""
 "Parametrą --and-operator galima naudoti tik su --list ir žymų argumentais"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Pridėjimo ir trynimo veiksmai negali būti naudojami kartu"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "Parametras --description gali būti naudojamas tik su --add"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Pridėti, šalinti arba išvardinti žymas"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "Indeksuoti turinį naudojant Tracker failų sistemos išgavėją"
+
+#~ msgid "info"
+#~ msgstr "into"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "Ieškoti turinio pagal tipą arba visuose tipuose"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Nepaisyti stop žodžių"
@@ -1697,9 +1691,6 @@ msgstr "Pridėti, šalinti arba išvardinti žymas"
 
 #~ msgid "Search for emails"
 #~ msgstr "Ieškoti el. laiškų"
-
-#~ msgid "Search for contacts"
-#~ msgstr "Ieškoti kontaktų"
 
 #~ msgid "Search for bookmarks (--all has no effect on this)"
 #~ msgstr "Ieškoti adresyno įrašų (--all neturi poveikio)"
