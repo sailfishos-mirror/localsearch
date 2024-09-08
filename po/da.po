@@ -14,8 +14,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-02-11 19:14+0000\n"
-"PO-Revision-Date: 2024-03-12 09:55+0100\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-07 22:37+0200\n"
 "Last-Translator: Ask Hjorth Larsen <asklarsen@gmail.com>\n"
 "Language-Team: Danish <dansk@dansk-gruppen.dk>\n"
 "Language: da\n"
@@ -325,81 +325,81 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d sekund"
 msgstr[1] " %2.2d sekunder"
 
-#: src/miners/fs/tracker-main.c:82
+#: src/miners/fs/tracker-main.c:89
 msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 msgstr "Oprindelig sovetid i sekunder, 0->1000 (standard=15)"
 
-#: src/miners/fs/tracker-main.c:87
+#: src/miners/fs/tracker-main.c:94
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Kører indtil alle konfigurerede placeringer er indekserede og afsluttes så"
 
-#: src/miners/fs/tracker-main.c:91 src/tracker/tracker-info.c:91
+#: src/miners/fs/tracker-main.c:98 src/tracker/tracker-info.c:91
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Tjekker om FIL er egnet til at blive indekseret baseret på konfiguration"
 
-#: src/miners/fs/tracker-main.c:92 src/tracker-extract/tracker-main.c:82
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
-#: src/tracker/tracker-index.c:59 src/tracker/tracker-index.c:60
+#: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
+#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
 msgid "FILE"
 msgstr "FIL"
 
-#: src/miners/fs/tracker-main.c:95 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:96
+#: src/miners/fs/tracker-main.c:102 src/miners/rss/tracker-main.c:63
+#: src/tracker-extract/tracker-main.c:94
 msgid "Runs for a specific domain ontology"
 msgstr "Kører for en specifik domæneontologi"
 
-#: src/miners/fs/tracker-main.c:99
+#: src/miners/fs/tracker-main.c:106
 msgid "Avoids changes in the filesystem"
 msgstr "Undgår ændringer i filsystemet"
 
-#: src/miners/fs/tracker-main.c:103 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:104
+#: src/miners/fs/tracker-main.c:110 src/tracker-control/tracker-main.c:61
+#: src/tracker-extract/tracker-main.c:102
 #: src/tracker-writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Viser versionsoplysninger"
 
-#: src/miners/fs/tracker-main.c:483
+#: src/miners/fs/tracker-main.c:555
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Dataobjekt “%s” findes aktuelt"
 
-#: src/miners/fs/tracker-main.c:484
+#: src/miners/fs/tracker-main.c:556
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Dataobjekt “%s” findes aktuelt ikke"
 
-#: src/miners/fs/tracker-main.c:494
+#: src/miners/fs/tracker-main.c:566
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Mappen er IKKE egnet til at blive indekseret (baseret på filtre)"
 
-#: src/miners/fs/tracker-main.c:498
+#: src/miners/fs/tracker-main.c:570
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Filen er IKKE egnet til at blive indekseret (baseret på filtre)"
 
-#: src/miners/fs/tracker-main.c:501
+#: src/miners/fs/tracker-main.c:573
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Filen er IKKE egnet til at blive indekseret (skjult fil)"
 
-#: src/miners/fs/tracker-main.c:503
+#: src/miners/fs/tracker-main.c:575
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Filen er IKKE egnet til at blive indekseret (ikke en indekseret mappe)"
 
-#: src/miners/fs/tracker-main.c:527
+#: src/miners/fs/tracker-main.c:599
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Ophavsmappen “%s” er IKKE egnet til at blive indekseret (baseret på filtre)"
 
-#: src/miners/fs/tracker-main.c:533
+#: src/miners/fs/tracker-main.c:605
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Ophavsmappen “%s” er IKKE egnet til at blive indekseret (skjult fil)"
 
-#: src/miners/fs/tracker-main.c:539
+#: src/miners/fs/tracker-main.c:611
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -408,18 +408,18 @@ msgstr ""
 "Ophavsmappen “%s” er IKKE egnet til at blive indekseret (baseret på "
 "indholdsfiltre)"
 
-#: src/miners/fs/tracker-main.c:558
+#: src/miners/fs/tracker-main.c:630
 msgid "Directory is eligible to be indexed"
 msgstr "Mappen er egnet til at blive indekseret"
 
-#: src/miners/fs/tracker-main.c:559
+#: src/miners/fs/tracker-main.c:631
 msgid "File is eligible to be indexed"
 msgstr "Filen er egnet til at blive indekseret"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/miners/fs/tracker-main.c:786
+#: src/miners/fs/tracker-main.c:857
 msgid "— start the tracker indexer"
 msgstr "— start tracker-indekseringen"
 
@@ -448,19 +448,19 @@ msgstr "Slet nyhedskilde"
 
 #: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
 #: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
-#: src/tracker/tracker-search.c:1377 src/tracker/tracker-status.c:92
+#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:92
 #: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
 msgid "Could not establish a connection to Tracker"
 msgstr "Kunne ikke etablere en forbindelse til Tracker"
 
 #: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
-#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:448
-#: src/tracker/tracker-daemon.c:509 src/tracker/tracker-daemon.c:544
-#: src/tracker/tracker-daemon.c:613 src/tracker/tracker-daemon.c:712
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-daemon.c:980
+#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:449
+#: src/tracker/tracker-daemon.c:510 src/tracker/tracker-daemon.c:545
+#: src/tracker/tracker-daemon.c:614 src/tracker/tracker-daemon.c:713
+#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:981
 #: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
 #: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:93
+#: src/tracker/tracker-search.c:1379 src/tracker/tracker-status.c:93
 #: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
 #: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
 msgid "No error given"
@@ -492,62 +492,62 @@ msgstr "— start nyhedskildeindekseringen"
 msgid "— start the tracker index proxy"
 msgstr "— start tracker-indekseringsproxy"
 
-#: src/tracker-extract/tracker-extract.c:712
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "Udtrækning af metadata mislykkedes"
 
-#: src/tracker-extract/tracker-extract.c:794
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Ingen metadata eller udtrækkermoduler fundet til at håndtere denne fil"
 
-#: src/tracker-extract/tracker-main.c:81
+#: src/tracker-extract/tracker-main.c:79
 msgid "File to extract metadata for"
 msgstr "Fil der skal udtrækkes metadata for"
 
-#: src/tracker-extract/tracker-main.c:85
+#: src/tracker-extract/tracker-main.c:83
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "MIME-type for fil (hvis ikke angivet, vil den blive gættet)"
 
-#: src/tracker-extract/tracker-main.c:86
+#: src/tracker-extract/tracker-main.c:84
 msgid "MIME"
 msgstr "MIME"
 
-#: src/tracker-extract/tracker-main.c:89
+#: src/tracker-extract/tracker-main.c:87
 msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 msgstr "Brug et modul til udtrækning (f.eks. “foo” for “foo.so”)"
 
-#: src/tracker-extract/tracker-main.c:90
+#: src/tracker-extract/tracker-main.c:88
 msgid "MODULE"
 msgstr "MODUL"
 
-#: src/tracker-extract/tracker-main.c:92 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Format af output: “sparql”, “turtle” eller “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:93 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/tracker-extract/tracker-main.c:100
+#: src/tracker-extract/tracker-main.c:98
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "Sokkelfildeskriptor for peer til peer-kommunikation"
 
-#: src/tracker-extract/tracker-main.c:101
+#: src/tracker-extract/tracker-main.c:99
 msgid "FD"
 msgstr "FD"
 
-#: src/tracker-extract/tracker-main.c:196
+#: src/tracker-extract/tracker-main.c:194
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Serialiseringsformatet “%s” understøttes ikke\n"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:316
+#: src/tracker-extract/tracker-main.c:313
 msgid "— Extract file meta data"
 msgstr "— Udtræk filmetadata"
 
-#: src/tracker-extract/tracker-main.c:331
+#: src/tracker-extract/tracker-main.c:328
 msgid "Filename and mime type must be provided together"
 msgstr "Filnavn og MIME-type skal angives sammen"
 
@@ -570,47 +570,98 @@ msgstr "Deaktiver nedlukning efter 30 sekunders inaktivitet"
 msgid "— start the tracker writeback service"
 msgstr "— start trackers writeback-tjeneste"
 
-#: src/tracker/tracker-daemon.c:98
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
+msgstr ""
+"Start, stop, genstart og vis dæmoner, som er ansvarlige for "
+"indholdsindeksering"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Udtræk metadata fra en fil"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Udløs indeksering af indhold på et sted"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Indhent alle tilgængelige oplysninger om en bestemt fil"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Nulstil indeks og konfiguration"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "Søg efter indhold"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Vis status og statistik om de indekserede data"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Tilføj, fjern eller vis etiketter"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Sandkasse til et testmiljø"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "Tilgængelige kommandoer for localsearch er:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr "Se “localsearch help <kommando>” for information om en specifik underkommando."
+
+#: src/tracker/main.c:259
+#, c-format
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "“%s” er ikke en localsearch-kommando. Se “localsearch --help”"
+
+#: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
 msgstr "Utilgængelig"
 
 #. generic
-#: src/tracker/tracker-daemon.c:99
+#: src/tracker/tracker-daemon.c:100
 msgid "Initializing"
 msgstr "Initialiserer"
 
-#: src/tracker/tracker-daemon.c:100
+#: src/tracker/tracker-daemon.c:101
 msgid "Processing…"
 msgstr "Behandler …"
 
-#: src/tracker/tracker-daemon.c:101
+#: src/tracker/tracker-daemon.c:102
 msgid "Fetching…"
 msgstr "Indhenter …"
 
 #. miner/rss
-#: src/tracker/tracker-daemon.c:102
+#: src/tracker/tracker-daemon.c:103
 #, c-format
 msgid "Crawling single directory “%s”"
 msgstr "Gennemløber en enkelt mappe “%s”"
 
-#: src/tracker/tracker-daemon.c:103
+#: src/tracker/tracker-daemon.c:104
 #, c-format
 msgid "Crawling recursively directory “%s”"
 msgstr "Gennemløber rekursiv mappe “%s”"
 
-#: src/tracker/tracker-daemon.c:104
+#: src/tracker/tracker-daemon.c:105
 msgid "Paused"
 msgstr "Midlertidigt afbrudt"
 
-#: src/tracker/tracker-daemon.c:105
+#: src/tracker/tracker-daemon.c:106
 msgid "Idle"
 msgstr "Inaktiv"
 
-#: src/tracker/tracker-daemon.c:111
+#: src/tracker/tracker-daemon.c:112
 msgid "Follow status changes as they happen"
 msgstr "Følg ændringer i status når de sker"
 
-#: src/tracker/tracker-daemon.c:115
+#: src/tracker/tracker-daemon.c:116
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -618,19 +669,19 @@ msgstr ""
 "Overvåg ændringer i databasen i realtid (f.eks. ressourcer eller filer som "
 "tilføjes)"
 
-#: src/tracker/tracker-daemon.c:119
+#: src/tracker/tracker-daemon.c:120
 msgid "List common statuses for miners"
 msgstr "Vis fælles statusser for indsamlere"
 
-#: src/tracker/tracker-daemon.c:124
+#: src/tracker/tracker-daemon.c:125
 msgid "Pause a miner (you must use this with --miner)"
 msgstr "Sæt en indsamler på pause (du skal bruge denne med --miner)"
 
-#: src/tracker/tracker-daemon.c:125 src/tracker/tracker-daemon.c:129
+#: src/tracker/tracker-daemon.c:126 src/tracker/tracker-daemon.c:130
 msgid "REASON"
 msgstr "ÅRSAG"
 
-#: src/tracker/tracker-daemon.c:128
+#: src/tracker/tracker-daemon.c:129
 msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must "
 "use this with --miner)"
@@ -638,15 +689,15 @@ msgstr ""
 "Sæt en indsamler på pause, mens den er i gang, eller indtil den bliver "
 "genoptaget (du skal bruge denne med --miner)"
 
-#: src/tracker/tracker-daemon.c:132
+#: src/tracker/tracker-daemon.c:133
 msgid "Resume a miner (you must use this with --miner)"
 msgstr "Genoptag en indsamler (du skal bruge denne med --miner)"
 
-#: src/tracker/tracker-daemon.c:133
+#: src/tracker/tracker-daemon.c:134
 msgid "COOKIE"
 msgstr "COOKIE"
 
-#: src/tracker/tracker-daemon.c:136
+#: src/tracker/tracker-daemon.c:137
 msgid ""
 "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
 "Applications)"
@@ -654,243 +705,234 @@ msgstr ""
 "Indsamler der skal bruges med --resume eller --pause (du kan bruge "
 "suffikser, f.eks. filer eller programmer)"
 
-#: src/tracker/tracker-daemon.c:137
+#: src/tracker/tracker-daemon.c:138
 msgid "MINER"
 msgstr "INDSAMLER"
 
-#: src/tracker/tracker-daemon.c:140
+#: src/tracker/tracker-daemon.c:141
 msgid "List all miners currently running"
 msgstr "Vis alle indsamlere som kører i øjeblikket"
 
-#: src/tracker/tracker-daemon.c:144
+#: src/tracker/tracker-daemon.c:145
 msgid "List all miners installed"
 msgstr "Vis alle installerede indsamlere"
 
-#: src/tracker/tracker-daemon.c:148
+#: src/tracker/tracker-daemon.c:149
 msgid "List pause reasons"
 msgstr "Vis pauseårsager"
 
-#: src/tracker/tracker-daemon.c:153
+#: src/tracker/tracker-daemon.c:154
 msgid "List all Tracker processes"
 msgstr "Vis alle Trackerprocesser"
 
-#: src/tracker/tracker-daemon.c:155
+#: src/tracker/tracker-daemon.c:156
 msgid "Use SIGKILL to stop all miners"
 msgstr "Brug SIGKILL til at stoppe alle indsamlere"
 
-#: src/tracker/tracker-daemon.c:156 src/tracker/tracker-daemon.c:159
+#: src/tracker/tracker-daemon.c:157 src/tracker/tracker-daemon.c:160
 msgid "APPS"
 msgstr "APPS"
 
-#: src/tracker/tracker-daemon.c:158
+#: src/tracker/tracker-daemon.c:159
 msgid "Use SIGTERM to stop all miners"
 msgstr "Brug SIGTERM til at stoppe alle indsamlere"
 
-#: src/tracker/tracker-daemon.c:161
+#: src/tracker/tracker-daemon.c:162
 msgid "Starts miners"
 msgstr "Starter indsamlere"
 
-#: src/tracker/tracker-daemon.c:213
+#: src/tracker/tracker-daemon.c:214
 #, c-format
 msgid "Could not get status from miner: %s"
 msgstr "Kunne ikke hente status fra indsamler: %s"
 
 #. Translators: %s is a time string
-#: src/tracker/tracker-daemon.c:275
+#: src/tracker/tracker-daemon.c:276
 #, c-format
 msgid "%s remaining"
 msgstr "%s resterer"
 
-#: src/tracker/tracker-daemon.c:278
+#: src/tracker/tracker-daemon.c:279
 msgid "unknown time left"
 msgstr "ukendt resterende tid"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:291 src/tracker/tracker-daemon.c:769
+#: src/tracker/tracker-daemon.c:292 src/tracker/tracker-daemon.c:770
 msgid "PAUSED"
 msgstr "PAUSE"
 
-#: src/tracker/tracker-daemon.c:308
+#: src/tracker/tracker-daemon.c:309
 msgid "Not running or is a disabled plugin"
 msgstr "Kører ikke eller er et deaktiveret udvidelsesmodul"
 
-#: src/tracker/tracker-daemon.c:447
+#: src/tracker/tracker-daemon.c:448
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
 msgstr ""
 "Kunne ikke sætte indsamleren på pause, håndteringen kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:454
+#: src/tracker/tracker-daemon.c:455
 #, c-format
 msgid "Attempting to pause miner “%s” with reason “%s”"
 msgstr "Forsøger at sætte indsamleren “%s” på pause med årsagen “%s”"
 
-#: src/tracker/tracker-daemon.c:462 src/tracker/tracker-daemon.c:468
+#: src/tracker/tracker-daemon.c:463 src/tracker/tracker-daemon.c:469
 #, c-format
 msgid "Could not pause miner: %s"
 msgstr "Kunne ikke sætte indsamleren på pause: %s"
 
-#: src/tracker/tracker-daemon.c:474
+#: src/tracker/tracker-daemon.c:475
 #, c-format
 msgid "Cookie is %d"
 msgstr "Cookie er %d"
 
-#: src/tracker/tracker-daemon.c:481 src/tracker/tracker-daemon.c:724
-#: src/tracker/tracker-daemon.c:841
+#: src/tracker/tracker-daemon.c:482 src/tracker/tracker-daemon.c:725
+#: src/tracker/tracker-daemon.c:842
 msgid "Press Ctrl+C to stop"
 msgstr "Tryk Ctrl+C for at stoppe"
 
-#: src/tracker/tracker-daemon.c:508
+#: src/tracker/tracker-daemon.c:509
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
 msgstr "Kunne ikke genoptage indsamleren, håndtering kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:515
+#: src/tracker/tracker-daemon.c:516
 #, c-format
 msgid "Attempting to resume miner %s with cookie %d"
 msgstr "Forsøger at genoptage indsamleren %s med cookie %d"
 
-#: src/tracker/tracker-daemon.c:522
+#: src/tracker/tracker-daemon.c:523
 #, c-format
 msgid "Could not resume miner: %s"
 msgstr "Kunne ikke genoptage indsamleren: %s"
 
-#: src/tracker/tracker-daemon.c:526
+#: src/tracker/tracker-daemon.c:527
 msgid "Done"
 msgstr "Færdig"
 
-#: src/tracker/tracker-daemon.c:543
+#: src/tracker/tracker-daemon.c:544
 #, c-format
 msgid "Could not list miners, manager could not be created, %s"
 msgstr "Kunne ikke vise indsamlere, håndteringen kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:557
+#: src/tracker/tracker-daemon.c:558
 #, c-format
 msgid "Found %d miner installed"
 msgid_plural "Found %d miners installed"
 msgstr[0] "Fandt %d installeret indsamler"
 msgstr[1] "Fandt %d installerede indsamlere"
 
-#: src/tracker/tracker-daemon.c:580
+#: src/tracker/tracker-daemon.c:581
 #, c-format
 msgid "Found %d miner running"
 msgid_plural "Found %d miners running"
 msgstr[0] "Fandt %d kørende indsamler"
 msgstr[1] "Fandt %d kørende indsamlere"
 
-#: src/tracker/tracker-daemon.c:612
+#: src/tracker/tracker-daemon.c:613
 #, c-format
 msgid "Could not get pause details, manager could not be created, %s"
 msgstr ""
 "Kunne ikke indhente pausedetaljer, håndteringen kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:622
+#: src/tracker/tracker-daemon.c:623
 msgid "No miners are running"
 msgstr "Ingen indsamlere kører"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:662 src/tracker/tracker-daemon.c:779
+#: src/tracker/tracker-daemon.c:663 src/tracker/tracker-daemon.c:780
 msgid "Miners"
 msgstr "Indsamlere"
 
-#: src/tracker/tracker-daemon.c:669
+#: src/tracker/tracker-daemon.c:670
 msgid "Application"
 msgstr "Program"
 
-#: src/tracker/tracker-daemon.c:671
+#: src/tracker/tracker-daemon.c:672
 msgid "Reason"
 msgstr "Årsag"
 
-#: src/tracker/tracker-daemon.c:680
+#: src/tracker/tracker-daemon.c:681
 msgid "No miners are paused"
 msgstr "Ingen indsamlere er sat på pause"
 
-#: src/tracker/tracker-daemon.c:711
+#: src/tracker/tracker-daemon.c:712
 msgid "Could not get SPARQL connection"
 msgstr "Kunne ikke hente SPARQL-forbindelse"
 
-#: src/tracker/tracker-daemon.c:722
+#: src/tracker/tracker-daemon.c:723
 msgid "Now listening for resource updates to the database"
 msgstr "Lytter nu efter ressourceopdateringer til databasen"
 
-#: src/tracker/tracker-daemon.c:723
+#: src/tracker/tracker-daemon.c:724
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "Alle nie:plainTextContent-egenskaber udelades"
 
-#: src/tracker/tracker-daemon.c:740
+#: src/tracker/tracker-daemon.c:741
 msgid "Common statuses include"
 msgstr "Almindelige statusser omfatter"
 
-#: src/tracker/tracker-daemon.c:758 src/tracker/tracker-status.c:280
+#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:280
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "Kunne ikke hente status, håndteringen kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:787
+#: src/tracker/tracker-daemon.c:788
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr "Kunne ikke hente kaldenavn for indsamleren “%s”"
 
-#: src/tracker/tracker-daemon.c:881
+#: src/tracker/tracker-daemon.c:882
 msgid "You can not use miner pause and resume switches together"
 msgstr "Du kan ikke bruge indsamlerens indstillinger pause og genoptag sammen"
 
-#: src/tracker/tracker-daemon.c:887
+#: src/tracker/tracker-daemon.c:888
 msgid "You must provide the miner for pause or resume commands"
 msgstr "Du skal angive indsamleren for kommandoerne pause eller genoptag"
 
-#: src/tracker/tracker-daemon.c:893
+#: src/tracker/tracker-daemon.c:894
 msgid "You must provide a pause or resume command for the miner"
 msgstr "Du skal angive en af kommandoerne pause eller genoptag for indsamleren"
 
-#: src/tracker/tracker-daemon.c:927
+#: src/tracker/tracker-daemon.c:928
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "Du kan ikke bruge argumenterne --kill og --terminate samtidig"
 
-#: src/tracker/tracker-daemon.c:938 src/tracker/tracker-process.c:197
+#: src/tracker/tracker-daemon.c:939 src/tracker/tracker-process.c:197
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
 msgstr[0] "Fandt %d PID …"
 msgstr[1] "Fandt %d PID'er …"
 
-#: src/tracker/tracker-daemon.c:948
+#: src/tracker/tracker-daemon.c:949
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "Fandt proces-id %d for “%s”"
 
-#: src/tracker/tracker-daemon.c:974
+#: src/tracker/tracker-daemon.c:975
 msgid "Starting miners…"
 msgstr "Starter indsamlere …"
 
-#: src/tracker/tracker-daemon.c:979
+#: src/tracker/tracker-daemon.c:980
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "Kunne ikke starte indsamlere, håndteringen kunne ikke oprettes, %s"
 
-#: src/tracker/tracker-daemon.c:1004
+#: src/tracker/tracker-daemon.c:1005
 msgid "perhaps a disabled plugin?"
 msgstr "måske et deaktiveret udvidelsesmodul?"
 
-#: src/tracker/tracker-daemon.c:1054
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "Hvis der ikke gives nogen argumenter, vises status for dataindsamlerne"
 
-#: src/tracker/tracker-daemon.c:1059 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:394 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:263 src/tracker/tracker-search.c:1568
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Ugenkendte indstillinger"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr "Start, stop, genstart og vis dæmoner, som er ansvarlige for indholdsindeksering"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -900,71 +942,53 @@ msgstr "Kunne ikke hente D-Bus-forbindelse"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Kunne ikke oprette D-Bus-proxy til tracker-store"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Kunne ikke køre tracker-extract: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Udtræk metadata fra en fil"
-
-#: src/tracker/tracker-index.c:50
+#: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
 msgstr "Tilføjer FIL som indekseret sted"
 
-#: src/tracker/tracker-index.c:53
+#: src/tracker/tracker-index.c:54
 msgid "Removes FILE from indexed locations"
 msgstr "Fjerner FIL fra indekserede steder"
 
-#: src/tracker/tracker-index.c:56
+#: src/tracker/tracker-index.c:57
 msgid "Makes indexing recursive"
 msgstr "Gør indeksering rekursiv"
 
-#: src/tracker/tracker-index.c:192
+#: src/tracker/tracker-index.c:193
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "“%s” er ikke en mappe"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:282
+#: src/tracker/tracker-index.c:283
 msgid "Either --add or --remove must be provided"
 msgstr "Enten --add eller --remove skal angives"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:286
+#: src/tracker/tracker-index.c:287
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add og --remove udelukker hinanden"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:296
+#: src/tracker/tracker-index.c:297
 msgid "--recursive requires --add"
 msgstr "--recursive kræver --add"
 
-#: src/tracker/tracker-index.c:356 src/tracker/tracker-status.c:331
+#: src/tracker/tracker-index.c:357 src/tracker/tracker-status.c:331
 msgid "Path"
 msgstr "Sti"
 
-#: src/tracker/tracker-index.c:357
+#: src/tracker/tracker-index.c:358
 msgid "Recursive"
 msgstr "Rekursiv"
 
-#: src/tracker/tracker-index.c:407
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Angiv venligst et eller flere steder, der skal indekseres."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Indeksér indhold med Trackers filsystemdataindsamler"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1016,15 +1040,6 @@ msgstr "Ingen tilgængelige metadata for den URI"
 msgid "Could not get eligible status: "
 msgstr "Kunne ikke indhente egnethedsstatus: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Indhent alle tilgængelige oplysninger om en bestemt fil"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1060,77 +1075,69 @@ msgstr ""
 "De indekserede data for denne fil er blevet slettet og vil blive "
 "genindekseret."
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Nulstil indeks og konfiguration"
-
-#: src/tracker/tracker-search.c:59
+#: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
-msgstr "Søg efter indhold som matcher ORD; enten en bestemt type eller alle typer."
+msgstr ""
+"Søg efter indhold som matcher ORD; enten en bestemt type eller alle typer."
 
-#: src/tracker/tracker-search.c:76
+#: src/tracker/tracker-search.c:77
 msgid "Search for files"
 msgstr "Søg efter filer"
 
-#: src/tracker/tracker-search.c:80
+#: src/tracker/tracker-search.c:81
 msgid "Search for folders"
 msgstr "Søg efter mapper"
 
-#: src/tracker/tracker-search.c:84
+#: src/tracker/tracker-search.c:85
 msgid "Search for music files"
 msgstr "Søg efter musikfiler"
 
-#: src/tracker/tracker-search.c:88
+#: src/tracker/tracker-search.c:89
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "Søg efter musikalbum (--all har ingen effekt her)"
 
-#: src/tracker/tracker-search.c:92
+#: src/tracker/tracker-search.c:93
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "Søg efter musikkunstnere (--all har ingen effekt her)"
 
-#: src/tracker/tracker-search.c:96
+#: src/tracker/tracker-search.c:97
 msgid "Search for image files"
 msgstr "Søg efter billedfiler"
 
-#: src/tracker/tracker-search.c:100
+#: src/tracker/tracker-search.c:101
 msgid "Search for video files"
 msgstr "Søg efter videofiler"
 
-#: src/tracker/tracker-search.c:104
+#: src/tracker/tracker-search.c:105
 msgid "Search for document files"
 msgstr "Søg efter dokumentfiler"
 
-#: src/tracker/tracker-search.c:108
+#: src/tracker/tracker-search.c:109
 msgid "Search for software (--all has no effect on this)"
 msgstr "Søg efter programmer (--all har ingen effekt her)"
 
-#: src/tracker/tracker-search.c:112
+#: src/tracker/tracker-search.c:113
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "Søg efter programkategorier (--all har ingen effekt her)"
 
-#: src/tracker/tracker-search.c:116
+#: src/tracker/tracker-search.c:117
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "Søg efter nyhedskilder (--all har ingen effekt her)"
 
-#: src/tracker/tracker-search.c:125 src/tracker/tracker-tag.c:71
+#: src/tracker/tracker-search.c:126 src/tracker/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "Begræns antallet af viste resultater"
 
 # baseret på den svenske oversættelse
-#: src/tracker/tracker-search.c:129 src/tracker/tracker-tag.c:75
+#: src/tracker/tracker-search.c:130 src/tracker/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "Positioner resultater"
 
-#: src/tracker/tracker-search.c:133
+#: src/tracker/tracker-search.c:134
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "Brug ELLER (OR) for søgetermer i stedet for OG (AND) som er standarden"
 
-#: src/tracker/tracker-search.c:137
+#: src/tracker/tracker-search.c:138
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
 "feeds, --software, --software-categories)"
@@ -1138,13 +1145,13 @@ msgstr ""
 "Vis URN'er for resultater (gælder ikke for --music-albums, --music-artists, "
 "--feeds, --software, --software-categories)"
 
-#: src/tracker/tracker-search.c:141
+#: src/tracker/tracker-search.c:142
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Returner også alle ikkeeksisterende resultater (det vil sige inkluder "
 "diskområder, som ikke er monteret)"
 
-#: src/tracker/tracker-search.c:145
+#: src/tracker/tracker-search.c:146
 msgid ""
 "Disable showing snippets with results. This is only shown for some "
 "categories, e.g. Documents, Music…"
@@ -1152,95 +1159,86 @@ msgstr ""
 "Deaktivér visning af uddrag fra resultater. Dette bliver kun vist for visse "
 "kategorier som f.eks. dokumenter, musik …"
 
-#: src/tracker/tracker-search.c:149
+#: src/tracker/tracker-search.c:150
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr "Deaktivér fuldtekstsøgning (FTF). Indebærer --disable-snippets"
 
-#: src/tracker/tracker-search.c:153
+#: src/tracker/tracker-search.c:154
 msgid "Disable color when printing snippets and results"
 msgstr "Deaktivér farver ved udskrivning af tekststumper og resultater"
 
-#: src/tracker/tracker-search.c:160 src/tracker/tracker-status.c:58
+#: src/tracker/tracker-search.c:161 src/tracker/tracker-status.c:58
 msgid "search terms"
 msgstr "søgetermer"
 
-#: src/tracker/tracker-search.c:161
+#: src/tracker/tracker-search.c:162
 msgid "TERMS"
 msgstr "ORD"
 
-#: src/tracker/tracker-search.c:251 src/tracker/tracker-search.c:641
-#: src/tracker/tracker-search.c:737 src/tracker/tracker-search.c:829
-#: src/tracker/tracker-search.c:918 src/tracker/tracker-search.c:1007
-#: src/tracker/tracker-search.c:1294
+#: src/tracker/tracker-search.c:252 src/tracker/tracker-search.c:642
+#: src/tracker/tracker-search.c:738 src/tracker/tracker-search.c:830
+#: src/tracker/tracker-search.c:919 src/tracker/tracker-search.c:1008
+#: src/tracker/tracker-search.c:1295
 msgid "Could not get search results"
 msgstr "Kunne ikke indhente søgeresultat"
 
-#: src/tracker/tracker-search.c:260
+#: src/tracker/tracker-search.c:261
 msgid "No files were found"
 msgstr "Ingen filer blev fundet"
 
-#: src/tracker/tracker-search.c:264 src/tracker/tracker-tag.c:426
+#: src/tracker/tracker-search.c:265 src/tracker/tracker-tag.c:426
 msgid "Files"
 msgstr "Filer"
 
-#: src/tracker/tracker-search.c:650
+#: src/tracker/tracker-search.c:651
 msgid "No artists were found"
 msgstr "Ingen kunstnere blev fundet"
 
-#: src/tracker/tracker-search.c:654
+#: src/tracker/tracker-search.c:655
 msgid "Artists"
 msgstr "Kunstnere"
 
-#: src/tracker/tracker-search.c:746
+#: src/tracker/tracker-search.c:747
 msgid "No music was found"
 msgstr "Ingen musik blev fundet"
 
-#: src/tracker/tracker-search.c:750
+#: src/tracker/tracker-search.c:751
 msgid "Albums"
 msgstr "Album"
 
-#: src/tracker/tracker-search.c:838
+#: src/tracker/tracker-search.c:839
 msgid "No feeds were found"
 msgstr "Ingen nyhedskilder blev fundet"
 
-#: src/tracker/tracker-search.c:842
+#: src/tracker/tracker-search.c:843
 msgid "Feeds"
 msgstr "Nyhedskilder"
 
-#: src/tracker/tracker-search.c:927
+#: src/tracker/tracker-search.c:928
 msgid "No software was found"
 msgstr "Ingen programmer blev fundet"
 
-#: src/tracker/tracker-search.c:931
+#: src/tracker/tracker-search.c:932
 msgid "Software"
 msgstr "Programmer"
 
-#: src/tracker/tracker-search.c:1016
+#: src/tracker/tracker-search.c:1017
 msgid "No software categories were found"
 msgstr "Ingen programkategorier blev fundet"
 
-#: src/tracker/tracker-search.c:1020
+#: src/tracker/tracker-search.c:1021
 msgid "Software Categories"
 msgstr "Programkategorier"
 
-#: src/tracker/tracker-search.c:1303
+#: src/tracker/tracker-search.c:1304
 msgid "No results were found matching your query"
 msgstr "Ingen resultater fundet, der matcher din forespørgsel"
 
-#: src/tracker/tracker-search.c:1307
+#: src/tracker/tracker-search.c:1308
 msgid "Results"
 msgstr "Resultater"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Søg efter indhold af en bestemt type eller alle typer"
-
-#: src/tracker/tracker-status.c:53E
+#: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Vis statistik om nuværende indeks / datasæt"
 
@@ -1345,15 +1343,6 @@ msgstr[1] "%d fejl registreret"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Ingen rapporter fundet"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Vis status og statistik om de indekserede data"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1502,11 +1491,11 @@ msgstr "Uden mærkat"
 msgid "File not indexed or already untagged"
 msgstr "Fil er ikke indekseret eller er allerede uden mærkat"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "Tilvalget --list er krævet for --show-files"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1514,22 +1503,43 @@ msgstr ""
 "Tilvalget --and-operator kan kun bruges med --list og mærkat-etiket-"
 "argumenter"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "Handlingerne tilføj og slet kan ikke bruges sammen"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "Tilvalget --description kan kun bruges med --add"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
+#~ msgid "daemon"
+#~ msgstr "daemon"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Tilføj, fjern eller vis etiketter"
+#~ msgid "extract"
+#~ msgstr "extract"
+
+#~ msgid "index"
+#~ msgstr "index"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr "Indeksér indhold med Trackers filsystemdataindsamler"
+
+#~ msgid "info"
+#~ msgstr "info"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "search"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "Søg efter indhold af en bestemt type eller alle typer"
+
+#~ msgid "status"
+#~ msgstr "status"
+
+#~ msgid "tag"
+#~ msgstr "tag"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "Ignorér stopord"
@@ -1693,9 +1703,6 @@ msgstr "Tilføj, fjern eller vis etiketter"
 
 #~ msgid "Search for emails"
 #~ msgstr "Søg efter e-mail"
-
-#~ msgid "Search for contacts"
-#~ msgstr "Søg efter kontakter"
 
 #~ msgid "Search for bookmarks (--all has no effect on this)"
 #~ msgstr "Søg efter bogmærker (--all har ingen effekt her)"
