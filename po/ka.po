@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-23 11:47+0200\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-08 04:57+0200\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -330,7 +330,7 @@ msgstr ""
 "დაყრდნობით"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -480,11 +480,11 @@ msgstr "— ლენტების ინდექსერის გაშვ
 msgid "— start the tracker index proxy"
 msgstr "— ტრეკერის ინდექსერის პროქსის გაშვება"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "მეტამონაცემების გამოღება ჩავარდა"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "ამ ფაილიდან მეტამონაცემების ან ინფორმაციის გამოღებისთვის მოდული ვერ ვიპოვე"
@@ -511,11 +511,11 @@ msgstr ""
 msgid "MODULE"
 msgstr "მოდული"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "გამოტანის შედეგი ფორმატებია: “sparql”, “turtle” ან “json-ld”"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "ფორმატი"
 
@@ -560,20 +560,58 @@ msgstr "30 წამი არააქტიურობის შემდე�
 msgid "— start the tracker writeback service"
 msgstr "— ტრეკერის უკუჩაწერის სერვისის გაჩვება"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "ხელმისაწვდომი localsearch3-ის ბრძანებებია:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"მითითებული ქვებრძანების შესახებ მეტი ინფორმაციისთვის იხილეთ 'localsearch3 "
+"გაუშვით, გააჩერეთ, გადატვირთეთ და იხილეთ სია დემონებისა, რომლებიც "
+"შემცველობის დაინდექსებაზე არიან პასუხისმგებლები"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "მეტამონაცემების მიღება ფაილიდან"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "მდებარეობის შემცველობის დაინდექსების გადართვა"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "მითითებული ფაილის შესახებ ყველა ხელმისაწვდომი ინფორმაციის ჩვენება"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "ინდექსის და კონფიგურაციის ჩამოყრა"
+
+#: src/tracker/main.c:72
+msgid "Search for content"
+msgstr "შემცველობის ძებნა"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "დაინდექსებული მონაცემების სტატუსისა და სტატისტიკის გამოტანა"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "დაამატეთ, წაშალეთ და მიიღეთ ჭდეები"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "სენდბოქსი სატესტო გარემოსთვის"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+msgid "Available localsearch commands are:"
+msgstr "ხელმისაწვდომი localsearch-ის ბრძანებებია:"
+
+#: src/tracker/main.c:216
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"მითითებული ქვებრძანების შესახებ მეტი ინფორმაციისთვის იხილეთ 'localsearch "
 "help <ბრძანება>."
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "\"%s\" localsearch3-ის ბრძანება არაა. იხილეთ \"localsearch3 --help\""
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "\"%s\" localsearch-ის ბრძანება არაა. იხილეთ \"localsearch --help\""
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -882,29 +920,18 @@ msgstr ""
 msgid "perhaps a disabled plugin?"
 msgstr "ალბათ დამატება გათიშულა?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "თუ არგუმენტები მითითებული არაა, ნაჩვენებია მონაცემის დამაინდექსებლების "
 "მდგომარეობა"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "უცნობი პარამეტრები"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "დემონი"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"გაუშვით, გააჩერეთ, გადატვირთეთ და იხილეთ სია დემონებისა, რომლებიც "
-"შემცველობის დაინდექსებაზე არიან პასუხისმგებლები"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -914,18 +941,9 @@ msgstr "D-Bus-თან კავშირის მიღების შეც
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "ვერ შევქმენი D-Bus პროქსი tracker-store-სთვის"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "შეცდომა tracker-extract-ის გაშვებისას: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "გაშლა"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "მეტამონაცემების მიღება ფაილიდან"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -967,19 +985,9 @@ msgstr "ბილიკი"
 msgid "Recursive"
 msgstr "რეკურსიული"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "დასაინდექსებლად მიუთითეთ ერთი ან მეტი მდებარეობა."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "ინდექსი"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr ""
-"შემცბელობის დაინდექსება ტრეკერის ფაილური სისტემის დამაინდექსებლის გამოყენებით"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1033,15 +1041,6 @@ msgstr "იმ URI-სთვის მეტამონაცემები �
 msgid "Could not get eligible status: "
 msgstr "უფლებამოსილების მდგომარეობის მიღება შეუძლებელია: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "ინფორმაცია"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "მითითებული ფაილის შესახებ ყველა ხელმისაწვდომი ინფორმაციის ჩვენება"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1077,15 +1076,6 @@ msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
 "ამ ფაილისთვის დაინდექსებული მონაცემები წაიშალა და ის თავიდან დაინდექსდება."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "ინდექსის და კონფიგურაციის ჩამოყრა"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1249,15 +1239,6 @@ msgstr "თქვენს მოთხოვნაზე შედეგებ�
 msgid "Results"
 msgstr "შედეგები"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "ძებნა"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "შემცველობის ტიპით ან ყველა ტიპით ძებნა"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "მიმდინარე ინდექსის / მონაცემების ნაკრების სტატისტიკის ჩვენება"
@@ -1363,15 +1344,6 @@ msgstr[1] "%d ჩაწერილი ჩავარდნა"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "ანგარიშები ვერ ვიპოვე"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "სტატუსი"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "დაინდექსებული მონაცემების სტატუსისა და სტატისტიკის გამოტანა"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1524,11 +1496,11 @@ msgstr "ჭდის გარეშე"
 msgid "File not indexed or already untagged"
 msgstr "ფაილი დაინდექსებული არაა ან ჭდე უკვე მოხსნილია"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "--show-files-თვის --list აუცილებელია"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1536,22 +1508,45 @@ msgstr ""
 "პარამეტრი --and-operator, მხოლოდ, --list და --tag ჭდის არგუმენტებთან ერთად "
 "შეგიძლიათ, გამოიყენოთ"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "დამატების და წაშლის ოპერაციებს ერთად ვერ გამოიყენებთ"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "პარამეტრს --descrption, მხოლოდ, --add-თან ერთად გამოიყენებთ"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "ჭდე"
+#~ msgid "daemon"
+#~ msgstr "დემონი"
 
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "დაამატეთ, წაშალეთ და მიიღეთ ჭდეები"
+#~ msgid "extract"
+#~ msgstr "გაშლა"
+
+#~ msgid "index"
+#~ msgstr "ინდექსი"
+
+#~ msgid "Index content using the Tracker filesystem miner"
+#~ msgstr ""
+#~ "შემცბელობის დაინდექსება ტრეკერის ფაილური სისტემის დამაინდექსებლის "
+#~ "გამოყენებით"
+
+#~ msgid "info"
+#~ msgstr "ინფორმაცია"
+
+#~ msgid "reset"
+#~ msgstr "reset"
+
+#~ msgid "search"
+#~ msgstr "ძებნა"
+
+#~ msgid "Search for content by type or across all types"
+#~ msgstr "შემცველობის ტიპით ან ყველა ტიპით ძებნა"
+
+#~ msgid "status"
+#~ msgstr "სტატუსი"
+
+#~ msgid "tag"
+#~ msgstr "ჭდე"
 
 #~ msgid "Unable to retrieve namespace prefixes"
 #~ msgstr "სახელების სივრცის პრეფიქსების მიღების შეცდომა"
