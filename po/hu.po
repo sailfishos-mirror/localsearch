@@ -9,8 +9,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-07-10 10:14+0000\n"
-"PO-Revision-Date: 2024-08-30 16:36+0200\n"
+"POT-Creation-Date: 2024-09-03 20:09+0000\n"
+"PO-Revision-Date: 2024-09-08 09:17+0200\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <openscope at fsf dot hu>\n"
 "Language: hu\n"
@@ -330,7 +330,7 @@ msgstr ""
 "Ellenőrzi, hogy a FÁJL alkalmas-e adatbányászásra a beállítások alapján"
 
 #: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:45 src/tracker/tracker-extract.c:46
+#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
 #: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
 #: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
 #: src/tracker/tracker-reset.c:56
@@ -485,11 +485,11 @@ msgstr "– a hírforrás-indexelő elindítása"
 msgid "— start the tracker index proxy"
 msgstr "– a követő indexelő proxy elindítása"
 
-#: src/tracker-extract/tracker-extract.c:716
+#: src/tracker-extract/tracker-extract.c:721
 msgid "Metadata extraction failed"
 msgstr "A metaadatok kinyerése sikertelen"
 
-#: src/tracker-extract/tracker-extract.c:798
+#: src/tracker-extract/tracker-extract.c:803
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Nem találhatók metaadat- vagy kinyerő modulok ezen fájl kezeléséhez"
 
@@ -514,11 +514,11 @@ msgstr ""
 msgid "MODULE"
 msgstr "MODUL"
 
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:42
+#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
 msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgstr "Kimeneti eredmények formátuma: „sparql”, „turtle” vagy „json-ld”"
 
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:43
+#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
 msgid "FORMAT"
 msgstr "FORMÁTUM"
 
@@ -563,20 +563,63 @@ msgstr "30 másodperc inaktivitás utáni leállítás kikapcsolása"
 msgid "— start the tracker writeback service"
 msgstr "– a követő visszaíró szolgáltatásának elindítása"
 
-#: src/tracker/main.c:123
-msgid "Available localsearch3 commands are:"
-msgstr "Az elérhető localsearch3 parancsok:"
-
-#: src/tracker/main.c:155
-msgid "See “localsearch3 help <command>” to read about a specific subcommand."
+#: src/tracker/main.c:67
+msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr ""
-"Az egyes alparancsokkal kapcsolatban olvassa el a „localsearch3 help <parancs"
+"Az indexelt tartalomért felelős démonok indítása, leállítása, újraindítása "
+"és felsorolása"
+
+#: src/tracker/main.c:68
+msgid "Extract metadata from a file"
+msgstr "Metaadatok kinyerése egy fájlból"
+
+#: src/tracker/main.c:69
+msgid "Trigger content indexing of a location"
+msgstr "Hely tartalomindexelésének aktiválása"
+
+#: src/tracker/main.c:70
+msgid "Retrieve all information available for a certain file"
+msgstr "Egy adott fájlhoz elérhető összes információ lekérdezése"
+
+#: src/tracker/main.c:71
+msgid "Reset the index and configuration"
+msgstr "Az index és a beállítások visszaállítása"
+
+#: src/tracker/main.c:72
+#| msgid "Search for folders"
+msgid "Search for content"
+msgstr "Tartalom keresése"
+
+#: src/tracker/main.c:73
+msgid "Provide status and statistics on the data indexed"
+msgstr "Állapot és statisztikák készítése az indexelt adatokról"
+
+#: src/tracker/main.c:74
+msgid "Add, remove and list tags"
+msgstr "Címkék hozzáadása, eltávolítása és felsorolása"
+
+#: src/tracker/main.c:75
+msgid "Sandbox for a testing environment"
+msgstr "Homokozó tesztelési környezethez"
+
+#: src/tracker/main.c:120 src/tracker/main.c:183
+#| msgid "Available localsearch3 commands are:"
+msgid "Available localsearch commands are:"
+msgstr "Az elérhető localsearch parancsok:"
+
+#: src/tracker/main.c:216
+#| msgid ""
+#| "See “localsearch3 help <command>” to read about a specific subcommand."
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+"Az egyes alparancsokkal kapcsolatban olvassa el a „localsearch help <parancs"
 ">” kimenetét."
 
-#: src/tracker/main.c:208
+#: src/tracker/main.c:259
 #, c-format
-msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
-msgstr "A(z) „%s” nem localsearch3 parancs. Lásd: „localsearch3 --help”"
+#| msgid "“%s” is not a localsearch3 command. See “localsearch3 --help”"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "A(z) „%s” nem localsearch parancs. Lásd: „localsearch --help”"
 
 #: src/tracker/tracker-daemon.c:99
 msgid "Unavailable"
@@ -887,29 +930,18 @@ msgstr ""
 msgid "perhaps a disabled plugin?"
 msgstr "talán egy letiltott bővítmény?"
 
-#: src/tracker/tracker-daemon.c:1055
+#: src/tracker/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr ""
 "Ha nincsenek argumentumok megadva, akkor az adatbányászok állapota jelenik "
 "meg"
 
-#: src/tracker/tracker-daemon.c:1060 src/tracker/tracker-extract.c:152
-#: src/tracker/tracker-index.c:395 src/tracker/tracker-info.c:635
-#: src/tracker/tracker-reset.c:270 src/tracker/tracker-search.c:1569
-#: src/tracker/tracker-status.c:560 src/tracker/tracker-tag.c:1055
+#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
+#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
+#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
+#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "Azonosítatlan kapcsolók"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-daemon.desktop.in:6
-msgid "daemon"
-msgstr "daemon"
-
-#: src/tracker/tracker-daemon.desktop.in:7
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Az indexelt tartalomért felelős démonok indítása, leállítása, újraindítása "
-"és felsorolása"
 
 #: src/tracker/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
@@ -919,18 +951,9 @@ msgstr "Nem sikerült lekérni a D-Bus kapcsolatot"
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "Nem sikerült létrehozni a D-Bus proxyt a tracker-store-hoz"
 
-#: src/tracker/tracker-extract.c:90
+#: src/tracker/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Nem sikerült futtatni a tracker-extract parancsot: "
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-extract.desktop.in:6
-msgid "extract"
-msgstr "extract"
-
-#: src/tracker/tracker-extract.desktop.in:7
-msgid "Extract metadata from a file"
-msgstr "Metaadatok kinyerése egy fájlból"
 
 #: src/tracker/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
@@ -972,18 +995,9 @@ msgstr "Útvonal"
 msgid "Recursive"
 msgstr "Rekurzív"
 
-#: src/tracker/tracker-index.c:408
+#: src/tracker/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "Adjon meg egy vagy több indexelendő helyet."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-index.desktop.in:6
-msgid "index"
-msgstr "index"
-
-#: src/tracker/tracker-index.desktop.in:7
-msgid "Index content using the Tracker filesystem miner"
-msgstr "Tartalom indexelése a Tracker fájlrendszerbányász használatával"
 
 #: src/tracker/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -1038,15 +1052,6 @@ msgstr "Nem érhetők el metaadatok ahhoz az URI-hoz"
 msgid "Could not get eligible status: "
 msgstr "Nem sikerült lekérni az alkalmassági állapotot: "
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-info.desktop.in:6
-msgid "info"
-msgstr "info"
-
-#: src/tracker/tracker-info.desktop.in:7
-msgid "Retrieve all information available for a certain file"
-msgstr "Egy adott fájlhoz elérhető összes információ lekérdezése"
-
 #: src/tracker/tracker-process.c:216
 #, c-format
 msgid "Could not kill process %d — “%s”"
@@ -1082,15 +1087,6 @@ msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
 "A fájlhoz tartozó indexelt adatok törölve lettek, és újra lesznek indexelve."
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-reset.desktop.in:6
-msgid "reset"
-msgstr "reset"
-
-#: src/tracker/tracker-reset.desktop.in:7
-msgid "Reset the index and configuration"
-msgstr "Az index és a beállítások visszaállítása"
 
 #: src/tracker/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
@@ -1258,15 +1254,6 @@ msgstr "Nincsenek a keresésnek megfelelő találatok"
 msgid "Results"
 msgstr "Eredmények"
 
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-search.desktop.in:6
-msgid "search"
-msgstr "search"
-
-#: src/tracker/tracker-search.desktop.in:7
-msgid "Search for content by type or across all types"
-msgstr "Tartalmak keresése típusonként vagy az összes típus között"
-
 #: src/tracker/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "Statisztikák megjelenítése a jelenlegi indexhez vagy adatkészlethez"
@@ -1372,15 +1359,6 @@ msgstr[1] "%d rögzített hiba"
 #: src/tracker/tracker-status.c:524
 msgid "No reports found"
 msgstr "Nem találhatók jelentések"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-status.desktop.in:6
-msgid "status"
-msgstr "status"
-
-#: src/tracker/tracker-status.desktop.in:7
-msgid "Provide status and statistics on the data indexed"
-msgstr "Állapot és statisztikák készítése az indexelt adatokról"
 
 #: src/tracker/tracker-tag.c:51
 msgid ""
@@ -1535,11 +1513,11 @@ msgstr "Nem címkézett"
 msgid "File not indexed or already untagged"
 msgstr "A fájl nincs indexelve, vagy már nem címkézett"
 
-#: src/tracker/tracker-tag.c:1064
+#: src/tracker/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "A --list kapcsoló szükséges a --show-files kapcsolóhoz"
 
-#: src/tracker/tracker-tag.c:1066
+#: src/tracker/tracker-tag.c:1067
 msgid ""
 "The --and-operator option can only be used with --list and tag label "
 "arguments"
@@ -1547,20 +1525,10 @@ msgstr ""
 "Az --and-operator kapcsoló csak a --list és címkenév argumentumokkal "
 "használható"
 
-#: src/tracker/tracker-tag.c:1068
+#: src/tracker/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "A hozzáadás és törlés műveletek együtt nem használhatók"
 
-#: src/tracker/tracker-tag.c:1070
+#: src/tracker/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "A --description kapcsoló csak az --add kapcsolóval használható"
-
-#. Translators: This is a CLI command name that should not be translated.
-#: src/tracker/tracker-tag.desktop.in:6
-msgid "tag"
-msgstr "tag"
-
-#: src/tracker/tracker-tag.desktop.in:7
-msgid "Add, remove and list tags"
-msgstr "Címkék hozzáadása, eltávolítása és felsorolása"
-
