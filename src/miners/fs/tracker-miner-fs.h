@@ -43,7 +43,6 @@ G_BEGIN_DECLS
 #define TRACKER_MINER_FS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_MINER_FS, TrackerMinerFSClass))
 
 typedef struct _TrackerMinerFS        TrackerMinerFS;
-typedef struct _TrackerMinerFSPrivate TrackerMinerFSPrivate;
 
 /**
  * TrackerMinerFS:
@@ -52,7 +51,6 @@ typedef struct _TrackerMinerFSPrivate TrackerMinerFSPrivate;
  **/
 struct _TrackerMinerFS {
 	TrackerMiner parent;
-	TrackerMinerFSPrivate *priv;
 };
 
 /**
