@@ -152,12 +152,17 @@ enum {
 	LAST_SIGNAL
 };
 
+static guint signals[LAST_SIGNAL] = { 0, };
+
 enum {
 	PROP_0,
 	PROP_THROTTLE,
 	PROP_FILE_ATTRIBUTES,
 	PROP_INDEXING_TREE,
+	N_PROPS,
 };
+
+static GParamSpec *props[N_PROPS] = { 0, };
 
 static void           fs_finalize                         (GObject              *object);
 static void           fs_constructed                      (GObject              *object);
@@ -215,8 +220,6 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
                                                                GParamSpec     *pspec,
                                                                gpointer        user_data);
 
-static guint signals[LAST_SIGNAL] = { 0, };
-
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
 
 #define EVENT_QUEUE_LOG_PREFIX "[Event Queue] "
@@ -256,28 +259,25 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	miner_class->paused  = miner_paused;
 	miner_class->resumed = miner_resumed;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_THROTTLE,
-	                                 g_param_spec_double ("throttle",
-	                                                      "Throttle",
-	                                                      "Modifier for the indexing speed, 0 is max speed",
-	                                                      0, 1, 0,
-	                                                      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_FILE_ATTRIBUTES,
-	                                 g_param_spec_string ("file-attributes",
-	                                                      "File attributes",
-	                                                      "File attributes",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_INDEXING_TREE,
-	                                 g_param_spec_object ("indexing-tree",
-	                                                      NULL, NULL,
-	                                                      TRACKER_TYPE_INDEXING_TREE,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
+	props[PROP_THROTTLE] =
+		g_param_spec_double ("throttle", NULL, NULL,
+		                     0, 1, 0,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_FILE_ATTRIBUTES] =
+		g_param_spec_string ("file-attributes", NULL, NULL,
+		                     NULL,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_INDEXING_TREE] =
+		g_param_spec_object ("indexing-tree", NULL, NULL,
+		                     TRACKER_TYPE_INDEXING_TREE,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties (object_class, N_PROPS, props);
 
 	/**
 	 * TrackerMinerFS::finished:
