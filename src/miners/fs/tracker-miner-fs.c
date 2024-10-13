@@ -1270,20 +1270,16 @@ static gboolean
 item_queue_handlers_cb (gpointer user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	gboolean retval = FALSE;
 	gint i;
 
 	for (i = 0; i < MAX_SIMULTANEOUS_ITEMS; i++) {
-		retval = miner_handle_next_item (fs);
-		if (retval == FALSE)
-			break;
+		if (!miner_handle_next_item (fs)) {
+			fs->priv->item_queues_handler_id = 0;
+			return G_SOURCE_REMOVE;
+		}
 	}
 
-	if (retval == FALSE) {
-		fs->priv->item_queues_handler_id = 0;
-	}
-
-	return retval;
+	return G_SOURCE_CONTINUE;
 }
 
 static guint
