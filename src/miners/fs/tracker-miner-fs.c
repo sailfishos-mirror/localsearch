@@ -898,7 +898,7 @@ sparql_buffer_flush_cb (GObject      *object,
 	g_clear_error (&error);
 }
 
-static gboolean
+static void
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
                     GFileInfo      *info,
@@ -915,7 +915,7 @@ item_add_or_update (TrackerMinerFS *fs,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
 		if (!info)
-			return TRUE;
+			return;
 	}
 
 	uri = g_file_get_uri (file);
@@ -933,11 +933,9 @@ item_add_or_update (TrackerMinerFS *fs,
 
 	g_free (uri);
 	g_object_unref (info);
-
-	return TRUE;
 }
 
-static gboolean
+static void
 item_remove (TrackerMinerFS *fs,
              GFile          *file,
              gboolean        is_dir,
@@ -966,11 +964,9 @@ item_remove (TrackerMinerFS *fs,
 	}
 
 	g_free (uri);
-
-	return TRUE;
 }
 
-static gboolean
+static void
 item_move (TrackerMinerFS *fs,
            GFile          *dest_file,
            GFile          *source_file,
@@ -1010,8 +1006,6 @@ item_move (TrackerMinerFS *fs,
 	                                            recursive);
 	g_free (uri);
 	g_free (source_uri);
-
-	return TRUE;
 }
 
 static gboolean
@@ -1239,16 +1233,16 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	/* Handle queues */
 	switch (type) {
 	case TRACKER_MINER_FS_EVENT_MOVED:
-		keep_processing = item_move (fs, file, source_file, is_dir);
+		item_move (fs, file, source_file, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_DELETED:
-		keep_processing = item_remove (fs, file, is_dir, FALSE);
+		item_remove (fs, file, is_dir, FALSE);
 		break;
 	case TRACKER_MINER_FS_EVENT_CREATED:
-		keep_processing = item_add_or_update (fs, file, info, FALSE, TRUE);
+		item_add_or_update (fs, file, info, FALSE, TRUE);
 		break;
 	case TRACKER_MINER_FS_EVENT_UPDATED:
-		keep_processing = item_add_or_update (fs, file, info, attributes_update, FALSE);
+		item_add_or_update (fs, file, info, attributes_update, FALSE);
 		break;
 	default:
 		g_assert_not_reached ();
