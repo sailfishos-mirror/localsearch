@@ -1280,20 +1280,26 @@ item_queue_handlers_cb (gpointer user_data)
 	return G_SOURCE_CONTINUE;
 }
 
-static guint
-_tracker_idle_add (TrackerMinerFS *fs,
-                   GSourceFunc     func,
-                   gpointer        user_data)
+static void
+queue_handler_set_up (TrackerMinerFS *fs)
 {
+	guint source_id;
 	guint interval;
 
+	g_assert (fs->priv->item_queues_handler_id == 0);
 	interval = TRACKER_CRAWLER_MAX_TIMEOUT_INTERVAL * fs->priv->throttle;
 
 	if (interval == 0) {
-		return g_idle_add_full (TRACKER_TASK_PRIORITY, func, user_data, NULL);
+		source_id = g_idle_add_full (TRACKER_TASK_PRIORITY,
+		                             item_queue_handlers_cb,
+		                             fs, NULL);
 	} else {
-		return g_timeout_add_full (TRACKER_TASK_PRIORITY, interval, func, user_data, NULL);
+		source_id = g_timeout_add_full (TRACKER_TASK_PRIORITY, interval,
+		                                item_queue_handlers_cb,
+		                                fs, NULL);
 	}
+
+	fs->priv->item_queues_handler_id = source_id;
 }
 
 static void
@@ -1335,10 +1341,7 @@ queue_handler_maybe_set_up (TrackerMinerFS *fs)
 	}
 
 	trace_eq ("   scheduled in idle");
-	fs->priv->item_queues_handler_id =
-		_tracker_idle_add (fs,
-		                   item_queue_handlers_cb,
-		                   fs);
+	queue_handler_set_up (fs);
 }
 
 static gint
@@ -1638,12 +1641,8 @@ tracker_miner_fs_set_throttle (TrackerMinerFS *fs,
 
 	/* Update timeouts */
 	if (fs->priv->item_queues_handler_id != 0) {
-		g_source_remove (fs->priv->item_queues_handler_id);
-
-		fs->priv->item_queues_handler_id =
-			_tracker_idle_add (fs,
-			                   item_queue_handlers_cb,
-			                   fs);
+		g_clear_handle_id (&fs->priv->item_queues_handler_id, g_source_remove);
+		queue_handler_set_up (fs);
 	}
 }
 
