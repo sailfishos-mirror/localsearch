@@ -207,7 +207,7 @@ static void           file_notifier_directory_finished    (TrackerFileNotifier *
 static void           file_notifier_finished              (TrackerFileNotifier *notifier,
                                                            gpointer             user_data);
 
-static void           item_queue_handlers_set_up          (TrackerMinerFS       *fs);
+static void           queue_handler_maybe_set_up          (TrackerMinerFS       *fs);
 
 static void           task_pool_limit_reached_notify_cb       (GObject        *object,
                                                                GParamSpec     *pspec,
@@ -662,9 +662,8 @@ task_pool_limit_reached_notify_cb (GObject    *object,
 				   GParamSpec *pspec,
 				   gpointer    user_data)
 {
-	if (!tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
-		item_queue_handlers_set_up (TRACKER_MINER_FS (user_data));
-	}
+	if (!tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object)))
+		queue_handler_maybe_set_up (user_data);
 }
 
 static void
@@ -729,9 +728,8 @@ miner_resumed (TrackerMiner *miner)
 	/* Only set up queue handler if we have items waiting to be
 	 * processed.
 	 */
-	if (tracker_miner_fs_has_items_to_process (fs)) {
-		item_queue_handlers_set_up (fs);
-	}
+	if (tracker_miner_fs_has_items_to_process (fs))
+		queue_handler_maybe_set_up (fs);
 }
 
 static void
@@ -892,7 +890,7 @@ sparql_buffer_flush_cb (GObject      *object,
 	}
 
 	check_notifier_high_water (fs);
-	item_queue_handlers_set_up (fs);
+	queue_handler_maybe_set_up (fs);
 
 	g_ptr_array_unref (tasks);
 	g_clear_error (&error);
@@ -1299,7 +1297,7 @@ _tracker_idle_add (TrackerMinerFS *fs,
 }
 
 static void
-item_queue_handlers_set_up (TrackerMinerFS *fs)
+queue_handler_maybe_set_up (TrackerMinerFS *fs)
 {
 	trace_eq ("Setting up queue handlers...");
 	if (fs->priv->item_queues_handler_id != 0) {
@@ -1447,7 +1445,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 			tracker_priority_queue_add (fs->priv->items, event, priority);
 		g_hash_table_replace (fs->priv->items_by_file,
 		                      g_object_ref (event->file), event);
-		item_queue_handlers_set_up (fs);
+		queue_handler_maybe_set_up (fs);
 		check_notifier_high_water (fs);
 	}
 }
@@ -1582,7 +1580,7 @@ file_notifier_finished (TrackerFileNotifier *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 
-	item_queue_handlers_set_up (fs);
+	queue_handler_maybe_set_up (fs);
 }
 
 static void
