@@ -1259,8 +1259,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		notify_roots_finished (fs);
 	}
 
-	item_queue_handlers_set_up (fs);
-
 	g_clear_object (&file);
 	g_clear_object (&source_file);
 	g_clear_object (&info);
