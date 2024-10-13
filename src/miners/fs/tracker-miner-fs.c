@@ -218,17 +218,15 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
 
-/* For TRACKER_DEBUG=miner-fs-events */
-#ifdef G_ENABLE_DEBUG
-#define EVENT_QUEUE_LOG_PREFIX "[Event Queues] "
-#define EVENT_QUEUE_STATUS_TIMEOUT_SECS 30
+#define EVENT_QUEUE_LOG_PREFIX "[Event Queue] "
 
-static void
+G_GNUC_UNUSED static void
 debug_print_event (QueueEvent *event)
 {
 	const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED" };
 	gchar *uri1 = g_file_get_uri (event->file);
 	gchar *uri2 = event->dest_file ? g_file_get_uri (event->dest_file) : NULL;
+
 	g_message ("%s New %s event: %s%s%s%s",
 	            EVENT_QUEUE_LOG_PREFIX,
 	            event_type_name[event->type],
@@ -239,14 +237,6 @@ debug_print_event (QueueEvent *event)
 	g_free (uri1);
 	g_free (uri2);
 }
-
-#define trace_eq(message, ...) TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX message, ##__VA_ARGS__))
-#define trace_eq_event(event) TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
-
-#else
-#define trace_eq(...)
-#define trace_eq_event(...)
-#endif /* G_ENABLE_DEBUG */
 
 static void
 tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
@@ -1305,21 +1295,23 @@ queue_handler_set_up (TrackerMinerFS *fs)
 static void
 queue_handler_maybe_set_up (TrackerMinerFS *fs)
 {
-	trace_eq ("Setting up queue handlers...");
+	TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "Setting up queue handlers..."));
+
 	if (fs->priv->item_queues_handler_id != 0) {
-		trace_eq ("   cancelled: already one active");
+		TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: already one active"));
 		return;
 	}
 
 	if (fs->priv->is_paused) {
-		trace_eq ("   cancelled: paused");
+		TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: paused"));
 		return;
 	}
 
 	/* Already processing max number of sparql updates */
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->priv->sparql_buffer))) {
-		trace_eq ("   cancelled: pool limit reached (sparql buffer: %u)",
-		          tracker_task_pool_get_limit (TRACKER_TASK_POOL (fs->priv->sparql_buffer)));
+		TRACKER_NOTE (MINER_FS_EVENTS,
+		              g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: pool limit reached (sparql buffer: %u)",
+		                         tracker_task_pool_get_limit (TRACKER_TASK_POOL (fs->priv->sparql_buffer))));
 		return;
 	}
 
@@ -1340,7 +1332,7 @@ queue_handler_maybe_set_up (TrackerMinerFS *fs)
 		g_free (status);
 	}
 
-	trace_eq ("   scheduled in idle");
+	TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   scheduled in idle"));
 	queue_handler_set_up (fs);
 }
 
@@ -1441,7 +1433,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 							       (GDestroyNotify) queue_event_free);
 		}
 
-		trace_eq_event (event);
+		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
 
 		assign_root_node (fs, event);
 		event->queue_node =
