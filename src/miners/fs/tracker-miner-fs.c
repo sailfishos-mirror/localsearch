@@ -224,8 +224,11 @@ G_GNUC_UNUSED static void
 debug_print_event (QueueEvent *event)
 {
 	const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED" };
-	gchar *uri1 = g_file_get_uri (event->file);
-	gchar *uri2 = event->dest_file ? g_file_get_uri (event->dest_file) : NULL;
+	g_autofree char *uri1 = NULL, *uri2 = NULL;
+
+	uri1 = g_file_get_uri (event->file);
+	if (event->dest_file)
+		uri2 = g_file_get_uri (event->dest_file);
 
 	g_message ("%s New %s event: %s%s%s%s",
 	            EVENT_QUEUE_LOG_PREFIX,
@@ -234,8 +237,6 @@ debug_print_event (QueueEvent *event)
 	            uri1,
 	            uri2 ? "->" : "",
 	            uri2 ? uri2 : "");
-	g_free (uri1);
-	g_free (uri2);
 }
 
 static void
@@ -842,12 +843,11 @@ sparql_buffer_flush_cb (GObject      *object,
 		task_file = tracker_task_get_file (task);
 
 		if (error) {
-			gchar *sparql;
+			g_autofree char *sparql = NULL;
 
 			sparql = tracker_sparql_task_get_sparql (task);
 			tracker_error_report (task_file, error->message, sparql);
 			fs->priv->total_files_notified_error++;
-			g_free (sparql);
 		} else {
 			tracker_error_report_delete (task_file);
 		}
@@ -1119,7 +1119,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		extraction_elapsed = g_timer_elapsed (fs->priv->extraction_timer, NULL);
 
 		if (!tracker_file_notifier_is_active (fs->priv->file_notifier)) {
-			gchar *status;
+			g_autofree char *status = NULL;
 			gint remaining_time;
 
 			g_object_get (fs, "status", &status, NULL);
@@ -1145,13 +1145,11 @@ miner_handle_next_item (TrackerMinerFS *fs)
 				              "remaining-time", remaining_time,
 				              NULL);
 			}
-
-			g_free (status);
 		}
 
 		if (++info_last >= 5 &&
 		    (gint) (progress_last * 100) != (gint) (progress_now * 100)) {
-			gchar *str1, *str2;
+			g_autofree char *str1 = NULL, *str2 = NULL;
 
 			info_last = 0;
 			progress_last = progress_now;
@@ -1168,9 +1166,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 			        items_processed + items_remaining,
 			        str1,
 			        str2);
-
-			g_free (str2);
-			g_free (str1);
 		}
 	}
 
@@ -1303,7 +1298,7 @@ queue_handler_maybe_set_up (TrackerMinerFS *fs)
 	}
 
 	if (!tracker_file_notifier_is_active (fs->priv->file_notifier)) {
-		gchar *status;
+		g_autofree char *status = NULL;
 		gdouble progress;
 
 		g_object_get (fs,
@@ -1315,8 +1310,6 @@ queue_handler_maybe_set_up (TrackerMinerFS *fs)
 		if (progress > 0.01 && g_strcmp0 (status, "Processing…") != 0) {
 			g_object_set (fs, "status", "Processing…", NULL);
 		}
-
-		g_free (status);
 	}
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   scheduled in idle"));
@@ -1495,7 +1488,7 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
 {
 	TrackerMinerFS *fs = user_data;
 	TrackerDirectoryFlags flags;
-	gchar *str, *uri;
+	g_autofree char *str = NULL, *uri = NULL;
 
 	uri = g_file_get_uri (directory);
 	tracker_indexing_tree_get_root (fs->priv->indexing_tree,
@@ -1515,8 +1508,6 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
                       "status", str,
                       "remaining-time", -1,
                       NULL);
-	g_free (str);
-	g_free (uri);
 }
 
 static void
@@ -1529,7 +1520,7 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
                                   gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	gchar *str, *uri;
+	g_autofree char *str = NULL, *uri = NULL;
 
 	/* Update stats */
 	fs->priv->total_directories_found += directories_found;
@@ -1545,9 +1536,6 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
                       "status", str,
                       "remaining-time", -1,
                       NULL);
-
-	g_free (str);
-	g_free (uri);
 
 	if (directories_found == 0 &&
 	    files_found == 0) {
@@ -1648,7 +1636,7 @@ const gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 				 GFile          *file)
 {
-	GFileInfo *info;
+	g_autoptr (GFileInfo) info = NULL;
 	gchar *str;
 
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
@@ -1668,14 +1656,11 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 	if (!info)
 		return NULL;
 
-	if (!tracker_indexing_tree_file_is_indexable (fs->priv->indexing_tree, file, info)) {
-		g_object_unref (info);
+	if (!tracker_indexing_tree_file_is_indexable (fs->priv->indexing_tree, file, info))
 		return NULL;
-	}
 
 	str = TRACKER_MINER_FS_GET_CLASS (fs)->get_content_identifier (fs, file, info);
 	tracker_lru_add (fs->priv->urn_lru, g_object_ref (file), str);
-	g_object_unref (info);
 
 	return str;
 }
