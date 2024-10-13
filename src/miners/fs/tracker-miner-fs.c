@@ -215,7 +215,6 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
                                                                GParamSpec     *pspec,
                                                                gpointer        user_data);
 
-static GQuark quark_last_queue_event = 0;
 static guint signals[LAST_SIGNAL] = { 0, };
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
@@ -341,8 +340,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 					 G_SIGNAL_RUN_LAST, 0,
 					 NULL, NULL, NULL,
 					 G_TYPE_NONE, 0);
-
-	quark_last_queue_event = g_quark_from_static_string ("tracker-last-queue-event");
 }
 
 static void
