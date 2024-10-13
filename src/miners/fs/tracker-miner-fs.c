@@ -279,67 +279,33 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 
-	/**
-	 * TrackerMinerFS::finished:
-	 * @miner_fs: the #TrackerMinerFS
-	 * @elapsed: elapsed time since mining was started
-	 * @directories_found: number of directories found
-	 * @directories_ignored: number of ignored directories
-	 * @files_found: number of files found
-	 * @files_ignored: number of ignored files
-	 * @changes: number of changes processed
-	 *
-	 * The ::finished signal is emitted when @miner_fs has finished
-	 * all pending processing.
-	 *
-	 * Since: 0.8
-	 **/
 	signals[FINISHED] =
 		g_signal_new ("finished",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, finished),
-		              NULL, NULL,
-		              NULL,
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE,
-		              6,
-		              G_TYPE_DOUBLE,
-		              G_TYPE_UINT,
-		              G_TYPE_UINT,
-		              G_TYPE_UINT,
-		              G_TYPE_UINT,
-		              G_TYPE_UINT);
+		              6, G_TYPE_DOUBLE, G_TYPE_UINT, G_TYPE_UINT,
+		              G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT);
 
-	/**
-	 * TrackerMinerFS::finished-root:
-	 * @miner_fs: the #TrackerMinerFS
-	 * @file: a #GFile
-	 *
-	 * The ::finished-crawl signal is emitted when @miner_fs has
-	 * finished finding all resources that need to be indexed
-	 * with the root location of @file. At this point, it's likely
-	 * many are still in the queue to be added to the database,
-	 * but this gives some indication that a location is
-	 * processed.
-	 *
-	 * Since: 1.2
-	 **/
 	signals[FINISHED_ROOT] =
 		g_signal_new ("finished-root",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, finished_root),
 		              NULL, NULL,
-		              NULL,
+		              g_cclosure_marshal_VOID__OBJECT,
 		              G_TYPE_NONE,
-		              1,
-		              G_TYPE_FILE);
+		              1, G_TYPE_FILE);
 
-	signals[CORRUPT] = g_signal_new ("corrupt",
-					 G_TYPE_FROM_CLASS (object_class),
-					 G_SIGNAL_RUN_LAST, 0,
-					 NULL, NULL, NULL,
-					 G_TYPE_NONE, 0);
+	signals[CORRUPT] =
+		g_signal_new ("corrupt",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
 }
 
 static void
