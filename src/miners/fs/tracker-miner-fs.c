@@ -901,14 +901,15 @@ sparql_buffer_flush_cb (GObject      *object,
 static void
 item_add_or_update (TrackerMinerFS *fs,
                     GFile          *file,
-                    GFileInfo      *info,
+                    GFileInfo      *file_info,
                     gboolean        attributes_update,
                     gboolean        create)
 {
-	gchar *uri;
+	g_autoptr (GFileInfo) info = NULL;
+	g_autofree char *uri = NULL;
 
-	if (info) {
-		g_object_ref (info);
+	if (file_info) {
+		g_set_object (&info, file_info);
 	} else {
 		info = g_file_query_info (file,
 		                          fs->priv->file_attributes,
@@ -930,9 +931,6 @@ item_add_or_update (TrackerMinerFS *fs,
 		TRACKER_MINER_FS_GET_CLASS (fs)->process_file_attributes (fs, file, info,
 		                                                          fs->priv->sparql_buffer);
 	}
-
-	g_free (uri);
-	g_object_unref (info);
 }
 
 static void
@@ -941,7 +939,7 @@ item_remove (TrackerMinerFS *fs,
              gboolean        is_dir,
              gboolean        only_children)
 {
-	gchar *uri;
+	g_autofree char *uri = NULL;
 
 	uri = g_file_get_uri (file);
 
@@ -962,8 +960,6 @@ item_remove (TrackerMinerFS *fs,
 		                                              fs->priv->sparql_buffer,
 		                                              is_dir);
 	}
-
-	g_free (uri);
 }
 
 static void
@@ -972,7 +968,7 @@ item_move (TrackerMinerFS *fs,
            GFile          *source_file,
            gboolean        is_dir)
 {
-	gchar *uri, *source_uri;
+	g_autofree char *uri = NULL, *source_uri = NULL;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean recursive;
 
@@ -1004,8 +1000,6 @@ item_move (TrackerMinerFS *fs,
 	TRACKER_MINER_FS_GET_CLASS (fs)->move_file (fs, dest_file, source_file,
 	                                            fs->priv->sparql_buffer,
 	                                            recursive);
-	g_free (uri);
-	g_free (source_uri);
 }
 
 static gboolean
