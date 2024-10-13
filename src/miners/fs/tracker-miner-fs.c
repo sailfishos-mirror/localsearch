@@ -497,42 +497,29 @@ queue_event_is_equal_or_descendant (QueueEvent *event,
 static void
 fs_finalize (GObject *object)
 {
-	TrackerMinerFSPrivate *priv;
-
-	priv = TRACKER_MINER_FS (object)->priv;
+	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
 
 	g_timer_destroy (priv->timer);
 	g_timer_destroy (priv->extraction_timer);
 
 	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
+	g_clear_handle_id (&priv->item_queues_handler_id, g_source_remove);
 
-	if (priv->item_queues_handler_id) {
-		g_source_remove (priv->item_queues_handler_id);
-		priv->item_queues_handler_id = 0;
-	}
-
-	if (priv->file_notifier) {
+	if (priv->file_notifier)
 		tracker_file_notifier_stop (priv->file_notifier);
-	}
 
-	if (priv->sparql_buffer) {
-		g_object_unref (priv->sparql_buffer);
-	}
-
+	g_clear_object (&priv->sparql_buffer);
 	g_hash_table_unref (priv->items_by_file);
+
 	tracker_priority_queue_foreach (priv->items,
 					(GFunc) queue_event_free,
 					NULL);
 	tracker_priority_queue_unref (priv->items);
 
-	if (priv->indexing_tree) {
-		g_object_unref (priv->indexing_tree);
-	}
-
-	if (priv->file_notifier) {
-		g_object_unref (priv->file_notifier);
-	}
-
+	g_clear_object (&priv->indexing_tree);
+	g_clear_object (&priv->file_notifier);
 	g_hash_table_unref (priv->roots_to_notify);
 	g_free (priv->file_attributes);
 
