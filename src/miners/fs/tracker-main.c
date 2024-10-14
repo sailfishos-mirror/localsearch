@@ -821,7 +821,8 @@ main (gint argc, gchar *argv[])
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	GMemoryMonitor *memory_monitor;
 #endif
-	gchar *domain_name, *dbus_name;
+	gchar *domain_name;
+	g_autofree char *dbus_name = NULL, *legacy_dbus_name = NULL;
 	TrackerFilesInterface *files_interface;
 	gboolean initial_index = TRUE;
 
@@ -977,22 +978,17 @@ main (gint argc, gchar *argv[])
 		g_critical ("Could not request DBus name '%s': %s",
 		            dbus_name, error->message);
 		g_error_free (error);
-		g_free (dbus_name);
 		return EXIT_FAILURE;
 	}
 
-	g_clear_pointer (&dbus_name, g_free);
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, LEGACY_DBUS_NAME_SUFFIX);
+	legacy_dbus_name = tracker_domain_ontology_get_domain (domain_ontology, LEGACY_DBUS_NAME_SUFFIX);
 
-	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
+	if (!tracker_dbus_request_name (connection, legacy_dbus_name, &error)) {
 		g_critical ("Could not request legacy DBus name '%s': %s",
-		            dbus_name, error->message);
+		            legacy_dbus_name, error->message);
 		g_error_free (error);
-		g_free (dbus_name);
 		return EXIT_FAILURE;
 	}
-
-	g_free (dbus_name);
 
 	/* Check if we should crawl and if we should force mtime
 	 * checking based on the config.
