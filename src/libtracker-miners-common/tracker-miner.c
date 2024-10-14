@@ -38,12 +38,6 @@
  */
 #define PROGRESS_ROUNDED(x) ((x) < 0.01 ? 0.00 : (ceil (((x) * 100) - 0.49) / 100))
 
-#ifdef G_ENABLE_DEBUG
-#define trace(message, ...) TRACKER_NOTE (STATUS, g_message (message, ##__VA_ARGS__))
-#else
-#define trace(...)
-#endif /* MINER_STATUS_ENABLE_TRACE */
-
 /**
  * SECTION:tracker-miner-object
  * @short_description: Abstract base class for data miners
@@ -315,9 +309,10 @@ miner_set_property (GObject      *object,
 
 		new_status = g_value_get_string (value);
 
-		trace ("(Miner:'%s') set property:'status' to '%s'",
-		       G_OBJECT_TYPE_NAME (miner),
-		       new_status);
+		TRACKER_NOTE (STATUS,
+		              g_message ("(Miner:'%s') set property:'status' to '%s'",
+		                         G_OBJECT_TYPE_NAME (miner),
+		                         new_status));
 
 		if (miner->priv->status && new_status &&
 		    strcmp (miner->priv->status, new_status) == 0) {
@@ -332,13 +327,15 @@ miner_set_property (GObject      *object,
 		if (new_status != NULL) {
 			if (g_ascii_strcasecmp (new_status, "Initializing") == 0 &&
 			    miner->priv->progress != 0.0) {
-				trace ("(Miner:'%s') Set progress to 0.0 from status:'Initializing'",
-				       G_OBJECT_TYPE_NAME (miner));
+				TRACKER_NOTE (STATUS,
+				              g_message ("(Miner:'%s') Set progress to 0.0 from status:'Initializing'",
+				                         G_OBJECT_TYPE_NAME (miner)));
 				miner->priv->progress = 0.0;
 			} else if (g_ascii_strcasecmp (new_status, "Idle") == 0 &&
 			           miner->priv->progress != 1.0) {
-				trace ("(Miner:'%s') Set progress to 1.0 from status:'Idle'",
-				       G_OBJECT_TYPE_NAME (miner));
+				TRACKER_NOTE (STATUS,
+				              g_message ("(Miner:'%s') Set progress to 1.0 from status:'Idle'",
+				                         G_OBJECT_TYPE_NAME (miner)));
 				miner->priv->progress = 1.0;
 			}
 		}
@@ -356,10 +353,11 @@ miner_set_property (GObject      *object,
 		gdouble new_progress;
 
 		new_progress = PROGRESS_ROUNDED (g_value_get_double (value));
-		trace ("(Miner:'%s') Set property:'progress' to '%2.2f' (%2.2f before rounded)",
-		         G_OBJECT_TYPE_NAME (miner),
-		         new_progress,
-		         g_value_get_double (value));
+		TRACKER_NOTE (STATUS,
+		              g_message ("(Miner:'%s') Set property:'progress' to '%2.2f' (%2.2f before rounded)",
+		                         G_OBJECT_TYPE_NAME (miner),
+		                         new_progress,
+		                         g_value_get_double (value)));
 
 		/* NOTE: We don't round the current progress before
 		 * comparison because we use the rounded value when
@@ -378,16 +376,18 @@ miner_set_property (GObject      *object,
 		if (new_progress == 0.0) {
 			if (miner->priv->status == NULL ||
 			    g_ascii_strcasecmp (miner->priv->status, "Initializing") != 0) {
-				trace ("(Miner:'%s') Set status:'Initializing' from progress:0.0",
-				       G_OBJECT_TYPE_NAME (miner));
+				TRACKER_NOTE (STATUS,
+				              g_message ("(Miner:'%s') Set status:'Initializing' from progress:0.0",
+				                         G_OBJECT_TYPE_NAME (miner)));
 				g_free (miner->priv->status);
 				miner->priv->status = g_strdup ("Initializing");
 			}
 		} else if (new_progress == 1.0) {
 			if (miner->priv->status == NULL ||
 			    g_ascii_strcasecmp (miner->priv->status, "Idle") != 0) {
-				trace ("(Miner:'%s') Set status:'Idle' from progress:1.0",
-				       G_OBJECT_TYPE_NAME (miner));
+				TRACKER_NOTE (STATUS,
+				              g_message ("(Miner:'%s') Set status:'Idle' from progress:1.0",
+				                         G_OBJECT_TYPE_NAME (miner)));
 				g_free (miner->priv->status);
 				miner->priv->status = g_strdup ("Idle");
 			}
