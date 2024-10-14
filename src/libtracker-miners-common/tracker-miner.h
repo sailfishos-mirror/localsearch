@@ -84,7 +84,6 @@ G_BEGIN_DECLS
 #define TRACKER_MINER_ERROR        tracker_miner_error_quark()
 
 typedef struct _TrackerMiner TrackerMiner;
-typedef struct _TrackerMinerPrivate TrackerMinerPrivate;
 
 /**
  * TrackerMiner:
@@ -93,7 +92,6 @@ typedef struct _TrackerMinerPrivate TrackerMinerPrivate;
  **/
 struct _TrackerMiner {
 	GObject parent_instance;
-	TrackerMinerPrivate *priv;
 };
 
 /**

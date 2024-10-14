@@ -49,6 +49,8 @@
  * task.
  **/
 
+typedef struct _TrackerMinerPrivate TrackerMinerPrivate;
+
 struct _TrackerMinerPrivate {
 	TrackerSparqlConnection *connection;
 	gboolean started;
@@ -268,20 +270,20 @@ tracker_miner_class_init (TrackerMinerClass *klass)
 static void
 tracker_miner_init (TrackerMiner *miner)
 {
-	miner->priv = tracker_miner_get_instance_private (miner);
 }
 
 static gboolean
 miner_update_progress_cb (gpointer data)
 {
 	TrackerMiner *miner = data;
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
 	g_signal_emit (miner, signals[PROGRESS], 0,
-	               miner->priv->status,
-	               miner->priv->progress,
-	               miner->priv->remaining_time);
+	               priv->status,
+	               priv->progress,
+	               priv->remaining_time);
 
-	miner->priv->update_id = 0;
+	priv->update_id = 0;
 
 	return FALSE;
 }
@@ -293,6 +295,7 @@ miner_set_property (GObject      *object,
                     GParamSpec   *pspec)
 {
 	TrackerMiner *miner = TRACKER_MINER (object);
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
 	/* Quite often, we see status of 100% and still have
 	 * status messages saying Processing... which is not
@@ -314,34 +317,34 @@ miner_set_property (GObject      *object,
 		                         G_OBJECT_TYPE_NAME (miner),
 		                         new_status));
 
-		if (miner->priv->status && new_status &&
-		    strcmp (miner->priv->status, new_status) == 0) {
+		if (priv->status && new_status &&
+		    strcmp (priv->status, new_status) == 0) {
 			/* Same, do nothing */
 			break;
 		}
 
-		g_free (miner->priv->status);
-		miner->priv->status = g_strdup (new_status);
+		g_free (priv->status);
+		priv->status = g_strdup (new_status);
 
 		/* Check progress matches special statuses */
 		if (new_status != NULL) {
 			if (g_ascii_strcasecmp (new_status, "Initializing") == 0 &&
-			    miner->priv->progress != 0.0) {
+			    priv->progress != 0.0) {
 				TRACKER_NOTE (STATUS,
 				              g_message ("(Miner:'%s') Set progress to 0.0 from status:'Initializing'",
 				                         G_OBJECT_TYPE_NAME (miner)));
-				miner->priv->progress = 0.0;
+				priv->progress = 0.0;
 			} else if (g_ascii_strcasecmp (new_status, "Idle") == 0 &&
-			           miner->priv->progress != 1.0) {
+			           priv->progress != 1.0) {
 				TRACKER_NOTE (STATUS,
 				              g_message ("(Miner:'%s') Set progress to 1.0 from status:'Idle'",
 				                         G_OBJECT_TYPE_NAME (miner)));
-				miner->priv->progress = 1.0;
+				priv->progress = 1.0;
 			}
 		}
 
-		if (miner->priv->update_id == 0) {
-			miner->priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
+		if (priv->update_id == 0) {
+			priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
 			                                          miner_update_progress_cb,
 			                                          miner,
 			                                          NULL);
@@ -365,39 +368,39 @@ miner_set_property (GObject      *object,
 		 *
 		 * Only notify 1% changes
 		 */
-		if (new_progress == miner->priv->progress) {
+		if (new_progress == priv->progress) {
 			/* Same, do nothing */
 			break;
 		}
 
-		miner->priv->progress = new_progress;
+		priv->progress = new_progress;
 
 		/* Check status matches special progress values */
 		if (new_progress == 0.0) {
-			if (miner->priv->status == NULL ||
-			    g_ascii_strcasecmp (miner->priv->status, "Initializing") != 0) {
+			if (priv->status == NULL ||
+			    g_ascii_strcasecmp (priv->status, "Initializing") != 0) {
 				TRACKER_NOTE (STATUS,
 				              g_message ("(Miner:'%s') Set status:'Initializing' from progress:0.0",
 				                         G_OBJECT_TYPE_NAME (miner)));
-				g_free (miner->priv->status);
-				miner->priv->status = g_strdup ("Initializing");
+				g_free (priv->status);
+				priv->status = g_strdup ("Initializing");
 			}
 		} else if (new_progress == 1.0) {
-			if (miner->priv->status == NULL ||
-			    g_ascii_strcasecmp (miner->priv->status, "Idle") != 0) {
+			if (priv->status == NULL ||
+			    g_ascii_strcasecmp (priv->status, "Idle") != 0) {
 				TRACKER_NOTE (STATUS,
 				              g_message ("(Miner:'%s') Set status:'Idle' from progress:1.0",
 				                         G_OBJECT_TYPE_NAME (miner)));
-				g_free (miner->priv->status);
-				miner->priv->status = g_strdup ("Idle");
+				g_free (priv->status);
+				priv->status = g_strdup ("Idle");
 			}
 		}
 
-		if (miner->priv->update_id == 0) {
-			miner->priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
-			                                          miner_update_progress_cb,
-			                                          miner,
-			                                          NULL);
+		if (priv->update_id == 0) {
+			priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
+			                                   miner_update_progress_cb,
+			                                   miner,
+			                                   NULL);
 		}
 
 		break;
@@ -406,14 +409,14 @@ miner_set_property (GObject      *object,
 		gint new_remaining_time;
 
 		new_remaining_time = g_value_get_int (value);
-		if (new_remaining_time != miner->priv->remaining_time) {
+		if (new_remaining_time != priv->remaining_time) {
 			/* Just set the new remaining time, don't notify it */
-			miner->priv->remaining_time = new_remaining_time;
+			priv->remaining_time = new_remaining_time;
 		}
 		break;
 	}
 	case PROP_CONNECTION: {
-		miner->priv->connection = g_value_dup_object (value);
+		priv->connection = g_value_dup_object (value);
 		break;
 	}
 	default:
@@ -429,19 +432,20 @@ miner_get_property (GObject    *object,
                     GParamSpec *pspec)
 {
 	TrackerMiner *miner = TRACKER_MINER (object);
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
 	switch (prop_id) {
 	case PROP_STATUS:
-		g_value_set_string (value, miner->priv->status);
+		g_value_set_string (value, priv->status);
 		break;
 	case PROP_PROGRESS:
-		g_value_set_double (value, miner->priv->progress);
+		g_value_set_double (value, priv->progress);
 		break;
 	case PROP_REMAINING_TIME:
-		g_value_set_int (value, miner->priv->remaining_time);
+		g_value_set_int (value, priv->remaining_time);
 		break;
 	case PROP_CONNECTION:
-		g_value_set_object (value, miner->priv->connection);
+		g_value_set_object (value, priv->connection);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -460,10 +464,12 @@ miner_get_property (GObject    *object,
 void
 tracker_miner_start (TrackerMiner *miner)
 {
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
+
 	g_return_if_fail (TRACKER_IS_MINER (miner));
 
-	if (miner->priv->started == FALSE) {
-		miner->priv->started = TRUE;
+	if (priv->started == FALSE) {
+		priv->started = TRUE;
 		g_signal_emit (miner, signals[STARTED], 0);
 	}
 }
@@ -479,10 +485,12 @@ tracker_miner_start (TrackerMiner *miner)
 void
 tracker_miner_stop (TrackerMiner *miner)
 {
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
+
 	g_return_if_fail (TRACKER_IS_MINER (miner));
 
-	if (miner->priv->started == TRUE) {
-		miner->priv->started = FALSE;
+	if (priv->started == TRUE) {
+		priv->started = FALSE;
 		g_signal_emit (miner, signals[STOPPED], 0);
 	}
 }
@@ -500,9 +508,11 @@ tracker_miner_stop (TrackerMiner *miner)
 gboolean
 tracker_miner_is_started (TrackerMiner *miner)
 {
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
+
 	g_return_val_if_fail (TRACKER_IS_MINER (miner), TRUE);
 
-	return miner->priv->started;
+	return priv->started;
 }
 
 /**
@@ -518,9 +528,11 @@ tracker_miner_is_started (TrackerMiner *miner)
 gboolean
 tracker_miner_is_paused (TrackerMiner *miner)
 {
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
+
 	g_return_val_if_fail (TRACKER_IS_MINER (miner), TRUE);
 
-	return miner->priv->n_pauses > 0;
+	return priv->n_pauses > 0;
 }
 
 /**
@@ -535,11 +547,12 @@ tracker_miner_is_paused (TrackerMiner *miner)
 void
 tracker_miner_pause (TrackerMiner *miner)
 {
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 	gint previous;
 
 	g_return_if_fail (TRACKER_IS_MINER (miner));
 
-	previous = g_atomic_int_add (&miner->priv->n_pauses, 1);
+	previous = g_atomic_int_add (&priv->n_pauses, 1);
 
 	if (previous == 0)
 		g_signal_emit (miner, signals[PAUSED], 0);
@@ -559,10 +572,12 @@ tracker_miner_pause (TrackerMiner *miner)
 gboolean
 tracker_miner_resume (TrackerMiner *miner)
 {
-	g_return_val_if_fail (TRACKER_IS_MINER (miner), FALSE);
-	g_return_val_if_fail (miner->priv->n_pauses > 0, FALSE);
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
-	if (g_atomic_int_dec_and_test (&miner->priv->n_pauses)) {
+	g_return_val_if_fail (TRACKER_IS_MINER (miner), FALSE);
+	g_return_val_if_fail (priv->n_pauses > 0, FALSE);
+
+	if (g_atomic_int_dec_and_test (&priv->n_pauses)) {
 		g_signal_emit (miner, signals[RESUMED], 0);
 		return TRUE;
 	}
@@ -583,22 +598,25 @@ tracker_miner_resume (TrackerMiner *miner)
 TrackerSparqlConnection *
 tracker_miner_get_connection (TrackerMiner *miner)
 {
-	return miner->priv->connection;
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
+
+	return priv->connection;
 }
 
 static void
 miner_finalize (GObject *object)
 {
 	TrackerMiner *miner = TRACKER_MINER (object);
+	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
-	if (miner->priv->update_id != 0) {
-		g_source_remove (miner->priv->update_id);
+	if (priv->update_id != 0) {
+		g_source_remove (priv->update_id);
 	}
 
-	g_free (miner->priv->status);
+	g_free (priv->status);
 
-	if (miner->priv->connection) {
-		g_object_unref (miner->priv->connection);
+	if (priv->connection) {
+		g_object_unref (priv->connection);
 	}
 
 	G_OBJECT_CLASS (tracker_miner_parent_class)->finalize (object);
