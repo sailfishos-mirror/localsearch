@@ -440,7 +440,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	TrackerResource *metadata = NULL;
 	GError *inner_error = NULL;
 	GFile *file;
-	gchar *buffer;
+	g_autofree char *buffer = NULL;
 	Track *track;
 	Cd *cd;
 
@@ -496,15 +496,19 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 	g_debug ("CUE file not recognized");
+	g_clear_pointer (&cd, cd_delete);
 	return TRUE;
 
 out:
 	if (metadata) {
 		tracker_extract_info_set_resource (info, metadata);
+		g_clear_pointer (&cd, cd_delete);
 		return TRUE;
 	}
 
 error:
+	g_clear_pointer (&cd, cd_delete);
+
 	if (inner_error)
 		g_propagate_error (error, inner_error);
 
