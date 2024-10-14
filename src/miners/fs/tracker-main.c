@@ -981,6 +981,7 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
+	g_clear_pointer (&dbus_name, g_free);
 	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, LEGACY_DBUS_NAME_SUFFIX);
 
 	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
