@@ -30,27 +30,8 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_MINER_FILES         (tracker_miner_files_get_type())
-#define TRACKER_MINER_FILES(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_MINER_FILES, TrackerMinerFiles))
-#define TRACKER_MINER_FILES_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_MINER_FILES, TrackerMinerFilesClass))
-#define TRACKER_IS_MINER_FILES(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_MINER_FILES))
-#define TRACKER_IS_MINER_FILES_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),  TRACKER_TYPE_MINER_FILES))
-#define TRACKER_MINER_FILES_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_MINER_FILES, TrackerMinerFilesClass))
-
-typedef struct TrackerMinerFiles TrackerMinerFiles;
-typedef struct TrackerMinerFilesClass TrackerMinerFilesClass;
-typedef struct TrackerMinerFilesPrivate TrackerMinerFilesPrivate;
-
-struct TrackerMinerFiles {
-	TrackerMinerFS parent_instance;
-	TrackerMinerFilesPrivate *private;
-};
-
-struct TrackerMinerFilesClass {
-	TrackerMinerFSClass parent_class;
-};
-
-GType         tracker_miner_files_get_type                 (void) G_GNUC_CONST;
+#define TRACKER_TYPE_MINER_FILES tracker_miner_files_get_type()
+G_DECLARE_FINAL_TYPE (TrackerMinerFiles, tracker_miner_files, TRACKER, MINER_FILES, TrackerMinerFS)
 
 TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,
