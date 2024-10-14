@@ -66,8 +66,11 @@ enum {
 	PROP_STATUS,
 	PROP_PROGRESS,
 	PROP_REMAINING_TIME,
-	PROP_CONNECTION
+	PROP_CONNECTION,
+	N_PROPS
 };
+
+static GParamSpec *props[N_PROPS] = { 0, };
 
 enum {
 	STARTED,
@@ -215,56 +218,32 @@ tracker_miner_class_init (TrackerMinerClass *klass)
 		              G_TYPE_DOUBLE,
 		              G_TYPE_INT);
 
-	g_object_class_install_property (object_class,
-	                                 PROP_STATUS,
-	                                 g_param_spec_string ("status",
-	                                                      "Status",
-	                                                      "Translatable string with status description",
-	                                                      "Idle",
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT |
-	                                                      G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_PROGRESS,
-	                                 g_param_spec_double ("progress",
-	                                                      "Progress",
-	                                                      "Miner progress",
-	                                                      0.0,
-	                                                      1.0,
-	                                                      0.0,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT |
-	                                                      G_PARAM_STATIC_STRINGS));
+	props[PROP_STATUS] =
+		g_param_spec_string ("status", NULL, NULL,
+		                     "Idle",
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_PROGRESS] =
+		g_param_spec_double ("progress", NULL, NULL,
+		                     0.0, 1.0, 0.0,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_REMAINING_TIME] =
+		g_param_spec_int ("remaining-time", NULL, NULL,
+		                  -1, G_MAXINT, -1,
+		                  G_PARAM_READWRITE |
+		                  G_PARAM_CONSTRUCT |
+		                  G_PARAM_STATIC_STRINGS);
+	props[PROP_CONNECTION] =
+		g_param_spec_object ("connection", NULL, NULL,
+		                     TRACKER_SPARQL_TYPE_CONNECTION,
+		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
-	g_object_class_install_property (object_class,
-	                                 PROP_REMAINING_TIME,
-	                                 g_param_spec_int ("remaining-time",
-	                                                   "Remaining time",
-	                                                   "Estimated remaining time to finish processing",
-	                                                   -1,
-	                                                   G_MAXINT,
-	                                                   -1,
-	                                                   G_PARAM_READWRITE |
-	                                                   G_PARAM_CONSTRUCT |
-	                                                   G_PARAM_STATIC_STRINGS));
-	/**
-	 * TrackerMiner:connection:
-	 *
-	 * The SPARQL connection to use. For compatibility reasons, if not set
-	 * at construct time, one shall be obtained through
-	 * tracker_sparql_connection_get().
-	 *
-	 * Since: 2.0
-	 **/
-	g_object_class_install_property (object_class,
-	                                 PROP_CONNECTION,
-	                                 g_param_spec_object ("connection",
-	                                                      "Connection",
-	                                                      "SPARQL Connection",
-	                                                      TRACKER_SPARQL_TYPE_CONNECTION,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
+	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
 static void
