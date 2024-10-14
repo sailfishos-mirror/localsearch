@@ -461,6 +461,7 @@ tracker_extract_decorator_items_available (TrackerDecorator *decorator)
 	g_debug ("Starting to process %d items",
 	         tracker_decorator_get_n_items (decorator));
 
+	g_clear_pointer (&priv->timer, g_timer_destroy);
 	priv->timer = g_timer_new ();
 	if (tracker_miner_is_paused (TRACKER_MINER (decorator)))
 		g_timer_stop (priv->timer);
