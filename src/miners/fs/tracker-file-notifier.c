@@ -510,7 +510,7 @@ enumerator_next_files_cb (GObject      *object,
                           GAsyncResult *res,
                           gpointer      user_data)
 {
-	TrackerIndexRoot *root;
+	TrackerIndexRoot *root = user_data;
 	g_autoptr (GError) error = NULL;
 	GList *infos, *l;
 	int n_files = 0;
@@ -528,15 +528,13 @@ enumerator_next_files_cb (GObject      *object,
 		g_warning ("Got error crawling '%s': %s\n",
 		           uri, error->message);
 
-		tracker_index_root_continue (user_data);
+		tracker_index_root_continue (root);
 		return;
 	} else if (!infos) {
 		/* Directory contents were fully obtained */
-		tracker_index_root_continue (user_data);
+		tracker_index_root_continue (root);
 		return;
 	}
-
-	root = user_data;
 
 	for (l = infos; l; l = l->next) {
 		GFileInfo *info = l->data;
@@ -576,7 +574,7 @@ enumerator_next_files_cb (GObject      *object,
 		                                    enumerator_next_files_cb,
 		                                    root);
 	} else {
-		tracker_index_root_continue (user_data);
+		tracker_index_root_continue (root);
 	}
 }
 
