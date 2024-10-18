@@ -568,8 +568,12 @@ enumerator_next_files_cb (GObject      *object,
 
 	g_list_free_full (infos, g_object_unref);
 
-	if (n_files != N_ENUMERATOR_BATCH_ITEMS)
+	if (n_files == N_ENUMERATOR_BATCH_ITEMS) {
+		if (check_high_water (root->notifier))
+			return;
+	} else {
 		g_clear_object (&root->enumerator);
+	}
 
 	tracker_index_root_continue (root);
 }
