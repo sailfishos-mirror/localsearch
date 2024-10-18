@@ -528,10 +528,12 @@ enumerator_next_files_cb (GObject      *object,
 		g_warning ("Got error crawling '%s': %s\n",
 		           uri, error->message);
 
+		g_clear_object (&root->enumerator);
 		tracker_index_root_continue (root);
 		return;
 	} else if (!infos) {
 		/* Directory contents were fully obtained */
+		g_clear_object (&root->enumerator);
 		tracker_index_root_continue (root);
 		return;
 	}
@@ -566,16 +568,10 @@ enumerator_next_files_cb (GObject      *object,
 
 	g_list_free_full (infos, g_object_unref);
 
-	if (n_files == N_ENUMERATOR_BATCH_ITEMS) {
-		g_file_enumerator_next_files_async (root->enumerator,
-		                                    N_ENUMERATOR_BATCH_ITEMS,
-		                                    G_PRIORITY_DEFAULT,
-		                                    root->cancellable,
-		                                    enumerator_next_files_cb,
-		                                    root);
-	} else {
-		tracker_index_root_continue (root);
-	}
+	if (n_files != N_ENUMERATOR_BATCH_ITEMS)
+		g_clear_object (&root->enumerator);
+
+	tracker_index_root_continue (root);
 }
 
 static void
@@ -736,9 +732,27 @@ tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
 	                         root->files_ignored));
 }
 
+static gboolean
+tracker_index_root_continue_current_folder (TrackerIndexRoot *root)
+{
+	if (!root->enumerator)
+		return FALSE;
+
+	g_file_enumerator_next_files_async (root->enumerator,
+	                                    N_ENUMERATOR_BATCH_ITEMS,
+	                                    G_PRIORITY_DEFAULT,
+	                                    root->cancellable,
+	                                    enumerator_next_files_cb,
+	                                    root);
+	return TRUE;
+}
+
 static void
 tracker_index_root_continue (TrackerIndexRoot *root)
 {
+	if (tracker_index_root_continue_current_folder (root))
+		return;
+
 	if (tracker_index_root_continue_cursor (root))
 		return;
 
