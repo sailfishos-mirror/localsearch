@@ -42,6 +42,7 @@ enum {
 	FILE_UPDATED,
 	FILE_DELETED,
 	FILE_MOVED,
+	DIRECTORY_FINISHED,
 	ROOT_STARTED,
 	ROOT_FINISHED,
 	FINISHED,
@@ -83,6 +84,7 @@ typedef struct {
 	GQueue deleted_dirs;
 	GFile *current_dir;
 	GQueue *pending_dirs;
+	GQueue *pending_finish_dirs;
 	GTimer *timer;
 	guint flags;
 	guint cursor_idle_id;
@@ -206,6 +208,7 @@ tracker_index_root_new (TrackerFileNotifier *notifier,
 	data->notifier = notifier;
 	data->root = g_object_ref (file);
 	data->pending_dirs = g_queue_new ();
+	data->pending_finish_dirs = g_queue_new ();
 	data->flags = flags;
 	data->ignore_root = ignore_root;
 	data->timer = g_timer_new ();
@@ -224,6 +227,7 @@ static void
 tracker_index_root_free (TrackerIndexRoot *data)
 {
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
+	g_queue_free_full (data->pending_finish_dirs, (GDestroyNotify) g_object_unref);
 	g_timer_destroy (data->timer);
 	g_queue_clear (&data->queue);
 	g_queue_clear_full (&data->deleted_dirs, g_object_unref);
@@ -235,6 +239,40 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	g_clear_object (&data->cancellable);
 	g_object_unref (data->root);
 	g_free (data);
+}
+
+static void
+tracker_index_root_close_folder (TrackerIndexRoot *root)
+{
+	GFile *container;
+
+	g_assert (root->enumerator != NULL);
+	container = g_file_enumerator_get_container (root->enumerator);
+	g_queue_push_head (root->pending_finish_dirs, g_object_ref (container));
+	g_clear_object (&root->enumerator);
+
+	/* Check the folders that can be notified already via
+	 * ::directory-finished, i.e. those that don't have any child
+	 * folder pending crawling.
+	 */
+	while (!g_queue_is_empty (root->pending_finish_dirs)) {
+		GList *l = root->pending_finish_dirs->head;
+		GFile *directory = l->data;
+
+		/* We just need to check the last folder added to the
+		 * "pending crawl" queue, no need to iterate further.
+		 * Also, the queue of directories pending finish is sorted
+		 * in a way that all directories after this element will also
+		 * need to wait for being finished.
+		 */
+		if (!g_queue_is_empty (root->pending_dirs) &&
+		    g_file_has_parent (root->pending_dirs->head->data, directory))
+			break;
+
+		g_signal_emit (root->notifier, signals[DIRECTORY_FINISHED], 0, directory);
+		g_queue_remove (root->pending_finish_dirs, directory);
+		g_object_unref (directory);
+	}
 }
 
 static gboolean
@@ -528,12 +566,12 @@ enumerator_next_files_cb (GObject      *object,
 		g_warning ("Got error crawling '%s': %s\n",
 		           uri, error->message);
 
-		g_clear_object (&root->enumerator);
+		tracker_index_root_close_folder (root);
 		tracker_index_root_continue (root);
 		return;
 	} else if (!infos) {
 		/* Directory contents were fully obtained */
-		g_clear_object (&root->enumerator);
+		tracker_index_root_close_folder (root);
 		tracker_index_root_continue (root);
 		return;
 	}
@@ -572,7 +610,7 @@ enumerator_next_files_cb (GObject      *object,
 		if (check_high_water (root->notifier))
 			return;
 	} else {
-		g_clear_object (&root->enumerator);
+		tracker_index_root_close_folder (root);
 	}
 
 	tracker_index_root_continue (root);
@@ -1737,6 +1775,14 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL,
 		              G_TYPE_NONE,
 		              3, G_TYPE_FILE, G_TYPE_FILE, G_TYPE_BOOLEAN);
+	signals[DIRECTORY_FINISHED] =
+		g_signal_new ("directory-finished",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL,
+		              g_cclosure_marshal_VOID__OBJECT,
+		              G_TYPE_NONE,
+		              1, G_TYPE_FILE);
 	signals[ROOT_STARTED] =
 		g_signal_new ("root-started",
 		              G_TYPE_FROM_CLASS (klass),
