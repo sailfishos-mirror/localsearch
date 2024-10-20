@@ -64,14 +64,14 @@ struct _TrackerFileNotifierClass {
 	                       GFile               *to);
 
 	/* Directory notifications */
-	void (* directory_started)  (TrackerFileNotifier *notifier,
-	                             GFile               *directory);
-	void (* directory_finished) (TrackerFileNotifier *notifier,
-	                             GFile               *directory,
-	                             guint                directories_found,
-	                             guint                directories_ignored,
-	                             guint                files_found,
-	                             guint                files_ignored);
+	void (* root_started)  (TrackerFileNotifier *notifier,
+	                        GFile               *directory);
+	void (* root_finished) (TrackerFileNotifier *notifier,
+	                        GFile               *directory,
+	                        guint                directories_found,
+	                        guint                directories_ignored,
+	                        guint                files_found,
+	                        guint                files_ignored);
 
 	void (* finished)           (TrackerFileNotifier *notifier);
 };

@@ -200,16 +200,16 @@ static void           file_notifier_file_moved            (TrackerFileNotifier  
                                                            GFile                *dest,
                                                            gboolean              is_dir,
                                                            gpointer              user_data);
-static void           file_notifier_directory_started     (TrackerFileNotifier *notifier,
-                                                           GFile               *directory,
-                                                           gpointer             user_data);
-static void           file_notifier_directory_finished    (TrackerFileNotifier *notifier,
-                                                           GFile               *directory,
-                                                           guint                directories_found,
-                                                           guint                directories_ignored,
-                                                           guint                files_found,
-                                                           guint                files_ignored,
-                                                           gpointer             user_data);
+static void           file_notifier_root_started     (TrackerFileNotifier *notifier,
+                                                      GFile               *directory,
+                                                      gpointer             user_data);
+static void           file_notifier_root_finished    (TrackerFileNotifier *notifier,
+                                                      GFile               *directory,
+                                                      guint                directories_found,
+                                                      guint                directories_ignored,
+                                                      guint                files_found,
+                                                      guint                files_ignored,
+                                                      gpointer             user_data);
 static void           file_notifier_finished              (TrackerFileNotifier *notifier,
                                                            gpointer             user_data);
 
@@ -534,11 +534,11 @@ fs_constructed (GObject *object)
 	g_signal_connect (priv->file_notifier, "file-moved",
 	                  G_CALLBACK (file_notifier_file_moved),
 	                  object);
-	g_signal_connect (priv->file_notifier, "directory-started",
-	                  G_CALLBACK (file_notifier_directory_started),
+	g_signal_connect (priv->file_notifier, "root-started",
+	                  G_CALLBACK (file_notifier_root_started),
 	                  object);
-	g_signal_connect (priv->file_notifier, "directory-finished",
-	                  G_CALLBACK (file_notifier_directory_finished),
+	g_signal_connect (priv->file_notifier, "root-finished",
+	                  G_CALLBACK (file_notifier_root_finished),
 	                  object);
 	g_signal_connect (priv->file_notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished),
@@ -1484,9 +1484,9 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 }
 
 static void
-file_notifier_directory_started (TrackerFileNotifier *notifier,
-                                 GFile               *directory,
-                                 gpointer             user_data)
+file_notifier_root_started (TrackerFileNotifier *notifier,
+                            GFile               *directory,
+                            gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv =
@@ -1515,13 +1515,13 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
 }
 
 static void
-file_notifier_directory_finished (TrackerFileNotifier *notifier,
-                                  GFile               *directory,
-                                  guint                directories_found,
-                                  guint                directories_ignored,
-                                  guint                files_found,
-                                  guint                files_ignored,
-                                  gpointer             user_data)
+file_notifier_root_finished (TrackerFileNotifier *notifier,
+                             GFile               *directory,
+                             guint                directories_found,
+                             guint                directories_ignored,
+                             guint                files_found,
+                             guint                files_ignored,
+                             gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv =

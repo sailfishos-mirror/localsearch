@@ -42,8 +42,8 @@ enum {
 	FILE_UPDATED,
 	FILE_DELETED,
 	FILE_MOVED,
-	DIRECTORY_STARTED,
-	DIRECTORY_FINISHED,
+	ROOT_STARTED,
+	ROOT_FINISHED,
 	FINISHED,
 	LAST_SIGNAL
 };
@@ -713,10 +713,10 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 }
 
 static void
-tracker_file_notifier_emit_directory_finished (TrackerFileNotifier *notifier,
-                                               TrackerIndexRoot    *root)
+tracker_file_notifier_emit_root_finished (TrackerFileNotifier *notifier,
+                                          TrackerIndexRoot    *root)
 {
-	g_signal_emit (notifier, signals[DIRECTORY_FINISHED], 0,
+	g_signal_emit (notifier, signals[ROOT_FINISHED], 0,
 	               root->root,
 	               root->directories_found,
 	               root->directories_ignored,
@@ -764,7 +764,7 @@ tracker_index_root_continue (TrackerIndexRoot *root)
 		return;
 
 	tracker_index_root_notify_changes (root);
-	tracker_file_notifier_emit_directory_finished (root->notifier, root);
+	tracker_file_notifier_emit_root_finished (root->notifier, root);
 	notifier_check_next_root (root->notifier);
 }
 
@@ -1032,8 +1032,8 @@ query_execute_cb (TrackerSparqlStatement *statement,
 			g_critical ("Could not query contents for indexed folder '%s': %s",
 			            uri, error->message);
 
-			tracker_file_notifier_emit_directory_finished (root->notifier,
-			                                               root);
+			tracker_file_notifier_emit_root_finished (root->notifier,
+			                                          root);
 		}
 
 		return;
@@ -1070,7 +1070,7 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	}
 
 	g_timer_reset (root->timer);
-	g_signal_emit (notifier, signals[DIRECTORY_STARTED], 0, directory);
+	g_signal_emit (notifier, signals[ROOT_STARTED], 0, directory);
 
 	uri = g_file_get_uri (directory);
 	tracker_sparql_statement_bind_string (priv->content_query, "root", uri);
@@ -1528,8 +1528,8 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 		/* Directory being currently processed */
 		if (priv->cancellable)
 			g_cancellable_cancel (priv->cancellable);
-		tracker_file_notifier_emit_directory_finished (notifier,
-		                                               priv->current_index_root);
+		tracker_file_notifier_emit_root_finished (notifier,
+		                                          priv->current_index_root);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1737,22 +1737,22 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL,
 		              G_TYPE_NONE,
 		              3, G_TYPE_FILE, G_TYPE_FILE, G_TYPE_BOOLEAN);
-	signals[DIRECTORY_STARTED] =
-		g_signal_new ("directory-started",
+	signals[ROOT_STARTED] =
+		g_signal_new ("root-started",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               directory_started),
+		                               root_started),
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
 		              1, G_TYPE_FILE);
-	signals[DIRECTORY_FINISHED] =
-		g_signal_new ("directory-finished",
+	signals[ROOT_FINISHED] =
+		g_signal_new ("root-finished",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               directory_finished),
+		                               root_finished),
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
