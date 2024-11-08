@@ -118,10 +118,11 @@ static GVariant *
 create_extractor_config_variant (TrackerFilesInterface *files_interface)
 {
 	GVariantBuilder builder;
+	g_autoptr (GVariant) max_bytes = NULL;
 
 	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
-	g_variant_builder_add (&builder, "{sv}", "max-bytes",
-	                       g_settings_get_value (files_interface->settings, "max-bytes"));
+	max_bytes = g_settings_get_value (files_interface->settings, "max-bytes");
+	g_variant_builder_add (&builder, "{sv}", "max-bytes", max_bytes);
 
 	if (files_interface->priority_graphs)
 		g_variant_builder_add (&builder, "{sv}", "priority-graphs", files_interface->priority_graphs);

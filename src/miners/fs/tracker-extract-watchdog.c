@@ -339,7 +339,8 @@ static GStrv
 get_indexed_folders (TrackerExtractWatchdog *watchdog)
 {
 	GArray *array;
-	GList *roots, *l;
+	g_autoptr (GList) roots = NULL;
+	GList *l;
 
 	array = g_array_new (TRUE, FALSE, sizeof (gchar*));
 	roots = tracker_indexing_tree_list_roots (watchdog->indexing_tree);
