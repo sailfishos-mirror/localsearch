@@ -442,7 +442,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GFile *file;
 	g_autofree char *buffer = NULL;
 	Track *track;
-	Cd *cd;
+	Cd *cd = NULL;
 
 	file = tracker_extract_info_get_file (info);
 
