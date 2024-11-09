@@ -497,7 +497,7 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 	    check_directory_contents (root->notifier, file) &&
 	    !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) {
 		/* Queue child dirs for later processing */
-		g_queue_push_tail (root->pending_dirs, g_object_ref (file));
+		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
 	tracker_file_notifier_notify (root->notifier, file_data, info);
