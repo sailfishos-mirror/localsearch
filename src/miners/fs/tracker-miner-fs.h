@@ -74,6 +74,9 @@ struct _TrackerMinerFSClass {
 	                                       GFile                *source,
 	                                       TrackerSparqlBuffer  *buffer,
 	                                       gboolean              recursive);
+	void (* finish_directory)             (TrackerMinerFS       *fs,
+	                                       GFile                *folder,
+	                                       TrackerSparqlBuffer  *buffer);
 	gchar * (* get_content_identifier)    (TrackerMinerFS       *fs,
 					       GFile                *file,
 	                                       GFileInfo            *info);
