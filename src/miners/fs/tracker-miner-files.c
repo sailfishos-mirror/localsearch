@@ -1053,6 +1053,7 @@ miner_files_finish_directory (TrackerMinerFS      *fs,
                               GFile               *file,
                               TrackerSparqlBuffer *buffer)
 {
+	tracker_miner_files_finish_directory (fs, file, buffer);
 }
 
 static void
