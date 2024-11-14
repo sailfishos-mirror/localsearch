@@ -149,7 +149,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GFile *file;
 	FILE *f;
 	goffset size;
-	gchar *filename, *uri, *resource_uri;
+	g_autofree char *resource_uri = NULL;
+	gchar *filename, *uri;
 	gchar *comment = NULL;
 	const gchar *dlna_profile, *dlna_mimetype;
 	GPtrArray *keywords;
@@ -186,7 +187,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
-	g_free (resource_uri);
 
 	jpeg_create_decompress (&cinfo);
 
@@ -279,7 +279,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			sidecar_resource = tracker_resource_new (sidecar);
 			tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
-			tracker_resource_add_relation (sidecar_resource, "nie:interpretedAs", metadata);
+			tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs", resource_uri);
 
 			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 		}

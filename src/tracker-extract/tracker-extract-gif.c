@@ -120,7 +120,8 @@ read_metadata (GifFileType        *gifFile,
 	MergeData md = { 0 };
 	GifData   gd = { 0 };
 	TrackerXmpData *xd = NULL;
-	gchar *sidecar = NULL, *resource_uri;
+	gchar *sidecar = NULL;
+	g_autofree char *resource_uri = NULL;
 
 	do {
 		GifByteType *ExtData;
@@ -258,14 +259,13 @@ read_metadata (GifFileType        *gifFile,
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
-	g_free (resource_uri);
 
 	if (sidecar) {
 		TrackerResource *sidecar_resource;
 
 		sidecar_resource = tracker_resource_new (sidecar);
 		tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
-		tracker_resource_add_relation (sidecar_resource, "nie:interpretedAs", metadata);
+		tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs", resource_uri);
 
 		tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 	}

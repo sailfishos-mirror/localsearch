@@ -994,11 +994,12 @@ extract_metadata (MetadataExtractor  *extractor,
 						track = tracker_resource_new (resource_uri);
 						g_free (resource_uri);
 						g_free (suffix);
+
+						tracker_resource_set_uri (track, "nie:isStoredAs", file_url);
+						tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 					}
 
 					extract_track (track, extractor, node->data, file_url, album_disc);
-					tracker_resource_set_relation (track, "nie:isStoredAs", file_resource);
-					tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 				}
 			} else {
 				extractor_apply_audio_metadata (extractor,
