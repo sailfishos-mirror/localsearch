@@ -408,7 +408,7 @@ extractor_get_address (MetadataExtractor     *extractor,
                        GstTagList            *tag_list)
 {
 	TrackerResource *address = NULL;
-	gchar *country = NULL, *city = NULL, *sublocation = NULL;
+	g_autofree char *country = NULL, *city = NULL, *sublocation = NULL;
 
 	g_debug ("Retrieving address metadata...");
 
@@ -417,7 +417,7 @@ extractor_get_address (MetadataExtractor     *extractor,
 	gst_tag_list_get_string (tag_list, GST_TAG_GEO_LOCATION_SUBLOCATION, &sublocation);
 
 	if (city || country || sublocation) {
-		gchar *address_uri = NULL;
+		g_autofree char *address_uri = NULL;
 
 		address_uri = tracker_sparql_get_uuid_urn ();
 		address = tracker_resource_new (address_uri);
