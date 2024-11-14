@@ -443,8 +443,9 @@ coverage:
   needs:
     - test-fedora@x86_64
     - test-fedora@aarch64
-    - test-debian@x86_64
     - test-fedora-rawhide@x86_64
+    # Currently breaks gcovr
+    #- test-debian@x86_64
 
 coverity:
   extends:
