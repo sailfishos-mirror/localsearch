@@ -43,12 +43,6 @@ typedef struct {
 } MergeData;
 
 typedef struct {
-	gchar *width;
-	gchar *height;
-	gchar *comment;
-} GifData;
-
-typedef struct {
 	unsigned int   byteCount;
 	char          *bytes;
 } ExtBlock;
@@ -118,10 +112,10 @@ read_metadata (GifFileType        *gifFile,
 	gint h;
 	int status;
 	MergeData md = { 0 };
-	GifData   gd = { 0 };
 	TrackerXmpData *xd = NULL;
 	gchar *sidecar = NULL;
-	g_autofree char *resource_uri = NULL;
+	int width = 0, height = 0;
+	g_autofree char *resource_uri = NULL, *comment = NULL;
 
 	do {
 		GifByteType *ExtData;
@@ -165,10 +159,8 @@ read_metadata (GifFileType        *gifFile,
 				}
 			}
 
-			gd.width  = g_strdup_printf ("%d", framewidth);
-			gd.height = g_strdup_printf ("%d", frameheight);
-
-
+			width = framewidth;
+			height = frameheight;
 			g_free (framedata);
 
 		break;
@@ -227,8 +219,9 @@ read_metadata (GifFileType        *gifFile,
 				extBlock.bytes = g_realloc (extBlock.bytes, extBlock.byteCount + 1);
 				extBlock.bytes[extBlock.byteCount] = '\0';
 
-				/* Set commentt */
-				gd.comment = extBlock.bytes;
+				/* Set comment */
+				g_clear_pointer (&comment, g_free);
+				comment = extBlock.bytes;
 			} else {
 				do {
 					status = DGifGetExtensionNext(gifFile, &ExtData);
@@ -452,20 +445,14 @@ read_metadata (GifFileType        *gifFile,
 		tracker_resource_set_string (metadata, "nfo:heading", xd->gps_direction);
 	}
 
-	if (gd.width) {
-		tracker_resource_set_string (metadata, "nfo:width", gd.width);
-		g_free (gd.width);
-	}
+	if (width > 0)
+		tracker_resource_set_int (metadata, "nfo:width", width);
 
-	if (gd.height) {
-		tracker_resource_set_string (metadata, "nfo:height", gd.height);
-		g_free (gd.height);
-	}
+	if (height > 0)
+		tracker_resource_set_int (metadata, "nfo:height", height);
 
-	if (gd.comment) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", gd.comment);
-		g_free (gd.comment);
-	}
+	if (comment)
+		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", comment);
 
 	tracker_xmp_free (xd);
 
