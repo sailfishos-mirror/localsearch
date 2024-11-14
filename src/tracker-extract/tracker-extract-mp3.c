@@ -1469,8 +1469,7 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 static void
 extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
 {
-	gchar *description = NULL;
-	gchar *value = NULL;
+	g_autofree char *description = NULL, *value = NULL;
 	gchar text_encode;
 	const gchar *text_desc;
 	const gchar *text;
@@ -1498,7 +1497,6 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 		txxxtype = id3_get_txxx_type (description);
 	} else {
 		/* Can't do anything without mb tag. */
-		g_free (description);
 		return;
 	}
 
@@ -1506,28 +1504,31 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 		g_strstrip (value);
 	} else {
 		/* Can't do anything without value. */
-		g_free (value);
 		return;
 	}
 
 	switch (txxxtype) {
 	case ACOUSTID_FINGERPRINT:
-		tag->acoustid_fingerprint = value;
+		g_clear_pointer (&tag->acoustid_fingerprint, g_free);
+		tag->acoustid_fingerprint = g_steal_pointer (&value);
 		break;
 	case MB_TRACK_ID:
-		tag->mb_track_id = value;
+		g_clear_pointer (&tag->mb_track_id, g_free);
+		tag->mb_track_id = g_steal_pointer (&value);
 		break;
 	case MB_RELEASE_ID:
-		tag->mb_release_id = value;
+		g_clear_pointer (&tag->mb_release_id, g_free);
+		tag->mb_release_id = g_steal_pointer (&value);
 		break;
 	case MB_ARTIST_ID:
-		tag->mb_artist_id = value;
+		g_clear_pointer (&tag->mb_artist_id, g_free);
+		tag->mb_artist_id = g_steal_pointer (&value);
 		break;
 	case MB_RELEASE_GROUP_ID:
-		tag->mb_release_group_id = value;
+		g_clear_pointer (&tag->mb_release_group_id, g_free);
+		tag->mb_release_group_id = g_steal_pointer (&value);
 		break;
 	default:
-		g_free (value);
 		break;
 	}
 }
@@ -1999,7 +2000,7 @@ get_id3v20_tags (id3v2frame            frame,
 		}
 	} else {
 		/* text frames */
-		gchar *word;
+		g_autofree char *word = NULL;
 
 		word = id3v2_text_to_utf8 (data[pos], &data[pos + 1], csize - 1, info);
 		if (!tracker_is_empty_string (word)) {
@@ -2015,45 +2016,44 @@ get_id3v20_tags (id3v2frame            frame,
 
 		switch (frame) {
 		case ID3V2_COM:
-			tag->comment = word;
+			/* There may be multiple comment frames */
+			g_clear_pointer (&tag->comment, g_free);
+			tag->comment = g_steal_pointer (&word);
 			break;
 		case ID3V2_TAL:
-			tag->album = word;
+			tag->album = g_steal_pointer (&word);
 			break;
 		case ID3V2_TCO: {
 			gint genre;
 
 			if (get_genre_number (word, &genre)) {
-				g_free (word);
+				g_clear_pointer (&word, g_free);
 				word = g_strdup (get_genre_name (genre));
 			}
 
 			if (word && strcasecmp (word, "unknown") != 0) {
-				tag->content_type = word;
-			} else {
-				g_free (word);
+				tag->content_type = g_steal_pointer (&word);
 			}
 
 			break;
 		}
 		case ID3V2_TCR:
-			tag->copyright = word;
+			tag->copyright = g_steal_pointer (&word);
 			break;
 		case ID3V2_TEN:
-			tag->encoded_by = word;
+			tag->encoded_by = g_steal_pointer (&word);
 			break;
 		case ID3V2_TLE:
 			tag->length = atoi (word) / 1000;
-			g_free (word);
 			break;
 		case ID3V2_TPB:
-			tag->publisher = word;
+			tag->publisher = g_steal_pointer (&word);
 			break;
 		case ID3V2_TP1:
-			tag->artist1 = word;
+			tag->artist1 = g_steal_pointer (&word);
 			break;
 		case ID3V2_TP2:
-			tag->artist2 = word;
+			tag->artist2 = g_steal_pointer (&word);
 			break;
 		case ID3V2_TRK: {
 			gchar **parts;
@@ -2066,30 +2066,26 @@ get_id3v20_tags (id3v2frame            frame,
 				}
 			}
 			g_strfreev (parts);
-			g_free (word);
-
 			break;
 		}
 		case ID3V2_TT1:
-			tag->title1 = word;
+			tag->title1 = g_steal_pointer (&word);
 			break;
 		case ID3V2_TT2:
-			tag->title2 = word;
+			tag->title2 = g_steal_pointer (&word);
 			break;
 		case ID3V2_TT3:
-			tag->title3 = word;
+			tag->title3 = g_steal_pointer (&word);
 			break;
 		case ID3V2_TXT:
-			tag->text = word;
+			tag->text = g_steal_pointer (&word);
 			break;
 		case ID3V2_TYE:
 			if (atoi (word) > 0) {
 				tag->recording_time = tracker_date_guess (word);
 			}
-			g_free (word);
 			break;
 		default:
-			g_free (word);
 			break;
 		}
 	}
