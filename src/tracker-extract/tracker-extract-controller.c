@@ -52,6 +52,11 @@ static const gchar *introspection_xml =
 	"    <signal name='Error'>"
 	"      <arg type='a{sv}' name='data' direction='out' />"
 	"    </signal>"
+	"    <signal name='Progress'>"
+	"      <arg type='s' name='status' />"
+	"      <arg type='d' name='progress' />"
+	"      <arg type='i' name='remaining_time' />"
+	"    </signal>"
 	"  </interface>"
 	"</node>";
 
@@ -269,6 +274,30 @@ decorator_raise_error_cb (TrackerDecorator         *decorator,
 }
 
 static void
+decorator_progress_cb (TrackerMiner             *miner,
+                       const gchar              *status,
+                       gdouble                   progress,
+                       gint                      remaining_time,
+                       TrackerExtractController *proxy)
+{
+	TrackerExtractControllerPrivate *priv;
+	g_autoptr (GError) error = NULL;
+
+	priv = tracker_extract_controller_get_instance_private (proxy);
+
+	g_dbus_connection_emit_signal (priv->connection,
+	                               NULL,
+	                               OBJECT_PATH,
+	                               "org.freedesktop.Tracker3.Extract",
+	                               "Progress",
+	                               g_variant_new ("(sdi)", status, progress, remaining_time),
+	                               &error);
+
+	if (error)
+		g_warning ("Could not emit signal: %s\n", error->message);
+}
+
+static void
 tracker_extract_controller_constructed (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
@@ -282,6 +311,8 @@ tracker_extract_controller_constructed (GObject *object)
 
 	g_signal_connect (priv->decorator, "raise-error",
 	                  G_CALLBACK (decorator_raise_error_cb), object);
+	g_signal_connect (priv->decorator, "progress",
+	                  G_CALLBACK (decorator_progress_cb), object);
 }
 
 static void
