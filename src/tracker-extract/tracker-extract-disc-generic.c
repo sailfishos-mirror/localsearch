@@ -437,7 +437,7 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *metadata = NULL;
+	g_autoptr (TrackerResource) metadata = NULL;
 	GError *inner_error = NULL;
 	GFile *file;
 	g_autofree char *buffer = NULL;
