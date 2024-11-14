@@ -29,6 +29,11 @@
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
+typedef struct {
+	GList *mounts;
+	guint64 mtime;
+} MountData;
+
 static void
 miner_files_add_to_datasource (TrackerMinerFiles *mf,
                                GFile             *file,
@@ -374,18 +379,60 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	                                             graph_file);
 }
 
+static void
+mount_data_free (gpointer user_data)
+{
+	MountData *mount_data = user_data;
+
+	g_list_free_full (mount_data->mounts, (GDestroyNotify) g_unix_mount_free);
+	g_free (mount_data);
+}
+
 static gchar *
 lookup_filesystem_id (TrackerMinerFiles *files,
                       GFile             *file)
 {
 	const gchar *id = NULL, *devname = NULL;
-	GUnixMountEntry *mount;
 	GUdevClient *udev_client;
 	g_autoptr (GUdevDevice) udev_device = NULL;
+	MountData *mount_data = NULL;
+	const char *path;
+	int path_len;
+	int best_len = 0;
+	GList *l;
 
-	mount = g_unix_mount_for (g_file_peek_path (file), NULL);
-	if (mount)
-		devname = g_unix_mount_get_device_path (mount);
+	path = g_file_peek_path (file);
+	path_len = strlen (path);
+
+	mount_data = g_object_get_data (G_OBJECT (files), "-indexer-cached-mounts");
+
+	if (!mount_data) {
+		mount_data = g_new0 (MountData, 1);
+		mount_data->mounts = g_unix_mounts_get (&mount_data->mtime);
+		g_object_set_data_full (G_OBJECT (files), "-indexer-cached-mounts", mount_data, mount_data_free);
+	} else if (g_unix_mount_entries_changed_since (mount_data->mtime)) {
+		g_list_free_full (mount_data->mounts, (GDestroyNotify) g_unix_mount_free);
+		mount_data->mounts = g_unix_mounts_get (&mount_data->mtime);
+	}
+
+	for (l = mount_data->mounts; l; l = l->next) {
+		GUnixMountEntry *elem = l->data;
+		const char *mount_path;
+		int mount_path_len;
+
+		mount_path = g_unix_mount_get_mount_path (elem);
+		mount_path_len = strlen (mount_path);
+
+		if (g_strcmp0 (mount_path, G_DIR_SEPARATOR_S) == 0 ||
+		    (path_len > mount_path_len &&
+		     g_str_has_prefix (path, mount_path) &&
+		     path[mount_path_len] == G_DIR_SEPARATOR)) {
+			if (mount_path_len > best_len) {
+				devname = g_unix_mount_get_device_path (elem);
+				best_len = mount_path_len;
+			}
+		}
+	}
 
 	if (devname) {
 		udev_client = tracker_miner_files_get_udev_client (files);
