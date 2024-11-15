@@ -78,17 +78,10 @@ config_finalize (GObject *object)
 
 	priv = tracker_config_get_instance_private (TRACKER_CONFIG (object));
 
-	g_slist_foreach (priv->index_single_directories, (GFunc) g_free, NULL);
-	g_slist_free (priv->index_single_directories);
-
-	g_slist_foreach (priv->index_single_directories_unfiltered, (GFunc) g_free, NULL);
-	g_slist_free (priv->index_single_directories_unfiltered);
-
-	g_slist_foreach (priv->index_recursive_directories, (GFunc) g_free, NULL);
-	g_slist_free (priv->index_recursive_directories);
-
-	g_slist_foreach (priv->index_recursive_directories_unfiltered, (GFunc) g_free, NULL);
-	g_slist_free (priv->index_recursive_directories_unfiltered);
+	g_slist_free_full (priv->index_single_directories, g_free);
+	g_slist_free_full (priv->index_single_directories_unfiltered, g_free);
+	g_slist_free_full (priv->index_recursive_directories, g_free);
+	g_slist_free_full (priv->index_recursive_directories_unfiltered, g_free);
 
 	(G_OBJECT_CLASS (tracker_config_parent_class)->finalize) (object);
 }
@@ -246,17 +239,10 @@ rebuild_filtered_lists (TrackerConfig *config)
 
 		priv->index_single_directories =
 			tracker_path_list_filter_duplicates (mapped_dirs, ".", FALSE);
-
-		if (mapped_dirs) {
-			g_slist_foreach (mapped_dirs, (GFunc) g_free, NULL);
-			g_slist_free (mapped_dirs);
-		}
+		g_slist_free_full (mapped_dirs, g_free);
 	}
 
-	if (old_list) {
-		g_slist_foreach (old_list, (GFunc) g_free, NULL);
-		g_slist_free (old_list);
-	}
+	g_slist_free_full (old_list, g_free);
 
 	/* Filter recursive directories */
 	old_list = priv->index_recursive_directories;
@@ -289,12 +275,8 @@ rebuild_filtered_lists (TrackerConfig *config)
 		priv->index_recursive_directories =
 			tracker_path_list_filter_duplicates (checked_dirs, ".", TRUE);
 
-		g_slist_foreach (checked_dirs, (GFunc) g_free, NULL);
-		g_slist_free (checked_dirs);
+		g_slist_free_full (checked_dirs, g_free);
 	}
 
-	if (old_list) {
-		g_slist_foreach (old_list, (GFunc) g_free, NULL);
-		g_slist_free (old_list);
-	}
+	g_slist_free_full (old_list, g_free);
 }
