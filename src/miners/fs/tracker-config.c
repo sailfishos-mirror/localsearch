@@ -36,6 +36,10 @@
 #define CONFIG_SCHEMA "org.freedesktop.Tracker3.Miner.Files"
 #define CONFIG_PATH   "/org/freedesktop/tracker/miner/files/"
 
+struct _TrackerConfig {
+	GSettings parent_instance;
+};
+
 typedef struct {
 	/* IMPORTANT: There are 3 versions of the directories:
 	 * 1. a GStrv stored in GSettings

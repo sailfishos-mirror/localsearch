@@ -24,30 +24,14 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_CONFIG         (tracker_config_get_type ())
-#define TRACKER_CONFIG(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_CONFIG, TrackerConfig))
-#define TRACKER_CONFIG_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST ((k), TRACKER_TYPE_CONFIG, TrackerConfigClass))
-#define TRACKER_IS_CONFIG(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_CONFIG))
-#define TRACKER_IS_CONFIG_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), TRACKER_TYPE_CONFIG))
-#define TRACKER_CONFIG_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_CONFIG, TrackerConfigClass))
+#define TRACKER_TYPE_CONFIG (tracker_config_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerConfig, tracker_config, TRACKER, CONFIG, GSettings)
 
-typedef struct TrackerConfig      TrackerConfig;
-typedef struct TrackerConfigClass TrackerConfigClass;
+TrackerConfig * tracker_config_new (void);
 
-struct TrackerConfig {
-	GSettings parent;
-};
+GSList * tracker_config_get_index_recursive_directories (TrackerConfig *config);
 
-struct TrackerConfigClass {
-	GSettingsClass parent_class;
-};
-
-GType          tracker_config_get_type                             (void) G_GNUC_CONST;
-
-TrackerConfig *tracker_config_new                                  (void);
-
-GSList *       tracker_config_get_index_recursive_directories      (TrackerConfig *config);
-GSList *       tracker_config_get_index_single_directories         (TrackerConfig *config);
+GSList * tracker_config_get_index_single_directories (TrackerConfig *config);
 
 G_END_DECLS
 
