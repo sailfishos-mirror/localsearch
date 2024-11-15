@@ -136,16 +136,16 @@ log_option_values (TrackerConfig *config)
 
 		g_message ("Indexer options:");
 		g_message ("  Throttle level  .......................  %d",
-		           tracker_config_get_throttle (config));
+		           g_settings_get_int (G_SETTINGS (config), "throttle"));
 		g_message ("  Indexing while on battery  ............  %s (first time only = %s)",
-		           tracker_config_get_index_on_battery (config) ? "yes" : "no",
-		           tracker_config_get_index_on_battery_first_time (config) ? "yes" : "no");
+		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery") ? "yes" : "no",
+		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery-first-time") ? "yes" : "no");
 
-		if (tracker_config_get_low_disk_space_limit (config) == -1) {
+		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
 			g_message ("  Low disk space limit  .................  Disabled");
 		} else {
 			g_message ("  Low disk space limit  .................  %d%%",
-			           tracker_config_get_low_disk_space_limit (config));
+			           g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit"));
 		}
 	}
 #endif
@@ -306,7 +306,7 @@ should_crawl (TrackerMinerFiles *miner_files,
 {
 	gint crawling_interval;
 
-	crawling_interval = tracker_config_get_crawling_interval (config);
+	crawling_interval = g_settings_get_int (G_SETTINGS (config), "crawling-interval");
 
 	TRACKER_NOTE (CONFIG, g_message ("Checking whether to crawl file system based on configured crawling interval:"));
 
@@ -921,7 +921,7 @@ main (gint argc, gchar *argv[])
 	config = tracker_config_new ();
 
 	if (initial_sleep < 0)
-		initial_sleep = tracker_config_get_initial_sleep (config);
+		initial_sleep = g_settings_get_int (G_SETTINGS (config), "initial-sleep");
 
 	log_option_values (config);
 
