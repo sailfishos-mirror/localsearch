@@ -132,7 +132,7 @@ log_option_values (TrackerConfig *config)
 	if (TRACKER_DEBUG_CHECK (CONFIG)) {
 		g_message ("General options:");
 		g_message ("  Initial Sleep  ........................  %d",
-		           tracker_config_get_initial_sleep (config));
+		           initial_sleep);
 
 		g_message ("Indexer options:");
 		g_message ("  Throttle level  .......................  %d",
@@ -373,8 +373,6 @@ static void
 miner_start (TrackerMiner  *miner,
              TrackerConfig *config)
 {
-	gint initial_sleep;
-
 	/* If requesting to run as no-daemon, start right away */
 	if (no_daemon) {
 		miner_maybe_start (miner);
@@ -382,8 +380,6 @@ miner_start (TrackerMiner  *miner,
 	}
 
 	/* If no need to initially sleep, start right away */
-	initial_sleep = tracker_config_get_initial_sleep (config);
-
 	if (initial_sleep <= 0) {
 		miner_maybe_start (miner);
 		return;
@@ -924,9 +920,8 @@ main (gint argc, gchar *argv[])
 	/* Initialize logging */
 	config = tracker_config_new ();
 
-	if (initial_sleep > -1) {
-		tracker_config_set_initial_sleep (config, initial_sleep);
-	}
+	if (initial_sleep < 0)
+		initial_sleep = tracker_config_get_initial_sleep (config);
 
 	log_option_values (config);
 
