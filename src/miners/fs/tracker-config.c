@@ -38,9 +38,7 @@
 
 struct _TrackerConfig {
 	GSettings parent_instance;
-};
 
-typedef struct {
 	/* IMPORTANT: There are 3 versions of the directories:
 	 * 1. a GStrv stored in GSettings
 	 * 2. a GSList stored here which is the GStrv without any
@@ -52,14 +50,14 @@ typedef struct {
 	GSList *index_recursive_directories_unfiltered;
 	GSList *index_single_directories;
 	GSList *index_single_directories_unfiltered;
-} TrackerConfigPrivate;
+};
 
 static void config_finalize (GObject *object);
 static void config_constructed (GObject *object);
 
 static void rebuild_filtered_lists (TrackerConfig *config);
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerConfig, tracker_config, G_TYPE_SETTINGS)
+G_DEFINE_TYPE (TrackerConfig, tracker_config, G_TYPE_SETTINGS)
 
 static void
 tracker_config_class_init (TrackerConfigClass *klass)
@@ -78,14 +76,12 @@ tracker_config_init (TrackerConfig *object)
 static void
 config_finalize (GObject *object)
 {
-	TrackerConfigPrivate *priv;
+	TrackerConfig *config = TRACKER_CONFIG (object);
 
-	priv = tracker_config_get_instance_private (TRACKER_CONFIG (object));
-
-	g_slist_free_full (priv->index_single_directories, g_free);
-	g_slist_free_full (priv->index_single_directories_unfiltered, g_free);
-	g_slist_free_full (priv->index_recursive_directories, g_free);
-	g_slist_free_full (priv->index_recursive_directories_unfiltered, g_free);
+	g_slist_free_full (config->index_single_directories, g_free);
+	g_slist_free_full (config->index_single_directories_unfiltered, g_free);
+	g_slist_free_full (config->index_recursive_directories, g_free);
+	g_slist_free_full (config->index_recursive_directories_unfiltered, g_free);
 
 	(G_OBJECT_CLASS (tracker_config_parent_class)->finalize) (object);
 }
@@ -122,15 +118,14 @@ dir_mapping_get (GSList   *dirs,
 static void
 update_directories (TrackerConfig *config)
 {
-	TrackerConfigPrivate *priv = tracker_config_get_instance_private (config);
 	GStrv strv;
 
 	strv = g_settings_get_strv (G_SETTINGS (config), "index-recursive-directories");
-	priv->index_recursive_directories_unfiltered = tracker_string_list_to_gslist (strv, -1);
+	config->index_recursive_directories_unfiltered = tracker_string_list_to_gslist (strv, -1);
 	g_strfreev (strv);
 
 	strv = g_settings_get_strv (G_SETTINGS (config), "index-single-directories");
-	priv->index_single_directories_unfiltered = tracker_string_list_to_gslist (strv, -1);
+	config->index_single_directories_unfiltered = tracker_string_list_to_gslist (strv, -1);
 	g_strfreev (strv);
 
 	rebuild_filtered_lists (config);
@@ -196,31 +191,22 @@ tracker_config_new (void)
 GSList *
 tracker_config_get_index_recursive_directories (TrackerConfig *config)
 {
-	TrackerConfigPrivate *priv;
-
 	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
 
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->index_recursive_directories;
+	return config->index_recursive_directories;
 }
 
 GSList *
 tracker_config_get_index_single_directories (TrackerConfig *config)
 {
-	TrackerConfigPrivate *priv;
-
 	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
 
-	priv = tracker_config_get_instance_private (config);
-
-	return priv->index_single_directories;
+	return config->index_single_directories;
 }
 
 static void
 rebuild_filtered_lists (TrackerConfig *config)
 {
-	TrackerConfigPrivate *priv;
 	GSList *old_list;
 
 	/* This function does 3 things:
@@ -232,16 +218,15 @@ rebuild_filtered_lists (TrackerConfig *config)
 	 * 1. Only notify on changes.
 	 * 2. Don't update the unfiltered lists (since they have aliases)
 	 */
-	priv = tracker_config_get_instance_private (config);
 
 	/* Filter single directories first, checking duplicates */
-	old_list = priv->index_single_directories;
-	priv->index_single_directories = NULL;
+	old_list = config->index_single_directories;
+	config->index_single_directories = NULL;
 
-	if (priv->index_single_directories_unfiltered) {
-		GSList *mapped_dirs = dir_mapping_get (priv->index_single_directories_unfiltered, FALSE);
+	if (config->index_single_directories_unfiltered) {
+		GSList *mapped_dirs = dir_mapping_get (config->index_single_directories_unfiltered, FALSE);
 
-		priv->index_single_directories =
+		config->index_single_directories =
 			tracker_path_list_filter_duplicates (mapped_dirs, ".", FALSE);
 		g_slist_free_full (mapped_dirs, g_free);
 	}
@@ -249,19 +234,19 @@ rebuild_filtered_lists (TrackerConfig *config)
 	g_slist_free_full (old_list, g_free);
 
 	/* Filter recursive directories */
-	old_list = priv->index_recursive_directories;
-	priv->index_recursive_directories = NULL;
+	old_list = config->index_recursive_directories;
+	config->index_recursive_directories = NULL;
 
-	if (priv->index_recursive_directories_unfiltered) {
+	if (config->index_recursive_directories_unfiltered) {
 		GSList *l, *checked_dirs = NULL;
 		GSList *mapped_dirs;
 
 		/* First, translate aliases */
-		mapped_dirs = dir_mapping_get (priv->index_recursive_directories_unfiltered, TRUE);
+		mapped_dirs = dir_mapping_get (config->index_recursive_directories_unfiltered, TRUE);
 
 		/* Second, remove elements already in single directories */
 		for (l = mapped_dirs; l; l = l->next) {
-			if (g_slist_find_custom (priv->index_single_directories,
+			if (g_slist_find_custom (config->index_single_directories,
 			                         l->data,
 			                         (GCompareFunc) g_strcmp0) != NULL) {
 				g_message ("Path '%s' being removed from recursive directories "
@@ -276,7 +261,7 @@ rebuild_filtered_lists (TrackerConfig *config)
 		checked_dirs = g_slist_reverse (checked_dirs);
 
 		/* Third, clean up any duplicates */
-		priv->index_recursive_directories =
+		config->index_recursive_directories =
 			tracker_path_list_filter_duplicates (checked_dirs, ".", TRUE);
 
 		g_slist_free_full (checked_dirs, g_free);
