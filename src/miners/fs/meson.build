@@ -77,31 +77,57 @@ executable('localsearch-@0@'.format(tracker_api_major),
     install_rpath: tracker_internal_libs_dir,
 )
 
-# This file allows starting the service with D-Bus autoactivation.
-# It's also used by tracker-control to identify the miner.
-tmp_conf = configuration_data()
-tmp_conf.merge_from(conf)
-tmp_conf.set ('DBUS_NAME', 'LocalSearch3')
-if get_option('domain_prefix') == 'org.freedesktop'
-  tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=localsearch-3.service')
-else
-  tmp_conf.set ('SYSTEMD_SERVICE', '')
+if get_option('domain_prefix') != 'org.freedesktop'
+    tmp_conf = configuration_data()
+    tmp_conf.merge_from(conf)
+    tmp_conf.set ('DBUS_NAME', 'LocalSearch3')
+
+    domain_ontology_localsearch_service_file = configure_file(
+        input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
+        output: get_option('domain_prefix') + '.LocalSearch3.service',
+        configuration: tmp_conf,
+        install: true,
+        install_dir: dbus_services_dir,
+    )
 endif
-dbus_service_file = configure_file(
+
+localsearch_service_file = configure_file(
     input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
-    output: get_option('domain_prefix') + '.LocalSearch3.service',
-    configuration: tmp_conf,
+    output: 'org.freedesktop.LocalSearch3.service',
+    configuration: configuration_data({
+        'DOMAIN_PREFIX': 'org.freedesktop',
+        'DBUS_NAME': 'LocalSearch3',
+        'SYSTEMD_SERVICE': 'SystemdService=localsearch-3.service',
+        'libexecdir': conf.get('libexecdir'),
+    }),
     install: true,
     install_dir: dbus_services_dir,
 )
 
-legacy_conf = configuration_data()
-legacy_conf.merge_from(conf)
-legacy_conf.set ('DBUS_NAME', 'Tracker3.Miner.Files')
-legacy_dbus_service_file = configure_file(
+
+if get_option('domain_prefix') != 'org.freedesktop'
+    legacy_conf = configuration_data()
+    legacy_conf.merge_from(conf)
+    legacy_conf.set ('DBUS_NAME', 'Tracker3.Miner.Files')
+
+    legacy_domain_ontology_service_file = configure_file(
+        input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
+        output: get_option('domain_prefix') + '.Tracker3.Miner.Files.service',
+        configuration: legacy_conf,
+        install: true,
+        install_dir: dbus_services_dir,
+    )
+endif
+
+legacy_service_file = configure_file(
     input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
-    output: get_option('domain_prefix') + '.Tracker3.Miner.Files.service',
-    configuration: legacy_conf,
+    output: 'org.freedesktop.Tracker3.Miner.Files.service',
+    configuration: configuration_data({
+        'DOMAIN_PREFIX': 'org.freedesktop',
+        'DBUS_NAME': 'Tracker3.Miner.Files',
+        'SYSTEMD_SERVICE': 'SystemdService=localsearch-3.service',
+        'libexecdir': conf.get('libexecdir'),
+    }),
     install: true,
     install_dir: dbus_services_dir,
 )
