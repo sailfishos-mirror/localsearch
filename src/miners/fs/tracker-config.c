@@ -143,24 +143,8 @@ static void
 config_constructed (GObject *object)
 {
 	TrackerConfig *config = TRACKER_CONFIG (object);
-	GSettings *settings = G_SETTINGS (object);
 
 	(G_OBJECT_CLASS (tracker_config_parent_class)->constructed) (object);
-
-	/* NOTE: Without the _delay() call the updates to settings
-	 * from tracker-preferences may not happen before we notify
-	 * about the property change from _set_*() APIs. This is
-	 * because the GValue in set_property() is not up to date at
-	 * the time we are called back. Quite fscking stupid really if
-	 * you ask me.
-	 *
-	 * NOTE: We need this. If we don't we can't have local
-	 * settings which are *NOT* stored in the GSettings database.
-	 * We need this for overriding things on start up.
-	 */
-	if (G_LIKELY (!g_getenv ("TRACKER_USE_CONFIG_FILES"))) {
-		g_settings_delay (settings);
-	}
 
 	g_signal_connect (config, "notify::index-recursive-directories",
 	                  G_CALLBACK (update_directories), NULL);
