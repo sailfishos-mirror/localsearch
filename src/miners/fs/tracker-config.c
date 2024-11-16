@@ -156,13 +156,10 @@ tracker_config_new (void)
 	if (G_UNLIKELY (g_getenv ("TRACKER_USE_CONFIG_FILES"))) {
 		GSettingsBackend *backend;
 		gchar *filename, *basename;
-		gboolean need_to_save;
 
 		basename = g_strdup_printf ("%s.cfg", g_get_prgname ());
 		filename = g_build_filename (g_get_user_config_dir (), "tracker", basename, NULL);
 		g_free (basename);
-
-		need_to_save = g_file_test (filename, G_FILE_TEST_EXISTS) == FALSE;
 
 		backend = g_keyfile_settings_backend_new (filename, CONFIG_PATH, "General");
 		g_info ("Using config file '%s'", filename);
@@ -174,10 +171,6 @@ tracker_config_new (void)
 		                       "path", CONFIG_PATH,
 		                       NULL);
 		g_object_unref (backend);
-
-		if (need_to_save) {
-			g_info ("  Config file does not exist, using default values...");
-		}
 	} else {
 		config = g_object_new (TRACKER_TYPE_CONFIG,
 		                       "schema-id", CONFIG_SCHEMA,
