@@ -149,36 +149,23 @@ config_constructed (GObject *object)
 TrackerConfig *
 tracker_config_new (void)
 {
-	TrackerConfig *config = NULL;
-
-	/* FIXME: should we unset GSETTINGS_BACKEND env var? */
+	g_autoptr (GSettingsBackend) backend = NULL;
 
 	if (G_UNLIKELY (g_getenv ("TRACKER_USE_CONFIG_FILES"))) {
-		GSettingsBackend *backend;
-		gchar *filename, *basename;
+		g_autofree char *filename = NULL, *basename = NULL;
 
 		basename = g_strdup_printf ("%s.cfg", g_get_prgname ());
 		filename = g_build_filename (g_get_user_config_dir (), "tracker", basename, NULL);
-		g_free (basename);
 
 		backend = g_keyfile_settings_backend_new (filename, CONFIG_PATH, "General");
 		g_info ("Using config file '%s'", filename);
-		g_free (filename);
-
-		config = g_object_new (TRACKER_TYPE_CONFIG,
-		                       "backend", backend,
-		                       "schema-id", CONFIG_SCHEMA,
-		                       "path", CONFIG_PATH,
-		                       NULL);
-		g_object_unref (backend);
-	} else {
-		config = g_object_new (TRACKER_TYPE_CONFIG,
-		                       "schema-id", CONFIG_SCHEMA,
-		                       "path", CONFIG_PATH,
-		                       NULL);
 	}
 
-	return config;
+	return g_object_new (TRACKER_TYPE_CONFIG,
+	                     "backend", backend,
+	                     "schema-id", CONFIG_SCHEMA,
+	                     "path", CONFIG_PATH,
+	                     NULL);
 }
 
 GSList *
