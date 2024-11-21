@@ -408,7 +408,7 @@ extractor_get_address (MetadataExtractor     *extractor,
                        GstTagList            *tag_list)
 {
 	TrackerResource *address = NULL;
-	gchar *country = NULL, *city = NULL, *sublocation = NULL;
+	g_autofree char *country = NULL, *city = NULL, *sublocation = NULL;
 
 	g_debug ("Retrieving address metadata...");
 
@@ -417,7 +417,7 @@ extractor_get_address (MetadataExtractor     *extractor,
 	gst_tag_list_get_string (tag_list, GST_TAG_GEO_LOCATION_SUBLOCATION, &sublocation);
 
 	if (city || country || sublocation) {
-		gchar *address_uri = NULL;
+		g_autofree char *address_uri = NULL;
 
 		address_uri = tracker_sparql_get_uuid_urn ();
 		address = tracker_resource_new (address_uri);
@@ -994,11 +994,12 @@ extract_metadata (MetadataExtractor  *extractor,
 						track = tracker_resource_new (resource_uri);
 						g_free (resource_uri);
 						g_free (suffix);
+
+						tracker_resource_set_uri (track, "nie:isStoredAs", file_url);
+						tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 					}
 
 					extract_track (track, extractor, node->data, file_url, album_disc);
-					tracker_resource_set_relation (track, "nie:isStoredAs", file_resource);
-					tracker_resource_add_take_relation (file_resource, "nie:interpretedAs", track);
 				}
 			} else {
 				extractor_apply_audio_metadata (extractor,

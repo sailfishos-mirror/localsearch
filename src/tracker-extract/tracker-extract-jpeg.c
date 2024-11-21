@@ -149,7 +149,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GFile *file;
 	FILE *f;
 	goffset size;
-	gchar *filename, *uri, *resource_uri;
+	g_autofree char *resource_uri = NULL;
+	gchar *filename, *uri;
 	gchar *comment = NULL;
 	const gchar *dlna_profile, *dlna_mimetype;
 	GPtrArray *keywords;
@@ -182,12 +183,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		goto fail;
 	}
 
-	resource_uri = tracker_extract_info_get_content_id (info, NULL);
-	metadata = tracker_resource_new (resource_uri);
-	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
-	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
-	g_free (resource_uri);
-
 	jpeg_create_decompress (&cinfo);
 
 	jpeg_save_markers (&cinfo, JPEG_COM, 0xFFFF);
@@ -206,6 +201,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	 *
 	 * jpeg_calc_output_dimensions(&cinfo);
 	 */
+
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
+	metadata = tracker_resource_new (resource_uri);
+	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
+	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
 
 	marker = (struct jpeg_marker_struct *) &cinfo.marker_list;
 
@@ -279,7 +279,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			sidecar_resource = tracker_resource_new (sidecar);
 			tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
-			tracker_resource_add_relation (sidecar_resource, "nie:interpretedAs", metadata);
+			tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs", resource_uri);
 
 			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 		}

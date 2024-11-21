@@ -424,7 +424,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			sidecar_resource = tracker_resource_new (sidecar);
 			tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
-			tracker_resource_add_relation (sidecar_resource, "nie:interpretedAs", metadata);
+			tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs",
+			                          tracker_resource_get_identifier (metadata));
 
 			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 		}

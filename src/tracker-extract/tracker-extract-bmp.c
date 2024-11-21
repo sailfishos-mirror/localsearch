@@ -106,7 +106,7 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *image;
+	g_autoptr (TrackerResource) image = NULL;
 	goffset size;
 	gchar *filename, *resource_uri;
 	GFile *file;

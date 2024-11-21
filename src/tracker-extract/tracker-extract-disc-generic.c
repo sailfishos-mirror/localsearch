@@ -105,13 +105,13 @@ build_basic_resource (TrackerExtractInfo *info,
                       GFile              *image)
 {
 	TrackerResource *metadata, *child;
-	gchar *uri, *resource_uri;
+	g_autofree char *resource_uri = NULL;
+	gchar *uri;
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:GameImage");
 	tracker_resource_set_string (metadata, "nie:mimeType", "application/x-cue");
-	g_free (resource_uri);
 
 	uri = g_file_get_uri (cue);
 	tracker_resource_add_uri (metadata, "nie:isStoredAs", uri);
@@ -121,7 +121,7 @@ build_basic_resource (TrackerExtractInfo *info,
 	uri = g_file_get_uri (image);
 	child = tracker_resource_new (uri);
 	tracker_resource_add_uri (child, "rdf:type", "nfo:FileDataObject");
-	tracker_resource_set_relation (child, "nie:interpretedAs", metadata);
+	tracker_resource_set_uri (child, "nie:interpretedAs", resource_uri);
 	tracker_resource_set_take_relation (metadata, "nie:isStoredAs", child);
 	g_free (uri);
 
@@ -437,7 +437,7 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *metadata = NULL;
+	g_autoptr (TrackerResource) metadata = NULL;
 	GError *inner_error = NULL;
 	GFile *file;
 	g_autofree char *buffer = NULL;

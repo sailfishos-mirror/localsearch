@@ -49,7 +49,6 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
                     "@type": "nmm:Artist",
                 },
                 "nfo:channels": 1,
-                "nie:interpretedAs": [{"@id": audio_uri}, {}],
                 "nie:isStoredAs": {"@id": audio_uri},
                 "nfo:sampleRate": 44100,
                 "nie:title": "Only Shallow",
