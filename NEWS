@@ -1,3 +1,13 @@
+NEW in 3.8.1 - 2024-11-21
+=========================
+  * Fix multiple leaks in metadata extractors
+  * Fix reporting of metadata extraction progress in "localsearch daemon -f"
+    and "localsearch status"
+  * Cache mounts for generating stable content identifiers
+  * Added missing includes necessary for Musl libc
+
+Translations: ca, be, fur, nl, lv, pt_BR, ro, sl
+
 NEW in 3.8.0 - 2024-09-16
 =========================
 
