@@ -32,6 +32,8 @@
 typedef struct {
 	GList *mounts;
 	guint64 mtime;
+	/* Just for the purpose to make changed_since() work underneath */
+	GUnixMountMonitor *mount_monitor;
 } MountData;
 
 static void
@@ -393,6 +395,7 @@ mount_data_free (gpointer user_data)
 	MountData *mount_data = user_data;
 
 	g_list_free_full (mount_data->mounts, (GDestroyNotify) g_unix_mount_entry_free);
+	g_object_unref (mount_data->mount_monitor);
 	g_free (mount_data);
 }
 
@@ -417,6 +420,7 @@ lookup_filesystem_id (TrackerMinerFiles *files,
 	if (!mount_data) {
 		mount_data = g_new0 (MountData, 1);
 		mount_data->mounts = g_unix_mount_entries_get (&mount_data->mtime);
+		mount_data->mount_monitor = g_unix_mount_monitor_get ();
 		g_object_set_data_full (G_OBJECT (files), "-indexer-cached-mounts", mount_data, mount_data_free);
 	} else if (g_unix_mount_entries_changed_since (mount_data->mtime)) {
 		g_list_free_full (mount_data->mounts, (GDestroyNotify) g_unix_mount_entry_free);
