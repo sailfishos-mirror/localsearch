@@ -129,9 +129,9 @@ check-merge-request:
 
 .tracker-miners.debian@common:
   variables:
-    BASE_TAG: '2025-01-01.0'
+    BASE_TAG: '2025-02-06.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libgrss-dev libavcodec-dev libavformat-dev libavutil-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libavcodec-dev libavformat-dev libavutil-dev'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&

@@ -48,21 +48,9 @@ totem_plparser = dependency('totem-plparser', required: get_option('playlist'))
 libgif = cc.find_library('gif', required: get_option('gif'))
 libmath = cc.find_library('m', required: false)
 
-network_manager = dependency('libnm', required: get_option('network_manager'))
-have_network_manager = network_manager.found()
-
 have_tracker_extract = get_option('extract')
 have_tracker_miner_fs = get_option('miner_fs')
-have_tracker_miner_rss = get_option('miner_rss')
 have_tracker_writeback = get_option('writeback')
-
-if have_tracker_miner_rss
-  libgrss = dependency('libgrss', version: '>= 0.7', required: false)
-  if not libgrss.found()
-    error('libgrss is required for the RSS feed miner. You can disable ' +
-          'this miner by passing -Dminer_rss=false if needed.')
-  endif
-endif
 
 if get_option('man')
   a2x = find_program('a2x')
@@ -288,7 +276,6 @@ conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_LIBIPTCDATA', libiptcdata.found())
 conf.set('HAVE_LIBSECCOMP', seccomp_required and libseccomp.found())
 conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
-conf.set('HAVE_NETWORK_MANAGER', have_network_manager)
 conf.set('HAVE_GUPNP_DLNA', gupnp_dlna.found())
 conf.set('HAVE_FANOTIFY', have_fanotify)
 conf.set('HAVE_BTRFS_IOCTL', have_btrfs_ioctl)
@@ -428,12 +415,10 @@ summary = [
   '    Landlock:                               ' + have_landlock.to_string(),
   '    BTRFS subvolumes:                       ' + have_btrfs_ioctl.to_string(),
   '    Battery/mains power detection:          ' + battery_detection_library_name,
-  '    Support for network status detection:   ' + have_network_manager.to_string(),
   '    Releasing heap memory with malloc_trim: ' + have_malloc_trim.to_string(),
   '    Store creation time:                    ' + glib.version().version_compare('>=2.70.0').to_string(),
   '\nData Miners / Writebacks:',
   '    FS (File System):                       ' + have_tracker_miner_fs.to_string(),
-  '    RSS:                                    ' + have_tracker_miner_rss.to_string(),
   '   Extract (secondary extraction):     ' + have_tracker_extract.to_string(),
   '   Writeback (writing changes back):   ' + have_tracker_writeback.to_string(),
 ]

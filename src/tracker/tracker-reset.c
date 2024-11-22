@@ -36,20 +36,15 @@
 #include "tracker-miner-manager.h"
 
 static gboolean files = FALSE;
-static gboolean rss = FALSE;
 static gchar *filename = NULL;
 
 #define RESET_OPTIONS_ENABLED() \
 	(files || \
-	 rss || \
 	 filename)
 
 static GOptionEntry entries[] = {
 	{ "filesystem", 's', 0, G_OPTION_ARG_NONE, &files,
 	  N_("Remove filesystem indexer database"),
-	  NULL },
-	{ "rss", 'r', 0, G_OPTION_ARG_NONE, &rss,
-	  N_("Remove RSS indexer database"),
 	  NULL },
 	{ "file", 'f', 0, G_OPTION_ARG_FILENAME, &filename,
 	  N_("Erase indexed information about a file, works recursively for directories"),
@@ -191,7 +186,7 @@ reset_run (void)
 	}
 
 	/* KILL processes first... */
-	if (files || rss) {
+	if (files) {
 		/* FIXME: we might selectively kill affected miners */
 		tracker_process_stop (SIGKILL);
 	}
@@ -210,17 +205,6 @@ reset_run (void)
 		location = g_file_new_for_path (dir);
 		delete_location (location);
 		g_object_unref (location);
-		g_free (dir);
-	}
-
-	if (rss) {
-		GFile *cache_location;
-		gchar *dir;
-
-		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "rss", NULL);
-		cache_location = g_file_new_for_path (dir);
-		delete_location (cache_location);
-		g_object_unref (cache_location);
 		g_free (dir);
 	}
 

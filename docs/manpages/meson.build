@@ -3,10 +3,6 @@ daemon_manpages = [
     ['localsearch-writeback-3', 1],
 ]
 
-if have_tracker_miner_rss
-  daemon_manpages += [['tracker-miner-rss-3', 1]]
-endif
-
 cli_manpages = [
   ['localsearch-daemon', 1],
   ['localsearch-extract', 1],

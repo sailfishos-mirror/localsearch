@@ -156,7 +156,7 @@ GSList *
 tracker_process_find_all (void)
 {
 	GDBusConnection *connection;
-	pid_t miner_fs, miner_rss;
+	pid_t miner_fs;
 	GSList *processes = NULL;
 	TrackerProcessData *data;
 	gchar *command;
@@ -167,15 +167,6 @@ tracker_process_find_all (void)
 		command = find_command (miner_fs);
 		if (command) {
 			data = process_data_new (command, miner_fs);
-			processes = g_slist_prepend (processes, data);
-		}
-	}
-
-	miner_rss = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.RSS");
-	if (miner_rss > 0) {
-		command = find_command (miner_rss);
-		if (command) {
-			data = process_data_new (command, miner_rss);
 			processes = g_slist_prepend (processes, data);
 		}
 	}
