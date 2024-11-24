@@ -1118,9 +1118,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		TrackerFileNotifierStatus notifier_status;
 		GFile *current_root;
 		gdouble progress_now;
-		static gdouble progress_last = 0.0;
-		static gint info_last = 0;
-		gdouble seconds_elapsed, extraction_elapsed;
+		gdouble extraction_elapsed;
 
 		time_last = time_now;
 
@@ -1128,7 +1126,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		progress_now = item_queue_get_progress (fs,
 		                                        &items_processed,
 		                                        &items_remaining);
-		seconds_elapsed = g_timer_elapsed (priv->timer, NULL);
 		extraction_elapsed = g_timer_elapsed (priv->extraction_timer, NULL);
 
 		if (tracker_file_notifier_get_status (priv->file_notifier,
@@ -1187,27 +1184,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 				              "remaining-time", remaining_time,
 				              NULL);
 			}
-		}
-
-		if (++info_last >= 5 &&
-		    (gint) (progress_last * 100) != (gint) (progress_now * 100)) {
-			g_autofree char *str1 = NULL, *str2 = NULL;
-
-			info_last = 0;
-			progress_last = progress_now;
-
-			/* Log estimated remaining time */
-			str1 = tracker_seconds_estimate_to_string (extraction_elapsed,
-			                                           TRUE,
-			                                           items_processed,
-			                                           items_remaining);
-			str2 = tracker_seconds_to_string (seconds_elapsed, TRUE);
-
-			g_info ("Processed %u/%u, estimated %s left, %s elapsed",
-			        items_processed,
-			        items_processed + items_remaining,
-			        str1,
-			        str2);
 		}
 	}
 
