@@ -1045,39 +1045,6 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 	}
 }
 
-static gdouble
-item_queue_get_progress (TrackerMinerFS *fs,
-                         guint          *n_items_processed,
-                         guint          *n_items_remaining)
-{
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-	guint items_to_process = 0;
-	guint items_total = 0;
-
-	items_to_process += tracker_priority_queue_get_length (priv->items);
-
-	items_total += priv->total_directories_found;
-	items_total += priv->total_files_found;
-
-	if (n_items_processed) {
-		*n_items_processed = ((items_total >= items_to_process) ?
-		                      (items_total - items_to_process) : 0);
-	}
-
-	if (n_items_remaining) {
-		*n_items_remaining = items_to_process;
-	}
-
-	if (items_total == 0 ||
-	    items_to_process == 0 ||
-	    items_to_process > items_total) {
-		return 1.0;
-	}
-
-	return (gdouble) (items_total - items_to_process) / items_total;
-}
-
 static gboolean
 miner_handle_next_item (TrackerMinerFS *fs)
 {
@@ -1114,19 +1081,10 @@ miner_handle_next_item (TrackerMinerFS *fs)
 
 	if ((time_now - time_last) >= 1000000) {
 		guint files_found, files_updated, files_ignored;
-		guint items_processed, items_remaining;
 		TrackerFileNotifierStatus notifier_status;
 		GFile *current_root;
-		gdouble progress_now;
-		gdouble extraction_elapsed;
 
 		time_last = time_now;
-
-		/* Update progress? */
-		progress_now = item_queue_get_progress (fs,
-		                                        &items_processed,
-		                                        &items_remaining);
-		extraction_elapsed = g_timer_elapsed (priv->extraction_timer, NULL);
 
 		if (tracker_file_notifier_get_status (priv->file_notifier,
 		                                      &notifier_status,
@@ -1157,33 +1115,17 @@ miner_handle_next_item (TrackerMinerFS *fs)
 			              "progress", 0.0,
 			              "remaining-time", -1,
 			              NULL);
-		} else {
+		} else if (tracker_priority_queue_get_length (priv->items) > 0) {
 			g_autofree char *status = NULL;
-			gint remaining_time;
 
-			g_object_get (fs, "status", &status, NULL);
+			status = g_strdup_printf ("Processing %d updates…",
+			                          tracker_priority_queue_get_length (priv->items));
 
-			/* Compute remaining time */
-			remaining_time = (gint)tracker_seconds_estimate (extraction_elapsed,
-			                                                 items_processed,
-			                                                 items_remaining);
-
-			/* CLAMP progress so it doesn't go back below
-			 * 2% (which we use for crawling)
-			 */
-			if (g_strcmp0 (status, "Processing…") != 0) {
-				/* Don't spam this */
-				g_object_set (fs,
-				              "status", "Processing…",
-				              "progress", CLAMP (progress_now, 0.02, 1.00),
-				              "remaining-time", remaining_time,
-				              NULL);
-			} else {
-				g_object_set (fs,
-				              "progress", CLAMP (progress_now, 0.02, 1.00),
-				              "remaining-time", remaining_time,
-				              NULL);
-			}
+			g_object_set (fs,
+			              "status", status,
+			              "progress", 0.0,
+			              "remaining-time", -1,
+			              NULL);
 		}
 	}
 
