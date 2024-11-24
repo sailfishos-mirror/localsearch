@@ -1568,22 +1568,12 @@ file_notifier_root_finished (TrackerFileNotifier *notifier,
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv =
 		tracker_miner_fs_get_instance_private (fs);
-	g_autofree char *str = NULL, *uri = NULL;
 
 	/* Update stats */
 	priv->total_directories_found += directories_found;
 	priv->total_directories_ignored += directories_ignored;
 	priv->total_files_found += files_found;
 	priv->total_files_ignored += files_ignored;
-
-	uri = g_file_get_uri (directory);
-	str = g_strdup_printf ("Crawl finished for directory '%s'", uri);
-
-        g_object_set (fs,
-                      "progress", 0.01,
-                      "status", str,
-                      "remaining-time", -1,
-                      NULL);
 
 	if (directories_found == 0 &&
 	    files_found == 0) {
