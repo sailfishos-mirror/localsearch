@@ -1113,7 +1113,10 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	time_now = g_get_monotonic_time ();
 
 	if ((time_now - time_last) >= 1000000) {
+		guint files_found, files_updated, files_ignored;
 		guint items_processed, items_remaining;
+		TrackerFileNotifierStatus notifier_status;
+		GFile *current_root;
 		gdouble progress_now;
 		static gdouble progress_last = 0.0;
 		static gint info_last = 0;
@@ -1128,7 +1131,36 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		seconds_elapsed = g_timer_elapsed (priv->timer, NULL);
 		extraction_elapsed = g_timer_elapsed (priv->extraction_timer, NULL);
 
-		if (!tracker_file_notifier_is_active (priv->file_notifier)) {
+		if (tracker_file_notifier_get_status (priv->file_notifier,
+		                                      &notifier_status,
+		                                      &current_root,
+		                                      &files_found,
+		                                      &files_updated,
+		                                      &files_ignored)) {
+			g_autofree char *uri = NULL;
+			GString *str;
+
+			str = g_string_new (NULL);
+			uri = g_file_get_uri (current_root);
+
+			if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_INDEXING)
+				g_string_append_printf (str, "Indexing '%s'. ", uri);
+			else if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_CHECKING)
+				g_string_append_printf (str, "Checking '%s'. ", uri);
+
+			if (files_found > 0)
+				g_string_append_printf (str, "Found: %d. ", files_found);
+			if (files_updated > 0)
+				g_string_append_printf (str, "Updated: %d. ", files_updated);
+			if (files_ignored > 0)
+				g_string_append_printf (str, "Ignored: %d. ", files_ignored);
+
+			g_object_set (fs,
+			              "status", str->str,
+			              "progress", 0.0,
+			              "remaining-time", -1,
+			              NULL);
+		} else {
 			g_autofree char *status = NULL;
 			gint remaining_time;
 
