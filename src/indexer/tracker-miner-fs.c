@@ -115,6 +115,8 @@ struct _TrackerMinerFSPrivate {
 	GHashTable *roots_to_notify;        /* Used to signal indexing
 	                                     * trees finished */
 
+	guint status_idle_id;
+
 	/*
 	 * Statistics
 	 */
@@ -206,9 +208,6 @@ static void           file_notifier_directory_finished (TrackerFileNotifier *not
                                                         GFile               *directory,
                                                         gpointer             user_data);
 
-static void           file_notifier_root_started     (TrackerFileNotifier *notifier,
-                                                      GFile               *directory,
-                                                      gpointer             user_data);
 static void           file_notifier_root_finished    (TrackerFileNotifier *notifier,
                                                       GFile               *directory,
                                                       guint                directories_found,
@@ -472,6 +471,8 @@ fs_finalize (GObject *object)
 	g_timer_destroy (priv->timer);
 	g_timer_destroy (priv->extraction_timer);
 
+	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
+
 	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
 	g_clear_handle_id (&priv->item_queues_handler_id, g_source_remove);
 
@@ -542,9 +543,6 @@ fs_constructed (GObject *object)
 	                  object);
 	g_signal_connect (priv->file_notifier, "directory-finished",
 	                  G_CALLBACK (file_notifier_directory_finished),
-	                  object);
-	g_signal_connect (priv->file_notifier, "root-started",
-	                  G_CALLBACK (file_notifier_root_started),
 	                  object);
 	g_signal_connect (priv->file_notifier, "root-finished",
 	                  G_CALLBACK (file_notifier_root_finished),
@@ -748,6 +746,8 @@ process_stop (TrackerMinerFS *fs)
 
 	priv->timer_stopped = TRUE;
 	priv->extraction_timer_stopped = TRUE;
+
+	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
 
 	g_object_set (fs,
 	              "progress", 1.0,
@@ -1052,8 +1052,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		tracker_miner_fs_get_instance_private (fs);
 	GFile *file = NULL;
 	GFile *source_file = NULL;
-	gint64 time_now;
-	static gint64 time_last = 0;
 	gboolean keep_processing = TRUE;
 	gboolean attributes_update = FALSE;
 	gboolean is_dir = FALSE;
@@ -1074,59 +1072,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	} else if (file != NULL && priv->extraction_timer_stopped) {
 		g_timer_continue (priv->extraction_timer);
 		priv->extraction_timer_stopped = FALSE;
-	}
-
-	/* Update progress, but don't spam it. */
-	time_now = g_get_monotonic_time ();
-
-	if ((time_now - time_last) >= 1000000) {
-		guint files_found, files_updated, files_ignored;
-		TrackerFileNotifierStatus notifier_status;
-		GFile *current_root;
-
-		time_last = time_now;
-
-		if (tracker_file_notifier_get_status (priv->file_notifier,
-		                                      &notifier_status,
-		                                      &current_root,
-		                                      &files_found,
-		                                      &files_updated,
-		                                      &files_ignored)) {
-			g_autofree char *uri = NULL;
-			GString *str;
-
-			str = g_string_new (NULL);
-			uri = g_file_get_uri (current_root);
-
-			if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_INDEXING)
-				g_string_append_printf (str, "Indexing '%s'. ", uri);
-			else if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_CHECKING)
-				g_string_append_printf (str, "Checking '%s'. ", uri);
-
-			if (files_found > 0)
-				g_string_append_printf (str, "Found: %d. ", files_found);
-			if (files_updated > 0)
-				g_string_append_printf (str, "Updated: %d. ", files_updated);
-			if (files_ignored > 0)
-				g_string_append_printf (str, "Ignored: %d. ", files_ignored);
-
-			g_object_set (fs,
-			              "status", str->str,
-			              "progress", 0.0,
-			              "remaining-time", -1,
-			              NULL);
-		} else if (tracker_priority_queue_get_length (priv->items) > 0) {
-			g_autofree char *status = NULL;
-
-			status = g_strdup_printf ("Processing %d updates…",
-			                          tracker_priority_queue_get_length (priv->items));
-
-			g_object_set (fs,
-			              "status", status,
-			              "progress", 0.0,
-			              "remaining-time", -1,
-			              NULL);
-		}
 	}
 
 	if (file == NULL) {
@@ -1219,6 +1164,64 @@ item_queue_handlers_cb (gpointer user_data)
 	return G_SOURCE_CONTINUE;
 }
 
+static gboolean
+update_status_cb (gpointer user_data)
+{
+	TrackerMinerFS *fs = user_data;
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+	g_autofree char *status = NULL;
+	guint files_found, files_updated, files_ignored;
+	TrackerFileNotifierStatus notifier_status;
+	GFile *current_root;
+
+	if (tracker_file_notifier_get_status (priv->file_notifier,
+	                                      &notifier_status,
+	                                      &current_root,
+	                                      &files_found,
+	                                      &files_updated,
+	                                      &files_ignored)) {
+		g_autofree char *uri = NULL;
+		GString *str;
+
+		str = g_string_new (NULL);
+		uri = g_file_get_uri (current_root);
+
+		if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_INDEXING)
+			g_string_append_printf (str, "Indexing '%s'. ", uri);
+		else if (notifier_status == TRACKER_FILE_NOTIFIER_STATUS_CHECKING)
+			g_string_append_printf (str, "Checking '%s'. ", uri);
+
+		if (files_found > 0)
+			g_string_append_printf (str, "Found: %d. ", files_found);
+		if (files_updated > 0)
+			g_string_append_printf (str, "Updated: %d. ", files_updated);
+		if (files_ignored > 0)
+			g_string_append_printf (str, "Ignored: %d. ", files_ignored);
+
+		status = g_string_free (str, FALSE);
+	} else {
+		guint elems_left;
+
+		elems_left =
+			tracker_priority_queue_get_length (priv->items) +
+			tracker_task_pool_get_size (TRACKER_TASK_POOL (priv->sparql_buffer));
+
+		if (elems_left > 0)
+			status = g_strdup_printf ("Processing %d updates…", elems_left);
+	}
+
+	if (status != NULL) {
+		g_object_set (fs,
+		              "status", status,
+		              "progress", 0.0,
+		              "remaining-time", -1,
+		              NULL);
+	}
+
+	return G_SOURCE_CONTINUE;
+}
+
 static void
 queue_handler_set_up (TrackerMinerFS *fs)
 {
@@ -1269,19 +1272,11 @@ queue_handler_maybe_set_up (TrackerMinerFS *fs)
 		return;
 	}
 
-	if (!tracker_file_notifier_is_active (priv->file_notifier)) {
-		g_autofree char *status = NULL;
-		gdouble progress;
-
-		g_object_get (fs,
-		              "progress", &progress,
-		              "status", &status,
-		              NULL);
-
-		/* Don't spam this */
-		if (progress > 0.01 && g_strcmp0 (status, "Processing…") != 0) {
-			g_object_set (fs, "status", "Processing…", NULL);
-		}
+	if (priv->status_idle_id == 0) {
+		priv->status_idle_id = g_timeout_add (250,
+		                                      update_status_cb,
+		                                      fs);
+		update_status_cb (fs);
 	}
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   scheduled in idle"));
@@ -1473,37 +1468,6 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_FINISH_DIRECTORY, directory, NULL);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, directory));
-}
-
-static void
-file_notifier_root_started (TrackerFileNotifier *notifier,
-                            GFile               *directory,
-                            gpointer             user_data)
-{
-	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-	TrackerDirectoryFlags flags;
-	g_autofree char *str = NULL, *uri = NULL;
-
-	uri = g_file_get_uri (directory);
-	tracker_indexing_tree_get_root (priv->indexing_tree,
-					directory, &flags);
-
-	if ((flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0) {
-                str = g_strdup_printf ("Crawling recursively directory '%s'", uri);
-        } else {
-                str = g_strdup_printf ("Crawling single directory '%s'", uri);
-        }
-
-	/* Always set the progress here to at least 1%, and the remaining time
-         * to -1 as we cannot guess during crawling (we don't know how many directories
-         * we will find) */
-        g_object_set (fs,
-                      "progress", 0.01,
-                      "status", str,
-                      "remaining-time", -1,
-                      NULL);
 }
 
 static void
