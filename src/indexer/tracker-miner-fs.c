@@ -640,11 +640,6 @@ miner_started (TrackerMiner *miner)
 static void
 miner_stopped (TrackerMiner *miner)
 {
-	g_object_set (miner,
-	              "progress", 1.0,
-	              "status", "Idle",
-	              "remaining-time", -1,
-	              NULL);
 }
 
 static void
