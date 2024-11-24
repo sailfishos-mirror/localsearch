@@ -552,6 +552,12 @@ fs_constructed (GObject *object)
 	g_signal_connect (priv->file_notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished),
 	                  object);
+
+	g_object_set (object,
+	              "progress", 0.0,
+	              "status", "Initializing",
+	              "remaining-time", -1,
+	              NULL);
 }
 
 static void
@@ -627,12 +633,6 @@ miner_started (TrackerMiner *miner)
 		g_timer_start (priv->timer);
 		priv->timer_stopped = FALSE;
 	}
-
-	g_object_set (miner,
-	              "progress", 0.0,
-	              "status", "Initializing",
-	              "remaining-time", 0,
-	              NULL);
 
 	tracker_file_notifier_start (priv->file_notifier);
 }
