@@ -962,7 +962,14 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	/* Get stored info */
 	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 	store_mtime = tracker_sparql_cursor_get_datetime (cursor, 2);
-	file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
+
+	if (folder_urn) {
+		file_type = G_FILE_TYPE_DIRECTORY;
+		root->directories_found++;
+	} else {
+		file_type = G_FILE_TYPE_UNKNOWN;
+		root->files_found++;
+	}
 
 	file_data = _insert_store_info (root,
 	                                file,
