@@ -2038,3 +2038,49 @@ tracker_file_notifier_is_active (TrackerFileNotifier *notifier)
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	return priv->pending_index_roots || priv->current_index_root;
 }
+
+gboolean
+tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
+                                  TrackerFileNotifierStatus  *status,
+                                  GFile                     **current_root,
+                                  guint                      *files_found,
+                                  guint                      *files_updated,
+                                  guint                      *files_ignored)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (!priv->current_index_root ||
+	    (!priv->current_index_root->cursor &&
+	     !priv->current_index_root->current_dir)) {
+		/* Not doing anything in special? */
+		return FALSE;
+	}
+
+	if (status) {
+		*status = priv->current_index_root->current_dir ?
+			TRACKER_FILE_NOTIFIER_STATUS_INDEXING :
+			TRACKER_FILE_NOTIFIER_STATUS_CHECKING;
+	}
+
+	if (current_root)
+		*current_root = priv->current_index_root->root;
+
+	if (files_found) {
+		*files_found = priv->current_index_root->directories_found +
+			priv->current_index_root->files_found;
+	}
+
+	if (files_updated) {
+		*files_updated = priv->current_index_root->directories_updated +
+			priv->current_index_root->files_updated;
+	}
+
+	if (files_ignored) {
+		*files_ignored = priv->current_index_root->directories_ignored +
+			priv->current_index_root->files_ignored;
+	}
+
+	return TRUE;
+}
