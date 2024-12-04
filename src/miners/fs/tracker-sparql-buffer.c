@@ -597,10 +597,23 @@ tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
                                   TrackerResource     *file_resource,
                                   TrackerResource     *folder_resource)
 {
+	TrackerSparqlBufferPrivate *priv;
+	TrackerBatch *batch;
+	g_autofree gchar *uri = NULL;
+
 	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
 	g_return_if_fail (G_IS_FILE (file));
 	g_return_if_fail (TRACKER_IS_RESOURCE (file_resource));
 	g_return_if_fail (TRACKER_IS_RESOURCE (folder_resource));
+
+	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	uri = g_file_get_uri (file);
+	tracker_batch_add_statement (batch, priv->delete_file_content,
+	                             "uri", G_TYPE_STRING, uri,
+	                             NULL);
+
+	push_stmt_task (buffer, priv->delete_file_content, file);
 
 	/* Add indexing roots also to content specific graphs to provide the availability information */
 	if (is_root) {
