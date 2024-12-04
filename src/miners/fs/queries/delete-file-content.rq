@@ -9,6 +9,14 @@ DELETE WHERE {
   }
 };
 
+# Ensure there are no stale resources keeping the inverse relation
+DELETE WHERE {
+  GRAPH ?g {
+    ?ie a rdfs:Resource ;
+      nie:isStoredAs ~uri .
+  }
+};
+
 # Delete extractorHash, to ensure the file is extracted again.
 DELETE WHERE {
   GRAPH tracker:FileSystem {
