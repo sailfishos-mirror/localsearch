@@ -633,8 +633,9 @@ class IndexedFolderTest(fixtures.TrackerMinerTest):
         self.assertIn(self.uri("test-monitored/file2.txt"), unpacked_result)
         self.assertIn(self.uri("test-monitored/dir1/file3.txt"), unpacked_result)
 
+        # The file was moved to test-monitored
         datasource2 = self.__get_index_folder(dest);
-        self.assertNotEqual(datasource2, self.uri("test-monitored"))
+        self.assertEqual(datasource2, self.uri("test-monitored"))
         self.assertNotEqual(datasource1, datasource2)
 
 

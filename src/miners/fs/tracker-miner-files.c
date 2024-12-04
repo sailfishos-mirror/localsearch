@@ -1001,9 +1001,25 @@ miner_files_move_file (TrackerMinerFS      *fs,
                        TrackerSparqlBuffer *buffer,
                        gboolean             recursive)
 {
-	const gchar *data_source;
+	TrackerIndexingTree *indexing_tree;
+	const gchar *data_source = NULL;
 
-	data_source = tracker_miner_fs_get_identifier (fs, file);
+	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+
+	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+		data_source = tracker_miner_fs_get_identifier (fs, file);
+	} else {
+		GFile *root;
+
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+
+		if (root)
+			data_source = tracker_miner_fs_get_identifier (fs, root);
+	}
+
+	if (!data_source)
+		return;
+
 	tracker_sparql_buffer_log_move (buffer, source_file, file,
 	                                data_source);
 
