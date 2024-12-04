@@ -582,6 +582,8 @@ tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
 	                             "uri", G_TYPE_STRING, uri,
 	                             NULL);
 
+	push_stmt_task (buffer, priv->delete_file_content, file);
+
 	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, file_resource);
 
 	if (content_graph && graph_resource)
