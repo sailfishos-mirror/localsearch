@@ -91,7 +91,6 @@ struct _TrackerMinerFSPrivate {
 	TrackerFileNotifier *file_notifier;
 
 	/* Sparql insertion tasks */
-	TrackerTaskPool *task_pool;
 	TrackerSparqlBuffer *sparql_buffer;
 
 	/* Folder URN cache */
