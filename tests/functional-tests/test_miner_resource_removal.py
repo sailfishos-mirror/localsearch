@@ -115,6 +115,7 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
         )
 
         self.assertResourceExists(file_1_uri)
+        self.assertResourceExists("test:content")
         self.assertResourceMissing(file_2_uri)
 
         # Second create a second file that will be picked up by the extractor
@@ -122,6 +123,7 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
 
         # Third check that the first resource does not exist
         self.assertResourceMissing(file_1_uri)
+        self.assertResourceMissing("test:content")
         self.assertResourceExists(file_2_uri)
 
         # Fourth, create another file to ensure the extractor is not stuck
