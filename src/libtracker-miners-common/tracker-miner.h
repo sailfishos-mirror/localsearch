@@ -66,12 +66,8 @@ G_BEGIN_DECLS
  **/
 #define TRACKER_MINER_DBUS_PATH_PREFIX "/org/freedesktop/Tracker3/Miner/"
 
-#define TRACKER_TYPE_MINER         (tracker_miner_get_type())
-#define TRACKER_MINER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_MINER, TrackerMiner))
-#define TRACKER_MINER_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c),    TRACKER_TYPE_MINER, TrackerMinerClass))
-#define TRACKER_IS_MINER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_MINER))
-#define TRACKER_IS_MINER_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),    TRACKER_TYPE_MINER))
-#define TRACKER_MINER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o),  TRACKER_TYPE_MINER, TrackerMinerClass))
+#define TRACKER_TYPE_MINER tracker_miner_get_type()
+G_DECLARE_DERIVABLE_TYPE (TrackerMiner, tracker_miner, TRACKER, MINER, GObject)
 
 /**
  * TRACKER_MINER_ERROR:
@@ -83,32 +79,7 @@ G_BEGIN_DECLS
  **/
 #define TRACKER_MINER_ERROR        tracker_miner_error_quark()
 
-typedef struct _TrackerMiner TrackerMiner;
-typedef struct _TrackerMinerPrivate TrackerMinerPrivate;
-
-/**
- * TrackerMiner:
- *
- * Abstract miner object.
- **/
-struct _TrackerMiner {
-	GObject parent_instance;
-	TrackerMinerPrivate *priv;
-};
-
-/**
- * TrackerMinerClass:
- * @parent_class: parent object class.
- * @started: Called when the miner is told to start collecting data.
- * @stopped: Called when the miner is told to stop collecting data.
- * @paused: Called when the miner is told to pause.
- * @resumed: Called when the miner is told to resume activity.
- * @progress: progress.
- * @padding: Reserved for future API improvements.
- *
- * Virtual methods left to implement.
- **/
-typedef struct {
+struct _TrackerMinerClass {
 	GObjectClass parent_class;
 
 	/* signals */
@@ -122,18 +93,13 @@ typedef struct {
 	                             const gchar  *status,
 	                             gdouble       progress,
 	                             gint          remaining_time);
-
-	/* <Private> */
-	gpointer padding[10];
-} TrackerMinerClass;
+};
 
 typedef enum {
 	TRACKER_MINER_ERROR_PAUSED_ALREADY,
 	TRACKER_MINER_ERROR_INVALID_COOKIE
 } TrackerMinerError;
 
-
-GType                    tracker_miner_get_type            (void) G_GNUC_CONST;
 GQuark                   tracker_miner_error_quark         (void);
 
 void                     tracker_miner_start               (TrackerMiner         *miner);

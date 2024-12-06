@@ -51,9 +51,17 @@
 
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
 
+typedef struct _TrackerMinerFiles TrackerMinerFiles;
+typedef struct _TrackerMinerFilesPrivate TrackerMinerFilesPrivate;
+
+struct _TrackerMinerFiles {
+	TrackerMinerFS parent_instance;
+	TrackerMinerFilesPrivate *private;
+};
+
 static GQuark miner_files_error_quark = 0;
 
-struct TrackerMinerFilesPrivate {
+struct _TrackerMinerFilesPrivate {
 	TrackerConfig *config;
 	TrackerStorage *storage;
 

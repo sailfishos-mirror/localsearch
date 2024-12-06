@@ -35,45 +35,10 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_MINER_FS         (tracker_miner_fs_get_type())
-#define TRACKER_MINER_FS(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_MINER_FS, TrackerMinerFS))
-#define TRACKER_MINER_FS_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_MINER_FS, TrackerMinerFSClass))
-#define TRACKER_IS_MINER_FS(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_MINER_FS))
-#define TRACKER_IS_MINER_FS_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),  TRACKER_TYPE_MINER_FS))
-#define TRACKER_MINER_FS_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_MINER_FS, TrackerMinerFSClass))
+#define TRACKER_TYPE_MINER_FS tracker_miner_fs_get_type()
+G_DECLARE_DERIVABLE_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER, MINER_FS, TrackerMiner)
 
-typedef struct _TrackerMinerFS        TrackerMinerFS;
-typedef struct _TrackerMinerFSPrivate TrackerMinerFSPrivate;
-
-/**
- * TrackerMinerFS:
- *
- * Abstract miner implementation to get data from the filesystem.
- **/
-struct _TrackerMinerFS {
-	TrackerMiner parent;
-	TrackerMinerFSPrivate *priv;
-};
-
-/**
- * TrackerMinerFSClass:
- * @parent: parent object class
- * @process_file: Called when the metadata associated to a file is
- * requested.
- * @finished: Called when all processing has been performed.
- * @process_file_attributes: Called when the metadata associated with
- * a file's attributes changes, for example, the mtime.
- * @finished_root: Called when all resources on a particular root URI
- * have been processed.
- * @remove_file: Called when a file is removed.
- * @remove_children: Called when children have been removed.
- * @move_file: Called when a file has moved.
- * @padding: Reserved for future API improvements.
- *
- * Prototype for the abstract class, @process_file must be implemented
- * in the deriving class in order to actually extract data.
- **/
-typedef struct {
+struct _TrackerMinerFSClass {
 	TrackerMinerClass parent;
 
 	void     (* process_file)             (TrackerMinerFS       *fs,
@@ -112,9 +77,7 @@ typedef struct {
 	gchar * (* get_content_identifier)    (TrackerMinerFS       *fs,
 					       GFile                *file,
 	                                       GFileInfo            *info);
-} TrackerMinerFSClass;
-
-GType                 tracker_miner_fs_get_type              (void) G_GNUC_CONST;
+};
 
 /* Properties */
 TrackerIndexingTree * tracker_miner_fs_get_indexing_tree     (TrackerMinerFS  *fs);

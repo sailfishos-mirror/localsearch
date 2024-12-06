@@ -201,13 +201,7 @@ run_standalone (void)
 	file = g_file_new_for_commandline_arg (filename);
 	uri = g_file_get_uri (file);
 
-	object = tracker_extract_new (TRUE, force_module);
-
-	if (!object) {
-		g_object_unref (file);
-		g_free (uri);
-		return EXIT_FAILURE;
-	}
+	object = tracker_extract_new (force_module);
 
 	tracker_extract_get_metadata_by_cmdline (object, uri, mime_type, output_format);
 
@@ -354,7 +348,9 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	tracker_extract_module_manager_init ();
+	if (!tracker_extract_module_manager_init ())
+		return EXIT_FAILURE;
+
 	tracker_module_manager_load_modules ();
 
 	/* Set conditions when we use stand alone settings */
@@ -389,11 +385,7 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	extract = tracker_extract_new (TRUE, force_module);
-
-	if (!extract) {
-		return EXIT_FAILURE;
-	}
+	extract = tracker_extract_new (force_module);
 
 	sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name,
 	                                                       NULL, connection,
@@ -451,6 +443,7 @@ do_main (int argc, char *argv[])
 	tracker_miner_stop (TRACKER_MINER (decorator));
 
 	/* Shutdown subsystems */
+	tracker_module_manager_shutdown_modules ();
 	g_object_unref (extract);
 	g_object_unref (decorator);
 	g_object_unref (controller);

@@ -19,16 +19,7 @@
 
 #include "config-miners.h"
 
-#include <string.h>
-#include <unistd.h>
-
-#include <gmodule.h>
 #include <glib/gi18n.h>
-#include <gio/gio.h>
-
-#include <gio/gunixoutputstream.h>
-#include <gio/gunixinputstream.h>
-#include <gio/gunixfdlist.h>
 
 #include <libtracker-extract/tracker-extract.h>
 
@@ -41,8 +32,6 @@
 #warning Main thread traces enabled
 #endif /* THREAD_ENABLE_TRACE */
 
-#define TRACKER_EXTRACT_GET_PRIVATE(obj) (tracker_extract_get_instance_private (TRACKER_EXTRACT (obj)))
-
 G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 #define DEFAULT_DEADLINE_SECONDS 5
@@ -51,31 +40,30 @@ G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 static gint deadline_seconds = -1;
 
-extern gboolean debug;
-
 typedef struct {
 	GTimer *elapsed;
 	gint extracted_count;
 	gint failed_count;
 } StatisticsData;
 
+struct _TrackerExtract {
+	GObject parent_instance;
+};
+
 typedef struct {
 	GHashTable *statistics_data;
-	GList *running_tasks;
 
 	gint max_text;
 
 	/* used to maintain the running tasks
 	 * and stats from different threads
 	 */
-	GMutex task_mutex;
+	GMutex stats_mutex;
 
-	/* module -> async queue hashtable
-	 * for single-threaded extractors
-	 */
-	GHashTable *single_thread_extractors;
+	GMainContext *thread_context;
+	GMainLoop *thread_loop;
 
-	gboolean disable_shutdown;
+	GThread *task_thread;
 
 	gchar *force_module;
 	GTimer *total_elapsed;
@@ -129,10 +117,9 @@ statistics_data_free (StatisticsData *data)
 static void
 tracker_extract_init (TrackerExtract *object)
 {
-	TrackerExtractPrivate *priv;
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (object);
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
-	priv->single_thread_extractors = g_hash_table_new (NULL, NULL);
 	priv->max_text = DEFAULT_MAX_TEXT;
 
 #ifdef G_ENABLE_DEBUG
@@ -141,32 +128,37 @@ tracker_extract_init (TrackerExtract *object)
 		g_timer_stop (priv->total_elapsed);
 		priv->statistics_data = g_hash_table_new_full (NULL, NULL, NULL,
 		                                               (GDestroyNotify) statistics_data_free);
+		g_mutex_init (&priv->stats_mutex);
 	}
 #endif
-
-	g_mutex_init (&priv->task_mutex);
 }
 
 static void
 tracker_extract_finalize (GObject *object)
 {
-	TrackerExtractPrivate *priv;
-
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
-
-	tracker_module_manager_shutdown_modules ();
-
-	g_hash_table_destroy (priv->single_thread_extractors);
+	TrackerExtract *extract = TRACKER_EXTRACT (object);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
 		log_statistics (object);
 		g_hash_table_destroy (priv->statistics_data);
 		g_timer_destroy (priv->total_elapsed);
+		g_mutex_clear (&priv->stats_mutex);
 	}
 #endif
 
-	g_mutex_clear (&priv->task_mutex);
+	if (priv->thread_loop) {
+		g_main_loop_quit (priv->thread_loop);
+		g_main_loop_unref (priv->thread_loop);
+	}
+
+	if (priv->task_thread)
+		g_thread_join (priv->task_thread);
+
+	if (priv->thread_context)
+		g_main_context_unref (priv->thread_context);
 
 	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);
 }
@@ -176,14 +168,14 @@ log_statistics (GObject *object)
 {
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		TrackerExtractPrivate *priv;
+		TrackerExtract *extract = TRACKER_EXTRACT (object);
+		TrackerExtractPrivate *priv =
+			tracker_extract_get_instance_private (extract);
 		GHashTableIter iter;
 		gpointer key, value;
 		gdouble total_elapsed;
 
-		priv = TRACKER_EXTRACT_GET_PRIVATE (object);
-
-		g_mutex_lock (&priv->task_mutex);
+		g_mutex_lock (&priv->stats_mutex);
 
 		g_message ("--------------------------------------------------");
 		g_message ("Statistics:");
@@ -219,28 +211,22 @@ log_statistics (GObject *object)
 
 		g_message ("--------------------------------------------------");
 
-		g_mutex_unlock (&priv->task_mutex);
+		g_mutex_unlock (&priv->stats_mutex);
 	}
 #endif
 }
 
 TrackerExtract *
-tracker_extract_new (gboolean     disable_shutdown,
-                     const gchar *force_module)
+tracker_extract_new (const gchar *force_module)
 {
 	TrackerExtract *object;
 	TrackerExtractPrivate *priv;
 
-	if (!tracker_extract_module_manager_init ()) {
-		return NULL;
-	}
-
 	/* Set extractors */
 	object = g_object_new (TRACKER_TYPE_EXTRACT, NULL);
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (object);
+	priv = tracker_extract_get_instance_private (object);
 
-	priv->disable_shutdown = disable_shutdown;
 	priv->force_module = g_strdup (force_module);
 
 	return object;
@@ -255,15 +241,15 @@ notify_task_finish (TrackerExtractTask *task,
 	StatisticsData *stats_data;
 
 	extract = task->extract;
-	priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	priv = tracker_extract_get_instance_private (extract);
 
 	/* Reports and ongoing tasks may be
 	 * accessed from other threads.
 	 */
-	g_mutex_lock (&priv->task_mutex);
-
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		g_mutex_lock (&priv->stats_mutex);
+
 		if (task->module) {
 			stats_data = g_hash_table_lookup (priv->statistics_data,
 			                                  task->module);
@@ -278,14 +264,9 @@ notify_task_finish (TrackerExtractTask *task,
 			priv->unhandled_count++;
 		}
 
-		if (!priv->running_tasks && g_timer_is_active (priv->total_elapsed))
-			g_timer_stop (priv->total_elapsed);
+		g_mutex_unlock (&priv->stats_mutex);
 	}
 #endif
-
-	priv->running_tasks = g_list_remove (priv->running_tasks, task);
-
-	g_mutex_unlock (&priv->task_mutex);
 }
 
 static gboolean
@@ -354,7 +335,8 @@ extract_task_new (TrackerExtract *extract,
                   GAsyncResult   *res,
                   GError        **error)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 	TrackerExtractTask *task;
 	gchar *mimetype_used;
 
@@ -452,7 +434,7 @@ filter_module (TrackerExtract *extract,
 		return FALSE;
 	}
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	priv = tracker_extract_get_instance_private (extract);
 
 	if (!priv->force_module) {
 		return FALSE;
@@ -490,7 +472,8 @@ filter_module (TrackerExtract *extract,
 static gboolean
 get_metadata (TrackerExtractTask *task)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (task->extract);
 	TrackerExtractInfo *info;
 	GError *error = NULL;
 
@@ -554,19 +537,33 @@ get_metadata (TrackerExtractTask *task)
 	return FALSE;
 }
 
-static gpointer
-single_thread_get_metadata (GAsyncQueue *queue)
+static gboolean
+handle_task_in_thread (gpointer user_data)
 {
-	while (TRUE) {
-		TrackerExtractTask *task;
+	TrackerExtractTask *task = user_data;
 
-		task = g_async_queue_pop (queue);
 #ifdef THREAD_ENABLE_TRACE
-		g_debug ("Thread:%p --> '%s': Dispatching in dedicated thread",
-		         g_thread_self(), task->file);
+	g_debug ("Thread:%p --> '%s': Dispatching in thread",
+	         g_thread_self(), task->file);
 #endif /* THREAD_ENABLE_TRACE */
-		get_metadata (task);
-	}
+	get_metadata (task);
+
+	return G_SOURCE_REMOVE;
+}
+
+
+static gpointer
+metadata_thread_func (GMainLoop *loop)
+{
+	GMainContext *context;
+
+	context = g_main_loop_get_context (loop);
+	g_main_context_push_thread_default (context);
+
+	g_main_loop_run (loop);
+
+	g_main_context_pop_thread_default (context);
+	g_main_loop_unref (loop);
 
 	return NULL;
 }
@@ -580,7 +577,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 {
 	TrackerExtractPrivate *priv;
 	GError *error = NULL;
-	GAsyncQueue *async_queue;
 
 #ifdef THREAD_ENABLE_TRACE
 	g_debug ("Thread:%p (Main) <-- '%s': Handling task...\n",
@@ -588,7 +584,7 @@ dispatch_task_cb (TrackerExtractTask *task)
 	         task->file);
 #endif /* THREAD_ENABLE_TRACE */
 
-	priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
+	priv = tracker_extract_get_instance_private (task->extract);
 
 	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
 	if (!task->graph) {
@@ -614,34 +610,26 @@ dispatch_task_cb (TrackerExtractTask *task)
 		                                                          &task->func);
 	}
 
-	async_queue = g_hash_table_lookup (priv->single_thread_extractors,
-	                                   task->module);
+	if (!priv->task_thread) {
+		priv->thread_context = g_main_context_new ();
+		priv->thread_loop = g_main_loop_new (priv->thread_context, FALSE);
 
-	if (!async_queue) {
-		GThread *thread;
-
-		/* No thread created yet for this module, create it
-		 * together with the async queue used to pass data to it
-		 */
-		async_queue = g_async_queue_new ();
-		thread = g_thread_try_new ("single",
-		                           (GThreadFunc) single_thread_get_metadata,
-		                           g_async_queue_ref (async_queue),
-		                           &error);
-		if (!thread) {
+		priv->task_thread =
+			g_thread_try_new ("single",
+					  (GThreadFunc) metadata_thread_func,
+					  g_main_loop_ref (priv->thread_loop),
+					  &error);
+		if (!priv->task_thread) {
 			g_task_return_error (G_TASK (task->res), error);
 			extract_task_free (task);
 			return FALSE;
 		}
 
-		/* We won't join the thread, so just unref it here */
-		g_thread_unref (thread);
-
-		g_hash_table_insert (priv->single_thread_extractors, task->module, async_queue);
 	}
 
-	g_async_queue_push (async_queue, task);
-
+	g_main_context_invoke (priv->thread_context,
+			       handle_task_in_thread,
+			       task);
 	return FALSE;
 }
 
@@ -680,19 +668,13 @@ tracker_extract_file (TrackerExtract      *extract,
 	} else {
 		TrackerExtractPrivate *priv;
 
-		priv = TRACKER_EXTRACT_GET_PRIVATE (task->extract);
-
-		g_mutex_lock (&priv->task_mutex);
-		priv->running_tasks = g_list_prepend (priv->running_tasks, task);
+		priv = tracker_extract_get_instance_private (task->extract);
 
 #ifdef G_ENABLE_DEBUG
 		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-			if (priv->running_tasks && !g_timer_is_active (priv->total_elapsed))
-				g_timer_continue (priv->total_elapsed);
+			g_timer_continue (priv->total_elapsed);
 		}
 #endif
-
-		g_mutex_unlock (&priv->task_mutex);
 
 		g_idle_add ((GSourceFunc) dispatch_task_cb, task);
 	}
@@ -815,6 +797,15 @@ tracker_extract_file_finish (TrackerExtract  *extract,
 	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), NULL);
 	g_return_val_if_fail (!error || !*error, NULL);
 
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		TrackerExtractPrivate *priv =
+			tracker_extract_get_instance_private (extract);
+
+		g_timer_stop (priv->total_elapsed);
+	}
+#endif
+
 	return g_task_propagate_pointer (G_TASK (res), error);
 }
 
@@ -822,7 +813,8 @@ void
 tracker_extract_set_max_text (TrackerExtract *extract,
                               gint            max_text)
 {
-	TrackerExtractPrivate *priv = TRACKER_EXTRACT_GET_PRIVATE (extract);
+	TrackerExtractPrivate *priv =
+		tracker_extract_get_instance_private (extract);
 
 	priv->max_text = max_text;
 }
