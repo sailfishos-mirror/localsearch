@@ -95,6 +95,43 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
         self.assertResourceExists(self.uri(file_2_name))
         self.assertResourceExists(ie_2.urn)
 
+    def test_02_stale_file(self):
+        """
+        Simulate the situation where the extractor will find a file that
+        is already deleted, and ensure the situation will end up corrected.
+        """
+
+        file_1_name = "test-monitored/test_1.txt"
+        file_1_uri = self.uri(file_1_name)
+        file_2_name = "test-monitored/test_2.txt"
+        file_2_uri = self.uri(file_2_name)
+        file_3_name = "test-monitored/test_3.txt"
+        file_3_uri = self.uri(file_3_name)
+
+        # First create fake data for a file that would be picked up
+        # by the extractor
+        self.tracker.update(
+            "INSERT DATA { GRAPH tracker:Audio { <test:content> a nie:InformationElement . <%s> a nfo:FileDataObject ; nie:interpretedAs <test:content> } }" % file_1_uri
+        )
+
+        self.assertResourceExists(file_1_uri)
+        self.assertResourceExists("test:content")
+        self.assertResourceMissing(file_2_uri)
+
+        # Second create a second file that will be picked up by the extractor
+        file_2 = self.create_text_file(file_2_name)
+
+        # Third check that the first resource does not exist
+        self.assertResourceMissing(file_1_uri)
+        self.assertResourceMissing("test:content")
+        self.assertResourceExists(file_2_uri)
+
+        # Fourth, create another file to ensure the extractor is not stuck
+        file_3 = self.create_text_file(file_3_name)
+        self.assertResourceMissing(file_1_uri)
+        self.assertResourceExists(file_2_uri)
+        self.assertResourceExists(file_3_uri)
+
     # def test_02_removable_device_data (self):
     #    """
     #    Tracker does periodic cleanups of data on removable volumes that haven't
