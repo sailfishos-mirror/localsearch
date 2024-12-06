@@ -92,7 +92,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	TrackerResource *resource, *file_resource;
 	TrackerIndexingTree *indexing_tree;
 	const gchar *urn;
-	gchar *uri;
+	g_autofree char *uri = NULL;
 
 	/* Preserve URN for nfo:Folders */
 	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
@@ -117,7 +117,6 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	uri = g_file_get_uri (file);
 	file_resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
-	g_free (uri);
 
 	/* Laying the link between the IE and the DO */
 	tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);

@@ -533,6 +533,63 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         result = self.tracker.query(query)
         self.assertEqual(result[0][0], "false")
 
+    def test_16_folder_update_offline(self):
+        """
+        Check that updating a folder deletes the old nfo:Folder
+        """
+
+        directory_uri = self.uri("test-monitored/dir1")
+        document_uri = self.uri("test-monitored/dir1/unrelated.txt")
+        dest_uri = self.uri("test-monitored/dir1/unrelated2.txt")
+        directory = self.path("test-monitored/dir1")
+        document = self.path("test-monitored/dir1/unrelated.txt")
+        dest = self.path("test-monitored/dir1/unrelated2.txt")
+        ie_urn = self.__get_file_urn(directory)
+
+        self.assertResourceExists(ie_urn)
+
+        # Create a dir to overwrite the original first, to guarantee
+        # a different inode.
+        os.makedirs(self.path("zzz"))
+
+        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+
+        # Replace the dir
+        shutil.rmtree(directory)
+        shutil.move(self.path("zzz"), directory)
+
+        conn = self.miner_fs.get_sparql_connection()
+
+        # Write document
+        with self.await_document_inserted(document) as resource:
+            with open(document, "w") as f:
+                f.write(DEFAULT_TEXT)
+
+        new_ie_urn = self.__get_file_urn(directory)
+        self.assertNotEqual(new_ie_urn, ie_urn)
+
+        self.assertResourceMissing(ie_urn)
+        self.assertResourceExists(new_ie_urn)
+        self.assertResourceExists(document_uri)
+
+        query = "SELECT ?u { ?u nie:isStoredAs <%s> }" % self.uri(directory)
+        result = self.tracker.query(query)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0][0], new_ie_urn)
+
+        query = "SELECT ?u { <%s> nie:interpretedAs ?u }" % self.uri(directory)
+        result = self.tracker.query(query)
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0][0], new_ie_urn)
+
+        # Move document
+        resource_id = self.tracker.get_content_resource_id(document_uri)
+        dest = self.path("test-monitored/dir1/unrelated2.txt")
+        with self.await_document_uri_change(resource_id, document, dest):
+            shutil.move(document, dest)
+
+        self.assertResourceMissing(document_uri)
+        self.assertResourceExists(dest_uri)
 
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
@@ -633,8 +690,9 @@ class IndexedFolderTest(fixtures.TrackerMinerTest):
         self.assertIn(self.uri("test-monitored/file2.txt"), unpacked_result)
         self.assertIn(self.uri("test-monitored/dir1/file3.txt"), unpacked_result)
 
+        # The file was moved to test-monitored
         datasource2 = self.__get_index_folder(dest);
-        self.assertNotEqual(datasource2, self.uri("test-monitored"))
+        self.assertEqual(datasource2, self.uri("test-monitored"))
         self.assertNotEqual(datasource1, datasource2)
 
 

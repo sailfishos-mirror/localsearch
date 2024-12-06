@@ -149,7 +149,7 @@ class TrackerSandbox:
 
         """
         log.info("Stopping daemon process that owns %s.", busname)
-        pid = self.daemon.get_connection_unix_process_id_sync(busname)
+        pid = self.session_bus.get_connection_unix_process_id_sync(busname)
         if pid:
             os.kill(pid, signal.SIGTERM)
             psutil.wait_pid(pid)
