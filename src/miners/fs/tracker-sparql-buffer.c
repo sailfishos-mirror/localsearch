@@ -559,11 +559,8 @@ tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
 }
 
 void
-tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
-                                GFile               *file,
-                                const gchar         *content_graph,
-                                TrackerResource     *file_resource,
-                                TrackerResource     *graph_resource)
+tracker_sparql_buffer_log_clear_content (TrackerSparqlBuffer *buffer,
+                                         GFile               *file)
 {
 	TrackerSparqlBufferPrivate *priv;
 	TrackerBatch *batch;
@@ -571,8 +568,6 @@ tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
 
 	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
 	g_return_if_fail (G_IS_FILE (file));
-	g_return_if_fail (TRACKER_IS_RESOURCE (file_resource));
-	g_return_if_fail (!graph_resource || TRACKER_IS_RESOURCE (graph_resource));
 
 	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
 	batch = tracker_sparql_buffer_get_current_batch (buffer);
@@ -582,6 +577,21 @@ tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
 	                             NULL);
 
 	push_stmt_task (buffer, priv->delete_file_content, file);
+}
+
+void
+tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
+                                GFile               *file,
+                                const gchar         *content_graph,
+                                TrackerResource     *file_resource,
+                                TrackerResource     *graph_resource)
+{
+	g_autofree gchar *uri = NULL;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (G_IS_FILE (file));
+	g_return_if_fail (TRACKER_IS_RESOURCE (file_resource));
+	g_return_if_fail (!graph_resource || TRACKER_IS_RESOURCE (graph_resource));
 
 	tracker_sparql_buffer_push (buffer, file, DEFAULT_GRAPH, file_resource);
 
@@ -596,23 +606,12 @@ tracker_sparql_buffer_log_folder (TrackerSparqlBuffer *buffer,
                                   TrackerResource     *file_resource,
                                   TrackerResource     *folder_resource)
 {
-	TrackerSparqlBufferPrivate *priv;
-	TrackerBatch *batch;
 	g_autofree gchar *uri = NULL;
 
 	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
 	g_return_if_fail (G_IS_FILE (file));
 	g_return_if_fail (TRACKER_IS_RESOURCE (file_resource));
 	g_return_if_fail (TRACKER_IS_RESOURCE (folder_resource));
-
-	priv = tracker_sparql_buffer_get_instance_private (TRACKER_SPARQL_BUFFER (buffer));
-	batch = tracker_sparql_buffer_get_current_batch (buffer);
-	uri = g_file_get_uri (file);
-	tracker_batch_add_statement (batch, priv->delete_file_content,
-	                             "uri", G_TYPE_STRING, uri,
-	                             NULL);
-
-	push_stmt_task (buffer, priv->delete_file_content, file);
 
 	/* Add indexing roots also to content specific graphs to provide the availability information */
 	if (is_root) {
