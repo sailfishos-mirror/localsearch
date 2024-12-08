@@ -10,10 +10,14 @@ DELETE WHERE {
 };
 
 # Ensure there are no stale resources keeping the inverse relation
-DELETE WHERE {
+DELETE {
   GRAPH ?g {
-    ?ie a rdfs:Resource ;
-      nie:isStoredAs ~uri .
+    ?ie a rdfs:Resource .
+  }
+} WHERE {
+  GRAPH ?g {
+    ?ie nie:isStoredAs ?f .
+    ?f nie:url ~uri .
   }
 };
 
