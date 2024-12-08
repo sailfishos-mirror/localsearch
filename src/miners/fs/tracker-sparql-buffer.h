@@ -83,6 +83,9 @@ void tracker_sparql_buffer_log_move_content (TrackerSparqlBuffer *buffer,
                                              GFile               *source,
                                              GFile               *dest);
 
+void tracker_sparql_buffer_log_clear_content (TrackerSparqlBuffer *buffer,
+                                              GFile               *file);
+
 void tracker_sparql_buffer_log_file (TrackerSparqlBuffer *buffer,
                                      GFile               *file,
                                      const gchar         *content_graph,
