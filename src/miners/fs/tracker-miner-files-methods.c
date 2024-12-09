@@ -309,6 +309,10 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		tracker_resource_set_uri (information_element, "nie:isStoredAs", uri);
 	}
 
+	if (!create) {
+		tracker_sparql_buffer_log_clear_content (buffer, file);
+	}
+
 	if (is_directory) {
 		tracker_sparql_buffer_log_folder (buffer, file,
 		                                  is_root,
