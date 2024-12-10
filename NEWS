@@ -1,3 +1,11 @@
+NEW in 3.7.4 - 2024-12-10
+=========================
+  * Fix database inconsistency resulting from some patterns of folder
+    updates, and possible resulting CPU churn.
+  * Handle GST registry location in landlock rules
+
+Translations: ca, el, hi, ne, pt, ro, th, zh_TW
+
 NEW in 3.7.3 - 2024-05-02
 =========================
   * Fix possible crashes handling live changes to extractor
