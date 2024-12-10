@@ -2,6 +2,8 @@ include:
   - remote: "https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/ci-fairy.yml"
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/fedora.yml'
   - remote: 'https://gitlab.freedesktop.org/freedesktop/ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/debian.yml'
+  - project: 'Infrastructure/gnome-release-service-ci-templates'
+    file: 'release-module.yml'
 
 variables:
   MESON_TEST_TIMEOUT_MULTIPLIER: 3
@@ -509,6 +511,16 @@ pages:
     - test-docs
   only:
     - main
+
+release-dist:
+  stage: deploy
+  needs:
+    - test-dist
+  variables:
+    TARBALL_ARTIFACT_PATH: build/meson-dist/$CI_PROJECT_NAME-$CI_PROJECT_TAG.tar.xz
+  extends: .release-module
+  rules:
+    - if: '$CI_COMMIT_TAG'
 
 # Triggered from a scheduled job
 
