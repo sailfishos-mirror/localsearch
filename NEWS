@@ -1,3 +1,8 @@
+NEW in 3.8.2 - 2024-12-10
+=========================
+  * Fix database inconsistency resulting from some patterns of folder
+    updates, and possible resulting CPU churn.
+
 NEW in 3.8.1 - 2024-11-21
 =========================
   * Fix multiple leaks in metadata extractors
