@@ -24,7 +24,7 @@ stages:
   - test
   - sandbox
   - analysis
-  - docs
+  - deploy
 
 workflow:
   rules:
@@ -479,7 +479,7 @@ pages:
   extends:
     - .fdo.distribution-image@fedora
     - .tracker-miners.fedora:latest@x86_64
-  stage: docs
+  stage: deploy
   script:
     - mv website public
   artifacts:
