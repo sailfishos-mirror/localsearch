@@ -360,6 +360,26 @@ test-docs:
   needs:
     - build-fedora-container@x86_64
 
+test-dist:
+  extends:
+    - .fdo.distribution-image@fedora
+    - .tracker-miners.fedora:latest@x86_64
+  needs:
+    - build-fedora-container@x86_64
+  stage: test
+  script:
+    - |
+      git clone https://gitlab.gnome.org/GNOME/tinysparql.git
+      pushd tinysparql; meson setup build --libdir lib --prefix=/usr -Ddocs=false; ninja -C build install; popd
+      rm -rf build
+      meson setup --wipe build
+      meson compile -C build
+      dbus-run-session meson dist -C build
+  artifacts:
+    expose_as: 'Tarball'
+    paths:
+      - build/meson-dist/
+
 .sandbox_template: &sandbox
   stage: sandbox
 
