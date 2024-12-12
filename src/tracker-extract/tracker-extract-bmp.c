@@ -23,6 +23,8 @@
 
 #include <libtracker-miners-common/tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
+#include <glib.h>
+#include <glib/gstdio.h>
 
 static gboolean
 get_img_resolution (const GFile *file,
@@ -87,6 +89,9 @@ get_img_resolution (const GFile *file,
 		g_object_unref (stream);
 		return FALSE;
 	}
+
+        w = GUINT32_FROM_LE (w);
+        h = GUINT32_FROM_LE (h);
 
 	if (width) {
 		*width = w;
