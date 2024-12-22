@@ -38,7 +38,6 @@
 #include "tracker-enums.h"
 #include "tracker-error-report.h"
 #include "tracker-file-utils.h"
-#include "tracker-fts-config.h"
 #include "tracker-ioprio.h"
 
 #ifdef HAVE_LANDLOCK

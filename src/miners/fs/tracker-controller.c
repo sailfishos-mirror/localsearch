@@ -112,7 +112,7 @@ add_indexed_directory (TrackerController     *controller,
 
 	g_debug ("  Adding:'%s'", path);
 
-	if (tracker_config_get_enable_monitors (controller->config))
+	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors"))
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 
 	tracker_indexing_tree_add (controller->indexing_tree, file, flags);
@@ -129,7 +129,7 @@ add_removable_or_optical_directory (TrackerController *controller,
 		TRACKER_DIRECTORY_FLAG_PRESERVE |
 		TRACKER_DIRECTORY_FLAG_PRIORITY;
 
-	if (tracker_config_get_enable_monitors (controller->config)) {
+	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 	}
 
@@ -174,7 +174,7 @@ mount_point_added_cb (TrackerController *controller,
 			flags = TRACKER_DIRECTORY_FLAG_RECURSE |
 				TRACKER_DIRECTORY_FLAG_PRESERVE;
 
-			if (tracker_config_get_enable_monitors (controller->config)) {
+			if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
 				flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 			}
 
@@ -208,7 +208,7 @@ mount_point_added_cb (TrackerController *controller,
 
 			flags = TRACKER_DIRECTORY_FLAG_NONE;
 
-			if (tracker_config_get_enable_monitors (controller->config)) {
+			if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
 				flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 			}
 
@@ -261,40 +261,38 @@ mount_pre_unmount_cb (GVolumeMonitor    *volume_monitor,
 static void
 indexing_tree_update_filter (TrackerIndexingTree *indexing_tree,
 			     TrackerFilterType    filter,
-			     GSList              *new_elems)
+                             GStrv                strv)
 {
+	int i;
+
 	tracker_indexing_tree_clear_filters (indexing_tree, filter);
 
-	while (new_elems) {
-		tracker_indexing_tree_add_filter (indexing_tree, filter,
-						  new_elems->data);
-		new_elems = new_elems->next;
-	}
+	for (i = 0; strv[i]; i++)
+		tracker_indexing_tree_add_filter (indexing_tree, filter, strv[i]);
 }
 
 static void
 update_filters (TrackerController *controller)
 {
-	GSList *list;
+	GStrv strv;
 
 	/* Always ignore hidden */
 	tracker_indexing_tree_set_filter_hidden (controller->indexing_tree, TRUE);
 
 	/* Ignored files */
-	list = tracker_config_get_ignored_files (controller->config);
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_FILE, list);
+	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-files");
+	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_FILE, strv);
+	g_strfreev (strv);
 
 	/* Ignored directories */
-	list = tracker_config_get_ignored_directories (controller->config);
-	indexing_tree_update_filter (controller->indexing_tree,
-				     TRACKER_FILTER_DIRECTORY,
-				     list);
+	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories");
+	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_DIRECTORY, strv);
+	g_strfreev (strv);
 
 	/* Directories with content */
-	list = tracker_config_get_ignored_directories_with_content (controller->config);
-	indexing_tree_update_filter (controller->indexing_tree,
-				     TRACKER_FILTER_PARENT_DIRECTORY,
-				     list);
+	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories-with-content");
+	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
+	g_strfreev (strv);
 }
 
 static void
@@ -350,7 +348,7 @@ update_directories_from_new_config (TrackerController *controller,
 		flags |= TRACKER_DIRECTORY_FLAG_RECURSE;
 	}
 
-	if (tracker_config_get_enable_monitors (controller->config)) {
+	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
 		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
 	}
 
@@ -459,9 +457,9 @@ index_volumes_changed_idle (gpointer user_data)
 
 	/* Read new config values. Note that if removable devices is FALSE,
 	 * optical discs will also always be FALSE. */
-	new_index_removable_devices = tracker_config_get_index_removable_devices (controller->config);
+	new_index_removable_devices = g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
 	new_index_optical_discs = (new_index_removable_devices ?
-	                           tracker_config_get_index_optical_discs (controller->config) :
+	                           g_settings_get_boolean (G_SETTINGS (controller->config), "index-optical-discs") :
 	                           FALSE);
 
 	/* Removable devices config changed? */
@@ -574,12 +572,12 @@ initialize_from_config (TrackerController *controller)
 	 * function.
 	 */
 	controller->index_removable_devices =
-		tracker_config_get_index_removable_devices (controller->config);
+		g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
 
 	/* Note that if removable devices not indexed, optical discs
 	 * will also never be indexed */
 	controller->index_optical_discs = (controller->index_removable_devices ?
-	                                   tracker_config_get_index_optical_discs (controller->config) :
+	                                   g_settings_get_boolean (G_SETTINGS (controller->config), "index-optical-discs") :
 	                                   FALSE);
 
 	if (controller->index_removable_devices) {

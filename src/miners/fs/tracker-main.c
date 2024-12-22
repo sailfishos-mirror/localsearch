@@ -132,20 +132,20 @@ log_option_values (TrackerConfig *config)
 	if (TRACKER_DEBUG_CHECK (CONFIG)) {
 		g_message ("General options:");
 		g_message ("  Initial Sleep  ........................  %d",
-		           tracker_config_get_initial_sleep (config));
+		           initial_sleep);
 
 		g_message ("Indexer options:");
 		g_message ("  Throttle level  .......................  %d",
-		           tracker_config_get_throttle (config));
+		           g_settings_get_int (G_SETTINGS (config), "throttle"));
 		g_message ("  Indexing while on battery  ............  %s (first time only = %s)",
-		           tracker_config_get_index_on_battery (config) ? "yes" : "no",
-		           tracker_config_get_index_on_battery_first_time (config) ? "yes" : "no");
+		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery") ? "yes" : "no",
+		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery-first-time") ? "yes" : "no");
 
-		if (tracker_config_get_low_disk_space_limit (config) == -1) {
+		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
 			g_message ("  Low disk space limit  .................  Disabled");
 		} else {
 			g_message ("  Low disk space limit  .................  %d%%",
-			           tracker_config_get_low_disk_space_limit (config));
+			           g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit"));
 		}
 	}
 #endif
@@ -306,7 +306,7 @@ should_crawl (TrackerMinerFiles *miner_files,
 {
 	gint crawling_interval;
 
-	crawling_interval = tracker_config_get_crawling_interval (config);
+	crawling_interval = g_settings_get_int (G_SETTINGS (config), "crawling-interval");
 
 	TRACKER_NOTE (CONFIG, g_message ("Checking whether to crawl file system based on configured crawling interval:"));
 
@@ -373,8 +373,6 @@ static void
 miner_start (TrackerMiner  *miner,
              TrackerConfig *config)
 {
-	gint initial_sleep;
-
 	/* If requesting to run as no-daemon, start right away */
 	if (no_daemon) {
 		miner_maybe_start (miner);
@@ -382,8 +380,6 @@ miner_start (TrackerMiner  *miner,
 	}
 
 	/* If no need to initially sleep, start right away */
-	initial_sleep = tracker_config_get_initial_sleep (config);
-
 	if (initial_sleep <= 0) {
 		miner_maybe_start (miner);
 		return;
@@ -653,18 +649,16 @@ TrackerSparqlConnectionFlags
 get_fts_connection_flags (void)
 {
 	TrackerSparqlConnectionFlags flags = 0;
-	TrackerFTSConfig *fts_config;
+	g_autoptr (GSettings) settings = NULL;
 
-	fts_config = tracker_fts_config_new ();
+	settings = g_settings_new ("org.freedesktop.Tracker3.FTS");
 
-	if (tracker_fts_config_get_enable_stemmer (fts_config))
+	if (g_settings_get_boolean (settings, "enable-stemmer"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER;
-	if (tracker_fts_config_get_enable_unaccent (fts_config))
+	if (g_settings_get_boolean (settings, "enable-unaccent"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
-	if (tracker_fts_config_get_ignore_numbers (fts_config))
+	if (g_settings_get_boolean (settings, "ignore-numbers"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS;
-
-	g_object_unref (fts_config);
 
 	return flags;
 }
@@ -926,9 +920,8 @@ main (gint argc, gchar *argv[])
 	/* Initialize logging */
 	config = tracker_config_new ();
 
-	if (initial_sleep > -1) {
-		tracker_config_set_initial_sleep (config, initial_sleep);
-	}
+	if (initial_sleep < 0)
+		initial_sleep = g_settings_get_int (G_SETTINGS (config), "initial-sleep");
 
 	log_option_values (config);
 

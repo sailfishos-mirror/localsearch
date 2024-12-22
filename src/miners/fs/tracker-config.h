@@ -24,48 +24,14 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_CONFIG         (tracker_config_get_type ())
-#define TRACKER_CONFIG(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_CONFIG, TrackerConfig))
-#define TRACKER_CONFIG_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST ((k), TRACKER_TYPE_CONFIG, TrackerConfigClass))
-#define TRACKER_IS_CONFIG(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_CONFIG))
-#define TRACKER_IS_CONFIG_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), TRACKER_TYPE_CONFIG))
-#define TRACKER_CONFIG_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_CONFIG, TrackerConfigClass))
+#define TRACKER_TYPE_CONFIG (tracker_config_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerConfig, tracker_config, TRACKER, CONFIG, GSettings)
 
-typedef struct TrackerConfig      TrackerConfig;
-typedef struct TrackerConfigClass TrackerConfigClass;
+TrackerConfig * tracker_config_new (void);
 
-struct TrackerConfig {
-	GSettings parent;
-};
+GSList * tracker_config_get_index_recursive_directories (TrackerConfig *config);
 
-struct TrackerConfigClass {
-	GSettingsClass parent_class;
-};
-
-GType          tracker_config_get_type                             (void) G_GNUC_CONST;
-
-TrackerConfig *tracker_config_new                                  (void);
-
-gint           tracker_config_get_initial_sleep                    (TrackerConfig *config);
-gboolean       tracker_config_get_enable_monitors                  (TrackerConfig *config);
-gint           tracker_config_get_throttle                         (TrackerConfig *config);
-gboolean       tracker_config_get_index_on_battery                 (TrackerConfig *config);
-gboolean       tracker_config_get_index_on_battery_first_time      (TrackerConfig *config);
-gboolean       tracker_config_get_index_removable_devices          (TrackerConfig *config);
-gboolean       tracker_config_get_index_optical_discs              (TrackerConfig *config);
-gboolean       tracker_config_get_index_mounted_directories        (TrackerConfig *config);
-gboolean       tracker_config_get_index_applications               (TrackerConfig *config);
-gint           tracker_config_get_low_disk_space_limit             (TrackerConfig *config);
-GSList *       tracker_config_get_index_recursive_directories      (TrackerConfig *config);
-GSList *       tracker_config_get_index_single_directories         (TrackerConfig *config);
-GSList *       tracker_config_get_ignored_directories              (TrackerConfig *config);
-GSList *       tracker_config_get_ignored_directories_with_content (TrackerConfig *config);
-GSList *       tracker_config_get_ignored_files                    (TrackerConfig *config);
-gint           tracker_config_get_crawling_interval                (TrackerConfig *config);
-gint           tracker_config_get_removable_days_threshold         (TrackerConfig *config);
-
-void           tracker_config_set_initial_sleep                    (TrackerConfig *config,
-                                                                    gint           value);
+GSList * tracker_config_get_index_single_directories (TrackerConfig *config);
 
 G_END_DECLS
 

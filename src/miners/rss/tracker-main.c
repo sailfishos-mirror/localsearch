@@ -78,18 +78,16 @@ TrackerSparqlConnectionFlags
 get_fts_connection_flags (void)
 {
 	TrackerSparqlConnectionFlags flags = 0;
-	TrackerFTSConfig *fts_config;
+	g_autoptr (GSettings) settings = NULL;
 
-	fts_config = tracker_fts_config_new ();
+	settings = g_settings_new ("org.freedesktop.Tracker3.FTS");
 
-	if (tracker_fts_config_get_enable_stemmer (fts_config))
+	if (g_settings_get_boolean (settings, "enable-stemmer"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER;
-	if (tracker_fts_config_get_enable_unaccent (fts_config))
+	if (g_settings_get_boolean (settings, "enable-unaccent"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
-	if (tracker_fts_config_get_ignore_numbers (fts_config))
+	if (g_settings_get_boolean (settings, "ignore-numbers"))
 		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS;
-
-	g_object_unref (fts_config);
 
 	return flags;
 }

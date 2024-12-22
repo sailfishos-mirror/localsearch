@@ -313,13 +313,13 @@ removable_days_threshold_changed (TrackerMinerFiles *mf)
 {
 	/* Check if the stale volume removal configuration changed from enabled to disabled
 	 * or from disabled to enabled */
-	if (tracker_config_get_removable_days_threshold (mf->private->config) == 0 &&
+	if (g_settings_get_int (G_SETTINGS (mf->private->config), "removable-days-threshold") == 0 &&
 	    mf->private->stale_volumes_check_id != 0) {
 		/* From having the check enabled to having it disabled, remove the timeout */
 		TRACKER_NOTE (CONFIG, g_message ("Stale volume removal now disabled, removing timeout"));
 		g_source_remove (mf->private->stale_volumes_check_id);
 		mf->private->stale_volumes_check_id = 0;
-	} else if (tracker_config_get_removable_days_threshold (mf->private->config) > 0 &&
+	} else if (g_settings_get_int (G_SETTINGS (mf->private->config), "removable-days-threshold") > 0 &&
 	           mf->private->stale_volumes_check_id == 0) {
 		TRACKER_NOTE (CONFIG, g_message ("Stale volume removal now enabled, initializing timeout"));
 		/* From having the check disabled to having it enabled, so fire up the
@@ -582,11 +582,11 @@ init_index_roots (TrackerMinerFiles *miner_files)
 			}
 		} else {
 			/* Directory is indexed, but no longer configured */
-			if (tracker_config_get_removable_days_threshold (miner_files->private->config) > 0 &&
+			if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") > 0 &&
 			    ((is_optical &&
-			      tracker_config_get_index_optical_discs (miner_files->private->config)) ||
+			      g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-optical-discs")) ||
 			     (!is_optical && is_removable &&
-			      tracker_config_get_index_removable_devices (miner_files->private->config)))) {
+			      g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices")))) {
 				/* Preserve */
 				set_up_mount_point (TRACKER_MINER_FILES (miner),
 				                    file, FALSE, batch);
@@ -629,7 +629,7 @@ cleanup_stale_removable_volumes_cb (gpointer user_data)
 	g_autoptr (GDateTime) now = NULL, n_days_ago = NULL;
 	gint n_days_threshold;
 
-	n_days_threshold = tracker_config_get_removable_days_threshold (miner->private->config);
+	n_days_threshold = g_settings_get_int (G_SETTINGS (miner->private->config), "removable-days-threshold");
 
 	if (n_days_threshold == 0)
 		return TRUE;
@@ -647,7 +647,7 @@ static void
 init_stale_volume_removal (TrackerMinerFiles *miner)
 {
 	/* If disabled, make sure we don't do anything */
-	if (tracker_config_get_removable_days_threshold (miner->private->config) == 0) {
+	if (g_settings_get_int (G_SETTINGS (miner->private->config), "removable-days-threshold") == 0) {
 		g_debug ("Stale volume check is disabled");
 		return;
 	}
@@ -673,7 +673,7 @@ set_up_throttle (TrackerMinerFiles *mf,
 	gdouble throttle;
 	gint config_throttle;
 
-	config_throttle = tracker_config_get_throttle (mf->private->config);
+	config_throttle = g_settings_get_int (G_SETTINGS (mf->private->config), "throttle");
 	throttle = (1.0 / 20) * config_throttle;
 
 	if (enable) {
@@ -712,8 +712,8 @@ check_battery_status (TrackerMinerFiles *mf)
 		should_throttle = TRUE;
 
 		/* Check if miner should be paused based on configuration */
-		if (!tracker_config_get_index_on_battery (mf->private->config)) {
-			if (!tracker_config_get_index_on_battery_first_time (mf->private->config)) {
+		if (!g_settings_get_boolean (G_SETTINGS (mf->private->config), "index-on-battery")) {
+			if (!g_settings_get_boolean (G_SETTINGS (mf->private->config), "index-on-battery-first-time")) {
 				g_message ("Running on battery, but not enabled, pausing");
 				should_pause = TRUE;
 			} else if (!mf->private->initial_index) {
@@ -812,7 +812,7 @@ disk_space_check (TrackerMinerFiles *mf)
 	gchar *data_dir;
 	gdouble remaining;
 
-	limit = tracker_config_get_low_disk_space_limit (mf->private->config);
+	limit = g_settings_get_int (G_SETTINGS (mf->private->config), "low-disk-space-limit");
 
 	if (limit < 1) {
 		return FALSE;
@@ -866,7 +866,7 @@ disk_space_check_start (TrackerMinerFiles *mf)
 		return;
 	}
 
-	limit = tracker_config_get_low_disk_space_limit (mf->private->config);
+	limit = g_settings_get_int (G_SETTINGS (mf->private->config), "low-disk-space-limit");
 
 	if (limit != -1) {
 		TRACKER_NOTE (CONFIG, g_message ("Starting disk space check for every %d seconds",
@@ -936,12 +936,12 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
 	type = tracker_storage_get_type_for_file (storage, directory);
 
 	if ((type & TRACKER_STORAGE_REMOVABLE) != 0) {
-		if (!tracker_config_get_index_removable_devices (miner_files->private->config))
+		if (!g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices"))
 			delete = TRUE;
 		else if ((type & TRACKER_STORAGE_OPTICAL) != 0 &&
-		         !tracker_config_get_index_optical_discs (miner_files->private->config))
+		         !g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-optical-discs"))
 			delete = TRUE;
-		else if (tracker_config_get_removable_days_threshold (miner_files->private->config) == 0)
+		else if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") == 0)
 			delete = TRUE;
 		else
 			update_mount = TRUE;
