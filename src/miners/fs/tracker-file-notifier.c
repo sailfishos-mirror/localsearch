@@ -106,6 +106,7 @@ typedef struct {
 
 	TrackerSparqlStatement *content_query;
 	TrackerSparqlStatement *deleted_query;
+	TrackerSparqlStatement *file_exists_query;
 
 	gchar *file_attributes;
 
@@ -130,6 +131,8 @@ static void tracker_index_root_continue (TrackerIndexRoot *root);
 
 static TrackerSparqlStatement * sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
                                                                   GError              **error);
+static TrackerSparqlStatement * sparql_file_exists_ensure_statement (TrackerFileNotifier  *notifier,
+                                                                     GError              **error);
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerFileNotifier, tracker_file_notifier, G_TYPE_OBJECT)
 
@@ -543,6 +546,34 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 	g_hash_table_remove (root->cache, file);
 }
 
+static gboolean
+notifier_query_file_exists (TrackerFileNotifier  *notifier,
+                            GFile                *file)
+{
+	TrackerSparqlStatement *stmt;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autofree char *uri = NULL;
+	gboolean exists;
+
+	stmt = sparql_file_exists_ensure_statement (notifier, NULL);
+	if (!stmt)
+		return FALSE;
+
+	uri = g_file_get_uri (file);
+	tracker_sparql_statement_bind_string (stmt, "file", uri);
+	cursor = tracker_sparql_statement_execute (stmt, NULL, NULL);
+
+	if (!cursor)
+		return FALSE;
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL))
+		return FALSE;
+
+	exists = tracker_sparql_cursor_get_boolean (cursor, 0);
+	tracker_sparql_cursor_close (cursor);
+
+	return exists;
+}
+
 static void
 enumerator_next_files_cb (GObject      *object,
                           GAsyncResult *res,
@@ -582,6 +613,15 @@ enumerator_next_files_cb (GObject      *object,
 		g_autoptr (GFile) file = NULL;
 
 		file = g_file_enumerator_get_child (G_FILE_ENUMERATOR (object), info);
+
+		/* When a folder is updated, we did already process all
+		 * updated/deleted files in it through the DB cursor loop.
+		 * There is only new files left to be processed. In the case
+		 * of newly indexed folders, all files will be new.
+		 */
+		if (notifier_query_file_exists (root->notifier, file))
+			continue;
+
 		file_type = g_file_info_get_file_type (info);
 		n_files++;
 
@@ -840,6 +880,22 @@ file_notifier_current_root_check_remove_directory (TrackerFileNotifier *notifier
 }
 
 static TrackerSparqlStatement *
+sparql_file_exists_ensure_statement (TrackerFileNotifier  *notifier,
+                                     GError              **error)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (priv->file_exists_query)
+		return priv->file_exists_query;
+
+	priv->file_exists_query =
+		tracker_load_statement (priv->connection, "ask-file-exists.rq", error);
+	return priv->file_exists_query;
+}
+
+static TrackerSparqlStatement *
 sparql_contents_ensure_statement (TrackerFileNotifier  *notifier,
                                   GError              **error)
 {
@@ -879,16 +935,6 @@ file_is_equal (gconstpointer a,
 }
 
 static int
-file_is_equal_or_child (gconstpointer a,
-                        gconstpointer b)
-{
-	GFile *deleted_file = G_FILE (a);
-	GFile *file = G_FILE (b);
-
-	return (g_file_equal (file, deleted_file) || g_file_has_parent (file, deleted_file)) ? 0 : -1;
-}
-
-static int
 file_is_equal_or_descendant (gconstpointer a,
                              gconstpointer b)
 {
@@ -906,7 +952,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	TrackerFileNotifierPrivate *priv;
 	const gchar *folder_urn, *uri;
 	GFileType file_type;
-	g_autoptr (GFile) file = NULL, parent = NULL;
+	g_autoptr (GFile) file = NULL;
 	g_autoptr (GDateTime) store_mtime = NULL;
 	g_autoptr (GFileInfo) info = NULL;
 	TrackerFileData *file_data;
@@ -973,20 +1019,9 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		}
 	}
 
-	parent = g_file_get_parent (file);
-
-	/* Notify immediately of changes, unless the directory needs crawling.
-	 * Deleted events and updates due to extractor changes can be emitted
-	 * right away.
-	 */
-	if (file_data->state == FILE_STATE_DELETE ||
-	    file_data->state == FILE_STATE_EXTRACTOR_UPDATE ||
-	    !g_queue_find_custom (root->pending_dirs, parent,
-	                          file_is_equal_or_child)) {
-		tracker_file_notifier_notify (notifier, file_data, info);
-		g_queue_delete_link (&root->queue, file_data->node);
-		g_hash_table_remove (root->cache, file);
-	}
+	tracker_file_notifier_notify (notifier, file_data, info);
+	g_queue_delete_link (&root->queue, file_data->node);
+	g_hash_table_remove (root->cache, file);
 }
 
 static gboolean
@@ -1631,6 +1666,7 @@ tracker_file_notifier_finalize (GObject *object)
 
 	g_clear_object (&priv->content_query);
 	g_clear_object (&priv->deleted_query);
+	g_clear_object (&priv->file_exists_query);
 
 	tracker_monitor_set_enabled (priv->monitor, FALSE);
 	g_signal_handlers_disconnect_by_data (priv->monitor, object);
