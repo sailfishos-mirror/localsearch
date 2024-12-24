@@ -29,6 +29,8 @@
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
+#define DIRECTORY_MIME "inode/directory"
+
 typedef struct {
 	GList *mounts;
 	guint64 mtime;
@@ -39,28 +41,27 @@ typedef struct {
 static void
 miner_files_add_to_datasource (TrackerMinerFiles *mf,
                                GFile             *file,
-                               TrackerResource   *resource,
-                               TrackerResource   *element_resource)
+                               TrackerResource   *resource)
 {
 	TrackerIndexingTree *indexing_tree;
 	TrackerMinerFS *fs = TRACKER_MINER_FS (mf);
+	const char *datasource_uri = NULL;
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-		tracker_resource_set_relation (resource, "nie:dataSource", element_resource);
+		datasource_uri = tracker_miner_fs_get_identifier (fs, file);
 	} else {
-		const gchar *identifier = NULL;
 		GFile *root;
 
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
 
 		if (root)
-			identifier = tracker_miner_fs_get_identifier (fs, root);
-
-		if (identifier)
-			tracker_resource_set_uri (resource, "nie:dataSource", identifier);
+			datasource_uri = tracker_miner_fs_get_identifier (fs, root);
 	}
+
+	if (datasource_uri)
+		tracker_resource_set_uri (resource, "nie:dataSource", datasource_uri);
 }
 
 static void
@@ -85,11 +86,9 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 
 static TrackerResource *
 miner_files_create_folder_information_element (TrackerMinerFiles *miner,
-                                               GFile             *file,
-                                               const gchar       *mime_type,
-                                               gboolean           create)
+                                               GFile             *file)
 {
-	TrackerResource *resource, *file_resource;
+	TrackerResource *resource;
 	TrackerIndexingTree *indexing_tree;
 	const gchar *urn;
 	g_autofree char *uri = NULL;
@@ -99,7 +98,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	                                       file);
 	resource = tracker_resource_new (urn);
 
-	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
+	tracker_resource_set_string (resource, "nie:mimeType", DIRECTORY_MIME);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
@@ -107,21 +106,8 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 		tracker_resource_add_uri (resource, "rdf:type", "tracker:IndexedFolder");
-		tracker_resource_set_boolean (resource, "tracker:available", TRUE);
-		tracker_resource_set_uri (resource, "nie:rootElementOf",
-		                          tracker_resource_get_identifier (resource));
-
 		miner_files_add_mount_info (miner, resource, file);
 	}
-
-	uri = g_file_get_uri (file);
-	file_resource = tracker_resource_new (uri);
-	tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
-
-	/* Laying the link between the IE and the DO */
-	tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
-	tracker_resource_set_uri (file_resource, "nie:interpretedAs",
-				  tracker_resource_get_identifier (resource));
 
 	return resource;
 }
@@ -189,14 +175,12 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
                                   TrackerSparqlBuffer *buffer,
                                   gboolean             create)
 {
-	TrackerIndexingTree *indexing_tree;
-	g_autoptr (TrackerResource) resource = NULL, folder_resource = NULL, graph_file = NULL;
+	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
 	const gchar *graph;
 	const gchar *parent_urn;
 	g_autoptr (GFile) parent = NULL;
 	g_autofree gchar *uri = NULL;
 	g_autofree gchar *mime_type = NULL;
-	gboolean is_directory, is_root;
 	g_autoptr (GDateTime) modified = NULL;
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 
@@ -205,11 +189,6 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		return;
 
 	uri = g_file_get_uri (file);
-	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
-
-	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
-	is_directory = (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY ?
-	                TRUE : FALSE);
 
 	modified = g_file_info_get_modification_date_time (file_info);
 	if (!modified)
@@ -251,19 +230,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	/* The URL of the DataObject (because IE = DO, this is correct) */
 	tracker_resource_set_string (resource, "nie:url", uri);
 
-	if (is_directory) {
-		folder_resource =
-			miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
-			                                               file,
-			                                               mime_type,
-			                                               create);
-
-		/* Always use inode/directory here, we don't really care if it's a symlink */
-		tracker_resource_set_string (resource, "tracker:extractorHash",
-		                             tracker_extract_module_manager_get_hash ("inode/directory"));
-	}
-
-	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource, folder_resource);
+	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource);
 
 	graph = tracker_extract_module_manager_get_graph (mime_type);
 
@@ -284,7 +251,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 		tracker_resource_set_int64 (graph_file, "nfo:fileSize",
 		                            g_file_info_get_size (file_info));
-		miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, graph_file, NULL);
+		miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, graph_file);
 
 		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
 		                                                            "nfo:PlainTextDocument") &&
@@ -307,22 +274,35 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 		tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", information_element);
 		tracker_resource_set_uri (information_element, "nie:isStoredAs", uri);
+	} else if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
+		g_autoptr (TrackerResource) folder = NULL;
+		TrackerIndexingTree *indexing_tree;
+		const char *urn = NULL;
+
+		indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+		urn = tracker_miner_fs_get_identifier (fs, file);
+		folder = tracker_resource_new (urn);
+
+		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
+			tracker_resource_set_uri (folder, "rdf:type", "tracker:IndexedFolder");
+			tracker_resource_set_uri (folder, "nie:rootElementOf", urn);
+			tracker_resource_set_boolean (folder, "tracker:available", TRUE);
+		} else {
+			tracker_resource_set_uri (folder, "rdf:type", "nfo:Folder");
+		}
+
+		tracker_resource_set_relation (resource, "nie:interpretedAs", folder);
+		tracker_resource_set_uri (folder, "nie:isStoredAs", uri);
 	}
 
 	if (!create) {
 		tracker_sparql_buffer_log_clear_content (buffer, file);
 	}
 
-	if (is_directory) {
-		tracker_sparql_buffer_log_folder (buffer, file,
-		                                  is_root,
-		                                  resource, folder_resource);
-	} else {
-		tracker_sparql_buffer_log_file (buffer, file,
-		                                graph,
-		                                resource,
-		                                graph_file);
-	}
+	tracker_sparql_buffer_log_file (buffer, file,
+	                                graph,
+	                                resource,
+	                                graph_file);
 }
 
 void
@@ -382,6 +362,33 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	                                             graph,
 	                                             resource,
 	                                             graph_file);
+}
+
+void
+tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
+                                      GFile               *file,
+                                      TrackerSparqlBuffer *buffer)
+{
+	TrackerIndexingTree *indexing_tree;
+	g_autoptr (TrackerResource) resource = NULL, folder_resource = NULL;
+	g_autofree char *uri = NULL;
+	gboolean is_root;
+
+	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
+
+	uri = g_file_get_uri (file);
+	resource = tracker_resource_new (uri);
+	tracker_resource_set_string (resource, "tracker:extractorHash",
+	                             tracker_extract_module_manager_get_hash (DIRECTORY_MIME));
+
+	folder_resource =
+		miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
+		                                               file);
+
+	tracker_sparql_buffer_log_folder (buffer, file,
+	                                  is_root,
+	                                  resource, folder_resource);
 }
 
 #if !GLIB_CHECK_VERSION (2, 83, 0)

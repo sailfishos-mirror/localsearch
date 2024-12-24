@@ -150,12 +150,20 @@ test_miner_finished (TrackerMinerFS *miner,
 }
 
 static void
+test_miner_finish_directory (TrackerMinerFS      *miner,
+                             GFile               *file,
+                             TrackerSparqlBuffer *buffer)
+{
+}
+
+static void
 test_miner_class_init (TestMinerClass *klass)
 {
 	TrackerMinerFSClass *fs_class = TRACKER_MINER_FS_CLASS (klass);
 
 	fs_class->process_file = test_miner_process_file;
 	fs_class->process_file_attributes = test_miner_process_file_attributes;
+	fs_class->finish_directory = test_miner_finish_directory;
 	fs_class->remove_file = test_miner_remove_file;
 	fs_class->remove_children = test_miner_remove_children;
 	fs_class->move_file = test_miner_move_file;

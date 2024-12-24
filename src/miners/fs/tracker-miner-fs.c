@@ -142,6 +142,7 @@ typedef enum {
 	TRACKER_MINER_FS_EVENT_UPDATED,
 	TRACKER_MINER_FS_EVENT_DELETED,
 	TRACKER_MINER_FS_EVENT_MOVED,
+	TRACKER_MINER_FS_EVENT_FINISH_DIRECTORY,
 } TrackerMinerFSEventType;
 
 enum {
@@ -200,16 +201,21 @@ static void           file_notifier_file_moved            (TrackerFileNotifier  
                                                            GFile                *dest,
                                                            gboolean              is_dir,
                                                            gpointer              user_data);
-static void           file_notifier_directory_started     (TrackerFileNotifier *notifier,
-                                                           GFile               *directory,
-                                                           gpointer             user_data);
-static void           file_notifier_directory_finished    (TrackerFileNotifier *notifier,
-                                                           GFile               *directory,
-                                                           guint                directories_found,
-                                                           guint                directories_ignored,
-                                                           guint                files_found,
-                                                           guint                files_ignored,
-                                                           gpointer             user_data);
+
+static void           file_notifier_directory_finished (TrackerFileNotifier *notifier,
+                                                        GFile               *directory,
+                                                        gpointer             user_data);
+
+static void           file_notifier_root_started     (TrackerFileNotifier *notifier,
+                                                      GFile               *directory,
+                                                      gpointer             user_data);
+static void           file_notifier_root_finished    (TrackerFileNotifier *notifier,
+                                                      GFile               *directory,
+                                                      guint                directories_found,
+                                                      guint                directories_ignored,
+                                                      guint                files_found,
+                                                      guint                files_ignored,
+                                                      gpointer             user_data);
 static void           file_notifier_finished              (TrackerFileNotifier *notifier,
                                                            gpointer             user_data);
 
@@ -534,11 +540,14 @@ fs_constructed (GObject *object)
 	g_signal_connect (priv->file_notifier, "file-moved",
 	                  G_CALLBACK (file_notifier_file_moved),
 	                  object);
-	g_signal_connect (priv->file_notifier, "directory-started",
-	                  G_CALLBACK (file_notifier_directory_started),
-	                  object);
 	g_signal_connect (priv->file_notifier, "directory-finished",
 	                  G_CALLBACK (file_notifier_directory_finished),
+	                  object);
+	g_signal_connect (priv->file_notifier, "root-started",
+	                  G_CALLBACK (file_notifier_root_started),
+	                  object);
+	g_signal_connect (priv->file_notifier, "root-finished",
+	                  G_CALLBACK (file_notifier_root_finished),
 	                  object);
 	g_signal_connect (priv->file_notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished),
@@ -958,6 +967,16 @@ item_move (TrackerMinerFS *fs,
 	                                            recursive);
 }
 
+static void
+item_finish_directory (TrackerMinerFS *fs,
+                       GFile          *file)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	TRACKER_MINER_FS_GET_CLASS (fs)->finish_directory (fs, file, priv->sparql_buffer);
+}
+
 static gboolean
 maybe_remove_file_event_node (TrackerMinerFS *fs,
                               QueueEvent     *event)
@@ -1196,6 +1215,9 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		break;
 	case TRACKER_MINER_FS_EVENT_UPDATED:
 		item_add_or_update (fs, file, info, attributes_update, FALSE);
+		break;
+	case TRACKER_MINER_FS_EVENT_FINISH_DIRECTORY:
+		item_finish_directory (fs, file);
 		break;
 	default:
 		g_assert_not_reached ();
@@ -1484,9 +1506,21 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 }
 
 static void
-file_notifier_directory_started (TrackerFileNotifier *notifier,
-                                 GFile               *directory,
-                                 gpointer             user_data)
+file_notifier_directory_finished (TrackerFileNotifier *notifier,
+                                  GFile               *directory,
+                                  gpointer             user_data)
+{
+	TrackerMinerFS *fs = user_data;
+	QueueEvent *event;
+
+	event = queue_event_new (TRACKER_MINER_FS_EVENT_FINISH_DIRECTORY, directory, NULL);
+	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, directory));
+}
+
+static void
+file_notifier_root_started (TrackerFileNotifier *notifier,
+                            GFile               *directory,
+                            gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv =
@@ -1515,13 +1549,13 @@ file_notifier_directory_started (TrackerFileNotifier *notifier,
 }
 
 static void
-file_notifier_directory_finished (TrackerFileNotifier *notifier,
-                                  GFile               *directory,
-                                  guint                directories_found,
-                                  guint                directories_ignored,
-                                  guint                files_found,
-                                  guint                files_ignored,
-                                  gpointer             user_data)
+file_notifier_root_finished (TrackerFileNotifier *notifier,
+                             GFile               *directory,
+                             guint                directories_found,
+                             guint                directories_ignored,
+                             guint                files_found,
+                             guint                files_ignored,
+                             gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
 	TrackerMinerFSPrivate *priv =

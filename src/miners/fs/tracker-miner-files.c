@@ -146,6 +146,9 @@ static void        miner_files_move_file                (TrackerMinerFS       *f
                                                          GFile                *source_file,
                                                          TrackerSparqlBuffer  *buffer,
                                                          gboolean              recursive);
+static void        miner_files_finish_directory         (TrackerMinerFS       *fs,
+                                                         GFile                *directory,
+                                                         TrackerSparqlBuffer  *buffer);
 static void        miner_files_finished                 (TrackerMinerFS       *fs,
                                                          gdouble               elapsed,
                                                          gint                  directories_found,
@@ -201,6 +204,7 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	miner_fs_class->remove_file = miner_files_remove_file;
 	miner_fs_class->remove_children = miner_files_remove_children;
 	miner_fs_class->move_file = miner_files_move_file;
+	miner_fs_class->finish_directory = miner_files_finish_directory;
 	miner_fs_class->get_content_identifier = miner_files_get_content_identifier;
 
 	g_object_class_install_property (object_class,
@@ -1042,6 +1046,14 @@ miner_files_move_file (TrackerMinerFS      *fs,
 
 	if (recursive)
 		tracker_sparql_buffer_log_move_content (buffer, source_file, file);
+}
+
+static void
+miner_files_finish_directory (TrackerMinerFS      *fs,
+                              GFile               *file,
+                              TrackerSparqlBuffer *buffer)
+{
+	tracker_miner_files_finish_directory (fs, file, buffer);
 }
 
 static void
