@@ -928,13 +928,6 @@ sparql_deleted_ensure_statement (TrackerFileNotifier  *notifier,
 }
 
 static int
-file_is_equal (gconstpointer a,
-               gconstpointer b)
-{
-	return g_file_equal (G_FILE (a), G_FILE (b)) ? 0 : -1;
-}
-
-static int
 file_is_equal_or_descendant (gconstpointer a,
                              gconstpointer b)
 {
@@ -1012,8 +1005,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		}
 
 		if ((file_data->state == FILE_STATE_CREATE ||
-		     file_data->state == FILE_STATE_UPDATE) &&
-		    !g_queue_find_custom (root->pending_dirs, file, file_is_equal)) {
+		     file_data->state == FILE_STATE_UPDATE)) {
 			/* Updated directory, needs crawling */
 			g_queue_push_head (root->pending_dirs, g_object_ref (file));
 		}
