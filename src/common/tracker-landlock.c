@@ -214,11 +214,6 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		/* Necessary for libosinfo in Ubuntu/Debian */
 		{ "/var/lib/usbutils",
 		  LANDLOCK_ACCESS_FS_READ_FILE },
-		/* Necessary for mount monitors */
-		{ "/proc/mounts",
-		  LANDLOCK_ACCESS_FS_READ_FILE },
-		{ "/proc/self/mountinfo",
-		  LANDLOCK_ACCESS_FS_READ_FILE },
 		/* Necessary for g_get_user_name() */
 		{ "/etc/passwd",
 		  LANDLOCK_ACCESS_FS_READ_FILE },
