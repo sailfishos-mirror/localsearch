@@ -104,7 +104,6 @@ struct _TrackerMinerFSPrivate {
 	GTimer *timer;
 	GTimer *extraction_timer;
 
-	guint shown_totals : 1;     /* TRUE if totals have been shown */
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
 
@@ -116,21 +115,6 @@ struct _TrackerMinerFSPrivate {
 	                                     * trees finished */
 
 	guint status_idle_id;
-
-	/*
-	 * Statistics
-	 */
-
-	/* How many we found during crawling and how many were black
-	 * listed (ignored). Reset to 0 when processing stops. */
-	guint total_directories_found;
-	guint total_directories_ignored;
-	guint total_files_found;
-	guint total_files_ignored;
-
-	/* How many we indexed and how many had errors indexing. */
-	guint changes_processed;
-	guint total_files_notified_error;
 };
 
 typedef enum {
@@ -699,45 +683,10 @@ notify_roots_finished (TrackerMinerFS *fs)
 }
 
 static void
-log_stats (TrackerMinerFS *fs)
-{
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		TrackerMinerFSPrivate *priv =
-			tracker_miner_fs_get_instance_private (fs);
-
-		/* Only do this the first time, otherwise the results are
-		 * likely to be inaccurate. Devices can be added or removed so
-		 * we can't assume stats are correct.
-		 */
-		if (!priv->shown_totals) {
-			priv->shown_totals = TRUE;
-
-			g_info ("--------------------------------------------------");
-			g_info ("Total directories : %d (%d ignored)",
-			        priv->total_directories_found,
-			        priv->total_directories_ignored);
-			g_info ("Total files       : %d (%d ignored)",
-			        priv->total_files_found,
-			        priv->total_files_ignored);
-			g_info ("Changes processed : %d (%d errors)",
-			        priv->changes_processed,
-			        priv->total_files_notified_error);
-			g_info ("--------------------------------------------------\n");
-		}
-	}
-#endif
-}
-
-static void
 process_stop (TrackerMinerFS *fs)
 {
 	TrackerMinerFSPrivate *priv =
 		tracker_miner_fs_get_instance_private (fs);
-
-	/* Now we have finished crawling, we enable monitor events */
-
-	log_stats (fs);
 
 	g_timer_stop (priv->timer);
 	g_timer_stop (priv->extraction_timer);
@@ -759,13 +708,6 @@ process_stop (TrackerMinerFS *fs)
 	notify_roots_finished (fs);
 
 	g_signal_emit (fs, signals[FINISHED], 0);
-
-	priv->total_directories_found = 0;
-	priv->total_directories_ignored = 0;
-	priv->total_files_found = 0;
-	priv->total_files_ignored = 0;
-	priv->changes_processed = 0;
-	priv->total_files_notified_error = 0;
 }
 
 static void
@@ -818,7 +760,6 @@ sparql_buffer_flush_cb (GObject      *object,
 
 			sparql = tracker_sparql_task_get_sparql (task);
 			tracker_error_report (task_file, error->message, sparql);
-			priv->total_files_notified_error++;
 		} else {
 			tracker_error_report_delete (task_file);
 		}
@@ -1070,7 +1011,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		if (!tracker_file_notifier_is_active (priv->file_notifier)) {
 			if (!priv->flushing &&
 			    tracker_task_pool_get_size (TRACKER_TASK_POOL (priv->sparql_buffer)) == 0) {
-				/* Print stats and signal finished */
 				process_stop (fs);
 			} else {
 				/* Flush any possible pending update here */
@@ -1088,8 +1028,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		/* No more files left to process */
 		return FALSE;
 	}
-
-	priv->changes_processed++;
 
 	/* Handle queues */
 	switch (type) {
@@ -1472,14 +1410,6 @@ file_notifier_root_finished (TrackerFileNotifier *notifier,
                              gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	/* Update stats */
-	priv->total_directories_found += directories_found;
-	priv->total_directories_ignored += directories_ignored;
-	priv->total_files_found += files_found;
-	priv->total_files_ignored += files_ignored;
 
 	if (directories_found == 0 &&
 	    files_found == 0) {
