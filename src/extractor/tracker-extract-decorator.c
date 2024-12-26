@@ -47,7 +47,6 @@ struct _TrackerExtractDecorator {
 	TrackerSparqlStatement *delete_file;
 
 	TrackerExtractPersistence *persistence;
-	GVolumeMonitor *volume_monitor;
 
 	guint throttle_id;
 	guint throttled : 1;
@@ -126,7 +125,6 @@ tracker_extract_decorator_finalize (GObject *object)
 
 	g_clear_handle_id (&extract_decorator->throttle_id, g_source_remove);
 	g_clear_object (&extract_decorator->extractor);
-	g_clear_object (&extract_decorator->volume_monitor);
 	g_clear_object (&extract_decorator->update_hash);
 	g_clear_object (&extract_decorator->delete_file);
 	g_clear_object (&extract_decorator->persistence);
@@ -450,29 +448,8 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 }
 
 static void
-mount_points_changed_cb (GVolumeMonitor *monitor,
-                         GMount         *mount,
-                         gpointer        user_data)
-{
-	GDrive *drive = g_mount_get_drive (mount);
-
-	if (drive) {
-		if (g_drive_is_media_removable (drive))
-			tracker_decorator_invalidate_cache (user_data);
-		g_object_unref (drive);
-	}
-}
-
-static void
 tracker_extract_decorator_init (TrackerExtractDecorator *decorator)
 {
-	decorator->volume_monitor = g_volume_monitor_get ();
-	g_signal_connect_object (decorator->volume_monitor, "mount-added",
-	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
-	g_signal_connect_object (decorator->volume_monitor, "mount-pre-unmount",
-	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
-	g_signal_connect_object (decorator->volume_monitor, "mount-removed",
-	                         G_CALLBACK (mount_points_changed_cb), decorator, 0);
 }
 
 TrackerDecorator *

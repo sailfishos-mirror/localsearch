@@ -72,8 +72,6 @@ void          tracker_decorator_set_priority_graphs (TrackerDecorator    *decora
 
 TrackerBatch * tracker_decorator_get_batch (TrackerDecorator *decorator);
 
-void tracker_decorator_invalidate_cache (TrackerDecorator *decorator);
-
 GType         tracker_decorator_info_get_type     (void) G_GNUC_CONST;
 
 TrackerDecoratorInfo *

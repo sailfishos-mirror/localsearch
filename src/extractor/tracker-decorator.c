@@ -1137,12 +1137,6 @@ tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
 }
 
 void
-tracker_decorator_invalidate_cache (TrackerDecorator *decorator)
-{
-	decorator_rebuild_cache (decorator);
-}
-
-void
 tracker_decorator_raise_error (TrackerDecorator *decorator,
                                GFile            *file,
                                const char       *message,
