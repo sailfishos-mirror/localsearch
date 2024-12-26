@@ -145,12 +145,7 @@ static void        miner_files_move_file                (TrackerMinerFS       *f
 static void        miner_files_finish_directory         (TrackerMinerFS       *fs,
                                                          GFile                *directory,
                                                          TrackerSparqlBuffer  *buffer);
-static void        miner_files_finished                 (TrackerMinerFS       *fs,
-                                                         gdouble               elapsed,
-                                                         gint                  directories_found,
-                                                         gint                  directories_ignored,
-                                                         gint                  files_found,
-                                                         gint                  files_ignored);
+static void        miner_files_finished                 (TrackerMinerFS       *fs);
 
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
                                                                    GDateTime          *datetime);
@@ -936,12 +931,7 @@ miner_files_process_file_attributes (TrackerMinerFS       *fs,
 }
 
 static void
-miner_files_finished (TrackerMinerFS *fs,
-                      gdouble         elapsed,
-                      gint            directories_found,
-                      gint            directories_ignored,
-                      gint            files_found,
-                      gint            files_ignored)
+miner_files_finished (TrackerMinerFS *fs)
 {
 	tracker_miner_files_check_unextracted (TRACKER_MINER_FILES (fs));
 }

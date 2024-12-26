@@ -289,9 +289,7 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              G_SIGNAL_RUN_LAST,
 		              G_STRUCT_OFFSET (TrackerMinerFSClass, finished),
 		              NULL, NULL, NULL,
-		              G_TYPE_NONE,
-		              6, G_TYPE_DOUBLE, G_TYPE_UINT, G_TYPE_UINT,
-		              G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT);
+		              G_TYPE_NONE, 0);
 
 	signals[FINISHED_ROOT] =
 		g_signal_new ("finished-root",
@@ -760,13 +758,7 @@ process_stop (TrackerMinerFS *fs)
 	 */
 	notify_roots_finished (fs);
 
-	g_signal_emit (fs, signals[FINISHED], 0,
-	               g_timer_elapsed (priv->timer, NULL),
-	               priv->total_directories_found,
-	               priv->total_directories_ignored,
-	               priv->total_files_found,
-	               priv->total_files_ignored,
-	               priv->changes_processed);
+	g_signal_emit (fs, signals[FINISHED], 0);
 
 	priv->total_directories_found = 0;
 	priv->total_directories_ignored = 0;

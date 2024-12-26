@@ -139,12 +139,7 @@ test_miner_move_file (TrackerMinerFS      *miner,
 }
 
 static void
-test_miner_finished (TrackerMinerFS *miner,
-                     gdouble         elapsed,
-                     gint            directories_found,
-                     gint            directories_ignored,
-                     gint            files_found,
-                     gint            files_ignored)
+test_miner_finished (TrackerMinerFS *miner)
 {
 	((TestMiner *) miner)->finished = TRUE;
 }

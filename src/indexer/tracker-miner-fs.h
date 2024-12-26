@@ -42,12 +42,7 @@ struct _TrackerMinerFSClass {
 	                                       GFileInfo            *info,
 	                                       TrackerSparqlBuffer  *buffer,
 	                                       gboolean              created);
-	void     (* finished)                 (TrackerMinerFS       *fs,
-	                                       gdouble               elapsed,
-	                                       gint                  directories_found,
-	                                       gint                  directories_ignored,
-	                                       gint                  files_found,
-	                                       gint                  files_ignored);
+	void     (* finished)                 (TrackerMinerFS       *fs);
 	void     (* process_file_attributes)  (TrackerMinerFS       *fs,
 	                                       GFile                *file,
 	                                       GFileInfo            *info,
