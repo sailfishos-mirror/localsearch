@@ -27,7 +27,6 @@
 #include <sys/socket.h>
 
 #define REMOTE_FD_NUMBER 3
-#define MINER_FS_NAME "org.freedesktop.Tracker3.Miner.Files"
 
 enum {
 	STATUS,
