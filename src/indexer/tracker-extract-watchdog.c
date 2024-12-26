@@ -41,6 +41,7 @@ enum {
 	PROP_0,
 	PROP_SPARQL_CONN,
 	PROP_INDEXING_TREE,
+	PROP_STORAGE,
 	N_PROPS,
 };
 
@@ -56,6 +57,7 @@ struct _TrackerExtractWatchdog {
 	TrackerEndpoint *endpoint;
 	TrackerFilesInterface *files_interface;
 	TrackerIndexingTree *indexing_tree;
+	TrackerStorage *storage;
 	guint progress_signal_id;
 	guint error_signal_id;
 	int persistence_fd;
@@ -151,6 +153,35 @@ clear_process_state (TrackerExtractWatchdog *watchdog)
 }
 
 static void
+mount_removed_cb (TrackerStorage         *storage,
+                  const gchar            *uuid,
+                  const gchar            *mount_point,
+                  TrackerExtractWatchdog *watchdog)
+{
+	g_autoptr (GFile) file = NULL;
+
+	file = g_file_new_for_path (mount_point);
+
+	/* Terminate extractor process, so it can abandon activity early on
+	 * pre-unmount.
+	 */
+	if (watchdog->extract_process &&
+	    tracker_indexing_tree_file_is_root (watchdog->indexing_tree, file))
+		g_subprocess_send_signal (watchdog->extract_process, SIGTERM);
+}
+
+static void
+tracker_extract_watchdog_constructed (GObject *object)
+{
+	TrackerExtractWatchdog *watchdog = TRACKER_EXTRACT_WATCHDOG (object);
+
+	g_signal_connect (watchdog->storage, "mount-point-removed",
+	                  G_CALLBACK (mount_removed_cb), watchdog);
+
+	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->constructed (object);
+}
+
+static void
 tracker_extract_watchdog_finalize (GObject *object)
 {
 	TrackerExtractWatchdog *watchdog = TRACKER_EXTRACT_WATCHDOG (object);
@@ -163,8 +194,11 @@ tracker_extract_watchdog_finalize (GObject *object)
 	if (watchdog->persistence_fd)
 		close (watchdog->persistence_fd);
 
+	g_signal_handlers_disconnect_by_func (watchdog->storage, mount_removed_cb, watchdog);
+
 	g_clear_object (&watchdog->sparql_conn);
 	g_clear_object (&watchdog->indexing_tree);
+	g_clear_object (&watchdog->storage);
 
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
 }
@@ -184,6 +218,9 @@ tracker_extract_watchdog_set_property (GObject      *object,
 	case PROP_INDEXING_TREE:
 		watchdog->indexing_tree = g_value_dup_object (value);
 		break;
+	case PROP_STORAGE:
+		watchdog->storage = g_value_dup_object (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -195,6 +232,7 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 {
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
+	object_class->constructed = tracker_extract_watchdog_constructed;
 	object_class->finalize = tracker_extract_watchdog_finalize;
 	object_class->set_property = tracker_extract_watchdog_set_property;
 
@@ -225,6 +263,12 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_STORAGE] =
+		g_param_spec_object ("storage", NULL, NULL,
+		                     TRACKER_TYPE_STORAGE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -238,11 +282,13 @@ tracker_extract_watchdog_init (TrackerExtractWatchdog *watchdog)
 
 TrackerExtractWatchdog *
 tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
-                              TrackerIndexingTree     *indexing_tree)
+                              TrackerIndexingTree     *indexing_tree,
+                              TrackerStorage          *storage)
 {
 	return g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
 	                     "sparql-conn", sparql_conn,
 	                     "indexing-tree", indexing_tree,
+	                     "storage", storage,
 	                     NULL);
 }
 
