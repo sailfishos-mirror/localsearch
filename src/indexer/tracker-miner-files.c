@@ -81,7 +81,6 @@ struct _TrackerMinerFilesPrivate {
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
-	gulong finished_handler;
 
 	guint stale_volumes_check_id;
 };
@@ -152,13 +151,6 @@ static void        miner_files_finished                 (TrackerMinerFS       *f
                                                          gint                  directories_ignored,
                                                          gint                  files_found,
                                                          gint                  files_ignored);
-static void        miner_finished_cb                    (TrackerMinerFS *fs,
-                                                         gdouble         seconds_elapsed,
-                                                         guint           total_directories_found,
-                                                         guint           total_directories_ignored,
-                                                         guint           total_files_found,
-                                                         guint           total_files_ignored,
-                                                         gpointer        user_data);
 
 static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
                                                                    GDateTime          *datetime);
@@ -297,9 +289,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 	}
 #endif /* HAVE_POWER */
 
-	priv->finished_handler = g_signal_connect_after (mf, "finished",
-	                                                 G_CALLBACK (miner_finished_cb),
-	                                                 NULL);
 	priv->udev_client = g_udev_client_new (NULL);
 }
 
@@ -757,30 +746,6 @@ index_on_battery_cb (GObject    *object,
 }
 
 #endif /* HAVE_POWER */
-
-/* Called when mining has finished the first time */
-static void
-miner_finished_cb (TrackerMinerFS *fs,
-                   gdouble         seconds_elapsed,
-                   guint           total_directories_found,
-                   guint           total_directories_ignored,
-                   guint           total_files_found,
-                   guint           total_files_ignored,
-                   gpointer        user_data)
-{
-	TrackerMinerFiles *mf = TRACKER_MINER_FILES (fs);
-
-	/* And remove the signal handler so that it's not
-	 *  called again */
-	if (mf->private->finished_handler) {
-		g_signal_handler_disconnect (fs, mf->private->finished_handler);
-		mf->private->finished_handler = 0;
-	}
-
-#ifdef HAVE_POWER
-	check_battery_status (mf);
-#endif /* HAVE_POWER */
-}
 
 static GFile *
 get_cache_dir (TrackerMinerFiles *mf)
