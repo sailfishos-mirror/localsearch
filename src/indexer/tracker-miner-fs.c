@@ -66,7 +66,6 @@ typedef struct {
 	GFile *file;
 	GFile *dest_file;
 	GFileInfo *info;
-	GList *root_node;
 	GList *queue_node;
 } QueueEvent;
 
@@ -111,9 +110,6 @@ struct _TrackerMinerFSPrivate {
 	guint extraction_timer_stopped : 1; /* TRUE if the extraction
 	                                     * timer is stopped */
 
-	GHashTable *roots_to_notify;        /* Used to signal indexing
-	                                     * trees finished */
-
 	guint status_idle_id;
 };
 
@@ -133,7 +129,6 @@ typedef enum {
 
 enum {
 	FINISHED,
-	FINISHED_ROOT,
 	CORRUPT,
 	LAST_SIGNAL
 };
@@ -192,13 +187,6 @@ static void           file_notifier_directory_finished (TrackerFileNotifier *not
                                                         GFile               *directory,
                                                         gpointer             user_data);
 
-static void           file_notifier_root_finished    (TrackerFileNotifier *notifier,
-                                                      GFile               *directory,
-                                                      guint                directories_found,
-                                                      guint                directories_ignored,
-                                                      guint                files_found,
-                                                      guint                files_ignored,
-                                                      gpointer             user_data);
 static void           file_notifier_finished              (TrackerFileNotifier *notifier,
                                                            gpointer             user_data);
 
@@ -275,16 +263,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 0);
 
-	signals[FINISHED_ROOT] =
-		g_signal_new ("finished-root",
-		              G_TYPE_FROM_CLASS (object_class),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerMinerFSClass, finished_root),
-		              NULL, NULL,
-		              g_cclosure_marshal_VOID__OBJECT,
-		              G_TYPE_NONE,
-		              1, G_TYPE_FILE);
-
 	signals[CORRUPT] =
 		g_signal_new ("corrupt",
 		              G_TYPE_FROM_CLASS (object_class),
@@ -314,10 +292,6 @@ tracker_miner_fs_init (TrackerMinerFS *object)
 	                                             (GEqualFunc) g_file_equal,
 	                                             g_object_unref, NULL);
 
-	priv->roots_to_notify = g_hash_table_new_full (g_file_hash,
-	                                               (GEqualFunc) g_file_equal,
-	                                               g_object_unref,
-	                                               (GDestroyNotify) g_queue_free);
 	priv->urn_lru = tracker_lru_new (DEFAULT_URN_LRU_SIZE,
 	                                 g_file_hash,
 	                                 (GEqualFunc) g_file_equal,
@@ -361,13 +335,6 @@ queue_event_moved_new (GFile    *source,
 static void
 queue_event_free (QueueEvent *event)
 {
-	if (event->root_node) {
-		GQueue *root_queue;
-
-		root_queue = event->root_node->data;
-		g_queue_delete_link (root_queue, event->root_node);
-	}
-
 	g_clear_object (&event->dest_file);
 	g_clear_object (&event->file);
 	g_clear_object (&event->info);
@@ -471,7 +438,6 @@ fs_finalize (GObject *object)
 
 	g_clear_object (&priv->indexing_tree);
 	g_clear_object (&priv->file_notifier);
-	g_hash_table_unref (priv->roots_to_notify);
 	g_free (priv->file_attributes);
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
@@ -525,9 +491,6 @@ fs_constructed (GObject *object)
 	                  object);
 	g_signal_connect (priv->file_notifier, "directory-finished",
 	                  G_CALLBACK (file_notifier_directory_finished),
-	                  object);
-	g_signal_connect (priv->file_notifier, "root-finished",
-	                  G_CALLBACK (file_notifier_root_finished),
 	                  object);
 	g_signal_connect (priv->file_notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished),
@@ -658,31 +621,6 @@ miner_resumed (TrackerMiner *miner)
 }
 
 static void
-notify_roots_finished (TrackerMinerFS *fs)
-{
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-	GHashTableIter iter;
-	gpointer key, value;
-
-	g_hash_table_iter_init (&iter, priv->roots_to_notify);
-
-	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		GFile *root = key;
-		GQueue *queue = value;
-
-		if (!g_queue_is_empty (queue))
-			continue;
-
-		/* Signal root is finished */
-		g_signal_emit (fs, signals[FINISHED_ROOT], 0, root);
-
-		/* Remove from hash table */
-		g_hash_table_iter_remove (&iter);
-	}
-}
-
-static void
 process_stop (TrackerMinerFS *fs)
 {
 	TrackerMinerFSPrivate *priv =
@@ -701,11 +639,6 @@ process_stop (TrackerMinerFS *fs)
 	              "status", "Idle",
 	              "remaining-time", 0,
 	              NULL);
-
-	/* Make sure we signal _ALL_ roots as finished before the
-	 * main FINISHED signal
-	 */
-	notify_roots_finished (fs);
 
 	g_signal_emit (fs, signals[FINISHED], 0);
 }
@@ -773,9 +706,6 @@ sparql_buffer_flush_cb (GObject      *object,
 						 sparql_buffer_flush_cb,
 						 fs))
 			priv->flushing = TRUE;
-
-		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs);
 	}
 
 	queue_handler_maybe_set_up (fs);
@@ -1019,9 +949,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 								 sparql_buffer_flush_cb,
 								 fs))
 					priv->flushing = TRUE;
-
-				/* Check if we've finished inserting for given prefixes ... */
-				notify_roots_finished (fs);
 			}
 		}
 
@@ -1062,9 +989,6 @@ miner_handle_next_item (TrackerMinerFS *fs)
 			 */
 			keep_processing = FALSE;
 		}
-
-		/* Check if we've finished inserting for given prefixes ... */
-		notify_roots_finished (fs);
 	}
 
 	check_notifier_high_water (fs);
@@ -1229,34 +1153,6 @@ miner_fs_get_queue_priority (TrackerMinerFS *fs,
 }
 
 static void
-assign_root_node (TrackerMinerFS *fs,
-                  QueueEvent     *event)
-{
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-	GFile *root, *file;
-	GQueue *queue;
-
-	file = event->dest_file ? event->dest_file : event->file;
-	root = tracker_indexing_tree_get_root (priv->indexing_tree,
-	                                       file, NULL);
-	if (!root)
-		return;
-
-	queue = g_hash_table_lookup (priv->roots_to_notify, root);
-
-	if (!queue) {
-		queue = g_queue_new ();
-		g_hash_table_insert (priv->roots_to_notify,
-		                     g_object_ref (root), queue);
-	}
-
-	event->root_node = g_list_alloc ();
-	event->root_node->data = queue;
-	g_queue_push_head_link (queue, event->root_node);
-}
-
-static void
 miner_fs_queue_event (TrackerMinerFS *fs,
 		      QueueEvent     *event,
 		      guint           priority)
@@ -1307,7 +1203,6 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 
 		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
 
-		assign_root_node (fs, event);
 		event->queue_node =
 			tracker_priority_queue_add (priv->items, event, priority);
 
@@ -1398,24 +1293,6 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
 
 	event = queue_event_new (TRACKER_MINER_FS_EVENT_FINISH_DIRECTORY, directory, NULL);
 	miner_fs_queue_event (fs, event, miner_fs_get_queue_priority (fs, directory));
-}
-
-static void
-file_notifier_root_finished (TrackerFileNotifier *notifier,
-                             GFile               *directory,
-                             guint                directories_found,
-                             guint                directories_ignored,
-                             guint                files_found,
-                             guint                files_ignored,
-                             gpointer             user_data)
-{
-	TrackerMinerFS *fs = user_data;
-
-	if (directories_found == 0 &&
-	    files_found == 0) {
-		/* Signal now because we have nothing to index */
-		g_signal_emit (fs, signals[FINISHED_ROOT], 0, directory);
-	}
 }
 
 static void
