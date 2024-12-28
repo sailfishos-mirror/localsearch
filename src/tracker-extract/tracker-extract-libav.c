@@ -101,8 +101,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if (audio_stream->codecpar->sample_rate > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:sampleRate", audio_stream->codecpar->sample_rate);
 		}
-		if (audio_stream->codecpar->channels > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->channels);
+		if (audio_stream->codecpar->ch_layout.nb_channels > 0) {
+			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->ch_layout.nb_channels);
 		}
 	}
 
