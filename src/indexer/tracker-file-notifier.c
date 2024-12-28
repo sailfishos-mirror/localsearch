@@ -89,8 +89,10 @@ typedef struct {
 	guint cursor_idle_id;
 	guint directories_found;
 	guint directories_ignored;
+	guint directories_updated;
 	guint files_found;
 	guint files_ignored;
+	guint files_updated;
 	guint ignore_root : 1;
 	guint cursor_has_content : 1;
 } TrackerIndexRoot;
@@ -538,6 +540,13 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 	    !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) {
 		/* Queue child dirs for later processing */
 		g_queue_push_head (root->pending_dirs, g_object_ref (file));
+	}
+
+	if (file_data->state != FILE_STATE_NONE) {
+		if (file_type == G_FILE_TYPE_DIRECTORY)
+			root->directories_updated++;
+		else
+			root->files_updated++;
 	}
 
 	tracker_file_notifier_notify (root->notifier, file_data, info);
@@ -1016,6 +1025,13 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 			/* Updated directory, needs crawling */
 			g_queue_push_head (root->pending_dirs, g_object_ref (file));
 		}
+	}
+
+	if (file_data->state != FILE_STATE_NONE) {
+		if (file_type == G_FILE_TYPE_DIRECTORY)
+			root->directories_updated++;
+		else
+			root->files_updated++;
 	}
 
 	tracker_file_notifier_notify (notifier, file_data, info);
