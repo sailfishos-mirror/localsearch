@@ -210,27 +210,16 @@ if libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and
   ]
 endif
 
-if generic_media_handler_name != 'none'
+if gstreamer.found()
   functional_tests += 'test_writeback_audio'
 endif
 
-detect_h264_codec = join_paths(meson.current_source_dir(), 'detect-h264-codec.sh')
-detect_h264_codec_result = run_command(detect_h264_codec, check: false)
-
-if detect_h264_codec_result.returncode() == 0
-  if gstreamer.version() >= '1.20.0'
-    extractor_tests += 'video/mkv-basic'
-  endif
-  extractor_tests += [
-    'video/mov-basic',
-    'video/mp4-basic',
-    'video/mp4-video-without-audio',
-  ]
-else
-  # FIXME: it would be nicer to visibly mark the tests as 'skipped', but the Meson
-  # test runner doesn't support this at the moment.
-  warning('No GStreamer h264 codec was detected. Some extractor tests will be disabled.')
-endif
+extractor_tests += [
+  'video/mkv-basic',
+  'video/mov-basic',
+  'video/mp4-basic',
+  'video/mp4-video-without-audio',
+]
 
 test_env = environment()
 

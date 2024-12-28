@@ -58,7 +58,7 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
                 "nmm:musicAlbumDisc": {
                     "@id": "urn:album-disc:Loveless:My%20Bloody%20Valentine:1991-01-01:Disc1"
                 },
-                "nfo:duration": 360,
+                "nfo:duration": 257,
             },
             "nie:title": "Loomer",
             "nfo:duration": 102,

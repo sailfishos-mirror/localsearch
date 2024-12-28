@@ -7,7 +7,7 @@
 modules = [
   ['extract-bmp', 'tracker-extract-bmp.c', ['10-bmp.rule'], [tracker_miners_common_dep]],
   ['extract-desktop', 'tracker-extract-desktop.c', ['10-desktop.rule'], [tracker_miners_common_dep]],
-  ['extract-dummy', [], ['10-comics.rule', '10-ebooks.rule', '10-folder.rule', '15-games.rule', '15-executable.rule'], [tracker_miners_common_dep]]
+  ['extract-dummy', [], ['10-comics.rule', '10-ebooks.rule', '10-folder.rule', '10-svg.rule', '15-games.rule', '15-executable.rule'], [tracker_miners_common_dep]]
 ]
 
 if get_option('abiword')
@@ -29,20 +29,6 @@ if libgif.found()
   modules += [['extract-gif', 'tracker-extract-gif.c', ['10-gif.rule'], [libgif, tracker_miners_common_dep]]]
 endif
 
-if generic_media_handler_name == 'gstreamer'
-  sources = ['tracker-extract-gstreamer.c', 'tracker-cue-sheet.c']
-  rules = ['10-svg.rule', '15-gstreamer-guess.rule', '90-gstreamer-audio-generic.rule', '90-gstreamer-video-generic.rule']
-  dependencies = [gstreamer, gstreamer_pbutils, libcue, tracker_miners_common_dep]
-
-  if gstreamer_backend_name == 'GUPnP-DLNA'
-    dependencies += [gupnp_dlna, gupnp_dlna_gst]
-  elif gstreamer_backend_name == 'discoverer'
-    dependencies += gstreamer_pbutils
-  endif
-
-  modules += [['extract-gstreamer', sources, rules, dependencies]]
-endif
-
 if libxml2.found()
   modules += [['extract-html', 'tracker-extract-html.c', ['10-html.rule'], [libxml2]]]
 endif
@@ -51,7 +37,7 @@ if libjpeg.found()
   modules += [['extract-jpeg', 'tracker-extract-jpeg.c', ['10-jpeg.rule'], [libjpeg, tracker_miners_common_dep]]]
 endif
 
-if generic_media_handler_name == 'libav'
+if not get_option('libav').disabled()
   rules = ['15-libav-guess.rule', '90-libav-audio-generic.rule', '90-libav-video-generic.rule']
   modules += [['extract-libav', ['tracker-extract-libav.c', 'tracker-cue-sheet.c'], rules, [avcodec, avformat, avutil, gstreamer, libcue, tracker_miners_common_dep]]]
 endif
@@ -97,7 +83,7 @@ if libgxps.found()
 endif
 
 if libcue.found()
-  modules += [['extract-disc-generic', 'tracker-extract-disc-generic.c', ['90-disc-generic.rule'], dependencies]]
+  modules += [['extract-disc-generic', 'tracker-extract-disc-generic.c', ['90-disc-generic.rule'], [libcue, tracker_miners_common_dep]]]
 endif
 
 enabled_rule_files = []
