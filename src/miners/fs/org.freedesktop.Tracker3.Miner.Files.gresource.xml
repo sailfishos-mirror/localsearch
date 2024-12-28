@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/freedesktop/Tracker3/Miner/Files">
+    <file>queries/ask-file-exists.rq</file>
     <file>queries/delete-file.rq</file>
     <file>queries/delete-file-content.rq</file>
     <file>queries/delete-folder-contents.rq</file>
