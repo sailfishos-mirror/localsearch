@@ -51,10 +51,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	GFile *file;
-	TrackerResource *metadata;
-	gchar *absolute_file_path;
-	gchar *content_created = NULL;
-	gchar *uri, *resource_uri;
+	g_autoptr (TrackerResource) metadata = NULL;
+	g_autofree char *absolute_file_path = NULL;
+	g_autofree char *content_created = NULL;
+	g_autofree char *uri = NULL, *resource_uri = NULL;
 	AVFormatContext *format = NULL;
 	AVStream *audio_stream = NULL;
 	AVStream *video_stream = NULL;
@@ -69,11 +69,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	absolute_file_path = g_file_get_path (file);
 	if (avformat_open_input (&format, absolute_file_path, NULL, NULL)) {
-		g_free (absolute_file_path);
-		g_free (uri);
 		return FALSE;
 	}
-	g_free (absolute_file_path);
 
 	avformat_find_stream_info (format, NULL);
 
@@ -89,13 +86,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	if (!audio_stream && !video_stream) {
 		avformat_close_input (&format);
-		g_free (uri);
 		return FALSE;
 	}
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
-	g_free (resource_uri);
 
 	if (audio_stream) {
 		if (audio_stream->codecpar->sample_rate > 0) {
@@ -156,9 +151,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 	} else if (audio_stream) {
-		TrackerResource *album_artist = NULL, *artist = NULL, *performer = NULL;
-		char *album_artist_name = NULL;
-		char *album_title = NULL;
+		g_autoptr (TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
+		g_autofree char *album_artist_name = NULL;
+		g_autofree char *album_title = NULL;
 
 		tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
 		tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
@@ -177,11 +172,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
-			album_title = tag->value;
+			album_title = g_strdup (tag->value);
 		}
 
 		if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
-			album_artist_name = tag->value;
+			album_artist_name = g_strdup (tag->value);
 			album_artist = tracker_extract_new_artist (album_artist_name);
 		}
 
@@ -209,14 +204,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
-			TrackerResource *composer = tracker_extract_new_artist (tag->value);
+			g_autoptr (TrackerResource) composer = tracker_extract_new_artist (tag->value);
 			tracker_resource_set_relation (metadata, "nmm:composer", composer);
-			g_object_unref (composer);
 		}
 
 		if (album_title) {
 			int disc_number = 1;
-			TrackerResource *album_disc;
+			g_autoptr (TrackerResource) album_disc = NULL;
 
 			if ((tag = find_tag (format, audio_stream, NULL, "disc"))) {
 				disc_number = atoi (tag->value);
@@ -226,15 +220,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
 			tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
-
-			g_object_unref (album_disc);
 		}
-
-		if (artist)
-			g_object_unref (artist);
-
-		if (performer)
-			g_object_unref (performer);
 	}
 
 	if (format->bit_rate > 0) {
@@ -263,13 +249,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	tracker_guarantee_resource_title_from_file (metadata, "nie:title", title, uri, NULL);
 
-	g_free (content_created);
-	g_free (uri);
-
 	avformat_close_input (&format);
 
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
 
 	return TRUE;
 }
