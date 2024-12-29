@@ -182,10 +182,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
 			artist = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:artist", artist);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
 			performer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:performer", performer);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "date"))) {
@@ -193,14 +195,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			if (content_created) {
 				tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
 			}
-		}
-
-		if (artist) {
-			tracker_resource_set_relation (metadata, "nmm:artist", artist);
-		}
-
-		if (performer) {
-			tracker_resource_set_relation (metadata, "nmm:performer", performer);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
