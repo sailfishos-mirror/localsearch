@@ -252,6 +252,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_string (metadata, "nfo:genre", tag->value);
 	}
 
+	if ((tag = find_tag (format, audio_stream, video_stream, "encoder"))) {
+		tracker_resource_set_string (metadata, "nie:generator", tag->value);
+	}
+
 	if ((tag = find_tag (format, audio_stream, video_stream, "title"))) {
 		title = tag->value;
 	}
