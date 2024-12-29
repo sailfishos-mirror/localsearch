@@ -52,9 +52,8 @@ if libjpeg.found()
 endif
 
 if generic_media_handler_name == 'libav'
-  rules = ['90-libav-audio-generic.rule', '90-libav-video-generic.rule']
-  dependencies = [avcodec, avformat, avutil, tracker_miners_common_dep]
-  modules += [['extract-libav', 'tracker-extract-libav.c', rules, dependencies]]
+  rules = ['15-libav-guess.rule', '90-libav-audio-generic.rule', '90-libav-video-generic.rule']
+  modules += [['extract-libav', 'tracker-extract-libav.c', rules, [avcodec, avformat, avutil, tracker_miners_common_dep]]]
 endif
 
 if get_option('icon')
