@@ -154,6 +154,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		g_autoptr (TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
 		g_autofree char *album_artist_name = NULL;
 		g_autofree char *album_title = NULL;
+		int track_count = 0;
 
 		tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
 		tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
@@ -165,10 +166,19 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "track"))) {
-			int track = atoi (tag->value);
-			if (track > 0) {
-				tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
+			int track = 0;
+
+			if (sscanf (tag->value, "%u/%u", &track, &track_count) != 2) {
+				track = atoi (tag->value);
 			}
+
+			if (track > 0)
+				tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
+		}
+
+		if (track_count == 0 &&
+		    (tag = find_tag (format, audio_stream, NULL, "tracktotal"))) {
+			track_count = atoi (tag->value);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
@@ -205,15 +215,20 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if (album_title) {
 			int disc_number = 1;
 			g_autoptr (TrackerResource) album_disc = NULL;
+			TrackerResource *album;
 
 			if ((tag = find_tag (format, audio_stream, NULL, "disc"))) {
 				disc_number = atoi (tag->value);
 			}
 
 			album_disc = tracker_extract_new_music_album_disc (album_title, album_artist, disc_number, content_created);
-
 			tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
-			tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
+
+			album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
+			tracker_resource_set_relation (metadata, "nmm:musicAlbum", album);
+
+			if (track_count > 0)
+				tracker_resource_set_int (album, "nmm:albumTrackCount", track_count);
 		}
 	}
 
