@@ -27,6 +27,8 @@
 #include <gst/tag/tag.h>
 #include <tinysparql.h>
 
+#include <libtracker-extract/tracker-extract-info.h>
+
 G_BEGIN_DECLS
 
 typedef struct {
@@ -52,6 +54,10 @@ void        tracker_toc_add_entry       (TrackerToc *toc,
 TrackerToc *tracker_cue_sheet_parse     (const gchar *cue_sheet);
 TrackerToc *tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
                                               const gchar             *uri);
+
+void tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
+                                          TrackerResource    *ie,
+                                          TrackerExtractInfo *info);
 
 G_END_DECLS
 

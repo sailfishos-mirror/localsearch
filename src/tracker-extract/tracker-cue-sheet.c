@@ -34,6 +34,7 @@
 #endif
 
 #include <libtracker-miners-common/tracker-file-utils.h>
+#include <libtracker-extract/tracker-resource-helpers.h>
 
 #include "tracker-cue-sheet.h"
 
@@ -96,6 +97,37 @@ tracker_toc_add_entry (TrackerToc *toc,
 }
 
 #if defined(HAVE_LIBCUE)
+
+static void
+set_cdtext_resource_string (Cdtext          *cd_text,
+                            enum Pti         index,
+                            TrackerResource *resource,
+                            const gchar     *property)
+{
+	const gchar *text;
+
+	text = cdtext_get (index, cd_text);
+	if (text)
+		tracker_resource_set_string (resource, property, text);
+}
+
+static void
+set_rem_resource_double (Rem             *cd_comments,
+                         enum RemType     index,
+                         TrackerResource *resource,
+                         const gchar     *property)
+{
+	const gchar *text;
+	gdouble value;
+
+	text = rem_get (index, cd_comments);
+	if (!text)
+		return;
+
+	value = strtod (text, NULL);
+	if (value != 0.0)
+		tracker_resource_set_double (resource, property, value);
+}
 
 static void
 add_cdtext_string_tag (Cdtext      *cd_text,
@@ -414,6 +446,246 @@ tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
 	return toc;
 }
 
+static TrackerResource *
+intern_artist (GHashTable *artists,
+               const char *name)
+{
+	TrackerResource *resource;
+
+	resource = g_hash_table_lookup (artists, name);
+	if (resource)
+		return g_object_ref (resource);
+
+	resource = tracker_extract_new_artist (name);
+	g_hash_table_insert (artists,
+	                     g_strdup (name),
+	                     g_object_ref (resource));
+
+	return resource;
+}
+
+static TrackerResource *
+new_album_from_cue_sheet (TrackerToc *toc,
+                          GHashTable *artists)
+{
+	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
+	g_autoptr (TrackerResource) album_artist = NULL;
+	const char *album_title = NULL;
+	g_autofree char *date = NULL;
+	Cdtext *cd_text;
+	Rem *remarks;
+
+	cd_text = cd_get_cdtext (priv->cue_data);
+	remarks = cd_get_rem (priv->cue_data);
+
+	if (cd_text) {
+		const char *text;
+
+		album_title = cdtext_get (PTI_TITLE, cd_text);
+		text = cdtext_get (PTI_PERFORMER, cd_text);
+		if (text)
+			album_artist = intern_artist (artists, text);
+	}
+
+	if (!album_title)
+		return NULL;
+
+	if (remarks) {
+		const char *text;
+		int year;
+
+		g_autoptr (GDateTime) datetime = NULL;
+
+		text = rem_get (REM_DATE, remarks);
+		if (text) {
+			g_autoptr (GTimeZone) tz = NULL;
+
+			tz = g_time_zone_new_utc ();
+			year = atoi (text);
+			datetime = g_date_time_new (tz, year, 1, 1, 0, 0, 0);
+			date = g_date_time_format_iso8601 (datetime);
+		}
+	}
+
+	return tracker_extract_new_music_album_disc (album_title,
+	                                             album_artist,
+	                                             1, date);
+}
+
+static void
+copy_property (TrackerResource *resource,
+               TrackerResource *source,
+               const gchar     *property)
+{
+	g_autoptr (GList) values = NULL;
+	GList *l;
+
+	values = tracker_resource_get_values (source, property);
+	for (l = values; l; l = l->next)
+		tracker_resource_add_gvalue (resource, property, l->data);
+}
+
+void
+tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
+                                     TrackerResource    *ie,
+                                     TrackerExtractInfo *info)
+{
+	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
+	TrackerResource *ie_performer, *ie_composer;
+	g_autoptr (TrackerResource) file_resource = NULL, album_disc = NULL, album = NULL;
+	g_autofree char *basename = NULL, *uri = NULL;
+	g_autoptr (GHashTable) artists = NULL;
+	gint64 total_duration = 0;
+	GFile *file;
+	int i;
+
+	file = tracker_extract_info_get_file (info);
+	uri = g_file_get_uri (file);
+	basename = g_file_get_basename (file);
+
+	artists = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
+
+	g_set_object (&album_disc, tracker_resource_get_first_relation (ie, "nmm:musicAlbumDisc"));
+	if (!album_disc)
+		album_disc = new_album_from_cue_sheet (toc, artists);
+
+	if (album_disc)
+		g_set_object (&album, tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
+
+	if (album) {
+		Rem *cd_remarks;
+
+		cd_remarks = cd_get_rem (priv->cue_data);
+		if (cd_remarks) {
+			set_rem_resource_double (cd_remarks,
+			                         REM_REPLAYGAIN_ALBUM_GAIN,
+			                         album, "nfo:albumGain");
+			set_rem_resource_double (cd_remarks,
+			                         REM_REPLAYGAIN_ALBUM_PEAK,
+			                         album, "nmm:albumPeakGain");
+		}
+
+		tracker_resource_set_int (album, "nmm:albumTrackCount", cd_get_ntrack (priv->cue_data));
+	}
+
+	/* Extract existing information from the given resource */
+	ie_performer = tracker_resource_get_first_relation (ie, "nmm:performer");
+	ie_composer = tracker_resource_get_first_relation (ie, "nmm:composer");
+	total_duration = tracker_resource_get_first_int64 (ie, "nfo:duration");
+
+	g_set_object (&file_resource, tracker_resource_get_first_relation (ie, "nie:isStoredAs"));
+	if (!file_resource) {
+		file_resource = tracker_resource_new (uri);
+		tracker_resource_add_uri (file_resource, "rdf:type", "nie:DataObject");
+		tracker_resource_set_relation (ie, "nie:isStoredAs", file_resource);
+	}
+
+	for (i = 1; i <= cd_get_ntrack (priv->cue_data); i++) {
+		g_autoptr (TrackerResource) track_resource = NULL, performer = NULL, composer = NULL;
+		Track *track;
+		Cdtext *cd_text;
+		Rem *cd_remarks;
+		gint64 duration;
+		gdouble start;
+
+		track = cd_get_track (priv->cue_data, i);
+
+		/* CUE sheets generally have the correct basename but wrong
+		 * extension in the FILE field, so this is what we test for.
+		 */
+		if (!tracker_filename_casecmp_without_extension (basename,
+		                                                 track_get_filename (track))) {
+			continue;
+		}
+
+		if (track_get_mode (track) != MODE_AUDIO)
+			continue;
+
+		/* Reuse the "root" InformationElement resource for the first track,
+		 * so there's no spare ones.
+		 */
+		if (i == 1) {
+			g_set_object (&track_resource, ie);
+		} else {
+			g_autofree char *suffix = NULL, *resource_uri = NULL;
+
+			suffix = g_strdup_printf ("%d", i);
+			resource_uri = tracker_extract_info_get_content_id (info, suffix);
+
+			track_resource = tracker_resource_new (resource_uri);
+			tracker_resource_add_uri (track_resource, "rdf:type", "nmm:MusicPiece");
+			tracker_resource_add_uri (track_resource, "rdf:type", "nfo:Audio");
+			tracker_resource_set_uri (track_resource, "nie:isStoredAs", uri);
+
+			copy_property (track_resource, ie, "nfo:channels");
+			copy_property (track_resource, ie, "nfo:averageBitrate");
+			copy_property (track_resource, ie, "nfo:sampleRate");
+			copy_property (track_resource, ie, "nie:generator");
+
+			tracker_resource_add_relation (file_resource, "nie:interpretedAs", track_resource);
+		}
+
+		duration = (gint64) track_get_length (track) / 75;
+		start = track_get_start (track) / 75.0;
+
+		if (duration > 0) {
+			tracker_resource_set_int64 (track_resource, "nfo:duration", duration);
+		} else if (i == cd_get_ntrack (priv->cue_data) && total_duration > start) {
+			/* The last element may not have a duration, because it depends
+			 * on the duration of the media file rather than info from the
+			 * cue sheet. In this case figure the data out from the total
+			 * duration.
+			 */
+			tracker_resource_set_int64 (track_resource, "nfo:duration", total_duration - start);
+		}
+
+		tracker_resource_set_double (track_resource, "nfo:audioOffset", start);
+
+		cd_text = track_get_cdtext (track);
+		if (cd_text) {
+			const char *text;
+
+			text = cdtext_get (PTI_PERFORMER, cd_text);
+			if (text)
+				performer = intern_artist (artists, text);
+
+			text = cdtext_get (PTI_COMPOSER, cd_text);
+			if (text)
+				composer = intern_artist (artists, text);
+
+			set_cdtext_resource_string (cd_text, PTI_TITLE,
+			                            track_resource, "nie:title");
+		}
+
+		/* Set from embedded metadata if empty in cue sheet */
+		if (!performer)
+			g_set_object (&performer, ie_performer);
+		if (!composer)
+			g_set_object (&composer, ie_composer);
+
+		cd_remarks = track_get_rem (track);
+		if (cd_remarks) {
+			set_rem_resource_double (cd_remarks,
+			                         REM_REPLAYGAIN_TRACK_GAIN,
+			                         track_resource, "nfo:gain");
+			set_rem_resource_double (cd_remarks,
+			                         REM_REPLAYGAIN_TRACK_PEAK,
+			                         track_resource, "nfo:peakGain");
+		}
+
+		tracker_resource_set_int (track_resource, "nmm:trackNumber", i);
+
+		if (album)
+			tracker_resource_set_relation (track_resource, "nmm:musicAlbum", album);
+		if (album_disc)
+			tracker_resource_set_relation (track_resource, "nmm:musicAlbumDisc", album_disc);
+		if (performer)
+			tracker_resource_set_relation (track_resource, "nmm:performer", performer);
+		if (composer)
+			tracker_resource_set_relation (track_resource, "nmm:composer", composer);
+	}
+}
+
 #else  /* ! HAVE_LIBCUE */
 
 TrackerToc *
@@ -427,6 +699,13 @@ tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
                                   const gchar             *uri)
 {
 	return NULL;
+}
+
+void
+tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
+                                     TrackerResource    *ie,
+                                     TrackerExtractInfo *info)
+{
 }
 
 #endif /* ! HAVE_LIBCUE */
