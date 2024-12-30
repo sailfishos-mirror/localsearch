@@ -37,21 +37,27 @@
 
 #include "tracker-cue-sheet.h"
 
+typedef struct {
+	TrackerToc toc;
+	Cd *cue_data;
+} TrackerTocPrivate;
+
 TrackerToc *
 tracker_toc_new (void)
 {
-	TrackerToc *toc;
+	TrackerTocPrivate *priv;
 
-	toc = g_slice_new (TrackerToc);
-	toc->tag_list = gst_tag_list_new_empty ();
-	toc->entry_list = NULL;
+	priv = g_slice_new (TrackerTocPrivate);
+	priv->toc.tag_list = gst_tag_list_new_empty ();
+	priv->toc.entry_list = NULL;
 
-	return toc;
+	return (TrackerToc *) priv;
 }
 
 void
 tracker_toc_free (TrackerToc *toc)
 {
+	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
 	TrackerTocEntry *entry;
 	GList *n;
 
@@ -68,7 +74,9 @@ tracker_toc_free (TrackerToc *toc)
 	gst_tag_list_free (toc->tag_list);
 	g_list_free (toc->entry_list);
 
-	g_slice_free (TrackerToc, toc);
+	cd_delete (priv->cue_data);
+
+	g_slice_free (TrackerTocPrivate, priv);
 }
 
 void
@@ -269,10 +277,12 @@ parse_cue_sheet_for_file (const gchar *cue_sheet,
 		toc->entry_list = g_list_prepend (toc->entry_list, toc_entry);
 	}
 
-	cd_delete (cd);
+	if (toc != NULL) {
+		TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
 
-	if (toc != NULL)
 		toc->entry_list = g_list_reverse (toc->entry_list);
+		priv->cue_data = cd;
+	}
 
 	return toc;
 }
