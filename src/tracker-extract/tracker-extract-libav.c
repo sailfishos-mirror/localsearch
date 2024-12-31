@@ -29,6 +29,11 @@
 #include <libavformat/avformat.h>
 #include <libavutil/mathematics.h>
 
+#include "tracker-cue-sheet.h"
+#include "tracker-main.h"
+
+static TrackerSparqlConnection *local_conn = NULL;
+
 static AVDictionaryEntry *
 find_tag (AVFormatContext *format,
           AVStream        *stream1,
@@ -154,6 +159,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		g_autoptr (TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
 		g_autofree char *album_artist_name = NULL;
 		g_autofree char *album_title = NULL;
+		TrackerToc *cue_sheet = NULL;
 		int track_count = 0;
 
 		tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
@@ -230,6 +236,22 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			if (track_count > 0)
 				tracker_resource_set_int (album, "nmm:albumTrackCount", track_count);
 		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
+			cue_sheet = tracker_cue_sheet_parse (tag->value);
+		} else {
+			if (!local_conn)
+				local_conn = tracker_main_get_readonly_connection (NULL);
+
+			cue_sheet = tracker_cue_sheet_guess_from_uri (local_conn, uri);
+		}
+
+		if (cue_sheet) {
+			tracker_cue_sheet_apply_to_resource (cue_sheet,
+			                                     metadata,
+			                                     info);
+			tracker_toc_free (cue_sheet);
+		}
 	}
 
 	if (format->bit_rate > 0) {
@@ -266,5 +288,20 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	tracker_extract_info_set_resource (info, metadata);
 
+	return TRUE;
+}
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_init (GError **error)
+{
+	gst_init (NULL, NULL);
+
+	return TRUE;
+}
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_shutdown (void)
+{
+	g_clear_object (&local_conn);
 	return TRUE;
 }
