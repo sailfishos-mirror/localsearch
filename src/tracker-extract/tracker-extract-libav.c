@@ -236,6 +236,20 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			}
 		}
 
+		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
+			g_autoptr (TrackerResource) performer = NULL;
+
+			performer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:leadActor", performer);
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
+			g_autoptr (TrackerResource) composer = NULL;
+
+			composer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:director", composer);
+		}
+
 		if ((hash = extract_gibest_hash (file))) {
 			g_autofree char *hash_str;
 
