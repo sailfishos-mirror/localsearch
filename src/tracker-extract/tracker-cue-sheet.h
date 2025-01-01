@@ -23,33 +23,15 @@
 #define __TRACKER_EXTRACT_CUE_SHEET_H__
 
 #include <glib.h>
-#include <gst/gst.h>
-#include <gst/tag/tag.h>
 #include <tinysparql.h>
 
 #include <libtracker-extract/tracker-extract-info.h>
 
 G_BEGIN_DECLS
 
-typedef struct {
-	/* Values in seconds */
-	gdouble start;
-	gdouble duration;
-	GstTagList *tag_list;
-} TrackerTocEntry;
-
-typedef struct {
-	GstTagList *tag_list;
-	GList *entry_list;
-} TrackerToc;
+typedef struct _TrackerToc TrackerToc;
 
 void        tracker_toc_free            (TrackerToc  *toc);
-TrackerToc *tracker_toc_new             (void);
-
-void        tracker_toc_add_entry       (TrackerToc *toc,
-                                         GstTagList *tags,
-                                         gdouble     start,
-                                         gdouble     duration);
 
 TrackerToc *tracker_cue_sheet_parse     (const gchar *cue_sheet);
 TrackerToc *tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,

@@ -26,8 +26,6 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include <gst/gst.h>
-#include <gst/tag/tag.h>
 
 #if defined(HAVE_LIBCUE)
 #include <libcue.h>
@@ -38,62 +36,30 @@
 
 #include "tracker-cue-sheet.h"
 
-typedef struct {
-	TrackerToc toc;
+struct _TrackerToc {
 	Cd *cue_data;
-} TrackerTocPrivate;
+};
 
 TrackerToc *
 tracker_toc_new (void)
 {
-	TrackerTocPrivate *priv;
+	TrackerToc *toc;
 
-	priv = g_slice_new (TrackerTocPrivate);
-	priv->toc.tag_list = gst_tag_list_new_empty ();
-	priv->toc.entry_list = NULL;
+	toc = g_slice_new (TrackerToc);
 
-	return (TrackerToc *) priv;
+	return toc;
 }
 
 void
 tracker_toc_free (TrackerToc *toc)
 {
-	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
-	TrackerTocEntry *entry;
-	GList *n;
-
 	if (!toc) {
 		return;
 	}
 
-	for (n = toc->entry_list; n != NULL; n = n->next) {
-		entry = n->data;
-		gst_tag_list_free (entry->tag_list);
-		g_slice_free (TrackerTocEntry, entry);
-	}
+	cd_delete (toc->cue_data);
 
-	gst_tag_list_free (toc->tag_list);
-	g_list_free (toc->entry_list);
-
-	cd_delete (priv->cue_data);
-
-	g_slice_free (TrackerTocPrivate, priv);
-}
-
-void
-tracker_toc_add_entry (TrackerToc *toc,
-                       GstTagList *tags,
-                       gdouble     start,
-                       gdouble     duration)
-{
-	TrackerTocEntry *toc_entry;
-
-	toc_entry = g_slice_new (TrackerTocEntry);
-	toc_entry->tag_list = gst_tag_list_ref (tags);
-	toc_entry->start = start;
-	toc_entry->duration = duration;
-
-	toc->entry_list = g_list_append (toc->entry_list, toc_entry);
+	g_slice_free (TrackerToc, toc);
 }
 
 #if defined(HAVE_LIBCUE)
@@ -129,117 +95,6 @@ set_rem_resource_double (Rem             *cd_comments,
 		tracker_resource_set_double (resource, property, value);
 }
 
-static void
-add_cdtext_string_tag (Cdtext      *cd_text,
-                       enum Pti     index,
-                       GstTagList  *tag_list,
-                       const gchar *tag)
-{
-	const gchar *text;
-
-	text = cdtext_get (index, cd_text);
-
-	if (text != NULL) {
-		gst_tag_list_add (tag_list, GST_TAG_MERGE_REPLACE, tag, text, NULL);
-	}
-}
-
-static void
-add_cdtext_comment_date_tag (Rem          *cd_comments,
-                             enum RemType index,
-                             GstTagList   *tag_list,
-                             const gchar  *tag)
-{
-	const gchar *text;
-	gint year;
-	GDate *date;
-
-	text = rem_get (index, cd_comments);
-
-	if (text != NULL) {
-		year = atoi (text);
-
-		if (year >= 1860) {
-			date = g_date_new_dmy (1, 1, year);
-			gst_tag_list_add (tag_list, GST_TAG_MERGE_REPLACE, tag, date, NULL);
-			g_date_free (date);
-		}
-	}
-}
-
-static void
-add_cdtext_comment_double_tag (Rem          *cd_comments,
-                               enum RemType  index,
-                               GstTagList   *tag_list,
-                               const gchar  *tag)
-{
-	const gchar *text;
-	gdouble value;
-
-	text = rem_get (index, cd_comments);
-
-	if (text != NULL) {
-		value = strtod (text, NULL);
-
-		/* Shortcut: it just so happens that 0.0 is meaningless for the replay
-		 * gain properties so we can get away with testing for errors this way.
-		 */
-		if (value != 0.0)
-			gst_tag_list_add (tag_list, GST_TAG_MERGE_REPLACE, tag, value, NULL);
-	}
-}
-
-static void
-set_album_tags_from_cdtext (GstTagList *tag_list,
-                            Cdtext     *cd_text,
-                            Rem        *cd_comments)
-{
-	if (cd_text != NULL) {
-		add_cdtext_string_tag (cd_text, PTI_TITLE, tag_list, GST_TAG_ALBUM);
-		add_cdtext_string_tag (cd_text, PTI_PERFORMER, tag_list, GST_TAG_ALBUM_ARTIST);
-	}
-
-	if (cd_comments != NULL) {
-		add_cdtext_comment_date_tag (cd_comments, REM_DATE, tag_list, GST_TAG_DATE);
-
-		add_cdtext_comment_double_tag (cd_comments, REM_REPLAYGAIN_ALBUM_GAIN, tag_list, GST_TAG_ALBUM_GAIN);
-		add_cdtext_comment_double_tag (cd_comments, REM_REPLAYGAIN_ALBUM_PEAK, tag_list, GST_TAG_ALBUM_PEAK);
-	}
-}
-
-static void
-set_track_tags_from_cdtext (GstTagList *tag_list,
-                            Cdtext     *cd_text,
-                            Rem        *cd_comments)
-{
-	if (cd_text != NULL) {
-		add_cdtext_string_tag (cd_text, PTI_TITLE, tag_list, GST_TAG_TITLE);
-		add_cdtext_string_tag (cd_text, PTI_PERFORMER, tag_list, GST_TAG_PERFORMER);
-		add_cdtext_string_tag (cd_text, PTI_COMPOSER, tag_list, GST_TAG_COMPOSER);
-	}
-
-	if (cd_comments != NULL) {
-		add_cdtext_comment_double_tag (cd_comments, REM_REPLAYGAIN_TRACK_GAIN, tag_list, GST_TAG_TRACK_GAIN);
-		add_cdtext_comment_double_tag (cd_comments, REM_REPLAYGAIN_TRACK_PEAK, tag_list, GST_TAG_TRACK_PEAK);
-	}
-}
-
-/* Some simple heuristics to fill in missing tag information. */
-static void
-process_toc_tags (TrackerToc *toc)
-{
-	gint track_count;
-
-	if (gst_tag_list_get_tag_size (toc->tag_list, GST_TAG_TRACK_COUNT) == 0) {
-		track_count = g_list_length (toc->entry_list);
-		gst_tag_list_add (toc->tag_list,
-		                  GST_TAG_MERGE_REPLACE,
-		                  GST_TAG_TRACK_COUNT,
-		                  track_count,
-		                  NULL);
-	}
-}
-
 /* This function runs in two modes: for external CUE sheets, it will check
  * the FILE field for each track and build a TrackerToc for all the tracks
  * contained in @file_name. If @file_name does not appear in the CUE sheet,
@@ -250,13 +105,10 @@ static TrackerToc *
 parse_cue_sheet_for_file (const gchar *cue_sheet,
                           const gchar *file_name)
 {
-	TrackerToc *toc;
-	TrackerTocEntry *toc_entry;
+	TrackerToc *toc = NULL;
 	Cd *cd;
 	Track *track;
 	gint i;
-
-	toc = NULL;
 
 	cd = cue_parse_string (cue_sheet);
 
@@ -282,39 +134,13 @@ parse_cue_sheet_for_file (const gchar *cue_sheet,
 		if (track_get_mode (track) != MODE_AUDIO)
 			continue;
 
-		if (toc == NULL) {
-			toc = tracker_toc_new ();
-
-			set_album_tags_from_cdtext (toc->tag_list,
-			                            cd_get_cdtext (cd),
-			                            cd_get_rem (cd));
-		}
-
-		toc_entry = g_slice_new (TrackerTocEntry);
-		toc_entry->tag_list = gst_tag_list_new_empty ();
-		toc_entry->start = track_get_start (track) / 75.0;
-		toc_entry->duration = track_get_length (track) / 75.0;
-
-		set_track_tags_from_cdtext (toc_entry->tag_list,
-		                            track_get_cdtext (track),
-		                            track_get_rem (track));
-
-		gst_tag_list_add (toc_entry->tag_list,
-		                  GST_TAG_MERGE_REPLACE,
-		                  GST_TAG_TRACK_NUMBER,
-		                  i,
-		                  NULL);
-
-
-		toc->entry_list = g_list_prepend (toc->entry_list, toc_entry);
+		toc = tracker_toc_new ();
+		toc->cue_data = cd;
+		break;
 	}
 
-	if (toc != NULL) {
-		TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
-
-		toc->entry_list = g_list_reverse (toc->entry_list);
-		priv->cue_data = cd;
-	}
+	if (!toc)
+		cd_delete (cd);
 
 	return toc;
 }
@@ -325,9 +151,6 @@ tracker_cue_sheet_parse (const gchar *cue_sheet)
 	TrackerToc *result;
 
 	result = parse_cue_sheet_for_file (cue_sheet, NULL);
-
-	if (result)
-		process_toc_tags (result);
 
 	return result;
 }
@@ -440,9 +263,6 @@ tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
 	g_object_unref (audio_file);
 	g_free (audio_file_name);
 
-	if (toc)
-		process_toc_tags (toc);
-
 	return toc;
 }
 
@@ -468,15 +288,14 @@ static TrackerResource *
 new_album_from_cue_sheet (TrackerToc *toc,
                           GHashTable *artists)
 {
-	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
 	g_autoptr (TrackerResource) album_artist = NULL;
 	const char *album_title = NULL;
 	g_autofree char *date = NULL;
 	Cdtext *cd_text;
 	Rem *remarks;
 
-	cd_text = cd_get_cdtext (priv->cue_data);
-	remarks = cd_get_rem (priv->cue_data);
+	cd_text = cd_get_cdtext (toc->cue_data);
+	remarks = cd_get_rem (toc->cue_data);
 
 	if (cd_text) {
 		const char *text;
@@ -530,7 +349,6 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
                                      TrackerResource    *ie,
                                      TrackerExtractInfo *info)
 {
-	TrackerTocPrivate *priv = (TrackerTocPrivate *) toc;
 	TrackerResource *ie_performer, *ie_composer;
 	g_autoptr (TrackerResource) file_resource = NULL, album_disc = NULL, album = NULL;
 	g_autofree char *basename = NULL, *uri = NULL;
@@ -555,7 +373,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 	if (album) {
 		Rem *cd_remarks;
 
-		cd_remarks = cd_get_rem (priv->cue_data);
+		cd_remarks = cd_get_rem (toc->cue_data);
 		if (cd_remarks) {
 			set_rem_resource_double (cd_remarks,
 			                         REM_REPLAYGAIN_ALBUM_GAIN,
@@ -565,7 +383,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 			                         album, "nmm:albumPeakGain");
 		}
 
-		tracker_resource_set_int (album, "nmm:albumTrackCount", cd_get_ntrack (priv->cue_data));
+		tracker_resource_set_int (album, "nmm:albumTrackCount", cd_get_ntrack (toc->cue_data));
 	}
 
 	/* Extract existing information from the given resource */
@@ -580,7 +398,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 		tracker_resource_set_relation (ie, "nie:isStoredAs", file_resource);
 	}
 
-	for (i = 1; i <= cd_get_ntrack (priv->cue_data); i++) {
+	for (i = 1; i <= cd_get_ntrack (toc->cue_data); i++) {
 		g_autoptr (TrackerResource) track_resource = NULL, performer = NULL, composer = NULL;
 		Track *track;
 		Cdtext *cd_text;
@@ -588,7 +406,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 		gint64 duration;
 		gdouble start;
 
-		track = cd_get_track (priv->cue_data, i);
+		track = cd_get_track (toc->cue_data, i);
 
 		/* CUE sheets generally have the correct basename but wrong
 		 * extension in the FILE field, so this is what we test for.
@@ -630,7 +448,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 
 		if (duration > 0) {
 			tracker_resource_set_int64 (track_resource, "nfo:duration", duration);
-		} else if (i == cd_get_ntrack (priv->cue_data) && total_duration > start) {
+		} else if (i == cd_get_ntrack (toc->cue_data) && total_duration > start) {
 			/* The last element may not have a duration, because it depends
 			 * on the duration of the media file rather than info from the
 			 * cue sheet. In this case figure the data out from the total

@@ -29,9 +29,6 @@
 /* Define to 1 if you have the `getline' function. */
 #mesondefine HAVE_GETLINE
 
-/* Define if we have GStreamer */
-#mesondefine HAVE_GSTREAMER
-
 /* Define if we have Gstreamer version 1.20.0 or up */
 #mesondefine HAVE_GSTREAMER_1_20
 
