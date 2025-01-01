@@ -34,6 +34,85 @@
 
 static TrackerSparqlConnection *local_conn = NULL;
 
+#define CHUNK_N_BYTES (2 << 15)
+
+static guint64
+extract_gibest_hash (GFile *file)
+{
+	guint64 buffer[2][CHUNK_N_BYTES/8];
+	g_autoptr (GInputStream) stream = NULL;
+	g_autoptr (GError) error = NULL;
+	gssize n_bytes, file_size;
+	guint64 hash = 0;
+	gint i;
+
+	stream = G_INPUT_STREAM (g_file_read (file, NULL, &error));
+	if (stream == NULL)
+		goto fail;
+
+	/* Extract start/end chunks of the file */
+	n_bytes = g_input_stream_read (stream, buffer[0], CHUNK_N_BYTES, NULL, &error);
+	if (n_bytes == -1)
+		goto fail;
+
+	if (!g_seekable_seek (G_SEEKABLE (stream), -CHUNK_N_BYTES, G_SEEK_END, NULL, &error)) {
+		/* Files may be smaller than the chunk size */
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT))
+			goto fail;
+
+		g_clear_error (&error);
+		if (!g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, &error))
+			goto fail;
+	}
+
+	n_bytes = g_input_stream_read (stream, buffer[1], CHUNK_N_BYTES, NULL, &error);
+	if (n_bytes == -1)
+		goto fail;
+
+	for (i = 0; i < G_N_ELEMENTS (buffer[0]); i++)
+		hash += buffer[0][i] + buffer[1][i];
+
+	file_size = g_seekable_tell (G_SEEKABLE (stream));
+
+	if (file_size < CHUNK_N_BYTES)
+		goto end;
+
+	/* Include file size */
+	hash += file_size;
+
+	return hash;
+
+ fail:
+	g_warning ("Could not get file hash: %s\n", error->message);
+ end:
+	return 0;
+}
+
+static void
+add_hash (TrackerResource *resource,
+          GFile           *file,
+          const char      *hash_str,
+          const char      *algorithm)
+{
+	g_autoptr (TrackerResource) file_resource = NULL, hash = NULL;
+	g_autofree char *uri = NULL;
+
+	g_set_object (&file_resource, tracker_resource_get_first_relation (resource, "nie:isStoredAs"));
+
+	if (!file_resource) {
+		uri = g_file_get_uri (file);
+		file_resource = tracker_resource_new (uri);
+		tracker_resource_set_relation (resource, "nie:isStoredAs", file_resource);
+	}
+
+	hash = tracker_resource_new (NULL);
+	tracker_resource_set_uri (hash, "rdf:type", "nfo:FileHash");
+	tracker_resource_set_string (hash, "nfo:hashValue", hash_str);
+	tracker_resource_set_string (hash, "nfo:hashAlgorithm", algorithm);
+
+	tracker_resource_set_relation (file_resource, "nfo:hasHash", hash);
+}
+
 static AVDictionaryEntry *
 find_tag (AVFormatContext *format,
           AVStream        *stream1,
@@ -107,6 +186,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
+		guint64 hash;
+
 		tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
 
 		if (video_stream->codecpar->width > 0 && video_stream->codecpar->height > 0) {
@@ -155,6 +236,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			}
 		}
 
+		if ((hash = extract_gibest_hash (file))) {
+			g_autofree char *hash_str;
+
+			hash_str = g_strdup_printf ("%" G_GINT64_MODIFIER "x", hash);
+			add_hash (metadata, file, hash_str, "gibest");
+		}
 	} else if (audio_stream) {
 		g_autoptr (TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
 		g_autofree char *album_artist_name = NULL;
