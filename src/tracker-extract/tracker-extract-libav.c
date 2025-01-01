@@ -113,6 +113,20 @@ add_hash (TrackerResource *resource,
 	tracker_resource_set_relation (file_resource, "nfo:hasHash", hash);
 }
 
+static void
+add_external_reference (TrackerResource *resource,
+                        const char      *uri_prefix,
+                        const char      *id,
+                        const char      *reference_id)
+{
+	g_autoptr (TrackerResource) reference = NULL;
+	g_autofree char *uri = NULL;
+
+	uri = g_strdup_printf ("%s/%s", uri_prefix, id);
+	reference = tracker_extract_new_external_reference (reference_id, id, uri);
+	tracker_resource_add_relation (resource, "tracker:hasExternalReference", reference);
+}
+
 static AVDictionaryEntry *
 find_tag (AVFormatContext *format,
           AVStream        *stream1,
@@ -300,6 +314,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
 			artist = tracker_extract_new_artist (tag->value);
 			tracker_resource_set_relation (metadata, "nmm:artist", artist);
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_artistid"))) {
+				add_external_reference (artist,
+				                        "https://musicbrainz.org/artist",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Artist");
+			}
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
@@ -312,6 +333,24 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			if (content_created) {
 				tracker_resource_set_string (metadata, "nie:contentCreated", content_created);
 			}
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "acoustid_fingerprint"))) {
+			add_hash (metadata, file, tag->value, "chromaprint");
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_trackid"))) {
+			add_external_reference (metadata,
+			                        "https://musicbrainz.org/recording",
+			                        tag->value,
+			                        "https://musicbrainz.org/doc/Recording");
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_releasetrackid"))) {
+			add_external_reference (metadata,
+			                        "https://musicbrainz.org/track",
+			                        tag->value,
+			                        "https://musicbrainz.org/doc/Track");
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
@@ -336,6 +375,20 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 			if (track_count > 0)
 				tracker_resource_set_int (album, "nmm:albumTrackCount", track_count);
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_albumid"))) {
+				add_external_reference (album,
+				                        "https://musicbrainz.org/release",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Release");
+			}
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_releasegroupid"))) {
+				add_external_reference (album,
+				                        "https://musicbrainz.org/release-group",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Release_Group");
+			}
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
