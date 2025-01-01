@@ -463,6 +463,8 @@ tracker_extract_module_init (GError **error)
 {
 	gst_init (NULL, NULL);
 
+	av_log_set_level (AV_LOG_FATAL);
+
 	return TRUE;
 }
 
