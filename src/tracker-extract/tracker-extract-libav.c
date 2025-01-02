@@ -160,16 +160,21 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	int video_stream_index;
 	AVDictionaryEntry *tag = NULL;
 	const char *title = NULL;
+	AVDictionary *options = NULL;
 
 	file = tracker_extract_info_get_file (info);
 
 	uri = g_file_get_uri (file);
 
 	absolute_file_path = g_file_get_path (file);
-	if (avformat_open_input (&format, absolute_file_path, NULL, NULL)) {
+	av_dict_set_int (&options, "export_xmp", 1, 0);
+
+	if (avformat_open_input (&format, absolute_file_path, NULL, &options)) {
+		av_dict_free (&options);
 		return FALSE;
 	}
 
+	av_dict_free (&options);
 	avformat_find_stream_info (format, NULL);
 
 	audio_stream_index = av_find_best_stream (format, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
@@ -406,6 +411,14 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			                                     info);
 			tracker_toc_free (cue_sheet);
 		}
+	}
+
+	if ((tag = find_tag (format, audio_stream, video_stream, "xmp"))) {
+		TrackerXmpData *xmp;
+
+		xmp = tracker_xmp_new (tag->value, -1, uri);
+		tracker_xmp_apply_to_resource (metadata, xmp);
+		tracker_xmp_free (xmp);
 	}
 
 	if (format->bit_rate > 0) {
