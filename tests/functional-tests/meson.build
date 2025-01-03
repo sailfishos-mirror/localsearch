@@ -234,6 +234,13 @@ endif
 
 test_env = environment()
 
+wrap_tinysparql_libdir = meson.build_root() / 'subprojects' / 'tinysparql' / 'src' / 'libtracker-sparql'
+tinysparql_gidir = tracker_sparql.get_variable(default_value: wrap_tinysparql_libdir, pkgconfig: 'libdir')
+tinysparql_libdir = tracker_sparql.get_variable(default_value: wrap_tinysparql_libdir, pkgconfig: 'libdir')
+
+test_env.prepend('GI_TYPELIB_PATH', tinysparql_gidir)
+test_env.prepend('LD_LIBRARY_PATH', tinysparql_libdir)
+
 test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_EXTRACT_DEADLINE', '30')
