@@ -1,3 +1,13 @@
+NEW in 3.9.alpha - 2025-01-11
+=============================
+  * Fix for folder updates happening while the daemon is not running
+  * Improve memory usage when dealing with very large folders
+  * Improve recovery after process interruption
+  * Code improvements
+  * Avoid GStreamer memory payload in indexer process
+  * Improved performance when deleting stale resources
+  * Test improvements
+
 NEW in 3.8.1 - 2024-11-21
 =========================
   * Fix multiple leaks in metadata extractors
