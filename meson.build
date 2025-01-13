@@ -208,9 +208,7 @@ endif
 # Check for tracker-extract: libav
 ####################################################################
 
-avcodec = dependency('libavcodec', version: '>= 0.8.4', required: get_option('libav'))
 avformat = dependency('libavformat', version: '>= 0.8.4', required: get_option('libav'))
-avutil = dependency('libavutil', version: '>= 0.8.4', required: get_option('libav'))
 
 ##################################################################
 # Check for libseccomp
@@ -456,7 +454,7 @@ if have_tracker_extract
     '    Support MS & Open Office:               ' + libgsf.found().to_string(),
     '    Support XML / HTML:                     ' + libxml2.found().to_string(),
     '    Support embedded / sidecar XMP:         ' + exempi.found().to_string(),
-    '    Support A/V formats:                    ' + avcodec.found().to_string(),
+    '    Support A/V formats:                    ' + avformat.found().to_string(),
     '    Support cue sheet parsing:              ' + libcue.found().to_string(),
     '    Support playlists (w/ Totem):           ' + totem_plparser.found().to_string(),
     '    Support ISO image parsing:              ' + libosinfo.found().to_string(),

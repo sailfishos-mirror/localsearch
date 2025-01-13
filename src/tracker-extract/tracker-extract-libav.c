@@ -25,9 +25,7 @@
 
 #include <libtracker-extract/tracker-extract.h>
 
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/mathematics.h>
 
 #include "tracker-cue-sheet.h"
 #include "tracker-main.h"
