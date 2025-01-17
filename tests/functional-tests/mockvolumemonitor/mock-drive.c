@@ -34,7 +34,7 @@ struct _MockDrive
 	const gchar *name;
 };
 
-static void mock_drive_drive_iface_init ();
+static void mock_drive_drive_iface_init (GDriveIface *iface);
 
 G_DEFINE_TYPE_EXTENDED (MockDrive, mock_drive, G_TYPE_OBJECT, 0,
 	                      G_IMPLEMENT_INTERFACE (G_TYPE_DRIVE, mock_drive_drive_iface_init))

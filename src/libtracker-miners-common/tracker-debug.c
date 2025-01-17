@@ -60,7 +60,7 @@ tracker_miners_get_debug_flags (void)
 {
 	static GOnce once = G_ONCE_INIT;
 
-	g_once (&once, parse_debug_flags, NULL);
+	g_once (&once, (GThreadFunc) parse_debug_flags, NULL);
 
 	return GPOINTER_TO_INT (once.retval);
 }
