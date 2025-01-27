@@ -11,12 +11,6 @@
 /* Define if we have GLib version 2.70.0 or up */
 #mesondefine GIO_SUPPORTS_CREATION_TIME
 
-/* Define that GStreamer Discoverer should be used */
-#mesondefine GSTREAMER_BACKEND_DISCOVERER
-
-/* Define that GUPnP-DLNA should be used */
-#mesondefine GSTREAMER_BACKEND_GUPNP_DLNA
-
 /* Guarantee existence of some metadata */
 #mesondefine GUARANTEE_METADATA
 
@@ -55,6 +49,9 @@
 
 /* Define if we have NetworkManager for network status detection */
 #mesondefine HAVE_NETWORK_MANAGER
+
+/* Define if we have GUPnP-DLNA */
+#mesondefine HAVE_GUPNP_DLNA
 
 /* Define to 1 if you have the `posix_fadvise' function. */
 #mesondefine HAVE_POSIX_FADVISE

@@ -39,7 +39,11 @@ endif
 
 if not get_option('libav').disabled()
   rules = ['15-libav-guess.rule', '90-libav-audio-generic.rule', '90-libav-video-generic.rule']
-  modules += [['extract-libav', ['tracker-extract-libav.c', 'tracker-cue-sheet.c'], rules, [avformat, libcue, tracker_miners_common_dep]]]
+  extract_libav_files = ['tracker-extract-libav.c', 'tracker-cue-sheet.c']
+  if gupnp_dlna.found()
+    extract_libav_files += ['tracker-gupnp.c']
+  endif
+  modules += [['extract-libav', extract_libav_files, rules, [avformat, libcue, gupnp_dlna, tracker_miners_common_dep]]]
 endif
 
 if get_option('icon')
