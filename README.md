@@ -17,12 +17,12 @@ The Tracker project is divided into two main repositories:
 
 Documentation on Tracker Miners can be found here:
 
-  * <https://gnome.pages.gitlab.gnome.org/tracker-miners>
+  * <https://gnome.pages.gitlab.gnome.org/LocalSearch>
 
 Source code and issue tracking:
 
   * <https://gitlab.gnome.org/GNOME/tracker>
-  * <https://gitlab.gnome.org/GNOME/tracker-miners>
+  * <https://gitlab.gnome.org/GNOME/LocalSearch>
 
 All discussion related to Tracker happens on:
 
