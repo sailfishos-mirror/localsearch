@@ -36,10 +36,6 @@
 #include <glib-object.h>
 #include <glib/gi18n.h>
 
-#if defined(HAVE_GSTREAMER)
-#include <gst/gst.h>
-#endif
-
 #include <libtracker-miners-common/tracker-common.h>
 
 #include "tracker-config.h"
@@ -798,32 +794,6 @@ setup_connection (TrackerDomainOntology  *domain,
 	return sparql_conn;
 }
 
-#ifdef HAVE_GSTREAMER
-static void
-init_gstreamer (void)
-{
-	int pid, status;
-
-	pid = fork ();
-
-	/* How to initialize GStreamer for the extractor process, and
-	 * avoid using ~2MB in the indexer resident memory forever.
-	 */
-	if (pid == 0) {
-		gst_init (NULL, NULL);
-		exit (EXIT_SUCCESS);
-	} else if (pid > 0) {
-		waitpid (pid, &status, 0);
-
-		if (WIFSIGNALED (status) || WCOREDUMP (status)) {
-			g_warning ("Failed to initialize GStreamer");
-		}
-	} else {
-		g_warning ("Could not initialize GStreamer");
-	}
-}
-#endif
-
 int
 main (gint argc, gchar *argv[])
 {
@@ -864,13 +834,6 @@ main (gint argc, gchar *argv[])
 	 * are many concurrently running queries through the endpoint.
 	 */
 	raise_file_descriptor_limit ();
-
-	/* Preempt possible registry updates, before tracker-extract-3 deals
-	 * with gstreamer plugins.
-	 */
-#if defined(HAVE_GSTREAMER)
-	init_gstreamer ();
-#endif
 
 	/* Translators: this messagge will apper immediately after the
 	 * usage string - Usage: COMMAND <THIS_MESSAGE>

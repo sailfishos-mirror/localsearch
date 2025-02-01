@@ -1,5 +1,5 @@
 [ExtractorRule]
-ModulePath=libextract-gstreamer.so
+ModulePath=libextract-libav.so
 MimeTypes=video/3gpp;video/mp4;video/x-ms-asf;application/vnd.ms-asf;application/vnd.rn-realmedia;
 FallbackRdfTypes=nfo:Media;nfo:Video;
 Graph=tracker:Video

@@ -30,10 +30,6 @@
 
 #include "tracker-cli-utils.h"
 
-#if defined(HAVE_GSTREAMER)
-#include <gst/gst.h>
-#endif
-
 static gboolean inside_build_tree = FALSE;
 static gchar *output_format = "turtle";
 static gchar **filenames;
@@ -139,10 +135,6 @@ tracker_extract (int          argc,
 {
 	GOptionContext *context;
 	GError *error = NULL;
-
-#if defined(HAVE_GSTREAMER)
-	gst_init (NULL, NULL);
-#endif
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);

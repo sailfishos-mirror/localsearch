@@ -21,14 +21,109 @@
 
 #include <glib.h>
 
-#include <libtracker-sparql/tracker-ontologies.h>
 #include <libtracker-miners-common/tracker-file-utils.h>
 
 #include <libtracker-extract/tracker-extract.h>
 
-#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
-#include <libavutil/mathematics.h>
+
+#include "tracker-cue-sheet.h"
+#include "tracker-main.h"
+
+static TrackerSparqlConnection *local_conn = NULL;
+
+#define CHUNK_N_BYTES (2 << 15)
+
+static guint64
+extract_gibest_hash (GFile *file)
+{
+	guint64 buffer[2][CHUNK_N_BYTES/8];
+	g_autoptr (GInputStream) stream = NULL;
+	g_autoptr (GError) error = NULL;
+	gssize n_bytes, file_size;
+	guint64 hash = 0;
+	gint i;
+
+	stream = G_INPUT_STREAM (g_file_read (file, NULL, &error));
+	if (stream == NULL)
+		goto fail;
+
+	/* Extract start/end chunks of the file */
+	n_bytes = g_input_stream_read (stream, buffer[0], CHUNK_N_BYTES, NULL, &error);
+	if (n_bytes == -1)
+		goto fail;
+
+	if (!g_seekable_seek (G_SEEKABLE (stream), -CHUNK_N_BYTES, G_SEEK_END, NULL, &error)) {
+		/* Files may be smaller than the chunk size */
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_INVALID_ARGUMENT))
+			goto fail;
+
+		g_clear_error (&error);
+		if (!g_seekable_seek (G_SEEKABLE (stream), 0, G_SEEK_SET, NULL, &error))
+			goto fail;
+	}
+
+	n_bytes = g_input_stream_read (stream, buffer[1], CHUNK_N_BYTES, NULL, &error);
+	if (n_bytes == -1)
+		goto fail;
+
+	for (i = 0; i < G_N_ELEMENTS (buffer[0]); i++)
+		hash += buffer[0][i] + buffer[1][i];
+
+	file_size = g_seekable_tell (G_SEEKABLE (stream));
+
+	if (file_size < CHUNK_N_BYTES)
+		goto end;
+
+	/* Include file size */
+	hash += file_size;
+
+	return hash;
+
+ fail:
+	g_warning ("Could not get file hash: %s\n", error->message);
+ end:
+	return 0;
+}
+
+static void
+add_hash (TrackerResource *resource,
+          GFile           *file,
+          const char      *hash_str,
+          const char      *algorithm)
+{
+	g_autoptr (TrackerResource) file_resource = NULL, hash = NULL;
+	g_autofree char *uri = NULL;
+
+	g_set_object (&file_resource, tracker_resource_get_first_relation (resource, "nie:isStoredAs"));
+
+	if (!file_resource) {
+		uri = g_file_get_uri (file);
+		file_resource = tracker_resource_new (uri);
+		tracker_resource_set_relation (resource, "nie:isStoredAs", file_resource);
+	}
+
+	hash = tracker_resource_new (NULL);
+	tracker_resource_set_uri (hash, "rdf:type", "nfo:FileHash");
+	tracker_resource_set_string (hash, "nfo:hashValue", hash_str);
+	tracker_resource_set_string (hash, "nfo:hashAlgorithm", algorithm);
+
+	tracker_resource_set_relation (file_resource, "nfo:hasHash", hash);
+}
+
+static void
+add_external_reference (TrackerResource *resource,
+                        const char      *uri_prefix,
+                        const char      *id,
+                        const char      *reference_id)
+{
+	g_autoptr (TrackerResource) reference = NULL;
+	g_autofree char *uri = NULL;
+
+	uri = g_strdup_printf ("%s/%s", uri_prefix, id);
+	reference = tracker_extract_new_external_reference (reference_id, id, uri);
+	tracker_resource_add_relation (resource, "tracker:hasExternalReference", reference);
+}
 
 static AVDictionaryEntry *
 find_tag (AVFormatContext *format,
@@ -52,10 +147,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	GFile *file;
-	TrackerResource *metadata;
-	gchar *absolute_file_path;
-	gchar *content_created = NULL;
-	gchar *uri, *resource_uri;
+	g_autoptr (TrackerResource) metadata = NULL;
+	g_autofree char *absolute_file_path = NULL;
+	g_autofree char *content_created = NULL;
+	g_autofree char *uri = NULL, *resource_uri = NULL;
 	AVFormatContext *format = NULL;
 	AVStream *audio_stream = NULL;
 	AVStream *video_stream = NULL;
@@ -63,19 +158,21 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	int video_stream_index;
 	AVDictionaryEntry *tag = NULL;
 	const char *title = NULL;
+	AVDictionary *options = NULL;
 
 	file = tracker_extract_info_get_file (info);
 
 	uri = g_file_get_uri (file);
 
 	absolute_file_path = g_file_get_path (file);
-	if (avformat_open_input (&format, absolute_file_path, NULL, NULL)) {
-		g_free (absolute_file_path);
-		g_free (uri);
+	av_dict_set_int (&options, "export_xmp", 1, 0);
+
+	if (avformat_open_input (&format, absolute_file_path, NULL, &options)) {
+		av_dict_free (&options);
 		return FALSE;
 	}
-	g_free (absolute_file_path);
 
+	av_dict_free (&options);
 	avformat_find_stream_info (format, NULL);
 
 	audio_stream_index = av_find_best_stream (format, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
@@ -90,24 +187,24 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	if (!audio_stream && !video_stream) {
 		avformat_close_input (&format);
-		g_free (uri);
 		return FALSE;
 	}
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
-	g_free (resource_uri);
 
 	if (audio_stream) {
 		if (audio_stream->codecpar->sample_rate > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:sampleRate", audio_stream->codecpar->sample_rate);
 		}
-		if (audio_stream->codecpar->channels > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->channels);
+		if (audio_stream->codecpar->ch_layout.nb_channels > 0) {
+			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->ch_layout.nb_channels);
 		}
 	}
 
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
+		guint64 hash;
+
 		tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
 
 		if (video_stream->codecpar->width > 0 && video_stream->codecpar->height > 0) {
@@ -156,10 +253,32 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			}
 		}
 
+		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
+			g_autoptr (TrackerResource) performer = NULL;
+
+			performer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:leadActor", performer);
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
+			g_autoptr (TrackerResource) composer = NULL;
+
+			composer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:director", composer);
+		}
+
+		if ((hash = extract_gibest_hash (file))) {
+			g_autofree char *hash_str;
+
+			hash_str = g_strdup_printf ("%" G_GINT64_MODIFIER "x", hash);
+			add_hash (metadata, file, hash_str, "gibest");
+		}
 	} else if (audio_stream) {
-		TrackerResource *album_artist = NULL, *artist = NULL, *performer = NULL;
-		char *album_artist_name = NULL;
-		char *album_title = NULL;
+		g_autoptr (TrackerResource) album_artist = NULL, artist = NULL, performer = NULL;
+		g_autofree char *album_artist_name = NULL;
+		g_autofree char *album_title = NULL;
+		TrackerToc *cue_sheet = NULL;
+		int track_count = 0;
 
 		tracker_resource_add_uri (metadata, "rdf:type", "nmm:MusicPiece");
 		tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
@@ -171,27 +290,45 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "track"))) {
-			int track = atoi (tag->value);
-			if (track > 0) {
-				tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
+			int track = 0;
+
+			if (sscanf (tag->value, "%u/%u", &track, &track_count) != 2) {
+				track = atoi (tag->value);
 			}
+
+			if (track > 0)
+				tracker_resource_set_int64 (metadata, "nmm:trackNumber", track);
+		}
+
+		if (track_count == 0 &&
+		    (tag = find_tag (format, audio_stream, NULL, "tracktotal"))) {
+			track_count = atoi (tag->value);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "album"))) {
-			album_title = tag->value;
+			album_title = g_strdup (tag->value);
 		}
 
 		if (album_title && (tag = find_tag (format, audio_stream, NULL, "album_artist"))) {
-			album_artist_name = tag->value;
+			album_artist_name = g_strdup (tag->value);
 			album_artist = tracker_extract_new_artist (album_artist_name);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "artist"))) {
 			artist = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:artist", artist);
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_artistid"))) {
+				add_external_reference (artist,
+				                        "https://musicbrainz.org/artist",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Artist");
+			}
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "performer"))) {
 			performer = tracker_extract_new_artist (tag->value);
+			tracker_resource_set_relation (metadata, "nmm:performer", performer);
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "date"))) {
@@ -201,41 +338,85 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			}
 		}
 
-		if (artist) {
-			tracker_resource_set_relation (metadata, "nmm:artist", artist);
+		if ((tag = find_tag (format, audio_stream, NULL, "acoustid_fingerprint"))) {
+			add_hash (metadata, file, tag->value, "chromaprint");
 		}
 
-		if (performer) {
-			tracker_resource_set_relation (metadata, "nmm:performer", performer);
+		if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_trackid"))) {
+			add_external_reference (metadata,
+			                        "https://musicbrainz.org/recording",
+			                        tag->value,
+			                        "https://musicbrainz.org/doc/Recording");
+		}
+
+		if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_releasetrackid"))) {
+			add_external_reference (metadata,
+			                        "https://musicbrainz.org/track",
+			                        tag->value,
+			                        "https://musicbrainz.org/doc/Track");
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "composer"))) {
-			TrackerResource *composer = tracker_extract_new_artist (tag->value);
+			g_autoptr (TrackerResource) composer = tracker_extract_new_artist (tag->value);
 			tracker_resource_set_relation (metadata, "nmm:composer", composer);
-			g_object_unref (composer);
 		}
 
 		if (album_title) {
 			int disc_number = 1;
-			TrackerResource *album_disc;
+			g_autoptr (TrackerResource) album_disc = NULL;
+			TrackerResource *album;
 
 			if ((tag = find_tag (format, audio_stream, NULL, "disc"))) {
 				disc_number = atoi (tag->value);
 			}
 
 			album_disc = tracker_extract_new_music_album_disc (album_title, album_artist, disc_number, content_created);
-
 			tracker_resource_set_relation (metadata, "nmm:musicAlbumDisc", album_disc);
-			tracker_resource_set_relation (metadata, "nmm:musicAlbum", tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum"));
 
-			g_object_unref (album_disc);
+			album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
+			tracker_resource_set_relation (metadata, "nmm:musicAlbum", album);
+
+			if (track_count > 0)
+				tracker_resource_set_int (album, "nmm:albumTrackCount", track_count);
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_albumid"))) {
+				add_external_reference (album,
+				                        "https://musicbrainz.org/release",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Release");
+			}
+
+			if ((tag = find_tag (format, audio_stream, NULL, "musicbrainz_releasegroupid"))) {
+				add_external_reference (album,
+				                        "https://musicbrainz.org/release-group",
+				                        tag->value,
+				                        "https://musicbrainz.org/doc/Release_Group");
+			}
 		}
 
-		if (artist)
-			g_object_unref (artist);
+		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
+			cue_sheet = tracker_cue_sheet_parse (tag->value);
+		} else {
+			if (!local_conn)
+				local_conn = tracker_main_get_readonly_connection (NULL);
 
-		if (performer)
-			g_object_unref (performer);
+			cue_sheet = tracker_cue_sheet_guess_from_uri (local_conn, uri);
+		}
+
+		if (cue_sheet) {
+			tracker_cue_sheet_apply_to_resource (cue_sheet,
+			                                     metadata,
+			                                     info);
+			tracker_toc_free (cue_sheet);
+		}
+	}
+
+	if ((tag = find_tag (format, audio_stream, video_stream, "xmp"))) {
+		TrackerXmpData *xmp;
+
+		xmp = tracker_xmp_new (tag->value, -1, uri);
+		tracker_xmp_apply_to_resource (metadata, xmp);
+		tracker_xmp_free (xmp);
 	}
 
 	if (format->bit_rate > 0) {
@@ -258,19 +439,34 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_string (metadata, "nfo:genre", tag->value);
 	}
 
+	if ((tag = find_tag (format, audio_stream, video_stream, "encoder"))) {
+		tracker_resource_set_string (metadata, "nie:generator", tag->value);
+	}
+
 	if ((tag = find_tag (format, audio_stream, video_stream, "title"))) {
 		title = tag->value;
 	}
 
 	tracker_guarantee_resource_title_from_file (metadata, "nie:title", title, uri, NULL);
 
-	g_free (content_created);
-	g_free (uri);
-
 	avformat_close_input (&format);
 
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
 
+	return TRUE;
+}
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_init (GError **error)
+{
+	av_log_set_level (AV_LOG_FATAL);
+
+	return TRUE;
+}
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_shutdown (void)
+{
+	g_clear_object (&local_conn);
 	return TRUE;
 }

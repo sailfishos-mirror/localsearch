@@ -205,54 +205,10 @@ elif charset_library_name == 'enca'
 endif
 
 ####################################################################
-# Check for tracker-extract: gstreamer/etc
+# Check for tracker-extract: libav
 ####################################################################
 
-generic_media_handler_name = get_option('generic_media_extractor')
-
-if generic_media_handler_name  == 'gstreamer'
-  gstreamer_pbutils = dependency('gstreamer-pbutils-1.0', required: false)
-
-  if gstreamer.found() and gstreamer_pbutils.found()
-    generic_media_handler = [gstreamer, gstreamer_pbutils]
-  else
-    error('GStreamer media handler was enabled but required GStreamer libraries were not found')
-  endif
-elif generic_media_handler_name == 'libav'
-  avcodec = dependency('libavcodec', version: '>= 0.8.4', required: false)
-  avformat = dependency('libavformat', version: '>= 0.8.4', required: false)
-  avutil = dependency('libavutil', version: '>= 0.8.4', required: false)
-
-  if avcodec.found() and avformat.found() and avutil.found()
-    generic_media_handler = [avcodec, avformat, avutil]
-  else
-    error('libav media handler was enabled but required libav libraries were not found')
-  endif
-else
-  generic_media_handler = []
-endif
-
-###########################################################################
-# Check for gstreamer backend: decodebin2/discoverer/gupnp-dlna
-###########################################################################
-
-gstreamer_backend_name = ''
-
-if generic_media_handler_name == 'gstreamer'
-  if get_option('gstreamer_backend') == 'discoverer'
-    if gstreamer_pbutils.found()
-      gstreamer_backend_name = 'Discoverer'
-    else
-      error('GStreamer Discoverer backend requires GStreamer pbutils library')
-    endif
-  elif get_option('gstreamer_backend') == 'gupnp'
-    if gupnp_dlna.found() and gupnp_dlna_gst.found()
-      gstreamer_backend_name = 'GUPnP-DLNA'
-    else
-      error('GStreamer GUPnP-DLNA backend requires the gupNp and gupnp-gst libraries')
-    endif
-  endif
-endif
+avformat = dependency('libavformat', version: '>= 0.8.4', required: get_option('libav'))
 
 ##################################################################
 # Check for libseccomp
@@ -325,10 +281,7 @@ conf.set('GIO_SUPPORTS_CREATION_TIME', glib.version().version_compare('>=2.70.0'
 
 conf.set('HAVE_ENCA', charset_library_name == 'enca')
 conf.set('HAVE_EXEMPI', exempi.found())
-conf.set('HAVE_GSTREAMER', generic_media_handler_name == 'gstreamer')
 conf.set('HAVE_GSTREAMER_1_20', gstreamer.version() >= '1.20.0')
-conf.set('GSTREAMER_BACKEND_DISCOVERER', gstreamer_backend_name == 'Discoverer')
-conf.set('GSTREAMER_BACKEND_GUPNP_DLNA', gstreamer_backend_name == 'GUPnP-DLNA')
 conf.set('HAVE_POWER', battery_detection_library_name != 'none')
 conf.set('HAVE_LIBCUE', libcue.found())
 conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
@@ -501,8 +454,7 @@ if have_tracker_extract
     '    Support MS & Open Office:               ' + libgsf.found().to_string(),
     '    Support XML / HTML:                     ' + libxml2.found().to_string(),
     '    Support embedded / sidecar XMP:         ' + exempi.found().to_string(),
-    '    Support generic media formats:          @0@ (backend: @1@)'.format(
-        generic_media_handler_name, gstreamer_backend_name),
+    '    Support A/V formats:                    ' + avformat.found().to_string(),
     '    Support cue sheet parsing:              ' + libcue.found().to_string(),
     '    Support playlists (w/ Totem):           ' + totem_plparser.found().to_string(),
     '    Support ISO image parsing:              ' + libosinfo.found().to_string(),
