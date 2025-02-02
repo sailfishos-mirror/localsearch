@@ -36,11 +36,13 @@
 
 #include "tracker-cue-sheet.h"
 
+#if defined(HAVE_LIBCUE)
+
 struct _TrackerToc {
 	Cd *cue_data;
 };
 
-TrackerToc *
+static TrackerToc *
 tracker_toc_new (void)
 {
 	TrackerToc *toc;
@@ -61,8 +63,6 @@ tracker_toc_free (TrackerToc *toc)
 
 	g_slice_free (TrackerToc, toc);
 }
-
-#if defined(HAVE_LIBCUE)
 
 static void
 set_cdtext_resource_string (Cdtext          *cd_text,
@@ -523,6 +523,11 @@ void
 tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
                                      TrackerResource    *ie,
                                      TrackerExtractInfo *info)
+{
+}
+
+void
+tracker_toc_free (TrackerToc *toc)
 {
 }
 
