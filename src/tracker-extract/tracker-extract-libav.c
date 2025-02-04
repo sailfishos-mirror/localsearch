@@ -30,6 +30,10 @@
 #include "tracker-cue-sheet.h"
 #include "tracker-main.h"
 
+#ifdef HAVE_GUPNP_DLNA
+#include "tracker-gupnp.h"
+#endif
+
 static TrackerSparqlConnection *local_conn = NULL;
 
 #define CHUNK_N_BYTES (2 << 15)
@@ -159,6 +163,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	AVDictionaryEntry *tag = NULL;
 	const char *title = NULL;
 	AVDictionary *options = NULL;
+#ifdef HAVE_GUPNP_DLNA
+	g_autoptr (GUPnPDLNAInformation) gupnp_info = NULL;
+	g_autoptr (GUPnPDLNAProfileGuesser) profile_guesser = NULL;
+	GUPnPDLNAProfile *gupnp_profile = NULL;
+#endif
 
 	file = tracker_extract_info_get_file (info);
 
@@ -448,6 +457,28 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 	tracker_guarantee_resource_title_from_file (metadata, "nie:title", title, uri, NULL);
+
+#ifdef HAVE_GUPNP_DLNA
+	gupnp_info = tracker_gupnp_dlna_information_new (format,
+	                                                 audio_stream,
+	                                                 video_stream);
+	profile_guesser = gupnp_dlna_profile_guesser_new (FALSE, FALSE);
+
+	gupnp_profile = gupnp_dlna_profile_guesser_guess_profile_from_info (profile_guesser,
+	                                                                    gupnp_info);
+
+	if (gupnp_profile) {
+		const char *profile_name, *profile_mime;
+
+		profile_mime = gupnp_dlna_profile_get_mime (gupnp_profile);
+		if (profile_mime)
+			tracker_resource_set_string (metadata, "nmm:dlnaMime", profile_mime);
+
+		profile_name = gupnp_dlna_profile_get_name (gupnp_profile);
+		if (profile_name)
+			tracker_resource_set_string (metadata, "nmm:dlnaProfile", profile_name);
+	}
+#endif
 
 	avformat_close_input (&format);
 
