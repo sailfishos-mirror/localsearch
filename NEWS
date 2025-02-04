@@ -1,3 +1,18 @@
+NEW in 3.9.beta - 2025-02-04
+============================
+  * Ditch GStreamer for metadata extraction, and switch to FFmpeg/libav for
+    many benefits in extraction speed, memory usage and sandbox friendliness.
+    If this causes dependency/distribution issues, it is recommended to
+    separate the following files to a standalone package:
+    - $(datadir)/localsearch3/extract-rules/15-libav-guess.rule
+    - $(datadir)/localsearch3/extract-rules/90-libav-audio-generic.rule
+    - $(datadir)/localsearch3/extract-rules/90-libav-video-generic.rule
+    - $(libdir)/localsearch-3.0/extract-modules/libextract-libav.so
+  * Fix build issues with gcc 15.x
+  * Updated README to new project name
+
+Translations: fr, sl, sr
+
 NEW in 3.9.alpha - 2025-01-11
 =============================
   * Fix for folder updates happening while the daemon is not running
