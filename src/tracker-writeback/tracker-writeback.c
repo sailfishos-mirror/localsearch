@@ -22,7 +22,7 @@
 #include "tracker-writeback.h"
 #include "tracker-writeback-module.h"
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include <gio/gio.h>
 
