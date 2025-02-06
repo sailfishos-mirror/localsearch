@@ -20,10 +20,6 @@
 #ifndef __TRACKER_DEBUG_H__
 #define __TRACKER_DEBUG_H__
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners/common/tracker-common.h> must be included directly."
-#endif
-
 #include <glib.h>
 
 G_BEGIN_DECLS

@@ -25,10 +25,6 @@
 
 G_BEGIN_DECLS
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 gint     tracker_string_in_string_list         (const gchar  *str,
                                                 gchar       **strv);
 gboolean tracker_string_in_gslist              (const gchar  *str,

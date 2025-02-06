@@ -25,10 +25,6 @@
 
 G_BEGIN_DECLS
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 gboolean tracker_is_empty_string            (const char   *str);
 gboolean tracker_is_blank_string            (const char   *str);
 guint    tracker_seconds_estimate           (gdouble       seconds_elapsed,

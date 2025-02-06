@@ -20,13 +20,7 @@
 #ifndef __LIBTRACKER_COMMON_H__
 #define __LIBTRACKER_COMMON_H__
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 #include <glib.h>
-
-#define __LIBTRACKER_COMMON_INSIDE__
 
 #ifdef HAVE_POWER
 #include "tracker-power.h"
@@ -53,7 +47,5 @@
 #include "tracker-utils.h"
 #include "tracker-locale.h"
 #include "tracker-miners-enum-types.h"
-
-#undef __LIBTRACKER_COMMON_INSIDE__
 
 #endif /* __LIBTRACKER_COMMON_H__ */

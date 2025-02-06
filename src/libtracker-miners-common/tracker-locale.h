@@ -24,10 +24,6 @@
 
 G_BEGIN_DECLS
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 /* Type of locales supported in tracker */
 typedef enum {
 	TRACKER_LOCALE_LANGUAGE,

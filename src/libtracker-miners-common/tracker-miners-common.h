@@ -20,16 +20,8 @@
 #ifndef __LIBTRACKER_MINERS_COMMON_H_
 #define __LIBTRACKER_MINERS_COMMON_H__
 
-#if !defined (__LIBTRACKER_MINERS_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 #include <glib.h>
 
-#define __LIBTRACKER_MINERS_COMMON_INSIDE__
-
 #include "tracker-seccomp.h"
-
-#undef __LIBTRACKER_MINERS_COMMON_INSIDE__
 
 #endif /* __LIBTRACKER_MINERS_COMMON_H__ */

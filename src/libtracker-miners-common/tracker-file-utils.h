@@ -27,10 +27,6 @@
 
 G_BEGIN_DECLS
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-miners-common/tracker-common.h> must be included directly."
-#endif
-
 /* File utils */
 int      tracker_file_open_fd                               (const gchar *path);
 FILE*    tracker_file_open                                  (const gchar *path);

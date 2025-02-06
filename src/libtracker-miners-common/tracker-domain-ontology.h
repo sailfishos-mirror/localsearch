@@ -22,10 +22,6 @@
 #ifndef __TRACKER_DOMAIN_ONTOLOGY_H__
 #define __TRACKER_DOMAIN_ONTOLOGY_H__
 
-#if !defined (__LIBTRACKER_COMMON_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-common/tracker-common.h> must be included directly."
-#endif
-
 #include <glib-object.h>
 #include <gio/gio.h>
 
