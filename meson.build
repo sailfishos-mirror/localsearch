@@ -352,7 +352,6 @@ tracker_writeback_modules_dir = join_paths(get_option('prefix'), get_option('lib
 tracker_extract_rules_dir = join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'extract-rules')
 tracker_miner_services_dir = join_paths(get_option('prefix'), get_option('datadir'), tracker_versioned_name, 'miners')
 
-tracker_uninstalled_cli_dir = meson.current_build_dir() / 'src' / 'tracker'
 tracker_uninstalled_extract_rules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-extract', 'uninstalled-rules')
 tracker_uninstalled_writeback_modules_dir = join_paths(meson.current_build_dir(), 'src', 'tracker-writeback')
 uninstalled_tracker_extract_path = join_paths(meson.current_build_dir(), 'src', 'tracker-extract', 'localsearch-extractor-3')

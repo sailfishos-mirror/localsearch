@@ -1,5 +1,7 @@
 po_dir = join_paths(meson.project_source_root(), 'po')
 
+tracker_uninstalled_cli_dir = meson.current_build_dir()
+
 sources = files(
     'tracker-cli-utils.c',
     'tracker-daemon.c',

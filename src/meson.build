@@ -19,6 +19,6 @@ if get_option('writeback')
 endif
 
 # CLI subcommands
-subdir('tracker')
+subdir('cli')
 
 meson.add_install_script('create-miner-symlinks.sh', dbus_services_dir, tracker_miner_services_dir, get_option('domain_prefix'), have_tracker_miner_fs.to_string())
