@@ -1,7 +1,7 @@
 subdir('test-utils')
 
 subdir('common')
-subdir('tracker-miner-fs')
+subdir('indexer')
 
 if have_tracker_extract
   subdir('extract-utils')
