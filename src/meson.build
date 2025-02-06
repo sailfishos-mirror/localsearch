@@ -6,7 +6,7 @@ subdir('miners')
 
 # Public data extract tool & modules
 if get_option('extract')
-  subdir('tracker-extract')
+  subdir('extractor')
 endif
 
 # Control Proxy

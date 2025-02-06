@@ -1,5 +1,9 @@
 subdir('utils')
 
+tracker_uninstalled_extract_rules_dir = join_paths(meson.current_build_dir(), 'uninstalled-rules')
+uninstalled_tracker_extract_dir = meson.current_build_dir()
+uninstalled_tracker_extract_path = join_paths(meson.current_build_dir(), 'localsearch-extractor-3')
+
 # Extract modules are tracked here as arrays with the following elements:
 #
 #   [ name, source-files, rule-files, dependencies ]
