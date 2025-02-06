@@ -1,8 +1,10 @@
 # Shared common code
 subdir('common')
 
-# Public miners
-subdir('miners')
+# Filesystem indexer
+if have_tracker_miner_fs
+  subdir('indexer')
+endif
 
 # Public data extract tool & modules
 if get_option('extract')

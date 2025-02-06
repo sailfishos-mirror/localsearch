@@ -20,6 +20,6 @@ src/common/tracker-utils.c
 src/control/tracker-main.c
 src/extractor/tracker-extract.c
 src/extractor/tracker-main.c
-src/miners/fs/tracker-main.c
-src/miners/fs/tracker-miner-files.c
+src/indexer/tracker-main.c
+src/indexer/tracker-miner-files.c
 src/writeback/tracker-main.c
