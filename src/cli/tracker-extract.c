@@ -26,7 +26,7 @@
 #include <gio/gio.h>
 #include <locale.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-cli-utils.h"
 

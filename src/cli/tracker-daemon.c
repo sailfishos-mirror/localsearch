@@ -34,7 +34,7 @@
 
 #include <tinysparql.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-process.h"
 #include "tracker-dbus.h"

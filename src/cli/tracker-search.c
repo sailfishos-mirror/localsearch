@@ -31,7 +31,7 @@
 
 #include <tinysparql.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-color.h"
 

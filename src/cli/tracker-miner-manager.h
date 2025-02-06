@@ -22,7 +22,7 @@
 
 #include <gio/gio.h>
 
-#include <libtracker-miners-common/tracker-miners-enum-types.h>
+#include <tracker-common.h>
 
 G_BEGIN_DECLS
 

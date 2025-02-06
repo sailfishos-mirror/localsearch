@@ -28,7 +28,7 @@
 #include <gio/gio.h>
 #include <gio/gdesktopappinfo.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-daemon.h"
 #include "tracker-extract.h"

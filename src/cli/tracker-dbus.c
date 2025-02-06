@@ -23,7 +23,7 @@
 #include <gio/gio.h>
 #include <glib/gi18n.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-dbus.h"
 
