@@ -31,7 +31,7 @@
 #include <glib-object.h>
 #include <glib/gi18n.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-miner-files-index.h"
 
