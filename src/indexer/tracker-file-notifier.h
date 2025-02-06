@@ -22,10 +22,6 @@
 #ifndef __TRACKER_FILE_NOTIFIER_H__
 #define __TRACKER_FILE_NOTIFIER_H__
 
-#if !defined (__LIBTRACKER_MINER_H_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "Only <libtracker-miner/tracker-miner.h> can be included directly."
-#endif
-
 #include <gio/gio.h>
 #include "tracker-indexing-tree.h"
 #include "tracker-miner-fs.h"
