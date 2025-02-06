@@ -20,7 +20,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <libtracker-miners-common/tracker-sched.h>
+#include <tracker-common.h>
 
 #ifdef __linux__
 #include <linux/sched.h>

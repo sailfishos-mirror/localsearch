@@ -22,7 +22,7 @@
 
 #include <glib-object.h>
 
-#include <libtracker-miners-common/tracker-type-utils.h>
+#include <tracker-common.h>
 
 static void
 test_string_in_string_list_failures_subprocess (void)

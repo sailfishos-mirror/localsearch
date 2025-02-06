@@ -1,6 +1,6 @@
 #include <glib.h>
 #include <tracker-miner-fs.h>
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 typedef struct {
 	TrackerMinerFS parent_instance;

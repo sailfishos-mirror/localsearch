@@ -21,9 +21,7 @@
 #include "config-miners.h"
 
 #include <glib-object.h>
-#include <libtracker-miners-common/tracker-file-utils.h>
-#include <libtracker-miners-common/tracker-utils.h>
-#include <libtracker-miners-common/tracker-locale.h>
+#include <tracker-common.h>
 #include <locale.h>
 
 static void

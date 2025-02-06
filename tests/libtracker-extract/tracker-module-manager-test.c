@@ -21,7 +21,7 @@
 
 #include <glib.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-module-manager.h>
 
 #define assert_path_basename(path, cmp, expected_value) {    \
