@@ -1,4 +1,4 @@
-subdir('common')
+subdir('test-utils')
 
 subdir('libtracker-miners-common')
 subdir('tracker-miner-fs')
