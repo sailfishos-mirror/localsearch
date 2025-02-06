@@ -25,7 +25,7 @@
 
 #include <totem-pl-parser.h>
 
-#include <libtracker-sparql/tracker-ontologies.h>
+#include <tinysparql.h>
 
 #include "tracker-writeback-file.h"
 
