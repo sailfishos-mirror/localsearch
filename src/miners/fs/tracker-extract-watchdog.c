@@ -22,7 +22,7 @@
 #include "tracker-extract-watchdog.h"
 
 #include "tracker-files-interface.h"
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include <sys/socket.h>
 

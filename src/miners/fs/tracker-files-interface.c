@@ -23,7 +23,7 @@
 
 #include "tracker-files-interface.h"
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include <gio/gunixfdlist.h>
 #include <sys/mman.h>

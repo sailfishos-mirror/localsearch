@@ -33,7 +33,7 @@
 #include "tracker-monitor-glib.h"
 #include "tracker-monitor-private.h"
 
-#include "libtracker-miners-common/tracker-debug.h"
+#include <tracker-common.h>
 
 typedef struct TrackerMonitorGlibPrivate  TrackerMonitorGlibPrivate;
 

@@ -33,7 +33,7 @@
 #include "tracker-monitor-fanotify.h"
 #include "tracker-monitor-private.h"
 
-#include "libtracker-miners-common/tracker-debug.h"
+#include <tracker-common.h>
 
 #define FANOTIFY_EVENTS (FAN_CREATE | FAN_MODIFY | FAN_CLOSE_WRITE | \
                          FAN_ATTRIB | \

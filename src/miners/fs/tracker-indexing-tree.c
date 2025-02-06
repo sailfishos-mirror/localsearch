@@ -19,8 +19,11 @@
  * Author: Carlos Garnacho  <carlos@lanedo.com>
  */
 
-#include <libtracker-miners-common/tracker-file-utils.h>
+#include "config-miners.h"
+
 #include "tracker-indexing-tree.h"
+
+#include <tracker-common.h>
 
 /**
  * SECTION:tracker-indexing-tree

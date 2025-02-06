@@ -23,7 +23,7 @@
 
 #include <gio/gio.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include "tracker-miner-files.h"
 #include "tracker-miner-files-methods.h"

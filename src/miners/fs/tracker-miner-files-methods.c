@@ -25,7 +25,7 @@
 #include "tracker-miner-files-methods.h"
 
 #include <libtracker-extract/tracker-extract.h>
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
 

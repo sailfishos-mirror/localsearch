@@ -23,7 +23,7 @@
 
 #include "tracker-sparql-buffer.h"
 
-#include "libtracker-miners-common/tracker-debug.h"
+#include <tracker-common.h>
 
 #include "tracker-utils.h"
 
