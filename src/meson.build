@@ -10,7 +10,7 @@ if get_option('extract')
 endif
 
 # Control Proxy
-subdir('tracker-control')
+subdir('control')
 
 # Public metadata writeback tool & modiles
 if get_option('writeback')
