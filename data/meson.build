@@ -34,7 +34,7 @@ foreach source, dest : schemas
 endforeach
 
 tracker_miners_settings_enums = custom_target('tracker-miners-common-settings-enums',
-    input: '../src/libtracker-miners-common/tracker-enums.h',
+    input: '../src/common/tracker-enums.h',
     output: 'org.freedesktop.TrackerMiners@0@.enums.xml'.format(tracker_api_major),
     command: [glib_mkenums,
               '--comments', '<!-- @comment@ -->',

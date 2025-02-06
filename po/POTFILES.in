@@ -14,9 +14,9 @@ src/cli/tracker-reset.c
 src/cli/tracker-search.c
 src/cli/tracker-status.c
 src/cli/tracker-tag.c
-src/libtracker-miners-common/tracker-dbus.c
-src/libtracker-miners-common/tracker-miner-proxy.c
-src/libtracker-miners-common/tracker-utils.c
+src/common/tracker-dbus.c
+src/common/tracker-miner-proxy.c
+src/common/tracker-utils.c
 src/miners/fs/tracker-main.c
 src/miners/fs/tracker-miner-files.c
 src/tracker-control/tracker-main.c
