@@ -20,10 +20,6 @@
 #ifndef __LIBTRACKER_CONTROL_MANAGER_H__
 #define __LIBTRACKER_CONTROL_MANAGER_H__
 
-#if !defined (__LIBTRACKER_CONTROL_H_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "Only <libtracker-control/tracker-control.h> can be included directly."
-#endif
-
 #include <gio/gio.h>
 
 #include <libtracker-miners-common/tracker-miners-enum-types.h>
