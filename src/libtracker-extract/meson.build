@@ -1,10 +1,8 @@
 libtracker_extract_sources = [
   'tracker-encoding.c',
   'tracker-exif.c',
-  'tracker-extract-info.c',
   'tracker-guarantee.c',
   'tracker-iptc.c',
-  'tracker-module-manager.c',
   'tracker-resource-helpers.c',
   'tracker-utils.c',
   'tracker-xmp.c',
@@ -33,15 +31,12 @@ endif
 libtracker_extract = library('tracker-extract',
   libtracker_extract_sources,
   dependencies: [tracker_miners_common_dep] + tracker_extract_dependencies,
-  c_args: tracker_c_args + [
-    '-DTRACKER_EXTRACTOR_RULES_DIR="@0@"'.format(tracker_extract_rules_dir),
-    '-DTRACKER_EXTRACTORS_DIR="@0@"'.format(tracker_extract_modules_dir)
-  ],
+  c_args: tracker_c_args,
   install: true,
   install_dir: tracker_internal_libs_dir,
 )
 
 tracker_extract_dep = declare_dependency(
   link_with: libtracker_extract,
-  dependencies: tracker_extract_dependencies,
+  dependencies: [tracker_extract_dependencies, tracker_miners_common_dep],
   include_directories: srcinc)

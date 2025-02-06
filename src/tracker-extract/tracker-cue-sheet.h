@@ -25,8 +25,6 @@
 #include <glib.h>
 #include <tinysparql.h>
 
-#include <libtracker-extract/tracker-extract-info.h>
-
 G_BEGIN_DECLS
 
 typedef struct _TrackerToc TrackerToc;

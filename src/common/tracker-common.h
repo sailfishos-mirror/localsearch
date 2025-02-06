@@ -31,6 +31,7 @@
 #include "tracker-domain-ontology.h"
 #include "tracker-enums.h"
 #include "tracker-error-report.h"
+#include "tracker-extract-info.h"
 #include "tracker-file-utils.h"
 #include "tracker-ioprio.h"
 
@@ -47,5 +48,6 @@
 #include "tracker-utils.h"
 #include "tracker-locale.h"
 #include "tracker-miners-enum-types.h"
+#include "tracker-module-manager.h"
 
 #endif /* __LIBTRACKER_COMMON_H__ */

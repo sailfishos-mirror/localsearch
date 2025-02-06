@@ -25,8 +25,8 @@
 #endif
 
 #include <tinysparql.h>
-#include "tracker-module-manager.h"
-#include "tracker-extract-info.h"
+
+#include <tracker-common.h>
 
 G_BEGIN_DECLS
 

@@ -20,10 +20,6 @@
 #ifndef __TRACKER_EXTRACT_MODULE_MANAGER_H__
 #define __TRACKER_EXTRACT_MODULE_MANAGER_H__
 
-#if !defined (__LIBTRACKER_EXTRACT_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-extract/tracker-extract.h> must be included directly."
-#endif
-
 #include <glib.h>
 #include <gmodule.h>
 

@@ -1,4 +1,4 @@
-#include <libtracker-extract/tracker-extract.h>
+#include <tracker-common.h>
 
 #include <stdio.h>
 #include <stdlib.h>

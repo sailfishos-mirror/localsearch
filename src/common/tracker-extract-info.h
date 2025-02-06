@@ -22,10 +22,6 @@
 #ifndef __LIBTRACKER_EXTRACT_INFO_H__
 #define __LIBTRACKER_EXTRACT_INFO_H__
 
-#if !defined (__LIBTRACKER_EXTRACT_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-extract/tracker-extract.h> must be included directly."
-#endif
-
 #include <tinysparql.h>
 #include <gio/gio.h>
 

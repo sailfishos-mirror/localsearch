@@ -22,7 +22,6 @@
 #include "config-miners.h"
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-file-notifier.h"
 #include "tracker-monitor-glib.h"

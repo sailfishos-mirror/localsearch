@@ -33,7 +33,7 @@ libtracker_miner_private = static_library(
     miner_fs_resources[0], miner_fs_resources[1],
     miner_fs_enums[0], miner_fs_enums[1],
     private_sources,
-    dependencies: [tracker_miners_common_dep, tracker_sparql, tracker_extract_dep],
+    dependencies: [tracker_miners_common_dep, tracker_sparql, gmodule],
     c_args: tracker_c_args,
 )
 
@@ -56,8 +56,6 @@ sources = [
 tracker_miner_fs_deps = [
     tracker_miners_common_dep,
     tracker_miner_dep,
-    tracker_extract_dep,
-    gstreamer,
     gudev,
 ]
 

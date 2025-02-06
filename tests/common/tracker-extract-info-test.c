@@ -19,7 +19,7 @@
 
 #include <glib.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include <tracker-common.h>
 
 static void
 test_extract_info_setters (void)

@@ -22,7 +22,6 @@
 #include <glib.h>
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-module-manager.h>
 
 #define assert_path_basename(path, cmp, expected_value) {    \
 	g_autofree gchar *basename = g_path_get_basename (path); \
@@ -32,7 +31,7 @@
 static gchar *
 get_test_rules_dir (void)
 {
-	return g_build_path (G_DIR_SEPARATOR_S, TOP_SRCDIR, "tests", "libtracker-extract", "test-extract-rules", NULL);
+	return g_build_path (G_DIR_SEPARATOR_S, TOP_SRCDIR, "tests", "common", "test-extract-rules", NULL);
 }
 
 static void
