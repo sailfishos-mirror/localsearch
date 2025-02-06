@@ -22,10 +22,6 @@
 #ifndef __LIBTRACKER_EXTRACT_GUARANTEE__
 #define __LIBTRACKER_EXTRACT_GUARANTEE_H__
 
-#if !defined (__LIBTRACKER_EXTRACT_INSIDE__) && !defined (TRACKER_COMPILATION)
-#error "only <libtracker-extract/tracker-extract.h> must be included directly."
-#endif
-
 #include "tracker-data.h"
 
 G_BEGIN_DECLS
