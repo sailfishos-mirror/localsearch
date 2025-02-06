@@ -4,7 +4,7 @@ subdir('common')
 subdir('tracker-miner-fs')
 
 if have_tracker_extract
-  subdir('libtracker-extract')
+  subdir('extract-utils')
 endif
 
 subdir('services')

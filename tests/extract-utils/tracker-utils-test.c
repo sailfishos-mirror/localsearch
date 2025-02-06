@@ -266,7 +266,7 @@ test_getline (void)
         gchar *line = NULL;
         gsize  n = 0;
  
-        f = fopen (TOP_SRCDIR "/tests/libtracker-extract/getline-test.txt", "r");
+        f = fopen (TOP_SRCDIR "/tests/extract-utils/getline-test.txt", "r");
         g_assert_cmpint (tracker_getline (&line, &n, f), >, 0);
         g_assert_cmpstr (line, ==, "Line 1\n");
         g_free (line);

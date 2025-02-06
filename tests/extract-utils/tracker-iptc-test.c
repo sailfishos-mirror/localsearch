@@ -134,7 +134,7 @@ test_iptc_extraction (void)
 {
         TrackerIptcData *data;
 
-        data = load_iptc_blob (TOP_SRCDIR "/tests/libtracker-extract/iptc-img.jpg");
+        data = load_iptc_blob (TOP_SRCDIR "/tests/extract-utils/iptc-img.jpg");
         g_assert_true (data);
 
         g_assert_cmpstr (data->keywords, ==, "Coverage, test");

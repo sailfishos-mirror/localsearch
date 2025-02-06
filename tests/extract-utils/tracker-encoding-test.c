@@ -32,7 +32,7 @@ test_encoding_guessing ()
 	GMappedFile *file = NULL;
 	gchar *prefix, *filen;
 
-	prefix = g_build_path (G_DIR_SEPARATOR_S, TOP_SRCDIR, "tests", "libtracker-extract", NULL);
+	prefix = g_build_path (G_DIR_SEPARATOR_S, TOP_SRCDIR, "tests", "extract-utils", NULL);
 	filen = g_build_filename (prefix, "encoding-detect.bin", NULL);
 
 	file = g_mapped_file_new (filen, FALSE, NULL);

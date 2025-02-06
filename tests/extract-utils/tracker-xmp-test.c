@@ -347,7 +347,7 @@ test_xmp_regions (void)
 	gsize  size;
 	gchar *filepath;
 
-	filepath = g_build_filename (TOP_SRCDIR, "tests", "libtracker-extract", "areas.xmp", NULL);
+	filepath = g_build_filename (TOP_SRCDIR, "tests", "extract-utils", "areas.xmp", NULL);
 	f = g_file_new_for_path (filepath);
 	g_assert_true (g_file_load_contents (f, NULL, &contents, &size, NULL, NULL));
 	g_object_unref (f);
@@ -390,7 +390,7 @@ test_xmp_regions_quill (void)
 	gsize  size;
 	gchar *filepath;
 
-	filepath = g_build_filename (TOP_SRCDIR, "tests", "libtracker-extract", "areas-with-contacts.xmp", NULL);
+	filepath = g_build_filename (TOP_SRCDIR, "tests", "extract-utils", "areas-with-contacts.xmp", NULL);
 	f = g_file_new_for_path (filepath);
 	g_assert_true (g_file_load_contents (f, NULL, &contents, &size, NULL, NULL));
 	g_object_unref (f);
@@ -436,7 +436,7 @@ test_xmp_regions_ns_prefix (void)
 	gsize  size;
 	gchar *filepath;
 
-	filepath = g_build_filename (TOP_SRCDIR, "tests", "libtracker-extract", "areas-ns.xmp", NULL);
+	filepath = g_build_filename (TOP_SRCDIR, "tests", "extract-utils", "areas-ns.xmp", NULL);
 	f = g_file_new_for_path (filepath);
 	g_assert(g_file_load_contents (f, NULL, &contents, &size, NULL, NULL));
 	g_object_unref (f);
@@ -479,7 +479,7 @@ test_xmp_regions_nb282393 ()
 	gsize  size;
 	gchar *filepath;
 
-	filepath = g_build_filename (TOP_SRCDIR, "tests", "libtracker-extract", "nb282393.xmp", NULL);
+	filepath = g_build_filename (TOP_SRCDIR, "tests", "extract-utils", "nb282393.xmp", NULL);
 	f = g_file_new_for_path (filepath);
 	g_assert(g_file_load_contents (f, NULL, &contents, &size, NULL, NULL));
 	g_object_unref (f);
@@ -513,7 +513,7 @@ test_xmp_regions_nb282393_2 ()
 	gsize  size;
 	gchar *filepath;
 
-	filepath = g_build_filename (TOP_SRCDIR, "tests", "libtracker-extract", "nb282393_simple.xmp", NULL);
+	filepath = g_build_filename (TOP_SRCDIR, "tests", "extract-utils", "nb282393_simple.xmp", NULL);
 	f = g_file_new_for_path (filepath);
 	g_assert(g_file_load_contents (f, NULL, &contents, &size, NULL, NULL));
 	g_object_unref (f);
