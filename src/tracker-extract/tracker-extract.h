@@ -22,7 +22,8 @@
 
 #include <gio/gio.h>
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
+
+#include "utils/tracker-extract.h"
 
 #define TRACKER_TYPE_EXTRACT (tracker_extract_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerExtract,

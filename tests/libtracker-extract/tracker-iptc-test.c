@@ -27,7 +27,8 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-#include <libtracker-extract/tracker-iptc.h>
+
+#include <tracker-iptc.h>
 
 #define PS3_NAMESPACE           "Photoshop 3.0\0"
 #define PS3_NAMESPACE_LENGTH    14

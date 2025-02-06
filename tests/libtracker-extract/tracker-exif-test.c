@@ -19,7 +19,7 @@
 
 #include <glib-object.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include <tracker-extract.h>
 
 static void
 test_exif_parse (void)

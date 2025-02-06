@@ -21,7 +21,7 @@
 #include "config-miners.h"
 
 #include <glib-object.h>
-#include <libtracker-extract/tracker-encoding.h>
+#include <tracker-encoding.h>
 #include <tracker-common.h>
 #include <locale.h>
 

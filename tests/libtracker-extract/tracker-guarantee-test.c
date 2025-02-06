@@ -23,7 +23,7 @@
 #include <glib.h>
 #include <tinysparql.h>
 
-#include <libtracker-extract/tracker-guarantee.h>
+#include <tracker-guarantee.h>
 
 typedef struct {
 	const gchar *test_name;

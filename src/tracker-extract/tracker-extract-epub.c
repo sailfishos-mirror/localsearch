@@ -18,8 +18,9 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#include <libtracker-extract/tracker-extract.h>
 #include <tracker-common.h>
+
+#include "utils/tracker-extract.h"
 
 #include "tracker-main.h"
 #include "tracker-gsf.h"

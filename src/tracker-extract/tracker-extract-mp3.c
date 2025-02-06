@@ -38,7 +38,7 @@
 
 #include <tracker-common.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include "utils/tracker-extract.h"
 
 #ifdef FRAME_ENABLE_TRACE
 #warning Frame traces enabled

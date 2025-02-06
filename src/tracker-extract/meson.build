@@ -1,3 +1,5 @@
+subdir('utils')
+
 # Extract modules are tracked here as arrays with the following elements:
 #
 #   [ name, source-files, rule-files, dependencies ]

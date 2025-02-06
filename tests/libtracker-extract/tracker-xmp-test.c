@@ -21,7 +21,7 @@
 
 #include <glib-object.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include <tracker-extract.h>
 
 #define BROKEN_XMP "This is not even XML"
 #define EXAMPLE_XMP	  \

@@ -23,12 +23,12 @@
 
 #include <tracker-common.h>
 
-#include <libtracker-extract/tracker-extract.h>
-
 #include <libavformat/avformat.h>
 
 #include "tracker-cue-sheet.h"
 #include "tracker-main.h"
+
+#include "utils/tracker-extract.h"
 
 #ifdef HAVE_GUPNP_DLNA
 #include "tracker-gupnp.h"

@@ -32,7 +32,8 @@
 
 #include <tiffio.h>
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
+
+#include "utils/tracker-extract.h"
 
 #define CMS_PER_INCH        2.54
 

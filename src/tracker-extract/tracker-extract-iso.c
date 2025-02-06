@@ -28,8 +28,9 @@
 
 #include <gio/gio.h>
 
-#include <libtracker-extract/tracker-extract.h>
 #include <tracker-common.h>
+
+#include "utils/tracker-extract.h"
 
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info_,

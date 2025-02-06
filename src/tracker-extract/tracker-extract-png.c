@@ -23,7 +23,8 @@
 #include <png.h>
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
+
+#include "utils/tracker-extract.h"
 
 #define RFC1123_DATE_FORMAT "%d %B %Y %H:%M:%S %z"
 #define CMS_PER_INCH        2.54

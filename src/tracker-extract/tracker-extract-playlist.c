@@ -29,9 +29,9 @@
 
 #include <totem-pl-parser.h>
 
-#include <libtracker-extract/tracker-extract.h>
-#include <libtracker-extract/tracker-guarantee.h>
 #include <tracker-common.h>
+
+#include "utils/tracker-extract.h"
 
 #define PLAYLIST_PROPERTY_NO_TRACKS "entryCounter"
 #define PLAYLIST_PROPERTY_DURATION  "listDuration"

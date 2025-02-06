@@ -22,9 +22,10 @@
 #include "config-miners.h"
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
 #include <glib.h>
 #include <glib/gstdio.h>
+
+#include "utils/tracker-extract.h"
 
 static gboolean
 get_img_resolution (const GFile *file,

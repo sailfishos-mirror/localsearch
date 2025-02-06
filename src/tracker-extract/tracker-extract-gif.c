@@ -31,7 +31,7 @@
 
 #include <tracker-common.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include "utils/tracker-extract.h"
 
 #define XMP_MAGIC_TRAILER_LENGTH 256
 #define EXTENSION_RECORD_COMMENT_BLOCK_CODE 0xFE

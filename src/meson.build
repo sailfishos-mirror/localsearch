@@ -1,6 +1,5 @@
 # Shared common code
 subdir('common')
-subdir('libtracker-extract')
 
 # Public miners
 subdir('miners')

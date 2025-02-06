@@ -24,7 +24,8 @@
 #include <glib/gstdio.h>
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-extract.h>
+
+#include "utils/tracker-extract.h"
 
 static gchar *
 hour_day_str_day (const gchar *date)

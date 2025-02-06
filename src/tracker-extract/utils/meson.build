@@ -39,4 +39,5 @@ libtracker_extract = library('tracker-extract',
 tracker_extract_dep = declare_dependency(
   link_with: libtracker_extract,
   dependencies: [tracker_extract_dependencies, tracker_miners_common_dep],
-  include_directories: srcinc)
+  include_directories: [srcinc, include_directories('.')]
+)

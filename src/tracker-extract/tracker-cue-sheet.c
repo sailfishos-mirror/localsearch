@@ -32,7 +32,8 @@
 #endif
 
 #include <tracker-common.h>
-#include <libtracker-extract/tracker-resource-helpers.h>
+
+#include "utils/tracker-extract.h"
 
 #include "tracker-cue-sheet.h"
 

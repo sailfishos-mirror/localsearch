@@ -23,8 +23,9 @@
 
 #include <gexiv2/gexiv2.h>
 
-#include <libtracker-extract/tracker-extract.h>
 #include <tracker-common.h>
+
+#include "utils/tracker-extract.h"
 
 #include "tracker-main.h"
 

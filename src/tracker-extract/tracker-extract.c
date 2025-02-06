@@ -21,7 +21,7 @@
 
 #include <glib/gi18n.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include "utils/tracker-extract.h"
 
 #include <valgrind.h>
 

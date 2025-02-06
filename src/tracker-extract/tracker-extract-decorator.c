@@ -19,7 +19,7 @@
 
 #include "config-miners.h"
 
-#include <libtracker-extract/tracker-extract.h>
+#include "utils/tracker-extract.h"
 
 #include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"

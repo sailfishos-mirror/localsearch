@@ -26,7 +26,7 @@
 #include <glib.h>
 #include <gio/gio.h>
 
-#include <libtracker-extract/tracker-extract.h>
+#include "utils/tracker-extract.h"
 
 #include "tracker-read.h"
 #include "tracker-extract.h"
