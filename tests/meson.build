@@ -1,6 +1,6 @@
 subdir('test-utils')
 
-subdir('libtracker-miners-common')
+subdir('common')
 subdir('tracker-miner-fs')
 
 if have_tracker_extract
