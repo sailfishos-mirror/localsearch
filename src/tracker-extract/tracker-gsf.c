@@ -24,7 +24,7 @@
 #define GLIB_VERSION_MIN_REQUIRED GLIB_VERSION_2_40
 #include <glib.h>
 
-#include <libtracker-miners-common/tracker-file-utils.h>
+#include <tracker-common.h>
 
 #include <gsf/gsf.h>
 #include <gsf/gsf-infile.h>

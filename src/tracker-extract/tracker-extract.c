@@ -23,7 +23,7 @@
 
 #include <libtracker-extract/tracker-extract.h>
 
-#include <libtracker-miners-common/valgrind.h>
+#include <valgrind.h>
 
 #include "tracker-extract.h"
 #include "tracker-main.h"

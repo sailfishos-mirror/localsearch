@@ -36,7 +36,7 @@
 #include <sys/mman.h>
 #endif /* G_OS_WIN32 */
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include <libtracker-extract/tracker-extract.h>
 

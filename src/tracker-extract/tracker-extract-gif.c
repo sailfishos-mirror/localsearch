@@ -29,7 +29,7 @@
 
 #include <gif_lib.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 
 #include <libtracker-extract/tracker-extract.h>
 

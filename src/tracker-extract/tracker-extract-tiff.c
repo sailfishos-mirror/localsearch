@@ -31,7 +31,7 @@
 #include <glib/gstdio.h>
 
 #include <tiffio.h>
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #define CMS_PER_INCH        2.54

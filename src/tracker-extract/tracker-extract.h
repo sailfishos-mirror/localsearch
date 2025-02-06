@@ -21,7 +21,7 @@
 #define __TRACKERD_EXTRACT_H__
 
 #include <gio/gio.h>
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #define TRACKER_TYPE_EXTRACT (tracker_extract_get_type ())

@@ -29,7 +29,7 @@
 #include <glib.h>
 #include <gsf/gsf.h>
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #include "tracker-main.h"

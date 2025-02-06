@@ -21,7 +21,7 @@
 
 #include "config-miners.h"
 
-#include <libtracker-miners-common/tracker-common.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 #include <glib.h>
 #include <glib/gstdio.h>

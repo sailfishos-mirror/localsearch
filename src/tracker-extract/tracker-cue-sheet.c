@@ -31,7 +31,7 @@
 #include <libcue.h>
 #endif
 
-#include <libtracker-miners-common/tracker-file-utils.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-resource-helpers.h>
 
 #include "tracker-cue-sheet.h"

@@ -19,7 +19,7 @@
 
 #include "config-miners.h"
 
-#include <libtracker-miners-common/tracker-file-utils.h>
+#include <tracker-common.h>
 #include <libtracker-extract/tracker-extract.h>
 
 #define ICON_HEADER_SIZE_16 3
