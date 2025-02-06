@@ -22,7 +22,7 @@
 #include <locale.h>
 #include <string.h>
 
-#include <libtracker-miners-common/tracker-utils.h>
+#include <tracker-common.h>
 
 #include "tracker-resource-helpers.h"
 #include "tracker-xmp.h"

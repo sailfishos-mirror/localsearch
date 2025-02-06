@@ -23,7 +23,7 @@
 
 #include <glib.h>
 
-#include <libtracker-miners-common/tracker-file-utils.h>
+#include <tracker-common.h>
 
 #include "tracker-guarantee.h"
 

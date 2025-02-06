@@ -23,7 +23,7 @@
 
 #include "tracker-module-manager.h"
 
-#include "libtracker-miners-common/tracker-debug.h"
+#include <tracker-common.h>
 
 #define EXTRACTOR_FUNCTION "tracker_extract_get_metadata"
 #define INIT_FUNCTION      "tracker_extract_module_init"

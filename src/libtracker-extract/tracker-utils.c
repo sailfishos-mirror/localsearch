@@ -26,7 +26,7 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <libtracker-miners-common/tracker-utils.h>
+#include <tracker-common.h>
 
 #include "tracker-utils.h"
 
