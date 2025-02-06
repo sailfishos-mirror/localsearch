@@ -23,9 +23,9 @@
 
 #include <glib/gi18n.h>
 
-#include <libtracker-miners-common/tracker-dbus.h>
-#include <libtracker-miners-common/tracker-debug.h>
-#include <libtracker-miners-common/tracker-type-utils.h>
+#include "tracker-dbus.h"
+#include "tracker-debug.h"
+#include "tracker-type-utils.h"
 
 #include "tracker-miner.h"
 

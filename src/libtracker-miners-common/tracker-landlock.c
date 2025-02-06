@@ -30,8 +30,8 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
-#include <libtracker-miners-common/valgrind.h>
-#include <libtracker-miners-common/tracker-debug.h>
+#include "valgrind.h"
+#include "tracker-debug.h"
 
 /* Compensate for these syscalls not being wrapped in libc */
 #define CREATE_RULESET(attr, flags) \

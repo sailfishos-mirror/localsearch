@@ -44,7 +44,7 @@
 
 #include <seccomp.h>
 
-#include <libtracker-miners-common/valgrind.h>
+#include "valgrind.h"
 
 #ifndef SYS_SECCOMP
 #define SYS_SECCOMP 1

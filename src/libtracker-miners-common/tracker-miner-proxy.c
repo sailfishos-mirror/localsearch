@@ -39,9 +39,10 @@
 #include "config-miners.h"
 
 #include <glib/gi18n.h>
-#include <libtracker-miners-common/tracker-dbus.h>
-#include <libtracker-miners-common/tracker-type-utils.h>
-#include <libtracker-miners-common/tracker-domain-ontology.h>
+
+#include "tracker-dbus.h"
+#include "tracker-type-utils.h"
+#include "tracker-domain-ontology.h"
 
 #include "tracker-miner-proxy.h"
 
