@@ -12,9 +12,9 @@ endif
 # Control Proxy
 subdir('control')
 
-# Public metadata writeback tool & modiles
+# Metadata writeback service & modules
 if get_option('writeback')
-  subdir('tracker-writeback')
+  subdir('writeback')
 endif
 
 # CLI subcommands

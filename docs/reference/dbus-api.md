@@ -71,4 +71,4 @@ This method may raise an error if the metadata could not be written.
 Writeback is only available for audio formats handled by GStreamer,
 and XMP metadata.
 
-See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/tracker-writeback/tracker-writeback.xml).
+See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/writeback/tracker-writeback.xml).

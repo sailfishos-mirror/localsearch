@@ -4,6 +4,8 @@
 #
 # This might be nicer if Meson supported dictionary types.
 
+tracker_uninstalled_writeback_modules_dir = join_paths(meson.current_build_dir())
+
 modules = []
 
 if gstreamer.found() and gstreamer_tag.found() and gstreamer_audio.found()
