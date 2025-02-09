@@ -1,10 +1,10 @@
-subdir('common')
+subdir('test-utils')
 
-subdir('libtracker-miners-common')
-subdir('tracker-miner-fs')
+subdir('common')
+subdir('indexer')
 
 if have_tracker_extract
-  subdir('libtracker-extract')
+  subdir('extract-utils')
 endif
 
 subdir('services')

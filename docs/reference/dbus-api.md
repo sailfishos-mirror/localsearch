@@ -34,7 +34,7 @@ indexer may prioritize these files to be available first.
 
 The `flags` argument is unused at the moment and should remain empty.
 
-See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/tracker-control/org.freedesktop.Tracker3.Miner.Files.Index.xml).
+See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/control/org.freedesktop.Tracker3.Miner.Files.Index.xml).
 
 ### org.freedesktop.Tracker3.Miner.Files.Proxy
 
@@ -49,7 +49,7 @@ IndexedLocations (as): read only
 The global set of indexed locations and graphs will be returned by
 these properties.
 
-See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/tracker-control/org.freedesktop.Tracker3.Miner.Files.Proxy.xml).
+See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/control/org.freedesktop.Tracker3.Miner.Files.Proxy.xml).
 
 ## org.freedesktop.LocalSearch3.Writeback
 
@@ -71,4 +71,4 @@ This method may raise an error if the metadata could not be written.
 Writeback is only available for audio formats handled by GStreamer,
 and XMP metadata.
 
-See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/tracker-writeback/tracker-writeback.xml).
+See the definition of [this interface](https://gitlab.gnome.org/GNOME/localsearch/blob/main/src/writeback/tracker-writeback.xml).

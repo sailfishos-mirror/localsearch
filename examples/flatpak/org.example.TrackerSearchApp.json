@@ -24,7 +24,6 @@
             "config-opts" : [
                 "-Dman=false",
                 "-Dminer_fs=true",
-                "-Dminer_rss=false",
                 "-Dsystemd_user_services=false",
                 "-Dwriteback=false",
                 "-Ddomain_prefix=org.example.TrackerSearchApp",

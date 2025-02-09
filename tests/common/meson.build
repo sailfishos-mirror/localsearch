@@ -1,15 +1,26 @@
-tracker_testcommon_dependencies = [glib]
+libtracker_common_tests = [
+    'dbus',
+    'extract-info',
+    'file-utils',
+    'module-manager',
+    'sched',
+    'type-utils',
+    'utils',
+]
 
-libtracker_testcommon = library('tracker-testcommon',
-    'tracker-test-helpers.c',
-    dependencies: tracker_testcommon_dependencies,
-    c_args: [
-        '-DTEST_TEXT="@0@/tests/libtracker-miners-common/non-utf8.txt"'.format(meson.source_root()),
-    ]
-)
+libtracker_miners_common_test_deps = [
+    tracker_miners_common_dep, tracker_testcommon_dep
+]
 
-tracker_testcommon_dep = declare_dependency(
-    link_with: libtracker_testcommon,
-    dependencies: tracker_testcommon_dependencies,
-    include_directories: include_directories('.'),
-)
+foreach base_name: libtracker_common_tests
+    source = 'tracker-@0@-test.c'.format(base_name)
+    binary_name = 'tracker-@0@-test'.format(base_name)
+
+    binary = executable(binary_name, source,
+      dependencies: [libtracker_miners_common_test_deps, gmodule],
+      c_args: test_c_args)
+
+    test(base_name, binary,
+      protocol: test_protocol,
+      suite: 'miners-common')
+endforeach

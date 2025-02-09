@@ -1,4 +1,4 @@
 [D-BUS Service]
 Name=org.freedesktop.Tracker3.Miner.Files.Control
-Exec=@abs_top_builddir@/src/tracker-control/localsearch-control-3
+Exec=@abs_top_builddir@/src/control/localsearch-control-3
 SystemdService=localsearch-control-3.service
