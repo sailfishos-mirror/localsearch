@@ -153,20 +153,19 @@ miner_files_create_empty_information_element (TrackerMinerFiles *miner,
 }
 
 gchar *
-get_content_type (GFile     *file,
-		  GFileInfo *file_info)
+get_content_type (GFile *file)
 {
-	g_autoptr (GFileInfo) content_info = NULL;
+	g_autoptr (GFileInfo) info = NULL;
 
-	if (!g_file_info_has_attribute (file_info, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE)) {
-		content_info =
-			g_file_query_info (file,
-					   G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-					   G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-					   NULL, NULL);
-	}
+	info = g_file_query_info (file,
+	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                          NULL, NULL);
 
-	return g_strdup (g_file_info_get_content_type (content_info ? content_info : file_info));
+	if (!info || !g_file_info_has_attribute (info, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE))
+		return NULL;
+
+	return g_strdup (g_file_info_get_content_type (info));
 }
 
 void
@@ -185,7 +184,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	g_autoptr (GDateTime) modified = NULL;
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 
-	mime_type = get_content_type (file, file_info);
+	mime_type = get_content_type (file);
 	if (!mime_type)
 		return;
 
@@ -320,7 +319,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	g_autoptr (GDateTime) modified = NULL;
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 
-	mime_type = get_content_type (file, info);
+	mime_type = get_content_type (file);
 	if (!mime_type)
 		return;
 
