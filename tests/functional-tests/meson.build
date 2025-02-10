@@ -16,9 +16,12 @@ testconf.set('TEST_DOMAIN_ONTOLOGY_RULE', meson.current_build_dir() / 'config' /
 testconf.set('TEST_EXTRACTOR_RULES_DIR', tracker_uninstalled_extract_rules_dir)
 testconf.set('TEST_EXTRACTORS_DIR', uninstalled_tracker_extract_dir)
 testconf.set('TEST_GSETTINGS_SCHEMA_DIR', tracker_miners_uninstalled_gsettings_schema_dir)
-testconf.set('TEST_WRITEBACK_MODULES_DIR', tracker_uninstalled_writeback_modules_dir)
 testconf.set('TEST_TAP_ENABLED', get_option('tests_tap_protocol').to_string())
 testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
+
+if have_tracker_writeback
+  testconf.set('TEST_WRITEBACK_MODULES_DIR', tracker_uninstalled_writeback_modules_dir)
+endif
 
 subdir('config')
 
@@ -203,13 +206,13 @@ if libcue.found()
   functional_tests += 'test_extractor_flac_cuesheet'
 endif
 
-if libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and exempi.found() and libexif.found()
+if have_tracker_writeback and libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and exempi.found() and libexif.found()
   functional_tests += [
     'test_writeback_images',
   ]
 endif
 
-if gstreamer.found()
+if have_tracker_writeback and gstreamer.found()
   functional_tests += 'test_writeback_audio'
 endif
 
