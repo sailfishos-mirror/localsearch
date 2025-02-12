@@ -384,7 +384,9 @@ run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninst
 run_uninstalled_conf.set('tracker_uninstalled_extractors_dir', uninstalled_tracker_extract_dir)
 run_uninstalled_conf.set('tracker_uninstalled_miner_services_dir', tracker_uninstalled_miner_services_dir)
 run_uninstalled_conf.set('tracker_uninstalled_testutils_dir', tracker_uninstalled_testutils_dir)
-run_uninstalled_conf.set('tracker_uninstalled_writeback_modules_dir', tracker_uninstalled_writeback_modules_dir)
+if have_tracker_writeback
+  run_uninstalled_conf.set('tracker_uninstalled_writeback_modules_dir', tracker_uninstalled_writeback_modules_dir)
+endif
 run_uninstalled_conf.set('uninstalled_gsettings_schema_dir', tracker_miners_uninstalled_gsettings_schema_dir)
 run_uninstalled = configure_file(
   input: 'run-uninstalled.in',
