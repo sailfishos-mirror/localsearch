@@ -410,9 +410,9 @@ tracker_extract_decorator_error (TrackerDecorator   *decorator,
 {
 	TrackerExtractDecorator *extract_decorator =
 		TRACKER_EXTRACT_DECORATOR (decorator);
-	g_autoptr (GError) error = NULL;
 	g_autofree gchar *uri = NULL;
 	g_autoptr (GFileInfo) info = NULL;
+	TrackerBatch *batch;
 	const gchar *hash = NULL;
 
 	uri = g_file_get_uri (file);
@@ -431,24 +431,19 @@ tracker_extract_decorator_error (TrackerDecorator   *decorator,
 		hash = tracker_extract_module_manager_get_hash (mimetype);
 	}
 
+	batch = tracker_decorator_get_batch (decorator);
+
 	if (hash) {
-		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
-		                                      "file", uri);
-		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
-		                                      "hash", hash);
-
-		tracker_sparql_statement_update (extract_decorator->update_hash,
-		                                 NULL, &error);
+		tracker_batch_add_statement (batch,
+		                             extract_decorator->update_hash,
+		                             "file", G_TYPE_STRING, uri,
+		                             "hash", G_TYPE_STRING, hash,
+		                             NULL);
 	} else {
-		tracker_sparql_statement_bind_string (extract_decorator->delete_file,
-		                                      "file", uri);
-		tracker_sparql_statement_update (extract_decorator->delete_file,
-		                                 NULL, &error);
-	}
-
-	if (error) {
-		g_warning ("Failed to update ignored file '%s': %s",
-		           uri, error->message);
+		tracker_batch_add_statement (batch,
+		                             extract_decorator->delete_file,
+		                             "file", G_TYPE_STRING, uri,
+		                             NULL);
 	}
 }
 

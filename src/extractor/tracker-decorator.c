@@ -292,6 +292,7 @@ retry_synchronously (TrackerDecorator *decorator,
 
 		if (error) {
 			g_autofree gchar *sparql = NULL;
+			g_autoptr (GError) inner_error = NULL;
 			TrackerResource *resource;
 			const gchar *graph;
 			GFile *file;
@@ -309,6 +310,18 @@ retry_synchronously (TrackerDecorator *decorator,
 
 			tracker_decorator_raise_error (decorator, file,
 			                               error->message, sparql);
+
+			batch = g_steal_pointer (&priv->batch);
+			if (batch)
+				tracker_batch_execute (batch, NULL, &inner_error);
+
+			if (inner_error) {
+				g_autofree char *uri = NULL;
+
+				uri = g_file_get_uri (file);
+				g_warning ("Could not handle error on '%s': %s",
+				           uri, inner_error->message);
+			}
 		}
 	}
 }
@@ -351,9 +364,8 @@ decorator_commit_info (TrackerDecorator *decorator)
 
 	priv = tracker_decorator_get_instance_private (decorator);
 
-	if (!priv->sparql_buffer || priv->sparql_buffer->len == 0)
+	if (!priv->batch)
 		return FALSE;
-
 	if (priv->commit_buffer)
 		return FALSE;
 
