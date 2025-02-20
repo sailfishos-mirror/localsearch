@@ -306,48 +306,25 @@ extract_task_new (TrackerExtract *extract,
                   const gchar    *uri,
                   const gchar    *content_id,
                   const gchar    *mimetype,
+                  const gchar    *graph,
                   GCancellable   *cancellable,
-                  GAsyncResult   *res,
-                  GError        **error)
+                  GAsyncResult   *res)
 {
 	TrackerExtractTask *task;
-	gchar *mimetype_used;
-
-	if (!mimetype || !*mimetype) {
-		GFile *file;
-		GFileInfo *info;
-		GError *internal_error = NULL;
-
-		file = g_file_new_for_uri (uri);
-		info = g_file_query_info (file,
-		                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-		                          G_FILE_QUERY_INFO_NONE,
-		                          NULL,
-		                          &internal_error);
-
-		g_object_unref (file);
-
-		if (internal_error) {
-			g_propagate_error (error, internal_error);
-			return NULL;
-		}
-
-		mimetype_used = g_strdup (g_file_info_get_content_type (info));
-		g_object_unref (info);
-		g_debug ("MIME type guessed as '%s' (from GIO)", mimetype_used);
-	} else {
-		mimetype_used = g_strdup (mimetype);
-		g_debug ("MIME type passed to us as '%s'", mimetype_used);
-	}
 
 	task = g_slice_new0 (TrackerExtractTask);
 	task->cancellable = (cancellable) ? g_object_ref (cancellable) : NULL;
 	task->res = (res) ? g_object_ref (res) : NULL;
 	task->file = g_strdup (uri);
 	task->content_id = g_strdup (content_id);
-	task->mimetype = mimetype_used;
+	task->mimetype = g_strdup (mimetype);
+	task->graph = graph;
 	task->extract = extract;
 	task->max_text = extract->max_text;
+
+	task->module = tracker_extract_module_manager_get_module (task->mimetype,
+	                                                          NULL,
+	                                                          &task->func);
 
 	if (task->res && !RUNNING_ON_VALGRIND) {
 		if (deadline_seconds < 0) {
@@ -492,30 +469,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 	TrackerExtract *extract = task->extract;
 	GError *error = NULL;
 
-	task->graph = tracker_extract_module_manager_get_graph (task->mimetype);
-	if (!task->graph) {
-		g_task_return_new_error (G_TASK (task->res),
-		                         tracker_extract_error_quark (),
-		                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
-		                         "Unknown target graph for uri:'%s' and mime:'%s'",
-		                         task->file, task->mimetype);
-		extract_task_free (task);
-		return FALSE;
-	}
-
-	if (!task->mimetype) {
-		g_task_return_new_error (G_TASK (task->res),
-		                         tracker_extract_error_quark (),
-		                         TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
-		                         "No mimetype for '%s'", task->file);
-		extract_task_free (task);
-		return FALSE;
-	} else {
-		task->module = tracker_extract_module_manager_get_module (task->mimetype,
-		                                                          NULL,
-		                                                          &task->func);
-	}
-
 	if (!extract->task_thread) {
 		extract->thread_context = g_main_context_new ();
 		extract->thread_loop = g_main_loop_new (extract->thread_context, FALSE);
@@ -549,34 +502,47 @@ tracker_extract_file (TrackerExtract      *extract,
                       GAsyncReadyCallback  cb,
                       gpointer             user_data)
 {
-	GError *error = NULL;
+	g_autoptr (GTask) async_task = NULL;
+	g_autoptr (GError) error = NULL;
 	TrackerExtractTask *task;
-	GTask *async_task;
+	const char *graph;
 
 	g_return_if_fail (TRACKER_IS_EXTRACT (extract));
 	g_return_if_fail (file != NULL);
 	g_return_if_fail (cb != NULL);
 
-	async_task = g_task_new (extract, cancellable, cb, user_data);
-
-	task = extract_task_new (extract, file, content_id, mimetype, cancellable,
-	                         G_ASYNC_RESULT (async_task), &error);
-
-	if (error) {
-		g_warning ("Could not get mimetype, %s", error->message);
-		g_task_return_error (async_task, error);
-	} else {
-#ifdef G_ENABLE_DEBUG
-		if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-			g_timer_continue (extract->total_elapsed);
-		}
-#endif
-
-		g_idle_add ((GSourceFunc) dispatch_task_cb, task);
+	if (!mimetype) {
+		g_task_report_new_error (extract, cb, user_data, NULL,
+		                         TRACKER_EXTRACT_ERROR,
+		                         TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
+		                         "No mimetype for '%s'",
+		                         file);
+		return;
 	}
 
-	/* Task takes a ref and if this fails, we want to unref anyway */
-	g_object_unref (async_task);
+	graph = tracker_extract_module_manager_get_graph (mimetype);
+
+	if (!graph) {
+		g_task_report_new_error (extract, cb, user_data, NULL,
+		                         TRACKER_EXTRACT_ERROR,
+		                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
+		                         "Unknown target graph for uri:'%s' and mime:'%s'",
+		                         file, mimetype);
+		return;
+	}
+
+	async_task = g_task_new (extract, cancellable, cb, user_data);
+
+	task = extract_task_new (extract, file, content_id, mimetype, graph, cancellable,
+	                         G_ASYNC_RESULT (async_task));
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		g_timer_continue (extract->total_elapsed);
+	}
+#endif
+
+	g_idle_add ((GSourceFunc) dispatch_task_cb, task);
 }
 
 TrackerExtractInfo *
@@ -588,17 +554,25 @@ tracker_extract_file_sync (TrackerExtract  *object,
 {
 	TrackerExtractTask *task;
 	TrackerExtractInfo *info;
+	const char *graph = NULL;
 
 	g_return_val_if_fail (uri != NULL, NULL);
+	g_return_val_if_fail (content_id != NULL, NULL);
 
-	task = extract_task_new (object, uri, content_id, mimetype,
-	                         NULL, NULL, error);
-	if (!task)
+	if (mimetype)
+		graph = tracker_extract_module_manager_get_graph (mimetype);
+
+	if (!graph) {
+		g_set_error (error,
+		             TRACKER_EXTRACT_ERROR,
+		             TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
+		             "Unknown target graph for uri:'%s' and mime:'%s'",
+		             uri, mimetype);
 		return NULL;
+	}
 
-	task->module = tracker_extract_module_manager_get_module (task->mimetype,
-	                                                          NULL,
-	                                                          &task->func);
+	task = extract_task_new (object, uri, content_id, mimetype, graph,
+	                         NULL, NULL);
 
 	if (!get_file_metadata (task, &info, error))
 		return NULL;
