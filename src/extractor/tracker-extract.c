@@ -598,108 +598,32 @@ tracker_extract_file (TrackerExtract      *extract,
 	g_object_unref (async_task);
 }
 
-void
-tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
-                                         const gchar                *uri,
-                                         const gchar                *mime,
-                                         TrackerSerializationFormat  output_format)
+TrackerExtractInfo *
+tracker_extract_file_sync (TrackerExtract  *object,
+                           const gchar     *uri,
+                           const gchar     *content_id,
+                           const gchar     *mimetype,
+                           GError         **error)
 {
-	GError *error = NULL;
 	TrackerExtractTask *task;
 	TrackerExtractInfo *info;
-	TrackerResource *resource = NULL;
 
-	g_return_if_fail (uri != NULL);
+	g_return_val_if_fail (uri != NULL, NULL);
 
-	task = extract_task_new (object, uri, "_:content", mime, NULL, NULL, &error);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Metadata extraction failed"),
-		            error->message);
-		g_error_free (error);
-
-		return;
-	}
+	task = extract_task_new (object, uri, content_id, mimetype,
+	                         NULL, NULL, error);
+	if (!task)
+		return NULL;
 
 	task->module = tracker_extract_module_manager_get_module (task->mimetype,
 	                                                          NULL,
 	                                                          &task->func);
 
-	if (get_file_metadata (task, &info, NULL)) {
-		resource = tracker_extract_info_get_resource (info);
-	}
-
-	if (resource) {
-		if (output_format == TRACKER_SERIALIZATION_FORMAT_SPARQL) {
-			char *text;
-			g_autoptr (TrackerResource) file_resource = NULL;
-
-			/* Set up the corresponding nfo:FileDataObject resource appropriately,
-			 * so the SPARQL we generate is valid according to Nepomuk.
-			 */
-			file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
-
-			if (file_resource) {
-				g_object_ref (file_resource);
-			} else {
-				file_resource = tracker_resource_new (uri);
-				tracker_resource_set_relation (resource, "nie:isStoredAs", file_resource);
-			}
-
-			tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
-
-			text = tracker_resource_print_sparql_update (resource, NULL, NULL);
-
-			g_print ("%s\n", text);
-
-			g_free (text);
-		} else if (output_format == TRACKER_SERIALIZATION_FORMAT_TURTLE) {
-			TrackerNamespaceManager *namespaces;
-			char *turtle;
-
-			/* If this was going into the tracker-store we'd generate a unique ID
-			 * here, so that the data persisted across file renames.
-			 */
-			tracker_resource_set_identifier (resource, uri);
-
-			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-			namespaces = tracker_namespace_manager_get_default ();
-			G_GNUC_END_IGNORE_DEPRECATIONS
-			turtle = tracker_resource_print_rdf (resource, namespaces, TRACKER_RDF_FORMAT_TURTLE, NULL);
-
-			if (turtle) {
-				g_print ("%s\n", turtle);
-				g_free (turtle);
-			}
-		} else {
-			/* JSON-LD extraction */
-			char *json;
-
-			/* If this was going into the tracker-store we'd generate a unique ID
-			 * here, so that the data persisted across file renames.
-			 */
-			tracker_resource_set_identifier (resource, uri);
-
-			/* We are using "deprecated" API here as the pretty printed output is
-			 * nicer than with `tracker_resource_print_rdf()`, which uses the
-			 * generic serializer.
-			 */
-			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
-			json = tracker_resource_print_jsonld (resource, NULL);
-			G_GNUC_END_IGNORE_DEPRECATIONS
-			if (json) {
-				g_print ("%s\n", json);
-				g_free (json);
-			}
-		}
-	} else {
-		g_printerr ("%s: %s\n",
-		         uri,
-		         _("No metadata or extractor modules found to handle this file"));
-	}
+	if (!get_file_metadata (task, &info, error))
+		return NULL;
 
 	extract_task_free (task);
+	return info;
 }
 
 TrackerExtractInfo *

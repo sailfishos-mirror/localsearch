@@ -57,10 +57,10 @@ TrackerExtractInfo *
 void            tracker_extract_set_max_text            (TrackerExtract *extract,
                                                          gint            max_text);
 
-/* Not DBus API */
-void            tracker_extract_get_metadata_by_cmdline (TrackerExtract             *object,
-                                                         const gchar                *path,
-                                                         const gchar                *mime,
-                                                         TrackerSerializationFormat  output_format);
+TrackerExtractInfo * tracker_extract_file_sync (TrackerExtract  *object,
+                                                const gchar     *uri,
+                                                const gchar     *content_id,
+                                                const gchar     *mimetype,
+                                                GError         **error);
 
 #endif /* __TRACKERD_EXTRACT_H__ */

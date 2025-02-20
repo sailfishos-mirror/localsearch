@@ -166,12 +166,15 @@ initialize_signal_handler (void)
 static int
 run_standalone (void)
 {
-	TrackerExtract *object;
-	GFile *file;
-	gchar *uri;
+	g_autoptr (TrackerExtract) extract = NULL;
+	g_autoptr (GFile) file = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *uri = NULL;
+	TrackerResource *resource = NULL;
 	GEnumClass *enum_class;
 	GEnumValue *enum_value;
 	TrackerSerializationFormat output_format;
+	TrackerExtractInfo *info;
 
 	if (!output_format_name) {
 		output_format_name = "turtle";
@@ -192,13 +195,80 @@ run_standalone (void)
 	file = g_file_new_for_commandline_arg (filename);
 	uri = g_file_get_uri (file);
 
-	object = tracker_extract_new ();
+	extract = tracker_extract_new ();
 
-	tracker_extract_get_metadata_by_cmdline (object, uri, mime_type, output_format);
+	info = tracker_extract_file_sync (extract, uri, "_:content", mime_type, &error);
 
-	g_object_unref (object);
-	g_object_unref (file);
-	g_free (uri);
+	if (error) {
+		g_printerr ("%s, %s\n",
+		            _("Metadata extraction failed"),
+		            error->message);
+		return EXIT_FAILURE;
+	}
+
+	resource = tracker_extract_info_get_resource (info);
+
+	if (resource) {
+		if (output_format == TRACKER_SERIALIZATION_FORMAT_SPARQL) {
+			g_autofree char *text = NULL;
+			TrackerResource *file_resource;
+
+			/* Set up the corresponding nfo:FileDataObject resource appropriately,
+			 * so the SPARQL we generate is valid according to Nepomuk.
+			 */
+			file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
+
+			if (!file_resource) {
+				file_resource = tracker_resource_new (uri);
+				tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
+			}
+
+			tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
+
+			text = tracker_resource_print_sparql_update (resource, NULL, NULL);
+
+			g_print ("%s\n", text);
+		} else if (output_format == TRACKER_SERIALIZATION_FORMAT_TURTLE) {
+			TrackerNamespaceManager *namespaces;
+			g_autofree char *turtle = NULL;
+
+			/* If this was going into the tracker-store we'd generate a unique ID
+			 * here, so that the data persisted across file renames.
+			 */
+			tracker_resource_set_identifier (resource, uri);
+
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+			namespaces = tracker_namespace_manager_get_default ();
+			G_GNUC_END_IGNORE_DEPRECATIONS
+			turtle = tracker_resource_print_rdf (resource, namespaces, TRACKER_RDF_FORMAT_TURTLE, NULL);
+
+			g_print ("%s\n", turtle);
+		} else {
+			/* JSON-LD extraction */
+			g_autofree char *json = NULL;
+
+			/* If this was going into the tracker-store we'd generate a unique ID
+			 * here, so that the data persisted across file renames.
+			 */
+			tracker_resource_set_identifier (resource, uri);
+
+			/* We are using "deprecated" API here as the pretty printed output is
+			 * nicer than with `tracker_resource_print_rdf()`, which uses the
+			 * generic serializer.
+			 */
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+			json = tracker_resource_print_jsonld (resource, NULL);
+			G_GNUC_END_IGNORE_DEPRECATIONS
+
+			g_print ("%s\n", json);
+		}
+	} else {
+		g_printerr ("%s: %s\n",
+		         uri,
+		         _("No metadata or extractor modules found to handle this file"));
+	}
+
+	tracker_extract_info_unref (info);
 
 	return EXIT_SUCCESS;
 }
