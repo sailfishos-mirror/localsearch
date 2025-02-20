@@ -345,17 +345,17 @@ tracker_main_get_readonly_connection (GError **error)
 static int
 do_main (int argc, char *argv[])
 {
-	GOptionContext *context;
-	GError *error = NULL;
-	TrackerExtract *extract;
-	TrackerDecorator *decorator;
-	TrackerExtractController *controller;
-	GMainLoop *my_main_loop;
-	GDBusConnection *connection = NULL;
-	TrackerExtractPersistence *persistence;
-	TrackerSparqlConnection *sparql_connection;
-	TrackerDomainOntology *domain_ontology;
-	gchar *miner_dbus_name;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autoptr (TrackerExtract) extract = NULL;
+	g_autoptr (TrackerDecorator) decorator = NULL;
+	g_autoptr (TrackerExtractController) controller = NULL;
+	g_autoptr (GMainLoop) loop = NULL;
+	g_autoptr (GDBusConnection) connection = NULL;
+	g_autoptr (TrackerExtractPersistence) persistence = NULL;
+	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
+	g_autoptr (TrackerDomainOntology) domain_ontology = NULL;
+	g_autofree gchar *miner_dbus_name = NULL;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -370,25 +370,19 @@ do_main (int argc, char *argv[])
 
 	if (error) {
 		g_printerr ("%s\n", error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
 	if (!filename && mime_type) {
-		gchar *help;
+		g_autofree gchar *help = NULL;
 
 		g_printerr ("%s\n\n",
 		            _("Filename and mime type must be provided together"));
 
 		help = g_option_context_get_help (context, TRUE, NULL);
-		g_option_context_free (context);
 		g_printerr ("%s", help);
-		g_free (help);
-
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (version) {
 		g_print ("\n" ABOUT "\n" LICENSE "\n");
@@ -403,7 +397,6 @@ do_main (int argc, char *argv[])
 	if (error) {
 		g_critical ("Could not load domain ontology '%s': %s",
 		            domain_ontology_name, error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
@@ -440,7 +433,6 @@ do_main (int argc, char *argv[])
 	if (!connection) {
 		g_critical ("Could not create DBus connection: %s\n",
 		            error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
@@ -453,7 +445,6 @@ do_main (int argc, char *argv[])
 	if (error) {
 		g_critical ("Could not connect to filesystem miner endpoint: %s",
 		            error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
@@ -466,13 +457,11 @@ do_main (int argc, char *argv[])
 	controller = tracker_extract_controller_new (decorator, connection, persistence, &error);
 	if (error) {
 		g_critical ("Could not create extraction controller: %s", error->message);
-		g_error_free (error);
-		g_object_unref (decorator);
 		return EXIT_FAILURE;
 	}
 
 	/* Main loop */
-	main_loop = g_main_loop_new (NULL, FALSE);
+	loop = main_loop = g_main_loop_new (NULL, FALSE);
 
 	g_signal_connect (decorator, "finished",
 	                  G_CALLBACK (on_decorator_finished),
@@ -490,22 +479,11 @@ do_main (int argc, char *argv[])
 
 	g_main_loop_run (main_loop);
 
-	my_main_loop = main_loop;
-	main_loop = NULL;
-	g_main_loop_unref (my_main_loop);
-
 	tracker_miner_stop (TRACKER_MINER (decorator));
 
 	/* Shutdown subsystems */
 	tracker_module_manager_shutdown_modules ();
-	g_object_unref (extract);
-	g_object_unref (decorator);
-	g_object_unref (controller);
-	g_object_unref (persistence);
-	g_object_unref (connection);
-	tracker_domain_ontology_unref (domain_ontology);
 	tracker_sparql_connection_close (sparql_connection);
-	g_object_unref (sparql_connection);
 
 	return EXIT_SUCCESS;
 }
