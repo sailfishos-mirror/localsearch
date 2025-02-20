@@ -959,7 +959,9 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 		g_signal_new ("raise-error",
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              0, NULL, NULL, NULL,
+		              G_STRUCT_OFFSET (TrackerDecoratorClass,
+		                               error),
+		              NULL, NULL, NULL,
 		              G_TYPE_NONE, 3,
 			      G_TYPE_FILE,
 			      G_TYPE_STRING,
@@ -1136,8 +1138,6 @@ tracker_decorator_raise_error (TrackerDecorator *decorator,
                                const char       *message,
                                const char       *extra_info)
 {
-	TRACKER_DECORATOR_GET_CLASS (decorator)->error (decorator,
-	                                                file,
-	                                                message,
-	                                                extra_info);
+	g_signal_emit (decorator, signals[RAISE_ERROR], 0,
+	               file, message, extra_info);
 }

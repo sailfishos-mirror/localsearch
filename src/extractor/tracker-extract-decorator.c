@@ -408,11 +408,10 @@ tracker_extract_decorator_error (TrackerDecorator   *decorator,
 {
 	TrackerExtractDecorator *extract_decorator =
 		TRACKER_EXTRACT_DECORATOR (decorator);
-	g_autoptr (GError) error = NULL, info_error = NULL;
+	g_autoptr (GError) error = NULL;
 	g_autofree gchar *uri = NULL;
 	g_autoptr (GFileInfo) info = NULL;
 	const gchar *hash = NULL;
-	gboolean removed_hash = FALSE;
 
 	uri = g_file_get_uri (file);
 	g_debug ("Extraction on file '%s' failed in previous execution, ignoring", uri);
@@ -420,7 +419,7 @@ tracker_extract_decorator_error (TrackerDecorator   *decorator,
 	info = g_file_query_info (file,
 	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                          NULL, &info_error);
+	                          NULL, NULL);
 
 	if (info) {
 		const gchar *mimetype;
@@ -431,22 +430,14 @@ tracker_extract_decorator_error (TrackerDecorator   *decorator,
 	}
 
 	if (hash) {
-		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
-
 		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
 		                                      "file", uri);
 		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
 		                                      "hash", hash);
 
-		removed_hash = tracker_sparql_statement_update (extract_decorator->update_hash,
-		                                                NULL, &error);
-	}
-
-	if (!removed_hash) {
-		if (info_error && !g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
-
-		g_clear_error (&error);
+		tracker_sparql_statement_update (extract_decorator->update_hash,
+		                                 NULL, &error);
+	} else {
 		tracker_sparql_statement_bind_string (extract_decorator->delete_file,
 		                                      "file", uri);
 		tracker_sparql_statement_update (extract_decorator->delete_file,
