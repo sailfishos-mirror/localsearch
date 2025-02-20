@@ -61,8 +61,6 @@ struct _TrackerExtract {
 
 typedef struct {
 	TrackerExtract *extract;
-	GCancellable *cancellable;
-	GAsyncResult *res;
 	gchar *content_id;
 	gchar *file;
 	gchar *mimetype;
@@ -75,7 +73,7 @@ typedef struct {
 	GSource *deadline;
 
 	guint success : 1;
-} TrackerExtractTask;
+} TrackerExtractTaskData;
 
 G_DEFINE_TYPE(TrackerExtract, tracker_extract, G_TYPE_OBJECT)
 
@@ -193,8 +191,8 @@ tracker_extract_new (void)
 }
 
 static void
-notify_task_finish (TrackerExtractTask *task,
-                    gboolean            success)
+notify_task_finish (TrackerExtractTaskData *task,
+                    gboolean                success)
 {
 	TrackerExtract *extract;
 	StatisticsData *stats_data;
@@ -224,9 +222,9 @@ notify_task_finish (TrackerExtractTask *task,
 }
 
 static gboolean
-get_file_metadata (TrackerExtractTask  *task,
-                   TrackerExtractInfo **info_out,
-                   GError             **error)
+get_file_metadata (TrackerExtractTaskData  *task,
+                   TrackerExtractInfo     **info_out,
+                   GError                 **error)
 {
 	TrackerExtractInfo *info;
 	GFile *file;
@@ -272,7 +270,7 @@ get_file_metadata (TrackerExtractTask  *task,
 static gboolean
 task_deadline_cb (gpointer user_data)
 {
-	TrackerExtractTask *task = user_data;
+	TrackerExtractTaskData *task = user_data;
 
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
@@ -280,20 +278,16 @@ task_deadline_cb (gpointer user_data)
 	exit (EXIT_FAILURE);
 }
 
-static TrackerExtractTask *
-extract_task_new (TrackerExtract *extract,
-                  const gchar    *uri,
-                  const gchar    *content_id,
-                  const gchar    *mimetype,
-                  const gchar    *graph,
-                  GCancellable   *cancellable,
-                  GAsyncResult   *res)
+static TrackerExtractTaskData *
+extract_task_data_new (TrackerExtract *extract,
+                       const gchar    *uri,
+                       const gchar    *content_id,
+                       const gchar    *mimetype,
+                       const gchar    *graph)
 {
-	TrackerExtractTask *task;
+	TrackerExtractTaskData *task;
 
-	task = g_slice_new0 (TrackerExtractTask);
-	task->cancellable = (cancellable) ? g_object_ref (cancellable) : NULL;
-	task->res = (res) ? g_object_ref (res) : NULL;
+	task = g_new0 (TrackerExtractTaskData, 1);
 	task->file = g_strdup (uri);
 	task->content_id = g_strdup (content_id);
 	task->mimetype = g_strdup (mimetype);
@@ -305,7 +299,7 @@ extract_task_new (TrackerExtract *extract,
 	                                                          NULL,
 	                                                          &task->func);
 
-	if (task->res && !RUNNING_ON_VALGRIND) {
+	if (!RUNNING_ON_VALGRIND) {
 		if (deadline_seconds < 0) {
 			const gchar *deadline_envvar;
 
@@ -320,60 +314,50 @@ extract_task_new (TrackerExtract *extract,
 			g_timeout_source_new_seconds (deadline_seconds);
 		g_source_set_callback (task->deadline, task_deadline_cb, task, NULL);
 		g_source_attach (task->deadline,
-		                 g_task_get_context (G_TASK (task->res)));
+		                 g_main_context_get_thread_default ());
 	}
 
 	return task;
 }
 
 static void
-extract_task_free (TrackerExtractTask *task)
+extract_task_data_free (TrackerExtractTaskData *data)
 {
-	notify_task_finish (task, task->success);
+	notify_task_finish (data, data->success);
 
-	if (task->deadline) {
-		g_source_destroy (task->deadline);
-		g_source_unref (task->deadline);
+	if (data->deadline) {
+		g_source_destroy (data->deadline);
+		g_source_unref (data->deadline);
 	}
 
-	if (task->res) {
-		g_object_unref (task->res);
-	}
-
-	if (task->cancellable) {
-		g_object_unref (task->cancellable);
-	}
-
-	g_free (task->mimetype);
-	g_free (task->file);
-	g_free (task->content_id);
-
-	g_slice_free (TrackerExtractTask, task);
+	g_free (data->mimetype);
+	g_free (data->file);
+	g_free (data->content_id);
+	g_free (data);
 }
 
 static gboolean
-get_metadata (TrackerExtractTask *task)
+get_metadata (GTask *task)
 {
-	TrackerExtract *extract = task->extract;
+	TrackerExtractTaskData *data = g_task_get_task_data (task);
+	TrackerExtract *extract = data->extract;
 	TrackerExtractInfo *info;
 	GError *error = NULL;
 
-	if (g_task_return_error_if_cancelled (G_TASK (task->res))) {
-		extract_task_free (task);
+	if (g_task_return_error_if_cancelled (task))
 		return FALSE;
-	}
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
 		StatisticsData *stats_data;
 
 		stats_data = g_hash_table_lookup (extract->statistics_data,
-						  task->module);
+						  data->module);
 		if (!stats_data) {
 			stats_data = g_slice_new0 (StatisticsData);
 			stats_data->elapsed = g_timer_new ();
 			g_hash_table_insert (extract->statistics_data,
-					     task->module,
+					     data->module,
 					     stats_data);
 		} else {
 			g_timer_continue (stats_data->elapsed);
@@ -381,18 +365,18 @@ get_metadata (TrackerExtractTask *task)
 	}
 #endif
 
-	if (get_file_metadata (task, &info, &error)) {
-		g_task_return_pointer (G_TASK (task->res), info,
+	if (get_file_metadata (data, &info, &error)) {
+		g_task_return_pointer (task, info,
 		                       (GDestroyNotify) tracker_extract_info_unref);
 	} else {
 		if (error) {
-			g_task_return_error (G_TASK (task->res), error);
+			g_task_return_error (task, error);
 		} else {
-			g_task_return_new_error (G_TASK (task->res),
+			g_task_return_new_error (task,
 			                         tracker_extract_error_quark (),
 			                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
 			                         "Could not get any metadata for uri:'%s' and mime:'%s'",
-			                         task->file, task->mimetype);
+			                         data->file, data->mimetype);
 		}
 	}
 
@@ -401,12 +385,10 @@ get_metadata (TrackerExtractTask *task)
 		StatisticsData *stats_data;
 
 		stats_data = g_hash_table_lookup (extract->statistics_data,
-						  task->module);
+						  data->module);
 		g_timer_stop (stats_data->elapsed);
 	}
 #endif
-
-	extract_task_free (task);
 
 	return FALSE;
 }
@@ -414,7 +396,7 @@ get_metadata (TrackerExtractTask *task)
 static gboolean
 handle_task_in_thread (gpointer user_data)
 {
-	TrackerExtractTask *task = user_data;
+	g_autoptr (GTask) task = user_data;
 
 	get_metadata (task);
 
@@ -447,9 +429,9 @@ tracker_extract_file (TrackerExtract      *extract,
                       GAsyncReadyCallback  cb,
                       gpointer             user_data)
 {
-	g_autoptr (GTask) async_task = NULL;
+	g_autoptr (GTask) task = NULL;
 	g_autoptr (GError) error = NULL;
-	TrackerExtractTask *task;
+	TrackerExtractTaskData *data;
 	const char *graph;
 
 	g_return_if_fail (TRACKER_IS_EXTRACT (extract));
@@ -476,10 +458,9 @@ tracker_extract_file (TrackerExtract      *extract,
 		return;
 	}
 
-	async_task = g_task_new (extract, cancellable, cb, user_data);
-
-	task = extract_task_new (extract, file, content_id, mimetype, graph, cancellable,
-	                         G_ASYNC_RESULT (async_task));
+	task = g_task_new (extract, cancellable, cb, user_data);
+	data = extract_task_data_new (extract, file, content_id, mimetype, graph);
+	g_task_set_task_data (task, data, (GDestroyNotify) extract_task_data_free);
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
@@ -497,16 +478,15 @@ tracker_extract_file (TrackerExtract      *extract,
 					  g_main_loop_ref (extract->thread_loop),
 					  &error);
 		if (!extract->task_thread) {
-			g_task_return_error (G_TASK (async_task), error);
-			extract_task_free (task);
+			g_task_return_error (task, error);
 			return;
 		}
 
 	}
 
 	g_main_context_invoke (extract->thread_context,
-			       handle_task_in_thread,
-			       task);
+	                       handle_task_in_thread,
+	                       g_steal_pointer (&task));
 }
 
 TrackerExtractInfo *
@@ -516,7 +496,7 @@ tracker_extract_file_sync (TrackerExtract  *object,
                            const gchar     *mimetype,
                            GError         **error)
 {
-	TrackerExtractTask *task;
+	TrackerExtractTaskData *task;
 	TrackerExtractInfo *info;
 	const char *graph = NULL;
 
@@ -535,13 +515,13 @@ tracker_extract_file_sync (TrackerExtract  *object,
 		return NULL;
 	}
 
-	task = extract_task_new (object, uri, content_id, mimetype, graph,
-	                         NULL, NULL);
+	task = extract_task_data_new (object, uri, content_id, mimetype, graph);
 
 	if (!get_file_metadata (task, &info, error))
 		return NULL;
 
-	extract_task_free (task);
+	extract_task_data_free (task);
+
 	return info;
 }
 
