@@ -41,7 +41,6 @@ struct _TrackerExtractDecorator {
 	TrackerDecorator parent_instance;
 
 	TrackerExtract *extractor;
-	GTimer *timer;
 	gboolean extracting;
 
 	TrackerSparqlStatement *update_hash;
@@ -131,7 +130,6 @@ tracker_extract_decorator_finalize (GObject *object)
 	g_clear_object (&extract_decorator->update_hash);
 	g_clear_object (&extract_decorator->delete_file);
 	g_clear_object (&extract_decorator->persistence);
-	g_clear_pointer (&extract_decorator->timer, g_timer_destroy);
 
 	G_OBJECT_CLASS (tracker_extract_decorator_parent_class)->finalize (object);
 }
@@ -332,24 +330,17 @@ tracker_extract_decorator_paused (TrackerMiner *miner)
 	g_debug ("Decorator paused");
 
 	g_clear_handle_id (&extract_decorator->throttle_id, g_source_remove);
-
-	if (extract_decorator->timer)
-		g_timer_stop (extract_decorator->timer);
 }
 
 static void
 tracker_extract_decorator_resumed (TrackerMiner *miner)
 {
-	TrackerExtractDecorator *extract_decorator =
-		TRACKER_EXTRACT_DECORATOR (miner);
+	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
 
 	g_debug ("Decorator resumed, processing remaining %d items",
-		 tracker_decorator_get_n_items (TRACKER_DECORATOR (miner)));
+	         tracker_decorator_get_n_items (decorator));
 
-	if (extract_decorator->timer)
-		g_timer_continue (extract_decorator->timer);
-
-	decorator_get_next_file (TRACKER_DECORATOR (miner));
+	decorator_get_next_file (decorator);
 }
 
 static void
@@ -371,35 +362,10 @@ tracker_extract_decorator_started (TrackerMiner *miner)
 static void
 tracker_extract_decorator_items_available (TrackerDecorator *decorator)
 {
-	TrackerExtractDecorator *extract_decorator =
-		TRACKER_EXTRACT_DECORATOR (decorator);
-
 	g_debug ("Starting to process %d items",
 	         tracker_decorator_get_n_items (decorator));
 
-	g_clear_pointer (&extract_decorator->timer, g_timer_destroy);
-	extract_decorator->timer = g_timer_new ();
-	if (tracker_miner_is_paused (TRACKER_MINER (decorator)))
-		g_timer_stop (extract_decorator->timer);
-
 	decorator_get_next_file (decorator);
-}
-
-static void
-tracker_extract_decorator_finished (TrackerDecorator *decorator)
-{
-	TrackerExtractDecorator *extract_decorator =
-		TRACKER_EXTRACT_DECORATOR (decorator);
-	g_autofree gchar *time_str = NULL;
-	gdouble elapsed = 0;
-
-	if (extract_decorator->timer) {
-		elapsed = g_timer_elapsed (extract_decorator->timer, NULL);
-		g_clear_pointer (&extract_decorator->timer, g_timer_destroy);
-	}
-
-	time_str = tracker_seconds_to_string (elapsed, TRUE);
-	g_debug ("Extraction finished in %s", time_str);
 }
 
 static void
@@ -463,7 +429,6 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 	miner_class->started = tracker_extract_decorator_started;
 
 	decorator_class->items_available = tracker_extract_decorator_items_available;
-	decorator_class->finished = tracker_extract_decorator_finished;
 	decorator_class->error = tracker_extract_decorator_error;
 	decorator_class->update = tracker_extract_decorator_update;
 
