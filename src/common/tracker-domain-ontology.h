@@ -45,4 +45,6 @@ gchar * tracker_domain_ontology_get_domain   (TrackerDomainOntology *domain_onto
 gboolean tracker_domain_ontology_uses_miner  (TrackerDomainOntology *domain_ontology,
                                               const gchar           *suffix);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerDomainOntology, tracker_domain_ontology_unref);
+
 #endif /* __TRACKER_DOMAIN_ONTOLOGY_H__ */
