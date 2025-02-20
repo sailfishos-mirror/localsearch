@@ -77,20 +77,7 @@ typedef struct {
 	guint success : 1;
 } TrackerExtractTask;
 
-static void tracker_extract_finalize (GObject *object);
-static void log_statistics        (GObject *object);
-
 G_DEFINE_TYPE(TrackerExtract, tracker_extract, G_TYPE_OBJECT)
-
-static void
-tracker_extract_class_init (TrackerExtractClass *klass)
-{
-	GObjectClass *object_class;
-
-	object_class = G_OBJECT_CLASS (klass);
-
-	object_class->finalize = tracker_extract_finalize;
-}
 
 static void
 statistics_data_free (StatisticsData *data)
@@ -113,33 +100,6 @@ tracker_extract_init (TrackerExtract *extract)
 			                       (GDestroyNotify) statistics_data_free);
 	}
 #endif
-}
-
-static void
-tracker_extract_finalize (GObject *object)
-{
-	TrackerExtract *extract = TRACKER_EXTRACT (object);
-
-	if (extract->thread_loop) {
-		g_main_loop_quit (extract->thread_loop);
-		g_main_loop_unref (extract->thread_loop);
-	}
-
-	if (extract->task_thread)
-		g_thread_join (extract->task_thread);
-
-	if (extract->thread_context)
-		g_main_context_unref (extract->thread_context);
-
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		log_statistics (object);
-		g_hash_table_destroy (extract->statistics_data);
-		g_timer_destroy (extract->total_elapsed);
-	}
-#endif
-
-	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);
 }
 
 static void
@@ -187,6 +147,43 @@ log_statistics (GObject *object)
 		g_message ("--------------------------------------------------");
 	}
 #endif
+}
+
+static void
+tracker_extract_finalize (GObject *object)
+{
+	TrackerExtract *extract = TRACKER_EXTRACT (object);
+
+	if (extract->thread_loop) {
+		g_main_loop_quit (extract->thread_loop);
+		g_main_loop_unref (extract->thread_loop);
+	}
+
+	if (extract->task_thread)
+		g_thread_join (extract->task_thread);
+
+	if (extract->thread_context)
+		g_main_context_unref (extract->thread_context);
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		log_statistics (object);
+		g_hash_table_destroy (extract->statistics_data);
+		g_timer_destroy (extract->total_elapsed);
+	}
+#endif
+
+	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);
+}
+
+static void
+tracker_extract_class_init (TrackerExtractClass *klass)
+{
+	GObjectClass *object_class;
+
+	object_class = G_OBJECT_CLASS (klass);
+
+	object_class->finalize = tracker_extract_finalize;
 }
 
 TrackerExtract *
