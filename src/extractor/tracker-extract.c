@@ -71,8 +71,6 @@ typedef struct {
 	GModule *module;
 
 	GSource *deadline;
-
-	guint success : 1;
 } TrackerExtractTaskData;
 
 G_DEFINE_TYPE(TrackerExtract, tracker_extract, G_TYPE_OBJECT)
@@ -190,37 +188,6 @@ tracker_extract_new (void)
 	return g_object_new (TRACKER_TYPE_EXTRACT, NULL);
 }
 
-static void
-notify_task_finish (TrackerExtractTaskData *task,
-                    gboolean                success)
-{
-	TrackerExtract *extract;
-	StatisticsData *stats_data;
-
-	extract = task->extract;
-
-	/* Reports and ongoing tasks may be
-	 * accessed from other threads.
-	 */
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		if (task->module) {
-			stats_data = g_hash_table_lookup (extract->statistics_data,
-			                                  task->module);
-			if (stats_data) {
-				stats_data->extracted_count++;
-
-				if (!success) {
-					stats_data->failed_count++;
-				}
-			}
-		} else {
-			extract->unhandled_count++;
-		}
-	}
-#endif
-}
-
 static gboolean
 get_file_metadata (TrackerExtractTaskData  *task,
                    TrackerExtractInfo     **info_out,
@@ -228,6 +195,7 @@ get_file_metadata (TrackerExtractTaskData  *task,
 {
 	TrackerExtractInfo *info;
 	GFile *file;
+	gboolean success = FALSE;
 
 	*info_out = NULL;
 
@@ -247,24 +215,24 @@ get_file_metadata (TrackerExtractTaskData  *task,
 		g_debug ("Using %s...",
 		         g_module_name (task->module));
 
-		task->success = (task->func) (info, error);
+		success = (task->func) (info, error);
 	} else {
 		g_autoptr (TrackerResource) resource = NULL;
 
 		/* Dummy extractor */
 		resource = tracker_resource_new (NULL);
 		tracker_extract_info_set_resource (info, resource);
-		task->success = TRUE;
+		success = TRUE;
 	}
 
-	if (!task->success) {
+	if (!success) {
 		tracker_extract_info_unref (info);
 		info = NULL;
 	}
 
 	*info_out = info;
 
-	return task->success;
+	return success;
 }
 
 static gboolean
@@ -323,8 +291,6 @@ extract_task_data_new (TrackerExtract *extract,
 static void
 extract_task_data_free (TrackerExtractTaskData *data)
 {
-	notify_task_finish (data, data->success);
-
 	if (data->deadline) {
 		g_source_destroy (data->deadline);
 		g_source_unref (data->deadline);
@@ -343,6 +309,7 @@ get_metadata (GTask *task)
 	TrackerExtract *extract = data->extract;
 	TrackerExtractInfo *info;
 	GError *error = NULL;
+	gboolean success = FALSE;
 
 	if (g_task_return_error_if_cancelled (task))
 		return FALSE;
@@ -366,6 +333,7 @@ get_metadata (GTask *task)
 #endif
 
 	if (get_file_metadata (data, &info, &error)) {
+		success = TRUE;
 		g_task_return_pointer (task, info,
 		                       (GDestroyNotify) tracker_extract_info_unref);
 	} else {
@@ -382,11 +350,21 @@ get_metadata (GTask *task)
 
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		StatisticsData *stats_data;
+		if (data->module) {
+			StatisticsData *stats_data;
 
-		stats_data = g_hash_table_lookup (extract->statistics_data,
-						  data->module);
-		g_timer_stop (stats_data->elapsed);
+			stats_data = g_hash_table_lookup (extract->statistics_data,
+			                                  data->module);
+			g_timer_stop (stats_data->elapsed);
+
+			stats_data->extracted_count++;
+
+			if (!success) {
+				stats_data->failed_count++;
+			}
+		} else {
+			extract->unhandled_count++;
+		}
 	}
 #endif
 
