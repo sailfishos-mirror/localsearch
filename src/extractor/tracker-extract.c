@@ -28,10 +28,6 @@
 #include "tracker-extract.h"
 #include "tracker-main.h"
 
-#ifdef THREAD_ENABLE_TRACE
-#warning Main thread traces enabled
-#endif /* THREAD_ENABLE_TRACE */
-
 G_DEFINE_QUARK (TrackerExtractError, tracker_extract_error)
 
 #define DEFAULT_DEADLINE_SECONDS 5
@@ -419,12 +415,6 @@ get_metadata (TrackerExtractTask *task)
 	TrackerExtractInfo *info;
 	GError *error = NULL;
 
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p --> '%s': Collected metadata",
-	         g_thread_self (),
-	         task->file);
-#endif /* THREAD_ENABLE_TRACE */
-
 	if (g_task_return_error_if_cancelled (G_TASK (task->res))) {
 		extract_task_free (task);
 		return FALSE;
@@ -483,10 +473,6 @@ handle_task_in_thread (gpointer user_data)
 {
 	TrackerExtractTask *task = user_data;
 
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p --> '%s': Dispatching in thread",
-	         g_thread_self(), task->file);
-#endif /* THREAD_ENABLE_TRACE */
 	get_metadata (task);
 
 	return G_SOURCE_REMOVE;
@@ -518,12 +504,6 @@ dispatch_task_cb (TrackerExtractTask *task)
 {
 	TrackerExtractPrivate *priv;
 	GError *error = NULL;
-
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p (Main) <-- '%s': Handling task...\n",
-	         g_thread_self (),
-	         task->file);
-#endif /* THREAD_ENABLE_TRACE */
 
 	priv = tracker_extract_get_instance_private (task->extract);
 
@@ -591,12 +571,6 @@ tracker_extract_file (TrackerExtract      *extract,
 	g_return_if_fail (TRACKER_IS_EXTRACT (extract));
 	g_return_if_fail (file != NULL);
 	g_return_if_fail (cb != NULL);
-
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p <-- '%s': Processing file\n",
-	         g_thread_self (),
-	         file);
-#endif /* THREAD_ENABLE_TRACE */
 
 	async_task = g_task_new (extract, cancellable, cb, user_data);
 

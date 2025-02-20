@@ -46,10 +46,6 @@
 #include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
 
-#ifdef THREAD_ENABLE_TRACE
-#warning Main thread traces enabled
-#endif /* THREAD_ENABLE_TRACE */
-
 #define ABOUT	  \
 	"Tracker " PACKAGE_VERSION "\n"
 
@@ -394,11 +390,6 @@ do_main (int argc, char *argv[])
 	persistence = tracker_extract_persistence_new ();
 
 	decorator = tracker_extract_decorator_new (sparql_connection, extract, persistence);
-
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p (Main) --- Waiting for extract requests...",
-	         g_thread_self ());
-#endif /* THREAD_ENABLE_TRACE */
 
 	tracker_locale_sanity_check ();
 
