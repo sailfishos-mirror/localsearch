@@ -60,8 +60,6 @@ struct _ExtractData {
 	TrackerDecorator *decorator;
 	TrackerDecoratorInfo *decorator_info;
 	GFile *file;
-	GCancellable *cancellable;
-	gulong signal_id;
 };
 
 static void decorator_get_next_file (TrackerDecorator *decorator);
@@ -247,14 +245,13 @@ get_metadata_cb (TrackerExtract *extract,
 
 	tracker_extract_persistence_set_file (extract_decorator->persistence, NULL);
 
-	if (data->cancellable && data->signal_id != 0) {
-		g_cancellable_disconnect (data->cancellable, data->signal_id);
-	}
-
 	if (error) {
-		decorator_ignore_file (data->file,
-		                       TRACKER_EXTRACT_DECORATOR (data->decorator),
-		                       error->message, NULL);
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			decorator_ignore_file (data->file,
+			                       TRACKER_EXTRACT_DECORATOR (data->decorator),
+			                       error->message, NULL);
+		}
+
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
 		ensure_data (info);
@@ -268,29 +265,7 @@ get_metadata_cb (TrackerExtract *extract,
 
 	tracker_decorator_info_unref (data->decorator_info);
 	g_object_unref (data->file);
-	g_object_unref (data->cancellable);
 	g_free (data);
-}
-
-static void
-task_cancellable_cancelled_cb (GCancellable *cancellable,
-                               ExtractData  *data)
-{
-	TrackerExtractDecorator *extract_decorator =
-		TRACKER_EXTRACT_DECORATOR (data->decorator);
-	g_autofree gchar *uri = NULL;
-
-	/* Delete persistence file on cancellation, we don't want to interpret
-	 * this as a failed operation.
-	 */
-	tracker_extract_persistence_set_file (extract_decorator->persistence, NULL);
-	uri = g_file_get_uri (data->file);
-
-	g_debug ("Cancelled task for '%s' was currently being "
-		 "processed, _exit()ing immediately",
-		 uri);
-
-	_exit (EXIT_FAILURE);
 }
 
 static void
@@ -301,7 +276,6 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	TrackerDecoratorInfo *info;
 	g_autoptr (GError) error = NULL;
 	ExtractData *data;
-	GCancellable *cancellable;
 	GFile *file;
 
 	if (!tracker_miner_is_started (TRACKER_MINER (decorator)) ||
@@ -348,7 +322,6 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	data->decorator = decorator;
 	data->decorator_info = info;
 	data->file = file;
-	cancellable = tracker_decorator_info_get_cancellable (info);
 
 	TRACKER_NOTE (DECORATOR,
 	              g_message ("[Decorator] Extracting metadata for '%s'",
@@ -356,19 +329,11 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 	tracker_extract_persistence_set_file (extract_decorator->persistence, data->file);
 
-	g_set_object (&data->cancellable, cancellable);
-
-	if (data->cancellable) {
-		data->signal_id = g_cancellable_connect (data->cancellable,
-		                                         G_CALLBACK (task_cancellable_cancelled_cb),
-		                                         data, NULL);
-	}
-
 	tracker_extract_file (extract_decorator->extractor,
 	                      tracker_decorator_info_get_url (info),
 	                      tracker_decorator_info_get_content_id (info),
 	                      tracker_decorator_info_get_mime_type (info),
-	                      cancellable,
+	                      tracker_decorator_info_get_cancellable (info),
 	                      (GAsyncReadyCallback) get_metadata_cb, data);
 }
 

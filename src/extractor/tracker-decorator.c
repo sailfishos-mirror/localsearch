@@ -439,18 +439,17 @@ decorator_task_done (GObject      *object,
 	TrackerDecoratorInfo *info = user_data;
 	TrackerDecoratorPrivate *priv;
 	TrackerExtractInfo *extract_info;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	priv = tracker_decorator_get_instance_private (decorator);
 	extract_info = g_task_propagate_pointer (G_TASK (result), &error);
 
 	tracker_decorator_info_hint_needed (info, FALSE);
 
-	if (!extract_info) {
-		if (error) {
+	if (error) {
+		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
 			g_warning ("Task for '%s' finished with error: %s\n",
 			           info->url, error->message);
-			g_error_free (error);
 		}
 	} else {
 		if (!priv->sparql_buffer) {
