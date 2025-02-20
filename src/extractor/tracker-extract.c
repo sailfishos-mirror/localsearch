@@ -79,7 +79,7 @@ static void
 statistics_data_free (StatisticsData *data)
 {
 	g_timer_destroy (data->elapsed);
-	g_slice_free (StatisticsData, data);
+	g_free (data);
 }
 
 static void
@@ -314,7 +314,7 @@ get_metadata (GTask *task)
 		stats_data = g_hash_table_lookup (extract->statistics_data,
 						  data->module);
 		if (!stats_data) {
-			stats_data = g_slice_new0 (StatisticsData);
+			stats_data = g_new0 (StatisticsData, 1);
 			stats_data->elapsed = g_timer_new ();
 			g_hash_table_insert (extract->statistics_data,
 					     data->module,

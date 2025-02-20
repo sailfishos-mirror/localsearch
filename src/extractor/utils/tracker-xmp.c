@@ -555,12 +555,12 @@ iterate_simple (const gchar    *uri,
                                 return;
                         }
 
-                        /* First time a property appear for a region, we create the region */
-                        current_region = g_slist_nth_data (data->regions, position-1);
-                        if (current_region == NULL) {
-                                current_region = g_slice_new0 (TrackerXmpRegion);
-                                data->regions = g_slist_append (data->regions, current_region);
-                        }
+			/* First time a property appear for a region, we create the region */
+			current_region = g_slist_nth_data (data->regions, position-1);
+			if (current_region == NULL) {
+				current_region = g_new0 (TrackerXmpRegion, 1);
+				data->regions = g_slist_append (data->regions, current_region);
+			}
 
                         propname = g_strdup (strrchr (path, '/') + 1);
 
@@ -757,8 +757,7 @@ xmp_region_free (gpointer data)
         g_free (region->height);
         g_free (region->link_class);
         g_free (region->link_uri);
-
-        g_slice_free (TrackerXmpRegion, region);
+        g_free (region);
 }
 
 

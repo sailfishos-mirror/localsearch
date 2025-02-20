@@ -128,7 +128,7 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 
 	priv = tracker_decorator_get_instance_private (decorator);
 
-	info = g_slice_new0 (TrackerDecoratorInfo);
+	info = g_new0 (TrackerDecoratorInfo, 1);
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
 	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
@@ -180,7 +180,7 @@ tracker_decorator_info_unref (TrackerDecoratorInfo *info)
 	g_free (info->url);
 	g_free (info->content_id);
 	g_free (info->mime_type);
-	g_slice_free (TrackerDecoratorInfo, info);
+	g_free (info);
 }
 
 G_DEFINE_BOXED_TYPE (TrackerDecoratorInfo,

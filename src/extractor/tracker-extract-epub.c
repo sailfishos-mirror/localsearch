@@ -74,7 +74,7 @@ static inline OPFData *
 opf_data_new (const char *uri,
               TrackerResource *resource)
 {
-	OPFData *data = g_slice_new0 (OPFData);
+	OPFData *data = g_new0 (OPFData, 1);
 
 	data->uri = g_strdup (uri);
 	data->resource = g_object_ref (resource);
@@ -107,8 +107,7 @@ opf_data_free (OPFData *data)
 
 	g_object_unref (data->resource);
 	g_free (data->uri);
-
-	g_slice_free (OPFData, data);
+	g_free (data);
 }
 
 /* Methods to parse the container.xml file

@@ -48,7 +48,7 @@ tracker_toc_new (void)
 {
 	TrackerToc *toc;
 
-	toc = g_slice_new (TrackerToc);
+	toc = g_new0 (TrackerToc, 1);
 
 	return toc;
 }
@@ -61,8 +61,7 @@ tracker_toc_free (TrackerToc *toc)
 	}
 
 	cd_delete (toc->cue_data);
-
-	g_slice_free (TrackerToc, toc);
+	g_free (toc);
 }
 
 static void
