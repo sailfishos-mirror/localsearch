@@ -40,7 +40,7 @@ typedef enum {
 } TrackerExtractError;
 
 GQuark          tracker_extract_error_quark             (void);
-TrackerExtract *tracker_extract_new                     (const gchar *force_module);
+TrackerExtract *tracker_extract_new                     (void);
 
 void            tracker_extract_file                    (TrackerExtract         *extract,
                                                          const gchar            *file,

@@ -66,7 +66,6 @@ static GMainLoop *main_loop;
 
 static gchar *filename;
 static gchar *mime_type;
-static gchar *force_module;
 static gchar *output_format_name;
 static gboolean version;
 static gchar *domain_ontology_name = NULL;
@@ -82,10 +81,6 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_STRING, &mime_type,
 	  N_("MIME type for file (if not provided, this will be guessed)"),
 	  N_("MIME") },
-	{ "force-module", 'm', 0,
-	  G_OPTION_ARG_STRING, &force_module,
-	  N_("Force a module to be used for extraction (e.g. “foo” for “foo.so”)"),
-	  N_("MODULE") },
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format_name,
 	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
 	  N_("FORMAT") },
@@ -201,7 +196,7 @@ run_standalone (void)
 	file = g_file_new_for_commandline_arg (filename);
 	uri = g_file_get_uri (file);
 
-	object = tracker_extract_new (force_module);
+	object = tracker_extract_new ();
 
 	tracker_extract_get_metadata_by_cmdline (object, uri, mime_type, output_format);
 
@@ -383,7 +378,7 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
-	extract = tracker_extract_new (force_module);
+	extract = tracker_extract_new ();
 
 	sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name,
 	                                                       NULL, connection,
