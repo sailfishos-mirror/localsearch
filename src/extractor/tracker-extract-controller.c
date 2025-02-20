@@ -33,11 +33,7 @@ enum {
 
 struct _TrackerExtractController {
 	GObject parent_instance;
-};
 
-typedef struct _TrackerExtractControllerPrivate TrackerExtractControllerPrivate;
-
-struct _TrackerExtractControllerPrivate {
 	TrackerDecorator *decorator;
 	TrackerExtractPersistence *persistence;
 	GCancellable *cancellable;
@@ -69,38 +65,32 @@ static void tracker_extract_controller_initable_iface_init (GInitableIface *ifac
 G_DEFINE_TYPE_WITH_CODE (TrackerExtractController,
                          tracker_extract_controller,
                          G_TYPE_OBJECT,
-                         G_ADD_PRIVATE (TrackerExtractController)
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_extract_controller_initable_iface_init))
+                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
+                                                tracker_extract_controller_initable_iface_init))
 
 static void
 update_paused_state (TrackerExtractController *controller,
                      gboolean                  pause)
 {
-	TrackerExtractControllerPrivate *priv =
-		tracker_extract_controller_get_instance_private (controller);
-
-	if (!!pause == !!priv->paused)
+	if (!!pause == !!controller->paused)
 		return;
 
 	if (pause)
-		tracker_miner_pause (TRACKER_MINER (priv->decorator));
+		tracker_miner_pause (TRACKER_MINER (controller->decorator));
 	else
-		tracker_miner_resume (TRACKER_MINER (priv->decorator));
+		tracker_miner_resume (TRACKER_MINER (controller->decorator));
 
-	priv->paused = pause;
+	controller->paused = pause;
 }
 
 static void
 update_extract_config (TrackerExtractController *controller,
                        GDBusProxy               *proxy)
 {
-	TrackerExtractControllerPrivate *priv;
 	GVariantIter iter;
 	g_autoptr (GVariant) v = NULL;
 	GVariant *value;
 	gchar *key;
-
-	priv = tracker_extract_controller_get_instance_private (controller);
 
 	v = g_dbus_proxy_get_cached_property (proxy, "ExtractorConfig");
 	if (!v)
@@ -115,7 +105,7 @@ update_extract_config (TrackerExtractController *controller,
 			gint max_bytes;
 
 			max_bytes = g_variant_get_int32 (value);
-			g_object_get (priv->decorator, "extractor", &extract, NULL);
+			g_object_get (controller->decorator, "extractor", &extract, NULL);
 
 			if (extract) {
 				tracker_extract_set_max_text (extract, max_bytes);
@@ -123,7 +113,7 @@ update_extract_config (TrackerExtractController *controller,
 			}
 		} else if (g_strcmp0 (key, "on-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
-			tracker_extract_decorator_set_throttled (TRACKER_EXTRACT_DECORATOR (priv->decorator),
+			tracker_extract_decorator_set_throttled (TRACKER_EXTRACT_DECORATOR (controller->decorator),
 			                                         g_variant_get_boolean (value));
 		} else if (g_strcmp0 (key, "on-low-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
@@ -133,7 +123,7 @@ update_extract_config (TrackerExtractController *controller,
 			const gchar **graphs = NULL;
 
 			graphs = g_variant_get_strv (value, NULL);
-			tracker_decorator_set_priority_graphs (priv->decorator, graphs);
+			tracker_decorator_set_priority_graphs (controller->decorator, graphs);
 			g_free (graphs);
 		}
 
@@ -156,13 +146,11 @@ set_up_persistence (TrackerExtractController  *controller,
                     GCancellable              *cancellable,
                     GError                   **error)
 {
-	TrackerExtractControllerPrivate *priv =
-		tracker_extract_controller_get_instance_private (controller);
 	g_autoptr (GUnixFDList) out_fd_list = NULL;
 	g_autoptr (GVariant) variant = NULL;
 	int idx, fd;
 
-	variant = g_dbus_proxy_call_with_unix_fd_list_sync (priv->miner_proxy,
+	variant = g_dbus_proxy_call_with_unix_fd_list_sync (controller->miner_proxy,
 	                                                    "GetPersistenceStorage",
 	                                                    NULL,
 	                                                    G_DBUS_CALL_FLAGS_NO_AUTO_START,
@@ -179,7 +167,7 @@ set_up_persistence (TrackerExtractController  *controller,
 	if (fd < 0)
 		return FALSE;
 
-	tracker_extract_persistence_set_fd (priv->persistence, fd);
+	tracker_extract_persistence_set_fd (controller->persistence, fd);
 	return TRUE;
 }
 
@@ -189,29 +177,27 @@ tracker_extract_controller_initable_init (GInitable     *initable,
                                           GError       **error)
 {
 	TrackerExtractController *controller;
-	TrackerExtractControllerPrivate *priv;
 	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
 	GDBusInterfaceVTable interface_vtable = {
 		NULL, NULL, NULL
 	};
 
 	controller = TRACKER_EXTRACT_CONTROLLER (initable);
-	priv = tracker_extract_controller_get_instance_private (controller);
 
-	priv->miner_proxy = g_dbus_proxy_new_sync (priv->connection,
-	                                           G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
-	                                           NULL,
-	                                           NULL,
-	                                           "/org/freedesktop/Tracker3/Files",
-	                                           "org.freedesktop.Tracker3.Files",
-	                                           NULL,
-	                                           error);
-	if (!priv->miner_proxy)
+	controller->miner_proxy = g_dbus_proxy_new_sync (controller->connection,
+	                                                 G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+	                                                 NULL,
+	                                                 NULL,
+	                                                 "/org/freedesktop/Tracker3/Files",
+	                                                 "org.freedesktop.Tracker3.Files",
+	                                                 NULL,
+	                                                 error);
+	if (!controller->miner_proxy)
 		return FALSE;
 
-	g_signal_connect (priv->miner_proxy, "g-properties-changed",
+	g_signal_connect (controller->miner_proxy, "g-properties-changed",
 	                  G_CALLBACK (miner_properties_changed_cb), controller);
-	update_extract_config (controller, priv->miner_proxy);
+	update_extract_config (controller, controller->miner_proxy);
 
 	if (!set_up_persistence (controller, cancellable, error))
 		return FALSE;
@@ -220,14 +206,14 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 	if (!introspection_data)
 		return FALSE;
 
-	priv->object_id =
-		g_dbus_connection_register_object (priv->connection,
+	controller->object_id =
+		g_dbus_connection_register_object (controller->connection,
 						   OBJECT_PATH,
 		                                   introspection_data->interfaces[0],
 		                                   &interface_vtable,
 		                                   initable,
 		                                   NULL, error);
-	if (priv->object_id == 0)
+	if (controller->object_id == 0)
 		return FALSE;
 
 	return TRUE;
@@ -246,8 +232,6 @@ decorator_raise_error_cb (TrackerDecorator         *decorator,
                           gchar                    *extra,
                           TrackerExtractController *controller)
 {
-	TrackerExtractControllerPrivate *priv =
-		tracker_extract_controller_get_instance_private (controller);
 	g_autoptr (GError) error = NULL;
 	g_autofree gchar *uri = NULL;
 	GVariantBuilder builder;
@@ -265,7 +249,7 @@ decorator_raise_error_cb (TrackerDecorator         *decorator,
 		                       g_variant_new_string (extra));
 	}
 
-	g_dbus_connection_emit_signal (priv->connection,
+	g_dbus_connection_emit_signal (controller->connection,
 	                               NULL,
 	                               OBJECT_PATH,
 	                               "org.freedesktop.Tracker3.Extract",
@@ -282,14 +266,11 @@ decorator_progress_cb (TrackerMiner             *miner,
                        const gchar              *status,
                        gdouble                   progress,
                        gint                      remaining_time,
-                       TrackerExtractController *proxy)
+                       TrackerExtractController *controller)
 {
-	TrackerExtractControllerPrivate *priv;
 	g_autoptr (GError) error = NULL;
 
-	priv = tracker_extract_controller_get_instance_private (proxy);
-
-	g_dbus_connection_emit_signal (priv->connection,
+	g_dbus_connection_emit_signal (controller->connection,
 	                               NULL,
 	                               OBJECT_PATH,
 	                               "org.freedesktop.Tracker3.Extract",
@@ -305,17 +286,14 @@ static void
 tracker_extract_controller_constructed (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
-	TrackerExtractControllerPrivate *priv;
-
-	priv = tracker_extract_controller_get_instance_private (self);
 
 	G_OBJECT_CLASS (tracker_extract_controller_parent_class)->constructed (object);
 
-	g_assert (priv->decorator != NULL);
+	g_assert (self->decorator != NULL);
 
-	g_signal_connect (priv->decorator, "raise-error",
+	g_signal_connect (self->decorator, "raise-error",
 	                  G_CALLBACK (decorator_raise_error_cb), object);
-	g_signal_connect (priv->decorator, "progress",
+	g_signal_connect (self->decorator, "progress",
 	                  G_CALLBACK (decorator_progress_cb), object);
 }
 
@@ -326,19 +304,16 @@ tracker_extract_controller_get_property (GObject    *object,
                                          GParamSpec *pspec)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
-	TrackerExtractControllerPrivate *priv;
-
-	priv = tracker_extract_controller_get_instance_private (self);
 
 	switch (param_id) {
 	case PROP_DECORATOR:
-		g_value_set_object (value, priv->decorator);
+		g_value_set_object (value, self->decorator);
 		break;
 	case PROP_CONNECTION:
-		g_value_set_object (value, priv->connection);
+		g_value_set_object (value, self->connection);
 		break;
 	case PROP_PERSISTENCE:
-		g_value_set_object (value, priv->persistence);
+		g_value_set_object (value, self->persistence);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -353,20 +328,16 @@ tracker_extract_controller_set_property (GObject      *object,
                                          GParamSpec   *pspec)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
-	TrackerExtractControllerPrivate *priv;
-
-	priv = tracker_extract_controller_get_instance_private (self);
 
 	switch (param_id) {
 	case PROP_DECORATOR:
-		g_assert (priv->decorator == NULL);
-		priv->decorator = g_value_dup_object (value);
+		self->decorator = g_value_dup_object (value);
 		break;
 	case PROP_CONNECTION:
-		priv->connection = g_value_dup_object (value);
+		self->connection = g_value_dup_object (value);
 		break;
 	case PROP_PERSISTENCE:
-		priv->persistence = g_value_dup_object (value);
+		self->persistence = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -378,18 +349,15 @@ static void
 tracker_extract_controller_dispose (GObject *object)
 {
 	TrackerExtractController *self = (TrackerExtractController *) object;
-	TrackerExtractControllerPrivate *priv;
 
-	priv = tracker_extract_controller_get_instance_private (self);
-
-	if (priv->connection && priv->object_id) {
-		g_dbus_connection_unregister_object (priv->connection, priv->object_id);
-		priv->object_id = 0;
+	if (self->connection && self->object_id) {
+		g_dbus_connection_unregister_object (self->connection, self->object_id);
+		self->object_id = 0;
 	}
 
-	g_clear_object (&priv->decorator);
-	g_clear_object (&priv->index_proxy);
-	g_clear_object (&priv->persistence);
+	g_clear_object (&self->decorator);
+	g_clear_object (&self->index_proxy);
+	g_clear_object (&self->persistence);
 
 	G_OBJECT_CLASS (tracker_extract_controller_parent_class)->dispose (object);
 }
