@@ -40,9 +40,10 @@ struct _TrackerDecoratorClass {
 	void (* items_available) (TrackerDecorator *decorator);
 	void (* finished)        (TrackerDecorator *decorator);
 
-	void (* error) (TrackerDecorator   *decorator,
-	                TrackerExtractInfo *extract_info,
-	                const gchar        *error_message);
+	void (* error) (TrackerDecorator *decorator,
+	                GFile            *file,
+	                const gchar      *error_message,
+	                const gchar      *extra_info);
 
 	void (* update) (TrackerDecorator   *decorator,
 	                 TrackerExtractInfo *extract_info,
@@ -61,6 +62,11 @@ guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorat
 
 TrackerDecoratorInfo * tracker_decorator_next (TrackerDecorator  *decorator,
                                                GError           **error);
+
+void tracker_decorator_raise_error (TrackerDecorator *decorator,
+                                    GFile            *file,
+                                    const char       *message,
+                                    const char       *extra_info);
 
 void          tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
                                                      const gchar * const *graphs);

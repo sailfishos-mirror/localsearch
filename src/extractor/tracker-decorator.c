@@ -289,9 +289,24 @@ retry_synchronously (TrackerDecorator *decorator,
 		tracker_batch_execute (batch, NULL, &error);
 
 		if (error) {
-			TRACKER_DECORATOR_GET_CLASS (decorator)->error (decorator,
-			                                                info,
-			                                                error->message);
+			g_autofree gchar *sparql = NULL;
+			TrackerResource *resource;
+			const gchar *graph;
+			GFile *file;
+
+			/* This is a SPARQL/ontology error, set the SPARQL query
+			 * as the the extra information.
+			 */
+			file = tracker_extract_info_get_file (info);
+			graph = tracker_extract_info_get_graph (info);
+			resource = tracker_extract_info_get_resource (info);
+
+			sparql = tracker_resource_print_sparql_update (resource,
+			                                               NULL,
+			                                               graph);
+
+			tracker_decorator_raise_error (decorator, file,
+			                               error->message, sparql);
 		}
 	}
 }
@@ -448,8 +463,14 @@ decorator_task_done (GObject      *object,
 
 	if (error) {
 		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
+			g_autoptr (GFile) file = NULL;
+
 			g_warning ("Task for '%s' finished with error: %s\n",
 			           info->url, error->message);
+
+			file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
+			tracker_decorator_raise_error (decorator, file,
+			                               error->message, NULL);
 		}
 	} else {
 		if (!priv->sparql_buffer) {
@@ -1107,4 +1128,16 @@ void
 tracker_decorator_invalidate_cache (TrackerDecorator *decorator)
 {
 	decorator_rebuild_cache (decorator);
+}
+
+void
+tracker_decorator_raise_error (TrackerDecorator *decorator,
+                               GFile            *file,
+                               const char       *message,
+                               const char       *extra_info)
+{
+	TRACKER_DECORATOR_GET_CLASS (decorator)->error (decorator,
+	                                                file,
+	                                                message,
+	                                                extra_info);
 }

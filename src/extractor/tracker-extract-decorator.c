@@ -64,11 +64,6 @@ struct _ExtractData {
 
 static void decorator_get_next_file (TrackerDecorator *decorator);
 
-static void decorator_ignore_file (GFile                   *file,
-                                   TrackerExtractDecorator *decorator,
-                                   const gchar             *error_message,
-                                   const gchar             *extra_info);
-
 G_DEFINE_TYPE (TrackerExtractDecorator, tracker_extract_decorator,
                TRACKER_TYPE_DECORATOR)
 
@@ -246,12 +241,6 @@ get_metadata_cb (TrackerExtract *extract,
 	tracker_extract_persistence_set_file (extract_decorator->persistence, NULL);
 
 	if (error) {
-		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			decorator_ignore_file (data->file,
-			                       TRACKER_EXTRACT_DECORATOR (data->decorator),
-			                       error->message, NULL);
-		}
-
 		tracker_decorator_info_complete_error (data->decorator_info, error);
 	} else {
 		ensure_data (info);
@@ -369,8 +358,10 @@ tracker_extract_decorator_started (TrackerMiner *miner)
 
 	file = tracker_extract_persistence_get_file (decorator->persistence);
 
-	if (file)
-		decorator_ignore_file (file, decorator, "Crash/hang handling file", NULL);
+	if (file) {
+		tracker_decorator_raise_error (TRACKER_DECORATOR (miner), file,
+		                               "Crash/hang handling file", NULL);
+	}
 
 	TRACKER_MINER_CLASS (tracker_extract_decorator_parent_class)->started (miner);
 }
@@ -411,23 +402,61 @@ tracker_extract_decorator_finished (TrackerDecorator *decorator)
 
 static void
 tracker_extract_decorator_error (TrackerDecorator   *decorator,
-                                 TrackerExtractInfo *extract_info,
-                                 const gchar        *error_message)
+                                 GFile              *file,
+                                 const gchar        *error_message,
+                                 const gchar        *extra_info)
 {
-	g_autofree gchar *sparql = NULL;
-	TrackerResource *resource;
-	const gchar *graph;
-	GFile *file;
+	TrackerExtractDecorator *extract_decorator =
+		TRACKER_EXTRACT_DECORATOR (decorator);
+	g_autoptr (GError) error = NULL, info_error = NULL;
+	g_autofree gchar *uri = NULL;
+	g_autoptr (GFileInfo) info = NULL;
+	const gchar *hash = NULL;
+	gboolean removed_hash = FALSE;
 
-	file = tracker_extract_info_get_file (extract_info);
-	graph = tracker_extract_info_get_graph (extract_info);
-	resource = tracker_extract_info_get_resource (extract_info);
+	uri = g_file_get_uri (file);
+	g_debug ("Extraction on file '%s' failed in previous execution, ignoring", uri);
 
-	sparql = tracker_resource_print_sparql_update (resource,
-	                                               NULL,
-	                                               graph);
+	info = g_file_query_info (file,
+	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                          NULL, &info_error);
 
-	decorator_ignore_file (file, TRACKER_EXTRACT_DECORATOR (decorator), error_message, sparql);
+	if (info) {
+		const gchar *mimetype;
+
+		mimetype = g_file_info_get_attribute_string (info,
+		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
+		hash = tracker_extract_module_manager_get_hash (mimetype);
+	}
+
+	if (hash) {
+		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
+
+		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
+		                                      "file", uri);
+		tracker_sparql_statement_bind_string (extract_decorator->update_hash,
+		                                      "hash", hash);
+
+		removed_hash = tracker_sparql_statement_update (extract_decorator->update_hash,
+		                                                NULL, &error);
+	}
+
+	if (!removed_hash) {
+		if (info_error && !g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
+
+		g_clear_error (&error);
+		tracker_sparql_statement_bind_string (extract_decorator->delete_file,
+		                                      "file", uri);
+		tracker_sparql_statement_update (extract_decorator->delete_file,
+		                                 NULL, &error);
+	}
+
+	if (error) {
+		g_warning ("Failed to update ignored file '%s': %s",
+		           uri, error->message);
+	}
 }
 
 static void
@@ -465,58 +494,6 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
-}
-
-static void
-decorator_ignore_file (GFile                   *file,
-                       TrackerExtractDecorator *decorator,
-                       const gchar             *error_message,
-                       const gchar             *extra_info)
-{
-	g_autoptr (GError) error = NULL, info_error = NULL;
-	g_autofree gchar *uri = NULL;
-	g_autoptr (GFileInfo) info = NULL;
-	const gchar *hash = NULL;
-	gboolean removed_hash = FALSE;
-
-	uri = g_file_get_uri (file);
-	g_debug ("Extraction on file '%s' failed in previous execution, ignoring", uri);
-
-	info = g_file_query_info (file,
-	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                          NULL, &info_error);
-
-	if (info) {
-		const gchar *mimetype;
-
-		mimetype = g_file_info_get_attribute_string (info,
-		                                             G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE);
-		hash = tracker_extract_module_manager_get_hash (mimetype);
-	}
-
-	if (hash) {
-		g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
-
-		tracker_sparql_statement_bind_string (decorator->update_hash, "file", uri);
-		tracker_sparql_statement_bind_string (decorator->update_hash, "hash", hash);
-
-		removed_hash = tracker_sparql_statement_update (decorator->update_hash, NULL, &error);
-	}
-
-	if (!removed_hash) {
-		if (info_error && !g_error_matches (info_error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
-			g_signal_emit_by_name (decorator, "raise-error", file, error_message, extra_info);
-
-		g_clear_error (&error);
-		tracker_sparql_statement_bind_string (decorator->delete_file, "file", uri);
-		tracker_sparql_statement_update (decorator->delete_file, NULL, &error);
-	}
-
-	if (error) {
-		g_warning ("Failed to update ignored file '%s': %s",
-		           uri, error->message);
-	}
 }
 
 static void
