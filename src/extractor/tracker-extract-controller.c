@@ -26,10 +26,14 @@
 #include <gio/gunixfdlist.h>
 
 enum {
-	PROP_DECORATOR = 1,
+	PROP_0,
+	PROP_DECORATOR,
 	PROP_CONNECTION,
 	PROP_PERSISTENCE,
+	N_PROPS,
 };
+
+static GParamSpec *props[N_PROPS] = { 0, };
 
 struct _TrackerExtractController {
 	GObject parent_instance;
@@ -298,30 +302,6 @@ tracker_extract_controller_constructed (GObject *object)
 }
 
 static void
-tracker_extract_controller_get_property (GObject    *object,
-                                         guint       param_id,
-                                         GValue     *value,
-                                         GParamSpec *pspec)
-{
-	TrackerExtractController *self = (TrackerExtractController *) object;
-
-	switch (param_id) {
-	case PROP_DECORATOR:
-		g_value_set_object (value, self->decorator);
-		break;
-	case PROP_CONNECTION:
-		g_value_set_object (value, self->connection);
-		break;
-	case PROP_PERSISTENCE:
-		g_value_set_object (value, self->persistence);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-		break;
-	}
-}
-
-static void
 tracker_extract_controller_set_property (GObject      *object,
                                          guint         param_id,
                                          const GValue *value,
@@ -369,35 +349,28 @@ tracker_extract_controller_class_init (TrackerExtractControllerClass *klass)
 
 	object_class->constructed = tracker_extract_controller_constructed;
 	object_class->dispose = tracker_extract_controller_dispose;
-	object_class->get_property = tracker_extract_controller_get_property;
 	object_class->set_property = tracker_extract_controller_set_property;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_DECORATOR,
-	                                 g_param_spec_object ("decorator",
-	                                                      "Decorator",
-	                                                      "Decorator",
-	                                                      TRACKER_TYPE_DECORATOR,
-	                                                      G_PARAM_STATIC_STRINGS |
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY));
-	g_object_class_install_property (object_class,
-	                                 PROP_CONNECTION,
-	                                 g_param_spec_object ("connection",
-	                                                      "Connection",
-	                                                      "Connection",
-	                                                      G_TYPE_DBUS_CONNECTION,
-	                                                      G_PARAM_STATIC_STRINGS |
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY));
-	g_object_class_install_property (object_class,
-	                                 PROP_PERSISTENCE,
-	                                 g_param_spec_object ("persistence",
-	                                                      NULL, NULL,
-	                                                      TRACKER_TYPE_EXTRACT_PERSISTENCE,
-	                                                      G_PARAM_STATIC_STRINGS |
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY));
+	props[PROP_DECORATOR] =
+		g_param_spec_object ("decorator", NULL, NULL,
+		                     TRACKER_TYPE_DECORATOR,
+		                     G_PARAM_STATIC_STRINGS |
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY);
+	props[PROP_CONNECTION] =
+		g_param_spec_object ("connection", NULL, NULL,
+		                     G_TYPE_DBUS_CONNECTION,
+		                     G_PARAM_STATIC_STRINGS |
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY);
+	props[PROP_PERSISTENCE] =
+		g_param_spec_object ("persistence", NULL, NULL,
+		                     TRACKER_TYPE_EXTRACT_PERSISTENCE,
+		                     G_PARAM_STATIC_STRINGS |
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY);
+
+	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
 static void
