@@ -169,7 +169,7 @@ run_standalone (void)
 	g_autoptr (TrackerExtract) extract = NULL;
 	g_autoptr (GFile) file = NULL;
 	g_autoptr (GError) error = NULL;
-	g_autofree gchar *uri = NULL;
+	g_autofree gchar *uri = NULL, *mime = NULL;
 	TrackerResource *resource = NULL;
 	GEnumClass *enum_class;
 	GEnumValue *enum_value;
@@ -193,18 +193,30 @@ run_standalone (void)
 	tracker_locale_sanity_check ();
 
 	file = g_file_new_for_commandline_arg (filename);
+
+	if (mime_type) {
+		mime = g_strdup (mime_type);
+	} else {
+		g_autoptr (GFileInfo) file_info = NULL;
+
+		file_info = g_file_query_info (file,
+		                               G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+		                               G_FILE_QUERY_INFO_NONE,
+		                               NULL,
+		                               &error);
+		if (!file_info)
+			goto error;
+
+		mime = g_strdup (g_file_info_get_content_type (file_info));
+	}
+
 	uri = g_file_get_uri (file);
 
 	extract = tracker_extract_new ();
 
-	info = tracker_extract_file_sync (extract, uri, "_:content", mime_type, &error);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Metadata extraction failed"),
-		            error->message);
-		return EXIT_FAILURE;
-	}
+	info = tracker_extract_file_sync (extract, uri, "_:content", mime, &error);
+	if (!info)
+		goto error;
 
 	resource = tracker_extract_info_get_resource (info);
 
@@ -271,6 +283,12 @@ run_standalone (void)
 	tracker_extract_info_unref (info);
 
 	return EXIT_SUCCESS;
+ error:
+	g_printerr ("%s, %s\n",
+	            _("Metadata extraction failed"),
+	            error->message);
+
+	return EXIT_FAILURE;
 }
 
 static void
