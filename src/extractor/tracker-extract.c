@@ -49,11 +49,6 @@ struct _TrackerExtract {
 
 	gint max_text;
 
-	/* used to maintain the running tasks
-	 * and stats from different threads
-	 */
-	GMutex stats_mutex;
-
 	GMainContext *thread_context;
 	GMainLoop *thread_loop;
 
@@ -116,7 +111,6 @@ tracker_extract_init (TrackerExtract *extract)
 		extract->statistics_data =
 			g_hash_table_new_full (NULL, NULL, NULL,
 			                       (GDestroyNotify) statistics_data_free);
-		g_mutex_init (&extract->stats_mutex);
 	}
 #endif
 }
@@ -125,15 +119,6 @@ static void
 tracker_extract_finalize (GObject *object)
 {
 	TrackerExtract *extract = TRACKER_EXTRACT (object);
-
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		log_statistics (object);
-		g_hash_table_destroy (extract->statistics_data);
-		g_timer_destroy (extract->total_elapsed);
-		g_mutex_clear (&extract->stats_mutex);
-	}
-#endif
 
 	if (extract->thread_loop) {
 		g_main_loop_quit (extract->thread_loop);
@@ -145,6 +130,14 @@ tracker_extract_finalize (GObject *object)
 
 	if (extract->thread_context)
 		g_main_context_unref (extract->thread_context);
+
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
+		log_statistics (object);
+		g_hash_table_destroy (extract->statistics_data);
+		g_timer_destroy (extract->total_elapsed);
+	}
+#endif
 
 	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);
 }
@@ -158,8 +151,6 @@ log_statistics (GObject *object)
 		GHashTableIter iter;
 		gpointer key, value;
 		gdouble total_elapsed;
-
-		g_mutex_lock (&extract->stats_mutex);
 
 		g_message ("--------------------------------------------------");
 		g_message ("Statistics:");
@@ -194,8 +185,6 @@ log_statistics (GObject *object)
 		}
 
 		g_message ("--------------------------------------------------");
-
-		g_mutex_unlock (&extract->stats_mutex);
 	}
 #endif
 }
@@ -220,8 +209,6 @@ notify_task_finish (TrackerExtractTask *task,
 	 */
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (STATISTICS)) {
-		g_mutex_lock (&extract->stats_mutex);
-
 		if (task->module) {
 			stats_data = g_hash_table_lookup (extract->statistics_data,
 			                                  task->module);
@@ -235,8 +222,6 @@ notify_task_finish (TrackerExtractTask *task,
 		} else {
 			extract->unhandled_count++;
 		}
-
-		g_mutex_unlock (&extract->stats_mutex);
 	}
 #endif
 }
