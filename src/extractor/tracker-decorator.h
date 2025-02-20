@@ -46,8 +46,7 @@ struct _TrackerDecoratorClass {
 	                const gchar      *extra_info);
 
 	void (* update) (TrackerDecorator   *decorator,
-	                 TrackerExtractInfo *extract_info,
-	                 TrackerBatch       *batch);
+	                 TrackerExtractInfo *extract_info);
 };
 
 #define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
@@ -70,6 +69,8 @@ void tracker_decorator_raise_error (TrackerDecorator *decorator,
 
 void          tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
                                                      const gchar * const *graphs);
+
+TrackerBatch * tracker_decorator_get_batch (TrackerDecorator *decorator);
 
 void tracker_decorator_invalidate_cache (TrackerDecorator *decorator);
 

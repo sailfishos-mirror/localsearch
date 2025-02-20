@@ -170,15 +170,17 @@ ensure_data (TrackerExtractInfo *info)
 
 static void
 tracker_extract_decorator_update (TrackerDecorator   *decorator,
-                                  TrackerExtractInfo *info,
-                                  TrackerBatch       *batch)
+                                  TrackerExtractInfo *info)
 {
 	TrackerExtractDecorator *extract_decorator =
 		TRACKER_EXTRACT_DECORATOR (decorator);
 	TrackerResource *resource;
 	const gchar *graph, *mime_type, *hash;
 	g_autofree gchar *uri = NULL;
+	TrackerBatch *batch;
 	GFile *file;
+
+	batch = tracker_decorator_get_batch (decorator);
 
 	mime_type = tracker_extract_info_get_mimetype (info);
 	hash = tracker_extract_module_manager_get_hash (mime_type);

@@ -73,6 +73,7 @@ struct _TrackerDecoratorPrivate {
 	GPtrArray *commit_buffer; /* Array of TrackerExtractInfo */
 	GTimer *timer;
 
+	TrackerBatch *batch;
 	TrackerSparqlStatement *remaining_items_query;
 	TrackerSparqlStatement *item_count_query;
 
@@ -271,10 +272,9 @@ static void
 retry_synchronously (TrackerDecorator *decorator,
                      GPtrArray        *commit_buffer)
 {
-	TrackerSparqlConnection *sparql_conn;
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 	guint i;
-
-	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
 
 	for (i = 0; i < commit_buffer->len; i++) {
 		g_autoptr (TrackerBatch) batch = NULL;
@@ -282,11 +282,13 @@ retry_synchronously (TrackerDecorator *decorator,
 		g_autoptr (GError) error = NULL;
 
 		info = g_ptr_array_index (commit_buffer, i);
-		batch = tracker_sparql_connection_create_batch (sparql_conn);
 
-		TRACKER_DECORATOR_GET_CLASS (decorator)->update (decorator, info, batch);
+		TRACKER_DECORATOR_GET_CLASS (decorator)->update (decorator, info);
 
-		tracker_batch_execute (batch, NULL, &error);
+		batch = g_steal_pointer (&priv->batch);
+
+		if (batch)
+			tracker_batch_execute (batch, NULL, &error);
 
 		if (error) {
 			g_autofree gchar *sparql = NULL;
@@ -344,10 +346,8 @@ decorator_commit_cb (GObject      *object,
 static gboolean
 decorator_commit_info (TrackerDecorator *decorator)
 {
-	TrackerSparqlConnection *sparql_conn;
 	TrackerDecoratorPrivate *priv;
-	TrackerBatch *batch;
-	gint i;
+	g_autoptr (TrackerBatch) batch = NULL;
 
 	priv = tracker_decorator_get_instance_private (decorator);
 
@@ -362,22 +362,15 @@ decorator_commit_info (TrackerDecorator *decorator)
 	priv->sparql_buffer = NULL;
 	priv->updating = TRUE;
 
-	sparql_conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
-	batch = tracker_sparql_connection_create_batch (sparql_conn);
+	batch = g_steal_pointer (&priv->batch);
 
-	for (i = 0; i < priv->commit_buffer->len; i++) {
-		TrackerExtractInfo *info;
-
-		info = g_ptr_array_index (priv->commit_buffer, i);
-		TRACKER_DECORATOR_GET_CLASS (decorator)->update (decorator, info, batch);
+	if (batch) {
+		tracker_batch_execute_async (batch,
+		                             priv->cancellable,
+		                             decorator_commit_cb,
+		                             decorator);
+		decorator_update_state (decorator, NULL, TRUE);
 	}
-
-	tracker_batch_execute_async (batch,
-	                             priv->cancellable,
-	                             decorator_commit_cb,
-	                             decorator);
-	decorator_update_state (decorator, NULL, TRUE);
-	g_object_unref (batch);
 
 	return TRUE;
 }
@@ -479,6 +472,9 @@ decorator_task_done (GObject      *object,
 		}
 
 		g_ptr_array_add (priv->sparql_buffer, extract_info);
+
+		TRACKER_DECORATOR_GET_CLASS (decorator)->update (decorator,
+		                                                 extract_info);
 	}
 
 	if (priv->n_remaining_items > 0)
@@ -838,6 +834,8 @@ tracker_decorator_finalize (GObject *object)
 	                 NULL);
 	g_queue_clear (&priv->item_cache);
 
+	g_clear_object (&priv->batch);
+
 	g_clear_pointer (&priv->sparql_buffer, g_ptr_array_unref);
 	g_clear_pointer (&priv->commit_buffer, g_ptr_array_unref);
 	g_timer_destroy (priv->timer);
@@ -1140,4 +1138,20 @@ tracker_decorator_raise_error (TrackerDecorator *decorator,
 {
 	g_signal_emit (decorator, signals[RAISE_ERROR], 0,
 	               file, message, extra_info);
+}
+
+TrackerBatch *
+tracker_decorator_get_batch (TrackerDecorator *decorator)
+{
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
+
+	if (!priv->batch) {
+		TrackerSparqlConnection *conn;
+
+		conn = tracker_miner_get_connection (TRACKER_MINER (decorator));
+		priv->batch = tracker_sparql_connection_create_batch (conn);
+	}
+
+	return priv->batch;
 }
