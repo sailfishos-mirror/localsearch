@@ -84,9 +84,6 @@ typedef struct {
 
 static void tracker_extract_finalize (GObject *object);
 static void log_statistics        (GObject *object);
-static gboolean get_metadata         (TrackerExtractTask *task);
-static gboolean dispatch_task_cb     (TrackerExtractTask *task);
-
 
 G_DEFINE_TYPE(TrackerExtract, tracker_extract, G_TYPE_OBJECT)
 
@@ -459,40 +456,6 @@ metadata_thread_func (GMainLoop *loop)
 	return NULL;
 }
 
-/* This function is executed in the main thread, decides the
- * module that's going to be run for a given task, and dispatches
- * the task according to the threading strategy of that module.
- */
-static gboolean
-dispatch_task_cb (TrackerExtractTask *task)
-{
-	TrackerExtract *extract = task->extract;
-	GError *error = NULL;
-
-	if (!extract->task_thread) {
-		extract->thread_context = g_main_context_new ();
-		extract->thread_loop = g_main_loop_new (extract->thread_context, FALSE);
-
-		extract->task_thread =
-			g_thread_try_new ("single",
-					  (GThreadFunc) metadata_thread_func,
-					  g_main_loop_ref (extract->thread_loop),
-					  &error);
-		if (!extract->task_thread) {
-			g_task_return_error (G_TASK (task->res), error);
-			extract_task_free (task);
-			return FALSE;
-		}
-
-	}
-
-	g_main_context_invoke (extract->thread_context,
-			       handle_task_in_thread,
-			       task);
-	return FALSE;
-}
-
-/* This function can be called in any thread */
 void
 tracker_extract_file (TrackerExtract      *extract,
                       const gchar         *file,
@@ -542,7 +505,26 @@ tracker_extract_file (TrackerExtract      *extract,
 	}
 #endif
 
-	g_idle_add ((GSourceFunc) dispatch_task_cb, task);
+	if (!extract->task_thread) {
+		extract->thread_context = g_main_context_new ();
+		extract->thread_loop = g_main_loop_new (extract->thread_context, FALSE);
+
+		extract->task_thread =
+			g_thread_try_new ("single",
+					  (GThreadFunc) metadata_thread_func,
+					  g_main_loop_ref (extract->thread_loop),
+					  &error);
+		if (!extract->task_thread) {
+			g_task_return_error (G_TASK (async_task), error);
+			extract_task_free (task);
+			return;
+		}
+
+	}
+
+	g_main_context_invoke (extract->thread_context,
+			       handle_task_in_thread,
+			       task);
 }
 
 TrackerExtractInfo *
