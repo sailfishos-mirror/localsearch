@@ -26,39 +26,14 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_DECORATOR         (tracker_decorator_get_type())
-#define TRACKER_DECORATOR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_DECORATOR, TrackerDecorator))
-#define TRACKER_DECORATOR_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_DECORATOR, TrackerDecoratorClass))
-#define TRACKER_IS_DECORATOR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_DECORATOR))
-#define TRACKER_IS_DECORATOR_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),  TRACKER_TYPE_DECORATOR))
-#define TRACKER_DECORATOR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_DECORATOR, TrackerDecoratorClass))
+#define TRACKER_TYPE_DECORATOR (tracker_decorator_get_type())
+G_DECLARE_DERIVABLE_TYPE (TrackerDecorator,
+                          tracker_decorator,
+                          TRACKER, DECORATOR,
+                          TrackerMiner)
 
-typedef struct _TrackerDecorator TrackerDecorator;
-typedef struct _TrackerDecoratorClass TrackerDecoratorClass;
 typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
 
-/**
- * TrackerDecorator:
- *
- * Abstract miner object for passive extended metadata indexing, i.e.
- * data past the basic information such as file name, size, etc.
- **/
-struct _TrackerDecorator {
-	TrackerMiner parent_instance;
-};
-
-/**
- * TrackerDecoratorClass:
- * @parent_class: parent object class.
- * @items_available: Called when there are resources to be processed.
- * @finished: Called when all resources have been processed.
- * @padding: Reserved for future API improvements.
- *
- * An implementation that takes care of extracting extra metadata
- * specific to file types by talking to tracker-extract.
- *
- * Based on #TrackerMinerClass.
- **/
 struct _TrackerDecoratorClass {
 	TrackerMinerClass parent_class;
 
@@ -80,8 +55,6 @@ typedef enum {
 	TRACKER_DECORATOR_ERROR_PAUSED
 } TrackerDecoratorError;
 
-
-GType         tracker_decorator_get_type          (void) G_GNUC_CONST;
 GQuark        tracker_decorator_error_quark       (void);
 
 guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorator);

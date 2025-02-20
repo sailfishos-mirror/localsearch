@@ -24,27 +24,11 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_EXTRACT_PERSISTENCE         (tracker_extract_persistence_get_type ())
-#define TRACKER_EXTRACT_PERSISTENCE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_EXTRACT_PERSISTENCE, TrackerExtractPersistence))
-#define TRACKER_EXTRACT_PERSISTENCE_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_EXTRACT_PERSISTENCE, TrackerExtractPersistenceClass))
-#define TRACKER_IS_EXTRACT_PERSISTENCE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_EXTRACT_PERSISTENCE))
-#define TRACKER_IS_EXTRACT_PERSISTENCE_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c), TRACKER_TYPE_EXTRACT_PERSISTENCE))
-#define TRACKER_EXTRACT_PERSISTENCE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_EXTRACT_PERSISTENCE, TrackerExtractPersistenceClass))
-
-typedef struct _TrackerExtractPersistence TrackerExtractPersistence;
-typedef struct _TrackerExtractPersistenceClass TrackerExtractPersistenceClass;
-
-struct _TrackerExtractPersistence
-{
-	GObject parent_instance;
-};
-
-struct _TrackerExtractPersistenceClass
-{
-	GObjectClass parent_class;
-};
-
-GType tracker_extract_persistence_get_type (void) G_GNUC_CONST;
+#define TRACKER_TYPE_EXTRACT_PERSISTENCE (tracker_extract_persistence_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerExtractPersistence,
+                      tracker_extract_persistence,
+                      TRACKER, EXTRACT_PERSISTENCE,
+                      GObject)
 
 TrackerExtractPersistence * tracker_extract_persistence_new (void);
 

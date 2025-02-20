@@ -19,6 +19,11 @@
 
 #include "tracker-extract-persistence.h"
 
+struct _TrackerExtractPersistence
+{
+	GObject parent_instance;
+};
+
 typedef struct _TrackerExtractPersistencePrivate TrackerExtractPersistencePrivate;
 
 struct _TrackerExtractPersistencePrivate

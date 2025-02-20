@@ -28,25 +28,11 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_EXTRACT_DECORATOR         (tracker_extract_decorator_get_type ())
-#define TRACKER_EXTRACT_DECORATOR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_EXTRACT_DECORATOR, TrackerExtractDecorator))
-#define TRACKER_EXTRACT_DECORATOR_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_EXTRACT_DECORATOR, TrackerExtractDecoratorClass))
-#define TRACKER_IS_EXTRACT_DECORATOR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_EXTRACT_DECORATOR))
-#define TRACKER_IS_EXTRACT_DECORATOR_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c), TRACKER_TYPE_EXTRACT_DECORATOR))
-#define TRACKER_EXTRACT_DECORATOR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_EXTRACT_DECORATOR, TrackerExtractDecoratorClass))
-
-typedef struct TrackerExtractDecorator TrackerExtractDecorator;
-typedef struct TrackerExtractDecoratorClass TrackerExtractDecoratorClass;
-
-struct TrackerExtractDecorator {
-	TrackerDecorator parent_instance;
-};
-
-struct TrackerExtractDecoratorClass {
-	TrackerDecoratorClass parent_class;
-};
-
-GType              tracker_extract_decorator_get_type (void) G_GNUC_CONST;
+#define TRACKER_TYPE_EXTRACT_DECORATOR (tracker_extract_decorator_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerExtractDecorator,
+                      tracker_extract_decorator,
+                      TRACKER, EXTRACT_DECORATOR,
+                      TrackerDecorator)
 
 TrackerDecorator * tracker_extract_decorator_new (TrackerSparqlConnection   *connection,
                                                   TrackerExtract            *extractor,

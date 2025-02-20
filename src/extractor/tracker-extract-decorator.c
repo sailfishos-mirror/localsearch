@@ -34,6 +34,10 @@ enum {
 	PROP_PERSISTENCE,
 };
 
+struct _TrackerExtractDecorator {
+	TrackerDecorator parent_instance;
+};
+
 typedef struct _TrackerExtractDecoratorPrivate TrackerExtractDecoratorPrivate;
 typedef struct _ExtractData ExtractData;
 

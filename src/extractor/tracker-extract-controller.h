@@ -26,25 +26,12 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_EXTRACT_CONTROLLER         (tracker_extract_controller_get_type ())
-#define TRACKER_EXTRACT_CONTROLLER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_EXTRACT_CONTROLLER, TrackerExtractController))
-#define TRACKER_EXTRACT_CONTROLLER_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_EXTRACT_CONTROLLER, TrackerExtractControllerClass))
-#define TRACKER_IS_EXTRACT_CONTROLLER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_EXTRACT_CONTROLLER))
-#define TRACKER_IS_EXTRACT_CONTROLLER_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c), TRACKER_TYPE_EXTRACT_CONTROLLER))
-#define TRACKER_EXTRACT_CONTROLLER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_EXTRACT_CONTROLLER, TrackerExtractControllerClass))
+#define TRACKER_TYPE_EXTRACT_CONTROLLER (tracker_extract_controller_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerExtractController,
+                      tracker_extract_controller,
+                      TRACKER, EXTRACT_CONTROLLER,
+                      GObject)
 
-typedef struct TrackerExtractController TrackerExtractController;
-typedef struct TrackerExtractControllerClass TrackerExtractControllerClass;
-
-struct TrackerExtractController {
-	GObject parent_instance;
-};
-
-struct TrackerExtractControllerClass {
-	GObjectClass parent_class;
-};
-
-GType                      tracker_extract_controller_get_type (void) G_GNUC_CONST;
 TrackerExtractController * tracker_extract_controller_new (TrackerDecorator           *decorator,
                                                            GDBusConnection            *connection,
                                                            TrackerExtractPersistence  *persistence,

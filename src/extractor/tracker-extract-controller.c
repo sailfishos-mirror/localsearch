@@ -31,6 +31,10 @@ enum {
 	PROP_PERSISTENCE,
 };
 
+struct _TrackerExtractController {
+	GObject parent_instance;
+};
+
 typedef struct _TrackerExtractControllerPrivate TrackerExtractControllerPrivate;
 
 struct _TrackerExtractControllerPrivate {
