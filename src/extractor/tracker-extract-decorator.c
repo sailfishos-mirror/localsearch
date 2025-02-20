@@ -299,11 +299,6 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 		g_clear_error (&error);
 		return;
-	} else if (!tracker_decorator_info_get_url (info)) {
-		/* Skip virtual elements with no real file representation */
-		tracker_decorator_info_unref (info);
-		decorator_get_next_file (decorator);
-		return;
 	}
 
 	file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
