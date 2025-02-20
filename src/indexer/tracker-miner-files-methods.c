@@ -137,7 +137,8 @@ miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
 
 static TrackerResource *
 miner_files_create_empty_information_element (TrackerMinerFiles *miner,
-                                              GFile             *file)
+                                              GFile             *file,
+                                              const gchar       *mime_type)
 {
 	TrackerResource *resource;
 	const gchar *urn;
@@ -146,6 +147,7 @@ miner_files_create_empty_information_element (TrackerMinerFiles *miner,
 	                                       file);
 	resource = tracker_resource_new (urn);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
+	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
 
 	return resource;
 }
@@ -268,7 +270,8 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 			 */
 			information_element =
 				miner_files_create_empty_information_element (TRACKER_MINER_FILES (fs),
-				                                              file);
+				                                              file,
+				                                              mime_type);
 		}
 
 		tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", information_element);
