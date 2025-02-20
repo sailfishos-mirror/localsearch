@@ -1,10 +1,11 @@
 # Inputs: documentsHigh, documentsLow, picturesHigh, picturesLow,
 #   audioHigh, audioLow, videoHigh, videoLow, softwareHigh, softwareLow
-# Outputs: urn, id, ie
+# Outputs: urn, id, ie, mimeType
 SELECT
   ?urn
   (tracker:id(?urn) AS ?id)
   ?ie
+  (nie:mimeType(?ie) As ?mimeType)
 {
   {
     # Data from high priority graphs

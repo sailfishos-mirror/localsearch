@@ -74,6 +74,7 @@ TrackerDecoratorInfo *
 void          tracker_decorator_info_unref        (TrackerDecoratorInfo *info);
 const gchar * tracker_decorator_info_get_url      (TrackerDecoratorInfo *info);
 const gchar * tracker_decorator_info_get_content_id (TrackerDecoratorInfo *info);
+const gchar * tracker_decorator_info_get_mime_type (TrackerDecoratorInfo *info);
 GCancellable * tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info);
 void          tracker_decorator_info_complete     (TrackerDecoratorInfo *info,
                                                    TrackerExtractInfo   *extract_info);

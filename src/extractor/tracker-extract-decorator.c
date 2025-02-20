@@ -386,7 +386,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	tracker_extract_file (extract_decorator->extractor,
 	                      tracker_decorator_info_get_url (info),
 	                      tracker_decorator_info_get_content_id (info),
-	                      NULL,
+	                      tracker_decorator_info_get_mime_type (info),
 	                      cancellable,
 	                      (GAsyncReadyCallback) get_metadata_cb, data);
 }
