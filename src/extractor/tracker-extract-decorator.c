@@ -32,7 +32,10 @@ enum {
 	PROP_0,
 	PROP_EXTRACTOR,
 	PROP_PERSISTENCE,
+	N_PROPS,
 };
+
+static GParamSpec *props[N_PROPS] = { 0, };
 
 struct _TrackerExtractDecorator {
 	TrackerDecorator parent_instance;
@@ -70,28 +73,6 @@ static void decorator_ignore_file (GFile                   *file,
 
 G_DEFINE_TYPE (TrackerExtractDecorator, tracker_extract_decorator,
                TRACKER_TYPE_DECORATOR)
-
-static void
-tracker_extract_decorator_get_property (GObject    *object,
-                                        guint       param_id,
-                                        GValue     *value,
-                                        GParamSpec *pspec)
-{
-	TrackerExtractDecorator *extract_decorator =
-		TRACKER_EXTRACT_DECORATOR (object);
-
-	switch (param_id) {
-	case PROP_EXTRACTOR:
-		g_value_set_object (value, extract_decorator->extractor);
-		break;
-	case PROP_PERSISTENCE:
-		g_value_set_object (value, extract_decorator->persistence);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-		break;
-	}
-}
 
 static void
 tracker_extract_decorator_set_property (GObject      *object,
@@ -498,7 +479,6 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 
 	object_class->constructed = tracker_extract_decorator_constructed;
 	object_class->finalize = tracker_extract_decorator_finalize;
-	object_class->get_property = tracker_extract_decorator_get_property;
 	object_class->set_property = tracker_extract_decorator_set_property;
 
 	miner_class->paused = tracker_extract_decorator_paused;
@@ -510,23 +490,21 @@ tracker_extract_decorator_class_init (TrackerExtractDecoratorClass *klass)
 	decorator_class->error = tracker_extract_decorator_error;
 	decorator_class->update = tracker_extract_decorator_update;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_EXTRACTOR,
-	                                 g_param_spec_object ("extractor",
-	                                                      "Extractor",
-	                                                      "Extractor",
-	                                                      TRACKER_TYPE_EXTRACT,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_PERSISTENCE,
-	                                 g_param_spec_object ("persistence",
-	                                                      NULL, NULL,
-	                                                      TRACKER_TYPE_EXTRACT_PERSISTENCE,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
+	props[PROP_EXTRACTOR] =
+		g_param_spec_object ("extractor", NULL, NULL,
+		                     TRACKER_TYPE_EXTRACT,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_PERSISTENCE] =
+		g_param_spec_object ("persistence",
+		                     NULL, NULL,
+		                     TRACKER_TYPE_EXTRACT_PERSISTENCE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
 static void
