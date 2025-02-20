@@ -50,6 +50,8 @@ TrackerResource *     tracker_extract_info_get_resource           (TrackerExtrac
 void                  tracker_extract_info_set_resource           (TrackerExtractInfo *info,
                                                                    TrackerResource    *resource);
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerExtractInfo, tracker_extract_info_unref)
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_EXTRACT_INFO_H__ */

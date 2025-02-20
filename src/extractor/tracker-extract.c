@@ -193,20 +193,17 @@ get_file_metadata (TrackerExtractTaskData  *task,
                    TrackerExtractInfo     **info_out,
                    GError                 **error)
 {
-	TrackerExtractInfo *info;
-	GFile *file;
+	g_autoptr (TrackerExtractInfo) info = NULL;
+	g_autoptr (GFile) file = NULL;
 	gboolean success = FALSE;
 
 	*info_out = NULL;
 
 	file = g_file_new_for_uri (task->file);
 	info = tracker_extract_info_new (file, task->content_id, task->mimetype, task->graph, task->max_text);
-	g_object_unref (file);
 
-	if (!task->mimetype || !*task->mimetype) {
-		tracker_extract_info_unref (info);
+	if (!task->mimetype || !*task->mimetype)
 		return FALSE;
-	}
 
 	/* Now we have sanity checked everything, actually get the
 	 * data we need from the extractors.
@@ -225,12 +222,8 @@ get_file_metadata (TrackerExtractTaskData  *task,
 		success = TRUE;
 	}
 
-	if (!success) {
-		tracker_extract_info_unref (info);
-		info = NULL;
-	}
-
-	*info_out = info;
+	if (success)
+		*info_out = g_steal_pointer (&info);
 
 	return success;
 }
