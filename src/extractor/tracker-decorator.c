@@ -100,9 +100,6 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-static void decorator_task_done (GObject      *object,
-                                 GAsyncResult *result,
-                                 gpointer      user_data);
 static void decorator_cache_next_items (TrackerDecorator *decorator);
 static gboolean decorator_check_commit (TrackerDecorator *decorator);
 
@@ -124,10 +121,7 @@ static TrackerDecoratorInfo *
 tracker_decorator_info_new (TrackerDecorator    *decorator,
                             TrackerSparqlCursor *cursor)
 {
-	TrackerDecoratorPrivate *priv;
 	TrackerDecoratorInfo *info;
-
-	priv = tracker_decorator_get_instance_private (decorator);
 
 	info = g_new0 (TrackerDecoratorInfo, 1);
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
@@ -135,11 +129,6 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 	info->mime_type = g_strdup (tracker_sparql_cursor_get_string (cursor, 3, NULL));
 	info->ref_count = 1;
-
-	info->task = g_task_new (decorator,
-	                         priv->task_cancellable,
-	                         decorator_task_done,
-	                         info);
 
 	return info;
 }
@@ -176,8 +165,7 @@ tracker_decorator_info_unref (TrackerDecoratorInfo *info)
 	if (!g_atomic_int_dec_and_test (&info->ref_count))
 		return;
 
-	if (info->task)
-		g_object_unref (info->task);
+	g_clear_object (&info->task);
 	g_free (info->url);
 	g_free (info->content_id);
 	g_free (info->mime_type);
@@ -1042,6 +1030,11 @@ tracker_decorator_next (TrackerDecorator  *decorator,
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s", info->url));
 	decorator_hint_next_file_needed (decorator);
+
+	info->task = g_task_new (decorator,
+	                         priv->task_cancellable,
+	                         decorator_task_done,
+	                         info);
 
 	return info;
 }
