@@ -250,7 +250,6 @@ get_metadata_cb (TrackerExtract *extract,
 
 	throttle_next_item (data->decorator);
 
-	tracker_decorator_info_unref (data->decorator_info);
 	g_object_unref (data->file);
 	g_free (data);
 }
@@ -296,7 +295,6 @@ decorator_get_next_file (TrackerDecorator *decorator)
 		                     "URI '%s' is not native",
 		                     tracker_decorator_info_get_url (info));
 		tracker_decorator_info_complete_error (info, error);
-		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
 	}

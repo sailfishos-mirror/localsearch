@@ -29,7 +29,6 @@
 #include <fcntl.h>
 #endif
 
-#define QUERY_BATCH_SIZE 200
 #define DEFAULT_BATCH_SIZE 200
 
 /**
@@ -65,7 +64,9 @@ struct _TrackerDecoratorPrivate {
 	gssize n_remaining_items;
 	gssize n_processed_items;
 
-	GQueue item_cache; /* Queue of TrackerDecoratorInfo */
+	TrackerSparqlCursor *cursor; /* Results of remaining_items_query */
+	TrackerDecoratorInfo *item; /* Pre-extracted info for the next element */
+	TrackerDecoratorInfo *next_item; /* Pre-extracted info for the next element */
 
 	GStrv priority_graphs;
 
@@ -100,7 +101,7 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-static void decorator_cache_next_items (TrackerDecorator *decorator);
+static void decorator_maybe_restart_query (TrackerDecorator *decorator);
 static gboolean decorator_check_commit (TrackerDecorator *decorator);
 
 /**
@@ -207,19 +208,6 @@ tracker_decorator_info_hint_needed (TrackerDecoratorInfo *info,
 }
 
 static void
-decorator_hint_next_file_needed (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv =
-		tracker_decorator_get_instance_private (decorator);
-	TrackerDecoratorInfo *next_info;
-	g_autoptr (GFile) file = NULL;
-
-	next_info = g_queue_peek_head (&priv->item_cache);
-	if (next_info)
-		tracker_decorator_info_hint_needed (next_info, TRUE);
-}
-
-static void
 decorator_update_state (TrackerDecorator *decorator,
                         const gchar      *message,
                         gboolean          estimate_time)
@@ -319,29 +307,26 @@ decorator_commit_cb (GObject      *object,
                      GAsyncResult *result,
                      gpointer      user_data)
 {
+	TrackerBatch *batch = TRACKER_BATCH (object);
+	TrackerDecorator *decorator = user_data;
 	TrackerDecoratorPrivate *priv;
-	TrackerDecorator *decorator;
-	TrackerBatch *batch;
 	g_autoptr (GError) error = NULL;
 
-	decorator = user_data;
-	priv = tracker_decorator_get_instance_private (decorator);
-	batch = TRACKER_BATCH (object);
+	tracker_batch_execute_finish (batch, result, &error);
 
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		return;
+
+	priv = tracker_decorator_get_instance_private (decorator);
 	priv->updating = FALSE;
 
-	if (!tracker_batch_execute_finish (batch, result, &error)) {
-		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-			return;
-
+	if (error) {
 		g_debug ("SPARQL error detected in batch, retrying one by one");
 		retry_synchronously (decorator, priv->commit_buffer);
 	}
 
 	g_clear_pointer (&priv->commit_buffer, g_ptr_array_unref);
-
-	if (!decorator_check_commit (decorator))
-		decorator_cache_next_items (decorator);
+	decorator_check_commit (decorator);
 }
 
 static gboolean
@@ -420,18 +405,25 @@ decorator_finish (TrackerDecorator *decorator)
 }
 
 static void
-decorator_rebuild_cache (TrackerDecorator *decorator)
+decorator_clear_cache (TrackerDecorator *decorator)
 {
-	TrackerDecoratorPrivate *priv;
-
-	priv = tracker_decorator_get_instance_private (decorator);
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
 	priv->n_remaining_items = 0;
-	g_queue_foreach (&priv->item_cache,
-	                 (GFunc) tracker_decorator_info_unref, NULL);
-	g_queue_clear (&priv->item_cache);
+	g_clear_pointer (&priv->next_item, tracker_decorator_info_unref);
 
-	decorator_cache_next_items (decorator);
+	if (priv->cursor) {
+		tracker_sparql_cursor_close (priv->cursor);
+		g_clear_object (&priv->cursor);
+	}
+}
+
+static void
+decorator_rebuild_cache (TrackerDecorator *decorator)
+{
+	decorator_clear_cache (decorator);
+	decorator_maybe_restart_query (decorator);
 }
 
 /* This function is called after the caller has completed the
@@ -449,22 +441,24 @@ decorator_task_done (GObject      *object,
 	TrackerExtractInfo *extract_info;
 	g_autoptr (GError) error = NULL;
 
-	priv = tracker_decorator_get_instance_private (decorator);
 	extract_info = g_task_propagate_pointer (G_TASK (result), &error);
 
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		return;
+
+	priv = tracker_decorator_get_instance_private (decorator);
+	g_assert (info == priv->item);
 	tracker_decorator_info_hint_needed (info, FALSE);
 
 	if (error) {
-		if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED)) {
-			g_autoptr (GFile) file = NULL;
+		g_autoptr (GFile) file = NULL;
 
-			g_warning ("Task for '%s' finished with error: %s\n",
-			           info->url, error->message);
+		g_warning ("Task for '%s' finished with error: %s\n",
+		           info->url, error->message);
 
-			file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
-			tracker_decorator_raise_error (decorator, file,
-			                               error->message, NULL);
-		}
+		file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
+		tracker_decorator_raise_error (decorator, file,
+		                               error->message, NULL);
 	} else {
 		if (!priv->sparql_buffer) {
 			priv->sparql_buffer =
@@ -477,17 +471,18 @@ decorator_task_done (GObject      *object,
 		                                                 extract_info);
 	}
 
+	g_clear_pointer (&priv->item, tracker_decorator_info_unref);
+
 	if (priv->n_remaining_items > 0)
 		priv->n_remaining_items--;
 	priv->n_processed_items++;
 
-	if (priv->n_remaining_items == 0) {
+	decorator_check_commit (decorator);
+
+	if (!priv->next_item) {
 		decorator_finish (decorator);
 		if (!priv->updating)
 			decorator_rebuild_cache (decorator);
-	} else if (g_queue_is_empty (&priv->item_cache) &&
-	           (!priv->sparql_buffer || !priv->commit_buffer)) {
-		decorator_cache_next_items (decorator);
 	}
 }
 
@@ -511,114 +506,55 @@ load_statement (TrackerDecorator *decorator,
 }
 
 static void
-decorator_count_remaining_items_cb (GObject      *object,
-                                    GAsyncResult *result,
-                                    gpointer      user_data)
+decorator_cache_next_item (TrackerDecorator *decorator)
 {
-	TrackerDecorator *decorator = user_data;
-	TrackerDecoratorPrivate *priv;
-	g_autoptr (TrackerSparqlCursor) cursor = NULL;
-	g_autoptr (GError) error = NULL;
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
-	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
-	                                                  result, &error);
-
-	if (error) {
-		g_warning ("Could not get remaining item count: %s", error->message);
-		return;
-	}
-
-	if (!tracker_sparql_cursor_next (cursor, NULL, NULL))
+	if (!priv->cursor)
 		return;
 
-	priv = tracker_decorator_get_instance_private (decorator);
-	priv->querying = FALSE;
-
-	priv->n_remaining_items = tracker_sparql_cursor_get_integer (cursor, 0);
-
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Found %" G_GSIZE_FORMAT " items to extract", priv->n_remaining_items));
-
-	if (priv->n_remaining_items > 0)
-		decorator_cache_next_items (decorator);
-	else
-		decorator_finish (decorator);
-}
-
-static void
-decorator_count_remaining_items (TrackerDecorator *decorator)
-{
-	TrackerDecoratorPrivate *priv;
-
-	priv = tracker_decorator_get_instance_private (decorator);
-
-	if (!priv->item_count_query)
-		priv->item_count_query = load_statement (decorator, "get-item-count.rq");
-
-	tracker_sparql_statement_execute_async (priv->item_count_query,
-	                                        priv->cancellable,
-	                                        decorator_count_remaining_items_cb,
-	                                        decorator);
-}
-
-static void
-decorator_item_cache_remove (TrackerDecorator *decorator,
-                             gint              id)
-{
-	TrackerDecoratorPrivate *priv;
-	GList *item;
-
-	priv = tracker_decorator_get_instance_private (decorator);
-
-	for (item = g_queue_peek_head_link (&priv->item_cache);
-	     item; item = item->next) {
-		TrackerDecoratorInfo *info = item->data;
-
-		if (info->id != id)
-			continue;
-
-		g_queue_remove (&priv->item_cache, info);
-		tracker_decorator_info_unref (info);
-		break;
+	if (tracker_sparql_cursor_next (priv->cursor, NULL, NULL)) {
+		priv->next_item = tracker_decorator_info_new (decorator,
+		                                              priv->cursor);
+		tracker_decorator_info_hint_needed (priv->next_item, TRUE);
+	} else {
+		decorator_clear_cache (decorator);
 	}
 }
 
 static void
-decorator_cache_items_cb (GObject      *object,
-                          GAsyncResult *result,
-                          gpointer      user_data)
+query_items_cb (GObject      *object,
+                GAsyncResult *result,
+                gpointer      user_data)
 {
 	TrackerDecorator *decorator = user_data;
-	TrackerDecoratorPrivate *priv;
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
-	TrackerDecoratorInfo *info;
 	g_autoptr (GError) error = NULL;
-	gboolean queue_was_empty;
+	gboolean had_cursor;
+
+	priv->querying = FALSE;
+	had_cursor = priv->cursor != NULL;
+	g_clear_object (&priv->cursor);
 
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
-	priv = tracker_decorator_get_instance_private (decorator);
-	priv->querying = FALSE;
-
-	decorator_commit_info (decorator);
-
-	queue_was_empty = g_queue_is_empty (&priv->item_cache);
 
 	if (error) {
 		g_warning ("Could not get unextracted files: %s", error->message);
 		return;
-	} else {
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			info = tracker_decorator_info_new (decorator, cursor);
-			g_queue_push_tail (&priv->item_cache, info);
-		}
 	}
 
-	if (!g_queue_is_empty (&priv->item_cache) && !priv->processing) {
+	g_set_object (&priv->cursor, cursor);
+	decorator_cache_next_item (decorator);
+
+	if (priv->next_item && !priv->processing) {
 		decorator_start (decorator);
-	} else if (g_queue_is_empty (&priv->item_cache) && priv->processing) {
+	} else if (!priv->next_item) {
 		decorator_finish (decorator);
-	} else if (queue_was_empty) {
-		decorator_hint_next_file_needed (decorator);
+	} else if (!had_cursor) {
 		g_signal_emit (decorator, signals[ITEMS_AVAILABLE], 0);
 	}
 }
@@ -661,35 +597,59 @@ bind_graph_limits (TrackerDecorator *decorator,
 }
 
 static void
-decorator_query_next_items (TrackerDecorator *decorator)
+decorator_query_items (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
-	gint offset = 0;
 
 	priv = tracker_decorator_get_instance_private (decorator);
-
-	if (priv->sparql_buffer)
-		offset += priv->sparql_buffer->len;
-	if (priv->commit_buffer)
-		offset += priv->commit_buffer->len;
 
 	if (!priv->remaining_items_query)
 		priv->remaining_items_query = load_statement (decorator, "get-items.rq");
 
+	priv->querying = TRUE;
 	bind_graph_limits (decorator, TRUE);
-	tracker_sparql_statement_bind_int (priv->remaining_items_query,
-	                                   "offset", offset);
-	tracker_sparql_statement_bind_int (priv->remaining_items_query,
-	                                   "limit", QUERY_BATCH_SIZE);
-
 	tracker_sparql_statement_execute_async (priv->remaining_items_query,
 	                                        priv->cancellable,
-	                                        decorator_cache_items_cb,
+	                                        query_items_cb,
 	                                        decorator);
 }
 
 static void
-decorator_cache_next_items (TrackerDecorator *decorator)
+count_remaining_items_cb (GObject      *object,
+                          GAsyncResult *result,
+                          gpointer      user_data)
+{
+	TrackerDecorator *decorator = user_data;
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
+
+	priv->querying = FALSE;
+	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
+	                                                  result, &error);
+
+	if (error) {
+		g_warning ("Could not get remaining item count: %s", error->message);
+		return;
+	}
+
+	if (!tracker_sparql_cursor_next (cursor, NULL, NULL))
+		return;
+
+	priv->n_remaining_items = tracker_sparql_cursor_get_integer (cursor, 0);
+
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Found %" G_GSIZE_FORMAT " items to extract", priv->n_remaining_items));
+
+	if (priv->n_remaining_items > 0) {
+		decorator_query_items (decorator);
+	} else {
+		decorator_finish (decorator);
+	}
+}
+
+static void
+decorator_maybe_restart_query (TrackerDecorator *decorator)
 {
 	TrackerDecoratorPrivate *priv;
 
@@ -697,18 +657,20 @@ decorator_cache_next_items (TrackerDecorator *decorator)
 
 	if (priv->querying ||
 	    priv->updating ||
-	    !g_queue_is_empty (&priv->item_cache))
+	    priv->next_item)
 		return;
 
 	priv->querying = TRUE;
 
-	if (priv->n_remaining_items == 0) {
-		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
-		decorator_count_remaining_items (decorator);
-	} else {
-		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Querying items which still need processing"));
-		decorator_query_next_items (decorator);
-	}
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
+
+	if (!priv->item_count_query)
+		priv->item_count_query = load_statement (decorator, "get-item-count.rq");
+
+	tracker_sparql_statement_execute_async (priv->item_count_query,
+	                                        priv->cancellable,
+	                                        count_remaining_items_cb,
+	                                        decorator);
 }
 
 static void
@@ -756,35 +718,29 @@ notifier_events_cb (TrackerDecorator *decorator,
                     GPtrArray        *events,
                     TrackerNotifier  *notifier)
 {
-	TrackerDecoratorPrivate *priv;
-	gboolean check_added = FALSE;
-	gint64 id;
+	gboolean added = FALSE, deleted = FALSE;
 	gint i;
-
-	priv = tracker_decorator_get_instance_private (decorator);
 
 	for (i = 0; i < events->len; i++) {
 		TrackerNotifierEvent *event;
 
 		event = g_ptr_array_index (events, i);
-		id = tracker_notifier_event_get_id (event);
 
 		switch (tracker_notifier_event_get_event_type (event)) {
 		case TRACKER_NOTIFIER_EVENT_CREATE:
 		case TRACKER_NOTIFIER_EVENT_UPDATE:
-			/* Merely use this as a hint that there is something
-			 * left to be processed.
-			 */
-			check_added = TRUE;
+			added = TRUE;
 			break;
 		case TRACKER_NOTIFIER_EVENT_DELETE:
-			decorator_item_cache_remove (decorator, id);
+			deleted = TRUE;
 			break;
 		}
 	}
 
-	if (check_added && !priv->querying && !priv->updating)
-		decorator_cache_next_items (decorator);
+	if (deleted)
+		decorator_rebuild_cache (decorator);
+	else if (added)
+		decorator_maybe_restart_query (decorator);
 }
 
 static void
@@ -829,10 +785,9 @@ tracker_decorator_finalize (GObject *object)
 
 	g_clear_object (&priv->notifier);
 
-	g_queue_foreach (&priv->item_cache,
-	                 (GFunc) tracker_decorator_info_unref,
-	                 NULL);
-	g_queue_clear (&priv->item_cache);
+	g_clear_object (&priv->cursor);
+	g_clear_pointer (&priv->item, tracker_decorator_info_unref);
+	g_clear_pointer (&priv->next_item, tracker_decorator_info_unref);
 
 	g_clear_object (&priv->batch);
 
@@ -846,51 +801,52 @@ tracker_decorator_finalize (GObject *object)
 static void
 tracker_decorator_paused (TrackerMiner *miner)
 {
-	TrackerDecoratorPrivate *priv;
+	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Paused"));
-
-	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
-	g_timer_stop (priv->timer);
-
 	g_cancellable_cancel (priv->task_cancellable);
-	g_clear_object (&priv->task_cancellable);
-	priv->task_cancellable = g_cancellable_new ();
+	g_set_object (&priv->task_cancellable, g_cancellable_new ());
+	decorator_clear_cache (decorator);
+	g_timer_stop (priv->timer);
 }
 
 static void
 tracker_decorator_resumed (TrackerMiner *miner)
 {
-	TrackerDecoratorPrivate *priv;
+	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Resumed"));
-	decorator_cache_next_items (TRACKER_DECORATOR (miner));
-	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
+	decorator_rebuild_cache (decorator);
 	g_timer_continue (priv->timer);
 }
 
 static void
 tracker_decorator_stopped (TrackerMiner *miner)
 {
-	TrackerDecoratorPrivate *priv;
+	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Stopped"));
-	priv = tracker_decorator_get_instance_private (TRACKER_DECORATOR (miner));
+	decorator_clear_cache (decorator);
 	g_timer_stop (priv->timer);
 }
 
 static void
 tracker_decorator_started (TrackerMiner *miner)
 {
-	TrackerDecoratorPrivate *priv;
-	TrackerDecorator *decorator;
-
-	decorator = TRACKER_DECORATOR (miner);
-	priv = tracker_decorator_get_instance_private (decorator);
+	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
+	TrackerDecoratorPrivate *priv =
+		tracker_decorator_get_instance_private (decorator);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Started"));
+	if (!decorator_commit_info (decorator))
+		decorator_rebuild_cache (decorator);
 	g_timer_start (priv->timer);
-	decorator_rebuild_cache (decorator);
 }
 
 static void
@@ -976,8 +932,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 	priv->timer = g_timer_new ();
 	priv->cancellable = g_cancellable_new ();
 	priv->task_cancellable = g_cancellable_new ();
-
-	g_queue_init (&priv->item_cache);
 }
 
 /**
@@ -1010,7 +964,6 @@ tracker_decorator_next (TrackerDecorator  *decorator,
                         GError           **error)
 {
 	TrackerDecoratorPrivate *priv;
-	TrackerDecoratorInfo *info;
 
 	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
 
@@ -1024,19 +977,22 @@ tracker_decorator_next (TrackerDecorator  *decorator,
 		return NULL;
 	}
 
-	info = g_queue_pop_head (&priv->item_cache);
-	if (!info)
-		return NULL;
+	priv->item = g_steal_pointer (&priv->next_item);
 
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s", info->url));
-	decorator_hint_next_file_needed (decorator);
+	if (priv->item) {
+		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s",
+		                                    priv->item->url));
+		priv->item->task =
+			g_task_new (decorator,
+			            priv->task_cancellable,
+			            decorator_task_done,
+			            priv->item);
+	}
 
-	info->task = g_task_new (decorator,
-	                         priv->task_cancellable,
-	                         decorator_task_done,
-	                         info);
+	/* Preempt next item */
+	decorator_cache_next_item (decorator);
 
-	return info;
+	return priv->item;
 }
 
 void

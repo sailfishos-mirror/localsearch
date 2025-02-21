@@ -39,5 +39,3 @@ SELECT
     GRAPH tracker:FileSystem { ?urn tracker:extractorHash ?hash }
   })
 }
-OFFSET ~offset
-LIMIT ~limit
