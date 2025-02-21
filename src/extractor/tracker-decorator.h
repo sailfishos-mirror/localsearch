@@ -52,7 +52,8 @@ struct _TrackerDecoratorClass {
 #define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
 
 typedef enum {
-	TRACKER_DECORATOR_ERROR_PAUSED
+	TRACKER_DECORATOR_ERROR_PAUSED,
+	TRACKER_DECORATOR_ERROR_INVALID_FILE,
 } TrackerDecoratorError;
 
 GQuark        tracker_decorator_error_quark       (void);

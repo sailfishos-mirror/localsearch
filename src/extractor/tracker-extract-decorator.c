@@ -291,8 +291,11 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	file = g_file_new_for_uri (tracker_decorator_info_get_url (info));
 
 	if (!g_file_is_native (file)) {
-		g_warning ("URI '%s' is not native",
-		           tracker_decorator_info_get_url (info));
+		error = g_error_new (TRACKER_DECORATOR_ERROR,
+		                     TRACKER_DECORATOR_ERROR_INVALID_FILE,
+		                     "URI '%s' is not native",
+		                     tracker_decorator_info_get_url (info));
+		tracker_decorator_info_complete_error (info, error);
 		tracker_decorator_info_unref (info);
 		decorator_get_next_file (decorator);
 		return;
