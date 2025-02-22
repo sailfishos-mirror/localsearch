@@ -29,25 +29,10 @@
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_DECORATOR (tracker_decorator_get_type())
-G_DECLARE_DERIVABLE_TYPE (TrackerDecorator,
-                          tracker_decorator,
-                          TRACKER, DECORATOR,
-                          TrackerMiner)
-
-struct _TrackerDecoratorClass {
-	TrackerMinerClass parent_class;
-
-	void (* items_available) (TrackerDecorator *decorator);
-	void (* finished)        (TrackerDecorator *decorator);
-
-	void (* error) (TrackerDecorator *decorator,
-	                GFile            *file,
-	                const gchar      *error_message,
-	                const gchar      *extra_info);
-
-	void (* update) (TrackerDecorator   *decorator,
-	                 TrackerExtractInfo *extract_info);
-};
+G_DECLARE_FINAL_TYPE (TrackerDecorator,
+                      tracker_decorator,
+                      TRACKER, DECORATOR,
+                      TrackerMiner)
 
 TrackerDecorator * tracker_decorator_new (TrackerSparqlConnection   *connection,
                                           TrackerExtract            *extract,
