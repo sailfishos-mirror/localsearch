@@ -33,6 +33,7 @@ G_DECLARE_FINAL_TYPE (TrackerExtractController,
                       GObject)
 
 TrackerExtractController * tracker_extract_controller_new (TrackerDecorator           *decorator,
+                                                           TrackerExtract             *extractor,
                                                            GDBusConnection            *connection,
                                                            TrackerExtractPersistence  *persistence,
                                                            GError                    **error);

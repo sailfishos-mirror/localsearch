@@ -28,6 +28,7 @@
 enum {
 	PROP_0,
 	PROP_DECORATOR,
+	PROP_EXTRACTOR,
 	PROP_CONNECTION,
 	PROP_PERSISTENCE,
 	N_PROPS,
@@ -39,6 +40,7 @@ struct _TrackerExtractController {
 	GObject parent_instance;
 
 	TrackerDecorator *decorator;
+	TrackerExtract *extractor;
 	TrackerExtractPersistence *persistence;
 	GCancellable *cancellable;
 	GDBusConnection *connection;
@@ -105,16 +107,8 @@ update_extract_config (TrackerExtractController *controller,
 	while (g_variant_iter_next (&iter, "{sv}", &key, &value)) {
 		if (g_strcmp0 (key, "max-bytes") == 0 &&
 		    g_variant_is_of_type (value, G_VARIANT_TYPE_INT32)) {
-			TrackerExtract *extract = NULL;
-			gint max_bytes;
-
-			max_bytes = g_variant_get_int32 (value);
-			g_object_get (controller->decorator, "extractor", &extract, NULL);
-
-			if (extract) {
-				tracker_extract_set_max_text (extract, max_bytes);
-				g_object_unref (extract);
-			}
+			tracker_extract_set_max_text (controller->extractor,
+			                              g_variant_get_int32 (value));
 		} else if (g_strcmp0 (key, "on-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
 			tracker_extract_decorator_set_throttled (TRACKER_EXTRACT_DECORATOR (controller->decorator),
@@ -313,6 +307,9 @@ tracker_extract_controller_set_property (GObject      *object,
 	case PROP_DECORATOR:
 		self->decorator = g_value_dup_object (value);
 		break;
+	case PROP_EXTRACTOR:
+		self->extractor = g_value_dup_object (value);
+		break;
 	case PROP_CONNECTION:
 		self->connection = g_value_dup_object (value);
 		break;
@@ -336,6 +333,7 @@ tracker_extract_controller_dispose (GObject *object)
 	}
 
 	g_clear_object (&self->decorator);
+	g_clear_object (&self->extractor);
 	g_clear_object (&self->index_proxy);
 	g_clear_object (&self->persistence);
 
@@ -354,6 +352,12 @@ tracker_extract_controller_class_init (TrackerExtractControllerClass *klass)
 	props[PROP_DECORATOR] =
 		g_param_spec_object ("decorator", NULL, NULL,
 		                     TRACKER_TYPE_DECORATOR,
+		                     G_PARAM_STATIC_STRINGS |
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY);
+	props[PROP_EXTRACTOR] =
+		g_param_spec_object ("extractor", NULL, NULL,
+		                     TRACKER_TYPE_EXTRACT,
 		                     G_PARAM_STATIC_STRINGS |
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY);
@@ -380,6 +384,7 @@ tracker_extract_controller_init (TrackerExtractController *self)
 
 TrackerExtractController *
 tracker_extract_controller_new (TrackerDecorator           *decorator,
+                                TrackerExtract             *extractor,
                                 GDBusConnection            *connection,
                                 TrackerExtractPersistence  *persistence,
                                 GError                    **error)
@@ -389,6 +394,7 @@ tracker_extract_controller_new (TrackerDecorator           *decorator,
 	return g_initable_new (TRACKER_TYPE_EXTRACT_CONTROLLER,
 	                       NULL, error,
 	                       "decorator", decorator,
+	                       "extractor", extractor,
 	                       "connection", connection,
 	                       "persistence", persistence,
 	                       NULL);

@@ -472,7 +472,11 @@ do_main (int argc, char *argv[])
 
 	tracker_locale_sanity_check ();
 
-	controller = tracker_extract_controller_new (decorator, connection, persistence, &error);
+	controller = tracker_extract_controller_new (decorator,
+	                                             extract,
+	                                             connection,
+	                                             persistence,
+	                                             &error);
 	if (error) {
 		g_critical ("Could not create extraction controller: %s", error->message);
 		return EXIT_FAILURE;
