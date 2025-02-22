@@ -54,7 +54,6 @@ struct _TrackerDecoratorInfo {
 	gchar *content_id;
 	gchar *mime_type;
 	gint id;
-	gint ref_count;
 };
 
 struct _TrackerDecorator {
@@ -141,43 +140,13 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
 	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 	info->mime_type = g_strdup (tracker_sparql_cursor_get_string (cursor, 3, NULL));
-	info->ref_count = 1;
 
 	return info;
 }
 
-/**
- * tracker_decorator_info_ref:
- * @info: a #TrackerDecoratorInfo
- *
- * Increases the reference count of @info by 1.
- *
- * Returns: the same @info passed in, or %NULL on error.
- *
- * Since: 0.18
- **/
-TrackerDecoratorInfo *
-tracker_decorator_info_ref (TrackerDecoratorInfo *info)
-{
-	g_atomic_int_inc (&info->ref_count);
-	return info;
-}
-
-/**
- * tracker_decorator_info_unref:
- * @info: a #TrackerDecoratorInfo
- *
- * Decreases the reference count of @info by 1 and frees it when the
- * reference count reaches 0.
- *
- * Since: 0.18
- **/
 void
-tracker_decorator_info_unref (TrackerDecoratorInfo *info)
+tracker_decorator_info_free (TrackerDecoratorInfo *info)
 {
-	if (!g_atomic_int_dec_and_test (&info->ref_count))
-		return;
-
 	g_clear_object (&info->task);
 	g_free (info->url);
 	g_free (info->content_id);
@@ -507,7 +476,7 @@ static void
 decorator_clear_cache (TrackerDecorator *decorator)
 {
 	decorator->n_remaining_items = 0;
-	g_clear_pointer (&decorator->next_item, tracker_decorator_info_unref);
+	g_clear_pointer (&decorator->next_item, tracker_decorator_info_free);
 
 	if (decorator->cursor) {
 		tracker_sparql_cursor_close (decorator->cursor);
@@ -563,7 +532,7 @@ decorator_task_done (GObject      *object,
 		tracker_decorator_update (decorator, extract_info);
 	}
 
-	g_clear_pointer (&decorator->item, tracker_decorator_info_unref);
+	g_clear_pointer (&decorator->item, tracker_decorator_info_free);
 
 	if (decorator->n_remaining_items > 0)
 		decorator->n_remaining_items--;
@@ -1026,8 +995,8 @@ tracker_decorator_finalize (GObject *object)
 	g_clear_object (&decorator->notifier);
 
 	g_clear_object (&decorator->cursor);
-	g_clear_pointer (&decorator->item, tracker_decorator_info_unref);
-	g_clear_pointer (&decorator->next_item, tracker_decorator_info_unref);
+	g_clear_pointer (&decorator->item, tracker_decorator_info_free);
+	g_clear_pointer (&decorator->next_item, tracker_decorator_info_free);
 
 	g_clear_object (&decorator->batch);
 
