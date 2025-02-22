@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #endif
 
-#define DEFAULT_BATCH_SIZE 200
+#define BATCH_SIZE 200
 #define THROTTLED_TIMEOUT_MS 10
 
 /**
@@ -98,7 +98,6 @@ struct _TrackerDecorator {
 
 enum {
 	PROP_0,
-	PROP_COMMIT_BATCH_SIZE,
 	PROP_EXTRACTOR,
 	PROP_PERSISTENCE,
 	N_PROPS,
@@ -445,7 +444,7 @@ decorator_check_commit (TrackerDecorator *decorator)
 {
 	if (!decorator->sparql_buffer ||
 	    (decorator->n_remaining_items > 0 &&
-	     decorator->sparql_buffer->len < (guint) decorator->batch_size))
+	     decorator->sparql_buffer->len < BATCH_SIZE))
 		return FALSE;
 
 	return decorator_commit_info (decorator);
@@ -903,9 +902,6 @@ tracker_decorator_set_property (GObject      *object,
 	TrackerDecorator *decorator  = TRACKER_DECORATOR (object);
 
 	switch (param_id) {
-	case PROP_COMMIT_BATCH_SIZE:
-		decorator->batch_size = g_value_get_int (value);
-		break;
 	case PROP_EXTRACTOR:
 		decorator->extractor = g_value_dup_object (value);
 		break;
@@ -1075,14 +1071,6 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 	miner_class->started = tracker_decorator_started;
 	miner_class->stopped = tracker_decorator_stopped;
 
-	props[PROP_COMMIT_BATCH_SIZE] =
-		g_param_spec_int ("commit-batch-size",
-		                  "Commit batch size",
-		                  "Number of items per update batch",
-		                  0, G_MAXINT, DEFAULT_BATCH_SIZE,
-		                  G_PARAM_WRITABLE |
-		                  G_PARAM_CONSTRUCT_ONLY |
-		                  G_PARAM_STATIC_STRINGS);
 	props[PROP_EXTRACTOR] =
 		g_param_spec_object ("extractor", NULL, NULL,
 		                     TRACKER_TYPE_EXTRACT,
@@ -1127,7 +1115,6 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 static void
 tracker_decorator_init (TrackerDecorator *decorator)
 {
-	decorator->batch_size = DEFAULT_BATCH_SIZE;
 	decorator->timer = g_timer_new ();
 	decorator->cancellable = g_cancellable_new ();
 	decorator->task_cancellable = g_cancellable_new ();
