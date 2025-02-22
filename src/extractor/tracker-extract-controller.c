@@ -111,8 +111,8 @@ update_extract_config (TrackerExtractController *controller,
 			                              g_variant_get_int32 (value));
 		} else if (g_strcmp0 (key, "on-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
-			tracker_extract_decorator_set_throttled (TRACKER_EXTRACT_DECORATOR (controller->decorator),
-			                                         g_variant_get_boolean (value));
+			tracker_decorator_set_throttled (controller->decorator,
+			                                 g_variant_get_boolean (value));
 		} else if (g_strcmp0 (key, "on-low-battery") == 0 &&
 		           g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN)) {
 			update_paused_state (controller, g_variant_get_boolean (value));

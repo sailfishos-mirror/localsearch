@@ -41,9 +41,9 @@
 #include <tracker-common.h>
 
 #include "tracker-main.h"
+#include "tracker-decorator.h"
 #include "tracker-extract.h"
 #include "tracker-extract-controller.h"
-#include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
 
 #define ABOUT	  \
@@ -468,7 +468,7 @@ do_main (int argc, char *argv[])
 
 	persistence = tracker_extract_persistence_new ();
 
-	decorator = tracker_extract_decorator_new (sparql_connection, extract, persistence);
+	decorator = tracker_decorator_new (sparql_connection, extract, persistence);
 
 	tracker_locale_sanity_check ();
 

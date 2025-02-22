@@ -22,6 +22,8 @@
 
 #include <tracker-common.h>
 
+#include "tracker-extract.h"
+#include "tracker-extract-persistence.h"
 #include "utils/tracker-extract.h"
 
 G_BEGIN_DECLS
@@ -31,8 +33,6 @@ G_DECLARE_DERIVABLE_TYPE (TrackerDecorator,
                           tracker_decorator,
                           TRACKER, DECORATOR,
                           TrackerMiner)
-
-typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
 
 struct _TrackerDecoratorClass {
 	TrackerMinerClass parent_class;
@@ -49,43 +49,15 @@ struct _TrackerDecoratorClass {
 	                 TrackerExtractInfo *extract_info);
 };
 
-#define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
+TrackerDecorator * tracker_decorator_new (TrackerSparqlConnection   *connection,
+                                          TrackerExtract            *extract,
+                                          TrackerExtractPersistence *persistence);
 
-typedef enum {
-	TRACKER_DECORATOR_ERROR_PAUSED,
-	TRACKER_DECORATOR_ERROR_INVALID_FILE,
-} TrackerDecoratorError;
+void tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
+                                            const gchar * const *graphs);
 
-GQuark        tracker_decorator_error_quark       (void);
-
-guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorator);
-
-TrackerDecoratorInfo * tracker_decorator_next (TrackerDecorator  *decorator,
-                                               GError           **error);
-
-void tracker_decorator_raise_error (TrackerDecorator *decorator,
-                                    GFile            *file,
-                                    const char       *message,
-                                    const char       *extra_info);
-
-void          tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
-                                                     const gchar * const *graphs);
-
-TrackerBatch * tracker_decorator_get_batch (TrackerDecorator *decorator);
-
-GType         tracker_decorator_info_get_type     (void) G_GNUC_CONST;
-
-TrackerDecoratorInfo *
-              tracker_decorator_info_ref          (TrackerDecoratorInfo *info);
-void          tracker_decorator_info_unref        (TrackerDecoratorInfo *info);
-const gchar * tracker_decorator_info_get_url      (TrackerDecoratorInfo *info);
-const gchar * tracker_decorator_info_get_content_id (TrackerDecoratorInfo *info);
-const gchar * tracker_decorator_info_get_mime_type (TrackerDecoratorInfo *info);
-GCancellable * tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info);
-void          tracker_decorator_info_complete     (TrackerDecoratorInfo *info,
-                                                   TrackerExtractInfo   *extract_info);
-void          tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
-                                                     GError               *error);
+void tracker_decorator_set_throttled (TrackerDecorator *decorator,
+                                      gboolean          throttled);
 
 G_END_DECLS
 

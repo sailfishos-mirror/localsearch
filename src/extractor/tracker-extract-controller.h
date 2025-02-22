@@ -22,7 +22,7 @@
 
 #include <gio/gio.h>
 
-#include "tracker-extract-decorator.h"
+#include "tracker-decorator.h"
 
 G_BEGIN_DECLS
 
