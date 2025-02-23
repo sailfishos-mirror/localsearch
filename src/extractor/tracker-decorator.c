@@ -53,7 +53,6 @@ struct _TrackerDecoratorInfo {
 	gchar *url;
 	gchar *content_id;
 	gchar *mime_type;
-	gint id;
 };
 
 struct _TrackerDecorator {
@@ -146,9 +145,8 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	info = g_new0 (TrackerDecoratorInfo, 1);
 	info->decorator = decorator;
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
-	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
-	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-	info->mime_type = g_strdup (tracker_sparql_cursor_get_string (cursor, 3, NULL));
+	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 1, NULL));
+	info->mime_type = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 
 	return info;
 }
