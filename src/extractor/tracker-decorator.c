@@ -861,7 +861,7 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	                      info->url,
 	                      info->content_id,
 	                      info->mime_type,
-	                      decorator->task_cancellable,
+	                      decorator->cancellable,
 	                      (GAsyncReadyCallback) get_metadata_cb,
 	                      decorator);
 }
@@ -958,9 +958,6 @@ tracker_decorator_finalize (GObject *object)
 	g_cancellable_cancel (decorator->cancellable);
 	g_clear_object (&decorator->cancellable);
 
-	g_cancellable_cancel (decorator->task_cancellable);
-	g_clear_object (&decorator->task_cancellable);
-
 	g_clear_object (&decorator->notifier);
 
 	g_clear_object (&decorator->cursor);
@@ -982,8 +979,15 @@ tracker_decorator_paused (TrackerMiner *miner)
 	TrackerDecorator *decorator = TRACKER_DECORATOR (miner);
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Paused"));
-	g_cancellable_cancel (decorator->task_cancellable);
-	g_set_object (&decorator->task_cancellable, g_cancellable_new ());
+
+	if (decorator->querying || decorator->updating || decorator->extracting) {
+		g_cancellable_cancel (decorator->cancellable);
+		g_set_object (&decorator->cancellable, g_cancellable_new ());
+		decorator->querying = FALSE;
+		decorator->updating = FALSE;
+		decorator->extracting = FALSE;
+	}
+
 	g_clear_handle_id (&decorator->throttle_id, g_source_remove);
 	decorator_clear_cache (decorator);
 	g_timer_stop (decorator->timer);
@@ -1090,7 +1094,6 @@ tracker_decorator_init (TrackerDecorator *decorator)
 {
 	decorator->timer = g_timer_new ();
 	decorator->cancellable = g_cancellable_new ();
-	decorator->task_cancellable = g_cancellable_new ();
 }
 
 TrackerDecorator *
