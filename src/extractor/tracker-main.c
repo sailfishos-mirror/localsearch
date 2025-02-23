@@ -319,12 +319,6 @@ on_decorator_finished (TrackerDecorator *decorator,
 	if (shutdown_timeout_id != 0)
 		return;
 
-	/* For debugging convenience, avoid the shutdown timeout if running
-	 * on a terminal.
-	 */
-	if (tracker_term_is_tty ())
-		return;
-
 	shutdown_timeout_id = g_timeout_add_seconds (10, shutdown_timeout_cb,
 	                                             main_loop);
 }
@@ -348,7 +342,6 @@ do_main (int argc, char *argv[])
 	g_autoptr (TrackerExtractPersistence) persistence = NULL;
 	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
 	g_autoptr (TrackerDomainOntology) domain_ontology = NULL;
-	g_autofree gchar *miner_dbus_name = NULL;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -408,7 +401,6 @@ do_main (int argc, char *argv[])
 		g_autoptr (GIOStream) stream = NULL;
 
 		socket = g_socket_new_from_fd (socket_fd, &error);
-		miner_dbus_name = NULL;
 
 		if (socket) {
 			stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
@@ -418,9 +410,8 @@ do_main (int argc, char *argv[])
 			                                         NULL, NULL, &error);
 		}
 	} else {
-		connection = g_bus_get_sync (TRACKER_IPC_BUS, NULL, &error);
-		miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
-		                                                      MINER_FS_NAME_SUFFIX);
+		g_warning ("The --socket-fd argument is mandatory");
+		return EXIT_FAILURE;
 	}
 
 	if (!connection) {
@@ -432,7 +423,7 @@ do_main (int argc, char *argv[])
 	extract = tracker_extract_new ();
 
 	sparql_connection = conn =
-		tracker_sparql_connection_bus_new (miner_dbus_name,
+		tracker_sparql_connection_bus_new (NULL,
 		                                   NULL, connection,
 		                                   &error);
 
