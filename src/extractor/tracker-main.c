@@ -65,7 +65,6 @@ static gchar *filename;
 static gchar *mime_type;
 static gchar *output_format_name;
 static gboolean version;
-static gchar *domain_ontology_name = NULL;
 static guint shutdown_timeout_id = 0;
 static int socket_fd;
 
@@ -81,10 +80,6 @@ static GOptionEntry entries[] = {
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format_name,
 	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
 	  N_("FORMAT") },
-	{ "domain-ontology", 'd', 0,
-	  G_OPTION_ARG_STRING, &domain_ontology_name,
-	  N_("Runs for a specific domain ontology"),
-	  NULL },
 	{ "socket-fd", 's', 0,
 	  G_OPTION_ARG_INT, &socket_fd,
 	  N_("Socket file descriptor for peer-to-peer communication"),
@@ -341,7 +336,6 @@ do_main (int argc, char *argv[])
 	g_autoptr (GDBusConnection) connection = NULL;
 	g_autoptr (TrackerExtractPersistence) persistence = NULL;
 	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
-	g_autoptr (TrackerDomainOntology) domain_ontology = NULL;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -378,13 +372,6 @@ do_main (int argc, char *argv[])
 	g_set_application_name ("tracker-extract");
 
 	setlocale (LC_ALL, "");
-
-	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
-	if (error) {
-		g_critical ("Could not load domain ontology '%s': %s",
-		            domain_ontology_name, error->message);
-		return EXIT_FAILURE;
-	}
 
 	if (!tracker_extract_module_manager_init ())
 		return EXIT_FAILURE;
