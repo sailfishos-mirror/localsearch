@@ -34,8 +34,6 @@
 #include "tracker-gupnp.h"
 #endif
 
-static TrackerSparqlConnection *local_conn = NULL;
-
 #define CHUNK_N_BYTES (2 << 15)
 
 static guint64
@@ -406,10 +404,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
 			cue_sheet = tracker_cue_sheet_parse (tag->value);
 		} else {
-			if (!local_conn)
-				local_conn = tracker_main_get_readonly_connection (NULL);
+			TrackerSparqlConnection *conn;
 
-			cue_sheet = tracker_cue_sheet_guess_from_uri (local_conn, uri);
+			conn = tracker_main_get_connection ();
+			cue_sheet = tracker_cue_sheet_guess_from_uri (conn, uri);
 		}
 
 		if (cue_sheet) {
@@ -492,12 +490,5 @@ tracker_extract_module_init (GError **error)
 {
 	av_log_set_level (AV_LOG_FATAL);
 
-	return TRUE;
-}
-
-G_MODULE_EXPORT gboolean
-tracker_extract_module_shutdown (void)
-{
-	g_clear_object (&local_conn);
 	return TRUE;
 }
