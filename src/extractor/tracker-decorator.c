@@ -119,7 +119,6 @@ static gboolean decorator_check_commit (TrackerDecorator *decorator);
 static void decorator_get_next_file (TrackerDecorator *decorator);
 
 typedef enum {
-	TRACKER_DECORATOR_ERROR_PAUSED,
 	TRACKER_DECORATOR_ERROR_INVALID_FILE,
 } TrackerDecoratorError;
 
@@ -803,18 +802,9 @@ get_metadata_cb (TrackerExtract   *extract,
 }
 
 static TrackerDecoratorInfo *
-tracker_decorator_next (TrackerDecorator  *decorator,
-                        GError           **error)
+tracker_decorator_next (TrackerDecorator  *decorator)
 {
 	g_return_val_if_fail (TRACKER_IS_DECORATOR (decorator), NULL);
-
-	if (tracker_miner_is_paused (TRACKER_MINER (decorator))) {
-		g_set_error (error,
-		             tracker_decorator_error_quark (),
-		             TRACKER_DECORATOR_ERROR_PAUSED,
-		             "Decorator is paused");
-		return NULL;
-	}
 
 	decorator->item = g_steal_pointer (&decorator->next_item);
 
@@ -848,21 +838,10 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	if (decorator->extracting)
 		return;
 
-	info = tracker_decorator_next (decorator, &error);
+	info = tracker_decorator_next (decorator);
 
-	if (!info) {
-		if (error &&
-		    g_error_matches (error,
-		                     TRACKER_DECORATOR_ERROR,
-		                     TRACKER_DECORATOR_ERROR_PAUSED)) {
-			g_debug ("Next item is on hold because miner is paused");
-		} else if (error) {
-			g_warning ("Next item could not be processed, %s", error->message);
-		}
-
-		g_clear_error (&error);
+	if (!info)
 		return;
-	}
 
 	file = g_file_new_for_uri (info->url);
 
