@@ -75,7 +75,7 @@ struct _TrackerDecorator {
 
 	GStrv priority_graphs;
 
-	GPtrArray *sparql_buffer; /* Array of TrackerExtractInfo */
+	GPtrArray *buffer; /* Array of TrackerExtractInfo */
 	GPtrArray *commit_buffer; /* Array of TrackerExtractInfo */
 	GTimer *timer;
 
@@ -423,7 +423,7 @@ decorator_commit_info (TrackerDecorator *decorator)
 		return FALSE;
 
 	/* Move sparql buffer to commit buffer */
-	decorator->commit_buffer = g_steal_pointer (&decorator->sparql_buffer);
+	decorator->commit_buffer = g_steal_pointer (&decorator->buffer);
 	decorator->updating = TRUE;
 
 	batch = g_steal_pointer (&decorator->batch);
@@ -442,9 +442,9 @@ decorator_commit_info (TrackerDecorator *decorator)
 static gboolean
 decorator_check_commit (TrackerDecorator *decorator)
 {
-	if (!decorator->sparql_buffer ||
+	if (!decorator->buffer ||
 	    (decorator->n_remaining_items > 0 &&
-	     decorator->sparql_buffer->len < BATCH_SIZE))
+	     decorator->buffer->len < BATCH_SIZE))
 		return FALSE;
 
 	return decorator_commit_info (decorator);
@@ -522,12 +522,12 @@ decorator_task_done (GObject      *object,
 		tracker_decorator_raise_error (decorator, file,
 		                               error->message, NULL);
 	} else {
-		if (!decorator->sparql_buffer) {
-			decorator->sparql_buffer =
+		if (!decorator->buffer) {
+			decorator->buffer =
 				g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_extract_info_unref);
 		}
 
-		g_ptr_array_add (decorator->sparql_buffer, extract_info);
+		g_ptr_array_add (decorator->buffer, extract_info);
 		tracker_decorator_update (decorator, extract_info);
 	}
 
@@ -996,7 +996,7 @@ tracker_decorator_finalize (GObject *object)
 
 	g_clear_object (&decorator->batch);
 
-	g_clear_pointer (&decorator->sparql_buffer, g_ptr_array_unref);
+	g_clear_pointer (&decorator->buffer, g_ptr_array_unref);
 	g_clear_pointer (&decorator->commit_buffer, g_ptr_array_unref);
 	g_timer_destroy (decorator->timer);
 
