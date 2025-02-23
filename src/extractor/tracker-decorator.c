@@ -581,12 +581,15 @@ query_items_cb (GObject      *object,
 	g_autoptr (GError) error = NULL;
 	gboolean had_cursor;
 
+	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
+	                                                  result, &error);
+
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		return;
+
 	decorator->querying = FALSE;
 	had_cursor = decorator->cursor != NULL;
 	g_clear_object (&decorator->cursor);
-
-	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
-	                                                  result, &error);
 
 	if (error) {
 		g_warning ("Could not get unextracted files: %s", error->message);
@@ -662,9 +665,13 @@ count_remaining_items_cb (GObject      *object,
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	g_autoptr (GError) error = NULL;
 
-	decorator->querying = FALSE;
 	cursor = tracker_sparql_statement_execute_finish (TRACKER_SPARQL_STATEMENT (object),
 	                                                  result, &error);
+
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
+		return;
+
+	decorator->querying = FALSE;
 
 	if (error) {
 		g_warning ("Could not get remaining item count: %s", error->message);
