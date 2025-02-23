@@ -112,20 +112,19 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2025-01-01.0'
+    BASE_TAG: '2025-02-24.2'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good ffmpeg-free-devel redhat-rpm-config'
+    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
     FDO_DISTRIBUTION_EXEC: |
       if [ -z $(command -v dnf5) ]; then
         dnf install -y 'dnf-command(builddep)' 'dnf-command(download)';
       else
         dnf install -y 'dnf5-command(builddep)' 'dnf5-command(download)';
       fi &&
+      dnf install -y --nogpgcheck ffmpeg-free-devel &&
       dnf builddep -y tracker tracker-miners --setopt=install_weak_deps=False &&
       dnf clean all &&
-      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py gcovr meson &&
-      dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm &&
-      dnf install -y --setopt=install_weak_deps=False gstreamer1-libav
+      pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py gcovr meson
 
 .tracker-miners.debian@common:
   variables:
