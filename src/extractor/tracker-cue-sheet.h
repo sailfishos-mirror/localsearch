@@ -32,8 +32,7 @@ typedef struct _TrackerToc TrackerToc;
 void        tracker_toc_free            (TrackerToc  *toc);
 
 TrackerToc *tracker_cue_sheet_parse     (const gchar *cue_sheet);
-TrackerToc *tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
-                                              const gchar             *uri);
+TrackerToc *tracker_cue_sheet_guess_from_uri (const gchar *uri);
 
 void tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
                                           TrackerResource    *ie,

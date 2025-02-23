@@ -36,6 +36,7 @@
 #include "utils/tracker-extract.h"
 
 #include "tracker-cue-sheet.h"
+#include "tracker-main.h"
 
 #if defined(HAVE_LIBCUE)
 
@@ -156,15 +157,16 @@ tracker_cue_sheet_parse (const gchar *cue_sheet)
 }
 
 static GList *
-find_local_cue_sheets (TrackerSparqlConnection *conn,
-                       GFile                   *audio_file)
+find_local_cue_sheets (GFile *audio_file)
 {
+	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	g_autoptr (GFile) parent = NULL;
 	g_autofree gchar *parent_uri = NULL;
 	GList *result = NULL;
 
+	conn = tracker_main_get_connection ();
 	stmt = tracker_sparql_connection_load_statement_from_gresource (conn,
 	                                                                "/org/freedesktop/Tracker3/Extract/queries/get-cue-sheets.rq",
 	                                                                NULL, NULL);
@@ -211,8 +213,7 @@ find_matching_cue_file (GFile *audio_file)
 }
 
 TrackerToc *
-tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
-                                  const gchar             *uri)
+tracker_cue_sheet_guess_from_uri (const gchar *uri)
 {
 	GFile *audio_file;
 	GFile *cue_sheet_file;
@@ -229,8 +230,8 @@ tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
 
 	if (cue_sheet_file)
 		cue_sheet_list = g_list_prepend (cue_sheet_list, cue_sheet_file);
-	else if (conn)
-		cue_sheet_list = find_local_cue_sheets (conn, audio_file);
+	else
+		cue_sheet_list = find_local_cue_sheets (audio_file);
 
 	toc = NULL;
 
@@ -513,8 +514,7 @@ tracker_cue_sheet_parse (const gchar *cue_sheet)
 }
 
 TrackerToc *
-tracker_cue_sheet_guess_from_uri (TrackerSparqlConnection *conn,
-                                  const gchar             *uri)
+tracker_cue_sheet_guess_from_uri (const gchar *uri)
 {
 	return NULL;
 }

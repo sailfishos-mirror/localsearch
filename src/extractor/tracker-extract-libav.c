@@ -26,7 +26,6 @@
 #include <libavformat/avformat.h>
 
 #include "tracker-cue-sheet.h"
-#include "tracker-main.h"
 
 #include "utils/tracker-extract.h"
 
@@ -404,10 +403,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
 			cue_sheet = tracker_cue_sheet_parse (tag->value);
 		} else {
-			TrackerSparqlConnection *conn;
-
-			conn = tracker_main_get_connection ();
-			cue_sheet = tracker_cue_sheet_guess_from_uri (conn, uri);
+			cue_sheet = tracker_cue_sheet_guess_from_uri (uri);
 		}
 
 		if (cue_sheet) {
