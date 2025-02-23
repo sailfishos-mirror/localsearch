@@ -49,7 +49,7 @@
 
 typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
 struct _TrackerDecoratorInfo {
-	GTask *task;
+	TrackerDecorator *decorator;
 	gchar *url;
 	gchar *content_id;
 	gchar *mime_type;
@@ -118,6 +118,16 @@ static void decorator_maybe_restart_query (TrackerDecorator *decorator);
 static gboolean decorator_check_commit (TrackerDecorator *decorator);
 static void decorator_get_next_file (TrackerDecorator *decorator);
 
+static void decorator_finish_current_item (TrackerDecorator *decorator);
+
+static void tracker_decorator_update (TrackerDecorator   *decorator,
+                                      TrackerExtractInfo *info);
+
+static void tracker_decorator_raise_error (TrackerDecorator *decorator,
+                                           GFile            *file,
+                                           const char       *message,
+                                           const char       *extra_info);
+
 typedef enum {
 	TRACKER_DECORATOR_ERROR_INVALID_FILE,
 } TrackerDecoratorError;
@@ -134,6 +144,7 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 	TrackerDecoratorInfo *info;
 
 	info = g_new0 (TrackerDecoratorInfo, 1);
+	info->decorator = decorator;
 	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->id = tracker_sparql_cursor_get_integer (cursor, 1);
 	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
@@ -145,7 +156,6 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 void
 tracker_decorator_info_free (TrackerDecoratorInfo *info)
 {
-	g_clear_object (&info->task);
 	g_free (info->url);
 	g_free (info->content_id);
 	g_free (info->mime_type);
@@ -156,18 +166,37 @@ static void
 tracker_decorator_info_complete (TrackerDecoratorInfo *info,
                                  TrackerExtractInfo   *extract_info)
 {
+	TrackerDecorator *decorator = info->decorator;
+
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s completed successfully", info->url));
-	g_task_return_pointer (info->task,
-	                       tracker_extract_info_ref (extract_info),
-	                       (GDestroyNotify) tracker_extract_info_unref);
+
+	if (!decorator->buffer) {
+		decorator->buffer =
+			g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_extract_info_unref);
+	}
+
+	g_ptr_array_add (decorator->buffer, tracker_extract_info_ref (extract_info));
+	tracker_decorator_update (decorator, extract_info);
+	decorator_finish_current_item (decorator);
 }
 
 static void
 tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
                                        GError               *error)
 {
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s failed: %s", info->url, error->message));
-	g_task_return_error (info->task, error);
+	TrackerDecorator *decorator = info->decorator;
+	g_autoptr (GFile) file = NULL;
+
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s failed: %s",
+	                                    info->url, error->message));
+
+	g_warning ("Task for '%s' finished with error: %s\n",
+	           info->url, error->message);
+
+	file = g_file_new_for_uri (info->url);
+	tracker_decorator_raise_error (decorator, file,
+	                               error->message, NULL);
+	decorator_finish_current_item (decorator);
 }
 
 static void
@@ -489,47 +518,10 @@ decorator_rebuild_cache (TrackerDecorator *decorator)
 	decorator_maybe_restart_query (decorator);
 }
 
-/* This function is called after the caller has completed the
- * GTask given on the TrackerDecoratorInfo, this definitely removes
- * the element being processed from queues.
- */
 static void
-decorator_task_done (GObject      *object,
-                     GAsyncResult *result,
-                     gpointer      user_data)
+decorator_finish_current_item (TrackerDecorator *decorator)
 {
-	TrackerDecorator *decorator = TRACKER_DECORATOR (object);
-	TrackerDecoratorInfo *info = user_data;
-	TrackerExtractInfo *extract_info;
-	g_autoptr (GError) error = NULL;
-
-	extract_info = g_task_propagate_pointer (G_TASK (result), &error);
-
-	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
-		return;
-
-	g_assert (info == decorator->item);
-	tracker_decorator_info_hint_needed (info, FALSE);
-
-	if (error) {
-		g_autoptr (GFile) file = NULL;
-
-		g_warning ("Task for '%s' finished with error: %s\n",
-		           info->url, error->message);
-
-		file = g_file_new_for_uri (info->url);
-		tracker_decorator_raise_error (decorator, file,
-		                               error->message, NULL);
-	} else {
-		if (!decorator->buffer) {
-			decorator->buffer =
-				g_ptr_array_new_with_free_func ((GDestroyNotify) tracker_extract_info_unref);
-		}
-
-		g_ptr_array_add (decorator->buffer, extract_info);
-		tracker_decorator_update (decorator, extract_info);
-	}
-
+	tracker_decorator_info_hint_needed (decorator->item, FALSE);
 	g_clear_pointer (&decorator->item, tracker_decorator_info_free);
 
 	if (decorator->n_remaining_items > 0)
@@ -811,11 +803,6 @@ tracker_decorator_next (TrackerDecorator  *decorator)
 	if (decorator->item) {
 		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s",
 		                                    decorator->item->url));
-		decorator->item->task =
-			g_task_new (decorator,
-			            decorator->task_cancellable,
-			            decorator_task_done,
-			            decorator->item);
 	}
 
 	/* Preempt next item */
