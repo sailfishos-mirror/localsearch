@@ -19,25 +19,22 @@
 
 #include "tracker-extract-persistence.h"
 
-typedef struct _TrackerExtractPersistencePrivate TrackerExtractPersistencePrivate;
-
-struct _TrackerExtractPersistencePrivate
+struct _TrackerExtractPersistence
 {
+	GObject parent_instance;
 	int fd;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerExtractPersistence, tracker_extract_persistence, G_TYPE_OBJECT)
+G_DEFINE_TYPE (TrackerExtractPersistence, tracker_extract_persistence, G_TYPE_OBJECT)
 
 static void
 tracker_extract_persistence_finalize (GObject *object)
 {
 	TrackerExtractPersistence *persistence =
 		TRACKER_EXTRACT_PERSISTENCE (object);
-	TrackerExtractPersistencePrivate *priv =
-		tracker_extract_persistence_get_instance_private (persistence);
 
-	if (priv->fd > 0)
-		close (priv->fd);
+	if (persistence->fd > 0)
+		close (persistence->fd);
 
 	G_OBJECT_CLASS (tracker_extract_persistence_parent_class)->finalize (object);
 }
@@ -66,20 +63,15 @@ void
 tracker_extract_persistence_set_fd (TrackerExtractPersistence *persistence,
                                     int                        fd)
 {
-	TrackerExtractPersistencePrivate *priv =
-		tracker_extract_persistence_get_instance_private (persistence);
-
-	if (priv->fd > 0)
-		close (priv->fd);
-	priv->fd = fd;
+	if (persistence->fd >= 0)
+		close (persistence->fd);
+	persistence->fd = fd;
 }
 
 void
 tracker_extract_persistence_set_file (TrackerExtractPersistence *persistence,
                                       GFile                     *file)
 {
-	TrackerExtractPersistencePrivate *priv =
-		tracker_extract_persistence_get_instance_private (persistence);
 	g_autofree gchar *path = NULL;
 	int len, written = 0, retval;
 
@@ -95,10 +87,10 @@ tracker_extract_persistence_set_file (TrackerExtractPersistence *persistence,
 	/* Write also the trailing \0 */
 	len = strlen (path) + 1;
 
-	lseek (priv->fd, 0, SEEK_SET);
+	lseek (persistence->fd, 0, SEEK_SET);
 
 	while (TRUE) {
-		retval = write (priv->fd, &path[written], len - written);
+		retval = write (persistence->fd, &path[written], len - written);
 		if (retval < 0)
 			break;
 
@@ -111,15 +103,13 @@ tracker_extract_persistence_set_file (TrackerExtractPersistence *persistence,
 GFile *
 tracker_extract_persistence_get_file (TrackerExtractPersistence *persistence)
 {
-	TrackerExtractPersistencePrivate *priv =
-		tracker_extract_persistence_get_instance_private (persistence);
 	gchar buf[2048];
 	int len;
 
 	g_return_val_if_fail (TRACKER_IS_EXTRACT_PERSISTENCE (persistence), NULL);
 
-	lseek (priv->fd, 0, SEEK_SET);
-	len = read (priv->fd, buf, sizeof (buf));
+	lseek (persistence->fd, 0, SEEK_SET);
+	len = read (persistence->fd, buf, sizeof (buf));
 	if (len <= 0)
 		return NULL;
 	if (buf[0] == '\0')

@@ -41,14 +41,10 @@
 #include <tracker-common.h>
 
 #include "tracker-main.h"
+#include "tracker-decorator.h"
 #include "tracker-extract.h"
 #include "tracker-extract-controller.h"
-#include "tracker-extract-decorator.h"
 #include "tracker-extract-persistence.h"
-
-#ifdef THREAD_ENABLE_TRACE
-#warning Main thread traces enabled
-#endif /* THREAD_ENABLE_TRACE */
 
 #define ABOUT	  \
 	"Tracker " PACKAGE_VERSION "\n"
@@ -63,13 +59,12 @@
 #define MINER_FS_NAME_SUFFIX "LocalSearch3"
 
 static GMainLoop *main_loop;
+static TrackerSparqlConnection *conn;
 
 static gchar *filename;
 static gchar *mime_type;
-static gchar *force_module;
 static gchar *output_format_name;
 static gboolean version;
-static gchar *domain_ontology_name = NULL;
 static guint shutdown_timeout_id = 0;
 static int socket_fd;
 
@@ -82,17 +77,9 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_STRING, &mime_type,
 	  N_("MIME type for file (if not provided, this will be guessed)"),
 	  N_("MIME") },
-	{ "force-module", 'm', 0,
-	  G_OPTION_ARG_STRING, &force_module,
-	  N_("Force a module to be used for extraction (e.g. “foo” for “foo.so”)"),
-	  N_("MODULE") },
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format_name,
 	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
 	  N_("FORMAT") },
-	{ "domain-ontology", 'd', 0,
-	  G_OPTION_ARG_STRING, &domain_ontology_name,
-	  N_("Runs for a specific domain ontology"),
-	  NULL },
 	{ "socket-fd", 's', 0,
 	  G_OPTION_ARG_INT, &socket_fd,
 	  N_("Socket file descriptor for peer-to-peer communication"),
@@ -175,12 +162,15 @@ initialize_signal_handler (void)
 static int
 run_standalone (void)
 {
-	TrackerExtract *object;
-	GFile *file;
-	gchar *uri;
+	g_autoptr (TrackerExtract) extract = NULL;
+	g_autoptr (GFile) file = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *uri = NULL, *mime = NULL;
+	TrackerResource *resource = NULL;
 	GEnumClass *enum_class;
 	GEnumValue *enum_value;
 	TrackerSerializationFormat output_format;
+	TrackerExtractInfo *info;
 
 	if (!output_format_name) {
 		output_format_name = "turtle";
@@ -199,17 +189,102 @@ run_standalone (void)
 	tracker_locale_sanity_check ();
 
 	file = g_file_new_for_commandline_arg (filename);
+
+	if (mime_type) {
+		mime = g_strdup (mime_type);
+	} else {
+		g_autoptr (GFileInfo) file_info = NULL;
+
+		file_info = g_file_query_info (file,
+		                               G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+		                               G_FILE_QUERY_INFO_NONE,
+		                               NULL,
+		                               &error);
+		if (!file_info)
+			goto error;
+
+		mime = g_strdup (g_file_info_get_content_type (file_info));
+	}
+
 	uri = g_file_get_uri (file);
 
-	object = tracker_extract_new (force_module);
+	extract = tracker_extract_new ();
 
-	tracker_extract_get_metadata_by_cmdline (object, uri, mime_type, output_format);
+	info = tracker_extract_file_sync (extract, uri, "_:content", mime, &error);
+	if (!info)
+		goto error;
 
-	g_object_unref (object);
-	g_object_unref (file);
-	g_free (uri);
+	resource = tracker_extract_info_get_resource (info);
+
+	if (resource) {
+		if (output_format == TRACKER_SERIALIZATION_FORMAT_SPARQL) {
+			g_autofree char *text = NULL;
+			TrackerResource *file_resource;
+
+			/* Set up the corresponding nfo:FileDataObject resource appropriately,
+			 * so the SPARQL we generate is valid according to Nepomuk.
+			 */
+			file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
+
+			if (!file_resource) {
+				file_resource = tracker_resource_new (uri);
+				tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
+			}
+
+			tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
+
+			text = tracker_resource_print_sparql_update (resource, NULL, NULL);
+
+			g_print ("%s\n", text);
+		} else if (output_format == TRACKER_SERIALIZATION_FORMAT_TURTLE) {
+			TrackerNamespaceManager *namespaces;
+			g_autofree char *turtle = NULL;
+
+			/* If this was going into the tracker-store we'd generate a unique ID
+			 * here, so that the data persisted across file renames.
+			 */
+			tracker_resource_set_identifier (resource, uri);
+
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+			namespaces = tracker_namespace_manager_get_default ();
+			G_GNUC_END_IGNORE_DEPRECATIONS
+			turtle = tracker_resource_print_rdf (resource, namespaces, TRACKER_RDF_FORMAT_TURTLE, NULL);
+
+			g_print ("%s\n", turtle);
+		} else {
+			/* JSON-LD extraction */
+			g_autofree char *json = NULL;
+
+			/* If this was going into the tracker-store we'd generate a unique ID
+			 * here, so that the data persisted across file renames.
+			 */
+			tracker_resource_set_identifier (resource, uri);
+
+			/* We are using "deprecated" API here as the pretty printed output is
+			 * nicer than with `tracker_resource_print_rdf()`, which uses the
+			 * generic serializer.
+			 */
+			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
+			json = tracker_resource_print_jsonld (resource, NULL);
+			G_GNUC_END_IGNORE_DEPRECATIONS
+
+			g_print ("%s\n", json);
+		}
+	} else {
+		g_printerr ("%s: %s\n",
+		         uri,
+		         _("No metadata or extractor modules found to handle this file"));
+	}
+
+	tracker_extract_info_unref (info);
 
 	return EXIT_SUCCESS;
+ error:
+	g_printerr ("%s, %s\n",
+	            _("Metadata extraction failed"),
+	            error->message);
+
+	return EXIT_FAILURE;
 }
 
 static void
@@ -239,62 +314,28 @@ on_decorator_finished (TrackerDecorator *decorator,
 	if (shutdown_timeout_id != 0)
 		return;
 
-	/* For debugging convenience, avoid the shutdown timeout if running
-	 * on a terminal.
-	 */
-	if (tracker_term_is_tty ())
-		return;
-
 	shutdown_timeout_id = g_timeout_add_seconds (10, shutdown_timeout_cb,
 	                                             main_loop);
 }
 
-static GFile *
-get_cache_dir (TrackerDomainOntology *domain_ontology)
-{
-	GFile *cache;
-
-	cache = tracker_domain_ontology_get_cache (domain_ontology);
-	return g_file_get_child (cache, "files");
-}
-
 TrackerSparqlConnection *
-tracker_main_get_readonly_connection (GError **error)
+tracker_main_get_connection (void)
 {
-	TrackerDomainOntology *domain_ontology = NULL;
-	g_autoptr (GFile) store = NULL;
-
-	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, error);
-	if (!domain_ontology)
-		return NULL;
-
-	store = get_cache_dir (domain_ontology);
-	tracker_domain_ontology_unref (domain_ontology);
-
-	if (!g_file_query_exists (store, NULL))
-		return NULL;
-
-	return tracker_sparql_connection_new (TRACKER_SPARQL_CONNECTION_FLAGS_READONLY,
-	                                      store,
-	                                      NULL,
-	                                      NULL,
-	                                      error);
+	return conn;
 }
 
 static int
 do_main (int argc, char *argv[])
 {
-	GOptionContext *context;
-	GError *error = NULL;
-	TrackerExtract *extract;
-	TrackerDecorator *decorator;
-	TrackerExtractController *controller;
-	GMainLoop *my_main_loop;
-	GDBusConnection *connection = NULL;
-	TrackerExtractPersistence *persistence;
-	TrackerSparqlConnection *sparql_connection;
-	TrackerDomainOntology *domain_ontology;
-	gchar *miner_dbus_name;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autoptr (TrackerExtract) extract = NULL;
+	g_autoptr (TrackerDecorator) decorator = NULL;
+	g_autoptr (TrackerExtractController) controller = NULL;
+	g_autoptr (GMainLoop) loop = NULL;
+	g_autoptr (GDBusConnection) connection = NULL;
+	g_autoptr (TrackerExtractPersistence) persistence = NULL;
+	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -309,25 +350,19 @@ do_main (int argc, char *argv[])
 
 	if (error) {
 		g_printerr ("%s\n", error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
 	if (!filename && mime_type) {
-		gchar *help;
+		g_autofree gchar *help = NULL;
 
 		g_printerr ("%s\n\n",
 		            _("Filename and mime type must be provided together"));
 
 		help = g_option_context_get_help (context, TRUE, NULL);
-		g_option_context_free (context);
 		g_printerr ("%s", help);
-		g_free (help);
-
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (version) {
 		g_print ("\n" ABOUT "\n" LICENSE "\n");
@@ -337,14 +372,6 @@ do_main (int argc, char *argv[])
 	g_set_application_name ("tracker-extract");
 
 	setlocale (LC_ALL, "");
-
-	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
-	if (error) {
-		g_critical ("Could not load domain ontology '%s': %s",
-		            domain_ontology_name, error->message);
-		g_error_free (error);
-		return EXIT_FAILURE;
-	}
 
 	if (!tracker_extract_module_manager_init ())
 		return EXIT_FAILURE;
@@ -361,7 +388,6 @@ do_main (int argc, char *argv[])
 		g_autoptr (GIOStream) stream = NULL;
 
 		socket = g_socket_new_from_fd (socket_fd, &error);
-		miner_dbus_name = NULL;
 
 		if (socket) {
 			stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
@@ -371,52 +397,47 @@ do_main (int argc, char *argv[])
 			                                         NULL, NULL, &error);
 		}
 	} else {
-		connection = g_bus_get_sync (TRACKER_IPC_BUS, NULL, &error);
-		miner_dbus_name = tracker_domain_ontology_get_domain (domain_ontology,
-		                                                      MINER_FS_NAME_SUFFIX);
+		g_warning ("The --socket-fd argument is mandatory");
+		return EXIT_FAILURE;
 	}
 
 	if (!connection) {
 		g_critical ("Could not create DBus connection: %s\n",
 		            error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
-	extract = tracker_extract_new (force_module);
+	extract = tracker_extract_new ();
 
-	sparql_connection = tracker_sparql_connection_bus_new (miner_dbus_name,
-	                                                       NULL, connection,
-	                                                       &error);
+	sparql_connection = conn =
+		tracker_sparql_connection_bus_new (NULL,
+		                                   NULL, connection,
+		                                   &error);
 
 	if (error) {
 		g_critical ("Could not connect to filesystem miner endpoint: %s",
 		            error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
 	persistence = tracker_extract_persistence_new ();
 
-	decorator = tracker_extract_decorator_new (sparql_connection, extract, persistence);
-
-#ifdef THREAD_ENABLE_TRACE
-	g_debug ("Thread:%p (Main) --- Waiting for extract requests...",
-	         g_thread_self ());
-#endif /* THREAD_ENABLE_TRACE */
+	decorator = tracker_decorator_new (sparql_connection, extract, persistence);
 
 	tracker_locale_sanity_check ();
 
-	controller = tracker_extract_controller_new (decorator, connection, persistence, &error);
+	controller = tracker_extract_controller_new (decorator,
+	                                             extract,
+	                                             connection,
+	                                             persistence,
+	                                             &error);
 	if (error) {
 		g_critical ("Could not create extraction controller: %s", error->message);
-		g_error_free (error);
-		g_object_unref (decorator);
 		return EXIT_FAILURE;
 	}
 
 	/* Main loop */
-	main_loop = g_main_loop_new (NULL, FALSE);
+	loop = main_loop = g_main_loop_new (NULL, FALSE);
 
 	g_signal_connect (decorator, "finished",
 	                  G_CALLBACK (on_decorator_finished),
@@ -434,22 +455,11 @@ do_main (int argc, char *argv[])
 
 	g_main_loop_run (main_loop);
 
-	my_main_loop = main_loop;
-	main_loop = NULL;
-	g_main_loop_unref (my_main_loop);
-
 	tracker_miner_stop (TRACKER_MINER (decorator));
 
 	/* Shutdown subsystems */
 	tracker_module_manager_shutdown_modules ();
-	g_object_unref (extract);
-	g_object_unref (decorator);
-	g_object_unref (controller);
-	g_object_unref (persistence);
-	g_object_unref (connection);
-	tracker_domain_ontology_unref (domain_ontology);
 	tracker_sparql_connection_close (sparql_connection);
-	g_object_unref (sparql_connection);
 
 	return EXIT_SUCCESS;
 }

@@ -134,7 +134,6 @@ tracker_extract_sources = [
   'tracker-decorator.c',
   'tracker-extract.c',
   'tracker-extract-controller.c',
-  'tracker-extract-decorator.c',
   'tracker-extract-persistence.c',
   'tracker-read.c',
   'tracker-main.c',

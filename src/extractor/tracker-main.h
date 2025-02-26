@@ -25,7 +25,7 @@
 
 G_BEGIN_DECLS
 
-TrackerSparqlConnection * tracker_main_get_readonly_connection (GError **error);
+TrackerSparqlConnection * tracker_main_get_connection (void);
 
 G_END_DECLS
 

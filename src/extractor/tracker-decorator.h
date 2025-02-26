@@ -22,90 +22,27 @@
 
 #include <tracker-common.h>
 
+#include "tracker-extract.h"
+#include "tracker-extract-persistence.h"
 #include "utils/tracker-extract.h"
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_DECORATOR         (tracker_decorator_get_type())
-#define TRACKER_DECORATOR(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_DECORATOR, TrackerDecorator))
-#define TRACKER_DECORATOR_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_DECORATOR, TrackerDecoratorClass))
-#define TRACKER_IS_DECORATOR(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_DECORATOR))
-#define TRACKER_IS_DECORATOR_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),  TRACKER_TYPE_DECORATOR))
-#define TRACKER_DECORATOR_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_DECORATOR, TrackerDecoratorClass))
+#define TRACKER_TYPE_DECORATOR (tracker_decorator_get_type())
+G_DECLARE_FINAL_TYPE (TrackerDecorator,
+                      tracker_decorator,
+                      TRACKER, DECORATOR,
+                      TrackerMiner)
 
-typedef struct _TrackerDecorator TrackerDecorator;
-typedef struct _TrackerDecoratorClass TrackerDecoratorClass;
-typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
+TrackerDecorator * tracker_decorator_new (TrackerSparqlConnection   *connection,
+                                          TrackerExtract            *extract,
+                                          TrackerExtractPersistence *persistence);
 
-/**
- * TrackerDecorator:
- *
- * Abstract miner object for passive extended metadata indexing, i.e.
- * data past the basic information such as file name, size, etc.
- **/
-struct _TrackerDecorator {
-	TrackerMiner parent_instance;
-};
+void tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
+                                            const gchar * const *graphs);
 
-/**
- * TrackerDecoratorClass:
- * @parent_class: parent object class.
- * @items_available: Called when there are resources to be processed.
- * @finished: Called when all resources have been processed.
- * @padding: Reserved for future API improvements.
- *
- * An implementation that takes care of extracting extra metadata
- * specific to file types by talking to tracker-extract.
- *
- * Based on #TrackerMinerClass.
- **/
-struct _TrackerDecoratorClass {
-	TrackerMinerClass parent_class;
-
-	void (* items_available) (TrackerDecorator *decorator);
-	void (* finished)        (TrackerDecorator *decorator);
-
-	void (* error) (TrackerDecorator   *decorator,
-	                TrackerExtractInfo *extract_info,
-	                const gchar        *error_message);
-
-	void (* update) (TrackerDecorator   *decorator,
-	                 TrackerExtractInfo *extract_info,
-	                 TrackerBatch       *batch);
-};
-
-#define TRACKER_DECORATOR_ERROR (tracker_decorator_error_quark ())
-
-typedef enum {
-	TRACKER_DECORATOR_ERROR_PAUSED
-} TrackerDecoratorError;
-
-
-GType         tracker_decorator_get_type          (void) G_GNUC_CONST;
-GQuark        tracker_decorator_error_quark       (void);
-
-guint         tracker_decorator_get_n_items       (TrackerDecorator     *decorator);
-
-TrackerDecoratorInfo * tracker_decorator_next (TrackerDecorator  *decorator,
-                                               GError           **error);
-
-void          tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
-                                                     const gchar * const *graphs);
-
-void tracker_decorator_invalidate_cache (TrackerDecorator *decorator);
-
-GType         tracker_decorator_info_get_type     (void) G_GNUC_CONST;
-
-TrackerDecoratorInfo *
-              tracker_decorator_info_ref          (TrackerDecoratorInfo *info);
-void          tracker_decorator_info_unref        (TrackerDecoratorInfo *info);
-const gchar * tracker_decorator_info_get_url      (TrackerDecoratorInfo *info);
-const gchar * tracker_decorator_info_get_content_id (TrackerDecoratorInfo *info);
-GCancellable * tracker_decorator_info_get_cancellable (TrackerDecoratorInfo *info);
-void          tracker_decorator_info_complete     (TrackerDecoratorInfo *info,
-                                                   TrackerExtractInfo   *extract_info);
-void          tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
-                                                     GError               *error);
+void tracker_decorator_set_throttled (TrackerDecorator *decorator,
+                                      gboolean          throttled);
 
 G_END_DECLS
 

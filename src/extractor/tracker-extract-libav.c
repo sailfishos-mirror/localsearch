@@ -26,15 +26,12 @@
 #include <libavformat/avformat.h>
 
 #include "tracker-cue-sheet.h"
-#include "tracker-main.h"
 
 #include "utils/tracker-extract.h"
 
 #ifdef HAVE_GUPNP_DLNA
 #include "tracker-gupnp.h"
 #endif
-
-static TrackerSparqlConnection *local_conn = NULL;
 
 #define CHUNK_N_BYTES (2 << 15)
 
@@ -406,10 +403,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {
 			cue_sheet = tracker_cue_sheet_parse (tag->value);
 		} else {
-			if (!local_conn)
-				local_conn = tracker_main_get_readonly_connection (NULL);
-
-			cue_sheet = tracker_cue_sheet_guess_from_uri (local_conn, uri);
+			cue_sheet = tracker_cue_sheet_guess_from_uri (uri);
 		}
 
 		if (cue_sheet) {
@@ -492,12 +486,5 @@ tracker_extract_module_init (GError **error)
 {
 	av_log_set_level (AV_LOG_FATAL);
 
-	return TRUE;
-}
-
-G_MODULE_EXPORT gboolean
-tracker_extract_module_shutdown (void)
-{
-	g_clear_object (&local_conn);
 	return TRUE;
 }
