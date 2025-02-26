@@ -153,20 +153,19 @@ miner_files_create_empty_information_element (TrackerMinerFiles *miner,
 }
 
 gchar *
-get_content_type (GFile     *file,
-		  GFileInfo *file_info)
+get_content_type (GFile *file)
 {
-	g_autoptr (GFileInfo) content_info = NULL;
+	g_autoptr (GFileInfo) info = NULL;
 
-	if (!g_file_info_has_attribute (file_info, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE)) {
-		content_info =
-			g_file_query_info (file,
-					   G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
-					   G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-					   NULL, NULL);
-	}
+	info = g_file_query_info (file,
+	                          G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
+	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
+	                          NULL, NULL);
 
-	return g_strdup (g_file_info_get_content_type (content_info ? content_info : file_info));
+	if (!info || !g_file_info_has_attribute (info, G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE))
+		return NULL;
+
+	return g_strdup (g_file_info_get_content_type (info));
 }
 
 void
@@ -177,7 +176,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
                                   gboolean             create)
 {
 	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
-	const gchar *graph;
+	const gchar *graph = NULL;
 	const gchar *parent_urn;
 	g_autoptr (GFile) parent = NULL;
 	g_autofree gchar *uri = NULL;
@@ -185,9 +184,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	g_autoptr (GDateTime) modified = NULL;
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 
-	mime_type = get_content_type (file, file_info);
-	if (!mime_type)
-		return;
+	mime_type = get_content_type (file);
 
 	uri = g_file_get_uri (file);
 
@@ -233,9 +230,10 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource);
 
-	graph = tracker_extract_module_manager_get_graph (mime_type);
+	if (mime_type)
+		graph = tracker_extract_module_manager_get_graph (mime_type);
 
-	if (graph && g_file_info_get_size (file_info) > 0) {
+	if (mime_type && graph && g_file_info_get_size (file_info) > 0) {
 		TrackerResource *information_element;
 
 		/* This mimetype will be extracted by some module, pre-fill the
@@ -316,13 +314,11 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
 	g_autofree gchar *uri = NULL;
 	g_autofree gchar *mime_type = NULL;
-	const gchar *graph;
+	const gchar *graph = NULL;
 	g_autoptr (GDateTime) modified = NULL;
 	g_autoptr (GDateTime) accessed = NULL, created = NULL;
 
-	mime_type = get_content_type (file, info);
-	if (!mime_type)
-		return;
+	mime_type = get_content_type (file);
 
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
@@ -332,7 +328,8 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 	if (!modified)
 		modified = g_date_time_new_from_unix_utc (0);
 
-	graph = tracker_extract_module_manager_get_graph (mime_type);
+	if (mime_type)
+		graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	/* Update nfo:fileLastModified */
 	tracker_resource_set_datetime (resource, "nfo:fileLastModified", modified);

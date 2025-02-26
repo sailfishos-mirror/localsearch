@@ -850,7 +850,6 @@ sparql_buffer_flush_cb (GObject      *object,
 		notify_roots_finished (fs);
 	}
 
-	check_notifier_high_water (fs);
 	queue_handler_maybe_set_up (fs);
 
 	g_ptr_array_unref (tasks);
@@ -1239,6 +1238,8 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		/* Check if we've finished inserting for given prefixes ... */
 		notify_roots_finished (fs);
 	}
+
+	check_notifier_high_water (fs);
 
 	g_clear_object (&file);
 	g_clear_object (&source_file);
