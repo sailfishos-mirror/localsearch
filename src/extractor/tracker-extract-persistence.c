@@ -33,7 +33,7 @@ tracker_extract_persistence_finalize (GObject *object)
 	TrackerExtractPersistence *persistence =
 		TRACKER_EXTRACT_PERSISTENCE (object);
 
-	if (persistence->fd > 0)
+	if (persistence->fd >= 0)
 		close (persistence->fd);
 
 	G_OBJECT_CLASS (tracker_extract_persistence_parent_class)->finalize (object);
@@ -50,6 +50,7 @@ tracker_extract_persistence_class_init (TrackerExtractPersistenceClass *klass)
 static void
 tracker_extract_persistence_init (TrackerExtractPersistence *persistence)
 {
+	persistence->fd = -1;
 }
 
 TrackerExtractPersistence *
