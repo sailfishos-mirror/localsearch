@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Gnome Nepali Translation Project\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-01-10 20:29+0000\n"
-"PO-Revision-Date: 2025-02-19 10:21+0545\n"
+"POT-Creation-Date: 2025-02-13 03:36+0000\n"
+"PO-Revision-Date: 2025-02-27 15:12+0545\n"
 "Last-Translator: Pawan Chitrakar <chautari@gmail.com>\n"
 "Language-Team: Nepali Translation Team <chautari@gmail.com>\n"
 "Language: ne\n"
@@ -227,718 +227,442 @@ msgstr "सामाग्री सहित बेवास्ता निर
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "यहाँ ब्लकसूचीबद्ध फाइल समावेश गर्ने कुनै पनि डाइरेक्टरीबाट जोगिनुहोस्"
 
-#: src/libtracker-miners-common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Cookie not recognized to resume paused miner"
-
-#: src/libtracker-miners-common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "अनुप्रयोग रोक्नुहोस् र कारण पहिल्यै अवस्थित विराम अनुरोधसँग मेल खान्छ"
-
-#: src/libtracker-miners-common/tracker-utils.c:101
-#: src/libtracker-miners-common/tracker-utils.c:152
-msgid "less than one second"
-msgstr "१ सेकेण्ड भन्दा कम"
-
-#. Translators: this is %d days
-#: src/libtracker-miners-common/tracker-utils.c:116
-#, c-format
-msgid " %dd"
-msgstr " %dd"
-
-#. Translators: this is %2.2d hours
-#: src/libtracker-miners-common/tracker-utils.c:120
-#, c-format
-msgid " %2.2dh"
-msgstr " %2.2dh"
-
-#. Translators: this is %2.2d minutes
-#: src/libtracker-miners-common/tracker-utils.c:124
-#, c-format
-msgid " %2.2dm"
-msgstr " %2.2dm"
-
-#. Translators: this is %2.2d seconds
-#: src/libtracker-miners-common/tracker-utils.c:128
-#, c-format
-msgid " %2.2ds"
-msgstr " %2.2ds"
-
-#: src/libtracker-miners-common/tracker-utils.c:132
-#, c-format
-msgid " %d day"
-msgid_plural " %d days"
-msgstr[0] " %d दिन"
-msgstr[1] " %d दिन"
-
-#: src/libtracker-miners-common/tracker-utils.c:136
-#, c-format
-msgid " %2.2d hour"
-msgid_plural " %2.2d hours"
-msgstr[0] " %2.2d घण्टा"
-msgstr[1] " %2.2d घण्टा"
-
-#: src/libtracker-miners-common/tracker-utils.c:140
-#, c-format
-msgid " %2.2d minute"
-msgid_plural " %2.2d minutes"
-msgstr[0] " %2.2d मिनेट"
-msgstr[1] " %2.2d मिनेट"
-
-#: src/libtracker-miners-common/tracker-utils.c:144
-#, c-format
-msgid " %2.2d second"
-msgid_plural " %2.2d seconds"
-msgstr[0] " %2.2d सेकेण्ड"
-msgstr[1] " %2.2d सेकेण्ड"
-
-#: src/miners/fs/tracker-main.c:89
-msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-msgstr "सेकेन्डमा प्रारम्भिक निद्रा समय, ०->१००० (पूर्वनिर्धारित=१५)"
-
-#: src/miners/fs/tracker-main.c:94
-msgid "Runs until all configured locations are indexed and then exits"
-msgstr "जबसम्म सबै कन्फिगर गरिएका स्थानहरू अनुक्रमणिका छन् अनि बाहिरिनुहोस्"
-
-#: src/miners/fs/tracker-main.c:98 src/tracker/tracker-info.c:91
-msgid "Checks if FILE is eligible for being mined based on configuration"
-msgstr "कन्फिगरेसनमा आधारित उत्खननका लागि फाइल योग्य छ कि छैन जाँच गर्दछ"
-
-#: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
-#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61 src/tracker/tracker-info.c:94
-#: src/tracker/tracker-info.c:95 src/tracker/tracker-reset.c:56
-msgid "FILE"
-msgstr "फाइल"
-
-#: src/miners/fs/tracker-main.c:102 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:94
-msgid "Runs for a specific domain ontology"
-msgstr "एक विशिष्ट डोमेन एन्टोलोजी लागि चलाउँछ"
-
-#: src/miners/fs/tracker-main.c:106
-msgid "Avoids changes in the filesystem"
-msgstr "फाइल प्रणालीमा परिवर्तन गर्दैन"
-
-#: src/miners/fs/tracker-main.c:110 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:102 src/tracker-writeback/tracker-main.c:50
-msgid "Displays version information"
-msgstr "संस्करण सूचना देखाउनुहोस्"
-
-#: src/miners/fs/tracker-main.c:555
-#, c-format
-msgid "Data object “%s” currently exists"
-msgstr "डेटा वस्तु \"%s\" अहिले अवस्थित छ"
-
-#: src/miners/fs/tracker-main.c:556
-#, c-format
-msgid "Data object “%s” currently does not exist"
-msgstr "डेटा वस्तु \"%s\" हाल अवस्थित छैन"
-
-#: src/miners/fs/tracker-main.c:566
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "डाइरेक्टरी अनुक्रमणिका गर्न योग्य छैन (फिल्टरमा आधारित)"
-
-#: src/miners/fs/tracker-main.c:570
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (फिल्टरमा आधारित)"
-
-#: src/miners/fs/tracker-main.c:573
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (लुकेको फाइल)"
-
-#: src/miners/fs/tracker-main.c:575
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (अनुक्रमणिका गरिएको फोल्डर होइन)"
-
-#: src/miners/fs/tracker-main.c:599
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमण गर्न योग्य छैन (फिल्टरमा आधारित)"
-
-#: src/miners/fs/tracker-main.c:605
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमणिका गर्न योग्य छैन (लुकेको फाइल)"
-
-#: src/miners/fs/tracker-main.c:611
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
-msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमण गर्न योग्य छैन (सामग्री फिल्टरमा आधारित)"
-
-#: src/miners/fs/tracker-main.c:630
-msgid "Directory is eligible to be indexed"
-msgstr "डाइरेक्टरी अनुक्रमण गर्न योग्य छ"
-
-#: src/miners/fs/tracker-main.c:631
-msgid "File is eligible to be indexed"
-msgstr "फाइल अनुक्रमणिका गर्न योग्य छ"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/miners/fs/tracker-main.c:858
-msgid "— start the tracker indexer"
-msgstr "—  ट्रयाकर अनुक्रमणिका सुरु गर्नुहोस्"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:45
-msgid "Add feed"
-msgstr "फिड थप्नुहोस्"
-
-#: src/miners/rss/tracker-main.c:46 src/miners/rss/tracker-main.c:60
-msgid "URL"
-msgstr "युआरएल"
-
-#: src/miners/rss/tracker-main.c:49
-msgid "Title to use (must be used with --add-feed)"
-msgstr "शीर्षकको प्रयोग ( --add-feed साथ प्रयोग गर्नु पर्छ)"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:54
-msgid "List feeds"
-msgstr "सूची फिड"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:59
-msgid "Delete feed"
-msgstr "फिड मेट्नुहोस्"
-
-#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
-#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
-#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:92
-#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
-msgid "Could not establish a connection to Tracker"
-msgstr "ट्रयाकर जडान स्थापाना असफल"
-
-#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
-#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:449
-#: src/tracker/tracker-daemon.c:510 src/tracker/tracker-daemon.c:545
-#: src/tracker/tracker-daemon.c:614 src/tracker/tracker-daemon.c:713
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:981
-#: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63 src/tracker/tracker-info.c:422
-#: src/tracker/tracker-process.c:219 src/tracker/tracker-search.c:1379
-#: src/tracker/tracker-status.c:93 src/tracker/tracker-status.c:206
-#: src/tracker/tracker-status.c:252 src/tracker/tracker-status.c:281
-#: src/tracker/tracker-tag.c:947
-msgid "No error given"
-msgstr "कुनै त्रुटि दिएन"
-
-#: src/miners/rss/tracker-main.c:188
-msgid "Could not add feed"
-msgstr "फिड थप्न सकेन"
-
-#: src/miners/rss/tracker-main.c:226
-msgid "Could not remove feed"
-msgstr "फिड हटाउन सकेन"
-
-#: src/miners/rss/tracker-main.c:294
-msgid "Could not list feeds"
-msgstr "फिडहरू सूचीकरण गर्न सकेन"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/miners/rss/tracker-main.c:422
-msgid "— start the feeds indexer"
-msgstr "— फिड अनुक्रमणिका सुरु गर्नुहोस्"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-control/tracker-main.c:136
-msgid "— start the tracker index proxy"
-msgstr "— ट्र्याकर अनुक्रमणिका प्रोक्सी सुरु गर्नुहोस्"
-
-#: src/tracker-extract/tracker-extract.c:721
-msgid "Metadata extraction failed"
-msgstr "मेटाडाटा निकाटर असफल"
-
-#: src/tracker-extract/tracker-extract.c:803
-msgid "No metadata or extractor modules found to handle this file"
-msgstr "यो फाइल ह्यान्डल गर्न कुनै मेटाडेटा वा एक्स्ट्रक्टर मोड्युल फेला परेन"
-
-#: src/tracker-extract/tracker-main.c:79
-msgid "File to extract metadata for"
-msgstr "मेटाडाटा निकाल्नका लागि फाइल"
-
-#: src/tracker-extract/tracker-main.c:83
-msgid "MIME type for file (if not provided, this will be guessed)"
-msgstr "फाइलका लागि माइम प्रकार (यदि प्रदान गरिएन भने, यो अनुमान लगाइनेछ)"
-
-#: src/tracker-extract/tracker-main.c:84
-msgid "MIME"
-msgstr "माइम"
-
-#: src/tracker-extract/tracker-main.c:87
-msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-msgstr "निष्कर्षणको लागि प्रयोग गर्न मोड्युल बल दिनुहोस् (उदाहरणका लागि \"foo.so\" को लागि \"फू\")"
-
-#: src/tracker-extract/tracker-main.c:88
-msgid "MODULE"
-msgstr "मोड्युल"
-
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
-msgid "Output results format: “sparql”, “turtle” or “json-ld”"
-msgstr "निर्गत परिणाम ढाँचा: \"स्पार्कल\", \"कछुवा\" वा \"जेसन-एलडी\""
-
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
-msgid "FORMAT"
-msgstr "ढाँचा"
-
-#: src/tracker-extract/tracker-main.c:98
-msgid "Socket file descriptor for peer-to-peer communication"
-msgstr "सहकर्मी-देखि-सहकर्मी संचारका लागि सकेट फाइल वर्णनकर्ता"
-
-#: src/tracker-extract/tracker-main.c:99
-msgid "FD"
-msgstr "FD"
-
-#: src/tracker-extract/tracker-main.c:194
-#, c-format
-msgid "Unsupported serialization format “%s”\n"
-msgstr "असमर्थित क्रमबद्धिकरण ढाँचा “%s”\n"
-
-#. Translators: this message will appear immediately after the
-#. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:313
-msgid "— Extract file meta data"
-msgstr "मेटाडाटा निकाल्नका लागि फाइल"
-
-#: src/tracker-extract/tracker-main.c:328
-msgid "Filename and mime type must be provided together"
-msgstr "फाइलनाम र माइम प्रकार सँगै उपलब्ध गराउनुपर्छ"
-
-#: src/tracker-writeback/tracker-main.c:54
-msgid "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr "लगिङ, ० = त्रुटिहरू मात्र, १ = न्यूनतम, २ = विस्तृत र ३ = डिबग (पूर्वनिर्धारित= ०)"
-
-#: src/tracker-writeback/tracker-main.c:61
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "निष्क्रियताको ३० सेकेन्ड पछि बन्द गर्न अक्षम पार्नुहोस्"
-
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:93
-msgid "— start the tracker writeback service"
-msgstr "— ट्र्याकर राइटब्याक सेवा सुरु गर्नुहोस्"
-
-#: src/tracker/main.c:67
+#: src/cli/main.c:67
 msgid "Start, stop, restart and list daemons responsible for indexing content"
 msgstr "सामग्री अनुक्रमणिकाका लागि जिम्मेवार डेमनहरू सुरु, रोक्नुहोस्, पुन: सुरु गर्नुहोस् र सूचीबद्ध गर्नुहोस्"
 
-#: src/tracker/main.c:68
+#: src/cli/main.c:68
 msgid "Extract metadata from a file"
 msgstr "फाइलबाट मेटाडाटा निकाल्नुहोस्"
 
-#: src/tracker/main.c:69
+#: src/cli/main.c:69
 msgid "Trigger content indexing of a location"
 msgstr "स्थानको सामग्री अनुक्रमणिका ट्रिगर गर्नुहोस्"
 
-#: src/tracker/main.c:70
+#: src/cli/main.c:70
 msgid "Retrieve all information available for a certain file"
 msgstr "निश्चित फाइलका लागि उपलब्ध सबै जानकारी पुन: प्राप्त गर्नुहोस्"
 
-#: src/tracker/main.c:71
+#: src/cli/main.c:71
 msgid "Reset the index and configuration"
 msgstr "अनुक्रमणिका र कन्फिगरेसन रिसेट गर्नुहोस्"
 
-#: src/tracker/main.c:72
+#: src/cli/main.c:72
 msgid "Search for content"
-msgstr "प्रकार द्वारा वा सबै प्रकारहरूमा, सामग्री मिल्दो सर्तहरूको लागि खोजी गर्नुहोस्"
+msgstr "सामग्री खोजी गर्नुहोस्"
 
-#: src/tracker/main.c:73
+#: src/cli/main.c:73
 msgid "Provide status and statistics on the data indexed"
 msgstr "अनुक्रमण गरिएको डेटामा स्थिति र तथ्याङ्क प्रदान गर्नुहोस्"
 
-#: src/tracker/main.c:74
+#: src/cli/main.c:74
 msgid "Add, remove and list tags"
 msgstr "ट्यागहरू थप्नुहोस्, हटाउनुहोस् र सूची गर्नुहोस्"
 
-#: src/tracker/main.c:75
+#: src/cli/main.c:75
 msgid "Sandbox for a testing environment"
 msgstr "परीक्षण वातावरणका लागि स्यान्डबक्स"
 
-#: src/tracker/main.c:120 src/tracker/main.c:183
+#: src/cli/main.c:120 src/cli/main.c:183
 msgid "Available localsearch commands are:"
 msgstr "उपलब्ध स्थानीय खोजी आदेशहरू हुन्:"
 
-#: src/tracker/main.c:216
+#: src/cli/main.c:216
 msgid "See “localsearch help <command>” to read about a specific subcommand."
-msgstr "<command>एउटा खास उप -आदेशबारे पढ् न \"स्थानीय अनुसन्धानले मदत \" हेर्नुहोस् ।."
+msgstr "एउटा खास उप -आदेशबारे <command> पढ्न \"स्थानीय खोज मदत \" हेर्नुहोस् ।."
 
-#: src/tracker/main.c:259
+#: src/cli/main.c:259
 #, c-format
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "\"%s\" स्थानीय खोजी आदेश होइन । \"स्थानीय खोज -- मद्दत\" हेर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:99
+#: src/cli/tracker-daemon.c:99
 msgid "Unavailable"
 msgstr "अनुपलब्ध"
 
 #. generic
-#: src/tracker/tracker-daemon.c:100
+#: src/cli/tracker-daemon.c:100
 msgid "Initializing"
 msgstr "थालनी गर्दै"
 
-#: src/tracker/tracker-daemon.c:101
+#: src/cli/tracker-daemon.c:101
 msgid "Processing…"
 msgstr "प्रोसेसिङ…"
 
-#: src/tracker/tracker-daemon.c:102
+#: src/cli/tracker-daemon.c:102
 msgid "Fetching…"
 msgstr "प्राप्त गर्दै…"
 
 #. miner/rss
-#: src/tracker/tracker-daemon.c:103
+#: src/cli/tracker-daemon.c:103
 #, c-format
 msgid "Crawling single directory “%s”"
 msgstr "एकल डाइरेक्टरी \"%s\" क्रल गर्दैछ"
 
-#: src/tracker/tracker-daemon.c:104
+#: src/cli/tracker-daemon.c:104
 #, c-format
 msgid "Crawling recursively directory “%s”"
 msgstr "पुनरावर्ती डाइरेक्टरी \"%s\" क्रल गर्दै"
 
-#: src/tracker/tracker-daemon.c:105
+#: src/cli/tracker-daemon.c:105
 msgid "Paused"
 msgstr "पज गरियो"
 
-#: src/tracker/tracker-daemon.c:106
+#: src/cli/tracker-daemon.c:106
 msgid "Idle"
 msgstr "निस्क्रिय"
 
-#: src/tracker/tracker-daemon.c:112
+#: src/cli/tracker-daemon.c:112
 msgid "Follow status changes as they happen"
 msgstr "स्थिति परिवर्तन हुने बित्तिक्कै पछ्याउनुहोस्"
 
-#: src/tracker/tracker-daemon.c:116
+#: src/cli/tracker-daemon.c:116
 msgid "Watch changes to the database in real time (e.g. resources or files being added)"
 msgstr "वास्तविक समयमा डेटाबेसमा परिवर्तनहरू हेर्नुहोस् (उदाहरणका लागि स्रोतहरू वा फाइलहरू थपिएका छन्)"
 
-#: src/tracker/tracker-daemon.c:120
+#: src/cli/tracker-daemon.c:120
 msgid "List common statuses for miners"
 msgstr "खानीमा काम गर्नेहरूका लागि साझा वस्तुस्थितिहरू सूचीबद्ध गर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:125
+#: src/cli/tracker-daemon.c:125
 msgid "Pause a miner (you must use this with --miner)"
 msgstr "माइनर रोक्नुहोस् (तपाईँले यसलाई --माइनरसँग प्रयोग गर्नुपर्दछ)"
 
-#: src/tracker/tracker-daemon.c:126 src/tracker/tracker-daemon.c:130
+#: src/cli/tracker-daemon.c:126 src/cli/tracker-daemon.c:130
 msgid "REASON"
 msgstr "कारण"
 
-#: src/tracker/tracker-daemon.c:129
+#: src/cli/tracker-daemon.c:129
 msgid ""
 "Pause a miner while the calling process is alive or until resumed (you must use this with --"
 "miner)"
 msgstr ""
 "कलिङ प्रक्रिया जीवित हुँदा वा पुन: सुरु नभएसम्म माइनर रोक्नुहोस् (तपाईँले यसलाई --माइनरसँग प्रयोग गर्नुपर्दछ)"
 
-#: src/tracker/tracker-daemon.c:133
+#: src/cli/tracker-daemon.c:133
 msgid "Resume a miner (you must use this with --miner)"
 msgstr "माइनर पुन: सुरु गर्नुहोस् (तपाईँले यसलाई --माइनरसँग प्रयोग गर्नुपर्दछ)"
 
-#: src/tracker/tracker-daemon.c:134
+#: src/cli/tracker-daemon.c:134
 msgid "COOKIE"
 msgstr "कुकी"
 
-#: src/tracker/tracker-daemon.c:137
+#: src/cli/tracker-daemon.c:137
 msgid ""
 "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or Applications)"
 msgstr ""
 "--रिज्यूमे वा -- पजसँग प्रयोग गर्न माइनर (तपाईँले प्रत्ययहरू प्रयोग गर्न सक्नुहुन्छ, उदाहरणका लागि फाइल हरू "
 "वा अनुप्रयोगहरू)"
 
-#: src/tracker/tracker-daemon.c:138
+#: src/cli/tracker-daemon.c:138
 msgid "MINER"
 msgstr "MINER"
 
-#: src/tracker/tracker-daemon.c:141
+#: src/cli/tracker-daemon.c:141
 msgid "List all miners currently running"
 msgstr "हाल चलिरहेका सबै खनिकहरूको सूची बनाउनुहोस्"
 
-#: src/tracker/tracker-daemon.c:145
+#: src/cli/tracker-daemon.c:145
 msgid "List all miners installed"
 msgstr "स्थापना गरिएका सबै खनिकहरूको सूची बनाउनुहोस्"
 
-#: src/tracker/tracker-daemon.c:149
+#: src/cli/tracker-daemon.c:149
 msgid "List pause reasons"
 msgstr "विराम कारणहरू सूचीबद्ध गर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:154
+#: src/cli/tracker-daemon.c:154
 msgid "List all Tracker processes"
 msgstr "सबै ट्रयाकर प्रक्रियाहरू सूचीबद्ध गर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:156
+#: src/cli/tracker-daemon.c:156
 msgid "Use SIGKILL to stop all miners"
 msgstr "सबै खनिकहरू रोक्न सिगकिल प्रयोग गर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:157 src/tracker/tracker-daemon.c:160
+#: src/cli/tracker-daemon.c:157 src/cli/tracker-daemon.c:160
 msgid "APPS"
 msgstr "APPS"
 
-#: src/tracker/tracker-daemon.c:159
+#: src/cli/tracker-daemon.c:159
 msgid "Use SIGTERM to stop all miners"
 msgstr "सबै खनिकहरू रोक्न सिग्टरम प्रयोग गर्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:162
+#: src/cli/tracker-daemon.c:162
 msgid "Starts miners"
 msgstr "खनिकहरू सुरु गर्दछ"
 
-#: src/tracker/tracker-daemon.c:214
+#: src/cli/tracker-daemon.c:214
 #, c-format
 msgid "Could not get status from miner: %s"
 msgstr "माइनरबाट स्थिति प्राप्त गर्न सकेन: %s"
 
 #. Translators: %s is a time string
-#: src/tracker/tracker-daemon.c:276
+#: src/cli/tracker-daemon.c:276
 #, c-format
 msgid "%s remaining"
 msgstr "%s बाकि छ"
 
-#: src/tracker/tracker-daemon.c:279
+#: src/cli/tracker-daemon.c:279
 msgid "unknown time left"
 msgstr "अज्ञात समय बाँकि छ"
 
 #. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:292 src/tracker/tracker-daemon.c:770
+#: src/cli/tracker-daemon.c:292 src/cli/tracker-daemon.c:770
 msgid "PAUSED"
 msgstr "पज गरियो"
 
-#: src/tracker/tracker-daemon.c:309
+#: src/cli/tracker-daemon.c:309
 msgid "Not running or is a disabled plugin"
 msgstr "चलिरहेको छैन वा अक्षम पारिएको प्लगइन हो"
 
-#: src/tracker/tracker-daemon.c:448
+#: src/cli/tracker-daemon.c:448
 #, c-format
 msgid "Could not pause miner, manager could not be created, %s"
 msgstr "माइनर रोक्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:455
+#: src/cli/tracker-daemon.c:449 src/cli/tracker-daemon.c:510 src/cli/tracker-daemon.c:545
+#: src/cli/tracker-daemon.c:614 src/cli/tracker-daemon.c:713 src/cli/tracker-daemon.c:760
+#: src/cli/tracker-daemon.c:981 src/cli/tracker-dbus.c:45 src/cli/tracker-dbus.c:63
+#: src/cli/tracker-info.c:422 src/cli/tracker-process.c:210 src/cli/tracker-search.c:1379
+#: src/cli/tracker-status.c:93 src/cli/tracker-status.c:206 src/cli/tracker-status.c:252
+#: src/cli/tracker-status.c:281 src/cli/tracker-tag.c:947
+msgid "No error given"
+msgstr "कुनै त्रुटि दिएन"
+
+#: src/cli/tracker-daemon.c:455
 #, c-format
 msgid "Attempting to pause miner “%s” with reason “%s”"
 msgstr "कारण \"%s\" सँग खनिक \"%s\" रोक्ने प्रयास गर्दै"
 
-#: src/tracker/tracker-daemon.c:463 src/tracker/tracker-daemon.c:469
+#: src/cli/tracker-daemon.c:463 src/cli/tracker-daemon.c:469
 #, c-format
 msgid "Could not pause miner: %s"
 msgstr "माइनर रोक्न सकेन: %s"
 
-#: src/tracker/tracker-daemon.c:475
+#: src/cli/tracker-daemon.c:475
 #, c-format
 msgid "Cookie is %d"
 msgstr "कुकी %d हो"
 
-#: src/tracker/tracker-daemon.c:482 src/tracker/tracker-daemon.c:725
-#: src/tracker/tracker-daemon.c:842
+#: src/cli/tracker-daemon.c:482 src/cli/tracker-daemon.c:725 src/cli/tracker-daemon.c:842
 msgid "Press Ctrl+C to stop"
-msgstr "रोक्न Ctrl+C थिच्नुहोस्"
+msgstr "रोक्नका लागि सीटीआरएल-सी थिच्नुहोस्"
 
-#: src/tracker/tracker-daemon.c:509
+#: src/cli/tracker-daemon.c:509
 #, c-format
 msgid "Could not resume miner, manager could not be created, %s"
 msgstr "माइनर पुन: सुरु गर्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:516
+#: src/cli/tracker-daemon.c:516
 #, c-format
 msgid "Attempting to resume miner %s with cookie %d"
 msgstr "खनिक %s पुन: सुरु, कुकी %d सँग प्रयास गर्दैछ"
 
-#: src/tracker/tracker-daemon.c:523
+#: src/cli/tracker-daemon.c:523
 #, c-format
 msgid "Could not resume miner: %s"
 msgstr "माइनर पुन: सुरु गर्न सकेन: %s"
 
-#: src/tracker/tracker-daemon.c:527
+#: src/cli/tracker-daemon.c:527
 msgid "Done"
 msgstr "गरियो"
 
-#: src/tracker/tracker-daemon.c:544
+#: src/cli/tracker-daemon.c:544
 #, c-format
 msgid "Could not list miners, manager could not be created, %s"
 msgstr "खनिकहरूको सूचीकरण गर्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:558
+#: src/cli/tracker-daemon.c:558
 #, c-format
 msgid "Found %d miner installed"
 msgid_plural "Found %d miners installed"
 msgstr[0] "%d माइनर स्थापना गरिएको फेला पर्यो"
 msgstr[1] "%d माइनरहरू स्थापना गरिएको फेला पर्यो"
 
-#: src/tracker/tracker-daemon.c:581
+#: src/cli/tracker-daemon.c:581
 #, c-format
 msgid "Found %d miner running"
 msgid_plural "Found %d miners running"
 msgstr[0] "%d माइनर चलिरहेको फेला पर्यो"
 msgstr[1] "%d माइनरहरू चलिरहेको फेला पर्यो"
 
-#: src/tracker/tracker-daemon.c:613
+#: src/cli/tracker-daemon.c:613
 #, c-format
 msgid "Could not get pause details, manager could not be created, %s"
 msgstr "विराम विवरण प्राप्त गर्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:623
+#: src/cli/tracker-daemon.c:623
 msgid "No miners are running"
 msgstr "कुनै खनिकहरू चलिरहेका छैनन्"
 
 #. Display states
-#: src/tracker/tracker-daemon.c:663 src/tracker/tracker-daemon.c:780
+#: src/cli/tracker-daemon.c:663 src/cli/tracker-daemon.c:780
 msgid "Miners"
 msgstr "खनिकहरू"
 
-#: src/tracker/tracker-daemon.c:670
+#: src/cli/tracker-daemon.c:670
 msgid "Application"
 msgstr "अनुप्रयोग"
 
-#: src/tracker/tracker-daemon.c:672
+#: src/cli/tracker-daemon.c:672
 msgid "Reason"
 msgstr "कारण"
 
-#: src/tracker/tracker-daemon.c:681
+#: src/cli/tracker-daemon.c:681
 msgid "No miners are paused"
 msgstr "कुनै खनिकहरू रोकिएका छैनन्"
 
-#: src/tracker/tracker-daemon.c:712
+#: src/cli/tracker-daemon.c:712
 msgid "Could not get SPARQL connection"
 msgstr "स्पारक्यूएल जडान प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-daemon.c:723
+#: src/cli/tracker-daemon.c:723
 msgid "Now listening for resource updates to the database"
 msgstr "अब डाटाबेसमा संसाधन अद्यावधिकका लागि सुन्दै"
 
-#: src/tracker/tracker-daemon.c:724
+#: src/cli/tracker-daemon.c:724
 msgid "All nie:plainTextContent properties are omitted"
 msgstr "All nie:plainTextContent गुणहरू हटाइएको  छ"
 
-#: src/tracker/tracker-daemon.c:741
+#: src/cli/tracker-daemon.c:741
 msgid "Common statuses include"
 msgstr "सामान्य वस्तुस्थितिहरू समाविष्ट गर्दछ"
 
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:280
+#: src/cli/tracker-daemon.c:759 src/cli/tracker-status.c:280
 #, c-format
 msgid "Could not get status, manager could not be created, %s"
 msgstr "स्थिति प्राप्त गर्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:788
+#: src/cli/tracker-daemon.c:788
 #, c-format
 msgid "Could not get display name for miner “%s”"
 msgstr "माइनर \"%s\" का लागि प्रदर्शन नाम प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-daemon.c:882
+#: src/cli/tracker-daemon.c:882
 msgid "You can not use miner pause and resume switches together"
 msgstr "तपाईँले माइनर पज प्रयोग गर्न सक्नुहुन्न र सँगै स्विचहरू पुन: सुरु गर्न सक्नुहुन्छ"
 
-#: src/tracker/tracker-daemon.c:888
+#: src/cli/tracker-daemon.c:888
 msgid "You must provide the miner for pause or resume commands"
 msgstr "तपाईँले विराम वा पुन: आरम्भ आदेशका लागि माइनर उपलब्ध गराउनुपर्दछ"
 
-#: src/tracker/tracker-daemon.c:894
+#: src/cli/tracker-daemon.c:894
 msgid "You must provide a pause or resume command for the miner"
 msgstr "तपाईँले खनिकका लागि विराम वा पुन: आरम्भ आदेश प्रदान गर्नुपर्दछ"
 
-#: src/tracker/tracker-daemon.c:928
+#: src/cli/tracker-daemon.c:928
 msgid "You can not use the --kill and --terminate arguments together"
 msgstr "तपाईँले --किल र --अन्त्य तर्कहरू सँगै प्रयोग गर्न सक्नुहुन्न"
 
-#: src/tracker/tracker-daemon.c:939 src/tracker/tracker-process.c:197
+#: src/cli/tracker-daemon.c:939 src/cli/tracker-process.c:188
 #, c-format
 msgid "Found %d PID…"
 msgid_plural "Found %d PIDs…"
 msgstr[0] "%d PID फेला पर्यो…"
 msgstr[1] "%d PID हरु फेला पर्यो…"
 
-#: src/tracker/tracker-daemon.c:949
+#: src/cli/tracker-daemon.c:949
 #, c-format
 msgid "Found process ID %d for “%s”"
 msgstr "आईडी %d का लागि प्रक्रिया \"%s\"   फेला पर्यो"
 
-#: src/tracker/tracker-daemon.c:975
+#: src/cli/tracker-daemon.c:975
 msgid "Starting miners…"
 msgstr "खनिकहरू सुरु गर्दैछ…"
 
-#: src/tracker/tracker-daemon.c:980
+#: src/cli/tracker-daemon.c:980
 #, c-format
 msgid "Could not start miners, manager could not be created, %s"
 msgstr "खनिक सुरु गर्न सकेन, प्रबन्धक सिर्जना गर्न सकिएन, %s"
 
-#: src/tracker/tracker-daemon.c:1005
+#: src/cli/tracker-daemon.c:1005
 msgid "perhaps a disabled plugin?"
 msgstr "सायद अक्षम गरिएको प्लगइन?"
 
-#: src/tracker/tracker-daemon.c:1056
+#: src/cli/tracker-daemon.c:1056
 msgid "If no arguments are given, the status of the data miners is shown"
 msgstr "यदि कुनै तर्क दिइएको छैन भने, डेटा खनिकहरूको स्थिति देखाइनेछ"
 
-#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
-#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
-#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
-#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
+#: src/cli/tracker-daemon.c:1061 src/cli/tracker-extract.c:147 src/cli/tracker-index.c:396
+#: src/cli/tracker-info.c:636 src/cli/tracker-reset.c:255 src/cli/tracker-search.c:1570
+#: src/cli/tracker-status.c:561 src/cli/tracker-tag.c:1056
 msgid "Unrecognized options"
 msgstr "पहिचान नभएको विकल्प"
 
-#: src/tracker/tracker-dbus.c:44
+#: src/cli/tracker-dbus.c:44
 msgid "Could not get D-Bus connection"
 msgstr "डी-बस जडान प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-dbus.c:62
+#: src/cli/tracker-dbus.c:62
 msgid "Could not create D-Bus proxy to tracker-store"
 msgstr "ट्रयाकर-स्टोरमा डी-बस प्रोक्सी सिर्जना गर्न सकेन"
 
-#: src/tracker/tracker-extract.c:94
+#: src/cli/tracker-extract.c:42 src/extractor/tracker-main.c:90
+msgid "Output results format: “sparql”, “turtle” or “json-ld”"
+msgstr "निर्गत परिणाम ढाँचा: \"स्पार्कल\", \"कछुवा\" वा \"जेसन-एलडी\""
+
+#: src/cli/tracker-extract.c:43 src/extractor/tracker-main.c:91
+msgid "FORMAT"
+msgstr "ढाँचा"
+
+#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46 src/cli/tracker-index.c:60
+#: src/cli/tracker-index.c:61 src/cli/tracker-info.c:94 src/cli/tracker-info.c:95
+#: src/cli/tracker-reset.c:51 src/extractor/tracker-main.c:80 src/indexer/tracker-main.c:95
+msgid "FILE"
+msgstr "फाइल"
+
+#: src/cli/tracker-extract.c:90
 msgid "Could not run tracker-extract: "
 msgstr "ट्रयाकर-एक्स्ट्र्याक्ट चलाउन सकेन: "
 
-#: src/tracker/tracker-index.c:51
+#: src/cli/tracker-index.c:51
 msgid "Adds FILE as an indexed location"
 msgstr "अनुक्रमण गरिएको स्थानको रूपमा फाइल थप्दछ"
 
-#: src/tracker/tracker-index.c:54
+#: src/cli/tracker-index.c:54
 msgid "Removes FILE from indexed locations"
 msgstr "अनुक्रमण गरिएको स्थानबाट फाइल हटाउछ"
 
-#: src/tracker/tracker-index.c:57
+#: src/cli/tracker-index.c:57
 msgid "Makes indexing recursive"
 msgstr "अनुक्रमणिका पुनरावर्ती बनाउँदछ"
 
-#: src/tracker/tracker-index.c:193
+#: src/cli/tracker-index.c:193
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "“%s” निर्देशिका होईन"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:283
+#: src/cli/tracker-index.c:283
 msgid "Either --add or --remove must be provided"
 msgstr "या त --add वा --remove प्रदान गरिएको हुनुपर्दछ"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:287
+#: src/cli/tracker-index.c:287
 msgid "--add and --remove are mutually exclusive"
 msgstr "--थप्नुहोस् र -- हटाउन पारस्परिक अनन्य छन्"
 
 #. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:297
+#: src/cli/tracker-index.c:297
 msgid "--recursive requires --add"
 msgstr "--पुनरावर्ती आवश्यकताहरू --थप्नुहोस्"
 
-#: src/tracker/tracker-index.c:357 src/tracker/tracker-status.c:331
+#: src/cli/tracker-index.c:357 src/cli/tracker-status.c:331
 msgid "Path"
 msgstr "पाथ"
 
-#: src/tracker/tracker-index.c:358
+#: src/cli/tracker-index.c:358
 msgid "Recursive"
 msgstr "पुनरावृतिक"
 
-#: src/tracker/tracker-index.c:409
+#: src/cli/tracker-index.c:409
 msgid "Please specify one or more locations to index."
 msgstr "कृपया अनुक्रमणिकामा एक वा बढी स्थान निर्दिष्ट गर्नुहोस् ।."
 
-#: src/tracker/tracker-info.c:65
+#: src/cli/tracker-info.c:65
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr "पूरा नामस्थान देखाउनुहोस् (उदा. नी:शीर्षक प्रयोग नगर्नुहोस्, पूरा यूआरएल प्रयोग गर्नुहोस्)"
 
-#: src/tracker/tracker-info.c:69
+#: src/cli/tracker-info.c:69
 msgid "Show plain text content if available for resources"
 msgstr "यदि संसाधनका लागि उपलब्ध भएमा खाली पाठ सामाग्री देखाउनुहोस्"
 
@@ -948,7 +672,7 @@ msgstr "यदि संसाधनका लागि उपलब्ध भ�
 #. * fully supports international characters. In practice, UTF-8
 #. * is the most popular encoding used for IRI.
 #.
-#: src/tracker/tracker-info.c:79
+#: src/cli/tracker-info.c:79
 msgid ""
 "Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. <file:///"
 "path/to/some/file.txt>)"
@@ -956,126 +680,131 @@ msgstr ""
 "फाइल नाम हेर्नुको सट्टा, फाइल तर्कहरूलाई वास्तविक आईआरआईको रूपमा व्यवहार गर्नुहोस् (उदाहरणका लागि "
 "<file:///path/to/some/file.txt>)"
 
-#: src/tracker/tracker-info.c:83
+#: src/cli/tracker-info.c:83
 msgid "Output results as RDF in Turtle format"
 msgstr "कछुवा ढाँचामा आरडीएफको रूपमा निर्गत परिणामहरू"
 
-#: src/tracker/tracker-info.c:87
+#: src/cli/tracker-info.c:87
 msgid "RDF property to treat as URL (eg. “nie:url”)"
 msgstr "आरडीएफ गुण यूआरएलको रूपमा व्यवहार गर्न (उदाहरणका लागि। \"नी:यूआरएल\")"
 
-#: src/tracker/tracker-info.c:388
+#: src/cli/tracker-info.c:91 src/indexer/tracker-main.c:94
+msgid "Checks if FILE is eligible for being mined based on configuration"
+msgstr "कन्फिगरेसनमा आधारित उत्खननका लागि फाइल योग्य छ कि छैन जाँच गर्दछ"
+
+#: src/cli/tracker-info.c:388
 msgid "Error message"
 msgstr "त्रुटि सन्देश"
 
-#: src/tracker/tracker-info.c:471
+#: src/cli/tracker-info.c:421 src/cli/tracker-search.c:1378 src/cli/tracker-status.c:92
+#: src/cli/tracker-status.c:205 src/cli/tracker-tag.c:946
+msgid "Could not establish a connection to Tracker"
+msgstr "ट्रयाकर जडान स्थापाना असफल"
+
+#: src/cli/tracker-info.c:471
 msgid "Unable to retrieve URN for URI"
 msgstr "यूआरआईका लागि यूआरएन पुन: प्राप्त गर्न अक्षम"
 
-#: src/tracker/tracker-info.c:505
+#: src/cli/tracker-info.c:505
 msgid "Unable to retrieve data for URI"
-msgstr "यूआरआईका लागि डेटा पुन: प्राप्त गर्न अक्षम"
+msgstr "यूआरआईका लागि डेटा प्राप्त गर्न अक्षम"
 
-#: src/tracker/tracker-info.c:515
+#: src/cli/tracker-info.c:515
 msgid "No metadata available for that URI"
 msgstr "त्यो यूआरआइका लागि मेटाडेटा उपलब्ध छैन"
 
-#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
+#: src/cli/tracker-info.c:520 src/cli/tracker-info.c:581
 msgid "Could not get eligible status: "
 msgstr "योग्य स्थिति प्राप्त गर्न सकेन: "
 
-#: src/tracker/tracker-process.c:216
+#: src/cli/tracker-process.c:207
 #, c-format
 msgid "Could not kill process %d — “%s”"
 msgstr "प्रक्रिया %d — \"%s\" मार्न सकेन"
 
-#: src/tracker/tracker-process.c:222
+#: src/cli/tracker-process.c:213
 #, c-format
 msgid "Killed process %d — “%s”"
 msgstr "मारिएको प्रक्रिया %d — \"%s\""
 
-#: src/tracker/tracker-reset.c:49
+#: src/cli/tracker-reset.c:47
 msgid "Remove filesystem indexer database"
 msgstr "फाइल प्रणाली अनुक्रमणिका डाटाबेस हटाउनुहोस्"
 
-#: src/tracker/tracker-reset.c:52
-msgid "Remove RSS indexer database"
-msgstr "आरएसएस अनुक्रमणिका डाटाबेस हटाउनुहोस्"
-
-#: src/tracker/tracker-reset.c:55
+#: src/cli/tracker-reset.c:50
 msgid "Erase indexed information about a file, works recursively for directories"
 msgstr "फाइलका बारेमा अनुक्रमणिका गरिएको जानकारी मेट्नुहोस्, डाइरेक्टरीका लागि पुनरावर्ती रूपमा कार्य गर्दछ"
 
 #. Now, delete the element recursively
-#: src/tracker/tracker-reset.c:95
+#: src/cli/tracker-reset.c:90
 msgid "Deleting…"
 msgstr "मेट्दैछ…"
 
-#: src/tracker/tracker-reset.c:115
+#: src/cli/tracker-reset.c:110
 msgid "The indexed data for this file has been deleted and will be reindexed again."
 msgstr "यो फाइलका लागि अनुक्रमणिका गरिएको डेटा मेटिएको छ र पुन: अनुक्रमणिका गरिनेछ ।."
 
-#: src/tracker/tracker-search.c:60
+#: src/cli/tracker-search.c:60
 msgid "Search for content matching TERMS, by type or across all types."
 msgstr "प्रकार द्वारा वा सबै प्रकारहरूमा, सामग्री मिल्दो सर्तहरूको लागि खोजी गर्नुहोस्।."
 
-#: src/tracker/tracker-search.c:77
+#: src/cli/tracker-search.c:77
 msgid "Search for files"
 msgstr "फाइलका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:81
+#: src/cli/tracker-search.c:81
 msgid "Search for folders"
 msgstr "फोल्डरका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:85
+#: src/cli/tracker-search.c:85
 msgid "Search for music files"
 msgstr "सङ्गीत फाइलका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:89
+#: src/cli/tracker-search.c:89
 msgid "Search for music albums (--all has no effect on this)"
 msgstr "सङ्गीत एल्बमका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
-#: src/tracker/tracker-search.c:93
+#: src/cli/tracker-search.c:93
 msgid "Search for music artists (--all has no effect on this)"
 msgstr "सङ्गीत कलाकारहरूका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
-#: src/tracker/tracker-search.c:97
+#: src/cli/tracker-search.c:97
 msgid "Search for image files"
 msgstr "छवि फाइलका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:101
+#: src/cli/tracker-search.c:101
 msgid "Search for video files"
 msgstr "भिडियो फाइलका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:105
+#: src/cli/tracker-search.c:105
 msgid "Search for document files"
 msgstr "कागजात फाइलका लागि खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:109
+#: src/cli/tracker-search.c:109
 msgid "Search for software (--all has no effect on this)"
 msgstr "सफ्टवेयरका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
-#: src/tracker/tracker-search.c:113
+#: src/cli/tracker-search.c:113
 msgid "Search for software categories (--all has no effect on this)"
 msgstr "सफ्टवेयर कोटिका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
-#: src/tracker/tracker-search.c:117
+#: src/cli/tracker-search.c:117
 msgid "Search for feeds (--all has no effect on this)"
 msgstr "फिडका लागि खोजी गर्नुहोस् (--all यसमा कुनै प्रभाव छैन)"
 
-#: src/tracker/tracker-search.c:126 src/tracker/tracker-tag.c:71
+#: src/cli/tracker-search.c:126 src/cli/tracker-tag.c:71
 msgid "Limit the number of results shown"
 msgstr "देखाइएका परिणामहरूको सङ्ख्या सीमित गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:130 src/tracker/tracker-tag.c:75
+#: src/cli/tracker-search.c:130 src/cli/tracker-tag.c:75
 msgid "Offset the results"
 msgstr "परिणाम अफसेट गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:134
+#: src/cli/tracker-search.c:134
 msgid "Use OR for search terms instead of AND (the default)"
 msgstr "र (पूर्वनिर्धारित) को सट्टामा खोजी शब्दहरूको लागि वा प्रयोग गर्नुहोस्"
 
-#: src/tracker/tracker-search.c:138
+#: src/cli/tracker-search.c:138
 msgid ""
 "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --"
 "software, --software-categories)"
@@ -1083,11 +812,11 @@ msgstr ""
 "नतिजाका लागि यूआरएन देखाउनुहोस् (-सङ्गीत-एल्बम, --सङ्गीत-कलाकार, --फिड्स, --सफ्टवेयर, --सफ्टवेयर-"
 "श्रेणीहरूमा लागू हुँदैन)"
 
-#: src/tracker/tracker-search.c:142
+#: src/cli/tracker-search.c:142
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "सबै गैर-अवस्थित मिलानहरू पनि फर्काउनुहोस् (जस्तै अनमाउन्ट गरिएका भोल्युमहरू समावेश गर्नुहोस्)"
 
-#: src/tracker/tracker-search.c:146
+#: src/cli/tracker-search.c:146
 msgid ""
 "Disable showing snippets with results. This is only shown for some categories, e.g. "
 "Documents, Music…"
@@ -1095,105 +824,104 @@ msgstr ""
 "परिणामहरूसँग स्निपेटहरू देखाउन अक्षम पार्नुहोस् । यो केवल केही श्रेणीहरूको लागि देखाइन्छ, उदाहरणका लागि "
 "कागजातहरू, सङ्गीत …"
 
-#: src/tracker/tracker-search.c:150
+#: src/cli/tracker-search.c:150
 msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
 msgstr "पूर्ण पाठ खोजी (एफटीएस) अक्षम पार्नुहोस् । तात्पर्य --अक्षम-स्निपेटहरू"
 
-#: src/tracker/tracker-search.c:154
+#: src/cli/tracker-search.c:154
 msgid "Disable color when printing snippets and results"
 msgstr "स्निपेट र परिणाम मुद्रण गर्दा रङ अक्षम पार्नुहोस्"
 
-#: src/tracker/tracker-search.c:161 src/tracker/tracker-status.c:58
+#: src/cli/tracker-search.c:161 src/cli/tracker-status.c:58
 msgid "search terms"
 msgstr "खोजी टर्म"
 
-#: src/tracker/tracker-search.c:162
+#: src/cli/tracker-search.c:162
 msgid "TERMS"
 msgstr "सर्तहरू"
 
-#: src/tracker/tracker-search.c:252 src/tracker/tracker-search.c:642
-#: src/tracker/tracker-search.c:738 src/tracker/tracker-search.c:830
-#: src/tracker/tracker-search.c:919 src/tracker/tracker-search.c:1008
-#: src/tracker/tracker-search.c:1295
+#: src/cli/tracker-search.c:252 src/cli/tracker-search.c:642 src/cli/tracker-search.c:738
+#: src/cli/tracker-search.c:830 src/cli/tracker-search.c:919 src/cli/tracker-search.c:1008
+#: src/cli/tracker-search.c:1295
 msgid "Could not get search results"
 msgstr "खोजी परिणामहरू प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-search.c:261
+#: src/cli/tracker-search.c:261
 msgid "No files were found"
 msgstr "कुनै फाइल फेला परेन"
 
-#: src/tracker/tracker-search.c:265 src/tracker/tracker-tag.c:426
+#: src/cli/tracker-search.c:265 src/cli/tracker-tag.c:426
 msgid "Files"
 msgstr "फाइल"
 
-#: src/tracker/tracker-search.c:651
+#: src/cli/tracker-search.c:651
 msgid "No artists were found"
 msgstr "कलाकार फेला परेन"
 
-#: src/tracker/tracker-search.c:655
+#: src/cli/tracker-search.c:655
 msgid "Artists"
 msgstr "कलाकार"
 
-#: src/tracker/tracker-search.c:747
+#: src/cli/tracker-search.c:747
 msgid "No music was found"
 msgstr "सङ्गीत फेला परेन"
 
-#: src/tracker/tracker-search.c:751
+#: src/cli/tracker-search.c:751
 msgid "Albums"
 msgstr "एल्बमहरू"
 
-#: src/tracker/tracker-search.c:839
+#: src/cli/tracker-search.c:839
 msgid "No feeds were found"
 msgstr "फिड फेला परेन"
 
-#: src/tracker/tracker-search.c:843
+#: src/cli/tracker-search.c:843
 msgid "Feeds"
 msgstr "फिड"
 
-#: src/tracker/tracker-search.c:928
+#: src/cli/tracker-search.c:928
 msgid "No software was found"
 msgstr "कुनै सफ्टवेयर फेला परेन"
 
-#: src/tracker/tracker-search.c:932
+#: src/cli/tracker-search.c:932
 msgid "Software"
 msgstr "सफ्टवेयर"
 
-#: src/tracker/tracker-search.c:1017
+#: src/cli/tracker-search.c:1017
 msgid "No software categories were found"
 msgstr "कुनै सफ्टवेयर कोटिहरू फेला परेन"
 
-#: src/tracker/tracker-search.c:1021
+#: src/cli/tracker-search.c:1021
 msgid "Software Categories"
 msgstr "सफ्टवेयर कोटिहरू"
 
-#: src/tracker/tracker-search.c:1304
+#: src/cli/tracker-search.c:1304
 msgid "No results were found matching your query"
 msgstr "तपाईँको क्वेरीसँग मिल्दो परिणाम फेला परेन"
 
-#: src/tracker/tracker-search.c:1308
+#: src/cli/tracker-search.c:1308
 msgid "Results"
 msgstr "नतिजा"
 
-#: src/tracker/tracker-status.c:53
+#: src/cli/tracker-status.c:53
 msgid "Show statistics for current index / data set"
 msgstr "हालको अनुक्रमणिका / डेटा सेटका लागि तथ्याङ्क देखाउनुहोस्"
 
-#: src/tracker/tracker-status.c:59
+#: src/cli/tracker-status.c:59
 msgid "EXPRESSION"
 msgstr "अभिव्यक्ति"
 
-#: src/tracker/tracker-status.c:106
+#: src/cli/tracker-status.c:106
 msgid "Could not get Tracker statistics"
 msgstr "ट्रयाकर तथ्याङ्क प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-status.c:113
+#: src/cli/tracker-status.c:113
 msgid "No statistics available"
 msgstr "तथ्याङ्क उपलब्ध छैन"
 
 #. To translators: This is to say there are no
 #. * statistics found. We use a "Statistics:
 #. * None" with multiple print statements
-#: src/tracker/tracker-status.c:154
+#: src/cli/tracker-status.c:154
 msgid "Statistics:"
 msgstr "तथ्याङ्क:"
 
@@ -1220,221 +948,435 @@ msgstr "तथ्याङ्क:"
 #. *     None
 #. *
 #.
-#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:310
-#: src/tracker/tracker-tag.c:442 src/tracker/tracker-tag.c:564 src/tracker/tracker-tag.c:924
+#: src/cli/tracker-status.c:157 src/cli/tracker-tag.c:310 src/cli/tracker-tag.c:442
+#: src/cli/tracker-tag.c:564 src/cli/tracker-tag.c:924
 msgid "None"
 msgstr "केही छैन"
 
-#: src/tracker/tracker-status.c:226 src/tracker/tracker-status.c:251
+#: src/cli/tracker-status.c:226 src/cli/tracker-status.c:251
 msgid "Could not get basic status for Tracker"
 msgstr "ट्रयाकरका लागि आधारभूत स्थिति प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-status.c:332 src/tracker/tracker-status.c:499
+#: src/cli/tracker-status.c:332 src/cli/tracker-status.c:499
 msgid "Message"
 msgstr "सन्देश"
 
-#: src/tracker/tracker-status.c:391
+#: src/cli/tracker-status.c:391
 msgid "Currently indexed"
 msgstr "अनुक्रमणिका हुदैछ"
 
-#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:546
+#: src/cli/tracker-status.c:394 src/cli/tracker-tag.c:546
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d फाइल"
 msgstr[1] "%d फाइलहरू"
 
-#: src/tracker/tracker-status.c:400
+#: src/cli/tracker-status.c:400
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d फोल्डर"
 msgstr[1] "%d फोल्डरहरु"
 
-#: src/tracker/tracker-status.c:414
+#: src/cli/tracker-status.c:414
 msgid "Remaining space on database partition"
 msgstr "डाटाबेस विभाजनमा बाँकी खाली स्थान"
 
-#: src/tracker/tracker-status.c:426
+#: src/cli/tracker-status.c:426
 msgid "Data is still being indexed"
 msgstr "डाटा अझै अनुक्रमण हुदैछ"
 
-#: src/tracker/tracker-status.c:427
+#: src/cli/tracker-status.c:427
 #, c-format
 msgid "Estimated %s left"
 msgstr "अन्दजि %s बाँकि छ"
 
-#: src/tracker/tracker-status.c:431
+#: src/cli/tracker-status.c:431
 msgid "All data miners are idle, indexing complete"
 msgstr "सबै डेटा खनिकहरू निष्क्रिय छन्, अनुक्रमणिका पूरा भयो"
 
-#: src/tracker/tracker-status.c:438
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d रेकर्ड असफल भयो"
 msgstr[1] "%d रेकर्ड असफल भयो"
 
-#: src/tracker/tracker-status.c:524
+#: src/cli/tracker-status.c:524
 msgid "No reports found"
 msgstr "कुनै प्रतिवेदन फेला परेन"
 
-#: src/tracker/tracker-tag.c:51
+#: src/cli/tracker-tag.c:51
 msgid "List all tags (using FILTER if specified; FILTER always uses logical OR)"
 msgstr ""
 "सबै ट्यागसूचीबद्ध गर्नुहोस् (यदि निर्दिष्ट गरिएमा FILTER प्रयोग गर्दै; फिल्टरले सधै तार्किक वा प्रयोग गर्दछ)"
 
-#: src/tracker/tracker-tag.c:52
+#: src/cli/tracker-tag.c:52
 msgid "FILTER"
 msgstr "फिल्टर"
 
-#: src/tracker/tracker-tag.c:55
+#: src/cli/tracker-tag.c:55
 msgid "Show files associated with each tag (this is only used with --list)"
 msgstr "प्रत्येक ट्यागसँग सम्बन्धित फाइल देखाउनुहोस् (यो --सूचीसँग मात्र प्रयोग गरिन्छ)"
 
-#: src/tracker/tracker-tag.c:59
+#: src/cli/tracker-tag.c:59
 msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
 msgstr "ट्याग थप्नुहोस् (यदि फाइल हरू छोडिएका छन् भने, ट्याग कुनै पनि फाइलसँग सम्बन्धित छैन)"
 
-#: src/tracker/tracker-tag.c:60 src/tracker/tracker-tag.c:64
+#: src/cli/tracker-tag.c:60 src/cli/tracker-tag.c:64
 msgid "TAG"
 msgstr "ट्याग"
 
-#: src/tracker/tracker-tag.c:63
+#: src/cli/tracker-tag.c:63
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
 msgstr "ट्याग मेट्नुहोस् (यदि फाइल हरू छोडियो भने, सबै फाइलका लागि ट्याग हटाइन्छ)"
 
-#: src/tracker/tracker-tag.c:67
+#: src/cli/tracker-tag.c:67
 msgid "Description for a tag (this is only used with --add)"
 msgstr "ट्यागका लागि वर्णन (यो --add सँग मात्र प्रयोग गरिन्छ)"
 
-#: src/tracker/tracker-tag.c:68
+#: src/cli/tracker-tag.c:68
 msgid "STRING"
 msgstr "स्ट्रिङ"
 
-#: src/tracker/tracker-tag.c:79
+#: src/cli/tracker-tag.c:79
 msgid "Use AND for search terms instead of OR (the default)"
 msgstr "वा (पूर्वनिर्धारित) को सट्टामा खोजी शब्दहरूको लागि प्रयोग गर्नुहोस् र खोजी गर्नुहोस्"
 
-#: src/tracker/tracker-tag.c:84
+#: src/cli/tracker-tag.c:84
 msgid "FILE…"
 msgstr "फाईल…"
 
-#: src/tracker/tracker-tag.c:85
+#: src/cli/tracker-tag.c:85
 msgid "FILE [FILE…]"
 msgstr "FILE [FILE…]"
 
-#: src/tracker/tracker-tag.c:101
+#: src/cli/tracker-tag.c:101
 msgid "NOTE: Limit was reached, there are more items in the database not listed here"
 msgstr "द्रष्टब्य: सीमा पुग्यो, यहाँ सूचीकृत नभएको डाटाबेसमा धेरै वस्तुहरू छन्"
 
-#: src/tracker/tracker-tag.c:247
+#: src/cli/tracker-tag.c:247
 msgid "Could not get file URNs"
 msgstr "फाइल यूआरएन प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:301
+#: src/cli/tracker-tag.c:301
 msgid "Could not get files related to tag"
 msgstr "ट्यागसँग सम्बन्धित फाइलहरू प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:368
+#: src/cli/tracker-tag.c:368
 msgid "Could not get all tags in the database"
 msgstr "डेटाबेसमा सबै ट्यागहरू प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:378
+#: src/cli/tracker-tag.c:378
 msgid "No files have been tagged"
 msgstr "कुनै फाइल ट्याग गरिएको छैन"
 
-#: src/tracker/tracker-tag.c:413
+#: src/cli/tracker-tag.c:413
 msgid "Could not get files for matching tags"
 msgstr "मिल्दो ट्यागका लागि फाइलहरू प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:422
+#: src/cli/tracker-tag.c:422
 msgid "No files were found matching ALL of those tags"
 msgstr "ती सबै ट्यागसँग मिल्दो फाइल फेला परेन"
 
-#: src/tracker/tracker-tag.c:501 src/tracker/tracker-tag.c:898
+#: src/cli/tracker-tag.c:501 src/cli/tracker-tag.c:898
 msgid "Could not get all tags"
 msgstr "सबै ट्यागहरू प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:510 src/tracker/tracker-tag.c:907
+#: src/cli/tracker-tag.c:510 src/cli/tracker-tag.c:907
 msgid "No tags were found"
 msgstr "ट्याग फेला परेन"
 
-#: src/tracker/tracker-tag.c:514
+#: src/cli/tracker-tag.c:514
 msgid "Tags (shown by name)"
 msgstr "ट्याग (नामद्वारा देखाइएको)"
 
-#: src/tracker/tracker-tag.c:589
+#: src/cli/tracker-tag.c:589
 msgid "No files were modified"
 msgstr "कुनै फाइलहरू परिमार्जन गरिएन"
 
-#: src/tracker/tracker-tag.c:633 src/tracker/tracker-tag.c:641
+#: src/cli/tracker-tag.c:633 src/cli/tracker-tag.c:641
 msgid "Files do not exist or aren’t indexed"
 msgstr "फाइल अवस्थित छैन वा अनुक्रमण गरिएको छैन"
 
-#: src/tracker/tracker-tag.c:682
+#: src/cli/tracker-tag.c:682
 msgid "Could not add tag"
 msgstr "ट्याग थप्न सकेन"
 
-#: src/tracker/tracker-tag.c:694
+#: src/cli/tracker-tag.c:694
 msgid "Tag was added successfully"
 msgstr "ट्याग सफलतापूर्वक थपियो"
 
-#: src/tracker/tracker-tag.c:724
+#: src/cli/tracker-tag.c:724
 msgid "Could not add tag to files"
 msgstr "फाइलमा ट्याग थप्न सकेन"
 
-#: src/tracker/tracker-tag.c:735
+#: src/cli/tracker-tag.c:735
 msgid "Tagged"
 msgstr "ट्यग गरियो"
 
-#: src/tracker/tracker-tag.c:736
+#: src/cli/tracker-tag.c:736
 msgid "Not tagged, file is not indexed"
 msgstr "ट्याग गरिएको छैन, फाइल अनुक्रमण गरिएको छैन"
 
-#: src/tracker/tracker-tag.c:778
+#: src/cli/tracker-tag.c:778
 msgid "Could not get tag by label"
 msgstr "लेबल द्वारा ट्याग प्राप्त गर्न सकेन"
 
-#: src/tracker/tracker-tag.c:789
+#: src/cli/tracker-tag.c:789
 msgid "No tags were found by that name"
 msgstr "त्यो नामद्वारा ट्याग फेला परेन"
 
-#: src/tracker/tracker-tag.c:807
+#: src/cli/tracker-tag.c:807
 msgid "None of the files had this tag set"
 msgstr "कुनै पनि फाइलमा यो ट्याग सेट थिएन"
 
-#: src/tracker/tracker-tag.c:854
+#: src/cli/tracker-tag.c:854
 msgid "Could not remove tag"
 msgstr "ट्याग हटाउन सकेन"
 
-#: src/tracker/tracker-tag.c:862
+#: src/cli/tracker-tag.c:862
 msgid "Tag was removed successfully"
 msgstr "ट्याग सफलतापूर्वक हटाइयो"
 
-#: src/tracker/tracker-tag.c:866
+#: src/cli/tracker-tag.c:866
 msgid "Untagged"
 msgstr "ट्याग नलगाइएको"
 
-#: src/tracker/tracker-tag.c:867
+#: src/cli/tracker-tag.c:867
 msgid "File not indexed or already untagged"
 msgstr "फाइल अनुक्रमणिका गरिएको छैन वा पहिल्यै ट्याग गरिएको छैन"
 
-#: src/tracker/tracker-tag.c:1065
+#: src/cli/tracker-tag.c:1065
 msgid "The --list option is required for --show-files"
 msgstr "--प्रदर्शन-फाइलका लागि --सूची विकल्प आवश्यक छ"
 
-#: src/tracker/tracker-tag.c:1067
+#: src/cli/tracker-tag.c:1067
 msgid "The --and-operator option can only be used with --list and tag label arguments"
 msgstr "--र-अपरेटर विकल्प --सूची र ट्याग लेबल तर्कहरूसँग मात्र प्रयोग गर्न सकिन्छ"
 
-#: src/tracker/tracker-tag.c:1069
+#: src/cli/tracker-tag.c:1069
 msgid "Add and delete actions can not be used together"
 msgstr "थप्ने र मेट्ने कार्य सँगै प्रयोग गर्न सकिँदैन"
 
-#: src/tracker/tracker-tag.c:1071
+#: src/cli/tracker-tag.c:1071
 msgid "The --description option can only be used with --add"
 msgstr "--वर्णन विकल्प --थप्नुहोस् सँग मात्र प्रयोग गर्न सकिन्छ"
+
+#: src/common/tracker-miner-proxy.c:350
+msgid "Cookie not recognized to resume paused miner"
+msgstr "Cookie not recognized to resume paused miner"
+
+#: src/common/tracker-miner-proxy.c:407
+msgid "Pause application and reason match an already existing pause request"
+msgstr "अनुप्रयोग रोक्नुहोस् र कारण पहिल्यै अवस्थित विराम अनुरोधसँग मेल खान्छ"
+
+#: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
+msgid "less than one second"
+msgstr "१ सेकेण्ड भन्दा कम"
+
+#. Translators: this is %d days
+#: src/common/tracker-utils.c:116
+#, c-format
+msgid " %dd"
+msgstr " %dd"
+
+#. Translators: this is %2.2d hours
+#: src/common/tracker-utils.c:120
+#, c-format
+msgid " %2.2dh"
+msgstr " %2.2dh"
+
+#. Translators: this is %2.2d minutes
+#: src/common/tracker-utils.c:124
+#, c-format
+msgid " %2.2dm"
+msgstr " %2.2dm"
+
+#. Translators: this is %2.2d seconds
+#: src/common/tracker-utils.c:128
+#, c-format
+msgid " %2.2ds"
+msgstr " %2.2ds"
+
+#: src/common/tracker-utils.c:132
+#, c-format
+msgid " %d day"
+msgid_plural " %d days"
+msgstr[0] " %d दिन"
+msgstr[1] " %d दिन"
+
+#: src/common/tracker-utils.c:136
+#, c-format
+msgid " %2.2d hour"
+msgid_plural " %2.2d hours"
+msgstr[0] " %2.2d घण्टा"
+msgstr[1] " %2.2d घण्टा"
+
+#: src/common/tracker-utils.c:140
+#, c-format
+msgid " %2.2d minute"
+msgid_plural " %2.2d minutes"
+msgstr[0] " %2.2d मिनेट"
+msgstr[1] " %2.2d मिनेट"
+
+#: src/common/tracker-utils.c:144
+#, c-format
+msgid " %2.2d second"
+msgid_plural " %2.2d seconds"
+msgstr[0] " %2.2d सेकेण्ड"
+msgstr[1] " %2.2d सेकेण्ड"
+
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:102
+#: src/indexer/tracker-main.c:106 src/writeback/tracker-main.c:50
+msgid "Displays version information"
+msgstr "संस्करण सूचना देखाउनुहोस्"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/control/tracker-main.c:136
+msgid "— start the tracker index proxy"
+msgstr "— ट्र्याकर अनुक्रमणिका प्रोक्सी सुरु गर्नुहोस्"
+
+#: src/extractor/tracker-extract.c:703
+msgid "Metadata extraction failed"
+msgstr "मेटाडाटा निकाटर असफल"
+
+#: src/extractor/tracker-extract.c:785
+msgid "No metadata or extractor modules found to handle this file"
+msgstr "यो फाइल ह्यान्डल गर्न कुनै मेटाडेटा वा एक्स्ट्रक्टर मोड्युल फेला परेन"
+
+#: src/extractor/tracker-main.c:79
+msgid "File to extract metadata for"
+msgstr "मेटाडाटा निकाल्नका लागि फाइल"
+
+#: src/extractor/tracker-main.c:83
+msgid "MIME type for file (if not provided, this will be guessed)"
+msgstr "फाइलका लागि माइम प्रकार (यदि प्रदान गरिएन भने, यो अनुमान लगाइनेछ)"
+
+#: src/extractor/tracker-main.c:84
+msgid "MIME"
+msgstr "माइम"
+
+#: src/extractor/tracker-main.c:87
+msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
+msgstr "निष्कर्षणको लागि प्रयोग गर्न मोड्युल बल दिनुहोस् (उदाहरणका लागि \"foo.so\" को लागि \"फू\")"
+
+#: src/extractor/tracker-main.c:88
+msgid "MODULE"
+msgstr "मोड्युल"
+
+#: src/extractor/tracker-main.c:94 src/indexer/tracker-main.c:98
+msgid "Runs for a specific domain ontology"
+msgstr "एक विशिष्ट डोमेन एन्टोलोजी लागि चलाउँछ"
+
+#: src/extractor/tracker-main.c:98
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "सहकर्मी-देखि-सहकर्मी संचारका लागि सकेट फाइल वर्णनकर्ता"
+
+#: src/extractor/tracker-main.c:99
+msgid "FD"
+msgstr "FD"
+
+#: src/extractor/tracker-main.c:194
+#, c-format
+msgid "Unsupported serialization format “%s”\n"
+msgstr "असमर्थित क्रमबद्धिकरण ढाँचा “%s”\n"
+
+#. Translators: this message will appear immediately after the
+#. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
+#: src/extractor/tracker-main.c:305
+msgid "— Extract file meta data"
+msgstr "मेटाडाटा निकाल्नका लागि फाइल"
+
+#: src/extractor/tracker-main.c:320
+msgid "Filename and mime type must be provided together"
+msgstr "फाइलनाम र माइम प्रकार सँगै उपलब्ध गराउनुपर्छ"
+
+#: src/indexer/tracker-main.c:85
+msgid "Initial sleep time in seconds, 0->1000 (default=15)"
+msgstr "सेकेन्डमा प्रारम्भिक निद्रा समय, ०->१००० (पूर्वनिर्धारित=१५)"
+
+#: src/indexer/tracker-main.c:90
+msgid "Runs until all configured locations are indexed and then exits"
+msgstr "जबसम्म सबै कन्फिगर गरिएका स्थानहरू अनुक्रमणिका छन् अनि बाहिरिनुहोस्"
+
+#: src/indexer/tracker-main.c:102
+msgid "Avoids changes in the filesystem"
+msgstr "फाइल प्रणालीमा परिवर्तन गर्दैन"
+
+#: src/indexer/tracker-main.c:547
+#, c-format
+msgid "Data object “%s” currently exists"
+msgstr "डेटा वस्तु \"%s\" अहिले अवस्थित छ"
+
+#: src/indexer/tracker-main.c:548
+#, c-format
+msgid "Data object “%s” currently does not exist"
+msgstr "डेटा वस्तु \"%s\" हाल अवस्थित छैन"
+
+#: src/indexer/tracker-main.c:558
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "डाइरेक्टरी अनुक्रमणिका गर्न योग्य छैन (फिल्टरमा आधारित)"
+
+#: src/indexer/tracker-main.c:562
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (फिल्टरमा आधारित)"
+
+#: src/indexer/tracker-main.c:565
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (लुकेको फाइल)"
+
+#: src/indexer/tracker-main.c:567
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "फाइल अनुक्रमणिका गर्न योग्य छैन (अनुक्रमणिका गरिएको फोल्डर होइन)"
+
+#: src/indexer/tracker-main.c:591
+#, c-format
+msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
+msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमण गर्न योग्य छैन (फिल्टरमा आधारित)"
+
+#: src/indexer/tracker-main.c:597
+#, c-format
+msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
+msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमणिका गर्न योग्य छैन (लुकेको फाइल)"
+
+#: src/indexer/tracker-main.c:603
+#, c-format
+msgid "Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
+msgstr "अभिभावक डाइरेक्टरी \"%s\" अनुक्रमण गर्न योग्य छैन (सामग्री फिल्टरमा आधारित)"
+
+#: src/indexer/tracker-main.c:622
+msgid "Directory is eligible to be indexed"
+msgstr "डाइरेक्टरी अनुक्रमण गर्न योग्य छ"
+
+#: src/indexer/tracker-main.c:623
+msgid "File is eligible to be indexed"
+msgstr "फाइल अनुक्रमणिका गर्न योग्य छ"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/indexer/tracker-main.c:841
+msgid "— start the tracker indexer"
+msgstr "—  ट्रयाकर अनुक्रमणिका सुरु गर्नुहोस्"
+
+#: src/writeback/tracker-main.c:54
+msgid "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr "लगिङ, ० = त्रुटिहरू मात्र, १ = न्यूनतम, २ = विस्तृत र ३ = डिबग (पूर्वनिर्धारित= ०)"
+
+#: src/writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "निष्क्रियताको ३० सेकेन्ड पछि बन्द गर्न अक्षम पार्नुहोस्"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "— ट्र्याकर राइटब्याक सेवा सुरु गर्नुहोस्"
 
 #~ msgid "Ignore stop words"
 #~ msgstr "रोकिने शब्द वेवास्ता गर्नुहोस"
@@ -1445,6 +1387,21 @@ msgstr "--वर्णन विकल्प --थप्नुहोस् स�
 
 #~ msgid "Operation not supported"
 #~ msgstr "सञ्चालन समर्थित छैन"
+
+#~ msgid "Add feed"
+#~ msgstr "फिड थप्नुहोस्"
+
+#~ msgid "URL"
+#~ msgstr "युआरएल"
+
+#~ msgid "Title to use (must be used with --add-feed)"
+#~ msgstr "शीर्षकको प्रयोग ( --add-feed साथ प्रयोग गर्नु पर्छ)"
+
+#~ msgid "— start the feeds indexer"
+#~ msgstr "— फिड अनुक्रमणिका सुरु गर्नुहोस्"
+
+#~ msgid "Could not add feed"
+#~ msgstr "फिड थप्न सकेन"
 
 #~ msgid "Unable to retrieve namespace prefixes"
 #~ msgstr "नामस्थान उपसर्गहरू प्राप्त गर्न सकिएन"
