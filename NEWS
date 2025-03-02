@@ -1,3 +1,11 @@
+NEW in 3.9.rc - 2025-03-02
+==========================
+  * Metadata extractor refactors
+  * Fixed possible runtime warnings
+  * Fixed possible indexer stall
+  * Restructure project directories
+  * Fix build with -Dwriteback=false
+
 NEW in 3.9.beta - 2025-02-04
 ============================
   * Ditch GStreamer for metadata extraction, and switch to FFmpeg/libav for
