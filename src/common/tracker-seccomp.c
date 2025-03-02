@@ -111,7 +111,7 @@ initialize_sigsys_handler (void)
 
 	sigemptyset (&act.sa_mask);
 	sigaddset (&act.sa_mask, SIGSYS);
-	act.sa_flags = SA_SIGINFO;
+	act.sa_flags = SA_SIGINFO | SA_RESETHAND;
 	act.sa_sigaction = sigsys_handler;
 
 	if (sigaction (SIGSYS, &act, NULL) < 0)
