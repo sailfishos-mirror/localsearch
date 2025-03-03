@@ -97,7 +97,8 @@ gboolean tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
                                            GFile                     **current_root,
                                            guint                      *files_found,
                                            guint                      *files_updated,
-                                           guint                      *files_ignored);
+                                           guint                      *files_ignored,
+                                           guint                      *files_reindexed);
 
 G_END_DECLS
 

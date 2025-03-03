@@ -88,6 +88,7 @@ typedef struct {
 	guint files_found;
 	guint files_ignored;
 	guint files_updated;
+	guint files_reindexed;
 	guint ignore_root : 1;
 	guint cursor_has_content : 1;
 } TrackerIndexRoot;
@@ -545,7 +546,9 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
-	if (file_data->state != FILE_STATE_NONE)
+	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
+		root->files_reindexed++;
+	else if (file_data->state != FILE_STATE_NONE)
 		root->files_updated++;
 
 	tracker_file_notifier_notify (root->notifier, file_data, info);
@@ -989,7 +992,9 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		}
 	}
 
-	if (file_data->state != FILE_STATE_NONE)
+	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
+		root->files_reindexed++;
+	else if (file_data->state != FILE_STATE_NONE)
 		root->files_updated++;
 
 	tracker_file_notifier_notify (notifier, file_data, info);
@@ -1976,7 +1981,8 @@ tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
                                   GFile                     **current_root,
                                   guint                      *files_found,
                                   guint                      *files_updated,
-                                  guint                      *files_ignored)
+                                  guint                      *files_ignored,
+                                  guint                      *files_reindexed)
 {
 	TrackerFileNotifierPrivate *priv;
 
@@ -2004,6 +2010,8 @@ tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
 		*files_updated = priv->current_index_root->files_updated;
 	if (files_ignored)
 		*files_ignored = priv->current_index_root->files_ignored;
+	if (files_reindexed)
+		*files_reindexed = priv->current_index_root->files_reindexed;
 
 	return TRUE;
 }

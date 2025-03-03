@@ -1025,7 +1025,7 @@ update_status_cb (gpointer user_data)
 	TrackerMinerFSPrivate *priv =
 		tracker_miner_fs_get_instance_private (fs);
 	g_autofree char *status = NULL;
-	guint files_found, files_updated, files_ignored;
+	guint files_found, files_updated, files_ignored, files_reindexed;
 	TrackerFileNotifierStatus notifier_status;
 	GFile *current_root;
 
@@ -1034,7 +1034,8 @@ update_status_cb (gpointer user_data)
 	                                      &current_root,
 	                                      &files_found,
 	                                      &files_updated,
-	                                      &files_ignored)) {
+	                                      &files_ignored,
+	                                      &files_reindexed)) {
 		g_autofree char *uri = NULL;
 		GString *str;
 
@@ -1050,6 +1051,8 @@ update_status_cb (gpointer user_data)
 			g_string_append_printf (str, "Found: %d. ", files_found);
 		if (files_updated > 0)
 			g_string_append_printf (str, "Updated: %d. ", files_updated);
+		if (files_reindexed > 0)
+			g_string_append_printf (str, "Re-indexed: %d. ", files_reindexed);
 		if (files_ignored > 0)
 			g_string_append_printf (str, "Ignored: %d. ", files_ignored);
 
