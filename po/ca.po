@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-02-13 03:36+0000\n"
-"PO-Revision-Date: 2024-09-17 00:21+0200\n"
+"PO-Revision-Date: 2025-03-03 00:21+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -297,7 +297,7 @@ msgstr "Sorral («Sandbox») per a un entorn de proves"
 
 #: src/cli/main.c:120 src/cli/main.c:183
 msgid "Available localsearch commands are:"
-msgstr "Les ordres «localsearch» disponibles son:"
+msgstr "Les ordres «localsearch» disponibles són:"
 
 #: src/cli/main.c:216
 msgid "See “localsearch help <command>” to read about a specific subcommand."
@@ -1490,89 +1490,3 @@ msgstr "Inhabilita l'aturada després de 30 segons d'inactivitat"
 msgid "— start the tracker writeback service"
 msgstr "— inicia el servei d'escriptura del Tracker"
 
-#~ msgid "Add feed"
-#~ msgstr "Afegeix canal"
-
-#~ msgid "URL"
-#~ msgstr "URL"
-
-#~ msgid "Title to use (must be used with --add-feed)"
-#~ msgstr "Títol a utilitzar (s'ha d'utilitzar amb «--add-feed»)"
-
-#~ msgid "List feeds"
-#~ msgstr "Llista els canals"
-
-#~ msgid "Delete feed"
-#~ msgstr "Suprimeix el canal"
-
-#~ msgid "Could not add feed"
-#~ msgstr "No s'ha pogut afegir el canal"
-
-#~ msgid "Could not remove feed"
-#~ msgstr "No s'ha pogut suprimir el canal"
-
-#~ msgid "Could not list feeds"
-#~ msgstr "No s'han pogut llistar els canals"
-
-#~ msgid "— start the feeds indexer"
-#~ msgstr "— inicia l'indexador de canals"
-
-#~ msgid "Remove RSS indexer database"
-#~ msgstr "Elimina la base de dades de l'indexador RSS"
-
-#~ msgid "daemon"
-#~ msgstr "dimoni"
-
-#~ msgid "index"
-#~ msgstr "índex"
-
-#~ msgid "info"
-#~ msgstr "informació"
-
-#~ msgid "reset"
-#~ msgstr "reinicia"
-
-#~ msgid "search"
-#~ msgstr "cerca"
-
-#~ msgid "status"
-#~ msgstr "estat"
-
-#~ msgid "tag"
-#~ msgstr "etiqueta"
-
-#~ msgid "Ignore stop words"
-#~ msgstr "Ignora les paraules buides"
-
-#~ msgid ""
-#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
-#~ "common words like “the”, “yes”, “no”, etc."
-#~ msgstr ""
-#~ "Si s'habilita, les paraules llistades a la llista de paraules buides "
-#~ "s'ignoraran. Per exemple, paraules comunes com ara «el», «sí», «no», etc."
-
-#~ msgid "Index applications installed on the system"
-#~ msgstr "Indexa les aplicacions instal·lades al sistema"
-
-#~ msgid ""
-#~ "If this option is enabled, the filesystem miner will look for .desktop "
-#~ "files in the standard XDG system and user data directories."
-#~ msgstr ""
-#~ "Si aquesta opció està activada, l'extractor de dades del sistema de "
-#~ "fitxers cercarà fitxers .desktop al sistema XDG estàndard i als "
-#~ "directoris de dades de l'usuari."
-
-#~ msgid "Operation not supported"
-#~ msgstr "L'operació no està implementada"
-
-#~ msgid "Unable to retrieve namespace prefixes"
-#~ msgstr "No s'han pogut recuperar els prefixos de l'espai de noms"
-
-#~ msgid "No namespace prefixes were returned"
-#~ msgstr "No s'ha retornat cap prefix d'espai de noms"
-
-#~ msgid "Querying information for entity"
-#~ msgstr "S'està consultant la informació de l'entitat"
-
-#~ msgid "unknown time"
-#~ msgstr "temps desconegut"
