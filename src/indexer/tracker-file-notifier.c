@@ -85,9 +85,6 @@ typedef struct {
 	GTimer *timer;
 	guint flags;
 	guint cursor_idle_id;
-	guint directories_found;
-	guint directories_ignored;
-	guint directories_updated;
 	guint files_found;
 	guint files_ignored;
 	guint files_updated;
@@ -231,10 +228,6 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	TRACKER_NOTE (STATISTICS,
 	              g_message ("  Notified files after %2.2f seconds",
 	                         g_timer_elapsed (data->timer, NULL)));
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Found %d directories, ignored %d directories",
-	                         data->directories_found,
-	                         data->directories_ignored));
 	TRACKER_NOTE (STATISTICS,
 	              g_message ("  Found %d files, ignored %d files",
 	                         data->files_found,
@@ -552,12 +545,8 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
-	if (file_data->state != FILE_STATE_NONE) {
-		if (file_type == G_FILE_TYPE_DIRECTORY)
-			root->directories_updated++;
-		else
-			root->files_updated++;
-	}
+	if (file_data->state != FILE_STATE_NONE)
+		root->files_updated++;
 
 	tracker_file_notifier_notify (root->notifier, file_data, info);
 	g_queue_delete_link (&root->queue, file_data->node);
@@ -643,20 +632,13 @@ enumerator_next_files_cb (GObject      *object,
 		file_type = g_file_info_get_file_type (info);
 		n_files++;
 
-		if (file_type == G_FILE_TYPE_DIRECTORY) {
-			root->directories_found++;
+		root->files_found++;
 
-			if (!check_directory (root->notifier, file, info)) {
-				root->directories_ignored++;
-				continue;
-			}
-		} else {
-			root->files_found++;
-
-			if (!check_file (root->notifier, file, info)) {
+		if ((file_type == G_FILE_TYPE_DIRECTORY &&
+		     !check_directory (root->notifier, file, info)) ||
+		    !check_file (root->notifier, file, info)) {
 				root->files_ignored++;
 				continue;
-			}
 		}
 
 		handle_file_from_filesystem (root, file, info);
@@ -958,13 +940,8 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 	store_mtime = tracker_sparql_cursor_get_datetime (cursor, 2);
 
-	if (folder_urn) {
-		file_type = G_FILE_TYPE_DIRECTORY;
-		root->directories_found++;
-	} else {
-		file_type = G_FILE_TYPE_UNKNOWN;
-		root->files_found++;
-	}
+	file_type = folder_urn ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
+	root->files_found++;
 
 	file_data = _insert_store_info (root,
 	                                file,
@@ -1012,12 +989,8 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 		}
 	}
 
-	if (file_data->state != FILE_STATE_NONE) {
-		if (file_type == G_FILE_TYPE_DIRECTORY)
-			root->directories_updated++;
-		else
-			root->files_updated++;
-	}
+	if (file_data->state != FILE_STATE_NONE)
+		root->files_updated++;
 
 	tracker_file_notifier_notify (notifier, file_data, info);
 	g_queue_delete_link (&root->queue, file_data->node);
@@ -2025,20 +1998,12 @@ tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
 	if (current_root)
 		*current_root = priv->current_index_root->root;
 
-	if (files_found) {
-		*files_found = priv->current_index_root->directories_found +
-			priv->current_index_root->files_found;
-	}
-
-	if (files_updated) {
-		*files_updated = priv->current_index_root->directories_updated +
-			priv->current_index_root->files_updated;
-	}
-
-	if (files_ignored) {
-		*files_ignored = priv->current_index_root->directories_ignored +
-			priv->current_index_root->files_ignored;
-	}
+	if (files_found)
+		*files_found = priv->current_index_root->files_found;
+	if (files_updated)
+		*files_updated = priv->current_index_root->files_updated;
+	if (files_ignored)
+		*files_ignored = priv->current_index_root->files_ignored;
 
 	return TRUE;
 }
