@@ -228,6 +228,18 @@ tracker_index_root_new (TrackerFileNotifier *notifier,
 static void
 tracker_index_root_free (TrackerIndexRoot *data)
 {
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Notified files after %2.2f seconds",
+	                         g_timer_elapsed (data->timer, NULL)));
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Found %d directories, ignored %d directories",
+	                         data->directories_found,
+	                         data->directories_ignored));
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Found %d files, ignored %d files",
+	                         data->files_found,
+	                         data->files_ignored));
+
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
 	g_queue_free_full (data->pending_finish_dirs, (GDestroyNotify) g_object_unref);
 	g_timer_destroy (data->timer);
@@ -797,23 +809,6 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	return TRUE;
 }
 
-static void
-tracker_file_notifier_root_finished (TrackerFileNotifier *notifier,
-				     TrackerIndexRoot    *root)
-{
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Notified files after %2.2f seconds",
-	                         g_timer_elapsed (root->timer, NULL)));
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Found %d directories, ignored %d directories",
-	                         root->directories_found,
-	                         root->directories_ignored));
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Found %d files, ignored %d files",
-	                         root->files_found,
-	                         root->files_ignored));
-}
-
 static gboolean
 tracker_index_root_continue_current_folder (TrackerIndexRoot *root)
 {
@@ -842,7 +837,6 @@ tracker_index_root_continue (TrackerIndexRoot *root)
 		return;
 
 	tracker_index_root_notify_changes (root);
-	tracker_file_notifier_root_finished (root->notifier, root);
 	notifier_check_next_root (root->notifier);
 }
 
@@ -1110,8 +1104,6 @@ query_execute_cb (TrackerSparqlStatement *statement,
 			uri = g_file_get_uri (root->root);
 			g_critical ("Could not query contents for indexed folder '%s': %s",
 			            uri, error->message);
-
-			tracker_file_notifier_root_finished (root->notifier, root);
 		}
 
 		return;
@@ -1609,8 +1601,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 		/* Directory being currently processed */
 		if (priv->cancellable)
 			g_cancellable_cancel (priv->cancellable);
-		tracker_file_notifier_root_finished (notifier,
-						     priv->current_index_root);
 		notifier_check_next_root (notifier);
 	}
 
