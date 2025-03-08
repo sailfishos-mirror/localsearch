@@ -1463,7 +1463,7 @@ msgstr "El directori és apte per a ser indexat"
 
 #: src/indexer/tracker-main.c:623
 msgid "File is eligible to be indexed"
-msgstr "El fitxer no és apte per a ser indexat"
+msgstr "El fitxer és apte per a ser indexat"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
