@@ -1,3 +1,12 @@
+NEW in 3.9.rc - 2025-03-16
+==========================
+Translations: ca
+
+  Highlighted changes since 3.8.0:
+  * Switched to libavformat for media extraction
+  * Memory usage improvements
+  * Improved recovery process after interruption
+
 NEW in 3.9.rc - 2025-03-02
 ==========================
   * Metadata extractor refactors
