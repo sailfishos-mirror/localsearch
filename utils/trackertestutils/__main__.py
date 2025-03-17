@@ -368,7 +368,7 @@ def main():
     if args.debug_dbus and args.dbus_session_bus:
         log.warn("The --debug-dbus flag has no effect when --dbus-session-bus is used")
 
-    shell = os.environ.get('SHELL', 'bash')
+    shell = os.environ.get('SHELL', 'sh')
 
     if args.prefix is None and args.dbus_config is None:
         parser.print_help()
