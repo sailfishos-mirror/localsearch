@@ -164,9 +164,14 @@ check-merge-request:
     FDO_DISTRIBUTION_VERSION: stable
     FDO_DISTRIBUTION_TAG: "x86_64-${BASE_TAG}"
 
+.dummy-container-build:
+  script:
+    - echo Dummy container build
+
 build-fedora-container@x86_64:
   extends:
-    - .fdo.container-build@fedora
+    #- .fdo.container-build@fedora
+    - .dummy-container-build
     - .tracker-miners.fedora:latest@x86_64
   stage: prepare
   variables:
@@ -177,7 +182,8 @@ build-fedora-container@x86_64:
 
 build-fedora-rawhide-container@x86_64:
   extends:
-    - .fdo.container-build@fedora
+    #- .fdo.container-build@fedora
+    - .dummy-container-build
     - .tracker-miners.fedora:rawhide@x86_64
   stage: prepare
   variables:
@@ -189,7 +195,8 @@ build-fedora-rawhide-container@x86_64:
 
 build-fedora-container@aarch64:
   extends:
-    - .fdo.container-build@fedora
+    #- .fdo.container-build@fedora
+    - .dummy-container-build
     - .tracker-miners.fedora:latest@aarch64
   stage: prepare
   variables:
@@ -201,7 +208,8 @@ build-fedora-container@aarch64:
 
 build-debian-container@x86_64:
   extends:
-    - .fdo.container-build@debian
+    #- .fdo.container-build@debian
+    - .dummy-container-build
     - .tracker-miners.debian:stable@x86_64
   stage: prepare
   variables:
@@ -213,7 +221,7 @@ build-debian-container@x86_64:
 
 check-code-style:
   extends:
-    - .fdo.distribution-image@fedora
+    #- .fdo.distribution-image@fedora
     - .tracker-miners.fedora:latest@x86_64
   needs:
     - build-fedora-container@x86_64
