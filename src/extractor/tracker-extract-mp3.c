@@ -654,7 +654,7 @@ read_id3v1_buffer (int     fd,
 		rc = read (fd,
 		           buffer + bytes_read,
 		           ID3V1_SIZE - bytes_read);
-		if (rc == -1) {
+		if (rc < 0) {
 			if (errno != EINTR) {
 				g_free (buffer);
 				return NULL;
