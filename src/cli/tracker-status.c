@@ -471,17 +471,18 @@ show_errors (gchar    **terms,
 	for (i = 0; terms[i] != NULL; i++) {
 		for (l = keyfiles; l; l = l->next) {
 			g_autoptr(GFile) file = NULL;
-			gchar *uri, *path;
+			g_autofree gchar *uri = NULL, *path = NULL;
 
 			keyfile = l->data;
 			uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
 			file = g_file_new_for_uri (uri);
-			path = g_file_get_path (file);
 
 			if (!g_file_query_exists (file, NULL)) {
 				tracker_error_report_delete (file);
 				continue;
 			}
+
+			path = g_file_get_path (file);
 
 			if (strstr (path, terms[i])) {
 				gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
@@ -511,9 +512,6 @@ show_errors (gchar    **terms,
 				g_free (sparql);
 				g_free (message);
 			}
-
-			g_free (uri);
-			g_free (path);
 		}
 	}
 
