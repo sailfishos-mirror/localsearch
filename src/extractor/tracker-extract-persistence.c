@@ -74,7 +74,8 @@ tracker_extract_persistence_set_file (TrackerExtractPersistence *persistence,
                                       GFile                     *file)
 {
 	g_autofree gchar *path = NULL;
-	int len, written = 0, retval;
+	ssize_t retval;
+	size_t len, written = 0;
 
 	g_return_if_fail (TRACKER_IS_EXTRACT_PERSISTENCE (persistence));
 	g_return_if_fail (!file || G_IS_FILE (file));
