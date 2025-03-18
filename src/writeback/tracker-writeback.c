@@ -64,6 +64,7 @@ typedef struct {
 	GError *initialization_error;
 
 	guint initialized : 1;
+	guint name_acquired : 1;
 
 	GHashTable *modules;
 	WritebackData *current;
@@ -524,6 +525,11 @@ bus_name_acquired_cb (GDBusConnection *connection,
                       const gchar     *name,
                       gpointer         user_data)
 {
+	TrackerController *controller = user_data;
+	TrackerControllerPrivate *priv =
+		tracker_controller_get_instance_private (controller);
+
+	priv->name_acquired = TRUE;
 	controller_notify_main_thread (TRACKER_CONTROLLER (user_data), NULL);
 }
 
@@ -538,7 +544,7 @@ bus_name_vanished_cb (GDBusConnection *connection,
 	controller = user_data;
 	priv = tracker_controller_get_instance_private (controller);
 
-	if (!priv->initialized) {
+	if (!priv->name_acquired) {
 		GError *error;
 
 		error = g_error_new_literal (TRACKER_DBUS_ERROR, 0,
