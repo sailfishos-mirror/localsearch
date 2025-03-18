@@ -463,7 +463,7 @@ miner_manager_initable_init (GInitable     *initable,
 		/* This error shouldn't be considered fatal */
 		if (inner_error) {
 			g_critical ("Could not create proxy on the D-Bus session bus, %s",
-			            inner_error ? inner_error->message : "no error given.");
+			            inner_error->message);
 			g_clear_error (&inner_error);
 			continue;
 		}
@@ -688,7 +688,7 @@ tracker_miner_manager_get_running (TrackerMinerManager *manager)
 
 	if (error) {
 		g_critical ("Could not get a list of names registered on the session bus, %s",
-		            error ? error->message : "no error given");
+		            error->message);
 		g_clear_error (&error);
 		return NULL;
 	}
@@ -1122,7 +1122,7 @@ tracker_miner_manager_is_active (TrackerMinerManager *manager,
 
 	if (error) {
 		g_critical ("Could not check whether miner '%s' is currently active: %s",
-		            miner, error ? error->message : "no error given");
+		            miner, error->message);
 		g_error_free (error);
 		return FALSE;
 	}
