@@ -156,7 +156,7 @@ static gchar *
 process_whole_string (GString  *s,
                       GError  **error)
 {
-	gchar *utf8 = NULL;
+	g_autofree gchar *utf8 = NULL;
 	gsize  utf8_len = 0;
 	gsize n_valid_utf8_bytes = 0;
 
@@ -235,11 +235,10 @@ process_whole_string (GString  *s,
 	}
 
 	if (utf8_len < 1) {
-		g_free (utf8);
 		return NULL;
 	}
 
-	return utf8;
+	return g_steal_pointer (&utf8);
 }
 
 /**
