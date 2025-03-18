@@ -427,9 +427,8 @@ info_run (void)
 	for (p = filenames; *p; p++) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (TrackerSparqlCursor) cursor = NULL;
-		gchar *uri = NULL;
-		gchar *query;
-		GList *keyfiles;
+		g_autofree gchar *uri = NULL, *query = NULL;
+		g_autoptr (GList) keyfiles = NULL;
 		gboolean found = FALSE;
 
 		/* support both, URIs and local file paths */
@@ -453,7 +452,6 @@ info_run (void)
 			query = g_strdup_printf ("SELECT ?urn { ?urn %s ~value }", url_property);
 			stmt = tracker_sparql_connection_query_statement (connection, query,
 			                                                  NULL, &error);
-			g_free (query);
 
 			if (stmt) {
 				tracker_sparql_statement_bind_string (stmt, "prop", url_property);
