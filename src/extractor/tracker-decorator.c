@@ -210,9 +210,14 @@ hint_file_needed (GFile    *file,
 		return;
 
 	fd = tracker_file_open_fd (path);
-	posix_fadvise (fd, 0, 0,
-	               needed ? POSIX_FADV_WILLNEED : POSIX_FADV_DONTNEED);
-	close (fd);
+
+	if (fd >= 0) {
+		posix_fadvise (fd, 0, 0,
+			       needed ?
+			       POSIX_FADV_WILLNEED :
+			       POSIX_FADV_DONTNEED);
+		close (fd);
+	}
 #endif /* HAVE_POSIX_FADVISE */
 }
 
