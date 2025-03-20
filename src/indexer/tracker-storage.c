@@ -661,10 +661,9 @@ mount_add (TrackerStorage *storage,
 					g_debug ("  No UUID, generated:'%s' (based on mount path)", uuid);
 				} else {
 					g_debug ("  Being ignored because mount is music/video "
-					         "(content type:%s, optical:%s, multimedia:%s)",
+					         "(content type:%s, optical:%s, multimedia: yes)",
 					         content_type,
-					         is_optical ? "yes" : "no",
-					         is_multimedia ? "yes" : "no");
+					         is_optical ? "yes" : "no");
 				}
 
 				g_free (content_type);

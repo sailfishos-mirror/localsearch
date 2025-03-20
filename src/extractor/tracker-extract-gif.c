@@ -186,9 +186,12 @@ read_metadata (GifFileType        *gifFile,
 					}
 				}
 
-				xd = tracker_xmp_new (extBlock.bytes,
-				                      extBlock.byteCount-XMP_MAGIC_TRAILER_LENGTH,
-				                      uri);
+				if (extBlock.byteCount > XMP_MAGIC_TRAILER_LENGTH) {
+					xd = tracker_xmp_new (extBlock.bytes,
+							      extBlock.byteCount -
+							      XMP_MAGIC_TRAILER_LENGTH,
+							      uri);
+				}
 
 				g_free (extBlock.bytes);
 			} else

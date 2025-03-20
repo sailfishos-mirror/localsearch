@@ -551,9 +551,9 @@ extract_opf_path (const gchar *uri)
 	tracker_gsf_parse_xml_in_zip (uri, "META-INF/container.xml", context, &error);
 	g_markup_parse_context_free (context);
 
-	if (error || !path) {
+	if (error) {
 		g_warning ("Could not get EPUB container.xml file: %s\n",
-		           (error) ? error->message : "No error provided");
+		           error->message);
 		g_error_free (error);
 		return NULL;
 	}
@@ -649,7 +649,7 @@ extract_opf (TrackerExtractInfo *info,
 
 	if (error) {
 		g_warning ("Could not get EPUB '%s' file: %s\n", opf_path,
-		           (error) ? error->message : "No error provided");
+		           error->message);
 		g_error_free (error);
 		opf_data_free (data);
 		g_object_unref (ebook);

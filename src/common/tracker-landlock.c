@@ -154,7 +154,7 @@ create_ruleset (int *landlock_fd)
 	};
 
 	fd = CREATE_RULESET (&attr, 0);
-	if (landlock_fd < 0) {
+	if (fd < 0) {
 		g_critical ("Failed to create landlock ruleset: %m");
 		return FALSE;
 	}

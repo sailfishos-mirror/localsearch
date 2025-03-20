@@ -83,7 +83,7 @@ clients_init (void)
 
 	if (error) {
 		g_critical ("Could not connect to the D-Bus session bus, %s",
-		            error ? error->message : "no error given.");
+		            error->message);
 		g_clear_error (&error);
 		connection = NULL;
 	}
@@ -188,7 +188,7 @@ client_data_new (gchar *sender)
 		if (!g_file_get_contents (filename, &contents, NULL, &error)) {
 			g_warning ("Could not get process name from id %ld, %s",
 			           cd->pid,
-			           error ? error->message : "no error given");
+			           error->message);
 			g_clear_error (&error);
 			g_free (filename);
 			return cd;

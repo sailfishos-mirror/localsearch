@@ -64,6 +64,7 @@ typedef struct {
 	GError *initialization_error;
 
 	guint initialized : 1;
+	guint name_acquired : 1;
 
 	GHashTable *modules;
 	WritebackData *current;
@@ -524,6 +525,11 @@ bus_name_acquired_cb (GDBusConnection *connection,
                       const gchar     *name,
                       gpointer         user_data)
 {
+	TrackerController *controller = user_data;
+	TrackerControllerPrivate *priv =
+		tracker_controller_get_instance_private (controller);
+
+	priv->name_acquired = TRUE;
 	controller_notify_main_thread (TRACKER_CONTROLLER (user_data), NULL);
 }
 
@@ -538,7 +544,7 @@ bus_name_vanished_cb (GDBusConnection *connection,
 	controller = user_data;
 	priv = tracker_controller_get_instance_private (controller);
 
-	if (!priv->initialized) {
+	if (!priv->name_acquired) {
 		GError *error;
 
 		error = g_error_new_literal (TRACKER_DBUS_ERROR, 0,
@@ -594,7 +600,7 @@ tracker_controller_dbus_start (TrackerController   *controller,
 
 	if (err) {
 		g_critical ("Could not register the D-Bus object "TRACKER_WRITEBACK_PATH", %s",
-		            err ? err->message : "no error given.");
+		            err->message);
 		g_propagate_error (error, err);
 		return FALSE;
 	}
@@ -607,12 +613,6 @@ tracker_controller_dbus_start (TrackerController   *controller,
 		                              bus_name_vanished_cb,
 		                              controller, NULL);
 
-	if (err) {
-		g_propagate_prefixed_error (error, err,
-		                            "Could not own the D-Bus name " WRITEBACK_SERVICE);
-		return FALSE;
-	}
-
 	priv->old_bus_name_id =
 		g_bus_own_name_on_connection (priv->d_connection,
 		                              TRACKER_WRITEBACK_SERVICE,
@@ -620,12 +620,6 @@ tracker_controller_dbus_start (TrackerController   *controller,
 		                              bus_name_acquired_cb,
 		                              bus_name_vanished_cb,
 		                              controller, NULL);
-
-	if (err) {
-		g_propagate_prefixed_error (error, err,
-		                            "Could not own the D-Bus name " TRACKER_WRITEBACK_SERVICE);
-		return FALSE;
-	}
 
 	return TRUE;
 }

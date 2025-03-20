@@ -295,6 +295,8 @@ extract_task_data_free (TrackerExtractTaskData *data)
 	g_free (data);
 }
 
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerExtractTaskData, extract_task_data_free)
+
 static gboolean
 get_metadata (GTask *task)
 {
@@ -467,7 +469,7 @@ tracker_extract_file_sync (TrackerExtract  *object,
                            const gchar     *mimetype,
                            GError         **error)
 {
-	TrackerExtractTaskData *task;
+	g_autoptr (TrackerExtractTaskData) task = NULL;
 	TrackerExtractInfo *info;
 	const char *graph = NULL;
 
@@ -490,8 +492,6 @@ tracker_extract_file_sync (TrackerExtract  *object,
 
 	if (!get_file_metadata (task, &info, error))
 		return NULL;
-
-	extract_task_data_free (task);
 
 	return info;
 }

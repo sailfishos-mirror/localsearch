@@ -310,6 +310,7 @@ read_metadata (TrackerResource      *metadata,
 			}
 
 			if (g_strcmp0 (text_ptr[i].key, "Creation Time") == 0) {
+				g_clear_pointer (&pd.creation_time, g_free);
 				pd.creation_time = rfc1123_to_iso8601_date (text_ptr[i].text);
 				continue;
 			}
