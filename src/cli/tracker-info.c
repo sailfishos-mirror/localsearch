@@ -234,7 +234,8 @@ print_plain_values (const gchar             *subject,
 
 			if (!full_namespaces && g_str_has_prefix (l->data, "http"))
 				str = tracker_namespace_manager_compress_uri (namespaces, l->data);
-			else
+
+			if (!str)
 				str = g_strdup (l->data);
 
 			if (l != objects)
