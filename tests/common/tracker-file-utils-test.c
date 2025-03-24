@@ -134,14 +134,14 @@ static void
 test_path_evaluate_name (void)
 {
 	gchar *result, *expected, *pwd, *home;
-
-
 	const gchar *test = "/one/two";
 	gchar *parent_dir;
+	gboolean success;
 
 	home = g_strdup (g_getenv ("HOME"));
 	pwd = g_get_current_dir ();
-	g_setenv ("TEST_TRACKER_DIR", test, TRUE);
+	success = g_setenv ("TEST_TRACKER_DIR", test, TRUE);
+	g_assert_true (success);
 
 
 	result = tracker_path_evaluate_name ("/home/user/all/ok");
@@ -208,10 +208,12 @@ test_path_evaluate_name (void)
 	g_assert_true (!result);
 
 
-        g_setenv ("HOME", "", TRUE);
+	success = g_setenv ("HOME", "", TRUE);
+	g_assert_true (success);
         result = tracker_path_evaluate_name ("~/but-no-home.txt");
         g_assert_true (!result);
-        g_setenv ("HOME", home, TRUE);
+        success = g_setenv ("HOME", home, TRUE);
+	g_assert_true (success);
 
         result = tracker_path_evaluate_name ("$UNDEFINED/something");
         g_assert_cmpstr (result, ==, "/something");
