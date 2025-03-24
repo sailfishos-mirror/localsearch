@@ -220,7 +220,7 @@ process_whole_string (GString  *s,
 		from_guessed_str = get_string_from_guessed_encoding (utf8,
 		                                                     utf8_len,
 		                                                     &from_guessed_str_len);
-		g_free (utf8);
+		g_clear_pointer (&utf8, g_free);
 		if (!from_guessed_str)
 			return NULL;
 		utf8 = from_guessed_str;
