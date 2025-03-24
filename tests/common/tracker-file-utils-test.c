@@ -166,8 +166,7 @@ test_path_evaluate_name (void)
 	g_free (expected);
 
 	result = tracker_path_evaluate_name ("just-a-filename");
-	g_assert_cmpstr (result, ==, "just-a-filename");
-	g_free (result);
+	g_assert_null (result);
 
 	result = tracker_path_evaluate_name ("$HOME/all/dir/");
 	expected = g_build_path (G_DIR_SEPARATOR_S, home, "/all/dir", NULL);

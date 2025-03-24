@@ -528,6 +528,7 @@ tracker_path_evaluate_name (const gchar *path)
 	g_autofree gchar *eval_path = NULL;
 	g_autofree gchar *expanded = NULL;
 	g_auto (GStrv) tokens = NULL;
+	g_autoptr (GFile) file = NULL;
 	int i;
 
 	if (!path || path[0] == '\0') {
@@ -591,23 +592,16 @@ tracker_path_evaluate_name (const gchar *path)
 		*token = g_strdup (env);
 	}
 
-	/* Third get the real path removing any "../" and other
-	 * symbolic links to other places, returning only the REAL
-	 * location.
-	 */
 	expanded = g_strjoinv (G_DIR_SEPARATOR_S, tokens);
 
 	/* Only resolve relative paths if there is a directory
 	 * separator in the path, otherwise it is just a name.
 	 */
-	if (strchr (expanded, G_DIR_SEPARATOR)) {
-		g_autoptr (GFile) file = NULL;
+	if (!strchr (expanded, G_DIR_SEPARATOR))
+		return NULL;
 
-		file = g_file_new_for_commandline_arg (expanded);
-		eval_path = g_file_get_path (file);
-	} else {
-		eval_path = g_steal_pointer (&expanded);
-	}
+	file = g_file_new_for_commandline_arg (expanded);
+	eval_path = g_file_get_path (file);
 
  end:
 	return g_steal_pointer (&eval_path);
