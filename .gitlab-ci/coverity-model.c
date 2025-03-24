@@ -13,7 +13,30 @@
 #define NULL ((void *) 0)
 
 typedef long ssize_t;
+typedef struct _GMappedFile { char *data } GMappedFile;
 typedef unsigned int gboolean;
+
+void
+g_atomic_int_inc (int *atomic)
+{
+	(*atomic)++;
+}
+
+gboolean
+g_atomic_int_dec_and_test (int *atomic)
+{
+	(*atomic)--;
+	if (*atomic < 0)
+		return 1;
+	else
+		return 0;
+}
+
+char *
+g_mapped_file_get_contents (GMappedFile *mapped_file)
+{
+	return mapped_file->data;
+}
 
 char *
 g_strchug (char *string)
