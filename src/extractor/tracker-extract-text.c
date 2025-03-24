@@ -99,15 +99,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		return FALSE;
 	}
 
-	if (content) {
-		tracker_resource_set_string (metadata, "nie:plainTextContent", content);
-		g_free (content);
-	} else {
-		tracker_resource_set_string (metadata, "nie:plainTextContent", "");
-	}
-
+	tracker_resource_set_string (metadata, "nie:plainTextContent", content);
 	tracker_extract_info_set_resource (info, metadata);
 	g_object_unref (metadata);
+	g_free (content);
 
 	return TRUE;
 }
