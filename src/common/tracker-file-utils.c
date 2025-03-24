@@ -582,12 +582,13 @@ tracker_path_evaluate_name (const gchar *path)
 		}
 
 		env = g_getenv (start);
-		g_free (*token);
 
-		/* Don't do g_strdup (s?s1:s2) as that doesn't work
-		 * with certain gcc 2.96 versions.
-		 */
-		*token = env ? g_strdup (env) : g_strdup ("");
+		/* If any element in the path fails evaluation, bail out */
+		if (!env)
+			return NULL;
+
+		g_free (*token);
+		*token = g_strdup (env);
 	}
 
 	/* Third get the real path removing any "../" and other

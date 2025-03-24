@@ -216,8 +216,10 @@ test_path_evaluate_name (void)
 	g_assert_true (success);
 
         result = tracker_path_evaluate_name ("$UNDEFINED/something");
-        g_assert_cmpstr (result, ==, "/something");
-        g_free (result);
+        g_assert_null (result);
+
+        result = tracker_path_evaluate_name ("$HOME/$UNDEFINED/something");
+        g_assert_null (result);
 
 	result = tracker_path_evaluate_name (tracker_test_helpers_get_nonutf8 ());
 	g_assert_cmpstr (result, ==, tracker_test_helpers_get_nonutf8 ());
