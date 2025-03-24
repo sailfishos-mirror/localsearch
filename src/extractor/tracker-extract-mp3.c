@@ -631,8 +631,8 @@ read_id3v1_buffer (int     fd,
                    goffset size)
 {
 	char *buffer;
-	guint bytes_read;
-	guint rc;
+	size_t bytes_read;
+	ssize_t rc;
 
 	if (size < 128) {
 		return NULL;
