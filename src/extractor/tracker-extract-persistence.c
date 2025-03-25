@@ -93,12 +93,10 @@ tracker_extract_persistence_set_file (TrackerExtractPersistence *persistence,
 
 	while (TRUE) {
 		retval = write (persistence->fd, &path[written], len - written);
-		if (retval < 0)
+		if (retval < 0 || written + retval >= len)
 			break;
 
 		written += retval;
-		if (written >= len)
-			break;
 	}
 }
 

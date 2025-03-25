@@ -114,12 +114,8 @@ process_desktop_file (TrackerResource  *resource,
 	gchar *lang;
 
 	key_file = get_desktop_key_file (file, &type, &inner_error);
-	if (inner_error) {
-		gchar *uri;
-
-		uri = g_file_get_uri (file);
+	if (!key_file) {
 		g_propagate_prefixed_error (error, inner_error, "Could not load desktop file:");
-		g_free (uri);
 		return FALSE;
 	}
 

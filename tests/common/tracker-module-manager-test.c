@@ -40,7 +40,8 @@ init_module_manager (void) {
 	g_autofree gchar *test_rules_dir = NULL;
 
 	test_rules_dir = get_test_rules_dir ();
-	g_setenv ("TRACKER_EXTRACTOR_RULES_DIR", test_rules_dir, TRUE);
+	success = g_setenv ("TRACKER_EXTRACTOR_RULES_DIR", test_rules_dir, TRUE);
+	g_assert_true (success);
 
 	success = tracker_extract_module_manager_init ();
 	g_assert_true (success);

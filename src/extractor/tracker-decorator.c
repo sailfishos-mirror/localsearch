@@ -212,10 +212,12 @@ hint_file_needed (GFile    *file,
 	fd = tracker_file_open_fd (path);
 
 	if (fd >= 0) {
-		posix_fadvise (fd, 0, 0,
-			       needed ?
-			       POSIX_FADV_WILLNEED :
-			       POSIX_FADV_DONTNEED);
+		if (posix_fadvise (fd, 0, 0,
+		                   needed ?
+		                   POSIX_FADV_WILLNEED :
+		                   POSIX_FADV_DONTNEED) < 0)
+			g_warning ("Could not mark file '%s' as needed: %m", path);
+
 		close (fd);
 	}
 #endif /* HAVE_POSIX_FADVISE */

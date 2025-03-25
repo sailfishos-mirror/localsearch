@@ -58,11 +58,11 @@ test_priority_queue_insertion_pop (void)
 
         /* Insert in to loops to "mix" priorities in the insertion */
         for (i = 1; i <= 10; i+=2) {
-                tracker_priority_queue_add (queue, g_strdup_printf ("test content %i", i), i);
+	        (void) tracker_priority_queue_add (queue, g_strdup_printf ("test content %i", i), i);
         }
 
         for (i = 2; i <= 10; i+=2) {
-                tracker_priority_queue_add (queue, g_strdup_printf ("test content %i", i), i);
+                (void) tracker_priority_queue_add (queue, g_strdup_printf ("test content %i", i), i);
         }
 
         for (i = 1; i <= 10; i++) {
@@ -93,8 +93,8 @@ test_priority_queue_peek (void)
         result = tracker_priority_queue_peek (queue, &priority);
         g_assert_true (result == NULL);
 
-        tracker_priority_queue_add (queue, g_strdup ("Low prio"), 10);
-        tracker_priority_queue_add (queue, g_strdup ("High prio"), 1);
+        (void) tracker_priority_queue_add (queue, g_strdup ("Low prio"), 10);
+        (void) tracker_priority_queue_add (queue, g_strdup ("High prio"), 1);
 
         result = tracker_priority_queue_peek (queue, &priority);
         g_assert_cmpint (priority, ==, 1);
@@ -121,10 +121,10 @@ test_priority_queue_find (void)
         int priority;
 
         queue = tracker_priority_queue_new ();
-        
-        tracker_priority_queue_add (queue, g_strdup ("search me"), 10);
-        tracker_priority_queue_add (queue, g_strdup ("Not me"), 1);
-        tracker_priority_queue_add (queue, g_strdup ("Not me either"), 20);
+
+        (void) tracker_priority_queue_add (queue, g_strdup ("search me"), 10);
+        (void) tracker_priority_queue_add (queue, g_strdup ("Not me"), 1);
+        (void) tracker_priority_queue_add (queue, g_strdup ("Not me either"), 20);
 
         result = (gchar *) tracker_priority_queue_find (queue, &priority, g_str_equal, "search me");
         g_assert_cmpstr (result, !=, NULL);
@@ -153,10 +153,10 @@ test_priority_queue_foreach (void)
         gint                  counter = 0;
 
         queue = tracker_priority_queue_new ();
-        
-        tracker_priority_queue_add (queue, g_strdup ("x"), 10);
-        tracker_priority_queue_add (queue, g_strdup ("x"), 20);        
-        tracker_priority_queue_add (queue, g_strdup ("x"), 30);
+
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 10);
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 20);
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 30);
 
         tracker_priority_queue_foreach (queue, foreach_testing_cb, &counter);
 
@@ -174,16 +174,16 @@ static void
 test_priority_queue_foreach_remove (void)
 {
         TrackerPriorityQueue *queue;
-        
+
         queue = tracker_priority_queue_new ();
 
-        tracker_priority_queue_add (queue, g_strdup ("y"), 1);
-        tracker_priority_queue_add (queue, g_strdup ("x"), 2);
-        tracker_priority_queue_add (queue, g_strdup ("y"), 3);
-        tracker_priority_queue_add (queue, g_strdup ("x"), 4);
-        tracker_priority_queue_add (queue, g_strdup ("y"), 5);
+        (void) tracker_priority_queue_add (queue, g_strdup ("y"), 1);
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 2);
+        (void) tracker_priority_queue_add (queue, g_strdup ("y"), 3);
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 4);
+        (void) tracker_priority_queue_add (queue, g_strdup ("y"), 5);
         g_assert_cmpint (tracker_priority_queue_get_length (queue), ==, 5);
-        
+
         tracker_priority_queue_foreach_remove (queue, g_str_equal, "y", g_free);
         g_assert_cmpint (tracker_priority_queue_get_length (queue), ==, 2);
 
@@ -210,16 +210,15 @@ test_priority_queue_branches (void)
 
 
         /* Insert multiple elements in the same priority */
-        tracker_priority_queue_add (queue, g_strdup ("x"), 5);
-        tracker_priority_queue_add (queue, g_strdup ("y"), 5);
-        tracker_priority_queue_add (queue, g_strdup ("z"), 5);
+        (void) tracker_priority_queue_add (queue, g_strdup ("x"), 5);
+        (void) tracker_priority_queue_add (queue, g_strdup ("y"), 5);
+        (void) tracker_priority_queue_add (queue, g_strdup ("z"), 5);
 
         g_assert_cmpint (tracker_priority_queue_get_length (queue), ==, 3);
 
         /* Removal with multiple elements in same priority*/
         g_assert_true (tracker_priority_queue_foreach_remove (queue, g_str_equal, "z", g_free));
         g_assert_true (tracker_priority_queue_foreach_remove (queue, g_str_equal, "x", g_free));
-        
 
         /* Pop those elements */
         result = tracker_priority_queue_pop (queue, &priority);
