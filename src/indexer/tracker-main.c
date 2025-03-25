@@ -505,11 +505,11 @@ static gint
 check_eligible (TrackerIndexingTree *indexing_tree,
                 TrackerStorage      *storage)
 {
-	TrackerController *controller;
-	GFile *file;
-	GFileInfo *info;
-	GError *error = NULL;
-	gchar *path;
+	g_autoptr (TrackerController) controller = NULL;
+	g_autoptr (GFile) file = NULL;
+	g_autoptr (GFileInfo) info = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree gchar *path = NULL;
 	gboolean exists = TRUE;
 	gboolean indexable;
 	gboolean parents_indexable = TRUE;
@@ -526,13 +526,8 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 	                          NULL,
 	                          &error);
 
-	if (error) {
-		if (error->code == G_IO_ERROR_NOT_FOUND) {
-			exists = FALSE;
-		}
-
-		g_error_free (error);
-	}
+	if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		exists = FALSE;
 
 	if (info) {
 		is_dir = g_file_info_get_file_type (info) == G_FILE_TYPE_DIRECTORY;
@@ -582,7 +577,7 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 		}
 
 		for (l = files; l; l = l->next) {
-			gchar *dir_path;
+			g_autofree gchar *dir_path = NULL;
 
 			dir_path = g_file_get_path (l->data);
 
@@ -607,8 +602,6 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 				}
 			}
 
-			g_free (dir_path);
-
 			if (!parents_indexable)
 				break;
 		}
@@ -622,11 +615,6 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 		         _("Directory is eligible to be indexed") :
 		         _("File is eligible to be indexed"));
 	}
-
-	g_free (path);
-	g_object_unref (file);
-	g_object_unref (info);
-	g_object_unref (controller);
 
 	return (indexable && parents_indexable) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
