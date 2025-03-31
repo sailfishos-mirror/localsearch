@@ -196,20 +196,16 @@ parser_characters (void          *data,
 
 	switch (pd->current) {
 	case READ_TITLE:
-		g_string_append (pd->title, ch);
+		g_string_append_len (pd->title, ch, len);
 		break;
 	case READ_IGNORE:
 		break;
 	default:
 		if (pd->in_body && pd->n_bytes_remaining > 0) {
-			gsize text_len;
-
-			text_len = strlen (ch);
-
 			if (tracker_text_validate_utf8 (ch,
-			                                (pd->n_bytes_remaining < text_len ?
+			                                (pd->n_bytes_remaining < len ?
 			                                 pd->n_bytes_remaining :
-			                                 text_len),
+			                                 len),
 			                                &pd->plain_text,
 			                                NULL)) {
 				/* In the case of HTML, each string arriving this
@@ -219,8 +215,8 @@ parser_characters (void          *data,
 				g_string_append_c (pd->plain_text, ' ');
 			}
 
-			if (pd->n_bytes_remaining > text_len) {
-				pd->n_bytes_remaining -= text_len;
+			if (pd->n_bytes_remaining > len) {
+				pd->n_bytes_remaining -= len;
 			} else {
 				pd->n_bytes_remaining = 0;
 			}
