@@ -380,10 +380,14 @@ subdir('tests')
 run_uninstalled_conf = configuration_data()
 run_uninstalled_conf.set('tracker_uninstalled_cli_dir', tracker_uninstalled_cli_dir)
 run_uninstalled_conf.set('tracker_uninstalled_domain_rule', meson.current_build_dir() / 'tests' / 'functional-tests' / 'config' / 'test-domain.rule')
-run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninstalled_extract_rules_dir)
-run_uninstalled_conf.set('tracker_uninstalled_extractors_dir', uninstalled_tracker_extract_dir)
 run_uninstalled_conf.set('tracker_uninstalled_miner_services_dir', tracker_uninstalled_miner_services_dir)
 run_uninstalled_conf.set('tracker_uninstalled_testutils_dir', tracker_uninstalled_testutils_dir)
+
+if have_tracker_extract
+  run_uninstalled_conf.set('tracker_uninstalled_extract_rules_dir', tracker_uninstalled_extract_rules_dir)
+  run_uninstalled_conf.set('tracker_uninstalled_extractors_dir', uninstalled_tracker_extract_dir)
+endif
+
 if have_tracker_writeback
   run_uninstalled_conf.set('tracker_uninstalled_writeback_modules_dir', tracker_uninstalled_writeback_modules_dir)
 endif
@@ -440,13 +444,12 @@ if have_tracker_extract
     '    Support cue sheet parsing:              ' + libcue.found().to_string(),
     '    Support playlists (w/ Totem):           ' + totem_plparser.found().to_string(),
     '    Support ISO image parsing:              ' + libosinfo.found().to_string(),
-    '    Support AbiWord document parsing:       true',
-    '    Support DVI parsing:                    true',
-    '    Support MP3 parsing:                    true',
+    '    Support AbiWord document parsing:       ' + get_option('abiword').to_string(),
+    '    Support MP3 parsing:                    ' + get_option('mp3').to_string(),
     '    Support MP3 tag charset detection:      ' + charset_library_name,
-    '    Support PS parsing:                     true',
-    '    Support text parsing:                   true',
-    '    Support icon parsing:                   true'
+    '    Support PS parsing:                     ' + get_option('ps').to_string(),
+    '    Support text parsing:                   ' + get_option('text').to_string(),
+    '    Support icon parsing:                   ' + get_option('icon').to_string(),
   ]
 endif
 

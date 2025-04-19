@@ -6,7 +6,6 @@ sources = [
 
 tracker_index_deps = [
      tracker_miners_common_dep,
-     tracker_extract_dep
 ]
 
 dbus_index_files_interface = files('org.freedesktop.Tracker3.Miner.Files.Index.xml')
