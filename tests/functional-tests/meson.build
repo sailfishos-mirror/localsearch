@@ -13,12 +13,15 @@ testconf.set('TEST_ROOT', meson.current_build_dir())
 testconf.set('TEST_CLI_DIR', tracker_uninstalled_cli_dir)
 testconf.set('TEST_DBUS_DAEMON_CONFIG_FILE', build_root / 'tests' / 'test-bus.conf')
 testconf.set('TEST_DOMAIN_ONTOLOGY_RULE', meson.current_build_dir() / 'config' / 'test-domain.rule')
-testconf.set('TEST_EXTRACTOR_RULES_DIR', tracker_uninstalled_extract_rules_dir)
-testconf.set('TEST_EXTRACTORS_DIR', uninstalled_tracker_extract_dir)
 testconf.set('TEST_GSETTINGS_SCHEMA_DIR', tracker_miners_uninstalled_gsettings_schema_dir)
 testconf.set('TEST_TAP_ENABLED', get_option('tests_tap_protocol').to_string())
-testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
 
+if have_tracker_extract
+  testconf.set('TEST_EXTRACTOR_RULES_DIR', tracker_uninstalled_extract_rules_dir)
+  testconf.set('TEST_EXTRACTORS_DIR', uninstalled_tracker_extract_dir)
+  testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
+endif
+ 
 if have_tracker_writeback
   testconf.set('TEST_WRITEBACK_MODULES_DIR', tracker_uninstalled_writeback_modules_dir)
 endif
