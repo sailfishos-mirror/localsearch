@@ -445,7 +445,6 @@ if have_tracker_extract
     '    Support playlists (w/ Totem):           ' + totem_plparser.found().to_string(),
     '    Support ISO image parsing:              ' + libosinfo.found().to_string(),
     '    Support AbiWord document parsing:       ' + get_option('abiword').to_string(),
-    '    Support DVI parsing:                    true',
     '    Support MP3 parsing:                    ' + get_option('mp3').to_string(),
     '    Support MP3 tag charset detection:      ' + charset_library_name,
     '    Support PS parsing:                     ' + get_option('ps').to_string(),
