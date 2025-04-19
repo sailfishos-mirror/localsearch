@@ -444,13 +444,13 @@ if have_tracker_extract
     '    Support cue sheet parsing:              ' + libcue.found().to_string(),
     '    Support playlists (w/ Totem):           ' + totem_plparser.found().to_string(),
     '    Support ISO image parsing:              ' + libosinfo.found().to_string(),
-    '    Support AbiWord document parsing:       true',
+    '    Support AbiWord document parsing:       ' + get_option('abiword').to_string(),
     '    Support DVI parsing:                    true',
-    '    Support MP3 parsing:                    true',
+    '    Support MP3 parsing:                    ' + get_option('mp3').to_string(),
     '    Support MP3 tag charset detection:      ' + charset_library_name,
-    '    Support PS parsing:                     true',
-    '    Support text parsing:                   true',
-    '    Support icon parsing:                   true'
+    '    Support PS parsing:                     ' + get_option('ps').to_string(),
+    '    Support text parsing:                   ' + get_option('text').to_string(),
+    '    Support icon parsing:                   ' + get_option('icon').to_string(),
   ]
 endif
 
