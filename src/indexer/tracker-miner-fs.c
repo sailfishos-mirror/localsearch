@@ -232,7 +232,7 @@ G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_T
 G_GNUC_UNUSED static void
 debug_print_event (QueueEvent *event)
 {
-	const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED" };
+	const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED", "FINISH_DIRECTORY" };
 	g_autofree char *uri1 = NULL, *uri2 = NULL;
 
 	uri1 = g_file_get_uri (event->file);
