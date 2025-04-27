@@ -944,18 +944,21 @@ item_move (TrackerMinerFS *fs,
 	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, &flags);
 	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
-	/* If the original location is recursive, but the destination location
-	 * is not, remove all children.
-	 */
-	if (source_recursive && (!is_dir || !dest_recursive)) {
-		TRACKER_NOTE (MINER_FS_EVENTS,
-		              g_message ("Removing children for item: '%s' (No longer monitored)", source_uri));
-
-		tracker_lru_remove (priv->urn_lru, source_file);
-
+	if (is_dir) {
 		tracker_lru_remove_foreach (priv->urn_lru,
 		                            (GEqualFunc) g_file_has_parent,
 		                            source_file);
+	}
+
+	tracker_lru_remove (priv->urn_lru, source_file);
+	tracker_lru_remove (priv->urn_lru, dest_file);
+
+	/* If the original location is recursive, but the destination location
+	 * is not, remove all children.
+	 */
+	if (is_dir && source_recursive && !dest_recursive) {
+		TRACKER_NOTE (MINER_FS_EVENTS,
+		              g_message ("Removing children for item: '%s' (No longer monitored)", source_uri));
 
 		TRACKER_MINER_FS_GET_CLASS (fs)->remove_children (fs, source_file,
 		                                                  priv->sparql_buffer);
