@@ -896,8 +896,7 @@ item_add_or_update (TrackerMinerFS *fs,
 static void
 item_remove (TrackerMinerFS *fs,
              GFile          *file,
-             gboolean        is_dir,
-             gboolean        only_children)
+             gboolean        is_dir)
 {
 	TrackerMinerFSPrivate *priv =
 		tracker_miner_fs_get_instance_private (fs);
@@ -908,20 +907,17 @@ item_remove (TrackerMinerFS *fs,
 	TRACKER_NOTE (MINER_FS_EVENTS,
 	              g_message ("Removing item: '%s' (Deleted from filesystem or no longer monitored)", uri));
 
-	tracker_lru_remove_foreach (priv->urn_lru,
-	                            (GEqualFunc) g_file_has_parent,
-	                            file);
+	if (is_dir) {
+		tracker_lru_remove_foreach (priv->urn_lru,
+		                            (GEqualFunc) g_file_has_parent,
+		                            file);
+	}
+
 	tracker_lru_remove (priv->urn_lru, file);
 
-	/* Call the implementation to generate a SPARQL update for the removal. */
-	if (only_children) {
-		TRACKER_MINER_FS_GET_CLASS (fs)->remove_children (fs, file,
-		                                                  priv->sparql_buffer);
-	} else {
-		TRACKER_MINER_FS_GET_CLASS (fs)->remove_file (fs, file,
-		                                              priv->sparql_buffer,
-		                                              is_dir);
-	}
+	TRACKER_MINER_FS_GET_CLASS (fs)->remove_file (fs, file,
+	                                              priv->sparql_buffer,
+	                                              is_dir);
 }
 
 static void
@@ -950,14 +946,25 @@ item_move (TrackerMinerFS *fs,
 
 	if (!is_dir) {
 		/* Delete destination item from store if any */
-		item_remove (fs, dest_file, is_dir, FALSE);
+		item_remove (fs, dest_file, is_dir);
 	}
 
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
-	if (source_recursive && (!is_dir || !dest_recursive))
-		item_remove (fs, source_file, is_dir, TRUE);
+	if (source_recursive && (!is_dir || !dest_recursive)) {
+		TRACKER_NOTE (MINER_FS_EVENTS,
+		              g_message ("Removing children for item: '%s' (No longer monitored)", source_uri));
+
+		tracker_lru_remove (priv->urn_lru, source_file);
+
+		tracker_lru_remove_foreach (priv->urn_lru,
+		                            (GEqualFunc) g_file_has_parent,
+		                            source_file);
+
+		TRACKER_MINER_FS_GET_CLASS (fs)->remove_children (fs, source_file,
+		                                                  priv->sparql_buffer);
+	}
 
 	TRACKER_MINER_FS_GET_CLASS (fs)->move_file (fs, dest_file, source_file,
 	                                            priv->sparql_buffer,
@@ -1206,7 +1213,7 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		item_move (fs, file, source_file, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_DELETED:
-		item_remove (fs, file, is_dir, FALSE);
+		item_remove (fs, file, is_dir);
 		break;
 	case TRACKER_MINER_FS_EVENT_CREATED:
 		item_add_or_update (fs, file, info, FALSE, TRUE);
