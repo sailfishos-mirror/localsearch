@@ -934,7 +934,7 @@ item_move (TrackerMinerFS *fs,
 		tracker_miner_fs_get_instance_private (fs);
 	g_autofree char *uri = NULL, *source_uri = NULL;
 	TrackerDirectoryFlags source_flags, flags;
-	gboolean recursive;
+	gboolean source_recursive, dest_recursive;
 
 	uri = g_file_get_uri (dest_file);
 	source_uri = g_file_get_uri (source_file);
@@ -944,10 +944,9 @@ item_move (TrackerMinerFS *fs,
 	                         source_uri, uri));
 
 	tracker_indexing_tree_get_root (priv->indexing_tree, source_file, &source_flags);
+	source_recursive = (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, &flags);
-	recursive = ((source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
-	             (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0 &&
-	             is_dir);
+	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
 	if (!is_dir) {
 		/* Delete destination item from store if any */
@@ -957,13 +956,13 @@ item_move (TrackerMinerFS *fs,
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
-	if (!recursive &&
-	    (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0)
+	if (source_recursive && (!is_dir || !dest_recursive))
 		item_remove (fs, source_file, is_dir, TRUE);
 
 	TRACKER_MINER_FS_GET_CLASS (fs)->move_file (fs, dest_file, source_file,
 	                                            priv->sparql_buffer,
-	                                            recursive);
+	                                            (is_dir && source_recursive &&
+	                                             dest_recursive));
 }
 
 static void
