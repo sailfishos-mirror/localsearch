@@ -944,11 +944,6 @@ item_move (TrackerMinerFS *fs,
 	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, &flags);
 	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
-	if (!is_dir) {
-		/* Delete destination item from store if any */
-		item_remove (fs, dest_file, is_dir);
-	}
-
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
