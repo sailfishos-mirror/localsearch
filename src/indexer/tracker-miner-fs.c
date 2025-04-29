@@ -1393,17 +1393,6 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		tracker_miner_fs_get_instance_private (fs);
 	QueueEvent *old = NULL;
 
-	if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
-		/* Remove all children of the dest location from being processed. */
-		g_hash_table_foreach_remove (priv->items_by_file,
-		                             remove_items_by_file_foreach,
-		                             event->dest_file);
-		tracker_priority_queue_foreach_remove (priv->items,
-						       (GEqualFunc) queue_event_is_equal_or_descendant,
-						       event->dest_file,
-						       (GDestroyNotify) queue_event_free);
-	}
-
 	old = g_hash_table_lookup (priv->items_by_file, event->file);
 
 	if (old) {
@@ -1449,8 +1438,23 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		assign_root_node (fs, event);
 		event->queue_node =
 			tracker_priority_queue_add (priv->items, event, priority);
-		g_hash_table_replace (priv->items_by_file,
-		                      g_object_ref (event->file), event);
+
+		if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
+			if (event->is_dir) {
+				g_hash_table_foreach_remove (priv->items_by_file,
+				                             remove_items_by_file_foreach,
+				                             event->dest_file);
+			} else {
+				g_hash_table_remove (priv->items_by_file, event->dest_file);
+			}
+
+			g_hash_table_remove (priv->items_by_file, event->file);
+		} else {
+			g_hash_table_replace (priv->items_by_file,
+			                      g_object_ref (event->file),
+			                      event);
+		}
+
 		queue_handler_maybe_set_up (fs);
 		check_notifier_high_water (fs);
 	}
