@@ -879,6 +879,10 @@ item_add_or_update (TrackerMinerFS *fs,
 			return;
 	}
 
+	if (!create) {
+		tracker_lru_remove (priv->urn_lru, file);
+	}
+
 	uri = g_file_get_uri (file);
 
 	if (!attributes_update) {
