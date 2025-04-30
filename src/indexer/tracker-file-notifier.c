@@ -1453,7 +1453,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 
 				/* Source file was not stored, check dest file as new */
 				if (!is_directory || !dest_is_recursive) {
-					g_signal_emit (notifier, signals[FILE_CREATED], 0, other_file, NULL);
+					g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, NULL);
 				} else if (is_directory) {
 					/* Crawl dest directory */
 					notifier_queue_root (notifier, other_file, flags, FALSE);
@@ -1493,6 +1493,10 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 					/* crawl the folder */
 					notifier_queue_root (notifier, other_file, flags, TRUE);
 				}
+			} else {
+				/* This is possibly a file replace operation, delete
+				 * pre-existing file if any. */
+				g_signal_emit (notifier, signals[FILE_DELETED], 0, other_file, is_directory);
 			}
 
 			g_signal_emit (notifier, signals[FILE_MOVED], 0, file, other_file, is_directory);

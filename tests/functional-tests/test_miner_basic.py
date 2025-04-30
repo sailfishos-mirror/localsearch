@@ -591,6 +591,96 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         self.assertResourceMissing(document_uri)
         self.assertResourceExists(dest_uri)
 
+    def test_17_move_and_replace(self):
+        """
+        Move a file on top of another, and have another file replace the first
+        """
+        source = self.path("test-monitored/file1.txt");
+        source_urn = self.__get_file_urn(source)
+        dest = self.path("test-monitored/dir1/file2.txt");
+        dest_urn = self.__get_file_urn(dest)
+
+        source_id = self.tracker.get_content_resource_id(self.uri(source))
+
+        # Move file overwriting another
+        with self.await_document_uri_change(source_id, source, dest):
+            shutil.move(source, dest)
+
+        result = self.__get_text_documents()
+        self.assertEqual(len(result), 2)
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/dir1/file2.txt"), unpacked_result)
+
+        # Ensure the file replaced by source changed and matches
+        new_dest_urn = self.__get_file_urn(dest)
+        self.assertNotEqual(dest_urn, new_dest_urn)
+        self.assertEqual(source_urn, new_dest_urn)
+
+        # Write a new document in the former position
+        with self.await_document_inserted(source) as resource:
+            with open(source, "w") as f:
+                f.write("Replacement")
+
+        # Ensure the file created at source location is different
+        new_source_urn = self.__get_file_urn(source)
+        self.assertNotEqual(source_urn, new_source_urn)
+
+    def test_18_move_and_replace_dir(self):
+        """
+        Move a directory, and create another directory replacing the first
+        """
+        source = self.path("test-monitored/dir1");
+        source_urn = self.__get_file_urn(source)
+        dest = self.path("test-monitored/moved");
+
+        with self.await_insert_dir(dest):
+            shutil.move(source, dest)
+
+        with self.await_insert_dir(source):
+            os.mkdir(source)
+
+        new_source_urn = self.__get_file_urn(source)
+        dest_urn = self.__get_file_urn(dest)
+
+        self.assertEqual(dest_urn, source_urn)
+        self.assertNotEqual(new_source_urn, source_urn)
+
+    def test_19_move_and_replace_from_hidden(self):
+        """
+        Create a hidden file, and make it visible. Then repeat.
+        """
+
+        old_text = "I am old!"
+        new_text = "I am new!"
+
+        source = self.path("test-monitored/.hidden.txt");
+        dest = self.path("test-monitored/nothidden.txt");
+
+        with open(source, "w") as f:
+            f.write(old_text)
+        with self.await_document_inserted(dest):
+            shutil.move(source, dest)
+
+        urn = self.__get_file_urn(dest)
+
+        with open(source, "w") as f:
+            f.write(new_text)
+
+        resource_id = self.tracker.get_content_resource_id(self.uri(dest))
+
+        with self.tracker.await_content_update(
+            fixtures.DOCUMENTS_GRAPH,
+            resource_id,
+            f'nie:plainTextContent "{old_text}"',
+            f'nie:plainTextContent "{new_text}"',
+            timeout=cfg.AWAIT_TIMEOUT,
+        ):
+            shutil.move(source, dest)
+
+        new_urn = self.__get_file_urn(dest)
+        self.assertNotEqual(urn, new_urn)
+
+
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
     Tests handling of data across multiple data sources
@@ -665,7 +755,7 @@ class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
     def test_01_move_between_indexed_folders(self):
         """
-        The precreated files and folders should be there
+        Move a file between indexed folders and check the data source changed
         """
         result = self.__get_text_documents()
         self.assertEqual(len(result), 3)
