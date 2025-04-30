@@ -645,6 +645,41 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         self.assertEqual(dest_urn, source_urn)
         self.assertNotEqual(new_source_urn, source_urn)
 
+    def test_19_move_and_replace_from_hidden(self):
+        """
+        Create a hidden file, and make it visible. Then repeat.
+        """
+
+        old_text = "I am old!"
+        new_text = "I am new!"
+
+        source = self.path("test-monitored/.hidden.txt");
+        dest = self.path("test-monitored/nothidden.txt");
+
+        with open(source, "w") as f:
+            f.write(old_text)
+        with self.await_document_inserted(dest):
+            shutil.move(source, dest)
+
+        urn = self.__get_file_urn(dest)
+
+        with open(source, "w") as f:
+            f.write(new_text)
+
+        resource_id = self.tracker.get_content_resource_id(self.uri(dest))
+
+        with self.tracker.await_content_update(
+            fixtures.DOCUMENTS_GRAPH,
+            resource_id,
+            f'nie:plainTextContent "{old_text}"',
+            f'nie:plainTextContent "{new_text}"',
+            timeout=cfg.AWAIT_TIMEOUT,
+        ):
+            shutil.move(source, dest)
+
+        new_urn = self.__get_file_urn(dest)
+        self.assertNotEqual(urn, new_urn)
+
 
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
