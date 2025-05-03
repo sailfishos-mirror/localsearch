@@ -220,7 +220,7 @@ tracker_miner_class_init (TrackerMinerClass *klass)
 
 	props[PROP_STATUS] =
 		g_param_spec_string ("status", NULL, NULL,
-		                     "Idle",
+		                     NULL,
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT |
 		                     G_PARAM_STATIC_STRINGS);
