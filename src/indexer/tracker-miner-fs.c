@@ -634,12 +634,6 @@ process_stop (TrackerMinerFS *fs)
 
 	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
 
-	g_object_set (fs,
-	              "progress", 1.0,
-	              "status", "Idle",
-	              "remaining-time", 0,
-	              NULL);
-
 	g_signal_emit (fs, signals[FINISHED], 0);
 }
 
