@@ -292,15 +292,6 @@ class MinerStatusWatch():
 
         self._sandbox = sandbox
 
-        # Stores a list of (time, status) pairs. This is used to determine
-        # if the miner has been idle continuously over a time peroid.
-        self._status_log = collections.deque()
-
-    def _log_status(self, time, status):
-        self._status_log.append((time, status))
-        if len(self._status_log) > 100:
-            self._status_log.popleft()
-
     def setup(self):
         log.debug(f"Set up status watch on {self.dbus_name}")
         self._proxy = Gio.DBusProxy.new_sync(
@@ -315,34 +306,17 @@ class MinerStatusWatch():
         # This call will raise GDBus.Error:org.freedesktop.DBus.Error.ServiceUnknown
         # if the miner name is invalid.
         status = self._proxy.GetStatus()
-        self._log_status(time.time(), status)
         log.debug(f"{self.dbus_name}: Current status: {status}")
 
-    def check_was_idle_for_time_period(self, period_seconds):
-        now = time.time()
-
-        status = self._proxy.GetStatus()
-        self._log_status(now, status)
-        log.debug(f"{self.dbus_name}: Current status: {status}")
-
-        cursor = len(self._status_log) - 1
-        previous_delta_from_now = 0
-        while True:
-            if cursor < 0 or self._status_log[cursor][1] != 'Idle':
-                if previous_delta_from_now >= period_seconds:
-                    return True
-                else:
-                    return False
-            previous_delta_from_now = (now - self._status_log[cursor][0])
-            cursor -= 1
+    def check_is_idle(self):
+        return self._proxy.GetStatus() == 'Idle'
 
 
 def wait_for_miners(watches):
     # We wait 1 second after "Idle" status is seen before exiting, because the
     # extractor goes to/from Idle frequently.
-    wait_for_idle_time = 1
     while True:
-        status = [watch.check_was_idle_for_time_period(wait_for_idle_time) for watch in watches.values()]
+        status = [watch.check_is_idle() for watch in watches.values()]
         if all(status):
             break
         else:
