@@ -729,6 +729,7 @@ query_root_info_cb (GObject      *object,
 	notifier = root->notifier;
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
+	root->files_found++;
 	handle_file_from_filesystem (root, G_FILE (object), info);
 
 	g_file_enumerate_children_async (G_FILE (object),
