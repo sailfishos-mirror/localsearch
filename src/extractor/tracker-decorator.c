@@ -940,7 +940,7 @@ tracker_decorator_constructed (GObject *object)
 	decorator->update_hash = load_statement (decorator, "update-hash.rq");
 	decorator->delete_file = load_statement (decorator, "delete-file.rq");
 
-	decorator_update_state (decorator, "Idle", FALSE);
+	decorator_update_state (decorator, "Extracting metadata", FALSE);
 }
 
 static void
