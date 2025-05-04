@@ -927,7 +927,6 @@ main (gint argc, gchar *argv[])
 	                                       indexing_tree,
 	                                       storage,
 	                                       config,
-	                                       domain_ontology,
 	                                       initial_index);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);

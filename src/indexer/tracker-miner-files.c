@@ -68,8 +68,6 @@ struct _TrackerMinerFilesPrivate {
 	TrackerExtractWatchdog *extract_watchdog;
 	guint grace_period_timeout_id;
 
-	TrackerDomainOntology *domain_ontology;
-
 	GSettings *extract_settings;
 	GList *allowed_text_patterns;
 
@@ -91,7 +89,6 @@ struct _TrackerMinerFilesPrivate {
 enum {
 	PROP_0,
 	PROP_CONFIG,
-	PROP_DOMAIN_ONTOLOGY,
 	PROP_STORAGE,
 	PROP_INITIAL_INDEX,
 };
@@ -214,12 +211,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                      "Config",
 	                                                      TRACKER_TYPE_CONFIG,
 	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_DOMAIN_ONTOLOGY,
-	                                 g_param_spec_boxed ("domain-ontology",
-	                                                     NULL, NULL,
-	                                                     TRACKER_TYPE_DOMAIN_ONTOLOGY,
-	                                                     G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_STORAGE,
 	                                 g_param_spec_object ("storage",
@@ -346,9 +337,6 @@ miner_files_set_property (GObject      *object,
 	case PROP_CONFIG:
 		priv->config = g_value_dup_object (value);
 		break;
-	case PROP_DOMAIN_ONTOLOGY:
-		priv->domain_ontology = g_value_dup_boxed (value);
-		break;
 	case PROP_STORAGE:
 		priv->storage = g_value_dup_object (value);
 		break;
@@ -374,9 +362,6 @@ miner_files_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_CONFIG:
 		g_value_set_object (value, priv->config);
-		break;
-	case PROP_DOMAIN_ONTOLOGY:
-		g_value_set_boxed (value, priv->domain_ontology);
 		break;
 	case PROP_STORAGE:
 		g_value_set_object (value, priv->storage);
@@ -428,7 +413,6 @@ miner_files_finalize (GObject *object)
 	}
 #endif /* HAVE_POWER */
 
-	tracker_domain_ontology_unref (priv->domain_ontology);
 	g_clear_pointer (&priv->udev_client, g_object_unref);
 
 	if (priv->storage) {
@@ -1136,7 +1120,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
                          TrackerStorage           *storage,
                          TrackerConfig            *config,
-                         TrackerDomainOntology    *domain_ontology,
                          gboolean                  initial_index)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
@@ -1147,7 +1130,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "indexing-tree", indexing_tree,
 	                     "storage", storage,
 	                     "config", config,
-	                     "domain-ontology", domain_ontology,
 	                     "file-attributes", FILE_ATTRIBUTES,
 	                     "initial-index", initial_index,
 	                     NULL);
