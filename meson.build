@@ -279,19 +279,17 @@ conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
 conf.set('HAVE_GUPNP_DLNA', gupnp_dlna.found())
 conf.set('HAVE_FANOTIFY', have_fanotify)
 conf.set('HAVE_BTRFS_IOCTL', have_btrfs_ioctl)
-conf.set('DOMAIN_PREFIX', get_option('domain_prefix'))
+conf.set_quoted('DOMAIN_PREFIX', get_option('domain_prefix'))
+
 if get_option('domain_prefix') != 'org.freedesktop'
-  rule_file = get_option('domain_prefix') + '.domain.rule'
-  domain_rule_path = get_option('prefix') / get_option('datadir') / 'tracker@0@'.format(tracker_api_major) / 'domain-ontologies' / rule_file
-  conf.set('DOMAIN_ONTOLOGY_OPTIONS', '--domain-ontology ' + domain_rule_path)
-  conf.set('MINER_FILES_INITIAL_SLEEP', '--initial-sleep 0')
   if get_option('miner_fs_cache_location') == ''
-    conf.set('MINER_FS_CACHE_LOCATION', '$XDG_CACHE_HOME/' + get_option('domain_prefix') + '/miner/files')
+    conf.set_quoted('MINER_FS_CACHE_LOCATION', get_option('domain_prefix') + '/miner/files')
   else
-    conf.set('MINER_FS_CACHE_LOCATION', get_option('miner_fs_cache_location'))
+    conf.set_quoted('MINER_FS_CACHE_LOCATION', get_option('miner_fs_cache_location'))
   endif
+  conf.set('MINER_FILES_INITIAL_SLEEP', '--initial-sleep 0')
 else
-  conf.set('DOMAIN_ONTOLOGY_OPTIONS', '')
+  conf.set_quoted('MINER_FS_CACHE_LOCATION', 'tracker3')
   conf.set('MINER_FILES_INITIAL_SLEEP', '')
 endif
 

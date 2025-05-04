@@ -72,7 +72,6 @@ static gchar *eligible;
 static gboolean version;
 static guint miners_timeout_id = 0;
 static gboolean do_crawling = FALSE;
-static gchar *domain_ontology_name = NULL;
 static gboolean dry_run = FALSE;
 
 static gboolean slept = TRUE;
@@ -93,10 +92,6 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_FILENAME, &eligible,
 	  N_("Checks if FILE is eligible for being mined based on configuration"),
 	  N_("FILE") },
-	{ "domain-ontology", 'd', 0,
-	  G_OPTION_ARG_STRING, &domain_ontology_name,
-	  N_("Runs for a specific domain ontology"),
-	  NULL },
 	{ "dry-run", 'r', 0,
 	  G_OPTION_ARG_NONE, &dry_run,
 	  N_("Avoids changes in the filesystem"),
@@ -148,24 +143,31 @@ log_option_values (TrackerConfig *config)
 }
 
 static GFile *
-get_cache_dir (TrackerDomainOntology *domain_ontology)
+get_cache_dir (void)
 {
 	GFile *cache;
 
-	cache = tracker_domain_ontology_get_cache (domain_ontology);
-	return g_file_get_child (cache, "files");
+	if (MINER_FS_CACHE_LOCATION[0] == G_DIR_SEPARATOR) {
+		cache = g_file_new_for_path (MINER_FS_CACHE_LOCATION);
+	} else {
+		g_autofree char *cache_dir = NULL;
+
+		cache_dir = g_build_path (g_get_user_cache_dir (),
+		                          MINER_FS_CACHE_LOCATION,
+		                          "files", NULL);
+		cache = g_file_new_for_path (cache_dir);
+	}
+
+	return cache;
 }
 
 static gchar *
 get_last_crawl_filename (TrackerMinerFiles *mf)
 {
 	g_autoptr (GFile) file = NULL, child = NULL;
-	TrackerDomainOntology *domain_ontology;
 
-	g_object_get (G_OBJECT (mf), "domain-ontology", &domain_ontology, NULL);
-	file = get_cache_dir (domain_ontology);
+	file = get_cache_dir ();
 	child = g_file_get_child (file, LAST_CRAWL_FILENAME);
-	tracker_domain_ontology_unref (domain_ontology);
 
 	return g_file_get_path (child);
 }
@@ -735,15 +737,14 @@ finish_endpoint_thread (void)
 }
 
 static TrackerSparqlConnection *
-setup_connection (TrackerDomainOntology  *domain,
-                  GError                **error)
+setup_connection (GError **error)
 {
 	TrackerSparqlConnection *sparql_conn;
 	g_autoptr (GFile) store = NULL, ontology = NULL;
 	GError *internal_error = NULL;
 
 	if (!dry_run)
-		store = get_cache_dir (domain);
+		store = get_cache_dir ();
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
 	sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
@@ -794,12 +795,10 @@ main (gint argc, gchar *argv[])
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
 	TrackerStorage *storage;
-	TrackerDomainOntology *domain_ontology;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	GMemoryMonitor *memory_monitor;
 #endif
-	gchar *domain_name;
 	g_autofree char *dbus_name = NULL, *legacy_dbus_name = NULL;
 	TrackerFilesInterface *files_interface;
 	gboolean initial_index = TRUE;
@@ -850,14 +849,6 @@ main (gint argc, gchar *argv[])
 		return check_eligible (indexing_tree, storage);
 	}
 
-	domain_ontology = tracker_domain_ontology_new (domain_ontology_name, NULL, &error);
-	if (error) {
-		g_critical ("Could not load domain ontology '%s': %s",
-		            domain_ontology_name, error->message);
-		g_error_free (error);
-		return EXIT_FAILURE;
-	}
-
 	connection = g_bus_get_sync (TRACKER_IPC_BUS, NULL, &error);
 	if (error) {
 		g_critical ("Could not create DBus connection: %s\n",
@@ -880,31 +871,29 @@ main (gint argc, gchar *argv[])
 
 	if (no_daemon) {
 		g_debug ("tracker-miner-fs-3 running in --no-daemon mode.");
-	} else if (domain_ontology_name) {
-		domain_name = tracker_domain_ontology_get_domain (domain_ontology, NULL);
-
-		g_debug ("tracker-miner-fs-3 running in --domain-ontology mode as "
-		         "%s." DBUS_NAME_SUFFIX ". The service will exit when %s "
-		         "disappears from the bus.", domain_name, domain_name);
-
-		g_bus_watch_name_on_connection (connection, domain_name,
-		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
-		                                NULL, on_domain_vanished,
-		                                main_loop, NULL);
-		g_free (domain_name);
 	} else {
-		g_debug ("tracker-miner-fs-3 running as org.freedesktop." DBUS_NAME_SUFFIX);
+		g_debug ("tracker-miner-fs-3 running as " DOMAIN_PREFIX "." DBUS_NAME_SUFFIX);
+
+		if (g_strcmp0 (DOMAIN_PREFIX, "org.freedesktop") != 0) {
+			g_debug ("tracker-miner-fs-3 running for domain " DOMAIN_PREFIX ". "
+			         "The service will exit when " DOMAIN_PREFIX " disappears from the bus.");
+
+			g_bus_watch_name_on_connection (connection, DOMAIN_PREFIX,
+			                                G_BUS_NAME_WATCHER_FLAGS_NONE,
+			                                NULL, on_domain_vanished,
+			                                main_loop, NULL);
+		}
 	}
 
 	if (!dry_run) {
-		GFile *store = get_cache_dir (domain_ontology);
+		GFile *store = get_cache_dir ();
 
 		initial_index = !g_file_query_exists (store, NULL);
 		tracker_error_report_init (store);
 		g_object_unref (store);
 	}
 
-	sparql_conn = setup_connection (domain_ontology, &error);
+	sparql_conn = setup_connection (&error);
 	if (!sparql_conn) {
 
 		g_critical ("Could not create store: %s",
@@ -941,7 +930,7 @@ main (gint argc, gchar *argv[])
 	}
 
 	/* Request DBus names */
-	dbus_name = tracker_domain_ontology_get_domain (domain_ontology, DBUS_NAME_SUFFIX);
+	dbus_name = g_strconcat (DOMAIN_PREFIX, ".", DBUS_NAME_SUFFIX, NULL);
 
 	if (!tracker_dbus_request_name (connection, dbus_name, &error)) {
 		g_critical ("Could not request DBus name '%s': %s",
@@ -950,7 +939,7 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
-	legacy_dbus_name = tracker_domain_ontology_get_domain (domain_ontology, LEGACY_DBUS_NAME_SUFFIX);
+	legacy_dbus_name = g_strconcat (DOMAIN_PREFIX, ".", LEGACY_DBUS_NAME_SUFFIX, NULL);
 
 	if (!tracker_dbus_request_name (connection, legacy_dbus_name, &error)) {
 		g_critical ("Could not request legacy DBus name '%s': %s",
@@ -1015,7 +1004,6 @@ main (gint argc, gchar *argv[])
 
 	g_object_unref (proxy);
 	g_object_unref (connection);
-	tracker_domain_ontology_unref (domain_ontology);
 
 	tracker_sparql_connection_close (sparql_conn);
 	g_object_unref (sparql_conn);

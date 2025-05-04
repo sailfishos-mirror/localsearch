@@ -71,8 +71,6 @@ struct TrackerMinerManagerPrivate {
 
 	/* Property values */
 	gboolean auto_start;
-	gchar *domain_ontology_name;
-	TrackerDomainOntology *domain_ontology;
 };
 
 typedef struct {
@@ -101,7 +99,6 @@ G_DEFINE_TYPE_WITH_CODE (TrackerMinerManager, tracker_miner_manager, G_TYPE_OBJE
 enum {
 	PROP_0,
 	PROP_AUTO_START,
-	PROP_DOMAIN_ONTOLOGY
 };
 
 enum {
@@ -131,13 +128,6 @@ tracker_miner_manager_class_init (TrackerMinerManagerClass *klass)
 	                                                      "If set, auto starts miners when querying their status",
 	                                                       TRUE,
 	                                                       G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
-	g_object_class_install_property (object_class,
-	                                 PROP_DOMAIN_ONTOLOGY,
-	                                 g_param_spec_string ("domain-ontology",
-	                                                      "Domain ontology",
-	                                                      "The domain ontology this object controls",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 
 	/**
 	 * TrackerMinerManager::miner-progress:
@@ -260,9 +250,6 @@ miner_manager_set_property (GObject      *object,
 	case PROP_AUTO_START:
 		priv->auto_start = g_value_get_boolean (value);
 		break;
-	case PROP_DOMAIN_ONTOLOGY:
-		priv->domain_ontology_name = g_value_dup_string (value);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -284,9 +271,6 @@ miner_manager_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_AUTO_START:
 		g_value_set_boolean (value, priv->auto_start);
-		break;
-	case PROP_DOMAIN_ONTOLOGY:
-		g_value_set_string (value, priv->domain_ontology_name);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -432,13 +416,6 @@ miner_manager_initable_init (GInitable     *initable,
 		return FALSE;
 	}
 
-	priv->domain_ontology = tracker_domain_ontology_new (priv->domain_ontology_name,
-	                                                     cancellable, &inner_error);
-	if (!priv->domain_ontology) {
-		g_propagate_error (error, inner_error);
-		return FALSE;
-	}
-
 	initialize_miners_data (manager);
 
 	for (m = priv->miners; m; m = m->next) {
@@ -576,8 +553,6 @@ miner_manager_finalize (GObject *object)
 	g_list_foreach (priv->miners, (GFunc) miner_data_free, NULL);
 	g_list_free (priv->miners);
 	g_hash_table_unref (priv->miner_proxies);
-	g_free (priv->domain_ontology_name);
-	g_clear_pointer (&priv->domain_ontology, tracker_domain_ontology_unref);
 
 	G_OBJECT_CLASS (tracker_miner_manager_parent_class)->finalize (object);
 }
@@ -693,7 +668,7 @@ tracker_miner_manager_get_running (TrackerMinerManager *manager)
 		return NULL;
 	}
 
-	prefix = tracker_domain_ontology_get_domain (priv->domain_ontology, "Tracker3.Miner");
+	prefix = g_strconcat (DOMAIN_PREFIX, ".Tracker3.Miner", NULL);
 
 	g_variant_get (v, "(as)", &iter);
 	while (g_variant_iter_loop (iter, "&s", &str)) {
@@ -767,24 +742,14 @@ check_file (GFile    *file,
 		return;
 	}
 
-	if (!tracker_domain_ontology_uses_miner (priv->domain_ontology, name_suffix)) {
-		/* Silently ignore, this domain ontology is not meant to use this miner */
-		g_key_file_free (key_file);
-		g_free (dbus_path);
-		g_free (display_name);
-		g_free (name_suffix);
-		return;
-	}
-
 	description = g_key_file_get_locale_string (key_file, DESKTOP_ENTRY_GROUP, DESCRIPTION_KEY, NULL, NULL);
 
 	data = g_slice_new0 (MinerData);
 	data->dbus_path = dbus_path;
 	data->name_suffix = name_suffix;
 
-	full_name_suffix = g_strconcat ("Tracker3.", name_suffix, NULL);
-	data->dbus_name = tracker_domain_ontology_get_domain (priv->domain_ontology,
-	                                                      full_name_suffix);
+	full_name_suffix = g_strconcat (".Tracker3.", name_suffix, NULL);
+	data->dbus_name = g_strconcat (DOMAIN_PREFIX, full_name_suffix, NULL);
 	g_free (full_name_suffix);
 
 	data->display_name = display_name;
