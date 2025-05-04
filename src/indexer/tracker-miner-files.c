@@ -801,12 +801,14 @@ miner_finished_cb (TrackerMinerFS *fs,
 static GFile *
 get_cache_dir (TrackerMinerFiles *mf)
 {
+	TrackerSparqlConnection *conn;
 	GFile *cache;
 
-	cache = tracker_domain_ontology_get_cache (mf->private->domain_ontology);
-	return g_file_get_child (cache, "files");
-}
+	conn = tracker_miner_get_connection (TRACKER_MINER (mf));
+	g_object_get (conn, "store-location", &cache, NULL);
 
+	return cache;
+}
 
 static gboolean
 disk_space_check (TrackerMinerFiles *mf)
