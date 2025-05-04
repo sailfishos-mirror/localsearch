@@ -1085,7 +1085,6 @@ miner_files_constructed (GObject *object)
 {
 	TrackerMinerFiles *mf = TRACKER_MINER_FILES (object);;
 	TrackerIndexingTree *indexing_tree;
-	g_autofree gchar *domain_name = NULL;
 
 	G_OBJECT_CLASS (tracker_miner_files_parent_class)->constructed (object);
 
@@ -1117,7 +1116,6 @@ miner_files_constructed (GObject *object)
 
 	disk_space_check_start (mf);
 
-	domain_name = tracker_domain_ontology_get_domain (mf->private->domain_ontology, NULL);
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),
 		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)),
