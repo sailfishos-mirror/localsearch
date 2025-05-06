@@ -28,7 +28,6 @@
 
 #include "tracker-dbus.h"
 #include "tracker-debug.h"
-#include "tracker-domain-ontology.h"
 #include "tracker-enums.h"
 #include "tracker-error-report.h"
 #include "tracker-extract-info.h"

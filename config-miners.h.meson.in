@@ -97,3 +97,7 @@
 
 /* Unzip ps.gz files */
 #mesondefine USING_UNZIPPSFILES
+
+#mesondefine DOMAIN_PREFIX
+
+#mesondefine MINER_FS_CACHE_LOCATION
