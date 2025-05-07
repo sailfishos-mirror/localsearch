@@ -52,7 +52,6 @@ static gboolean music_files;
 static gboolean image_files;
 static gboolean video_files;
 static gboolean document_files;
-static gboolean feeds;
 static gboolean software;
 static gboolean software_categories;
 
@@ -61,7 +60,6 @@ static const char *help_summary =
 
 #define SEARCH_OPTIONS_ENABLED() \
 	(music_albums || music_artists || music_files || \
-	 feeds || \
 	 software || \
 	 software_categories || \
 	 image_files || \
@@ -113,10 +111,6 @@ static GOptionEntry entries_resource_type[] = {
 	  N_("Search for software categories (--all has no effect on this)"),
 	  NULL
 	},
-	{ "feeds", 0, 0, G_OPTION_ARG_NONE, &feeds,
-	  N_("Search for feeds (--all has no effect on this)"),
-	  NULL
-	},
 	{ NULL }
 };
 
@@ -135,7 +129,7 @@ static GOptionEntry entries[] = {
 	  NULL
 	},
 	{ "detailed", 'd', 0, G_OPTION_ARG_NONE, &detailed,
-	  N_("Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --software, --software-categories)"),
+	  N_("Show URNs for results (does not apply to --music-albums, --music-artists, --software, --software-categories)"),
 	  NULL
 	},
 	{ "all", 'a', 0, G_OPTION_ARG_NONE, &all,
@@ -776,91 +770,6 @@ get_music_albums (TrackerSparqlConnection *connection,
 }
 
 static gboolean
-get_feeds (TrackerSparqlConnection *connection,
-           GStrv                    search_terms,
-           gint                     search_offset,
-           gint                     search_limit,
-           gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?feed nie:title(?feed) "
-		                         "WHERE {"
-		                         "  ?feed a mfo:FeedMessage ;"
-		                         "  fts:match \"%s\" . "
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?feed)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?feed nie:title(?feed) "
-		                         "WHERE {"
-		                         "  ?feed a mfo:FeedMessage ."
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?feed)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No feeds were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Feeds"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
 get_software (TrackerSparqlConnection *connection,
               GStrv                    search_terms,
               gint                     search_offset,
@@ -1427,16 +1336,6 @@ search_run (void)
 		gboolean success;
 
 		success = get_music_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (feeds) {
-		gboolean success;
-
-		success = get_feeds (connection, terms, offset, limit, or_operator);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 

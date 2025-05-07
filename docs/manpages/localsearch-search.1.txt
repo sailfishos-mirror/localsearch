@@ -50,9 +50,6 @@ Only resources which currently exist will be returned by this command
   Search for software categories matching _search-terms_.
   Returns a list of urns and their categories (e.g. Settings, Video,
   Utility, etc).
-*--feeds*::
-  Search through RSS feed information matching _search-terms_.
-  Returns a list of those found.
 
 == OPTIONS
 
@@ -71,7 +68,7 @@ Only resources which currently exist will be returned by this command
   removable media is not mounted for example. Without this option,
   resources are only shown if they exist. This option applies to all
   resource types except for `--music-artists`, `--software`,
-  `--software-categories` and `--feeds`.
+  and `--software-categories`.
 *--disable-snippets*::
   Results are shown with snippets. Snippets are context around the word
   that was searched for in the first place. This gives some idea of if
