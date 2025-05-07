@@ -39,7 +39,7 @@ static gchar **filenames;
 
 static GOptionEntry entries[] = {
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format,
-	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
+	  N_("Output results format: “turtle”, “trig” or “json-ld”"),
 	  N_("FORMAT") },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
@@ -70,7 +70,7 @@ extract_files (char *output_format)
 	tracker_term_pipe_to_pager ();
 
 	if (inside_build_tree) {
-		/* Developer convienence - use uninstalled version if running from build tree */
+		/* Developer convenience - use uninstalled version if running from build tree */
 		tracker_extract_path = g_build_filename(BUILDROOT, "src", "extractor", "localsearch-extractor-3", NULL);
 	} else {
 		tracker_extract_path = g_build_filename(LIBEXECDIR, "localsearch-extractor-3", NULL);
