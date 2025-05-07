@@ -56,7 +56,6 @@ static gboolean plain_text_content;
 static gboolean resource_is_iri;
 static gboolean turtle;
 static gboolean eligible;
-static gchar *url_property;
 
 static gboolean output_is_tty;
 
@@ -83,12 +82,8 @@ static GOptionEntry entries[] = {
 	  N_("Output results as RDF in Turtle format"),
 	  NULL,
 	},
-	{ "url", 'u', 0, G_OPTION_ARG_STRING, &url_property,
-	  N_("RDF property to treat as URL (eg. “nie:url”)"),
-	  NULL,
-	},
 	{ "eligible", 'e', 0, G_OPTION_ARG_NONE, &eligible,
-	  N_("Checks if FILE is eligible for being mined based on configuration"),
+	  N_("Checks if FILE is eligible for being indexed"),
 	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
@@ -443,35 +438,6 @@ info_run (void)
 			file = g_file_new_for_commandline_arg (*p);
 			uri = g_file_get_uri (file);
 			g_object_unref (file);
-		}
-
-		if (url_property) {
-			g_autoptr (TrackerSparqlStatement) stmt = NULL;
-			g_autoptr (TrackerSparqlCursor) cursor = NULL;
-
-			/* First check whether there's some entity with nie:url like this */
-			query = g_strdup_printf ("SELECT ?urn { ?urn %s ~value }", url_property);
-			stmt = tracker_sparql_connection_query_statement (connection, query,
-			                                                  NULL, &error);
-
-			if (stmt) {
-				tracker_sparql_statement_bind_string (stmt, "prop", url_property);
-				tracker_sparql_statement_bind_string (stmt, "value", uri);
-				cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
-			}
-
-			if (cursor && tracker_sparql_cursor_next (cursor, NULL, &error)) {
-				g_clear_pointer (&uri, g_free);
-				uri = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			}
-
-			if (error) {
-				g_printerr ("  %s, %s\n",
-				            _("Unable to retrieve URN for URI"),
-				            error->message);
-				g_clear_error (&error);
-				continue;
-			}
 		}
 
 		stmt = tracker_sparql_connection_query_statement (connection,
