@@ -35,15 +35,11 @@
 #include "tracker-color.h"
 #include "tracker-miner-manager.h"
 
-static gboolean files = FALSE;
+static gboolean filesystem = FALSE;
 static gchar *filename = NULL;
 
-#define RESET_OPTIONS_ENABLED() \
-	(files || \
-	 filename)
-
 static GOptionEntry entries[] = {
-	{ "filesystem", 's', 0, G_OPTION_ARG_NONE, &files,
+	{ "filesystem", 's', 0, G_OPTION_ARG_NONE, &filesystem,
 	  N_("Remove filesystem indexer database"),
 	  NULL },
 	{ "file", 'f', 0, G_OPTION_ARG_FILENAME, &filename,
@@ -172,65 +168,13 @@ delete_location (GFile *dir)
 	}
 }
 
-static gint
-reset_run (void)
+static void
+delete_path (const char *path)
 {
-	if (filename) {
-		GFile *file;
-		gint retval;
+	g_autoptr (GFile) file = NULL;
 
-		file = g_file_new_for_commandline_arg (filename);
-		retval = delete_info_recursively (file);
-		g_object_unref (file);
-		return retval;
-	}
-
-	/* KILL processes first... */
-	if (files) {
-		/* FIXME: we might selectively kill affected miners */
-		tracker_process_stop (SIGKILL);
-	}
-
-	if (files) {
-		GFile *location;
-		gchar *dir;
-
-		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
-		location = g_file_new_for_path (dir);
-		delete_location (location);
-		g_object_unref (location);
-		g_free (dir);
-
-		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
-		location = g_file_new_for_path (dir);
-		delete_location (location);
-		g_object_unref (location);
-		g_free (dir);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-static int
-reset_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, FALSE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
-static gboolean
-reset_options_enabled (void)
-{
-	return RESET_OPTIONS_ENABLED ();
+	file = g_file_new_for_path (path);
+	delete_location (file);
 }
 
 int
@@ -239,6 +183,7 @@ tracker_reset (int          argc,
 {
 	GOptionContext *context;
 	GError *error = NULL;
+	g_autofree char *cache_dir = NULL, *errors_dir = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -260,9 +205,39 @@ tracker_reset (int          argc,
 
 	g_option_context_free (context);
 
-	if (reset_options_enabled ()) {
-		return reset_run ();
+	if (filename) {
+		GFile *file;
+		gint retval;
+
+		file = g_file_new_for_commandline_arg (filename);
+		retval = delete_info_recursively (file);
+		g_object_unref (file);
+		return retval;
 	}
 
-	return reset_run_default ();
+	if (!filesystem && tracker_term_is_tty ()) {
+		char response[100] = { 0, };
+
+		g_print ("%s ", _("The LocalSearch indexed data is about to be deleted, proceed? [y/N]"));
+		fgets (response, 100, stdin);
+		response[strlen (response) - 1] = '\0';
+
+		/* TRANSLATORS: this is our test for a [y|N] question in the command line.
+		 * A partial or full match will be considered an affirmative answer,
+		 * it is intentionally lowercase, so please keep it like this.
+		 */
+		if (!g_str_has_prefix (_("yes"), response))
+			return EXIT_FAILURE;
+	}
+
+	/* Terminate and reset database */
+	tracker_process_stop (SIGKILL);
+
+	cache_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
+	delete_path (cache_dir);
+
+	errors_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
+	delete_path (errors_dir);
+
+	return EXIT_SUCCESS;
 }

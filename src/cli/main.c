@@ -68,7 +68,7 @@ static struct cmd_struct commands[] = {
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("Trigger content indexing of a location") },
 	{ "info", tracker_info, N_("Retrieve all information available for a certain file") },
-	{ "reset", tracker_reset, N_("Reset the index and configuration") },
+	{ "reset", tracker_reset, N_("Erase the indexed data") },
 	{ "search", tracker_search, N_("Search for content") },
 	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },
 	{ "tag", tracker_tag, N_("Add, remove and list tags") },
