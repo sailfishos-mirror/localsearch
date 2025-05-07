@@ -79,24 +79,6 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
-static gboolean
-has_valid_uri_scheme (const gchar *uri)
-{
-	const gchar *s;
-
-	s = uri;
-
-	if (!g_ascii_isalpha (*s)) {
-		return FALSE;
-	}
-
-	do {
-		s++;
-	} while (g_ascii_isalnum (*s) || *s == '+' || *s == '.' || *s == '-');
-
-	return (*s == ':');
-}
-
 static TrackerSparqlStatement *
 describe_statement_for_urns (TrackerSparqlConnection *conn,
                              GList                   *urns)
@@ -411,12 +393,14 @@ info_run (void)
 	for (p = filenames; *p; p++) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (TrackerSparqlCursor) cursor = NULL;
-		g_autofree gchar *uri = NULL, *query = NULL;
+		g_autofree gchar *uri = NULL, *query = NULL, *uri_scheme = NULL;
 		g_autoptr (GList) keyfiles = NULL;
 		gboolean found = FALSE;
 
+		uri_scheme = g_uri_parse_scheme (*p);
+
 		/* support both, URIs and local file paths */
-		if (has_valid_uri_scheme (*p)) {
+		if (uri_scheme) {
 			uri = g_strdup (*p);
 		} else {
 			GFile *file;
