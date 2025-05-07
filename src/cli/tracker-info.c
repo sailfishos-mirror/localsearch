@@ -53,7 +53,6 @@ static gboolean inside_build_tree = FALSE;
 static gchar **filenames;
 static gboolean full_namespaces;
 static gboolean plain_text_content;
-static gboolean resource_is_iri;
 static gboolean turtle;
 static gboolean eligible;
 
@@ -66,16 +65,6 @@ static GOptionEntry entries[] = {
 	},
 	{ "plain-text-content", 'c', 0, G_OPTION_ARG_NONE, &plain_text_content,
 	  N_("Show plain text content if available for resources"),
-	  NULL,
-	},
-	{ "resource-is-iri", 'i', 0, G_OPTION_ARG_NONE, &resource_is_iri,
-	  /* To translators:
-	   * IRI (International Resource Identifier) is a generalization
-	   * of the URI. While URI supports only ASCI encoding, IRI
-	   * fully supports international characters. In practice, UTF-8
-	   * is the most popular encoding used for IRI.
-	   */
-	  N_("Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. <file:///path/to/some/file.txt>)"),
 	  NULL,
 	},
 	{ "turtle", 't', 0, G_OPTION_ARG_NONE, &turtle,
@@ -429,8 +418,6 @@ info_run (void)
 
 		/* support both, URIs and local file paths */
 		if (has_valid_uri_scheme (*p)) {
-			uri = g_strdup (*p);
-		} else if (resource_is_iri) {
 			uri = g_strdup (*p);
 		} else {
 			GFile *file;
