@@ -53,7 +53,7 @@ static gboolean inside_build_tree = FALSE;
 static gchar **filenames;
 static gboolean full_namespaces;
 static gboolean plain_text_content;
-static gboolean turtle;
+static char *output_format = NULL;
 static gboolean eligible;
 
 static gboolean output_is_tty;
@@ -67,10 +67,9 @@ static GOptionEntry entries[] = {
 	  N_("Show plain text content if available for resources"),
 	  NULL,
 	},
-	{ "turtle", 't', 0, G_OPTION_ARG_NONE, &turtle,
-	  N_("Output results as RDF in Turtle format"),
-	  NULL,
-	},
+	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format,
+	  N_("Output results format: “turtle”, “trig” or “json-ld”"),
+	  N_("FORMAT") },
 	{ "eligible", 'e', 0, G_OPTION_ARG_NONE, &eligible,
 	  N_("Checks if FILE is eligible for being indexed"),
 	  NULL },
@@ -460,7 +459,7 @@ info_run (void)
 		}
 
 		if (!found) {
-			if (turtle) {
+			if (output_format) {
 				g_print ("# No metadata available for <%s>\n", uri);
 			} else {
 				g_print ("  %s\n",
@@ -484,15 +483,27 @@ info_run (void)
 	if (!urns)
 		goto out;
 
-	if (turtle) {
+	if (output_format) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (GMainLoop) main_loop = NULL;
+		g_autoptr (GEnumClass) enum_class = NULL;
+		GEnumValue *enum_value;
+		TrackerRdfFormat rdf_format;
+
+		/* Look up the output format by name */
+		enum_class = g_type_class_ref (TRACKER_TYPE_RDF_FORMAT);
+		enum_value = g_enum_get_value_by_nick (enum_class, output_format);
+		if (!enum_value) {
+			g_printerr (N_("Unsupported serialization format “%s”\n"), output_format);
+			return EXIT_FAILURE;
+		}
+		rdf_format = enum_value->value;
 
 		stmt = describe_statement_for_urns (connection, urns);
 		main_loop = g_main_loop_new (NULL, FALSE);
 		tracker_sparql_statement_serialize_async (stmt,
 		                                          TRACKER_SERIALIZE_FLAGS_NONE,
-		                                          TRACKER_RDF_FORMAT_TURTLE,
+		                                          rdf_format,
 		                                          NULL,
 		                                          serialize_cb,
 		                                          main_loop);

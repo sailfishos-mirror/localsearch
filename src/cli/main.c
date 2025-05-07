@@ -67,7 +67,7 @@ static struct cmd_struct commands[] = {
 	{ "daemon", tracker_daemon, N_("Start, stop, restart and list daemons responsible for indexing content") },
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("Trigger content indexing of a location") },
-	{ "info", tracker_info, N_("Retrieve all information available for a certain file") },
+	{ "info", tracker_info, N_("Retrieve information available for files and resources") },
 	{ "reset", tracker_reset, N_("Erase the indexed data") },
 	{ "search", tracker_search, N_("Search for content") },
 	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },
