@@ -1,0 +1,16 @@
+SELECT ?video ?u (fts:snippet(?video, "\u001b[0;1;39m", "\u001b[0m") AS ?result)
+WHERE {
+  GRAPH tracker:Video {
+    ?video a nfo:Video ;
+      nie:isStoredAs ?u ;
+      fts:match ~match .
+    ?u nie:dataSource ?ds .
+    OPTIONAL {
+      ?ds tracker:available ?available
+    }
+  }
+  FILTER (~showAll^^xsd:boolean || ?available)
+}
+ORDER BY ASC(?u)
+OFFSET ~offset
+LIMIT ~limit

@@ -1,0 +1,16 @@
+SELECT ?u ?url (fts:snippet(?u, "\u001b[0;1;39m", "\u001b[0m") AS ?result)
+WHERE {
+  GRAPH tracker:FileSystem {
+    ?u a nfo:FileDataObject ;
+      nie:url ?url ;
+      fts:match ~match ;
+      nie:dataSource ?ds .
+    OPTIONAL {
+      ?ds tracker:available ?available
+    }
+  }
+  FILTER (~showAll^^xsd:boolean || ?available) .
+}
+ORDER BY ASC(?url)
+OFFSET ~offset
+LIMIT ~limit
