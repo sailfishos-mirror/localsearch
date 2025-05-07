@@ -37,6 +37,9 @@
 #include "tracker-cli-utils.h"
 #include "tracker-color.h"
 
+#define GET_INFORMATION_ELEMENT_QUERY \
+	"/org/freedesktop/LocalSearch/queries/get-information-element.rq"
+
 #define INFO_OPTIONS_ENABLED() \
 	(filenames && g_strv_length (filenames) > 0);
 
@@ -410,16 +413,10 @@ info_run (void)
 			g_object_unref (file);
 		}
 
-		stmt = tracker_sparql_connection_query_statement (connection,
-		                                                  "SELECT DISTINCT ?urn {"
-		                                                  "  {"
-		                                                  "    BIND (~uri AS ?urn) . "
-		                                                  "    ?urn a rdfs:Resource . "
-		                                                  "  } UNION {"
-		                                                  "    ~uri nie:interpretedAs ?urn ."
-		                                                  "  }"
-		                                                  "}",
-		                                                  NULL, &error);
+		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                                GET_INFORMATION_ELEMENT_QUERY,
+		                                                                NULL,
+		                                                                &error);
 		if (stmt) {
 			tracker_sparql_statement_bind_string (stmt, "uri", uri);
 			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
