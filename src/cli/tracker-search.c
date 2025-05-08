@@ -76,6 +76,8 @@ static const char *help_summary =
 #define LIST_VIDEOS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-videos.rq"
 
+#define SEARCH_ALL_QUERY \
+	"/org/freedesktop/LocalSearch/queries/search-all.rq"
 #define SEARCH_DOCUMENTS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-documents.rq"
 #define SEARCH_FILES_QUERY \
@@ -342,194 +344,6 @@ query_data (TrackerSparqlConnection *connection,
 	return get_cursor_results (cursor, name, search_limit, details);
 }
 
-static gboolean
-get_all_by_search (TrackerSparqlConnection *connection,
-                   GStrv                    search_words,
-                   gboolean                 show_all,
-                   gint                     search_offset,
-                   gint                     search_limit,
-                   gboolean                 use_or_operator,
-                   gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-
-	fts = get_fts_string (search_words, use_or_operator);
-	if (!fts) {
-		return FALSE;
-	}
-
-	if (search_limit < 0)
-		search_limit = G_MAXINT;
-
-	if (details) {
-		query = g_strdup_printf ("SELECT ?uri ?mimetype ?type ?snippet "
-		                         "WHERE {"
-					 "  {"
-					 "    SELECT (?s AS ?uri) ?mimetype ?type (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH tracker:FileSystem {"
-					 "        ?s a nfo:FileDataObject ;"
-					 "           fts:match \"%s\" ;"
-					 "           rdf:type ?type ;"
-					 "           nie:dataSource ?ds ."
-					 "         ?ie nie:isStoredAs ?s;"
-					 "           nie:mimeType ?mimetype ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available)) ."
-					 "      }"
-					 "    }"
-					 "  } UNION {"
-					 "    SELECT ?uri ?mimetype ?type (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH ?g {"
-					 "        ?s a nie:InformationElement ;"
-					 "           fts:match \"%s\" ;"
-					 "           rdf:type ?type ;"
-					 "           nie:mimeType ?mimetype ;"
-					 "           nie:isStoredAs ?uri ."
-		                         "      }"
-		                         "      GRAPH tracker:FileSystem {"
-					 "        ?uri nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available)) ."
-					 "      }"
-					 "    }"
-					 "  }"
-		                         "} "
-		                         "GROUP BY ?uri "
-		                         "ORDER BY ?uri "
-		                         "OFFSET %d "
-					 "LIMIT %d",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         search_offset,
-		                         search_limit);
-	} else {
-		query = g_strdup_printf ("SELECT ?uri SAMPLE(?snippet) "
-		                         "WHERE {"
-					 "  {"
-					 "    SELECT (?s AS ?uri) (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH tracker:FileSystem {"
-					 "        ?s a nfo:FileDataObject ;"
-					 "           fts:match \"%s\" ;"
-					 "           nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available))"
-					 "      }"
-					 "    }"
-					 "  } UNION {"
-					 "    SELECT ?uri (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH ?g {"
-					 "        ?s a nie:InformationElement ;"
-					 "           fts:match \"%s\" ;"
-					 "           nie:isStoredAs ?uri ."
-		                         "      }"
-		                         "      GRAPH tracker:FileSystem {"
-					 "        ?uri nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available))"
-					 "      }"
-					 "    }"
-					 "  }"
-		                         "} "
-		                         "GROUP BY ?uri "
-		                         "ORDER BY ?uri "
-		                         "OFFSET %d "
-					 "LIMIT %d",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         search_offset,
-		                         search_limit);
-	}
-
-	g_free (fts);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No results were found matching your query"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Results"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				const gchar *urn;
-				const gchar *mime_type;
-				const gchar *class;
-
-				g_print ("cols:%d\n", tracker_sparql_cursor_get_n_columns (cursor));
-
-				urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-				mime_type = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-				class = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-
-				if (mime_type && mime_type[0] == '\0') {
-					mime_type = NULL;
-				}
-
-				if (mime_type) {
-					g_print ("  %s%s%s\n"
-					         "    %s\n"
-					         "    %s\n",
-					         disable_color ? "" : TITLE_BEGIN,
-					         urn,
-					         disable_color ? "" : TITLE_END,
-					         mime_type,
-					         class);
-				} else {
-					g_print ("  %s%s%s\n"
-					         "    %s\n",
-					         disable_color ? "" : TITLE_BEGIN,
-					         urn,
-					         disable_color ? "" : TITLE_END,
-					         class);
-				}
-				print_snippet (tracker_sparql_cursor_get_string (cursor, 3, NULL));
-			} else {
-				g_print ("  %s%s%s\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-				         disable_color ? "" : TITLE_END);
-				print_snippet (tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			}
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
 static gint
 search_run (void)
 {
@@ -684,7 +498,11 @@ search_run (void)
 	if (terms) {
 		gboolean success;
 
-		success = get_all_by_search (connection, terms, all, offset, limit, or_operator, detailed);
+		fts = get_fts_string (terms, or_operator);
+		resource_path = SEARCH_ALL_QUERY;
+
+		success = query_data (connection, resource_path, _("Results"),
+		                      fts, all, offset, limit, detailed);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 

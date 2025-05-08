@@ -1,0 +1,47 @@
+SELECT DISTINCT ?elem ?url (fts:snippet(?elem, "\u001b[0;1;39m", "\u001b[0m") AS ?snippet)
+WHERE {
+  {
+    GRAPH tracker:FileSystem {
+      ?f fts:match ~match .
+    }
+  } UNION {
+    GRAPH tracker:FileSystem {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  } UNION {
+    GRAPH tracker:Audio {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  } UNION {
+    GRAPH tracker:Documents {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  } UNION {
+    GRAPH tracker:Video {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  } UNION {
+    GRAPH tracker:Software {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  } UNION {
+    GRAPH tracker:Pictures {
+      ?elem fts:match ~match ;
+        nie:isStoredAs ?f .
+    }
+  }
+  FILTER (~showAll^^xsd:boolean || ?available)
+
+  GRAPH tracker:FileSystem {
+    ?f nie:url ?url .
+    BIND (tracker:available(nie:dataSource(?f)) AS ?available) .
+  }
+}
+ORDER BY ?url
+OFFSET ~offset
+LIMIT ~limit
