@@ -46,10 +46,6 @@ Only resources which currently exist will be returned by this command
 *--software*::
   Search for software installed matching _search-terms_.
   Returns a list of desktop files and application titles found.
-*--software-categories*::
-  Search for software categories matching _search-terms_.
-  Returns a list of urns and their categories (e.g. Settings, Video,
-  Utility, etc).
 
 == OPTIONS
 
@@ -67,8 +63,7 @@ Only resources which currently exist will be returned by this command
   Show results which might not be available. This might bebecause a
   removable media is not mounted for example. Without this option,
   resources are only shown if they exist. This option applies to all
-  resource types except for `--music-artists`, `--software`,
-  and `--software-categories`.
+  resource types except for `--music-artists` and `--software`.
 *--disable-snippets*::
   Results are shown with snippets. Snippets are context around the word
   that was searched for in the first place. This gives some idea of if
