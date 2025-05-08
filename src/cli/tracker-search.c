@@ -67,6 +67,8 @@ static const char *help_summary =
 	"/org/freedesktop/LocalSearch/queries/list-images.rq"
 #define LIST_MUSIC_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-music.rq"
+#define LIST_SOFTWARE_QUERY \
+	"/org/freedesktop/LocalSearch/queries/list-software.rq"
 #define LIST_VIDEOS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-videos.rq"
 
@@ -80,6 +82,8 @@ static const char *help_summary =
 	"/org/freedesktop/LocalSearch/queries/search-images.rq"
 #define SEARCH_MUSIC_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-music.rq"
+#define SEARCH_SOFTWARE_QUERY \
+	"/org/freedesktop/LocalSearch/queries/search-software.rq"
 #define SEARCH_VIDEOS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-videos.rq"
 
@@ -128,7 +132,7 @@ static GOptionEntry entries_resource_type[] = {
 	  NULL
 	},
 	{ "software", 0, 0, G_OPTION_ARG_NONE, &software,
-	  N_("Search for software (--all has no effect on this)"),
+	  N_("Search for software files"),
 	  NULL
 	},
 	{ NULL }
@@ -149,7 +153,7 @@ static GOptionEntry entries[] = {
 	  NULL
 	},
 	{ "detailed", 'd', 0, G_OPTION_ARG_NONE, &detailed,
-	  N_("Show URNs for results (does not apply to --music-albums, --music-artists, --software)"),
+	  N_("Show URNs for results (does not apply to --music-albums, --music-artists)"),
 	  NULL
 	},
 	{ "all", 'a', 0, G_OPTION_ARG_NONE, &all,
@@ -526,95 +530,6 @@ get_music_albums (TrackerSparqlConnection *connection,
 }
 
 static gboolean
-get_software (TrackerSparqlConnection *connection,
-              GStrv                    search_terms,
-              gint                     search_offset,
-              gint                     search_limit,
-              gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?soft nie:title(?soft) fts:snippet(?soft, \"%s\", \"%s\") "
-		                         "WHERE {"
-					 "  GRAPH tracker:Software {"
-		                         "    ?soft a nfo:Software ;"
-		                         "    fts:match \"%s\" . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?soft)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?soft nie:title(?soft) "
-		                         "WHERE {"
-		                         "  ?soft a nfo:Software ."
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?soft)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No software was found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Software"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
 get_all_by_search (TrackerSparqlConnection *connection,
                    GStrv                    search_words,
                    gboolean                 show_all,
@@ -934,7 +849,11 @@ search_run (void)
 	if (software) {
 		gboolean success;
 
-		success = get_software (connection, terms, offset, limit, or_operator);
+		fts = get_fts_string (terms, or_operator);
+		resource_path = fts ? SEARCH_SOFTWARE_QUERY : LIST_SOFTWARE_QUERY;
+
+		success = query_data (connection, resource_path, _("Files"),
+		                      fts, all, offset, limit, detailed);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 
