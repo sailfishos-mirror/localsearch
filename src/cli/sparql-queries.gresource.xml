@@ -6,6 +6,8 @@
     <file>queries/list-files.rq</file>
     <file>queries/list-folders.rq</file>
     <file>queries/list-images.rq</file>
+    <file>queries/list-music-albums.rq</file>
+    <file>queries/list-music-artists.rq</file>
     <file>queries/list-music.rq</file>
     <file>queries/list-software.rq</file>
     <file>queries/list-videos.rq</file>
@@ -13,6 +15,8 @@
     <file>queries/search-files.rq</file>
     <file>queries/search-folders.rq</file>
     <file>queries/search-images.rq</file>
+    <file>queries/search-music-albums.rq</file>
+    <file>queries/search-music-artists.rq</file>
     <file>queries/search-music.rq</file>
     <file>queries/search-software.rq</file>
     <file>queries/search-videos.rq</file>

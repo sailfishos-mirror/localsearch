@@ -65,6 +65,10 @@ static const char *help_summary =
 	"/org/freedesktop/LocalSearch/queries/list-folders.rq"
 #define LIST_IMAGES_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-images.rq"
+#define LIST_MUSIC_ALBUMS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/list-music-albums.rq"
+#define LIST_MUSIC_ARTISTS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/list-music-artists.rq"
 #define LIST_MUSIC_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-music.rq"
 #define LIST_SOFTWARE_QUERY \
@@ -80,6 +84,10 @@ static const char *help_summary =
 	"/org/freedesktop/LocalSearch/queries/search-folders.rq"
 #define SEARCH_IMAGES_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-images.rq"
+#define SEARCH_MUSIC_ALBUMS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/search-music-albums.rq"
+#define SEARCH_MUSIC_ARTISTS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/search-music-artists.rq"
 #define SEARCH_MUSIC_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-music.rq"
 #define SEARCH_SOFTWARE_QUERY \
@@ -112,11 +120,11 @@ static GOptionEntry entries_resource_type[] = {
 	  NULL
 	},
 	{ "music-albums", 0, 0, G_OPTION_ARG_NONE, &music_albums,
-	  N_("Search for music albums (--all has no effect on this)"),
+	  N_("Search for music albums"),
 	  NULL
 	},
 	{ "music-artists", 0, 0, G_OPTION_ARG_NONE, &music_artists,
-	  N_("Search for music artists (--all has no effect on this)"),
+	  N_("Search for music artists"),
 	  NULL
 	},
 	{ "images", 'i', 0, G_OPTION_ARG_NONE, &image_files,
@@ -153,7 +161,7 @@ static GOptionEntry entries[] = {
 	  NULL
 	},
 	{ "detailed", 'd', 0, G_OPTION_ARG_NONE, &detailed,
-	  N_("Show URNs for results (does not apply to --music-albums, --music-artists)"),
+	  N_("Show URNs for results"),
 	  NULL
 	},
 	{ "all", 'a', 0, G_OPTION_ARG_NONE, &all,
@@ -332,201 +340,6 @@ query_data (TrackerSparqlConnection *connection,
 	}
 
 	return get_cursor_results (cursor, name, search_limit, details);
-}
-
-static gboolean
-get_music_artists (TrackerSparqlConnection *connection,
-                   GStrv                    search_terms,
-                   gint                     search_offset,
-                   gint                     search_limit,
-                   gboolean                 use_or_operator,
-                   gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?artist ?title "
-		                         "WHERE {"
-		                         "  GRAPH tracker:Audio {"
-		                         "    ?artist a nmm:Artist ;"
-		                         "    nmm:artistName ?title ;"
-		                         "    fts:match \"%s\" . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?title) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?artist ?title "
-		                         "WHERE {"
-		                         "  GRAPH tracker:Audio {"
-		                         "    ?artist a nmm:Artist ;"
-		                         "    nmm:artistName ?title . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?title) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No artists were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Artists"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  '%s%s%s' (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			} else {
-				g_print ("  '%s%s%s'\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         disable_color ? "" : TITLE_END);
-			}
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_music_albums (TrackerSparqlConnection *connection,
-                  GStrv                    search_words,
-                  gint                     search_offset,
-                  gint                     search_limit,
-                  gboolean                 use_or_operator,
-                  gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_words, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?album nie:title(?album) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Audio {"
-		                         "    ?album a nmm:MusicAlbum ;"
-		                         "    fts:match \"%s\" ."
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?album)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?album nie:title(?album) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Audio {"
-		                         "    ?album a nmm:MusicAlbum ."
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?album)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No music was found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Albums"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  '%s%s%s' (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			} else {
-				g_print ("  '%s%s%s'\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         disable_color ? "" : TITLE_END);
-			}
-			count++;
-		}
-
-		g_print ("\n");
-
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
 }
 
 static gboolean
@@ -773,7 +586,11 @@ search_run (void)
 	if (music_albums) {
 		gboolean success;
 
-		success = get_music_albums (connection, terms, offset, limit, or_operator, detailed);
+		fts = get_fts_string (terms, or_operator);
+		resource_path = fts ? SEARCH_MUSIC_ALBUMS_QUERY : LIST_MUSIC_ALBUMS_QUERY;
+
+		success = query_data (connection, resource_path, _("Albums"),
+		                      fts, all, offset, limit, detailed);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 
@@ -783,7 +600,11 @@ search_run (void)
 	if (music_artists) {
 		gboolean success;
 
-		success = get_music_artists (connection, terms, offset, limit, or_operator, detailed);
+		fts = get_fts_string (terms, or_operator);
+		resource_path = fts ? SEARCH_MUSIC_ARTISTS_QUERY : LIST_MUSIC_ARTISTS_QUERY;
+
+		success = query_data (connection, resource_path, _("Artists"),
+		                      fts, all, offset, limit, detailed);
 		g_object_unref (connection);
 		tracker_term_pager_close ();
 
