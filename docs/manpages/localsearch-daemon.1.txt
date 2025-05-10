@@ -80,27 +80,3 @@ For example:
 
     ...
 ....
-
-*--pause-details*::
-  For listing all miners which are paused and the reasons for being
-  paused, you can use this. It will also display the application that
-  requested the pause too.
-*--miner=<__miner__>*::
-  This argument is used with *--pause* or *--resume* to say which miner
-  you want to pause or resume. You can use the full D-Bus name, e.g.
-  "org.freedesktop.Tracker3.Miner.Files" OR you can use the suffix, e.g.
-  "Files".
-*--pause=<__reason__>*::
-  The _reason_ here is useful to know WHY the miner should be paused. A
-  miner can be paused many times by multiple applications. Only when all
-  pauses have been resumed will it continue. If successful, a cookie
-  will be given to uniquely identify the request. This cookie is used to
-  resume the pause at a later stage.
-*--pause-for-process=<__reason__>*::
-  This works exactly the same way as *--pause* with the exception that
-  it only keeps the pause active while the calling process is alive. As
-  soon as you press Ctrl+C the pause is resumed automatically.
-*--resume=<__cookie__>*::
-  The _cookie_ is given by a successful *--pause* command. It is a
-  number which identifies each pause request. When all pauses have been
-  resumed, the miner will resume working.

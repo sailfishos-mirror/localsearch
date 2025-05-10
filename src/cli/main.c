@@ -34,6 +34,7 @@
 #include "tracker-extract.h"
 #include "tracker-index.h"
 #include "tracker-info.h"
+#include "tracker-inhibit.h"
 #include "tracker-reset.h"
 #include "tracker-search.h"
 #include "tracker-status.h"
@@ -68,6 +69,7 @@ static struct cmd_struct commands[] = {
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("List and change indexed folders") },
 	{ "info", tracker_info, N_("Retrieve information available for files and resources") },
+	{ "inhibit", tracker_inhibit, N_("Inhibit indexing temporarily") },
 	{ "reset", tracker_reset, N_("Erase the indexed data") },
 	{ "search", tracker_search, N_("Search for content") },
 	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },

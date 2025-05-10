@@ -8,6 +8,7 @@ cli_manpages = [
   ['localsearch-extract', 1],
   ['localsearch-index', 1],
   ['localsearch-info', 1],
+  ['localsearch-inhibit', 1],
   ['localsearch-reset', 1],
   ['localsearch-search', 1],
   ['localsearch-status', 1],

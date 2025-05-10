@@ -62,12 +62,6 @@ static gboolean status;
 static gboolean follow;
 static gboolean watch;
 
-static gchar *miner_name;
-static gchar *pause_reason;
-static gchar *pause_for_process_reason;
-static gint resume_cookie = -1;
-static gboolean pause_details;
-
 static gboolean list_processes;
 static gboolean start;
 static gboolean kill_miners;
@@ -77,11 +71,6 @@ static gchar *restore;
 
 #define DAEMON_OPTIONS_ENABLED() \
 	((status || follow || watch) || \
-	 (miner_name || \
-	  pause_reason || \
-	  pause_for_process_reason || \
-	  resume_cookie != -1 || \
-	  pause_details) || \
 	 (list_processes || \
 	  start || \
 	  kill_miners || \
@@ -97,27 +86,6 @@ static GOptionEntry entries[] = {
 	},
 	{ "watch", 'w', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &watch,
 	  N_("Watch changes to the database in real time (e.g. resources or files being added)"),
-	  NULL
-	},
-	/* Miners */
-	{ "pause", 0 , 0, G_OPTION_ARG_STRING, &pause_reason,
-	  N_("Pause a miner (you must use this with --miner)"),
-	  N_("REASON")
-	},
-	{ "pause-for-process", 0 , 0, G_OPTION_ARG_STRING, &pause_for_process_reason,
-	  N_("Pause a miner while the calling process is alive or until resumed (you must use this with --miner)"),
-	  N_("REASON")
-	},
-	{ "resume", 0 , 0, G_OPTION_ARG_INT, &resume_cookie,
-	  N_("Resume a miner (you must use this with --miner)"),
-	  N_("COOKIE")
-	},
-	{ "miner", 0 , 0, G_OPTION_ARG_STRING, &miner_name,
-	  N_("Miner to use with --resume or --pause (you can use suffixes, e.g. Files or Applications)"),
-	  N_("MINER")
-	},
-	{ "pause-details", 0, 0, G_OPTION_ARG_NONE, &pause_details,
-	  N_("List pause reasons"),
 	  NULL
 	},
 	/* Processes */
@@ -404,195 +372,6 @@ notifier_events_cb (TrackerNotifier         *notifier,
 }
 
 static gint
-miner_pause (const gchar *miner,
-             const gchar *reason,
-             gboolean     for_process)
-{
-	TrackerMinerManager *manager;
-	GError *error = NULL;
-	gchar *str;
-	guint32 cookie;
-
-	/* Don't auto-start the miners here */
-	manager = tracker_miner_manager_new_full (FALSE, &error);
-	if (!manager) {
-		g_printerr (_("Could not pause miner, manager could not be created, %s"),
-		            error ? error->message : _("No error given"));
-		g_printerr ("\n");
-		g_clear_error (&error);
-		return EXIT_FAILURE;
-	}
-
-	str = g_strdup_printf (_("Attempting to pause miner “%s” with reason “%s”"),
-	                       miner,
-	                       reason);
-	g_print ("%s\n", str);
-	g_free (str);
-
-	if (for_process) {
-		if (!tracker_miner_manager_pause_for_process (manager, miner, reason, &cookie)) {
-			g_printerr (_("Could not pause miner: %s"), miner);
-			g_printerr ("\n");
-			return EXIT_FAILURE;
-		}
-	} else {
-		if (!tracker_miner_manager_pause (manager, miner, reason, &cookie)) {
-			g_printerr (_("Could not pause miner: %s"), miner);
-			g_printerr ("\n");
-			return EXIT_FAILURE;
-		}
-	}
-
-	str = g_strdup_printf (_("Cookie is %d"), cookie);
-	g_print ("  %s\n", str);
-	g_free (str);
-
-	if (for_process) {
-		GMainLoop *main_loop;
-
-		g_print ("%s\n", _("Press Ctrl+C to stop"));
-
-		main_loop = g_main_loop_new (NULL, FALSE);
-		/* Block until Ctrl+C */
-		g_main_loop_run (main_loop);
-		g_object_unref (main_loop);
-	}
-
-	/* Carriage return, so we paper over the ^C */
-	g_print ("\r");
-
-	g_object_unref (manager);
-
-	return EXIT_SUCCESS;
-}
-
-static gint
-miner_resume (const gchar *miner,
-              gint         cookie)
-{
-	TrackerMinerManager *manager;
-	GError *error = NULL;
-	gchar *str;
-
-	/* Don't auto-start the miners here */
-	manager = tracker_miner_manager_new_full (FALSE, &error);
-	if (!manager) {
-		g_printerr (_("Could not resume miner, manager could not be created, %s"),
-		            error ? error->message : _("No error given"));
-		g_printerr ("\n");
-		g_clear_error (&error);
-		return EXIT_FAILURE;
-	}
-
-	str = g_strdup_printf (_("Attempting to resume miner %s with cookie %d"),
-	                       miner,
-	                       cookie);
-	g_print ("%s\n", str);
-	g_free (str);
-
-	if (!tracker_miner_manager_resume (manager, miner, cookie)) {
-		g_printerr (_("Could not resume miner: %s"), miner);
-		return EXIT_FAILURE;
-	}
-
-	g_print ("  %s\n", _("Done"));
-
-	g_object_unref (manager);
-
-	return EXIT_SUCCESS;
-}
-
-static gint
-miner_pause_details (void)
-{
-	TrackerMinerManager *manager;
-	GError *error = NULL;
-	GSList *miners_running, *l;
-	gint paused_miners = 0;
-
-	/* Don't auto-start the miners here */
-	manager = tracker_miner_manager_new_full (FALSE, &error);
-	if (!manager) {
-		g_printerr (_("Could not get pause details, manager could not be created, %s"),
-		            error ? error->message : _("No error given"));
-		g_printerr ("\n");
-		g_clear_error (&error);
-		return EXIT_FAILURE;
-	}
-
-	miners_running = tracker_miner_manager_get_running (manager);
-
-	if (!miners_running) {
-		g_print ("%s\n", _("No miners are running"));
-
-		g_slist_foreach (miners_running, (GFunc) g_free, NULL);
-		g_slist_free (miners_running);
-		g_object_unref (manager);
-
-		return EXIT_SUCCESS;
-	}
-
-	for (l = miners_running; l; l = l->next) {
-		const gchar *name;
-		GStrv pause_applications, pause_reasons;
-		gint i;
-
-		name = tracker_miner_manager_get_display_name (manager, l->data);
-
-		if (!name) {
-			g_critical ("Could not get name for '%s'", (gchar *) l->data);
-			continue;
-		}
-
-		tracker_miner_manager_is_paused (manager,
-		                                 l->data,
-		                                 &pause_applications,
-		                                 &pause_reasons);
-
-		if (!pause_applications || !pause_reasons) {
-			/* unable to get pause details,
-			   already logged by tracker_miner_manager_is_paused */
-			continue;
-		}
-
-		if (!(*pause_applications) || !(*pause_reasons)) {
-			g_strfreev (pause_applications);
-			g_strfreev (pause_reasons);
-			continue;
-		}
-
-		paused_miners++;
-		if (paused_miners == 1) {
-			g_print ("%s:\n", _("Miners"));
-		}
-
-		g_print ("  %s:\n", name);
-
-		for (i = 0; pause_applications[i] != NULL; i++) {
-			g_print ("    %s: '%s', %s: '%s'\n",
-			         _("Application"),
-			         pause_applications[i],
-			         _("Reason"),
-			         pause_reasons[i]);
-		}
-
-		g_strfreev (pause_applications);
-		g_strfreev (pause_reasons);
-	}
-
-	if (paused_miners < 1) {
-		g_print ("%s\n", _("No miners are paused"));
-	}
-
-	g_slist_foreach (miners_running, (GFunc) g_free, NULL);
-	g_slist_free (miners_running);
-
-	g_object_unref (manager);
-
-	return EXIT_SUCCESS;
-}
-
-static gint
 daemon_run (void)
 {
 	TrackerMinerManager *manager;
@@ -765,43 +544,6 @@ daemon_run (void)
 		}
 
 		return EXIT_SUCCESS;
-	}
-
-	/* Miners */
-	if (pause_reason && resume_cookie != -1) {
-		g_printerr ("%s\n",
-		            _("You can not use miner pause and resume switches together"));
-		return EXIT_FAILURE;
-	}
-
-	if ((pause_reason || pause_for_process_reason  || resume_cookie != -1) && !miner_name) {
-		g_printerr ("%s\n",
-		            _("You must provide the miner for pause or resume commands"));
-		return EXIT_FAILURE;
-	}
-
-	if ((!pause_reason && !pause_for_process_reason && resume_cookie == -1) && miner_name) {
-		g_printerr ("%s\n",
-		            _("You must provide a pause or resume command for the miner"));
-		return EXIT_FAILURE;
-	}
-
-	/* Known actions */
-
-	if (pause_reason) {
-		return miner_pause (miner_name, pause_reason, FALSE);
-	}
-
-	if (pause_for_process_reason) {
-		return miner_pause (miner_name, pause_for_process_reason, TRUE);
-	}
-
-	if (resume_cookie != -1) {
-		return miner_resume (miner_name, resume_cookie);
-	}
-
-	if (pause_details) {
-		return miner_pause_details ();
 	}
 
 	/* Processes */
