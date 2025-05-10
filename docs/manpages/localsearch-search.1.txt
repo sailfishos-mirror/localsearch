@@ -56,18 +56,12 @@ Only resources which currently exist will be returned by this command
 *-r, --or-operator*::
   Use OR for search terms instead of AND (the default)
 *-d, --detailed*::
-  Show the unique URN associated with each search result.
+  Show the unique URN associated with each search result and a snippet
+  of the matched search terms, if any was provided.
 *-a, --all*::
   Show results which might not be available. This might bebecause a
   removable media is not mounted for example. Without this option,
   resources are only shown if they exist.
-*--disable-snippets*::
-  Results are shown with snippets. Snippets are context around the word
-  that was searched for in the first place. This gives some idea of if
-  the resource found is the right one. Snippets require Full Text Search
-  to be compile time enabled AND to not be disabled with --disable-fts.
-  Using --disable-snippets only shows the resources which matched, no
-  context is provided about where the match occurred.
 *--disable-fts*::
   If Full Text Search (FTS) is available, this option allows it to be
   disabled for one off searches. This returns results slightly using

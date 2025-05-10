@@ -1,4 +1,4 @@
-SELECT DISTINCT ?artist ?name
+SELECT DISTINCT ?artist ?name ?snippet
 WHERE {
   GRAPH tracker:Audio {
     ?artist a nmm:Artist ;
@@ -10,6 +10,7 @@ WHERE {
     OPTIONAL {
       ?ds tracker:available ?available
     }
+    BIND (IF (~detailed^^xsd:boolean, fts:snippet(?artist, "\u001b[0;1;39m", "\u001b[0m"), "") AS ?snippet)
     FILTER (~showAll^^xsd:boolean || ?available)
   }
 }

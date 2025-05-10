@@ -1,4 +1,4 @@
-SELECT ?video ?u (fts:snippet(?video, "\u001b[0;1;39m", "\u001b[0m") AS ?result)
+SELECT ?video ?u ?snippet
 WHERE {
   GRAPH tracker:Video {
     ?video a nfo:Video ;
@@ -8,6 +8,7 @@ WHERE {
     OPTIONAL {
       ?ds tracker:available ?available
     }
+    BIND (IF (~detailed^^xsd:boolean, fts:snippet(?video, "\u001b[0;1;39m", "\u001b[0m"), "") AS ?snippet)
   }
   FILTER (~showAll^^xsd:boolean || ?available)
 }

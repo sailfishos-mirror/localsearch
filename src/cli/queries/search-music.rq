@@ -1,4 +1,4 @@
-SELECT ?audio ?u (fts:snippet(?audio, "\u001b[0;1;39m", "\u001b[0m") AS ?result)
+SELECT ?audio ?u ?snippet
 WHERE {
   GRAPH tracker:Audio {
     ?audio a nmm:MusicPiece ;
@@ -8,6 +8,7 @@ WHERE {
     OPTIONAL {
       ?ds tracker:available ?available
     }
+    BIND (IF (~detailed^^xsd:boolean, fts:snippet(?audio, "\u001b[0;1;39m", "\u001b[0m"), "") AS ?snippet)
   }
   FILTER (~showAll^^xsd:boolean || ?available)
 }

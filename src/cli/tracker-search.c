@@ -41,7 +41,6 @@ static gchar **terms;
 static gboolean or_operator;
 static gboolean detailed;
 static gboolean all;
-static gboolean disable_snippets;
 static gboolean disable_fts;
 static gboolean disable_color;
 static gboolean files;
@@ -170,10 +169,6 @@ static GOptionEntry entries[] = {
 	  N_("Return all non-existing matches too (i.e. include unmounted volumes)"),
 	  NULL
 	},
-	{ "disable-snippets", 0, 0, G_OPTION_ARG_NONE, &disable_snippets,
-	  N_("Disable showing snippets with results. This is only shown for some categories, e.g. Documents, Music…"),
-	  NULL,
-	},
 	{ "disable-fts", 0, 0, G_OPTION_ARG_NONE, &disable_fts,
 	  N_("Disable Full Text Search (FTS). Implies --disable-snippets"),
 	  NULL,
@@ -236,10 +231,6 @@ get_fts_string (GStrv    search_words,
 static inline void
 print_snippet (const gchar *snippet)
 {
-	if (disable_snippets) {
-		return;
-	}
-
 	if (!snippet || *snippet == '\0') {
 		return;
 	} else {
@@ -289,9 +280,6 @@ get_cursor_results (TrackerSparqlCursor *cursor,
 			         disable_color ? "" : TITLE_BEGIN,
 			         tracker_sparql_cursor_get_string (cursor, 1, NULL),
 			         disable_color ? "" : TITLE_END);
-
-			if (tracker_sparql_cursor_get_n_columns (cursor) > 2)
-				print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 		}
 
 		count++;
@@ -328,6 +316,7 @@ query_data (TrackerSparqlConnection *connection,
 
 	if (fts_match) {
 		tracker_sparql_statement_bind_string (stmt, "match", fts_match);
+		tracker_sparql_statement_bind_int (stmt, "detailed", detailed);
 	}
 
 	tracker_sparql_statement_bind_int (stmt, "showAll", show_all);
@@ -351,10 +340,6 @@ search_run (void)
 	g_autofree char *fts = NULL;
 	const char *resource_path = NULL;
 	GError *error = NULL;
-
-	if (disable_fts) {
-		disable_snippets = TRUE;
-	}
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 							NULL, NULL, &error);

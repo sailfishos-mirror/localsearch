@@ -1,4 +1,4 @@
-SELECT ?document ?u (fts:snippet(?document, "\u001b[0;1;39m", "\u001b[0m") AS ?result)
+SELECT ?document ?u ?snippet
 WHERE {
   GRAPH tracker:Documents {
     ?document a nfo:Document ;
@@ -8,6 +8,7 @@ WHERE {
     OPTIONAL {
       ?ds tracker:available ?available
     }
+    BIND (IF (~detailed^^xsd:boolean, fts:snippet(?document, "\u001b[0;1;39m", "\u001b[0m"), "") AS ?snippet)
   }
   FILTER (~showAll^^xsd:boolean || ?available)
 }
