@@ -52,6 +52,7 @@ static gboolean image_files;
 static gboolean video_files;
 static gboolean document_files;
 static gboolean software;
+static gboolean show_help;
 
 static const char *help_summary =
 	N_("Search for content matching TERMS, by type or across all types.");
@@ -184,6 +185,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "disable-color", 0, 0, G_OPTION_ARG_NONE, &disable_color,
 	  N_("Disable color when printing snippets and results"),
+	  NULL,
+	},
+	{ "help", 'h', 0, G_OPTION_ARG_NONE, &show_help,
+	  N_("Show help options"),
 	  NULL,
 	},
 
@@ -363,8 +368,6 @@ search_run (void)
 		return EXIT_FAILURE;
 	}
 
-	tracker_term_pipe_to_pager ();
-
 	if (files)
 		query_type = FILES;
 	else if (folders)
@@ -392,6 +395,7 @@ search_run (void)
 
 	title = titles[query_type];
 
+	tracker_term_pipe_to_pager ();
 	success = query_data (connection, resource_path, _(title),
 			      fts, all, offset, limit, detailed);
 	tracker_term_pager_close ();
@@ -399,29 +403,14 @@ search_run (void)
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-static GOptionContext *
-search_option_context_new (void)
-{
-	GOptionContext *context;
-        GOptionGroup *resource_type;
-	context = g_option_context_new (NULL);
-        g_option_context_set_summary (context, help_summary);
-        resource_type = g_option_group_new ("resource-type",
-		"Resource Type Options:",
-		"Show help for resource type options",
-		NULL, NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-        g_option_context_add_group (context, resource_type);
-        g_option_group_add_entries (resource_type, entries_resource_type);
-        return context;
-}
-
 int
 tracker_search (int          argc,
                 const char **argv)
 {
-	GOptionContext *context;
+	g_autoptr (GOptionContext) context = NULL;
+	GOptionGroup *resource_type;
 	GError *error = NULL;
+	g_autofree char *help = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -429,18 +418,32 @@ tracker_search (int          argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	context = search_option_context_new ();
-
 	argv[0] = "tracker search";
+
+	context = g_option_context_new (NULL);
+        g_option_context_set_summary (context, help_summary);
+        resource_type =
+	        g_option_group_new ("resource-type",
+	                            "Resource Type Options:",
+	                            "Show help for resource type options",
+	                            NULL, NULL);
+
+        g_option_context_set_help_enabled (context, FALSE);
+	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_add_group (context, resource_type);
+	g_option_group_add_entries (resource_type, entries_resource_type);
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
+		help = g_option_context_get_help (context, FALSE, NULL);
+		g_printerr ("%s\n", help);
 		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
+	} else if (show_help) {
+		help = g_option_context_get_help (context, FALSE, NULL);
+		g_printerr ("%s\n", help);
+		return EXIT_SUCCESS;
 	}
-
-	g_option_context_free (context);
 
 	return search_run ();
 }
