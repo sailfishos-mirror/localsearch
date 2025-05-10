@@ -4,6 +4,13 @@ tracker_uninstalled_cli_dir = meson.current_build_dir()
 
 sparql_gresource = gnome.compile_resources('sparql_gresources', 'sparql-queries.gresource.xml')
 
+indexer_dbus_proxy = gnome.gdbus_codegen('tracker-indexer-proxy',
+    indexer_dbus_interface,
+    interface_prefix: 'org.freedesktop.Tracker3.',
+    namespace: 'TrackerIndexer',
+    autocleanup: 'all',
+)
+
 sources = files(
     'tracker-cli-utils.c',
     'tracker-daemon.c',
@@ -28,6 +35,7 @@ main_command_name = 'localsearch'
 executable(main_command_name,
     sources,
     sparql_gresource,
+    indexer_dbus_proxy,
     c_args: tracker_c_args + [
         '-DMAIN_COMMAND_NAME=@0@'.format(main_command_name),
         '-DLIBEXECDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('libexecdir'))),

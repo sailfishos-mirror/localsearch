@@ -358,8 +358,8 @@ glib_compile_schemas = find_program('glib-compile-schemas')
 glib_mkenums = find_program('glib-mkenums')
 
 subdir('utils')
-subdir('src')
 subdir('data')
+subdir('src')
 subdir('docs')
 
 test_c_args = tracker_c_args + [
