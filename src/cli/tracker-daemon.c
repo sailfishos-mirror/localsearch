@@ -61,7 +61,6 @@ static gboolean full_namespaces = FALSE; /* Can be turned on if needed, or made 
 static gboolean status;
 static gboolean follow;
 static gboolean watch;
-static gboolean list_common_statuses;
 
 static gchar *miner_name;
 static gchar *pause_reason;
@@ -79,7 +78,7 @@ static gchar *backup;
 static gchar *restore;
 
 #define DAEMON_OPTIONS_ENABLED() \
-	((status || follow || watch || list_common_statuses) || \
+	((status || follow || watch) || \
 	 (miner_name || \
 	  pause_reason || \
 	  pause_for_process_reason || \
@@ -94,18 +93,6 @@ static gchar *restore;
 	  backup || \
 	  restore));
 
-/* Make sure our statuses are translated (most from libtracker-miner) */
-static const gchar *statuses[8] = {
-	N_("Unavailable"), /* generic */
-	N_("Initializing"),
-	N_("Processing…"),
-	N_("Fetching…"), /* miner/rss */
-	N_("Crawling single directory “%s”"),
-	N_("Crawling recursively directory “%s”"),
-	N_("Paused"),
-	N_("Idle")
-};
-
 static GOptionEntry entries[] = {
 	/* Status */
 	{ "follow", 'f', 0, G_OPTION_ARG_NONE, &follow,
@@ -114,10 +101,6 @@ static GOptionEntry entries[] = {
 	},
 	{ "watch", 'w', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &watch,
 	  N_("Watch changes to the database in real time (e.g. resources or files being added)"),
-	  NULL
-	},
-	{ "list-common-statuses", 0, 0, G_OPTION_ARG_NONE, &list_common_statuses,
-	  N_("List common statuses for miners"),
 	  NULL
 	},
 	/* Miners */
@@ -731,18 +714,6 @@ daemon_run (void)
 
 		/* Carriage return, so we paper over the ^C */
 		g_print ("\r");
-
-		return EXIT_SUCCESS;
-	}
-
-	if (list_common_statuses) {
-		gint i;
-
-		g_print ("%s:\n", _("Common statuses include"));
-
-		for (i = 0; i < G_N_ELEMENTS (statuses); i++) {
-			g_print ("  %s\n", _(statuses[i]));
-		}
 
 		return EXIT_SUCCESS;
 	}
