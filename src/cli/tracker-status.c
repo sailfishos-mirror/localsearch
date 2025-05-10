@@ -401,7 +401,6 @@ get_no_args (void)
 	gchar *data_dir;
 	guint64 remaining_bytes;
 	gdouble remaining;
-	gint remaining_time;
 	gint files, folders;
 	GList *keyfiles;
 	gboolean use_pager;
@@ -443,17 +442,10 @@ get_no_args (void)
 	g_free (data_dir);
 
 	/* Are we finished indexing? */
-	if (!are_miners_finished (&remaining_time)) {
-		gchar *remaining_time_str;
-
-		remaining_time_str = tracker_seconds_to_string (remaining_time, TRUE);
-
-		g_print ("%s: ", _("Data is still being indexed"));
-		g_print (_("Estimated %s left"), remaining_time_str);
-		g_print ("\n");
-		g_free (remaining_time_str);
+	if (!are_miners_finished (NULL)) {
+		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("Data is still being indexed"));
 	} else {
-		g_print ("%s\n", _("All data miners are idle, indexing complete"));
+		g_print ("%s\n", _("Indexer is idle"));
 	}
 
 	keyfiles = tracker_cli_get_error_keyfiles ();
