@@ -81,13 +81,6 @@ For example:
     ...
 ....
 
-*--list-miners-running*::
-  This will list all miners which have responded to a D-Bus call.
-  Sometimes it is helpful to use this command with
-  *--list-miners-available.*
-*--list-miners-available*::
-  This will list all miners which are available even if they are not
-  running at the moment.
 *--pause-details*::
   For listing all miners which are paused and the reasons for being
   paused, you can use this. It will also display the application that
