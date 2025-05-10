@@ -56,47 +56,64 @@ static gboolean software;
 static const char *help_summary =
 	N_("Search for content matching TERMS, by type or across all types.");
 
-#define LIST_ALL_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-all.rq"
-#define LIST_DOCUMENTS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-documents.rq"
-#define LIST_FILES_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-files.rq"
-#define LIST_FOLDERS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-folders.rq"
-#define LIST_IMAGES_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-images.rq"
-#define LIST_MUSIC_ALBUMS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-music-albums.rq"
-#define LIST_MUSIC_ARTISTS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-music-artists.rq"
-#define LIST_MUSIC_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-music.rq"
-#define LIST_SOFTWARE_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-software.rq"
-#define LIST_VIDEOS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/list-videos.rq"
+enum {
+	ALL,
+	DOCUMENTS,
+	FILES,
+	FOLDERS,
+	IMAGES,
+	MUSIC_ALBUMS,
+	MUSIC_ARTISTS,
+	MUSIC,
+	SOFTWARE,
+	VIDEOS,
+	N_QUERIES,
+};
 
-#define SEARCH_ALL_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-all.rq"
-#define SEARCH_DOCUMENTS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-documents.rq"
-#define SEARCH_FILES_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-files.rq"
-#define SEARCH_FOLDERS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-folders.rq"
-#define SEARCH_IMAGES_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-images.rq"
-#define SEARCH_MUSIC_ALBUMS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-music-albums.rq"
-#define SEARCH_MUSIC_ARTISTS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-music-artists.rq"
-#define SEARCH_MUSIC_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-music.rq"
-#define SEARCH_SOFTWARE_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-software.rq"
-#define SEARCH_VIDEOS_QUERY \
-	"/org/freedesktop/LocalSearch/queries/search-videos.rq"
+static const char *list_queries[] = {
+	"/org/freedesktop/LocalSearch/queries/list-all.rq",
+	"/org/freedesktop/LocalSearch/queries/list-documents.rq",
+	"/org/freedesktop/LocalSearch/queries/list-files.rq",
+	"/org/freedesktop/LocalSearch/queries/list-folders.rq",
+	"/org/freedesktop/LocalSearch/queries/list-images.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music-albums.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music-artists.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music.rq",
+	"/org/freedesktop/LocalSearch/queries/list-software.rq",
+	"/org/freedesktop/LocalSearch/queries/list-videos.rq",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (list_queries) == N_QUERIES);
+
+static const char *search_queries[] = {
+	"/org/freedesktop/LocalSearch/queries/search-all.rq",
+	"/org/freedesktop/LocalSearch/queries/search-documents.rq",
+	"/org/freedesktop/LocalSearch/queries/search-files.rq",
+	"/org/freedesktop/LocalSearch/queries/search-folders.rq",
+	"/org/freedesktop/LocalSearch/queries/search-images.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music-albums.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music-artists.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music.rq",
+	"/org/freedesktop/LocalSearch/queries/search-software.rq",
+	"/org/freedesktop/LocalSearch/queries/search-videos.rq",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (search_queries) == N_QUERIES);
+
+static const char *titles[] = {
+	N_("Results"),
+	N_("Files"),
+	N_("Files"),
+	N_("Folders"),
+	N_("Files"),
+	N_("Albums"),
+	N_("Artists"),
+	N_("Files"),
+	N_("Files"),
+	N_("Files"),
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (titles) == N_QUERIES);
 
 static GOptionEntry entries_resource_type[] = {
 	/* Search types */
@@ -328,9 +345,11 @@ query_data (TrackerSparqlConnection *connection,
 static gint
 search_run (void)
 {
-	TrackerSparqlConnection *connection;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autofree char *fts = NULL;
-	const char *resource_path = NULL;
+	const char *resource_path = NULL, *title = NULL;
+	int query_type;
+	gboolean success;
 	GError *error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
@@ -346,152 +365,38 @@ search_run (void)
 
 	tracker_term_pipe_to_pager ();
 
-	if (files) {
-		gboolean success;
+	if (files)
+		query_type = FILES;
+	else if (folders)
+		query_type = FOLDERS;
+	else if (music_albums)
+		query_type = MUSIC_ALBUMS;
+	else if (music_artists)
+		query_type = MUSIC_ARTISTS;
+	else if (music_files)
+		query_type = MUSIC;
+	else if (image_files)
+		query_type = IMAGES;
+	else if (document_files)
+		query_type = DOCUMENTS;
+	else if (video_files)
+		query_type = VIDEOS;
+	else
+		query_type = ALL;
 
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_FILES_QUERY : LIST_FILES_QUERY;
+	fts = get_fts_string (terms, or_operator);
 
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
+	resource_path = fts ?
+		search_queries[query_type] :
+		list_queries[query_type];
 
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
+	title = titles[query_type];
 
-	if (folders) {
-		gboolean success;
+	success = query_data (connection, resource_path, _(title),
+			      fts, all, offset, limit, detailed);
+	tracker_term_pager_close ();
 
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_FOLDERS_QUERY : LIST_FOLDERS_QUERY;
-
-		success = query_data (connection, resource_path, _("Folders"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_albums) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_MUSIC_ALBUMS_QUERY : LIST_MUSIC_ALBUMS_QUERY;
-
-		success = query_data (connection, resource_path, _("Albums"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_artists) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_MUSIC_ARTISTS_QUERY : LIST_MUSIC_ARTISTS_QUERY;
-
-		success = query_data (connection, resource_path, _("Artists"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_files) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_MUSIC_QUERY : LIST_MUSIC_QUERY;
-
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (image_files) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_IMAGES_QUERY : LIST_IMAGES_QUERY;
-
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (video_files) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_VIDEOS_QUERY : LIST_VIDEOS_QUERY;
-
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (document_files) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_DOCUMENTS_QUERY : LIST_DOCUMENTS_QUERY;
-
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (software) {
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_SOFTWARE_QUERY : LIST_SOFTWARE_QUERY;
-
-		success = query_data (connection, resource_path, _("Files"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	{
-		gboolean success;
-
-		fts = get_fts_string (terms, or_operator);
-		resource_path = fts ? SEARCH_ALL_QUERY : LIST_ALL_QUERY;
-
-		success = query_data (connection, resource_path, _("Results"),
-		                      fts, all, offset, limit, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	g_object_unref (connection);
-
-	/* All known options have their own exit points */
-	g_warn_if_reached ();
-
-	return EXIT_FAILURE;
+	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 static GOptionContext *
