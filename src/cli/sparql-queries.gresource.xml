@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/org/freedesktop/LocalSearch">
+    <file>queries/ask-file.rq</file>
+    <file>queries/delete-folder-recursive.rq</file>
     <file>queries/get-information-element.rq</file>
     <file>queries/list-all.rq</file>
     <file>queries/list-documents.rq</file>

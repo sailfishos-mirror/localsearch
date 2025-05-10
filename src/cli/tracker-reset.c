@@ -35,6 +35,11 @@
 #include "tracker-color.h"
 #include "tracker-miner-manager.h"
 
+#define ASK_FILE_QUERY \
+	"/org/freedesktop/LocalSearch/queries/ask-file.rq"
+#define DELETE_FOLDER_QUERY \
+	"/org/freedesktop/LocalSearch/queries/delete-folder-recursive.rq"
+
 static gboolean filesystem = FALSE;
 static gchar *filename = NULL;
 
@@ -51,10 +56,11 @@ static GOptionEntry entries[] = {
 static int
 delete_info_recursively (GFile *file)
 {
-	TrackerSparqlConnection *connection;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (TrackerSparqlStatement) ask_stmt = NULL, delete_stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	TrackerMinerManager *miner_manager;
-	TrackerSparqlCursor *cursor;
-	gchar *query, *uri;
+	g_autofree char *uri = NULL;
 	GError *error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
@@ -66,42 +72,41 @@ delete_info_recursively (GFile *file)
 	uri = g_file_get_uri (file);
 
 	/* First, query whether the item exists */
-	query = g_strdup_printf ("SELECT ?u { ?u nie:url '%s' }", uri);
-	cursor = tracker_sparql_connection_query (connection, query,
-	                                          NULL, &error);
+	ask_stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                    ASK_FILE_QUERY,
+	                                                                    NULL,
+	                                                                    &error);
 
-	/* If the item doesn't exist, bail out. */
-	if (!cursor || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
-		g_clear_object (&cursor);
+	if (ask_stmt) {
+		tracker_sparql_statement_bind_string (ask_stmt, "url", uri);
+		cursor = tracker_sparql_statement_execute (ask_stmt, NULL, &error);
+	}
 
+	if (!cursor ||
+	    !tracker_sparql_cursor_next (cursor, NULL, &error) ||
+	    !tracker_sparql_cursor_get_boolean (cursor, 0)) {
 		if (error)
 			goto error;
 
 		return EXIT_SUCCESS;
 	}
 
-	g_object_unref (cursor);
-
 	/* Now, delete the element recursively */
 	g_print ("%s\n", _("Deleting…"));
-	query = g_strdup_printf ("DELETE { "
-	                         "  ?f a rdfs:Resource . "
-	                         "  ?ie a rdfs:Resource "
-	                         "} WHERE {"
-	                         "  ?f nie:url ?url . "
-	                         "  ?ie nie:isStoredAs ?f . "
-	                         "  FILTER (?url = '%s' ||"
-	                         "          STRSTARTS (?url, '%s/'))"
-	                         "}", uri, uri);
-	g_free (uri);
 
-	tracker_sparql_connection_update (connection, query, NULL, &error);
-	g_free (query);
+	delete_stmt =
+		tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                         DELETE_FOLDER_QUERY,
+		                                                         NULL,
+		                                                         &error);
+
+	if (delete_stmt) {
+		tracker_sparql_statement_bind_string (delete_stmt, "uri", uri);
+		tracker_sparql_statement_update (delete_stmt, NULL, &error);
+	}
 
 	if (error)
 		goto error;
-
-	g_object_unref (connection);
 
 	g_print ("%s\n", _("The indexed data for this file has been deleted "
 	                   "and will be reindexed again."));
