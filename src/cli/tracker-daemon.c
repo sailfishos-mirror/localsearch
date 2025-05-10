@@ -50,15 +50,13 @@ static gboolean status;
 static gboolean follow;
 static gboolean watch;
 
-static gboolean list_processes;
 static gboolean start;
 static gboolean kill_miners;
 static gboolean terminate_miners;
 
 #define DAEMON_OPTIONS_ENABLED() \
 	((status || follow || watch) || \
-	 (list_processes || \
-	  start || \
+	 (start || \
 	  kill_miners || \
 	  terminate_miners));
 
@@ -73,8 +71,6 @@ static GOptionEntry entries[] = {
 	  NULL
 	},
 	/* Processes */
-	{ "list-processes", 'p', 0, G_OPTION_ARG_NONE, &list_processes,
-	  N_("List all Tracker processes") },
 	{ "kill", 'k', 0, G_OPTION_ARG_NONE, &kill_miners,
 	  N_("Use SIGKILL to stop all miners"),
 	  N_("APPS") },
@@ -501,34 +497,6 @@ daemon_run (void)
 		g_printerr ("%s\n",
 		            _("You can not use the --kill and --terminate arguments together"));
 		return EXIT_FAILURE;
-	}
-
-	if (list_processes) {
-		GSList *pids, *l;
-		gchar *str;
-
-		pids = tracker_process_find_all ();
-
-		str = g_strdup_printf (g_dngettext (NULL,
-		                                    "Found %d PID…",
-		                                    "Found %d PIDs…",
-		                                    g_slist_length (pids)),
-		                       g_slist_length (pids));
-		g_print ("%s\n", str);
-		g_free (str);
-
-		for (l = pids; l; l = l->next) {
-			TrackerProcessData *pd = l->data;
-
-			str = g_strdup_printf (_("Found process ID %d for “%s”"), pd->pid, pd->cmd);
-			g_print ("%s\n", str);
-			g_free (str);
-		}
-
-		g_slist_foreach (pids, (GFunc) tracker_process_data_free, NULL);
-		g_slist_free (pids);
-
-		return EXIT_SUCCESS;
 	}
 
 	if (kill_miners || terminate_miners) {

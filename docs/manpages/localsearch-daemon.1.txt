@@ -35,8 +35,6 @@ also list miners running and available.
 
 == OPTIONS
 
-*-p, --list-processes*::
-  This lists all Tracker processes in the system.
 *-k, --kill::
   This uses SIGKILL to stop all Tracker processes found matching the
   parameter, if no extra parameter is passed, "all" will be assumed.
