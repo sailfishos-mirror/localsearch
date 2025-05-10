@@ -18,9 +18,7 @@ _<search-terms>_::
   the default operation is a logical AND. For logical OR operations,
   see *-r*.
 +
-If no search terms are supplied but a _resource-type_ is given (like
-*--folders* for example), then ALL items in that category are
-returned.
+If no search terms are supplied, then all items are returned.
 
 Only resources which currently exist will be returned by this command
 (see *--all* for more information).

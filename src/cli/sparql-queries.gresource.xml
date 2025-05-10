@@ -2,6 +2,7 @@
 <gresources>
   <gresource prefix="/org/freedesktop/LocalSearch">
     <file>queries/get-information-element.rq</file>
+    <file>queries/list-all.rq</file>
     <file>queries/list-documents.rq</file>
     <file>queries/list-files.rq</file>
     <file>queries/list-folders.rq</file>

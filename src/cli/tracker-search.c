@@ -56,6 +56,8 @@ static gboolean software;
 static const char *help_summary =
 	N_("Search for content matching TERMS, by type or across all types.");
 
+#define LIST_ALL_QUERY \
+	"/org/freedesktop/LocalSearch/queries/list-all.rq"
 #define LIST_DOCUMENTS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/list-documents.rq"
 #define LIST_FILES_QUERY \
@@ -95,16 +97,6 @@ static const char *help_summary =
 	"/org/freedesktop/LocalSearch/queries/search-software.rq"
 #define SEARCH_VIDEOS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/search-videos.rq"
-
-#define SEARCH_OPTIONS_ENABLED() \
-	(music_albums || music_artists || music_files || \
-	 software || \
-	 image_files || \
-	 video_files || \
-	 document_files || \
-	 files || \
-	 folders || \
-	 (terms && g_strv_length (terms) > 0))
 
 static GOptionEntry entries_resource_type[] = {
 	/* Search types */
@@ -480,11 +472,11 @@ search_run (void)
 		return success ? EXIT_SUCCESS : EXIT_FAILURE;
 	}
 
-	if (terms) {
+	{
 		gboolean success;
 
 		fts = get_fts_string (terms, or_operator);
-		resource_path = SEARCH_ALL_QUERY;
+		resource_path = fts ? SEARCH_ALL_QUERY : LIST_ALL_QUERY;
 
 		success = query_data (connection, resource_path, _("Results"),
 		                      fts, all, offset, limit, detailed);
@@ -519,27 +511,6 @@ search_option_context_new (void)
         return context;
 }
 
-static int
-search_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-        context = search_option_context_new ();
-	help = g_option_context_get_help (context, FALSE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
-static gboolean
-search_options_enabled (void)
-{
-	return SEARCH_OPTIONS_ENABLED ();
-}
-
 int
 tracker_search (int          argc,
                 const char **argv)
@@ -566,9 +537,5 @@ tracker_search (int          argc,
 
 	g_option_context_free (context);
 
-	if (search_options_enabled ()) {
-		return search_run ();
-	}
-
-	return search_run_default ();
+	return search_run ();
 }
