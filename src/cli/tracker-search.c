@@ -40,7 +40,6 @@ static gint offset;
 static gchar **terms;
 static gboolean detailed;
 static gboolean all;
-static gboolean disable_fts;
 static gboolean files;
 static gboolean folders;
 static gboolean music_albums;
@@ -173,10 +172,6 @@ static GOptionEntry entries[] = {
 	  N_("Return all non-existing matches too (i.e. include unmounted volumes)"),
 	  NULL
 	},
-	{ "disable-fts", 0, 0, G_OPTION_ARG_NONE, &disable_fts,
-	  N_("Disable Full Text Search (FTS). Implies --disable-snippets"),
-	  NULL,
-	},
 	{ "help", 'h', 0, G_OPTION_ARG_NONE, &show_help,
 	  N_("Show help options"),
 	  NULL,
@@ -196,10 +191,6 @@ get_fts_string (GStrv search_words)
 {
 	GString *fts;
 	gint i, len;
-
-	if (disable_fts) {
-		return NULL;
-	}
 
 	if (!search_words) {
 		return NULL;
