@@ -40,24 +40,12 @@
 #include "tracker-dbus.h"
 #include "tracker-miner-manager.h"
 
-typedef struct {
-	TrackerSparqlConnection *connection;
-	GHashTable *prefixes;
-	GStrv filter;
-} WatchData;
-
 static GMainLoop *main_loop;
 static GHashTable *miners_progress;
 static GHashTable *miners_status;
 static gint longest_miner_name_length = 0;
 static gint paused_length = 0;
 
-static gboolean full_namespaces = FALSE; /* Can be turned on if needed, or made cmd line option */
-
-/* Note:
- * Every time a new option is added, make sure it is considered in the
- * 'STATUS_OPTIONS_ENABLED' macro below
- */
 static gboolean status;
 static gboolean follow;
 static gboolean watch;
@@ -66,17 +54,13 @@ static gboolean list_processes;
 static gboolean start;
 static gboolean kill_miners;
 static gboolean terminate_miners;
-static gchar *backup;
-static gchar *restore;
 
 #define DAEMON_OPTIONS_ENABLED() \
 	((status || follow || watch) || \
 	 (list_processes || \
 	  start || \
 	  kill_miners || \
-	  terminate_miners || \
-	  backup || \
-	  restore));
+	  terminate_miners));
 
 static GOptionEntry entries[] = {
 	/* Status */
@@ -313,44 +297,6 @@ miners_progress_destroy_notify (gpointer data)
 	value = data;
 	g_value_unset (value);
 	g_slice_free (GValue, value);
-}
-
-static gchar *
-get_shorthand (GHashTable  *prefixes,
-               const gchar *namespace)
-{
-	gchar *hash;
-
-	hash = strrchr (namespace, '#');
-
-	if (hash) {
-		gchar *property;
-		const gchar *prefix;
-
-		property = hash + 1;
-		*hash = '\0';
-
-		prefix = g_hash_table_lookup (prefixes, namespace);
-
-		return g_strdup_printf ("%s:%s", prefix, property);
-	}
-
-	return g_strdup (namespace);
-}
-
-static inline void
-print_key (GHashTable  *prefixes,
-           const gchar *key)
-{
-	if (G_UNLIKELY (full_namespaces)) {
-		g_print ("'%s'\n", key);
-	} else {
-		gchar *shorthand;
-
-		shorthand = get_shorthand (prefixes, key);
-		g_print ("'%s'\n", shorthand);
-		g_free (shorthand);
-	}
 }
 
 static void
