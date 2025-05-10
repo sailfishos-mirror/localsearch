@@ -32,8 +32,8 @@
 
 #include <tracker-common.h>
 
+#include "tracker-indexer-proxy.h"
 #include "tracker-term-utils.h"
-#include "tracker-miner-manager.h"
 #include "tracker-color.h"
 #include "tracker-cli-utils.h"
 
@@ -290,56 +290,27 @@ get_file_and_folder_count (int *files,
 }
 
 static gboolean
-are_miners_finished (gint *max_remaining_time)
+are_miners_finished (void)
 {
-	TrackerMinerManager *manager;
-	GError *error = NULL;
-	GSList *miners_running;
-	GSList *l;
-	gboolean finished = TRUE;
-	gint _max_remaining_time = 0;
+	g_autoptr (TrackerIndexerMiner) indexer_proxy = NULL;
+	double progress;
 
-	/* Don't auto-start the miners here */
-	manager = tracker_miner_manager_new_full (FALSE, &error);
-	if (!manager) {
-		g_printerr (_("Could not get status, manager could not be created, %s"),
-		            error ? error->message : _("No error given"));
-		g_printerr ("\n");
-		g_clear_error (&error);
-		return EXIT_FAILURE;
-	}
+	indexer_proxy =
+		tracker_indexer_miner_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+		                                              G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START |
+		                                              G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
+		                                              "org.freedesktop.LocalSearch3",
+		                                              "/org/freedesktop/Tracker3/Miner/Files",
+		                                              NULL, NULL);
+	if (!indexer_proxy)
+		return FALSE;
 
-	miners_running = tracker_miner_manager_get_running (manager);
+	if (!tracker_indexer_miner_call_get_progress_sync (indexer_proxy,
+	                                                   &progress,
+	                                                   NULL, NULL))
+		return FALSE;
 
-	for (l = miners_running; l; l = l->next) {
-		gchar *status;
-		gdouble progress;
-		gint remaining_time;
-
-		if (!tracker_miner_manager_get_status (manager,
-		                                       l->data,
-		                                       &status,
-		                                       &progress,
-		                                       &remaining_time)) {
-			continue;
-		}
-
-		g_free (status);
-
-		finished &= progress == 1.0;
-		_max_remaining_time = MAX(remaining_time, _max_remaining_time);
-	}
-
-	g_slist_foreach (miners_running, (GFunc) g_free, NULL);
-	g_slist_free (miners_running);
-
-	if (max_remaining_time) {
-		*max_remaining_time = _max_remaining_time;
-	}
-
-	g_object_unref (manager);
-
-	return finished;
+	return progress == 1.0;
 }
 
 static gint
@@ -442,7 +413,7 @@ get_no_args (void)
 	g_free (data_dir);
 
 	/* Are we finished indexing? */
-	if (!are_miners_finished (NULL)) {
+	if (!are_miners_finished ()) {
 		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("Data is still being indexed"));
 	} else {
 		g_print ("%s\n", _("Indexer is idle"));
