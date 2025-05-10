@@ -49,6 +49,8 @@
 #define COUNT_FOLDERS_QUERY \
 	"/org/freedesktop/LocalSearch/queries/count-folders.rq"
 
+#define LINK_STR "[🡕]" /* NORTH EAST SANS-SERIF ARROW, in consistence with systemd */
+
 #define STATUS_OPTIONS_ENABLED()	  \
 	(show_stat)
 
@@ -70,14 +72,41 @@ static GOptionEntry entries[] = {
 static int show_errors (gchar    **terms,
                         gboolean   piped);
 
+typedef struct {
+	char *graph;
+	char *type;
+	char *type_expanded;
+	gint64 count;
+} ClassStat;
+
+static void
+clear_stat (gpointer data)
+{
+	ClassStat *stat = data;
+
+	g_free (stat->graph);
+	g_free (stat->type_expanded);
+	g_free (stat->type);
+}
+
+static void
+print_link (const gchar *url)
+{
+	g_print ("\x1B]8;;%s\a" LINK_STR "\x1B]8;;\a", url);
+}
+
 static int
 status_stat (void)
 {
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	const char *last_graph = NULL;
+	TrackerNamespaceManager *namespaces;
+	g_autoptr (GArray) stats = NULL;
 	GError *error = NULL;
-	gboolean shown = FALSE;
+	int longest_class = 0;
+	guint i;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 	                                                NULL, NULL, &error);
@@ -107,17 +136,19 @@ status_stat (void)
 
 	tracker_term_pipe_to_pager ();
 
+	namespaces = tracker_sparql_connection_get_namespace_manager (connection);
+	stats = g_array_new (FALSE, FALSE, sizeof (ClassStat));
+	g_array_set_clear_func (stats, clear_stat);
+
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		const gchar *rdf_type;
-		const gchar *rdf_type_count;
+		g_autofree char *compressed_rdf_type = NULL;
+		const gchar *graph, *rdf_type;
+		int64_t rdf_type_count;
+		ClassStat entry;
 
-		if (!shown) {
-			g_print ("%s\n", _("Statistics:"));
-			shown = TRUE;
-		}
-
-		rdf_type = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-		rdf_type_count = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		graph = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		rdf_type = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		rdf_type_count = tracker_sparql_cursor_get_integer (cursor, 2);
 
 		if (terms) {
 			gint i, n_terms;
@@ -136,11 +167,34 @@ status_stat (void)
 			}
 		}
 
-		g_print ("  %s = %s\n", rdf_type, rdf_type_count);
+		entry.graph = tracker_namespace_manager_compress_uri (namespaces, graph);
+		entry.type = tracker_namespace_manager_compress_uri (namespaces, rdf_type);
+		entry.type_expanded = g_strdup (rdf_type);
+		entry.count = rdf_type_count;
+
+		longest_class = MAX (longest_class, strlen (entry.type));
+
+		g_array_append_val (stats, entry);
 	}
 
-	if (!shown)
-		g_print ("%s\n", _("None"));
+	for (i = 0; i < stats->len; i++) {
+		ClassStat *stat;
+		int padding;
+
+		stat = &g_array_index (stats, ClassStat, i);
+
+		if (g_strcmp0 (stat->graph, last_graph) != 0) {
+			g_autofree char *compressed_graph = NULL;
+
+			g_print (BOLD_BEGIN "%s: " BOLD_END "\n", stat->graph);
+			last_graph = stat->graph;
+		}
+
+		padding = longest_class + 1 - strlen (stat->type);
+		g_print ("%*c%s", padding, ' ', stat->type);
+		print_link (stat->type_expanded);
+		g_print (": %" G_GINT64_FORMAT "\n", stat->count);
+	}
 
 	tracker_term_pager_close ();
 
