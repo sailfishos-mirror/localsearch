@@ -33,7 +33,7 @@
 
 #include "tracker-process.h"
 #include "tracker-color.h"
-#include "tracker-miner-manager.h"
+#include "tracker-control-proxy.h"
 
 #define ASK_FILE_QUERY \
 	"/org/freedesktop/LocalSearch/queries/ask-file.rq"
@@ -59,7 +59,7 @@ delete_info_recursively (GFile *file)
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (TrackerSparqlStatement) ask_stmt = NULL, delete_stmt = NULL;
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
-	TrackerMinerManager *miner_manager;
+	g_autoptr (TrackerControlIndex) control_proxy = NULL;
 	g_autofree char *uri = NULL;
 	GError *error = NULL;
 
@@ -112,11 +112,20 @@ delete_info_recursively (GFile *file)
 	                   "and will be reindexed again."));
 
 	/* Request reindexing of this data, it was previously in the store. */
-	miner_manager = tracker_miner_manager_new_full (FALSE, NULL);
-	tracker_miner_manager_index_location (miner_manager, file, NULL, TRACKER_INDEX_LOCATION_FLAGS_NONE, NULL, &error);
-	g_object_unref (miner_manager);
+	control_proxy =
+		tracker_control_index_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+		                                              G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
+		                                              "org.freedesktop.Tracker3.Miner.Files.Control",
+		                                              "/org/freedesktop/Tracker3/Miner/Files/Index",
+		                                              NULL, &error);
 
-	if (error)
+	if (!control_proxy)
+		goto error;
+
+	if (!tracker_control_index_call_index_location_sync (control_proxy, uri,
+	                                                     (const char *[]) { "", NULL },
+	                                                     (const char *[]) { "", NULL },
+	                                                     NULL, &error))
 		goto error;
 
 	return EXIT_SUCCESS;

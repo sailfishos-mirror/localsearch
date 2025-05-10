@@ -11,6 +11,13 @@ indexer_dbus_proxy = gnome.gdbus_codegen('tracker-indexer-proxy',
     autocleanup: 'all',
 )
 
+control_dbus_proxy = gnome.gdbus_codegen('tracker-control-proxy',
+    dbus_index_files_interface,
+    interface_prefix: 'org.freedesktop.Tracker3.Miner.Files.',
+    namespace: 'TrackerControl',
+    autocleanup: 'all',
+)
+
 sources = files(
     'tracker-cli-utils.c',
     'tracker-daemon.c',
@@ -36,6 +43,7 @@ executable(main_command_name,
     sources,
     sparql_gresource,
     indexer_dbus_proxy,
+    control_dbus_proxy,
     c_args: tracker_c_args + [
         '-DMAIN_COMMAND_NAME=@0@'.format(main_command_name),
         '-DLIBEXECDIR="@0@"'.format(join_paths(get_option('prefix'), get_option('libexecdir'))),
