@@ -65,9 +65,6 @@ Only resources which currently exist will be returned by this command
   instead of looking for the search terms amongst ALL properties. It is
   more limiting to do this, but sometimes searching without FTS can
   yield better results if the FTS ranking is off.
-*--disable-color*::
-  This disables any ANSI color use on the command line. By default this
-  is enabled to make it easier to see results.
 
 == SEE ALSO
 

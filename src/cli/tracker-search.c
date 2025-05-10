@@ -41,7 +41,6 @@ static gchar **terms;
 static gboolean detailed;
 static gboolean all;
 static gboolean disable_fts;
-static gboolean disable_color;
 static gboolean files;
 static gboolean folders;
 static gboolean music_albums;
@@ -178,10 +177,6 @@ static GOptionEntry entries[] = {
 	  N_("Disable Full Text Search (FTS). Implies --disable-snippets"),
 	  NULL,
 	},
-	{ "disable-color", 0, 0, G_OPTION_ARG_NONE, &disable_color,
-	  N_("Disable color when printing snippets and results"),
-	  NULL,
-	},
 	{ "help", 'h', 0, G_OPTION_ARG_NONE, &show_help,
 	  N_("Show help options"),
 	  NULL,
@@ -265,31 +260,34 @@ get_cursor_results (TrackerSparqlCursor *cursor,
                     gint                 search_limit,
                     gboolean             details)
 {
+	gboolean is_tty;
 	gint count = 0;
 
-	g_print ("%s:\n", name);
+	is_tty = tracker_term_is_tty ();
+
+	tracker_term_pipe_to_pager ();
+
+	if (is_tty)
+		g_print (BOLD_BEGIN "%s:" BOLD_END "\n", name);
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		if (details) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
+			g_print ("%s (%s)\n",
 			         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-			         disable_color ? "" : TITLE_END,
 			         tracker_sparql_cursor_get_string (cursor, 0, NULL));
 
 			if (tracker_sparql_cursor_get_n_columns (cursor) > 2)
 				print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
 		} else {
-			g_print ("  %s%s%s\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-			         disable_color ? "" : TITLE_END);
+			g_print ("%s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
 		}
 
 		count++;
 	}
 
 	g_print ("\n");
+
+	tracker_term_pager_close ();
 
 	return TRUE;
 }
@@ -385,10 +383,8 @@ search_run (void)
 
 	title = titles[query_type];
 
-	tracker_term_pipe_to_pager ();
 	success = query_data (connection, resource_path, _(title),
 			      fts, all, offset, limit, detailed);
-	tracker_term_pager_close ();
 
 	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
