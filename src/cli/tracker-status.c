@@ -42,6 +42,13 @@
 #define KEY_MESSAGE "Message"
 #define KEY_SPARQL "Sparql"
 
+#define GET_STATS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/get-class-stats.rq"
+#define COUNT_FILES_QUERY \
+	"/org/freedesktop/LocalSearch/queries/count-files.rq"
+#define COUNT_FOLDERS_QUERY \
+	"/org/freedesktop/LocalSearch/queries/count-folders.rq"
+
 #define STATUS_OPTIONS_ENABLED()	  \
 	(show_stat)
 
@@ -63,26 +70,14 @@ static GOptionEntry entries[] = {
 static int show_errors (gchar    **terms,
                         gboolean   piped);
 
-static TrackerSparqlCursor *
-statistics_query (TrackerSparqlConnection  *connection,
-		  GError                  **error)
-{
-	return tracker_sparql_connection_query (connection,
-						"SELECT ?class (COUNT(?elem) AS ?count) {"
-						"  ?class a rdfs:Class . "
-						"  ?elem a ?class . "
-						"} "
-						"GROUP BY ?class "
-						"ORDER BY DESC count(?elem) ",
-                                               NULL, error);
-}
-
 static int
 status_stat (void)
 {
-	TrackerSparqlConnection *connection;
-	TrackerSparqlCursor *cursor;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	GError *error = NULL;
+	gboolean shown = FALSE;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 	                                                NULL, NULL, &error);
@@ -95,11 +90,12 @@ status_stat (void)
 		return EXIT_FAILURE;
 	}
 
-	tracker_term_pipe_to_pager ();
-
-	cursor = statistics_query (connection, &error);
-
-	g_object_unref (connection);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                GET_STATS_QUERY,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt)
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 
 	if (error) {
 		g_printerr ("%s, %s\n",
@@ -109,59 +105,42 @@ status_stat (void)
 		return EXIT_FAILURE;
 	}
 
-	if (!cursor) {
-		g_print ("%s\n", _("No statistics available"));
-	} else {
-		GString *output;
+	tracker_term_pipe_to_pager ();
 
-		output = g_string_new ("");
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		const gchar *rdf_type;
+		const gchar *rdf_type_count;
 
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			const gchar *rdf_type;
-			const gchar *rdf_type_count;
+		if (!shown) {
+			g_print ("%s\n", _("Statistics:"));
+			shown = TRUE;
+		}
 
-			rdf_type = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-			rdf_type_count = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		rdf_type = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		rdf_type_count = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 
-			if (terms) {
-				gint i, n_terms;
-				gboolean show_rdf_type = FALSE;
+		if (terms) {
+			gint i, n_terms;
+			gboolean show_rdf_type = FALSE;
 
-				n_terms = g_strv_length (terms);
+			n_terms = g_strv_length (terms);
 
-				for (i = 0;
-				     i < n_terms && !show_rdf_type;
-				     i++) {
-					show_rdf_type = g_str_match_string (terms[i], rdf_type, TRUE);
-				}
-
-				if (!show_rdf_type) {
-					continue;
-				}
+			for (i = 0;
+			     i < n_terms && !show_rdf_type;
+			     i++) {
+				show_rdf_type = g_str_match_string (terms[i], rdf_type, TRUE);
 			}
 
-			g_string_append_printf (output,
-			                        "  %s = %s\n",
-			                        rdf_type,
-			                        rdf_type_count);
+			if (!show_rdf_type) {
+				continue;
+			}
 		}
 
-		if (output->len > 0) {
-			g_string_prepend (output, "\n");
-			/* To translators: This is to say there are no
-			 * statistics found. We use a "Statistics:
-			 * None" with multiple print statements */
-			g_string_prepend (output, _("Statistics:"));
-		} else {
-			g_string_append_printf (output,
-			                        "  %s\n", _("None"));
-		}
-
-		g_print ("%s\n", output->str);
-		g_string_free (output, TRUE);
-
-		g_object_unref (cursor);
+		g_print ("  %s = %s\n", rdf_type, rdf_type_count);
 	}
+
+	if (!shown)
+		g_print ("%s\n", _("None"));
 
 	tracker_term_pager_close ();
 
@@ -185,8 +164,7 @@ static int
 get_file_and_folder_count (int *files,
                            int *folders)
 {
-	TrackerSparqlConnection *connection;
-	TrackerSparqlCursor *cursor;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	GError *error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
@@ -209,17 +187,16 @@ get_file_and_folder_count (int *files,
 	}
 
 	if (files) {
-		const gchar query[] =
-			"SELECT COUNT(?file) "
-			"WHERE { "
-			"  GRAPH tracker:FileSystem {"
-			"    ?file a nfo:FileDataObject ;"
-			"          nie:dataSource/tracker:available true ."
-			"    FILTER (! EXISTS { ?file nie:interpretedAs/rdf:type nfo:Folder }) "
-			"  }"
-			"}";
+		g_autoptr (TrackerSparqlStatement) stmt = NULL;
+		g_autoptr (TrackerSparqlCursor) cursor = NULL;
 
-		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                                COUNT_FILES_QUERY,
+		                                                                NULL,
+		                                                                &error);
+
+		if (stmt)
+			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 
 		if (error || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
 			g_printerr ("%s, %s\n",
@@ -230,21 +207,19 @@ get_file_and_folder_count (int *files,
 		}
 
 		*files = tracker_sparql_cursor_get_integer (cursor, 0);
-
-		g_object_unref (cursor);
 	}
 
 	if (folders) {
-		const gchar query[] =
-			"SELECT COUNT(?folders)"
-			"WHERE { "
-			"  GRAPH tracker:FileSystem {"
-			"    ?folders a nfo:Folder ;"
-			"             nie:isStoredAs/nie:dataSource/tracker:available true ."
-			"  }"
-			"}";
+		g_autoptr (TrackerSparqlStatement) stmt = NULL;
+		g_autoptr (TrackerSparqlCursor) cursor = NULL;
 
-		cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                                COUNT_FOLDERS_QUERY,
+		                                                                NULL,
+		                                                                &error);
+
+		if (stmt)
+			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 
 		if (error || !tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 			g_printerr ("%s, %s\n",
@@ -255,11 +230,7 @@ get_file_and_folder_count (int *files,
 		}
 
 		*folders = tracker_sparql_cursor_get_integer (cursor, 0);
-
-		g_object_unref (cursor);
 	}
-
-	g_object_unref (connection);
 
 	return EXIT_SUCCESS;
 }
