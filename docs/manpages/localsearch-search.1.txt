@@ -57,8 +57,7 @@ Only resources which currently exist will be returned by this command
 == OPTIONS
 
 *-l, --limit=<__limit__>*::
-  Limit search to _limit_ results. The default is 10 or 512 with
-  --disable-snippets.
+  Limit search to _limit_ results.
 *-o, --offset=<__offset__>*::
   Offset the search results by _offset_. For example, start at item
   number 10 in the results. The default is 0.
