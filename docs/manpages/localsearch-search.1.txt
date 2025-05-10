@@ -51,8 +51,6 @@ Only resources which currently exist will be returned by this command
 *-o, --offset=<__offset__>*::
   Offset the search results by _offset_. For example, start at item
   number 10 in the results. The default is 0.
-*-r, --or-operator*::
-  Use OR for search terms instead of AND (the default)
 *-d, --detailed*::
   Show the unique URN associated with each search result and a snippet
   of the matched search terms, if any was provided.

@@ -38,7 +38,6 @@
 static gint limit = -1;
 static gint offset;
 static gchar **terms;
-static gboolean or_operator;
 static gboolean detailed;
 static gboolean all;
 static gboolean disable_fts;
@@ -167,10 +166,6 @@ static GOptionEntry entries[] = {
 	  N_("Offset the results"),
 	  "0"
 	},
-	{ "or-operator", 'r', 0, G_OPTION_ARG_NONE, &or_operator,
-	  N_("Use OR for search terms instead of AND (the default)"),
-	  NULL
-	},
 	{ "detailed", 'd', 0, G_OPTION_ARG_NONE, &detailed,
 	  N_("Show URNs for results"),
 	  NULL
@@ -202,8 +197,7 @@ static GOptionEntry entries[] = {
 };
 
 static gchar *
-get_fts_string (GStrv    search_words,
-                gboolean use_or_operator)
+get_fts_string (GStrv search_words)
 {
 	GString *fts;
 	gint i, len;
@@ -229,11 +223,7 @@ get_fts_string (GStrv    search_words,
 		g_string_append (fts, escaped);
 
 		if (i < len - 1) {
-			if (use_or_operator) {
-				g_string_append (fts, " OR ");
-			} else {
-				g_string_append (fts, " ");
-			}
+			g_string_append (fts, " ");
 		}
 
 		g_free (escaped);
@@ -387,7 +377,7 @@ search_run (void)
 	else
 		query_type = ALL;
 
-	fts = get_fts_string (terms, or_operator);
+	fts = get_fts_string (terms);
 
 	resource_path = fts ?
 		search_queries[query_type] :
