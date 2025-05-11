@@ -256,6 +256,13 @@ if get_option('systemd_user_services')
   endif
 endif
 
+if get_option('bash_completion')
+  bash_completion_dir = get_option('bash_completion_dir')
+
+  if bash_completion_dir == ''
+    bash_completion_dir = join_paths(datadir, 'bash-completion', 'completions')
+  endif
+endif
 
 conf = configuration_data()
 
@@ -416,12 +423,12 @@ summary = [
   '    Battery/mains power detection:          ' + battery_detection_library_name,
   '    Releasing heap memory with malloc_trim: ' + have_malloc_trim.to_string(),
   '    Store creation time:                    ' + glib.version().version_compare('>=2.70.0').to_string(),
+  '    Bash completion support:                ' + get_option('bash_completion').to_string() + ' (' + bash_completion_dir + ')',
   '\nData Miners / Writebacks:',
   '    FS (File System):                       ' + have_tracker_miner_fs.to_string(),
   '   Extract (secondary extraction):     ' + have_tracker_extract.to_string(),
   '   Writeback (writing changes back):   ' + have_tracker_writeback.to_string(),
 ]
-
 
 if have_tracker_extract
   summary += [

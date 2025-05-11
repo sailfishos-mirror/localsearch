@@ -75,6 +75,13 @@ foreach c: python_commands
     )
 endforeach
 
+if get_option('bash_completion')
+    install_data(
+        sources: 'bash-completion/localsearch',
+        install_dir: bash_completion_dir,
+        rename: main_command_name)
+endif
+
 devenv = environment()
 devenv.set('LOCALSEARCH_CLI_PATH', meson.current_build_dir())
 meson.add_devenv(devenv)
