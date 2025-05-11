@@ -56,25 +56,3 @@ status is put on a new line.
 *-w, --watch=[_ontology_]*::
   Watch changes that happen to the database in real time. This requires
   Ctrl+C to stop and return to the command line.
-
-If _ontology_ is unspecified, all updates are shown. The _ontology_ can
-be a comma separated list of shorthand or long hand ontology properties.
-For example:
-
-....
-    $ localsearch daemon -w nie:url,nie:mimeType,nfo:fileSize,nie:dataSource
-    Now listening for resource updates to the database
-    All nie:plainTextContent properties are omitted
-
-    Press Ctrl+C to stop
-
-    'nfo:Document'
-       'nfo:fileSize' = '1770'
-       'nie:dataSource' = 'http://tracker.api.gnome.org/ontology/v3/tracker#extractor-data-source'
-       'nie:mimeType' = 'text/plain'
-       'nie:url' = 'file:///home/martyn/.bash_aliases'
-    'nfo:Document'
-       'nie:dataSource' = 'http://tracker.api.gnome.org/ontology/v3/tracker#extractor-data-source'
-
-    ...
-....
