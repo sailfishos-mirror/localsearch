@@ -32,6 +32,7 @@
 
 #include "tracker-daemon.h"
 #include "tracker-extract.h"
+#include "tracker-help.h"
 #include "tracker-index.h"
 #include "tracker-info.h"
 #include "tracker-inhibit.h"
@@ -65,6 +66,7 @@ static int launch_external_command (int argc, const char **argv);
 static void print_usage (void);
 
 static struct cmd_struct commands[] = {
+	{ "help", tracker_help, N_("Show help on subcommands") },
 	{ "daemon", tracker_daemon, N_("Start and stop the indexer") },
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("List and change indexed folders") },
