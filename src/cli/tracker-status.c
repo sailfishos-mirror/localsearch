@@ -108,7 +108,7 @@ status_stat (void)
 	int longest_class = 0;
 	guint i;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
 
 	if (!connection) {
@@ -221,7 +221,7 @@ get_file_and_folder_count (int *files,
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	GError *error = NULL;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
 
 	if (files) {

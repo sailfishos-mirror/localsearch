@@ -301,13 +301,6 @@ serialize_cb (GObject *object,
 	g_main_loop_quit (main_loop);
 }
 
-static TrackerSparqlConnection *
-create_connection (GError **error)
-{
-	return tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
-	                                          NULL, NULL, error);
-}
-
 static gboolean
 output_eligible_status_for_file (gchar   *path,
                                  GError **error)
@@ -383,7 +376,8 @@ info_run (void)
 
 	tracker_term_pipe_to_pager ();
 
-	connection = create_connection (&error);
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
+	                                                NULL, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",

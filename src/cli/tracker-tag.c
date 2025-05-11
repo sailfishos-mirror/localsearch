@@ -938,7 +938,7 @@ tag_run (void)
 	TrackerSparqlConnection *connection;
 	GError *error = NULL;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
 
 	if (!connection) {
