@@ -37,6 +37,10 @@ not have to be an absolute path.
 *-o, --output-format=<__FORMAT__>*::
   Choose which format to use to output results. Supported formats are
   _turtle_, _trig_ and _json-ld_.
+*-e, --eligible=<__FILE__>*::
+  Checks whether a file is eligible for indexing. There might be a number
+  of factors why it is not, e.g. being in a non-indexed folder, via
+  configuration or filters.
 
 == SEE ALSO
 
