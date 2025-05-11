@@ -290,9 +290,11 @@ get_file_and_folder_count (int *files,
 }
 
 static gboolean
-are_miners_finished (void)
+are_miners_finished (gboolean *paused)
 {
 	g_autoptr (TrackerIndexerMiner) indexer_proxy = NULL;
+	g_auto (GStrv) apps = NULL, reasons = NULL;
+	gboolean is_paused;
 	double progress;
 
 	indexer_proxy =
@@ -305,12 +307,22 @@ are_miners_finished (void)
 	if (!indexer_proxy)
 		return FALSE;
 
+	if (!tracker_indexer_miner_call_get_pause_details_sync (indexer_proxy,
+	                                                        &apps,
+	                                                        &reasons,
+	                                                        NULL, NULL))
+		return FALSE;
+
 	if (!tracker_indexer_miner_call_get_progress_sync (indexer_proxy,
 	                                                   &progress,
 	                                                   NULL, NULL))
 		return FALSE;
 
-	return progress == 1.0;
+	is_paused = apps && apps[0] && reasons && reasons[0];
+
+	*paused = is_paused;
+
+	return !is_paused && progress == 1.0;
 }
 
 static gint
@@ -374,7 +386,7 @@ get_no_args (void)
 	gdouble remaining;
 	gint files, folders;
 	GList *keyfiles;
-	gboolean use_pager;
+	gboolean use_pager, paused;
 
 	use_pager = tracker_term_pipe_to_pager ();
 
@@ -413,8 +425,11 @@ get_no_args (void)
 	g_free (data_dir);
 
 	/* Are we finished indexing? */
-	if (!are_miners_finished ()) {
-		g_print (BOLD_BEGIN "%s" BOLD_END "\n", _("Data is still being indexed"));
+	if (!are_miners_finished (&paused)) {
+		g_print (BOLD_BEGIN "%s" BOLD_END "\n",
+		         paused ?
+		         _("Indexer is paused") :
+		         _("Data is still being indexed"));
 	} else {
 		g_print ("%s\n", _("Indexer is idle"));
 	}
@@ -428,7 +443,7 @@ get_no_args (void)
 		                      g_list_length (keyfiles)),
 		         g_list_length (keyfiles));
 
-		g_print ("\n\n");
+		g_print (":\n\n");
 
 		if (use_pager) {
 			print_errors (keyfiles);
