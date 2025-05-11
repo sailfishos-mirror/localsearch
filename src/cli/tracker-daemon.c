@@ -92,14 +92,21 @@ notifier_events_cb (TrackerNotifier         *notifier,
 		    GPtrArray               *events,
 		    TrackerSparqlConnection *conn)
 {
+	TrackerNamespaceManager *namespaces;
 	gint i;
+
+	namespaces = tracker_sparql_connection_get_namespace_manager (conn);
 
 	for (i = 0; i < events->len; i++) {
 		TrackerNotifierEvent *event;
+		g_autofree char *compressed_graph = NULL;
 
 		event = g_ptr_array_index (events, i);
-		g_print ("  '%s' => '%s'\n", graph,
-			 tracker_notifier_event_get_urn (event));
+		compressed_graph = tracker_namespace_manager_compress_uri (namespaces,
+		                                                           graph);
+		g_print ("%s (%s)\n",
+		         tracker_notifier_event_get_urn (event),
+		         compressed_graph);
 	}
 }
 
@@ -223,9 +230,8 @@ daemon_run (void)
 
 	if (watch) {
 		g_autoptr (GMainLoop) main_loop = NULL;
-		TrackerSparqlConnection *sparql_connection;
-		TrackerNotifier *notifier;
-		GError *error = NULL;
+		g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
+		g_autoptr (TrackerNotifier) notifier = NULL;
 
 		sparql_connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
 		                                                       NULL, NULL, &error);
@@ -233,24 +239,20 @@ daemon_run (void)
 		if (!sparql_connection) {
 			g_critical ("%s, %s",
 			            _("Could not get SPARQL connection"),
-			            error ? error->message : _("No error given"));
-			g_clear_error (&error);
+			            error->message);
 			return EXIT_FAILURE;
 		}
 
 		notifier = tracker_sparql_connection_create_notifier (sparql_connection);
 		g_signal_connect (notifier, "events",
 				  G_CALLBACK (notifier_events_cb), sparql_connection);
-		g_object_unref (sparql_connection);
 
-		g_print ("%s\n", _("Now listening for resource updates to the database"));
-		g_print ("%s\n\n", _("All nie:plainTextContent properties are omitted"));
+		g_print ("%s\n", _("Now listening to database updates"));
 		g_print ("%s\n", _("Press Ctrl+C to stop"));
 
 		main_loop = g_main_loop_new (NULL, FALSE);
 		initialize_signal_handler (main_loop);
 		g_main_loop_run (main_loop);
-		g_object_unref (notifier);
 
 		/* Carriage return, so we paper over the ^C */
 		g_print ("\r");
