@@ -44,7 +44,7 @@ also list miners running and available.
   This uses SIGTERM to stop all Tracker processes.  This is recommended over
   --kill because it gives the processes time to shutdown cleanly.
 *-s, --start*::
-  Starts all miners.
+  Starts the indexer.
 *-f, --follow*::
   Follow status changes to daemons as they happen. This is a top level
   view of what is happening. You will see the name for each daemon and a

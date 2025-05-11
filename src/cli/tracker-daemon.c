@@ -78,7 +78,7 @@ static GOptionEntry entries[] = {
 	  N_("Use SIGTERM to stop all miners"),
 	  N_("APPS") },
 	{ "start", 's', 0, G_OPTION_ARG_NONE, &start,
-	  N_("Starts miners"),
+	  N_("Starts the indexer"),
 	  NULL },
 	{ NULL }
 };
@@ -511,51 +511,18 @@ daemon_run (void)
 	}
 
 	if (start) {
-		TrackerMinerManager *manager;
-		GSList *miners, *l;
+		g_autoptr (TrackerSparqlConnection) sparql_conn = NULL;
 
-		g_print ("%s\n", _("Starting miners…"));
+		g_print ("%s\n", _("Starting indexer…"));
 
-		/* Auto-start the miners here */
-		manager = tracker_miner_manager_new_full (TRUE, &error);
-		if (!manager) {
-			g_printerr (_("Could not start miners, manager could not be created, %s"),
-			            error ? error->message : _("No error given"));
-			g_printerr ("\n");
-			g_clear_error (&error);
+		sparql_conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+		                                                 NULL, NULL, &error);
+		if (error) {
+			g_printerr ("%s: %s\n", _("Could not start indexer"), error->message);
 			return EXIT_FAILURE;
 		}
 
-		miners = tracker_miner_manager_get_available (manager);
-
-		/* Get the status of all miners, this will start all
-		 * miners not already running.
-		 */
-		for (l = miners; l; l = l->next) {
-			const gchar *display_name;
-			gdouble progress = 0.0;
-
-			display_name = tracker_miner_manager_get_display_name (manager, l->data);
-
-			if (!tracker_miner_manager_get_status (manager,
-			                                       l->data,
-			                                       NULL,
-			                                       &progress,
-			                                       NULL)) {
-				g_printerr ("  ✗ %s (%s)\n",
-				            display_name,
-				            _("perhaps a disabled plugin?"));
-			} else {
-				g_print ("  ✓ %s\n",
-				         display_name);
-			}
-
-			g_free (l->data);
-		}
-
-		g_slist_free (miners);
-		g_object_unref (manager);
-
+		tracker_sparql_connection_close (sparql_conn);
 		return EXIT_SUCCESS;
 	}
 
