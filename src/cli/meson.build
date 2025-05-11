@@ -25,7 +25,6 @@ sources = files(
     'tracker-index.c',
     'tracker-info.c',
     'tracker-inhibit.c',
-    'tracker-miner-manager.c',
     'tracker-process.c',
     'tracker-reset.c',
     'tracker-search.c',
