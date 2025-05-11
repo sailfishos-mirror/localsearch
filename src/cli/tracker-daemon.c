@@ -46,16 +46,11 @@ static GHashTable *miners_status;
 static gint longest_miner_name_length = 0;
 static gint paused_length = 0;
 
-static gboolean status;
 static gboolean follow;
 static gboolean watch;
 
 static gboolean start;
 static gboolean terminate;
-
-#define DAEMON_OPTIONS_ENABLED() \
-	((status || follow || watch) || \
-	 (start || terminate));
 
 static GOptionEntry entries[] = {
 	/* Status */
@@ -311,11 +306,10 @@ static gint
 daemon_run (void)
 {
 	TrackerMinerManager *manager;
-
-	/* --follow implies --status */
-	if (follow) {
-		status = TRUE;
-	}
+	g_autoptr (GError) error = NULL;
+	GSList *miners_available;
+	GSList *miners_running;
+	GSList *l;
 
 	if (watch) {
 		TrackerSparqlConnection *sparql_connection;
@@ -353,98 +347,107 @@ daemon_run (void)
 		return EXIT_SUCCESS;
 	}
 
-	if (status) {
-		GError *error = NULL;
-		GSList *miners_available;
-		GSList *miners_running;
-		GSList *l;
+	if (terminate) {
+		return tracker_process_stop (SIGTERM);
+	}
 
-		/* Don't auto-start the miners here */
-		manager = tracker_miner_manager_new_full (FALSE, &error);
-		if (!manager) {
-			g_printerr (_("Could not get status, manager could not be created, %s"),
-			            error ? error->message : _("No error given"));
-			g_printerr ("\n");
-			g_clear_error (&error);
+	if (start) {
+		g_autoptr (TrackerSparqlConnection) sparql_conn = NULL;
+
+		g_print ("%s\n", _("Starting indexer…"));
+
+		sparql_conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+		                                                 NULL, NULL, &error);
+		if (error) {
+			g_printerr ("%s: %s\n", _("Could not start indexer"), error->message);
 			return EXIT_FAILURE;
 		}
 
-		miners_available = tracker_miner_manager_get_available (manager);
-		miners_running = tracker_miner_manager_get_running (manager);
+		tracker_sparql_connection_close (sparql_conn);
+		return EXIT_SUCCESS;
+	}
 
-		/* Work out lengths for output spacing */
-		paused_length = strlen (_("PAUSED"));
+	/* Don't auto-start the miners here */
+	manager = tracker_miner_manager_new_full (FALSE, &error);
+	if (!manager) {
+		g_printerr (_("Could not get status, manager could not be created, %s"),
+		            error ? error->message : _("No error given"));
+		g_printerr ("\n");
+		g_clear_error (&error);
+		return EXIT_FAILURE;
+	}
 
-		for (l = miners_available; l; l = l->next) {
-			const gchar *name;
+	miners_available = tracker_miner_manager_get_available (manager);
+	miners_running = tracker_miner_manager_get_running (manager);
 
-			name = tracker_miner_manager_get_display_name (manager, l->data);
-			longest_miner_name_length = MAX (longest_miner_name_length, strlen (name));
+	/* Work out lengths for output spacing */
+	paused_length = strlen (_("PAUSED"));
+
+	for (l = miners_available; l; l = l->next) {
+		const gchar *name;
+
+		name = tracker_miner_manager_get_display_name (manager, l->data);
+		longest_miner_name_length = MAX (longest_miner_name_length, strlen (name));
+	}
+
+	/* Display states */
+	g_print ("%s:\n", _("Miners"));
+
+	for (l = miners_available; l; l = l->next) {
+		const gchar *name;
+		gboolean is_running;
+
+		name = tracker_miner_manager_get_display_name (manager, l->data);
+		if (!name) {
+			g_critical (_("Could not get display name for miner “%s”"),
+			            (const gchar*) l->data);
+			continue;
 		}
 
-		/* Display states */
-		g_print ("%s:\n", _("Miners"));
+		is_running = tracker_string_in_gslist (l->data, miners_running);
 
-		for (l = miners_available; l; l = l->next) {
-			const gchar *name;
-			gboolean is_running;
+		if (is_running) {
+			GStrv pause_applications, pause_reasons;
+			gchar *status = NULL;
+			gdouble progress;
+			gint remaining_time;
+			gboolean is_paused;
 
-			name = tracker_miner_manager_get_display_name (manager, l->data);
-			if (!name) {
-				g_critical (_("Could not get display name for miner “%s”"),
-				            (const gchar*) l->data);
+			if (!miner_get_details (manager,
+			                        l->data,
+			                        &status,
+			                        &progress,
+			                        &remaining_time,
+			                        &pause_applications,
+			                        &pause_reasons)) {
 				continue;
 			}
 
-			is_running = tracker_string_in_gslist (l->data, miners_running);
+			is_paused = *pause_applications || *pause_reasons;
 
-			if (is_running) {
-				GStrv pause_applications, pause_reasons;
-				gchar *status = NULL;
-				gdouble progress;
-				gint remaining_time;
-				gboolean is_paused;
+			miner_print_state (manager,
+			                   l->data,
+			                   status,
+			                   progress,
+			                   remaining_time,
+			                   TRUE,
+			                   is_paused);
 
-				if (!miner_get_details (manager,
-				                        l->data,
-				                        &status,
-				                        &progress,
-				                        &remaining_time,
-				                        &pause_applications,
-				                        &pause_reasons)) {
-					continue;
-				}
-
-				is_paused = *pause_applications || *pause_reasons;
-
-				miner_print_state (manager,
-				                   l->data,
-				                   status,
-				                   progress,
-				                   remaining_time,
-				                   TRUE,
-				                   is_paused);
-
-				g_strfreev (pause_applications);
-				g_strfreev (pause_reasons);
-				g_free (status);
-			} else {
-				miner_print_state (manager, l->data, NULL, 0.0, -1, FALSE, FALSE);
-			}
+			g_strfreev (pause_applications);
+			g_strfreev (pause_reasons);
+			g_free (status);
+		} else {
+			miner_print_state (manager, l->data, NULL, 0.0, -1, FALSE, FALSE);
 		}
+	}
 
-		g_slist_foreach (miners_available, (GFunc) g_free, NULL);
-		g_slist_free (miners_available);
+	g_slist_foreach (miners_available, (GFunc) g_free, NULL);
+	g_slist_free (miners_available);
 
-		g_slist_foreach (miners_running, (GFunc) g_free, NULL);
-		g_slist_free (miners_running);
+	g_slist_foreach (miners_running, (GFunc) g_free, NULL);
+	g_slist_free (miners_running);
 
-		if (!follow) {
-			/* Do nothing further */
-			g_print ("\n");
-			return EXIT_SUCCESS;
-		}
-
+	if (follow) {
 		g_print ("%s\n", _("Press Ctrl+C to stop"));
 
 		g_signal_connect (manager, "miner-progress",
@@ -474,58 +477,13 @@ daemon_run (void)
 
 		g_hash_table_unref (miners_progress);
 		g_hash_table_unref (miners_status);
-
-		if (manager) {
-			g_object_unref (manager);
-		}
-
-		return EXIT_SUCCESS;
 	}
 
-	/* Processes */
-	GError *error = NULL;
-
-	/* Constraints */
-
-	if (terminate) {
-		return tracker_process_stop (SIGTERM);
+	if (manager) {
+		g_object_unref (manager);
 	}
 
-	if (start) {
-		g_autoptr (TrackerSparqlConnection) sparql_conn = NULL;
-
-		g_print ("%s\n", _("Starting indexer…"));
-
-		sparql_conn = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
-		                                                 NULL, NULL, &error);
-		if (error) {
-			g_printerr ("%s: %s\n", _("Could not start indexer"), error->message);
-			return EXIT_FAILURE;
-		}
-
-		tracker_sparql_connection_close (sparql_conn);
-		return EXIT_SUCCESS;
-	}
-
-	/* All known options have their own exit points */
-	g_warn_if_reached ();
-
-	return EXIT_FAILURE;
-}
-
-static int
-daemon_run_default (void)
-{
-	/* Enable status output in the default run */
-	status = TRUE;
-
-	return daemon_run ();
-}
-
-static gboolean
-daemon_options_enabled (void)
-{
-	return DAEMON_OPTIONS_ENABLED ();
+	return EXIT_SUCCESS;
 }
 
 int
@@ -556,9 +514,5 @@ tracker_daemon (int          argc,
 
 	g_option_context_free (context);
 
-	if (daemon_options_enabled ()) {
-		return daemon_run ();
-	}
-
-	return daemon_run_default ();
+	return daemon_run ();
 }
