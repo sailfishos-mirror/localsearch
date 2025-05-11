@@ -327,22 +327,21 @@ print_errors (GList       *keyfiles,
 {
 	GList *l;
 	GKeyFile *keyfile;
-	GFile *file;
+	g_autoptr (GFile) file = NULL;
 
 	file = g_file_new_for_uri (file_uri);
 
-
 	for (l = keyfiles; l; l = l->next) {
-		gchar *uri;
-		GFile *error_file;
+		g_autofree char *uri = NULL;
+		g_autoptr (GFile) error_file = NULL;
 
 		keyfile = l->data;
 		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
 		error_file = g_file_new_for_uri (uri);
 
 		if (g_file_equal (file, error_file)) {
-			gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
-			gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+			g_autofree char *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+			g_autofree char *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
 
 			if (message)
 				g_print (CRIT_BEGIN "%s\n%s: %s" CRIT_END "\n",
@@ -352,25 +351,16 @@ print_errors (GList       *keyfiles,
 			if (sparql)
 				g_print ("SPARQL: %s\n", sparql);
 			g_print ("\n");
-
-			g_free (message);
-			g_free (sparql);
 		}
-
-		g_free (uri);
-		g_object_unref (error_file);
 	}
-
-	g_object_unref (file);
-
 }
 
 
 static int
 info_run (void)
 {
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (GError) error = NULL;
 	GList *urns = NULL;
 	gchar **p;
 
@@ -383,7 +373,6 @@ info_run (void)
 		g_printerr ("%s: %s\n",
 		            _("Could not establish a connection to Tracker"),
 		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
 
@@ -400,11 +389,10 @@ info_run (void)
 		if (uri_scheme) {
 			uri = g_strdup (*p);
 		} else {
-			GFile *file;
+			g_autoptr (GFile) file = NULL;
 
 			file = g_file_new_for_commandline_arg (*p);
 			uri = g_file_get_uri (file);
-			g_object_unref (file);
 		}
 
 		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
@@ -498,7 +486,6 @@ info_run (void)
 
  out:
 	g_list_free_full (urns, g_free);
-	g_object_unref (connection);
 
 	tracker_term_pager_close ();
 
@@ -526,22 +513,6 @@ info_run_eligible (void)
 }
 
 
-static int
-info_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, TRUE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
 static gboolean
 info_options_enabled (void)
 {
@@ -552,8 +523,9 @@ int
 tracker_info (int          argc,
               const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 
 	output_is_tty = tracker_term_is_tty ();
 
@@ -573,12 +545,8 @@ tracker_info (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (info_options_enabled ()) {
 		if (eligible)
@@ -587,5 +555,8 @@ tracker_info (int          argc,
 		return info_run ();
 	}
 
-	return info_run_default ();
+	help = g_option_context_get_help (context, TRUE, NULL);
+	g_printerr ("%s\n", help);
+
+	return EXIT_FAILURE;
 }

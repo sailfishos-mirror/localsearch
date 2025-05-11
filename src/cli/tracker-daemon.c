@@ -287,8 +287,8 @@ int
 tracker_daemon (int          argc,
 		const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -304,12 +304,8 @@ tracker_daemon (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	return daemon_run ();
 }

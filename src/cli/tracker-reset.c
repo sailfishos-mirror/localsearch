@@ -61,7 +61,7 @@ delete_info_recursively (GFile *file)
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	g_autoptr (TrackerControlIndex) control_proxy = NULL;
 	g_autofree char *uri = NULL;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
@@ -132,16 +132,15 @@ delete_info_recursively (GFile *file)
 
 error:
 	g_warning ("%s", error->message);
-	g_error_free (error);
 	return EXIT_FAILURE;
 }
 
 static void
 delete_location (GFile *dir)
 {
-	GFileEnumerator *enumerator;
-	GError *error = NULL;
-	GFileInfo *info;
+	g_autoptr (GFileEnumerator) enumerator = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autoptr (GFileInfo) info = NULL;
 
 	enumerator = g_file_enumerate_children (dir,
 	                                        G_FILE_ATTRIBUTE_STANDARD_NAME,
@@ -153,12 +152,11 @@ delete_location (GFile *dir)
 			            error->message);
 		}
 
-		g_error_free (error);
 		return;
 	}
 
 	while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-		GFile *child;
+		g_autoptr (GFile) child = NULL;
 
 		child = g_file_enumerator_get_child (enumerator, info);
 
@@ -166,19 +164,13 @@ delete_location (GFile *dir)
 			g_critical ("Failed to delete '%s': %s",
 			            g_file_info_get_name (info),
 			            error->message);
-			g_error_free (error);
 		}
-
-		g_object_unref (child);
 	}
-
-	g_object_unref (enumerator);
 
 	if (!g_file_delete (dir, NULL, &error)) {
 		g_critical ("Failed to delete '%s': %s",
 		            g_file_info_get_name (info),
 		            error->message);
-		g_error_free (error);
 	}
 }
 
@@ -195,8 +187,8 @@ int
 tracker_reset (int          argc,
                const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
 	g_autofree char *cache_dir = NULL, *errors_dir = NULL;
 
 	setlocale (LC_ALL, "");
@@ -213,20 +205,15 @@ tracker_reset (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
 
-	g_option_context_free (context);
-
 	if (filename) {
-		GFile *file;
+		g_autoptr (GFile) file = NULL;
 		gint retval;
 
 		file = g_file_new_for_commandline_arg (filename);
 		retval = delete_info_recursively (file);
-		g_object_unref (file);
 		return retval;
 	}
 

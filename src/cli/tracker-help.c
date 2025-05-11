@@ -62,11 +62,11 @@ cmd_to_page (const char *cmd)
 int
 tracker_help_show_man_page (const char *cmd)
 {
-	char *page = cmd_to_page (cmd);
+	g_autofree char *page = NULL;
 	int retval;
 
+	page = cmd_to_page (cmd);
 	retval = exec_man_man ("man", page);
-	g_free (page);
 
 	return retval;
 }

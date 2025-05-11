@@ -331,7 +331,7 @@ search_run (void)
 	const char *resource_path = NULL, *title = NULL;
 	int query_type;
 	gboolean success;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 							NULL, NULL, &error);
@@ -340,7 +340,6 @@ search_run (void)
 		g_printerr ("%s: %s\n",
 		            _("Could not establish a connection to Tracker"),
 		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
 
@@ -383,7 +382,7 @@ tracker_search (int          argc,
 {
 	g_autoptr (GOptionContext) context = NULL;
 	GOptionGroup *resource_type;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 	g_autofree char *help = NULL;
 
 	setlocale (LC_ALL, "");
@@ -411,7 +410,6 @@ tracker_search (int          argc,
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
 		help = g_option_context_get_help (context, FALSE, NULL);
 		g_printerr ("%s\n", help);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	} else if (show_help) {
 		help = g_option_context_get_help (context, FALSE, NULL);

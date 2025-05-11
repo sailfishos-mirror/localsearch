@@ -104,7 +104,7 @@ status_stat (void)
 	const char *last_graph = NULL;
 	TrackerNamespaceManager *namespaces;
 	g_autoptr (GArray) stats = NULL;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 	int longest_class = 0;
 	guint i;
 
@@ -115,7 +115,6 @@ status_stat (void)
 		g_printerr ("%s: %s\n",
 		            _("Could not establish a connection to Tracker"),
 		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
 
@@ -130,7 +129,6 @@ status_stat (void)
 		g_printerr ("%s, %s\n",
 		            _("Could not get Tracker statistics"),
 		            error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
@@ -219,7 +217,7 @@ get_file_and_folder_count (int *files,
                            int *folders)
 {
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
@@ -236,7 +234,6 @@ get_file_and_folder_count (int *files,
 		g_printerr ("%s: %s\n",
 		            _("Could not establish a connection to Tracker"),
 		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
 		return EXIT_FAILURE;
 	}
 
@@ -256,7 +253,6 @@ get_file_and_folder_count (int *files,
 			g_printerr ("%s, %s\n",
 			            _("Could not get basic status for Tracker"),
 			            error->message);
-			g_error_free (error);
 			return EXIT_FAILURE;
 		}
 
@@ -279,7 +275,6 @@ get_file_and_folder_count (int *files,
 			g_printerr ("%s, %s\n",
 			            _("Could not get basic status for Tracker"),
 			            error ? error->message : _("No error given"));
-			g_error_free (error);
 			return EXIT_FAILURE;
 		}
 
@@ -544,8 +539,8 @@ int
 tracker_status (int          argc,
                 const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -561,12 +556,8 @@ tracker_status (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (status_options_enabled ()) {
 		return status_run ();

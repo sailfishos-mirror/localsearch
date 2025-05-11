@@ -63,9 +63,9 @@ extractor_child_setup (gpointer user_data)
 static gint
 extract_files (char *output_format)
 {
+	g_autofree char *tracker_extract_path = NULL;
+	g_autoptr (GError) error = NULL;
 	char **p;
-	char *tracker_extract_path;
-	GError *error = NULL;
 
 	tracker_term_pipe_to_pager ();
 
@@ -89,15 +89,12 @@ extract_files (char *output_format)
 			g_printerr ("%s: %s\n",
 			            _("Could not run tracker-extract: "),
 			            error->message);
-			g_error_free (error);
-			g_free (tracker_extract_path);
 			return EXIT_FAILURE;
 		}
 	}
 
 	tracker_term_pager_close ();
 
-	g_free (tracker_extract_path);
 	return EXIT_SUCCESS;
 }
 
@@ -105,22 +102,6 @@ static int
 extract_run (void)
 {
 	return extract_files (output_format);
-}
-
-static int
-extract_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, TRUE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
 }
 
 static gboolean
@@ -133,8 +114,9 @@ int
 tracker_extract (int          argc,
                  const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
@@ -146,16 +128,15 @@ tracker_extract (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (extract_options_enabled ()) {
 		return extract_run ();
 	}
 
-	return extract_run_default ();
+	help = g_option_context_get_help (context, TRUE, NULL);
+	g_printerr ("%s\n", help);
+
+	return EXIT_FAILURE;
 }
