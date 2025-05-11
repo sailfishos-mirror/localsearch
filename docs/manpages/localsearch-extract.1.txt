@@ -32,14 +32,6 @@ Using command line to extract metadata from a file:::
 
 $ localsearch extract /path/to/some/file.mp3
 
-== ENVIRONMENT
-
-*LOCALSEARCH_DEBUG*::
-  Enables more specialized debug output. Pass a comma-separated
-  list of one or more keywords:
-    config::: extractor configuration
-    statistics::: show statistics about how many files were processed
-
 == SEE ALSO
 
 *localsearch status*(1), *localsearch info*(1).

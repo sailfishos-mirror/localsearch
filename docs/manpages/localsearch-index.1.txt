@@ -3,7 +3,7 @@ localsearch-index(1)
 
 == NAME
 
-localsearch-index - Index content using the Tracker filesystem miner
+localsearch-index - List and change indexed folders
 
 == SYNOPSIS
 
@@ -15,7 +15,7 @@ localsearch index --remove <path> [[dir] ...]
 
 == DESCRIPTION
 
-This command causes the Tracker filesystem miner to process the given
+This command causes the LocalSearch indexer to process the given
 directories. These changes are persistent across future restarts.
 
 If invoked without arguments, the currently indexed locations will be

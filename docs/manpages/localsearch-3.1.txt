@@ -3,7 +3,7 @@ localsearch-3(1)
 
 == NAME
 
-localsearch-3 - Used to crawl the file system to mine data.
+localsearch-3 - Filesystem indexer.
 
 == SYNOPSIS
 
@@ -28,9 +28,9 @@ than one instance of this at the same time.
   Sets the initial sleep time before crawling the file system is
   started. If the *--no-daemon* option is used, this option is ignored.
 *-n, --no-daemon*::
-  Tells the miner to exit once all indexing has finished and the
+  Tells the indexer to exit once all indexing has finished and the
   database is up to date. This is not the default mode of operation for
-  the miner, usually it stays around acting like a daemon to monitor
+  the indexer, usually it stays around acting like a daemon to monitor
   file updates which may occur over time. This option renders the
   *--initial-sleep* option moot.
 *-e, --eligible=FILE*::
@@ -39,21 +39,6 @@ than one instance of this at the same time.
   would be monitored for changes. This works with non-existing *FILE*
   arguments as well as existing *FILE* arguments.
 
-== ENVIRONMENT
-
-*G_MESSAGES_DEBUG*::
-  Controls verbose log output from GLib-based code. Use
-  `G_MESSAGES_DEBUG=Tracker` to see only Tracker-related
-  logs, or `G_MESSAGES_DEBUG=all` to see everything.
-*TRACKER_DEBUG*::
-  Enables more specialized debug output. Pass a comma-separated
-  list of one or more keywords:
-    config::: miner configuration
-    miner-fs-events::: internal processing of localsearch-3
-    monitors::: change events from filesystem monitors
-    statistics::: show statistics about how many files were processed
-    status::: log the status messages that are published over D-Bus
-
 == SEE ALSO
 
-*localsearch3-info*(1).
+*localsearch-info*(1).

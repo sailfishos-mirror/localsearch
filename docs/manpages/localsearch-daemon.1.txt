@@ -10,28 +10,18 @@ indexing content
 
 ....
 localsearch daemon [options...]
-localsearch daemon -s | -t [daemons] | -k [daemons] | -l
-localsearch daemon -f | -w [ontology]
-localsearch daemon --miner <miner> --pause[-for-process] <reason>
-localsearch daemon --miner <miner> --resume <cookie>
 ....
 
 == DESCRIPTION
 
-Tracker indexes content with daemon processes that run in the background.
-The *localsearch daemon* command allows for control of these components.
-This ranges from starting, stopping and killing processes to pausing and
-resuming them.
+LocalSearch indexes content via a daemon process that runs in the background.
+The *localsearch daemon* subcommand allows for control of this component.
 
-In addition to all this, there are ways to follow or watch what is
-happening in real time from a top level and right down where the SPARQL
-commits are happening too.
+In addition to this, there are ways to follow indexing status updates and
+watching database updates as they happen.
 
 If no arguments are provided this command will show the current status
-of all Tracker data miners.
-
-The data miners can be paused or resumed using this command and you can
-also list miners running and available.
+of the LocalSearch indexer.
 
 == OPTIONS
 
@@ -44,7 +34,10 @@ also list miners running and available.
   view of what is happening. You will see the name for each daemon and a
   state with the progress in that state. This requires Ctrl+C to stop
   and return to the command line.
-
-*-w, --watch=[_ontology_]*::
+*-w, --watch*::
   Watch changes that happen to the database in real time. This requires
   Ctrl+C to stop and return to the command line.
+
+== SEE ALSO
+
+*localsearch inhibit*(1).
