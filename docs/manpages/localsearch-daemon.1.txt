@@ -35,14 +35,8 @@ also list miners running and available.
 
 == OPTIONS
 
-*-k, --kill::
-  This uses SIGKILL to stop all Tracker processes found matching the
-  parameter, if no extra parameter is passed, "all" will be assumed.
-  This is not advised unless you are having problems stopping Tracker in
-  the first place. This *GUARANTEES* death.
-*-t, --terminate=::
-  This uses SIGTERM to stop all Tracker processes.  This is recommended over
-  --kill because it gives the processes time to shutdown cleanly.
+*-t, --terminate::
+  Stops the indexer.
 *-s, --start*::
   Starts the indexer.
 *-f, --follow*::

@@ -51,14 +51,11 @@ static gboolean follow;
 static gboolean watch;
 
 static gboolean start;
-static gboolean kill_miners;
-static gboolean terminate_miners;
+static gboolean terminate;
 
 #define DAEMON_OPTIONS_ENABLED() \
 	((status || follow || watch) || \
-	 (start || \
-	  kill_miners || \
-	  terminate_miners));
+	 (start || terminate));
 
 static GOptionEntry entries[] = {
 	/* Status */
@@ -71,12 +68,9 @@ static GOptionEntry entries[] = {
 	  NULL
 	},
 	/* Processes */
-	{ "kill", 'k', 0, G_OPTION_ARG_NONE, &kill_miners,
-	  N_("Use SIGKILL to stop all miners"),
-	  N_("APPS") },
-	{ "terminate", 't', 0, G_OPTION_ARG_NONE, &terminate_miners,
-	  N_("Use SIGTERM to stop all miners"),
-	  N_("APPS") },
+	{ "terminate", 't', 0, G_OPTION_ARG_NONE, &terminate,
+	  N_("Stops the indexer"),
+	  NULL },
 	{ "start", 's', 0, G_OPTION_ARG_NONE, &start,
 	  N_("Starts the indexer"),
 	  NULL },
@@ -493,21 +487,8 @@ daemon_run (void)
 
 	/* Constraints */
 
-	if (kill_miners && terminate_miners) {
-		g_printerr ("%s\n",
-		            _("You can not use the --kill and --terminate arguments together"));
-		return EXIT_FAILURE;
-	}
-
-	if (kill_miners || terminate_miners) {
-		gint retval = 0;
-
-		if (kill_miners)
-			retval = tracker_process_stop (SIGKILL);
-		else if (terminate_miners)
-			retval = tracker_process_stop (SIGTERM);
-
-		return retval;
+	if (terminate) {
+		return tracker_process_stop (SIGTERM);
 	}
 
 	if (start) {
