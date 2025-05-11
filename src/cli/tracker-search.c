@@ -395,7 +395,7 @@ tracker_search (int          argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	argv[0] = "tracker search";
+	argv[0] = "localsearch search";
 
 	context = g_option_context_new (NULL);
         g_option_context_set_summary (context, help_summary);

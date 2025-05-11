@@ -574,7 +574,7 @@ tracker_info (int          argc,
 
 	inside_build_tree = tracker_cli_check_inside_build_tree (argv[0]);
 
-	argv[0] = "tracker info";
+	argv[0] = "localsearch info";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);

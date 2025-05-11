@@ -300,7 +300,7 @@ tracker_daemon (int          argc,
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_set_summary (context, _("If no arguments are given, the status of the data miners is shown"));
 
-	argv[0] = "tracker daemon";
+	argv[0] = "localsearch daemon";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
