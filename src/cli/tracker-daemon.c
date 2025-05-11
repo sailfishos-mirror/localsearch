@@ -36,8 +36,6 @@
 #include "tracker-dbus.h"
 #include "tracker-indexer-proxy.h"
 
-static GMainLoop *main_loop;
-
 static gboolean follow;
 static gboolean watch;
 
@@ -73,33 +71,18 @@ static GOptionEntry entries[] = {
 static gboolean
 signal_handler (gpointer user_data)
 {
-	int signo = GPOINTER_TO_INT (user_data);
+	GMainLoop *main_loop = user_data;
 
-	static gboolean in_loop = FALSE;
-
-	/* Die if we get re-entrant signals handler calls */
-	if (in_loop) {
-		exit (EXIT_FAILURE);
-	}
-
-	switch (signo) {
-	case SIGTERM:
-	case SIGINT:
-		in_loop = TRUE;
-		g_main_loop_quit (main_loop);
-		break;
-	default:
-		break;
-	}
+	g_main_loop_quit (main_loop);
 
 	return G_SOURCE_CONTINUE;
 }
 
 static void
-initialize_signal_handler (void)
+initialize_signal_handler (GMainLoop *main_loop)
 {
-	g_unix_signal_add (SIGTERM, signal_handler, GINT_TO_POINTER (SIGTERM));
-	g_unix_signal_add (SIGINT, signal_handler, GINT_TO_POINTER (SIGINT));
+	g_unix_signal_add (SIGTERM, signal_handler, main_loop);
+	g_unix_signal_add (SIGINT, signal_handler, main_loop);
 }
 
 static void
@@ -198,6 +181,7 @@ static int
 daemon_status (void)
 {
 	g_autoptr (TrackerIndexerMiner) indexer_proxy = NULL;
+	g_autoptr (GMainLoop) main_loop = NULL;
 
 	indexer_proxy =
 		tracker_indexer_miner_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
@@ -218,11 +202,9 @@ daemon_status (void)
 		g_signal_connect (indexer_proxy, "resumed",
 		                  G_CALLBACK (indexer_resumed_cb), NULL);
 
-		initialize_signal_handler ();
-
 		main_loop = g_main_loop_new (NULL, FALSE);
+		initialize_signal_handler (main_loop);
 		g_main_loop_run (main_loop);
-		g_main_loop_unref (main_loop);
 
 		if (tracker_term_is_tty ()) {
 			/* Print the status line a last time, papering over the ^C */
@@ -240,6 +222,7 @@ daemon_run (void)
 	g_autoptr (GError) error = NULL;
 
 	if (watch) {
+		g_autoptr (GMainLoop) main_loop = NULL;
 		TrackerSparqlConnection *sparql_connection;
 		TrackerNotifier *notifier;
 		GError *error = NULL;
@@ -265,8 +248,8 @@ daemon_run (void)
 		g_print ("%s\n", _("Press Ctrl+C to stop"));
 
 		main_loop = g_main_loop_new (NULL, FALSE);
+		initialize_signal_handler (main_loop);
 		g_main_loop_run (main_loop);
-		g_main_loop_unref (main_loop);
 		g_object_unref (notifier);
 
 		/* Carriage return, so we paper over the ^C */
