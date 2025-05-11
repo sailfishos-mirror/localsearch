@@ -138,6 +138,7 @@ tracker_extract (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Extract metadata from a file"));
 
 	inside_build_tree = tracker_cli_check_inside_build_tree (argv[0]);
 

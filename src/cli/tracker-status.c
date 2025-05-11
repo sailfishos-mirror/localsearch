@@ -555,6 +555,7 @@ tracker_status (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Provide status and statistics on the data indexed"));
 
 	argv[0] = "localsearch status";
 

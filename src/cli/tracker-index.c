@@ -389,6 +389,7 @@ tracker_index (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("List and change indexed folders"));
 
 	argv[0] = "localsearch index";
 

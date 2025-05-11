@@ -51,9 +51,6 @@ static gboolean document_files;
 static gboolean software;
 static gboolean show_help;
 
-static const char *help_summary =
-	N_("Search for content matching TERMS, by type or across all types.");
-
 enum {
 	ALL,
 	DOCUMENTS,
@@ -398,7 +395,7 @@ tracker_search (int          argc,
 	argv[0] = "localsearch search";
 
 	context = g_option_context_new (NULL);
-        g_option_context_set_summary (context, help_summary);
+        g_option_context_set_summary (context, _("Search for content"));
         resource_type =
 	        g_option_group_new ("resource-type",
 	                            "Resource Type Options:",

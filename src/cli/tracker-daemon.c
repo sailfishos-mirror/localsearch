@@ -298,7 +298,7 @@ tracker_daemon (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
-	g_option_context_set_summary (context, _("If no arguments are given, the status of the data miners is shown"));
+	g_option_context_set_summary (context, _("Start and stop the indexer"));
 
 	argv[0] = "localsearch daemon";
 

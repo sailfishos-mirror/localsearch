@@ -65,7 +65,7 @@ static int launch_external_command (int argc, const char **argv);
 static void print_usage (void);
 
 static struct cmd_struct commands[] = {
-	{ "daemon", tracker_daemon, N_("Start, stop, restart and list daemons responsible for indexing content") },
+	{ "daemon", tracker_daemon, N_("Start and stop the indexer") },
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("List and change indexed folders") },
 	{ "info", tracker_info, N_("Retrieve information available for files and resources") },
