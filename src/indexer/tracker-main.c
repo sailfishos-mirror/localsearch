@@ -152,9 +152,9 @@ get_cache_dir (void)
 	} else {
 		g_autofree char *cache_dir = NULL;
 
-		cache_dir = g_build_path (g_get_user_cache_dir (),
-		                          MINER_FS_CACHE_LOCATION,
-		                          "files", NULL);
+		cache_dir = g_build_filename (g_get_user_cache_dir (),
+		                              MINER_FS_CACHE_LOCATION,
+		                              "files", NULL);
 		cache = g_file_new_for_path (cache_dir);
 	}
 
