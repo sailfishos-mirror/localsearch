@@ -37,15 +37,21 @@ class DaemonNotStartedError(Exception):
     pass
 
 
-def await_bus_name(conn, bus_name, timeout=DEFAULT_TIMEOUT):
+def await_bus_name(conn, bus_name, timeout=DEFAULT_TIMEOUT, acquired=True):
     """Blocks until 'bus_name' has an owner."""
 
     log.info("Blocking until name %s has owner", bus_name)
     loop = mainloop.MainLoop()
 
     def name_appeared_cb(connection, name, name_owner):
-        log.info("Name %s appeared (owned by %s)", name, name_owner)
-        loop.quit()
+        if acquired:
+            log.info("Name %s appeared (owned by %s)", name, name_owner)
+            loop.quit()
+
+    def name_disappeared_cb(connection, name):
+        if not acquired:
+            log.info("Name %s lost", name)
+            loop.quit()
 
     def timeout_cb():
         log.info("Timeout fired after %s seconds", timeout)
@@ -53,7 +59,8 @@ def await_bus_name(conn, bus_name, timeout=DEFAULT_TIMEOUT):
             f"Timeout awaiting bus name '{bus_name}'")
 
     watch_id = Gio.bus_watch_name_on_connection(
-        conn, bus_name, Gio.BusNameWatcherFlags.NONE, name_appeared_cb, None)
+        conn, bus_name, Gio.BusNameWatcherFlags.NONE,
+        name_appeared_cb, name_disappeared_cb)
     timeout_id = GLib.timeout_add_seconds(timeout, timeout_cb)
 
     loop.run_checked()
@@ -241,5 +248,5 @@ class DBusDaemon:
             None, None, Gio.DBusCallFlags.NONE, GDBUS_DEFAULT_TIMEOUT, None)
         self.await_bus_name(bus_name)
 
-    def await_bus_name(self, bus_name, timeout=DEFAULT_TIMEOUT):
-        await_bus_name(self.get_connection(), bus_name, timeout)
+    def await_bus_name(self, bus_name, timeout=DEFAULT_TIMEOUT, acquired=True):
+        await_bus_name(self.get_connection(), bus_name, timeout, acquired)
