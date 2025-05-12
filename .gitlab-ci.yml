@@ -377,7 +377,7 @@ test-dist:
       pushd tinysparql; meson setup build --libdir lib64 --prefix=/usr -Ddocs=false; ninja -C build install; popd
       meson setup --wipe build
       meson compile -C build
-      dbus-run-session meson dist -C build
+      meson devenv -C build dbus-run-session meson dist
   artifacts:
     expose_as: 'Tarball'
     paths:

@@ -197,6 +197,14 @@ endif
 
 functional_tests = [
   'test_cli',
+  'test_cli_daemon',
+  'test_cli_index',
+  'test_cli_info',
+  'test_cli_inhibit',
+  'test_cli_reset',
+  'test_cli_search',
+  'test_cli_status',
+  'test_cli_tag',
   'test_extractor_decorator',
   'test_fts_basic',
   'test_fts_file_operations',
