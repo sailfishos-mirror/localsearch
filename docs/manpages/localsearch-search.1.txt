@@ -3,7 +3,7 @@ localsearch-search(1)
 
 == NAME
 
-localsearch-search - Search for content by type or across all types
+localsearch-search - Search for content
 
 == SYNOPSIS
 

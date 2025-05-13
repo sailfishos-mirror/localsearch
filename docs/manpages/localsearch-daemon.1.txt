@@ -3,8 +3,7 @@ localsearch-daemon(1)
 
 == NAME
 
-localsearch-daemon - Start, stop, restart and list daemons responsible for
-indexing content
+localsearch-daemon - Start and stop the indexer
 
 == SYNOPSIS
 
@@ -25,7 +24,7 @@ of the LocalSearch indexer.
 
 == OPTIONS
 
-*-t, --terminate::
+*-t, --terminate*::
   Stops the indexer.
 *-s, --start*::
   Starts the indexer.

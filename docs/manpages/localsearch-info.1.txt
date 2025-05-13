@@ -3,7 +3,7 @@ localsearch-info(1)
 
 == NAME
 
-localsearch-info - Retrieve all information available for a certain file.
+localsearch-info - Retrieve information available for files and resources.
 
 == SYNOPSIS
 
