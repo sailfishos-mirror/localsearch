@@ -373,11 +373,11 @@ wait_check_async_cb (GObject      *object,
 
 		g_warning ("Extractor subprocess died unexpectedly: %s", error->message);
 		g_signal_emit (watchdog, signals[LOST], 0);
+	} else {
+		g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
 	}
 
 	clear_process_state (watchdog);
-
-	g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
 }
 
 static GStrv

@@ -72,6 +72,12 @@ struct _TrackerFileNotifierClass {
 	void (* finished)           (TrackerFileNotifier *notifier);
 };
 
+typedef enum
+{
+	TRACKER_FILE_NOTIFIER_STATUS_INDEXING,
+	TRACKER_FILE_NOTIFIER_STATUS_CHECKING,
+} TrackerFileNotifierStatus;
+
 GType         tracker_file_notifier_get_type     (void) G_GNUC_CONST;
 
 TrackerFileNotifier *
@@ -85,6 +91,14 @@ gboolean      tracker_file_notifier_is_active    (TrackerFileNotifier     *notif
 
 void          tracker_file_notifier_set_high_water (TrackerFileNotifier *notifier,
                                                     gboolean             high_water);
+
+gboolean tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
+                                           TrackerFileNotifierStatus  *status,
+                                           GFile                     **current_root,
+                                           guint                      *files_found,
+                                           guint                      *files_updated,
+                                           guint                      *files_ignored,
+                                           guint                      *files_reindexed);
 
 G_END_DECLS
 

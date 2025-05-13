@@ -220,7 +220,7 @@ tracker_miner_class_init (TrackerMinerClass *klass)
 
 	props[PROP_STATUS] =
 		g_param_spec_string ("status", NULL, NULL,
-		                     "Idle",
+		                     NULL,
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT |
 		                     G_PARAM_STATIC_STRINGS);
@@ -276,15 +276,6 @@ miner_set_property (GObject      *object,
 	TrackerMiner *miner = TRACKER_MINER (object);
 	TrackerMinerPrivate *priv = tracker_miner_get_instance_private (miner);
 
-	/* Quite often, we see status of 100% and still have
-	 * status messages saying Processing... which is not
-	 * true. So we use an idle timeout to help that situation.
-	 * Additionally we can't force both properties are correct
-	 * with the GObject API, so we have to do some checks our
-	 * selves. The g_object_bind_property() API also isn't
-	 * sufficient here.
-	 */
-
 	switch (prop_id) {
 	case PROP_STATUS: {
 		const gchar *new_status;
@@ -304,23 +295,6 @@ miner_set_property (GObject      *object,
 
 		g_free (priv->status);
 		priv->status = g_strdup (new_status);
-
-		/* Check progress matches special statuses */
-		if (new_status != NULL) {
-			if (g_ascii_strcasecmp (new_status, "Initializing") == 0 &&
-			    priv->progress != 0.0) {
-				TRACKER_NOTE (STATUS,
-				              g_message ("(Miner:'%s') Set progress to 0.0 from status:'Initializing'",
-				                         G_OBJECT_TYPE_NAME (miner)));
-				priv->progress = 0.0;
-			} else if (g_ascii_strcasecmp (new_status, "Idle") == 0 &&
-			           priv->progress != 1.0) {
-				TRACKER_NOTE (STATUS,
-				              g_message ("(Miner:'%s') Set progress to 1.0 from status:'Idle'",
-				                         G_OBJECT_TYPE_NAME (miner)));
-				priv->progress = 1.0;
-			}
-		}
 
 		if (priv->update_id == 0) {
 			priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,
@@ -353,27 +327,6 @@ miner_set_property (GObject      *object,
 		}
 
 		priv->progress = new_progress;
-
-		/* Check status matches special progress values */
-		if (new_progress == 0.0) {
-			if (priv->status == NULL ||
-			    g_ascii_strcasecmp (priv->status, "Initializing") != 0) {
-				TRACKER_NOTE (STATUS,
-				              g_message ("(Miner:'%s') Set status:'Initializing' from progress:0.0",
-				                         G_OBJECT_TYPE_NAME (miner)));
-				g_free (priv->status);
-				priv->status = g_strdup ("Initializing");
-			}
-		} else if (new_progress == 1.0) {
-			if (priv->status == NULL ||
-			    g_ascii_strcasecmp (priv->status, "Idle") != 0) {
-				TRACKER_NOTE (STATUS,
-				              g_message ("(Miner:'%s') Set status:'Idle' from progress:1.0",
-				                         G_OBJECT_TYPE_NAME (miner)));
-				g_free (priv->status);
-				priv->status = g_strdup ("Idle");
-			}
-		}
 
 		if (priv->update_id == 0) {
 			priv->update_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE,

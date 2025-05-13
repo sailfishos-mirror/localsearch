@@ -42,8 +42,6 @@ enum {
 	FILE_DELETED,
 	FILE_MOVED,
 	DIRECTORY_FINISHED,
-	ROOT_STARTED,
-	ROOT_FINISHED,
 	FINISHED,
 	LAST_SIGNAL
 };
@@ -87,10 +85,10 @@ typedef struct {
 	GTimer *timer;
 	guint flags;
 	guint cursor_idle_id;
-	guint directories_found;
-	guint directories_ignored;
 	guint files_found;
 	guint files_ignored;
+	guint files_updated;
+	guint files_reindexed;
 	guint ignore_root : 1;
 	guint cursor_has_content : 1;
 } TrackerIndexRoot;
@@ -228,6 +226,14 @@ tracker_index_root_new (TrackerFileNotifier *notifier,
 static void
 tracker_index_root_free (TrackerIndexRoot *data)
 {
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Notified files after %2.2f seconds",
+	                         g_timer_elapsed (data->timer, NULL)));
+	TRACKER_NOTE (STATISTICS,
+	              g_message ("  Found %d files, ignored %d files",
+	                         data->files_found,
+	                         data->files_ignored));
+
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
 	g_queue_free_full (data->pending_finish_dirs, (GDestroyNotify) g_object_unref);
 	g_timer_destroy (data->timer);
@@ -540,6 +546,11 @@ handle_file_from_filesystem (TrackerIndexRoot *root,
 		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
+	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
+		root->files_reindexed++;
+	else if (file_data->state != FILE_STATE_NONE)
+		root->files_updated++;
+
 	tracker_file_notifier_notify (root->notifier, file_data, info);
 	g_queue_delete_link (&root->queue, file_data->node);
 	g_hash_table_remove (root->cache, file);
@@ -624,20 +635,13 @@ enumerator_next_files_cb (GObject      *object,
 		file_type = g_file_info_get_file_type (info);
 		n_files++;
 
-		if (file_type == G_FILE_TYPE_DIRECTORY) {
-			root->directories_found++;
+		root->files_found++;
 
-			if (!check_directory (root->notifier, file, info)) {
-				root->directories_ignored++;
-				continue;
-			}
-		} else {
-			root->files_found++;
-
-			if (!check_file (root->notifier, file, info)) {
+		if ((file_type == G_FILE_TYPE_DIRECTORY &&
+		     !check_directory (root->notifier, file, info)) ||
+		    !check_file (root->notifier, file, info)) {
 				root->files_ignored++;
 				continue;
-			}
 		}
 
 		handle_file_from_filesystem (root, file, info);
@@ -729,6 +733,7 @@ query_root_info_cb (GObject      *object,
 	notifier = root->notifier;
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
+	root->files_found++;
 	handle_file_from_filesystem (root, G_FILE (object), info);
 
 	g_file_enumerate_children_async (G_FILE (object),
@@ -789,30 +794,6 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	return TRUE;
 }
 
-static void
-tracker_file_notifier_emit_root_finished (TrackerFileNotifier *notifier,
-                                          TrackerIndexRoot    *root)
-{
-	g_signal_emit (notifier, signals[ROOT_FINISHED], 0,
-	               root->root,
-	               root->directories_found,
-	               root->directories_ignored,
-	               root->files_found,
-	               root->files_ignored);
-
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Notified files after %2.2f seconds",
-	                         g_timer_elapsed (root->timer, NULL)));
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Found %d directories, ignored %d directories",
-	                         root->directories_found,
-	                         root->directories_ignored));
-	TRACKER_NOTE (STATISTICS,
-	              g_message ("  Found %d files, ignored %d files",
-	                         root->files_found,
-	                         root->files_ignored));
-}
-
 static gboolean
 tracker_index_root_continue_current_folder (TrackerIndexRoot *root)
 {
@@ -841,7 +822,6 @@ tracker_index_root_continue (TrackerIndexRoot *root)
 		return;
 
 	tracker_index_root_notify_changes (root);
-	tracker_file_notifier_emit_root_finished (root->notifier, root);
 	notifier_check_next_root (root->notifier);
 }
 
@@ -962,7 +942,9 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	/* Get stored info */
 	folder_urn = tracker_sparql_cursor_get_string (cursor, 1, NULL);
 	store_mtime = tracker_sparql_cursor_get_datetime (cursor, 2);
-	file_type = folder_urn != NULL ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
+
+	file_type = folder_urn ? G_FILE_TYPE_DIRECTORY : G_FILE_TYPE_UNKNOWN;
+	root->files_found++;
 
 	file_data = _insert_store_info (root,
 	                                file,
@@ -1009,6 +991,11 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 			g_queue_push_head (root->pending_dirs, g_object_ref (file));
 		}
 	}
+
+	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
+		root->files_reindexed++;
+	else if (file_data->state != FILE_STATE_NONE)
+		root->files_updated++;
 
 	tracker_file_notifier_notify (notifier, file_data, info);
 	g_queue_delete_link (&root->queue, file_data->node);
@@ -1095,9 +1082,6 @@ query_execute_cb (TrackerSparqlStatement *statement,
 			uri = g_file_get_uri (root->root);
 			g_critical ("Could not query contents for indexed folder '%s': %s",
 			            uri, error->message);
-
-			tracker_file_notifier_emit_root_finished (root->notifier,
-			                                          root);
 		}
 
 		return;
@@ -1134,7 +1118,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	}
 
 	g_timer_reset (root->timer);
-	g_signal_emit (notifier, signals[ROOT_STARTED], 0, directory);
 
 	uri = g_file_get_uri (directory);
 	tracker_sparql_statement_bind_string (priv->content_query, "root", uri);
@@ -1596,8 +1579,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 		/* Directory being currently processed */
 		if (priv->cancellable)
 			g_cancellable_cancel (priv->cancellable);
-		tracker_file_notifier_emit_root_finished (notifier,
-		                                          priv->current_index_root);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1814,27 +1795,6 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              g_cclosure_marshal_VOID__OBJECT,
 		              G_TYPE_NONE,
 		              1, G_TYPE_FILE);
-	signals[ROOT_STARTED] =
-		g_signal_new ("root-started",
-		              G_TYPE_FROM_CLASS (klass),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               root_started),
-		              NULL, NULL,
-		              NULL,
-		              G_TYPE_NONE,
-		              1, G_TYPE_FILE);
-	signals[ROOT_FINISHED] =
-		g_signal_new ("root-finished",
-		              G_TYPE_FROM_CLASS (klass),
-		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               root_finished),
-		              NULL, NULL,
-		              NULL,
-		              G_TYPE_NONE,
-		              5, G_TYPE_FILE, G_TYPE_UINT,
-		              G_TYPE_UINT, G_TYPE_UINT, G_TYPE_UINT);
 	signals[FINISHED] =
 		g_signal_new ("finished",
 		              G_TYPE_FROM_CLASS (klass),
@@ -2013,4 +1973,45 @@ tracker_file_notifier_is_active (TrackerFileNotifier *notifier)
 
 	priv = tracker_file_notifier_get_instance_private (notifier);
 	return priv->pending_index_roots || priv->current_index_root;
+}
+
+gboolean
+tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
+                                  TrackerFileNotifierStatus  *status,
+                                  GFile                     **current_root,
+                                  guint                      *files_found,
+                                  guint                      *files_updated,
+                                  guint                      *files_ignored,
+                                  guint                      *files_reindexed)
+{
+	TrackerFileNotifierPrivate *priv;
+
+	priv = tracker_file_notifier_get_instance_private (notifier);
+
+	if (!priv->current_index_root ||
+	    (!priv->current_index_root->cursor &&
+	     !priv->current_index_root->current_dir)) {
+		/* Not doing anything in special? */
+		return FALSE;
+	}
+
+	if (status) {
+		*status = priv->current_index_root->current_dir ?
+			TRACKER_FILE_NOTIFIER_STATUS_INDEXING :
+			TRACKER_FILE_NOTIFIER_STATUS_CHECKING;
+	}
+
+	if (current_root)
+		*current_root = priv->current_index_root->root;
+
+	if (files_found)
+		*files_found = priv->current_index_root->files_found;
+	if (files_updated)
+		*files_updated = priv->current_index_root->files_updated;
+	if (files_ignored)
+		*files_ignored = priv->current_index_root->files_ignored;
+	if (files_reindexed)
+		*files_reindexed = priv->current_index_root->files_reindexed;
+
+	return TRUE;
 }
