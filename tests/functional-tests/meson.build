@@ -233,6 +233,7 @@ test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_EXTRACT_DEADLINE', '30')
 test_env.set('TZ', 'Europe/Amsterdam')
+test_env.prepend('MANPATH', uninstalled_manpath)
 test_env.set('LOCALSEARCH_DEBUG', 'statistics')
 
 foreach t: extractor_tests

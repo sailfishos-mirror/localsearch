@@ -355,7 +355,7 @@ test-docs:
     - .tracker-miners.fedora:latest@x86_64
   stage: test
   script:
-    - ./docs/reference/build.py --output=website --man-pages ./docs/manpages/localsearch-*.txt
+    - ./docs/reference/build.py --output=website --man-pages ./docs/man1/localsearch-*.txt
   artifacts:
     expose_as: 'Documentation'
     paths:
