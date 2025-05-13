@@ -26,93 +26,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 
-#ifdef __OpenBSD__
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif
-
-#ifdef __sun
-#define _STRUCTURED_PROC 1
-#include <sys/procfs.h>
-#endif
-
 #include "tracker-process.h"
-
-static TrackerProcessData *
-process_data_new (gchar *cmd, pid_t pid)
-{
-	TrackerProcessData *pd;
-
-	pd = g_slice_new0 (TrackerProcessData);
-	pd->cmd = cmd;
-	pd->pid = pid;
-
-	return pd;
-}
-
-void
-tracker_process_data_free (TrackerProcessData *pd)
-{
-	if (!pd) {
-		return;
-	}
-
-	g_free (pd->cmd);
-	g_slice_free (TrackerProcessData, pd);
-}
-
-static gchar *
-find_command (pid_t pid)
-{
-#ifndef __OpenBSD__
-	gchar *proc_path, path[PATH_MAX + 1];
-	ssize_t len;
-
-	proc_path = g_strdup_printf ("/proc/%d/exe", pid);
-	len = readlink (proc_path, path, PATH_MAX);
-	g_free (proc_path);
-
-	if (len < 0)
-		return NULL;
-
-	path[len] = '\0';
-
-	/* Trim the " (deleted)" suffix, if the miner happened to be reinstalled */
-	if (g_str_has_suffix (path, " (deleted)")) {
-		len -= strlen (" (deleted)");
-		path[len] = '\0';
-	}
-
-	return g_path_get_basename (path);
-#else /* __OpenBSD__ */
-	g_autofree char *path = NULL;
-	gchar **args = NULL;
-	gint mib[4];
-	size_t len;
-
-	mib[0] = CTL_KERN;
-	mib[1] = KERN_PROC_ARGS;
-	mib[2] = pid;
-	mib[3] = KERN_PROC_ARGV;
-
-	if (sysctl (mib, 4, NULL, &len, NULL, 0) == -1)
-		goto fail;
-
-	args = g_malloc0 (len);
-	if (args == NULL)
-		goto fail;
-
-	if (sysctl (mib, 4, args, &len, NULL, 0) == -1)
-		goto fail;
-
-	path = g_strndup (args[0], PATH_MAX);
-	return g_path_get_basename (path);
-
-fail:
-	g_free (args);
-	return NULL;
-#endif /* !__OpenBSD__ */
-}
 
 static pid_t
 get_pid_for_service (GDBusConnection *connection,
@@ -152,72 +66,31 @@ get_pid_for_service (GDBusConnection *connection,
 	return (pid_t) process_id;
 }
 
-GSList *
-tracker_process_find_all (void)
+pid_t
+tracker_process_find (void)
 {
-	GDBusConnection *connection;
-	pid_t miner_fs;
-	GSList *processes = NULL;
-	TrackerProcessData *data;
-	gchar *command;
+	g_autoptr (GDBusConnection) connection = NULL;
 
 	connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
-	miner_fs = get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.Files");
-	if (miner_fs > 0) {
-		command = find_command (miner_fs);
-		if (command) {
-			data = process_data_new (command, miner_fs);
-			processes = g_slist_prepend (processes, data);
-		}
-	}
 
-	g_object_unref (connection);
-
-	return processes;
+	return get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.Files");
 }
 
 gint
 tracker_process_stop (gint signal_id)
 {
-	GSList *pids, *l;
-	gchar *str;
+	pid_t indexer_pid;
 
-	pids = tracker_process_find_all ();
+	indexer_pid = tracker_process_find ();
+	if (indexer_pid < 0)
+		return 0;
 
-	str = g_strdup_printf (g_dngettext (NULL,
-	                                    "Found %d PID…",
-	                                    "Found %d PIDs…",
-	                                    g_slist_length (pids)),
-	                       g_slist_length (pids));
-	g_print ("%s\n", str);
-	g_free (str);
-
-	for (l = pids; l; l = l->next) {
-		TrackerProcessData *pd;
-		const gchar *basename;
-		pid_t pid;
-
-		pd = l->data;
-		basename = pd->cmd;
-		pid = pd->pid;
-
-		if (kill (pid, signal_id) == -1) {
-			const gchar *errstr = g_strerror (errno);
-
-			str = g_strdup_printf (_("Could not kill process %d — “%s”"), pid, basename);
-			g_printerr ("  %s: %s\n",
-			            str,
-			            errstr ? errstr : _("No error given"));
-			g_free (str);
-		} else {
-			str = g_strdup_printf (_("Killed process %d — “%s”"), pid, basename);
-			g_print ("  %s\n", str);
-			g_free (str);
-		}
+	if (kill (indexer_pid, signal_id) == -1) {
+		g_printerr ("%s: %s\n", _("Could not terminate indexer"),
+		            g_strerror (errno));
+	} else {
+		g_print ("%s\n", _("Indexer process terminated"));
 	}
-
-	g_slist_foreach (pids, (GFunc) tracker_process_data_free, NULL);
-	g_slist_free (pids);
 
 	return 0;
 }
