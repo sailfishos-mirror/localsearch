@@ -80,29 +80,28 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *metadata;
-	gchar *content = NULL, *resource_uri;
+	g_autoptr (TrackerResource) metadata = NULL;
+	g_autofree char *content = NULL, *resource_uri = NULL;
 	GError *inner_error = NULL;
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PlainTextDocument");
-	g_free (resource_uri);
 
 	content = get_file_content (tracker_extract_info_get_file (info),
 	                            tracker_extract_info_get_max_text (info),
 	                            &inner_error);
 
-	if (!content) {
+	if (inner_error) {
 		/* An error occurred, perhaps the file was deleted. */
 		g_propagate_prefixed_error (error, inner_error, "Could not open:");
 		return FALSE;
 	}
 
-	tracker_resource_set_string (metadata, "nie:plainTextContent", content);
+	if (content)
+		tracker_resource_set_string (metadata, "nie:plainTextContent", content);
+
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
-	g_free (content);
 
 	return TRUE;
 }
