@@ -44,9 +44,6 @@ G_BEGIN_DECLS
  * @TRACKER_DIRECTORY_FLAG_PRIORITY: Internally a priority queue is
  * used and this flag makes sure the directory is given a priority
  * over other directories queued.
- * @TRACKER_DIRECTORY_FLAG_CHECK_DELETED: Forces checks on deleted
- * contents. This is most usually optimized away unless directory
- * mtime changes indicate there could be deleted content.
  *
  * Flags used when adding a new directory to be indexed in the
  * #TrackerIndexingTree and #TrackerDataProvider.
@@ -54,10 +51,9 @@ G_BEGIN_DECLS
 typedef enum {
 	TRACKER_DIRECTORY_FLAG_NONE            = 0,
 	TRACKER_DIRECTORY_FLAG_RECURSE         = 1 << 1,
-	TRACKER_DIRECTORY_FLAG_CHECK_DELETED   = 1 << 2,
-	TRACKER_DIRECTORY_FLAG_MONITOR         = 1 << 3,
-	TRACKER_DIRECTORY_FLAG_PRESERVE        = 1 << 4,
-	TRACKER_DIRECTORY_FLAG_PRIORITY        = 1 << 5,
+	TRACKER_DIRECTORY_FLAG_MONITOR         = 1 << 2,
+	TRACKER_DIRECTORY_FLAG_PRESERVE        = 1 << 3,
+	TRACKER_DIRECTORY_FLAG_PRIORITY        = 1 << 4,
 } TrackerDirectoryFlags;
 
 /**

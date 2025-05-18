@@ -1505,7 +1505,6 @@ indexing_tree_directory_updated (TrackerIndexingTree *indexing_tree,
 	TrackerDirectoryFlags flags;
 
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
-	flags |= TRACKER_DIRECTORY_FLAG_CHECK_DELETED;
 	notifier_queue_root (notifier, directory, flags, FALSE);
 }
 
@@ -1576,8 +1575,6 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 
 	if (child_type == G_FILE_TYPE_DIRECTORY &&
 	    (flags & TRACKER_DIRECTORY_FLAG_RECURSE)) {
-		flags |= TRACKER_DIRECTORY_FLAG_CHECK_DELETED;
-
 		notifier_queue_root (notifier, child, flags, FALSE);
 	} else if (tracker_indexing_tree_file_is_indexable (priv->indexing_tree,
 	                                                    child, child_info)) {

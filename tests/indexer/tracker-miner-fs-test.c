@@ -810,11 +810,9 @@ test_content_filter_on_parent_root (TrackerMinerFSTestFixture *fixture,
 	                                  TRACKER_FILTER_PARENT_DIRECTORY, ".ignore");
 
 	fixture_add_indexed_folder (fixture, "non-recursive",
-	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED);
+	                            TRACKER_DIRECTORY_FLAG_PRESERVE);
 	fixture_add_indexed_folder (fixture, "non-recursive/recursive",
 	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
@@ -838,11 +836,9 @@ test_content_filter_on_parent_root (TrackerMinerFSTestFixture *fixture,
 	fixture_remove_indexed_folder (fixture, "non-recursive/recursive");
 
 	fixture_add_indexed_folder (fixture, "non-recursive",
-	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED);
+	                            TRACKER_DIRECTORY_FLAG_PRESERVE);
 	fixture_add_indexed_folder (fixture, "non-recursive/recursive",
 	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	test_miner_reset_counters ((TestMiner *) fixture->miner);
@@ -963,7 +959,6 @@ test_non_monitored_delete (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
@@ -988,7 +983,6 @@ test_non_monitored_delete (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	fixture_iterate (fixture);
@@ -1018,11 +1012,9 @@ test_non_monitored_move (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 	fixture_add_indexed_folder (fixture, "non-recursive",
-	                            TRACKER_DIRECTORY_FLAG_PRESERVE |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED);
+	                            TRACKER_DIRECTORY_FLAG_PRESERVE);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
 
@@ -1048,10 +1040,9 @@ test_non_monitored_move (TrackerMinerFSTestFixture *fixture,
 	MOVE_FILE (fixture, "recursive/d", "not-indexed/f");
 
 	fixture_add_indexed_folder (fixture, "recursive",
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 	fixture_add_indexed_folder (fixture, "non-recursive",
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED);
+	                            TRACKER_DIRECTORY_FLAG_NONE);
 
 	fixture_iterate (fixture);
 
@@ -1160,7 +1151,6 @@ test_monitored_delete (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_MONITOR |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
@@ -1227,11 +1217,9 @@ test_monitored_move (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_MONITOR |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 	fixture_add_indexed_folder (fixture, "non-recursive",
-	                            TRACKER_DIRECTORY_FLAG_MONITOR |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED);
+	                            TRACKER_DIRECTORY_FLAG_MONITOR);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
 
@@ -1281,7 +1269,6 @@ test_monitored_atomic_replace (TrackerMinerFSTestFixture *fixture,
 
 	fixture_add_indexed_folder (fixture, "recursive",
 	                            TRACKER_DIRECTORY_FLAG_MONITOR |
-	                            TRACKER_DIRECTORY_FLAG_CHECK_DELETED |
 	                            TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_miner_start (TRACKER_MINER (fixture->miner));
