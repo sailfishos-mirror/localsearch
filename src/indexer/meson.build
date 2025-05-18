@@ -48,6 +48,7 @@ tracker_miner_dep = declare_dependency(
 )
 
 sources = [
+    'tracker-application.c',
     'tracker-config.c',
     'tracker-controller.c',
     'tracker-extract-watchdog.c',
