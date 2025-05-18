@@ -45,31 +45,6 @@ struct _TrackerFileNotifier {
 
 struct _TrackerFileNotifierClass {
 	GObjectClass parent_class;
-
-	void (* file_created) (TrackerFileNotifier *notifier,
-	                       GFile               *file,
-	                       GFileInfo           *info);
-	void (* file_updated) (TrackerFileNotifier *notifier,
-	                       GFile               *file,
-	                       GFileInfo           *info,
-	                       gboolean             attributes_only);
-	void (* file_deleted) (TrackerFileNotifier *notifier,
-	                       GFile               *file);
-	void (* file_moved)   (TrackerFileNotifier *notifier,
-	                       GFile               *from,
-	                       GFile               *to);
-
-	/* Directory notifications */
-	void (* root_started)  (TrackerFileNotifier *notifier,
-	                        GFile               *directory);
-	void (* root_finished) (TrackerFileNotifier *notifier,
-	                        GFile               *directory,
-	                        guint                directories_found,
-	                        guint                directories_ignored,
-	                        guint                files_found,
-	                        guint                files_ignored);
-
-	void (* finished)           (TrackerFileNotifier *notifier);
 };
 
 typedef enum

@@ -1629,40 +1629,28 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		g_signal_new ("file-created",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               file_created),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE,
 		              2, G_TYPE_FILE, G_TYPE_FILE_INFO);
 	signals[FILE_UPDATED] =
 		g_signal_new ("file-updated",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               file_updated),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE,
 		              3, G_TYPE_FILE, G_TYPE_FILE_INFO, G_TYPE_BOOLEAN);
 	signals[FILE_DELETED] =
 		g_signal_new ("file-deleted",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               file_deleted),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE,
 		              2, G_TYPE_FILE, G_TYPE_BOOLEAN);
 	signals[FILE_MOVED] =
 		g_signal_new ("file-moved",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               file_moved),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE,
 		              3, G_TYPE_FILE, G_TYPE_FILE, G_TYPE_BOOLEAN);
 	signals[DIRECTORY_FINISHED] =
@@ -1677,10 +1665,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		g_signal_new ("finished",
 		              G_TYPE_FROM_CLASS (klass),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerFileNotifierClass,
-		                               finished),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE, 0, G_TYPE_NONE);
 
 	props[PROP_INDEXING_TREE] =
