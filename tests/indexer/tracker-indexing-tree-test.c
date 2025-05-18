@@ -125,7 +125,7 @@ test_indexing_tree_002 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -147,7 +147,7 @@ test_indexing_tree_003 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -170,10 +170,10 @@ test_indexing_tree_008 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -196,10 +196,10 @@ test_indexing_tree_009 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -222,10 +222,10 @@ test_indexing_tree_011 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -247,10 +247,10 @@ test_indexing_tree_012 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_A);
 	ASSERT_INDEXABLE (fixture, TEST_DIRECTORY_AA);
@@ -274,10 +274,10 @@ test_indexing_tree_021 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_A]);
@@ -304,10 +304,10 @@ test_indexing_tree_022 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_AA]);
@@ -334,10 +334,10 @@ test_indexing_tree_023 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_A]);
@@ -364,10 +364,10 @@ test_indexing_tree_024 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_AA]);
@@ -394,10 +394,10 @@ test_indexing_tree_027 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_A]);
@@ -423,10 +423,10 @@ test_indexing_tree_028 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR);
+	                           TRACKER_DIRECTORY_FLAG_NONE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_AA]);
@@ -453,10 +453,10 @@ test_indexing_tree_029 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_A]);
@@ -482,10 +482,10 @@ test_indexing_tree_030 (TestCommonContext *fixture,
 {
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_A],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 	tracker_indexing_tree_add (fixture->tree,
 	                           fixture->test_dir[TEST_DIRECTORY_AA],
-	                           TRACKER_DIRECTORY_FLAG_MONITOR | TRACKER_DIRECTORY_FLAG_RECURSE);
+	                           TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_indexing_tree_remove (fixture->tree,
 	                              fixture->test_dir[TEST_DIRECTORY_AA]);

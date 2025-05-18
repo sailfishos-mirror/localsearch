@@ -727,7 +727,7 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	tracker_indexing_tree_get_root (notifier->indexing_tree,
 	                                directory, NULL, &flags);
 
-	if (notifier->monitor && (flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
+	if (notifier->monitor)
 		tracker_monitor_add (notifier->monitor, directory);
 
 	notifier->active = TRUE;
@@ -921,7 +921,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	             !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) ||
 	            index_root_equals_file (root, file) == 0) &&
 	           check_directory_contents (notifier, file)) {
-		if (notifier->monitor && !!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
+		if (notifier->monitor) {
 			/* Directory, needs monitoring */
 			tracker_monitor_add (notifier->monitor, file);
 		}

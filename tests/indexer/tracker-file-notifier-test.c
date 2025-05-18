@@ -795,7 +795,7 @@ test_file_notifier_monitor_updates_non_recursive (TestCommonContext *fixture,
 	CREATE_UPDATE_FILE (fixture, "non-recursive/bbb");
 
 	test_common_context_index_dir (fixture, "non-recursive",
-	                               TRACKER_DIRECTORY_FLAG_MONITOR);
+	                               TRACKER_DIRECTORY_FLAG_NONE);
 
 	tracker_file_notifier_start (fixture->notifier);
 	test_common_context_expect_results (fixture, expected_results,
@@ -841,8 +841,7 @@ test_file_notifier_monitor_updates_recursive (TestCommonContext *fixture,
 	CREATE_UPDATE_FILE (fixture, "recursive/bbb");
 
 	test_common_context_index_dir (fixture, "recursive",
-	                               TRACKER_DIRECTORY_FLAG_RECURSE |
-	                               TRACKER_DIRECTORY_FLAG_MONITOR);
+	                               TRACKER_DIRECTORY_FLAG_RECURSE);
 
 	tracker_file_notifier_start (fixture->notifier);
 	test_common_context_expect_results (fixture, expected_results,

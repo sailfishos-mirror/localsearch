@@ -30,6 +30,7 @@ struct _TrackerController
 	GObject parent_instance;
 
 	TrackerIndexingTree *indexing_tree;
+	TrackerMonitor *monitor;
 	TrackerStorage *storage;
 	TrackerConfig *config;
 	GSettings *extractor_settings;
@@ -53,6 +54,7 @@ enum {
 	PROP_INDEXING_TREE,
 	PROP_STORAGE,
 	PROP_FILES_INTERFACE,
+	PROP_MONITOR,
 	N_PROPS,
 };
 
@@ -77,6 +79,9 @@ tracker_controller_set_property (GObject      *object,
 		break;
 	case PROP_FILES_INTERFACE:
 		controller->files_interface = g_value_dup_object (value);
+		break;
+	case PROP_MONITOR:
+		controller->monitor = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -130,9 +135,6 @@ add_indexed_directory (TrackerController     *controller,
 
 	g_debug ("  Adding:'%s'", path);
 
-	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors"))
-		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-
 	tracker_indexing_tree_add (controller->indexing_tree, file, flags);
 }
 
@@ -146,10 +148,6 @@ add_removable_directory (TrackerController *controller,
 	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
 		TRACKER_DIRECTORY_FLAG_PRESERVE |
 		TRACKER_DIRECTORY_FLAG_PRIORITY;
-
-	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
-		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-	}
 
 	uri = g_file_get_uri (mount_file);
 	g_debug ("  Adding removable: '%s'", uri);
@@ -190,10 +188,6 @@ mount_point_added_cb (TrackerController *controller,
 			flags = TRACKER_DIRECTORY_FLAG_RECURSE |
 				TRACKER_DIRECTORY_FLAG_PRESERVE;
 
-			if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
-				flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-			}
-
 			if (g_file_equal (config_file, mount_point_file) ||
 			    g_file_has_prefix (config_file, mount_point_file)) {
 				/* If the config path is contained inside the mount path,
@@ -223,10 +217,6 @@ mount_point_added_cb (TrackerController *controller,
 			g_autoptr (GFile) config_file = NULL;
 
 			flags = TRACKER_DIRECTORY_FLAG_NONE;
-
-			if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
-				flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-			}
 
 			config_file = g_file_new_for_path (l->data);
 			if (g_file_equal (config_file, mount_point_file) ||
@@ -380,10 +370,6 @@ update_directories_from_new_config (TrackerController *controller,
 		flags |= TRACKER_DIRECTORY_FLAG_RECURSE;
 	}
 
-	if (g_settings_get_boolean (G_SETTINGS (controller->config), "enable-monitors")) {
-		flags |= TRACKER_DIRECTORY_FLAG_MONITOR;
-	}
-
 	/* Second add directories which are new */
 	for (sl = new_dirs; sl; sl = sl->next) {
 		const gchar *path;
@@ -457,19 +443,11 @@ tracker_controller_check_all_roots (TrackerController *controller)
 }
 
 static void
-filter_changed_cb (TrackerConfig     *config,
+filter_changed_cb (GSettings         *config,
                    GParamSpec        *pspec,
                    TrackerController *controller)
 {
 	update_filters (controller);
-	tracker_controller_check_all_roots (controller);
-}
-
-static void
-enable_monitor_changed_cb (TrackerConfig *config,
-                           GParamSpec        *pspec,
-                           TrackerController *controller)
-{
 	tracker_controller_check_all_roots (controller);
 }
 
@@ -558,6 +536,22 @@ index_volumes_changed_cb (TrackerConfig     *config,
 		/* Set idle so multiple changes in the config lead to one check */
 		controller->volumes_changed_id =
 			g_idle_add (index_volumes_changed_idle, controller);
+	}
+}
+
+static void
+enable_monitors_changed_cb (GSettings         *config,
+                            GParamSpec        *pspec,
+                            TrackerController *controller)
+{
+	gboolean enable;
+
+	enable = g_settings_get_boolean (config, "enable-monitors");
+
+	if (enable != tracker_monitor_get_enabled (controller->monitor)) {
+		tracker_monitor_set_enabled (controller->monitor, enable);
+		if (enable)
+			filter_changed_cb (config, pspec, controller);
 	}
 }
 
@@ -688,8 +682,7 @@ update_indexed_files_from_proxy (TrackerController *controller,
 			                                              file, file_info)) {
 				tracker_indexing_tree_add (indexing_tree,
 				                           file,
-				                           TRACKER_DIRECTORY_FLAG_RECURSE |
-				                           TRACKER_DIRECTORY_FLAG_MONITOR);
+				                           TRACKER_DIRECTORY_FLAG_RECURSE);
 				g_ptr_array_add (controller->control_proxy_folders,
 				                 g_object_ref (file));
 			} else {
@@ -816,7 +809,7 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (filter_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::enable-monitors",
-	                  G_CALLBACK (enable_monitor_changed_cb),
+	                  G_CALLBACK (enable_monitors_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::index-removable-devices",
 	                  G_CALLBACK (index_volumes_changed_cb),
@@ -900,6 +893,13 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_MONITOR] =
+		g_param_spec_object ("monitor",
+		                     NULL, NULL,
+		                     TRACKER_TYPE_MONITOR,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -913,11 +913,13 @@ tracker_controller_init (TrackerController *controller)
 
 TrackerController *
 tracker_controller_new (TrackerIndexingTree   *tree,
+                        TrackerMonitor        *monitor,
                         TrackerStorage        *storage,
                         TrackerFilesInterface *files_interface)
 {
 	return g_object_new (TRACKER_TYPE_CONTROLLER,
 			     "indexing-tree", tree,
+	                     "monitor", monitor,
 	                     "storage", storage,
 	                     "files-interface", files_interface,
 			     NULL);

@@ -37,8 +37,6 @@ G_BEGIN_DECLS
  * TrackerDirectoryFlags:
  * @TRACKER_DIRECTORY_FLAG_NONE: No flags.
  * @TRACKER_DIRECTORY_FLAG_RECURSE: Should recurse in the directory.
- * @TRACKER_DIRECTORY_FLAG_MONITOR: Should setup monitors in the items
- * found in the directory.
  * @TRACKER_DIRECTORY_FLAG_PRESERVE: Should preserve items in the
  * directory even if the directory gets removed.
  * @TRACKER_DIRECTORY_FLAG_PRIORITY: Internally a priority queue is
@@ -49,11 +47,10 @@ G_BEGIN_DECLS
  * #TrackerIndexingTree and #TrackerDataProvider.
  */
 typedef enum {
-	TRACKER_DIRECTORY_FLAG_NONE            = 0,
-	TRACKER_DIRECTORY_FLAG_RECURSE         = 1 << 1,
-	TRACKER_DIRECTORY_FLAG_MONITOR         = 1 << 2,
-	TRACKER_DIRECTORY_FLAG_PRESERVE        = 1 << 3,
-	TRACKER_DIRECTORY_FLAG_PRIORITY        = 1 << 4,
+	TRACKER_DIRECTORY_FLAG_NONE = 0,
+	TRACKER_DIRECTORY_FLAG_RECURSE = 1 << 1,
+	TRACKER_DIRECTORY_FLAG_PRESERVE = 1 << 2,
+	TRACKER_DIRECTORY_FLAG_PRIORITY = 1 << 3,
 } TrackerDirectoryFlags;
 
 /**
