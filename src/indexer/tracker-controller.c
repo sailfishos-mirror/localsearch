@@ -35,7 +35,6 @@ struct _TrackerController
 	TrackerConfig *config;
 	GSettings *extractor_settings;
 	TrackerFilesInterface *files_interface;
-	GVolumeMonitor *volume_monitor;
 
 	GDBusProxy *control_proxy;
 	GCancellable *control_proxy_cancellable;
@@ -246,21 +245,6 @@ mount_point_removed_cb (TrackerController *controller,
 
 	mount_point_file = g_file_new_for_path (mount_point);
 	tracker_indexing_tree_remove (controller->indexing_tree, mount_point_file);
-}
-
-static void
-mount_pre_unmount_cb (GVolumeMonitor    *volume_monitor,
-                      GMount            *mount,
-                      TrackerController *controller)
-{
-	g_autoptr (GFile) mount_root = NULL;
-	g_autofree gchar *uri = NULL;
-
-	mount_root = g_mount_get_root (mount);
-	uri = g_file_get_uri (mount_root);
-	g_debug ("Pre-unmount requested for '%s'", uri);
-
-	tracker_indexing_tree_remove (controller->indexing_tree, mount_root);
 }
 
 static void
@@ -787,11 +771,6 @@ tracker_controller_constructed (GObject *object)
 	                         object,
 	                         G_CONNECT_SWAPPED);
 
-	controller->volume_monitor = g_volume_monitor_get ();
-	g_signal_connect_object (controller->volume_monitor, "mount-pre-unmount",
-	                         G_CALLBACK (mount_pre_unmount_cb),
-	                         object, G_CONNECT_SWAPPED);
-
 	controller->config = tracker_config_new ();
 	g_signal_connect (controller->config, "notify::index-recursive-directories",
 	                  G_CALLBACK (index_recursive_directories_cb),
@@ -851,7 +830,6 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->storage);
 	g_clear_object (&controller->config);
 	g_clear_object (&controller->extractor_settings);
-	g_clear_object (&controller->volume_monitor);
 	g_clear_object (&controller->files_interface);
 
 	g_slist_free_full (controller->config_single_directories, g_free);
