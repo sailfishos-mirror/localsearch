@@ -274,26 +274,6 @@ test_common_context_remove_dir (TestCommonContext     *fixture,
 }
 
 static void
-assert_notifier_properties (TrackerFileNotifier     *notifier,
-			    TrackerSparqlConnection *connection,
-			    TrackerIndexingTree     *tree,
-			    const gchar             *attributes)
-{
-	g_autoptr (GObject) c = NULL, i = NULL;
-	g_autofree gchar *a = NULL;
-
-	g_object_get (notifier,
-		      "connection", &c,
-		      "indexing-tree", &i,
-		      "file-attributes", &a,
-		      NULL);
-
-	g_assert_true (connection == TRACKER_SPARQL_CONNECTION (c));
-	g_assert_true (tree == TRACKER_INDEXING_TREE (i));
-	g_assert_cmpstr (attributes, ==, a);
-}
-
-static void
 test_common_context_setup (TestCommonContext *fixture,
                            gconstpointer      data)
 {
@@ -327,13 +307,6 @@ test_common_context_setup (TestCommonContext *fixture,
 	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
 	                                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
 	                                               G_FILE_ATTRIBUTE_TIME_MODIFIED);
-
-	assert_notifier_properties (fixture->notifier,
-	                            fixture->connection,
-	                            fixture->indexing_tree,
-	                            G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-	                            G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
-	                            G_FILE_ATTRIBUTE_TIME_MODIFIED);
 
 	g_signal_connect (fixture->notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created_cb), fixture);

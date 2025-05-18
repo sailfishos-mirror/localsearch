@@ -34,7 +34,10 @@ enum {
 	PROP_INDEXING_TREE,
 	PROP_CONNECTION,
 	PROP_FILE_ATTRIBUTES,
+	N_PROPS,
 };
+
+static GParamSpec *props[N_PROPS] = { 0, };
 
 enum {
 	FILE_CREATED,
@@ -152,32 +155,6 @@ tracker_file_notifier_set_property (GObject      *object,
 		break;
 	case PROP_FILE_ATTRIBUTES:
 		priv->file_attributes = g_value_dup_string (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-tracker_file_notifier_get_property (GObject    *object,
-                                    guint       prop_id,
-                                    GValue     *value,
-                                    GParamSpec *pspec)
-{
-	TrackerFileNotifierPrivate *priv;
-
-	priv = tracker_file_notifier_get_instance_private (TRACKER_FILE_NOTIFIER (object));
-
-	switch (prop_id) {
-	case PROP_INDEXING_TREE:
-		g_value_set_object (value, priv->indexing_tree);
-		break;
-	case PROP_CONNECTION:
-		g_value_set_object (value, priv->connection);
-		break;
-	case PROP_FILE_ATTRIBUTES:
-		g_value_set_string (value, priv->file_attributes);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1703,7 +1680,6 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 
 	object_class->finalize = tracker_file_notifier_finalize;
 	object_class->set_property = tracker_file_notifier_set_property;
-	object_class->get_property = tracker_file_notifier_get_property;
 	object_class->constructed = tracker_file_notifier_constructed;
 
 	klass->finished = tracker_file_notifier_real_finished;
@@ -1766,33 +1742,26 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		              NULL,
 		              G_TYPE_NONE, 0, G_TYPE_NONE);
 
-	g_object_class_install_property (object_class,
-	                                 PROP_INDEXING_TREE,
-	                                 g_param_spec_object ("indexing-tree",
-	                                                      "Indexing tree",
-	                                                      "Indexing tree",
-	                                                      TRACKER_TYPE_INDEXING_TREE,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_CONNECTION,
-	                                 g_param_spec_object ("connection",
-	                                                      "Connection",
-	                                                      "Connection to use for queries",
-	                                                      TRACKER_SPARQL_TYPE_CONNECTION,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_FILE_ATTRIBUTES,
-	                                 g_param_spec_string ("file-attributes",
-	                                                      "File attributes",
-	                                                      "File attributes",
-	                                                      NULL,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
+	props[PROP_INDEXING_TREE] =
+		g_param_spec_object ("indexing-tree", NULL, NULL,
+		                     TRACKER_TYPE_INDEXING_TREE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_CONNECTION] =
+		g_param_spec_object ("connection", NULL, NULL,
+		                     TRACKER_SPARQL_TYPE_CONNECTION,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_FILE_ATTRIBUTES] =
+		g_param_spec_string ("file-attributes", NULL, NULL,
+		                     NULL,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+
+	g_object_class_install_properties (object_class, N_PROPS, props);
 }
 
 static void
