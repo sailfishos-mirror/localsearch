@@ -28,32 +28,17 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_FILE_NOTIFIER         (tracker_file_notifier_get_type ())
-#define TRACKER_FILE_NOTIFIER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifier))
-#define TRACKER_FILE_NOTIFIER_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c),    TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifierClass))
-#define TRACKER_IS_FILE_NOTIFIER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_FILE_NOTIFIER))
-#define TRACKER_IS_FILE_NOTIFIER_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),    TRACKER_TYPE_FILE_NOTIFIER))
-#define TRACKER_FILE_NOTIFIER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o),  TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifierClass))
-
-typedef struct _TrackerFileNotifier TrackerFileNotifier;
-typedef struct _TrackerFileNotifierClass TrackerFileNotifierClass;
-typedef enum _TrackerFileNotifierType TrackerFileNotifierType;
-
-struct _TrackerFileNotifier {
-	GObject parent_instance;
-};
-
-struct _TrackerFileNotifierClass {
-	GObjectClass parent_class;
-};
+#define TRACKER_TYPE_FILE_NOTIFIER (tracker_file_notifier_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerFileNotifier,
+                      tracker_file_notifier,
+                      TRACKER, FILE_NOTIFIER,
+                      GObject);
 
 typedef enum
 {
 	TRACKER_FILE_NOTIFIER_STATUS_INDEXING,
 	TRACKER_FILE_NOTIFIER_STATUS_CHECKING,
 } TrackerFileNotifierStatus;
-
-GType         tracker_file_notifier_get_type     (void) G_GNUC_CONST;
 
 TrackerFileNotifier *
               tracker_file_notifier_new          (TrackerIndexingTree     *indexing_tree,

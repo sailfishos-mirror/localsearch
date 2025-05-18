@@ -96,6 +96,11 @@ typedef struct {
 	guint cursor_has_content : 1;
 } TrackerIndexRoot;
 
+struct _TrackerFileNotifier
+{
+	GObject parent_instance;
+};
+
 typedef struct {
 	TrackerIndexingTree *indexing_tree;
 
