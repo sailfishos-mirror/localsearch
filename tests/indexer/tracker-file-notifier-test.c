@@ -277,6 +277,7 @@ static void
 test_common_context_setup (TestCommonContext *fixture,
                            gconstpointer      data)
 {
+	TrackerMonitor *monitor;
 	GFile *data_loc, *ontology;
 	GError *error = NULL;
 
@@ -301,9 +302,12 @@ test_common_context_setup (TestCommonContext *fixture,
 	fixture->indexing_tree = tracker_indexing_tree_new ();
 	tracker_indexing_tree_set_filter_hidden (fixture->indexing_tree, TRUE);
 
+	monitor = tracker_monitor_new (NULL);
+
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
 	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree,
 	                                               fixture->connection,
+	                                               monitor,
 	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
 	                                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
 	                                               G_FILE_ATTRIBUTE_TIME_MODIFIED);
@@ -318,6 +322,8 @@ test_common_context_setup (TestCommonContext *fixture,
 	                  G_CALLBACK (file_notifier_file_moved_cb), fixture);
 	g_signal_connect (fixture->notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished_cb), fixture);
+
+	g_clear_object (&monitor);
 }
 
 static void

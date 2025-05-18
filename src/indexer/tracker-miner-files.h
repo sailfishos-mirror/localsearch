@@ -26,6 +26,7 @@
 #include "tracker-config.h"
 
 #include "tracker-miner-fs.h"
+#include "tracker-monitor.h"
 #include "tracker-storage.h"
 
 G_BEGIN_DECLS
@@ -35,6 +36,7 @@ G_DECLARE_FINAL_TYPE (TrackerMinerFiles, tracker_miner_files, TRACKER, MINER_FIL
 
 TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,
+                                        TrackerMonitor          *monitor,
                                         TrackerStorage          *storage);
 
 TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);

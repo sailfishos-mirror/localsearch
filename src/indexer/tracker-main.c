@@ -590,6 +590,7 @@ main (gint argc, gchar *argv[])
 	GDBusProxy *systemd_proxy = NULL;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
+	TrackerMonitor *monitor;
 	TrackerStorage *storage;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
@@ -697,9 +698,17 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
+	monitor = tracker_monitor_new (&error);
+
+	if (!monitor) {
+		g_warning ("Failed to initialize file monitoring: %s", error->message);
+		g_clear_error (&error);
+	}
+
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
+	                                       monitor,
 	                                       storage);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);
@@ -816,6 +825,7 @@ main (gint argc, gchar *argv[])
 	g_clear_object (&indexing_tree);
 	g_clear_object (&storage);
 	g_clear_object (&systemd_proxy);
+	g_clear_object (&monitor);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);

@@ -1,5 +1,6 @@
 #include <glib.h>
 #include <tracker-miner-fs.h>
+#include <tracker-monitor.h>
 #include <tracker-common.h>
 
 typedef struct {
@@ -175,12 +176,17 @@ static TrackerMinerFS *
 test_miner_new (TrackerSparqlConnection *conn)
 {
 	g_autoptr (TrackerIndexingTree) indexing_tree = NULL;
+	g_autoptr (TrackerMonitor) monitor = NULL;
+	g_autoptr (GError) error = NULL;
 
 	indexing_tree = tracker_indexing_tree_new ();
+	monitor = tracker_monitor_new (&error);
+	g_assert_no_error (error);
 
 	return g_object_new (test_miner_get_type (),
 	                     "indexing-tree", indexing_tree,
 			     "connection", conn,
+	                     "monitor", monitor,
 			     "file-attributes", "standard::*,time::*",
 			     NULL);
 }

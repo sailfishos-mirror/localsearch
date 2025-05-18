@@ -86,6 +86,7 @@ struct _TrackerMinerFSPrivate {
 
 	guint item_queues_handler_id;
 
+	TrackerMonitor *monitor;
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
 
@@ -141,6 +142,7 @@ enum {
 	PROP_THROTTLE,
 	PROP_FILE_ATTRIBUTES,
 	PROP_INDEXING_TREE,
+	PROP_MONITOR,
 	N_PROPS,
 };
 
@@ -251,6 +253,12 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		g_param_spec_object ("indexing-tree", NULL, NULL,
 		                     TRACKER_TYPE_INDEXING_TREE,
 		                     G_PARAM_READWRITE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_MONITOR] =
+		g_param_spec_object ("monitor", NULL, NULL,
+		                     TRACKER_TYPE_MONITOR,
+		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
 
@@ -446,6 +454,7 @@ fs_finalize (GObject *object)
 
 	g_clear_object (&priv->indexing_tree);
 	g_clear_object (&priv->file_notifier);
+	g_clear_object (&priv->monitor);
 	g_free (priv->file_attributes);
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
@@ -483,6 +492,7 @@ fs_constructed (GObject *object)
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
+	                                                 priv->monitor,
 	                                                 priv->file_attributes);
 
 	g_signal_connect (priv->file_notifier, "file-created",
@@ -531,6 +541,9 @@ fs_set_property (GObject      *object,
 		break;
 	case PROP_INDEXING_TREE:
 		priv->indexing_tree = g_value_dup_object (value);
+		break;
+	case PROP_MONITOR:
+		priv->monitor = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);

@@ -794,15 +794,17 @@ miner_files_constructed (GObject *object)
 }
 
 TrackerMiner *
-tracker_miner_files_new (TrackerSparqlConnection *connection,
-                         TrackerIndexingTree     *indexing_tree,
-                         TrackerStorage          *storage)
+tracker_miner_files_new (TrackerSparqlConnection  *connection,
+                         TrackerIndexingTree      *indexing_tree,
+                         TrackerMonitor           *monitor,
+                         TrackerStorage           *storage)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
+	                     "monitor", monitor,
 	                     "storage", storage,
 	                     "file-attributes", FILE_ATTRIBUTES,
 	                     NULL);

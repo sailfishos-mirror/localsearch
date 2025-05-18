@@ -34,6 +34,7 @@ enum {
 	PROP_INDEXING_TREE,
 	PROP_CONNECTION,
 	PROP_FILE_ATTRIBUTES,
+	PROP_MONITOR,
 	N_PROPS,
 };
 
@@ -155,6 +156,9 @@ tracker_file_notifier_set_property (GObject      *object,
 		break;
 	case PROP_FILE_ATTRIBUTES:
 		notifier->file_attributes = g_value_dup_string (value);
+		break;
+	case PROP_MONITOR:
+		notifier->monitor = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -313,7 +317,7 @@ check_directory_contents (TrackerFileNotifier *notifier,
 		                                                     parent);
 	}
 
-	if (!process)
+	if (notifier->monitor && !process)
 		tracker_monitor_remove (notifier->monitor, parent);
 
 	return process;
@@ -723,7 +727,7 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	tracker_indexing_tree_get_root (notifier->indexing_tree,
 	                                directory, NULL, &flags);
 
-	if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
+	if (notifier->monitor && (flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
 		tracker_monitor_add (notifier->monitor, directory);
 
 	notifier->active = TRUE;
@@ -917,7 +921,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	             !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) ||
 	            index_root_equals_file (root, file) == 0) &&
 	           check_directory_contents (notifier, file)) {
-		if (!!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
+		if (notifier->monitor && !!(root->flags & TRACKER_DIRECTORY_FLAG_MONITOR)) {
 			/* Directory, needs monitoring */
 			tracker_monitor_add (notifier->monitor, file);
 		}
@@ -1123,7 +1127,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 				g_signal_emit (notifier, signals[FILE_DELETED], 0, parent, TRUE);
 				file_notifier_current_root_check_remove_directory (notifier, parent);
 
-				tracker_monitor_remove_recursively (notifier->monitor, parent);
+				tracker_monitor_remove_recursively (monitor, parent);
 				return;
 			}
 
@@ -1202,10 +1206,9 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 	/* Remove monitors if any */
 	if (is_directory &&
 	    tracker_indexing_tree_file_is_root (notifier->indexing_tree, file)) {
-		tracker_monitor_remove_children_recursively (notifier->monitor,
-		                                             file);
+		tracker_monitor_remove_children_recursively (monitor, file);
 	} else if (is_directory) {
-		tracker_monitor_remove_recursively (notifier->monitor, file);
+		tracker_monitor_remove_recursively (monitor, file);
 	}
 
 	if (!is_directory) {
@@ -1291,7 +1294,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 	if (!is_source_monitored) {
 		if (is_directory) {
 			/* Remove monitors if any */
-			tracker_monitor_remove_recursively (notifier->monitor, file);
+			tracker_monitor_remove_recursively (monitor, file);
 			notifier_queue_root (notifier, other_file, flags, FALSE);
 		}
 		/* else, file, do nothing */
@@ -1330,8 +1333,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 
 			/* Remove monitors if any */
 			if (is_directory) {
-				tracker_monitor_remove_recursively (notifier->monitor,
-				                                    file);
+				tracker_monitor_remove_recursively (monitor, file);
 			}
 
 			if (should_process_other) {
@@ -1353,8 +1355,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 		} else if (!should_process_other) {
 			/* Delete original location as it moves to be non indexable */
 			if (is_directory) {
-				tracker_monitor_remove_recursively (notifier->monitor,
-				                                    file);
+				tracker_monitor_remove_recursively (monitor, file);
 			}
 
 			g_signal_emit (notifier, signals[FILE_DELETED], 0, file, is_directory);
@@ -1460,7 +1461,8 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	}
 
 	/* Remove monitors if any */
-	tracker_monitor_remove_recursively (notifier->monitor, directory);
+	if (notifier->monitor)
+		tracker_monitor_remove_recursively (notifier->monitor, directory);
 }
 
 static void
@@ -1514,10 +1516,11 @@ tracker_file_notifier_finalize (GObject *object)
 	g_clear_object (&notifier->deleted_query);
 	g_clear_object (&notifier->file_exists_query);
 
-	tracker_monitor_set_enabled (notifier->monitor, FALSE);
-	g_signal_handlers_disconnect_by_data (notifier->monitor, object);
+	if (notifier->monitor) {
+		g_signal_handlers_disconnect_by_data (notifier->monitor, object);
+		g_clear_object (&notifier->monitor);
+	}
 
-	g_object_unref (notifier->monitor);
 	g_clear_object (&notifier->connection);
 
 	g_clear_pointer (&notifier->current_index_root, tracker_index_root_free);
@@ -1545,6 +1548,24 @@ tracker_file_notifier_constructed (GObject *object)
 	                  G_CALLBACK (indexing_tree_directory_removed), object);
 	g_signal_connect (notifier->indexing_tree, "child-updated",
 	                  G_CALLBACK (indexing_tree_child_updated), object);
+
+	if (notifier->monitor) {
+		g_signal_connect (notifier->monitor, "item-created",
+		                  G_CALLBACK (monitor_item_created_cb),
+		                  notifier);
+		g_signal_connect (notifier->monitor, "item-updated",
+		                  G_CALLBACK (monitor_item_updated_cb),
+		                  notifier);
+		g_signal_connect (notifier->monitor, "item-attribute-updated",
+		                  G_CALLBACK (monitor_item_attribute_updated_cb),
+		                  notifier);
+		g_signal_connect (notifier->monitor, "item-deleted",
+		                  G_CALLBACK (monitor_item_deleted_cb),
+		                  notifier);
+		g_signal_connect (notifier->monitor, "item-moved",
+		                  G_CALLBACK (monitor_item_moved_cb),
+		                  notifier);
+	}
 }
 
 static void
@@ -1617,6 +1638,12 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_MONITOR] =
+		g_param_spec_object ("monitor", NULL, NULL,
+		                     TRACKER_TYPE_MONITOR,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -1656,6 +1683,7 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 TrackerFileNotifier *
 tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
                            TrackerSparqlConnection *connection,
+                           TrackerMonitor          *monitor,
                            const gchar             *file_attributes)
 {
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (indexing_tree), NULL);
@@ -1663,6 +1691,7 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	return g_object_new (TRACKER_TYPE_FILE_NOTIFIER,
 	                     "indexing-tree", indexing_tree,
 	                     "connection", connection,
+	                     "monitor", monitor,
 	                     "file-attributes", file_attributes,
 	                     NULL);
 }

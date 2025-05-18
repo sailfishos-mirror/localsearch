@@ -23,8 +23,9 @@
 #define __TRACKER_FILE_NOTIFIER_H__
 
 #include <gio/gio.h>
+#include <tinysparql.h>
 #include "tracker-indexing-tree.h"
-#include "tracker-miner-fs.h"
+#include "tracker-monitor.h"
 
 G_BEGIN_DECLS
 
@@ -43,6 +44,7 @@ typedef enum
 TrackerFileNotifier *
               tracker_file_notifier_new          (TrackerIndexingTree     *indexing_tree,
                                                   TrackerSparqlConnection *connection,
+                                                  TrackerMonitor          *monitor,
                                                   const gchar             *file_attributes);
 
 gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notifier);
