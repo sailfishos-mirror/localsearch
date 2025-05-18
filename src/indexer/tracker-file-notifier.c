@@ -1096,7 +1096,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 {
 	TrackerFileNotifier *notifier = root->notifier;
 	TrackerFileNotifierPrivate *priv;
-	TrackerDirectoryFlags flags;
 	GFile *directory;
 	g_autofree gchar *uri = NULL;
 
@@ -1107,15 +1106,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	g_set_object (&priv->cancellable, root->cancellable);
 
 	directory = root->root;
-	flags = root->flags;
-
-	if ((flags & TRACKER_DIRECTORY_FLAG_IGNORE) != 0) {
-		if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) == 0) {
-			g_signal_emit (notifier, signals[FILE_DELETED], 0, directory, TRUE);
-		}
-
-		return FALSE;
-	}
 
 	g_timer_reset (root->timer);
 
@@ -1533,32 +1523,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 
 	/* Flags are still valid at the moment of deletion */
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
-
-	/* If the folder was being ignored, index/crawl it from scratch */
-	if (flags & TRACKER_DIRECTORY_FLAG_IGNORE) {
-		GFile *parent;
-
-		parent = g_file_get_parent (directory);
-
-		if (parent) {
-			TrackerDirectoryFlags parent_flags;
-
-			tracker_indexing_tree_get_root (indexing_tree,
-			                                parent, NULL,
-			                                &parent_flags);
-
-			if (parent_flags & TRACKER_DIRECTORY_FLAG_RECURSE) {
-				notifier_queue_root (notifier, directory, parent_flags, FALSE);
-			} else if (tracker_indexing_tree_file_is_root (indexing_tree,
-			                                               parent)) {
-				g_signal_emit (notifier, signals[FILE_CREATED],
-				               0, directory, NULL);
-			}
-
-			g_object_unref (parent);
-		}
-		return;
-	}
 
 	if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) == 0) {
 		/* Directory needs to be deleted from the store too */

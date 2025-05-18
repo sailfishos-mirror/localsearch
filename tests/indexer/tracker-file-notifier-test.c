@@ -592,40 +592,6 @@ test_file_notifier_crawling_recursive_within_non_recursive (TestCommonContext *f
 }
 
 static void
-test_file_notifier_crawling_ignore_within_recursive (TestCommonContext *fixture,
-						     gconstpointer      data)
-{
-	FilesystemOperation expected_results[] = {
-		{ OPERATION_CREATE, "recursive", NULL },
-		{ OPERATION_CREATE, "recursive/folder", NULL },
-		{ OPERATION_CREATE, "recursive/folder/aaa", NULL },
-		{ OPERATION_CREATE, "recursive/bbb", NULL },
-		{ OPERATION_DELETE, "recursive/folder/ignore", NULL }
-	};
-
-	CREATE_FOLDER (fixture, "recursive/folder");
-	CREATE_UPDATE_FILE (fixture, "recursive/folder/aaa");
-	CREATE_UPDATE_FILE (fixture, "recursive/bbb");
-	CREATE_FOLDER (fixture, "recursive/folder/ignore");
-	CREATE_UPDATE_FILE (fixture, "recursive/folder/ignore/ccc");
-	CREATE_FOLDER (fixture, "recursive/folder/ignore/folder");
-	CREATE_UPDATE_FILE (fixture, "recursive/folder/ignore/folder/ddd");
-
-	test_common_context_index_dir (fixture, "recursive",
-	                               TRACKER_DIRECTORY_FLAG_RECURSE);
-	test_common_context_index_dir (fixture, "recursive/folder/ignore",
-	                               TRACKER_DIRECTORY_FLAG_IGNORE);
-
-	tracker_file_notifier_start (fixture->notifier);
-
-	test_common_context_expect_results (fixture, expected_results,
-	                                    G_N_ELEMENTS (expected_results),
-	                                    2, TRUE);
-
-	tracker_file_notifier_stop (fixture->notifier);
-}
-
-static void
 test_file_notifier_crawling_root_removal1 (TestCommonContext *fixture,
                                            gconstpointer      data)
 {
@@ -729,74 +695,6 @@ test_file_notifier_changes_remove_recursive (TestCommonContext *fixture,
 	tracker_file_notifier_start (fixture->notifier);
 	test_common_context_expect_results (fixture, expected_results,
 	                                    G_N_ELEMENTS (expected_results),
-	                                    1, FALSE);
-	tracker_file_notifier_stop (fixture->notifier);
-}
-
-static void
-test_file_notifier_changes_remove_ignore (TestCommonContext *fixture,
-                                          gconstpointer      data)
-{
-	FilesystemOperation expected_results[] = {
-		{ OPERATION_CREATE, "recursive/folder/ignore", NULL },
-		{ OPERATION_CREATE, "recursive/folder/ignore/ccc", NULL },
-		{ OPERATION_CREATE, "recursive/folder/ignore/folder", NULL },
-		{ OPERATION_CREATE, "recursive/folder/ignore/folder/ddd", NULL }
-	};
-	FilesystemOperation expected_results2[] = {
-		{ OPERATION_DELETE, "recursive/folder/ignore", NULL }
-	};
-
-	/* Start off from ignore test case */
-	test_file_notifier_crawling_ignore_within_recursive (fixture, data);
-
-	/* Remove ignored folder */
-	test_common_context_remove_dir (fixture, "recursive/folder/ignore");
-	tracker_file_notifier_start (fixture->notifier);
-	test_common_context_expect_results (fixture, expected_results,
-	                                    G_N_ELEMENTS (expected_results),
-	                                    1, FALSE);
-	tracker_file_notifier_stop (fixture->notifier);
-
-	/* And add it back */
-	fixture->expect_n_results = G_N_ELEMENTS (expected_results2);
-	test_common_context_index_dir (fixture, "recursive/folder/ignore",
-	                               TRACKER_DIRECTORY_FLAG_IGNORE);
-	tracker_file_notifier_start (fixture->notifier);
-	test_common_context_expect_results (fixture, expected_results2,
-	                                    G_N_ELEMENTS (expected_results2),
-	                                    1, FALSE);
-	tracker_file_notifier_stop (fixture->notifier);
-}
-
-static void
-test_file_notifier_changes_ignore_non_recursive (TestCommonContext *fixture,
-                                                 gconstpointer      data)
-{
-	FilesystemOperation expected_results[] = {
-		{ OPERATION_DELETE, "non-recursive/folder", NULL },
-	};
-	FilesystemOperation expected_results2[] = {
-		{ OPERATION_CREATE, "non-recursive/folder", NULL }
-	};
-
-	/* Start off from non-recursive crawl test case */
-	test_file_notifier_crawling_non_recursive (fixture, data);
-
-	/* Add ignored index root on the file */
-	test_common_context_index_dir (fixture, "non-recursive/folder",
-	                               TRACKER_DIRECTORY_FLAG_IGNORE);
-	tracker_file_notifier_start (fixture->notifier);
-	test_common_context_expect_results (fixture, expected_results,
-	                                    G_N_ELEMENTS (expected_results),
-	                                    1, FALSE);
-	tracker_file_notifier_stop (fixture->notifier);
-
-	/* And remove it */
-	test_common_context_remove_dir (fixture, "non-recursive/folder");
-	tracker_file_notifier_start (fixture->notifier);
-	test_common_context_expect_results (fixture, expected_results2,
-	                                    G_N_ELEMENTS (expected_results2),
 	                                    1, FALSE);
 	tracker_file_notifier_stop (fixture->notifier);
 }
@@ -1009,8 +907,6 @@ main (gint    argc,
 	          test_file_notifier_crawling_non_recursive_within_recursive);
 	test_add ("/libtracker-miner/file-notifier/crawling-recursive-within-non-recursive",
 	          test_file_notifier_crawling_recursive_within_non_recursive);
-	test_add ("/libtracker-miner/file-notifier/crawling-ignore-within-recursive",
-	          test_file_notifier_crawling_ignore_within_recursive);
 	test_add ("/libtracker-miner/file-notifier/crawling-root-removal1",
 	          test_file_notifier_crawling_root_removal1);
 	test_add ("/libtracker-miner/file-notifier/crawling-root-removal2",
@@ -1021,10 +917,6 @@ main (gint    argc,
 		  test_file_notifier_changes_remove_non_recursive);
 	test_add ("/libtracker-miner/file-notifier/changes-remove-recursive",
 		  test_file_notifier_changes_remove_recursive);
-	test_add ("/libtracker-miner/file-notifier/changes-remove-ignore",
-		  test_file_notifier_changes_remove_ignore);
-	test_add ("/libtracker-miner/file-notifier/changes-ignore-non-recursive",
-		  test_file_notifier_changes_ignore_non_recursive);
 	test_add ("/libtracker-miner/file-notifier/changes-update-child",
 		  test_file_notifier_changes_update_child);
 	test_add ("/libtracker-miner/file-notifier/start-stop",
