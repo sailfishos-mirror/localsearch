@@ -32,6 +32,7 @@ struct _TrackerController
 	TrackerIndexingTree *indexing_tree;
 	TrackerStorage *storage;
 	TrackerConfig *config;
+	GSettings *extractor_settings;
 	TrackerFilesInterface *files_interface;
 	GVolumeMonitor *volume_monitor;
 
@@ -286,6 +287,18 @@ indexing_tree_update_filter (TrackerIndexingTree *indexing_tree,
 }
 
 static void
+text_allowlist_update (TrackerIndexingTree *indexing_tree,
+                       GStrv                strv)
+{
+	int i;
+
+	tracker_indexing_tree_clear_allowed_text_patterns (indexing_tree);
+
+	for (i = 0; strv[i]; i++)
+		tracker_indexing_tree_add_allowed_text_pattern (indexing_tree, strv[i]);
+}
+
+static void
 update_filters (TrackerController *controller)
 {
 	GStrv strv;
@@ -306,6 +319,11 @@ update_filters (TrackerController *controller)
 	/* Directories with content */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories-with-content");
 	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
+	g_strfreev (strv);
+
+	/* Allowed text patterns */
+	strv = g_settings_get_strv (controller->extractor_settings, "text-allowlist");
+	text_allowlist_update (controller->indexing_tree, strv);
 	g_strfreev (strv);
 }
 
@@ -449,6 +467,14 @@ filter_changed_cb (TrackerConfig     *config,
 
 static void
 enable_monitor_changed_cb (TrackerConfig *config,
+                           GParamSpec        *pspec,
+                           TrackerController *controller)
+{
+	tracker_controller_check_all_roots (controller);
+}
+
+static void
+text_allowlist_changed_cb (TrackerConfig *config,
                            GParamSpec        *pspec,
                            TrackerController *controller)
 {
@@ -764,6 +790,11 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 
+	controller->extractor_settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
+	g_signal_connect (controller->extractor_settings, "changed::text-allowlist",
+	                  G_CALLBACK (text_allowlist_changed_cb),
+	                  object);
+
 	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
 	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
 	                          NULL,
@@ -792,6 +823,7 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->indexing_tree);
 	g_clear_object (&controller->storage);
 	g_clear_object (&controller->config);
+	g_clear_object (&controller->extractor_settings);
 	g_clear_object (&controller->volume_monitor);
 	g_clear_object (&controller->files_interface);
 
