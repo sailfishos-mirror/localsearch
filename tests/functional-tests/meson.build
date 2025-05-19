@@ -49,6 +49,7 @@ extractor_tests = [
   'images/bmp-corrupt-3',
   'images/bmp-corrupt-4',
   'images/ico-basic-1',
+  'text/text-non-utf8-1',
 ]
 
 if get_option('abiword')
