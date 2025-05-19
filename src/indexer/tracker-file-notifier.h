@@ -29,6 +29,18 @@
 
 G_BEGIN_DECLS
 
+#define INDEXER_FILE_ATTRIBUTES	\
+	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
+	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
+	G_FILE_ATTRIBUTE_STANDARD_NAME "," \
+	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
+	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
+	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
+	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
+	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
+	G_FILE_ATTRIBUTE_TIME_CREATED "," \
+	G_FILE_ATTRIBUTE_TIME_ACCESS
+
 #define TRACKER_TYPE_FILE_NOTIFIER (tracker_file_notifier_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerFileNotifier,
                       tracker_file_notifier,
@@ -41,11 +53,9 @@ typedef enum
 	TRACKER_FILE_NOTIFIER_STATUS_CHECKING,
 } TrackerFileNotifierStatus;
 
-TrackerFileNotifier *
-              tracker_file_notifier_new          (TrackerIndexingTree     *indexing_tree,
-                                                  TrackerSparqlConnection *connection,
-                                                  TrackerMonitor          *monitor,
-                                                  const gchar             *file_attributes);
+TrackerFileNotifier * tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
+                                                 TrackerSparqlConnection *connection,
+                                                 TrackerMonitor          *monitor);
 
 gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notifier);
 void          tracker_file_notifier_stop         (TrackerFileNotifier     *notifier);

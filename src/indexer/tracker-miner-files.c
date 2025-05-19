@@ -40,18 +40,6 @@
 
 #define REMOVABLE_DEVICES_CHECK_DAYS 3
 
-#define FILE_ATTRIBUTES	  \
-	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
-	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
-	G_FILE_ATTRIBUTE_STANDARD_NAME "," \
-	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
-	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
-	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
-	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
-	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
-	G_FILE_ATTRIBUTE_TIME_CREATED "," \
-	G_FILE_ATTRIBUTE_TIME_ACCESS
-
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
 
 typedef struct _TrackerMinerFiles TrackerMinerFiles;
@@ -806,7 +794,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "indexing-tree", indexing_tree,
 	                     "monitor", monitor,
 	                     "storage", storage,
-	                     "file-attributes", FILE_ATTRIBUTES,
 	                     NULL);
 }
 

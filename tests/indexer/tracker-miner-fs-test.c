@@ -187,7 +187,6 @@ test_miner_new (TrackerSparqlConnection *conn)
 	                     "indexing-tree", indexing_tree,
 			     "connection", conn,
 	                     "monitor", monitor,
-			     "file-attributes", "standard::*,time::*",
 			     NULL);
 }
 

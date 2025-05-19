@@ -33,7 +33,6 @@ enum {
 	PROP_0,
 	PROP_INDEXING_TREE,
 	PROP_CONNECTION,
-	PROP_FILE_ATTRIBUTES,
 	PROP_MONITOR,
 	N_PROPS,
 };
@@ -111,8 +110,6 @@ struct _TrackerFileNotifier
 	TrackerSparqlStatement *deleted_query;
 	TrackerSparqlStatement *file_exists_query;
 
-	gchar *file_attributes;
-
 	/* List of pending directory
 	 * trees to get data from
 	 */
@@ -153,9 +150,6 @@ tracker_file_notifier_set_property (GObject      *object,
 		break;
 	case PROP_CONNECTION:
 		notifier->connection = g_value_dup_object (value);
-		break;
-	case PROP_FILE_ATTRIBUTES:
-		notifier->file_attributes = g_value_dup_string (value);
 		break;
 	case PROP_MONITOR:
 		notifier->monitor = g_value_dup_object (value);
@@ -667,7 +661,6 @@ query_root_info_cb (GObject      *object,
                     gpointer      user_data)
 {
 	TrackerIndexRoot *root;
-	TrackerFileNotifier *notifier;
 	g_autoptr (GFileInfo) info = NULL;
 	g_autoptr (GError) error = NULL;
 
@@ -692,13 +685,12 @@ query_root_info_cb (GObject      *object,
 	}
 
 	root = user_data;
-	notifier = root->notifier;
 
 	root->files_found++;
 	handle_file_from_filesystem (root, G_FILE (object), info);
 
 	g_file_enumerate_children_async (G_FILE (object),
-	                                 notifier->file_attributes,
+	                                 INDEXER_FILE_ATTRIBUTES,
 	                                 G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                                 G_PRIORITY_DEFAULT,
 	                                 root->cancellable,
@@ -734,7 +726,7 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 
 	if (directory == root->root && !root->ignore_root) {
 		g_file_query_info_async (directory,
-		                         notifier->file_attributes,
+		                         INDEXER_FILE_ATTRIBUTES,
 		                         G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                         G_PRIORITY_DEFAULT,
 		                         root->cancellable,
@@ -742,7 +734,7 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 		                         root);
 	} else {
 		g_file_enumerate_children_async (directory,
-		                                 notifier->file_attributes,
+		                                 INDEXER_FILE_ATTRIBUTES,
 		                                 G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                                 G_PRIORITY_DEFAULT,
 		                                 root->cancellable,
@@ -895,7 +887,7 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	                                store_mtime);
 
 	/* Query fs info in place */
-	info = g_file_query_info (file, notifier->file_attributes,
+	info = g_file_query_info (file, INDEXER_FILE_ATTRIBUTES,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                          NULL, NULL);
 
@@ -1477,7 +1469,7 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 	GFileType child_type;
 
 	child_info = g_file_query_info (child,
-	                                notifier->file_attributes,
+	                                INDEXER_FILE_ATTRIBUTES,
 	                                G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                                NULL, NULL);
 	if (!child_info)
@@ -1500,8 +1492,6 @@ static void
 tracker_file_notifier_finalize (GObject *object)
 {
 	TrackerFileNotifier *notifier = TRACKER_FILE_NOTIFIER (object);
-
-	g_free (notifier->file_attributes);
 
 	if (notifier->indexing_tree) {
 		g_object_unref (notifier->indexing_tree);
@@ -1632,12 +1622,6 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
-	props[PROP_FILE_ATTRIBUTES] =
-		g_param_spec_string ("file-attributes", NULL, NULL,
-		                     NULL,
-		                     G_PARAM_WRITABLE |
-		                     G_PARAM_CONSTRUCT_ONLY |
-		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_MONITOR] =
 		g_param_spec_object ("monitor", NULL, NULL,
 		                     TRACKER_TYPE_MONITOR,
@@ -1683,8 +1667,7 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 TrackerFileNotifier *
 tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
                            TrackerSparqlConnection *connection,
-                           TrackerMonitor          *monitor,
-                           const gchar             *file_attributes)
+                           TrackerMonitor          *monitor)
 {
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (indexing_tree), NULL);
 
@@ -1692,7 +1675,6 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	                     "indexing-tree", indexing_tree,
 	                     "connection", connection,
 	                     "monitor", monitor,
-	                     "file-attributes", file_attributes,
 	                     NULL);
 }
 

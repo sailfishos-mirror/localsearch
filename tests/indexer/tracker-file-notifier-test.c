@@ -307,10 +307,7 @@ test_common_context_setup (TestCommonContext *fixture,
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
 	fixture->notifier = tracker_file_notifier_new (fixture->indexing_tree,
 	                                               fixture->connection,
-	                                               monitor,
-	                                               G_FILE_ATTRIBUTE_STANDARD_TYPE ","
-	                                               G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN ","
-	                                               G_FILE_ATTRIBUTE_TIME_MODIFIED);
+	                                               monitor);
 
 	g_signal_connect (fixture->notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created_cb), fixture);

@@ -98,7 +98,6 @@ struct _TrackerMinerFSPrivate {
 
 	/* Properties */
 	gdouble throttle;
-	gchar *file_attributes;
 
 	/* Status */
 	GTimer *timer;
@@ -140,7 +139,6 @@ static guint signals[LAST_SIGNAL] = { 0, };
 enum {
 	PROP_0,
 	PROP_THROTTLE,
-	PROP_FILE_ATTRIBUTES,
 	PROP_INDEXING_TREE,
 	PROP_MONITOR,
 	N_PROPS,
@@ -242,12 +240,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		g_param_spec_double ("throttle", NULL, NULL,
 		                     0, 1, 0,
 		                     G_PARAM_READWRITE |
-		                     G_PARAM_STATIC_STRINGS);
-	props[PROP_FILE_ATTRIBUTES] =
-		g_param_spec_string ("file-attributes", NULL, NULL,
-		                     NULL,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_INDEXING_TREE] =
 		g_param_spec_object ("indexing-tree", NULL, NULL,
@@ -455,7 +447,6 @@ fs_finalize (GObject *object)
 	g_clear_object (&priv->indexing_tree);
 	g_clear_object (&priv->file_notifier);
 	g_clear_object (&priv->monitor);
-	g_free (priv->file_attributes);
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
 }
@@ -492,8 +483,7 @@ fs_constructed (GObject *object)
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 priv->monitor,
-	                                                 priv->file_attributes);
+	                                                 priv->monitor);
 
 	g_signal_connect (priv->file_notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created),
@@ -536,9 +526,6 @@ fs_set_property (GObject      *object,
 		tracker_miner_fs_set_throttle (TRACKER_MINER_FS (object),
 		                               g_value_get_double (value));
 		break;
-	case PROP_FILE_ATTRIBUTES:
-		priv->file_attributes = g_value_dup_string (value);
-		break;
 	case PROP_INDEXING_TREE:
 		priv->indexing_tree = g_value_dup_object (value);
 		break;
@@ -564,9 +551,6 @@ fs_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_THROTTLE:
 		g_value_set_double (value, priv->throttle);
-		break;
-	case PROP_FILE_ATTRIBUTES:
-		g_value_set_string (value, priv->file_attributes);
 		break;
 	case PROP_INDEXING_TREE:
 		g_value_set_object (value, priv->indexing_tree);
@@ -749,7 +733,7 @@ item_add_or_update (TrackerMinerFS *fs,
 		g_set_object (&info, file_info);
 	} else {
 		info = g_file_query_info (file,
-		                          priv->file_attributes,
+		                          INDEXER_FILE_ATTRIBUTES,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
 		if (!info)
