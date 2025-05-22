@@ -5,8 +5,16 @@
     <file>queries/count-files.rq</file>
     <file>queries/count-folders.rq</file>
     <file>queries/delete-folder-recursive.rq</file>
+    <file>queries/delete-tag-from-file.rq</file>
+    <file>queries/delete-tag.rq</file>
     <file>queries/get-class-stats.rq</file>
+    <file>queries/get-files-with-tag.rq</file>
     <file>queries/get-information-element.rq</file>
+    <file>queries/get-tags-for-file.rq</file>
+    <file>queries/get-tags.rq</file>
+    <file>queries/insert-tag.rq</file>
+    <file>queries/insert-tag-with-desc.rq</file>
+    <file>queries/insert-tag-on-file.rq</file>
     <file>queries/list-all.rq</file>
     <file>queries/list-documents.rq</file>
     <file>queries/list-files.rq</file>

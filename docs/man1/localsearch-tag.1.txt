@@ -8,8 +8,8 @@ localsearch-tag - Add, remove and list tags.
 == SYNOPSIS
 
 ....
-localsearch tag FILE1 [FILE2 ...] [-l <limit>] [-o <offset>] [-r]
-localsearch tag -t [[TAG1] [TAG2] ...] [-s] [-r]
+localsearch tag FILE [-l <limit>] [-o <offset>] [-r]
+localsearch tag -t [-s] [-r] FILE
 localsearch tag -a <TAG> [-e <description>]
 localsearch tag -d <TAG>
 ....
@@ -29,27 +29,16 @@ not have to be an absolute path.
   List all tags. Results include the number of files associated with
   that tag and the tag's unique identifier. You can show the files
   associated with each tag by using --show-files.
-
-The _TAG_ arguments are optional. If no _TAG_ argument is specified, all
-tags are listed. If one or more __TAG__s are given, either matching tags
-are listed (OR condition). For example, this will match any tags named
-either _foo_, _bar_ or _baz_:
-
-....
-$ localsearch tag -t foo bar baz
-....
-
 *-s, --show-files*::
   Show the files associated with each tag. This option is ONLY available
   WITH the *--list* option.
 *-a, --add=TAG*::
-  Add a tag with the name _TAG_. If no _FILE_ arguments are specified,
+  Add a tag with the name _TAG_. If no _FILE_ argument is specified,
   the tag is simply created (if it didn'talready exist) and no files are
-  associated with it. Multiple _FILE_ arguments can be specified.
+  associated with it.
 *-d, --delete=TAG*::
-  Delete a tag with the name _TAG_. If no _FILE_ arguments are
-  specified, the tag is deleted for ALL files. If _FILE_ arguments are
-  specified, only those files have the _TAG_ deleted.
+  Delete a tag with the name _TAG_. If no _FILE_ argument is
+  specified, the tag is deleted for ALL files.
 *-e, --description=STRING*::
   This option ONLY applies when using *--add* and provides a description
   to go with the tag label according to _STRING_.
@@ -58,16 +47,12 @@ $ localsearch tag -t foo bar baz
 *-o, --offset=N*::
   Offset the search results by N. For example, start at item number 10
   in the results. The default is 0.
-*-n, --and-operator*::
-  Use AND operator for search terms instead of OR (the default). For
-  example:
 
 ....
-$ localsearch tag -s -t sliff sloff
+$ localsearch tag -s -t banana
 ....
 
-Should show files in the database that have both the _sliff_ and _sloff_
-tags.
+Should show files in the database that have both the _banana_ tag.
 
 == SEE ALSO
 

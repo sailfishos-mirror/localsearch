@@ -47,7 +47,8 @@ class TrackerTagOutputParser:
         assert header_line.startswith("Tags")
 
     def _parse_tag_line(self, tag_line) -> Tuple[str, str]:
-        name, description = re.match(r"  (\w+) \(([^)]+)\)", tag_line).groups()
+        print (tag_line)
+        name, description = re.match(r"(\w+) \(([^)]+)\)", tag_line).groups()
         return (name, description)
 
     def parse_tag_list(self, output) -> List[TagInfo]:
@@ -57,8 +58,9 @@ class TrackerTagOutputParser:
         result = []
         while len(lines) > 0:
             name, description = self._parse_tag_line(lines.pop(0))
-            _resource_id = lines.pop(0).strip()
-            file_count = int(lines.pop(0).strip().split()[0])
+            file_count = 0
+            if len(lines) > 0:
+                file_count = int(lines.pop(0).strip().split()[0])
             result.append(TagInfo(name, description, file_count, []))
 
         return result
@@ -71,7 +73,7 @@ class TrackerTagOutputParser:
         while len(lines) > 0:
             name, description = self._parse_tag_line(lines.pop(0))
             files = []
-            while len(lines) > 0 and lines[0].startswith("    "):
+            while len(lines) > 0 and lines[0].startswith("  "):
                 files.append(lines.pop(0).strip())
             result.append(TagInfo(name, description, len(files), files))
 
@@ -80,8 +82,7 @@ class TrackerTagOutputParser:
     def assert_tag_list_empty(self, output):
         lines = output.strip().splitlines()
         assert lines[0].startswith("Tags")
-        assert lines[1].find("None") >= 0
-        assert len(lines) == 2
+        assert len(lines) == 1
 
 
 class TestCliSearch(fixtures.TrackerCommandLineTestCase):
