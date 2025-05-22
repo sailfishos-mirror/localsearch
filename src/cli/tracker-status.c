@@ -126,8 +126,8 @@ status_stat (void)
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
+		            _("Could not connect to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
@@ -140,7 +140,7 @@ status_stat (void)
 
 	if (error) {
 		g_printerr ("%s, %s\n",
-		            _("Could not get Tracker statistics"),
+		            _("Could not get LocalSearch statistics"),
 		            error->message);
 		return EXIT_FAILURE;
 	}
@@ -245,8 +245,8 @@ get_file_and_folder_count (int *files,
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
+		            _("Could not connect to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
@@ -264,7 +264,7 @@ get_file_and_folder_count (int *files,
 
 		if (error || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
 			g_printerr ("%s, %s\n",
-			            _("Could not get basic status for Tracker"),
+			            _("Could not get LocalSearch statistics"),
 			            error->message);
 			return EXIT_FAILURE;
 		}
@@ -286,8 +286,8 @@ get_file_and_folder_count (int *files,
 
 		if (error || !tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 			g_printerr ("%s, %s\n",
-			            _("Could not get basic status for Tracker"),
-			            error ? error->message : _("No error given"));
+			            _("Could not get LocalSearch statistics"),
+			            error->message);
 			return EXIT_FAILURE;
 		}
 

@@ -371,8 +371,8 @@ info_run (void)
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
+		            _("Could not connect to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
