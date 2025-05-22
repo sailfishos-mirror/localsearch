@@ -44,7 +44,7 @@ static gboolean files;
 static gboolean folders;
 static gboolean music_albums;
 static gboolean music_artists;
-static gboolean music_files;
+static gboolean audio_files;
 static gboolean image_files;
 static gboolean video_files;
 static gboolean document_files;
@@ -120,8 +120,8 @@ static GOptionEntry entries_resource_type[] = {
 	  N_("Search for folders"),
 	  NULL
 	},
-	{ "music", 'm', 0, G_OPTION_ARG_NONE, &music_files,
-	  N_("Search for music files"),
+	{ "audio", 'a', 0, G_OPTION_ARG_NONE, &audio_files,
+	  N_("Search for audio files"),
 	  NULL
 	},
 	{ "music-albums", 0, 0, G_OPTION_ARG_NONE, &music_albums,
@@ -351,7 +351,7 @@ search_run (void)
 		query_type = MUSIC_ALBUMS;
 	else if (music_artists)
 		query_type = MUSIC_ARTISTS;
-	else if (music_files)
+	else if (audio_files)
 		query_type = MUSIC;
 	else if (image_files)
 		query_type = IMAGES;
