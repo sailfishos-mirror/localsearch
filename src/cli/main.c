@@ -66,7 +66,7 @@ static void print_usage (void);
 
 static struct cmd_struct commands[] = {
 	{ "help", tracker_help, N_("Show help on subcommands") },
-	{ "extract", tracker_extract, N_("Extract metadata from a file") },
+	{ "extract", tracker_extract, N_("Show metadata extractor output") },
 	{ "index", tracker_index, N_("List and change indexed folders") },
 	{ "info", tracker_info, N_("Retrieve information available for files and resources") },
 	{ "inhibit", tracker_inhibit, N_("Inhibit indexing temporarily") },

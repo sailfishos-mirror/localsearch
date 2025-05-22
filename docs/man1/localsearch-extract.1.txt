@@ -3,7 +3,7 @@ localsearch-extract(1)
 
 == NAME
 
-localsearch-extract - Extract metadata from a file.
+localsearch-extract - Show metadata extractor output.
 
 == SYNOPSYS
 
