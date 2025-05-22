@@ -47,13 +47,26 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         # Reset the database
         self.run_cli(["localsearch", "reset"])
 
-        # State should be none
-        output = self.run_cli(["localsearch", "daemon"])
-        self.assertEqual("", output)
+        # Ensure the process is gone
+        pid_exists = True
+        attempts = 0
+        while pid_exists:
+            if attempts == 10:
+                raise RuntimeError("Took too long to stop indexer")
+
+            try:
+                time.sleep(1)
+                program = os.readlink("/proc/" + str(pid) + "/exe")
+                pid_exists = os.path.basename(program) == "localsearch-3"
+                if pid_exists:
+                    attempts += 1
+            except:
+                pid_exists = False
 
         # Re-start the indexer, check that file is reindexed
         with self.await_document_inserted(target):
-            self.run_cli(["localsearch", "daemon", "--start"])
+            output = self.run_cli(["localsearch", "status"])
+            self.assertNotIn("idle", output)
 
     def test_reset_file(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
@@ -64,9 +77,9 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         with self.await_document_inserted(target):
             shutil.copy(file, target)
 
-        output = self.run_cli(["localsearch", "daemon"])
+        output = self.run_cli(["localsearch", "status"])
         # State should be idle
-        self.assertIn("Idle", output)
+        self.assertIn("idle", output)
 
         resource_id = self.tracker.get_content_resource_id(self.uri(target))
         with self.tracker.await_delete(fixtures.DOCUMENTS_GRAPH, resource_id):

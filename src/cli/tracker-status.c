@@ -27,6 +27,7 @@
 #include <locale.h>
 
 #include <glib.h>
+#include <glib-unix.h>
 #include <glib/gi18n.h>
 #include <tinysparql.h>
 
@@ -51,15 +52,27 @@
 
 #define LINK_STR "[🡕]" /* NORTH EAST SANS-SERIF ARROW, in consistence with systemd */
 
-#define STATUS_OPTIONS_ENABLED()	  \
-	(show_stat)
+#define INDETERMINATE_ROOM ((int) strlen ("100.0%") - 1)
 
 static gboolean show_stat;
+static gboolean follow;
+static gboolean watch;
 static gchar **terms;
 
+static gboolean indexer_paused;
+static int indeterminate_pos = 0;
+
 static GOptionEntry entries[] = {
+	{ "follow", 'f', 0, G_OPTION_ARG_NONE, &follow,
+	  N_("Follow status changes as they happen"),
+	  NULL
+	},
 	{ "stat", 'a', 0, G_OPTION_ARG_NONE, &show_stat,
 	  N_("Show statistics for current index / data set"),
+	  NULL
+	},
+	{ "watch", 'w', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &watch,
+	  N_("Watch changes to the database in real time (e.g. resources or files being added)"),
 	  NULL
 	},
 	{ G_OPTION_REMAINING, 0, 0,
@@ -523,16 +536,198 @@ show_errors (gchar    **terms,
 	return EXIT_SUCCESS;
 }
 
+static gboolean
+signal_handler (gpointer user_data)
+{
+	GMainLoop *main_loop = user_data;
+
+	g_main_loop_quit (main_loop);
+
+	return G_SOURCE_CONTINUE;
+}
+
+static void
+initialize_signal_handler (GMainLoop *main_loop)
+{
+	g_unix_signal_add (SIGTERM, signal_handler, main_loop);
+	g_unix_signal_add (SIGINT, signal_handler, main_loop);
+}
+
+static void
+notifier_events_cb (TrackerNotifier         *notifier,
+		    const gchar             *service,
+		    const gchar             *graph,
+		    GPtrArray               *events,
+		    TrackerSparqlConnection *conn)
+{
+	TrackerNamespaceManager *namespaces;
+	gint i;
+
+	namespaces = tracker_sparql_connection_get_namespace_manager (conn);
+
+	for (i = 0; i < events->len; i++) {
+		TrackerNotifierEvent *event;
+		g_autofree char *compressed_graph = NULL;
+
+		event = g_ptr_array_index (events, i);
+		compressed_graph = tracker_namespace_manager_compress_uri (namespaces,
+		                                                           graph);
+		g_print ("%s (%s)\n",
+		         tracker_notifier_event_get_urn (event),
+		         compressed_graph);
+	}
+}
+
+static void
+maybe_reset_line (void)
+{
+	if (tracker_term_is_tty ()) {
+		g_print ("\033[2K");
+		g_print ("\r");
+	}
+}
+
+static void
+print_indexer_status (TrackerIndexerMiner *indexer_proxy)
+{
+	g_auto (GStrv) pause_apps = NULL, pause_reasons = NULL;
+	g_autofree char *status = NULL;
+	double progress;
+
+	if (!tracker_indexer_miner_call_get_status_sync (indexer_proxy,
+	                                                 &status,
+	                                                 NULL, NULL))
+		return;
+
+	if (!tracker_indexer_miner_call_get_progress_sync (indexer_proxy,
+	                                                   &progress,
+	                                                   NULL, NULL))
+		return;
+
+	maybe_reset_line ();
+
+	if (progress > 0.0) {
+		g_print ("[%5.1f%%]", progress * 100);
+	} else {
+		g_print ("[");
+		if (indeterminate_pos > 0)
+			g_print ("%*c", indeterminate_pos, ' ');
+		g_print ("=");
+		if (INDETERMINATE_ROOM - indeterminate_pos > 0)
+			g_print ("%*c", INDETERMINATE_ROOM - indeterminate_pos, ' ');
+		g_print ("]");
+
+		indeterminate_pos++;
+		if (indeterminate_pos > INDETERMINATE_ROOM)
+			indeterminate_pos = 0;
+	}
+
+	g_print (" %s", status);
+
+	if (!tracker_term_is_tty ())
+		g_print ("\n");
+}
+
+static void
+indexer_progress_cb (TrackerIndexerMiner *indexer_proxy,
+                     const char          *status,
+                     double               progress,
+                     int                  remaining_time)
+{
+	if (!indexer_paused)
+		print_indexer_status (indexer_proxy);
+}
+
+static void
+indexer_paused_cb (TrackerIndexerMiner *indexer_proxy)
+{
+	maybe_reset_line ();
+	g_print ("%s", _("Indexer is paused"));
+	indexer_paused = TRUE;
+}
+
+static void
+indexer_resumed_cb (TrackerIndexerMiner *indexer_proxy)
+{
+	indexer_paused = FALSE;
+}
+
+static int
+status_follow (void)
+{
+	g_autoptr (TrackerIndexerMiner) indexer_proxy = NULL;
+	g_autoptr (GMainLoop) main_loop = NULL;
+
+	indexer_proxy =
+		tracker_indexer_miner_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+		                                              G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
+		                                              "org.freedesktop.LocalSearch3",
+		                                              "/org/freedesktop/Tracker3/Miner/Files",
+		                                              NULL, NULL);
+	if (!indexer_proxy)
+		return EXIT_FAILURE;
+
+	print_indexer_status (indexer_proxy);
+
+	g_signal_connect (indexer_proxy, "progress",
+	                  G_CALLBACK (indexer_progress_cb), NULL);
+	g_signal_connect (indexer_proxy, "paused",
+	                  G_CALLBACK (indexer_paused_cb), NULL);
+	g_signal_connect (indexer_proxy, "resumed",
+	                  G_CALLBACK (indexer_resumed_cb), NULL);
+
+	main_loop = g_main_loop_new (NULL, FALSE);
+	initialize_signal_handler (main_loop);
+	g_main_loop_run (main_loop);
+
+	if (tracker_term_is_tty ()) {
+		/* Print the status line a last time, papering over the ^C */
+		print_indexer_status (indexer_proxy);
+		g_print ("\n");
+	}
+
+	return EXIT_SUCCESS;
+}
+
+static int
+status_watch (void)
+{
+	g_autoptr (GMainLoop) main_loop = NULL;
+	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
+	g_autoptr (TrackerNotifier) notifier = NULL;
+	g_autoptr (GError) error = NULL;
+
+	sparql_connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	                                                       NULL, NULL, &error);
+
+	if (!sparql_connection) {
+		g_critical ("%s, %s",
+		            _("Could not get SPARQL connection"),
+		            error->message);
+		return EXIT_FAILURE;
+	}
+
+	notifier = tracker_sparql_connection_create_notifier (sparql_connection);
+	g_signal_connect (notifier, "events",
+	                  G_CALLBACK (notifier_events_cb), sparql_connection);
+
+	g_print ("%s\n", _("Now listening to database updates"));
+	g_print ("%s\n", _("Press Ctrl+C to stop"));
+
+	main_loop = g_main_loop_new (NULL, FALSE);
+	initialize_signal_handler (main_loop);
+	g_main_loop_run (main_loop);
+
+	/* Carriage return, so we paper over the ^C */
+	g_print ("\r");
+
+	return EXIT_SUCCESS;
+}
+
 static int
 status_run_default (void)
 {
 	return get_no_args ();
-}
-
-static gboolean
-status_options_enabled (void)
-{
-	return STATUS_OPTIONS_ENABLED ();
 }
 
 int
@@ -559,8 +754,12 @@ tracker_status (int          argc,
 		return EXIT_FAILURE;
 	}
 
-	if (status_options_enabled ()) {
+	if (show_stat) {
 		return status_run ();
+	} else if (follow) {
+		return status_follow ();
+	} else if (watch) {
+		return status_watch ();
 	}
 
 	if (terms) {

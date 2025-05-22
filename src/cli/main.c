@@ -30,7 +30,6 @@
 
 #include <tracker-common.h>
 
-#include "tracker-daemon.h"
 #include "tracker-extract.h"
 #include "tracker-help.h"
 #include "tracker-index.h"
@@ -67,7 +66,6 @@ static void print_usage (void);
 
 static struct cmd_struct commands[] = {
 	{ "help", tracker_help, N_("Show help on subcommands") },
-	{ "daemon", tracker_daemon, N_("Start and stop the indexer") },
 	{ "extract", tracker_extract, N_("Extract metadata from a file") },
 	{ "index", tracker_index, N_("List and change indexed folders") },
 	{ "info", tracker_info, N_("Retrieve information available for files and resources") },

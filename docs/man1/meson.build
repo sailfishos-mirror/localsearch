@@ -5,7 +5,6 @@ daemon_manpages = [
 
 cli_manpages = [
   ['localsearch', 1],
-  ['localsearch-daemon', 1],
   ['localsearch-extract', 1],
   ['localsearch-index', 1],
   ['localsearch-info', 1],

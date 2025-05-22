@@ -20,7 +20,6 @@ control_dbus_proxy = gnome.gdbus_codegen('tracker-control-proxy',
 
 sources = files(
     'tracker-cli-utils.c',
-    'tracker-daemon.c',
     'tracker-extract.c',
     'tracker-help.c',
     'tracker-index.c',

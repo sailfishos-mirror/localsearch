@@ -197,7 +197,6 @@ endif
 
 functional_tests = [
   'test_cli',
-  'test_cli_daemon',
   'test_cli_index',
   'test_cli_info',
   'test_cli_inhibit',

@@ -30,6 +30,14 @@ how many of each exist for data set that has been indexed. For example,
 *--stat*::
   List statistics of stored RDF classes (e.g. "nfo:Document" or "nfo:Folder")
   per graph.
+*-f, --follow*::
+  Follow status changes to daemons as they happen. This is a top level
+  view of what is happening. You will see the name for each daemon and a
+  state with the progress in that state. This requires Ctrl+C to stop
+  and return to the command line.
+*-w, --watch*::
+  Watch changes that happen to the database in real time. This requires
+  Ctrl+C to stop and return to the command line.
 
 This option is implied if search terms are provided to filter ALL
 possible statistics.
