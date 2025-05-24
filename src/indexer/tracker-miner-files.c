@@ -65,7 +65,6 @@ struct _TrackerMinerFiles {
 static GQuark miner_files_error_quark = 0;
 
 struct _TrackerMinerFilesPrivate {
-	TrackerConfig *config;
 	TrackerStorage *storage;
 
 	TrackerExtractWatchdog *extract_watchdog;
@@ -85,7 +84,6 @@ struct _TrackerMinerFilesPrivate {
 
 enum {
 	PROP_0,
-	PROP_CONFIG,
 	PROP_STORAGE,
 	PROP_INITIAL_INDEX,
 };
@@ -181,13 +179,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	miner_fs_class->finish_directory = miner_files_finish_directory;
 	miner_fs_class->get_content_identifier = miner_files_get_content_identifier;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_CONFIG,
-	                                 g_param_spec_object ("config",
-	                                                      "Config",
-	                                                      "Config",
-	                                                      TRACKER_TYPE_CONFIG,
-	                                                      G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY | G_PARAM_STATIC_STRINGS));
 	g_object_class_install_property (object_class,
 	                                 PROP_STORAGE,
 	                                 g_param_spec_object ("storage",
@@ -309,9 +300,6 @@ miner_files_set_property (GObject      *object,
 	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
 
 	switch (prop_id) {
-	case PROP_CONFIG:
-		priv->config = g_value_dup_object (value);
-		break;
 	case PROP_STORAGE:
 		priv->storage = g_value_dup_object (value);
 		break;
@@ -335,9 +323,6 @@ miner_files_get_property (GObject    *object,
 	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
 
 	switch (prop_id) {
-	case PROP_CONFIG:
-		g_value_set_object (value, priv->config);
-		break;
 	case PROP_STORAGE:
 		g_value_set_object (value, priv->storage);
 		break;
@@ -369,10 +354,6 @@ miner_files_finalize (GObject *object)
 	                                      on_extractor_lost,
 	                                      NULL);
 	g_clear_object (&priv->extract_watchdog);
-
-	if (priv->config) {
-		g_object_unref (priv->config);
-	}
 
 #ifdef HAVE_POWER
 	if (priv->power) {
@@ -828,17 +809,14 @@ TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
                          TrackerStorage           *storage,
-                         TrackerConfig            *config,
                          gboolean                  initial_index)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
-	g_return_val_if_fail (TRACKER_IS_CONFIG (config), NULL);
 
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
 	                     "storage", storage,
-	                     "config", config,
 	                     "file-attributes", FILE_ATTRIBUTES,
 	                     "initial-index", initial_index,
 	                     NULL);

@@ -743,7 +743,6 @@ main (gint argc, gchar *argv[])
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
 	                                       storage,
-	                                       config,
 	                                       initial_index);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);
