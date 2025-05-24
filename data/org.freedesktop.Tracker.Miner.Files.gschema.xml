@@ -42,11 +42,7 @@ Boston, MA  02110-1301, USA.
 
     <key name="crawling-interval" type="i">
       <summary>Crawling interval</summary>
-      <description>
-        Interval in days to check whether the filesystem is up to date in the database.
-	0 forces crawling anytime, -1 forces it only after unclean shutdowns, and -2
-	disables it entirely.
-      </description>
+      <description>This setting is deprecated</description>
       <range min="-2" max="365"/>
       <default>-1</default>
     </key>

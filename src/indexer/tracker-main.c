@@ -55,13 +55,9 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define SECONDS_PER_DAY 60 * 60 * 24
-
 #define DBUS_NAME_SUFFIX "LocalSearch3"
 #define LEGACY_DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
-
-#define LAST_CRAWL_FILENAME "last-crawl.txt"
 
 static GMainLoop *main_loop;
 static guint cleanup_id;
@@ -71,7 +67,6 @@ static gboolean no_daemon;
 static gchar *eligible;
 static gboolean version;
 static guint miners_timeout_id = 0;
-static gboolean do_crawling = FALSE;
 static gboolean dry_run = FALSE;
 
 static gboolean slept = TRUE;
@@ -161,62 +156,6 @@ get_cache_dir (void)
 	return cache;
 }
 
-static gchar *
-get_last_crawl_filename (TrackerMinerFiles *mf)
-{
-	g_autoptr (GFile) file = NULL, child = NULL;
-
-	file = get_cache_dir ();
-	child = g_file_get_child (file, LAST_CRAWL_FILENAME);
-
-	return g_file_get_path (child);
-}
-
-guint64
-get_last_crawl_done (TrackerMinerFiles *mf)
-{
-	g_autofree gchar *filename = NULL, *content = NULL;
-	guint64 then;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
-		g_info ("  No previous timestamp, crawling forced");
-		return 0;
-	}
-
-	then = g_ascii_strtoull (content, NULL, 10);
-
-	return then;
-}
-
-void
-set_last_crawl_done (TrackerMinerFiles *mf,
-                     gboolean           done)
-{
-	g_autofree gchar *filename = NULL;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (done) {
-		g_autoptr (GError) error = NULL;
-		g_autofree gchar *content = NULL;
-
-		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
-		g_info ("  Updating last crawl file:'%s'", filename);
-		/* Create/update time stamp file */
-		if (!g_file_set_contents (filename, content, -1, &error)) {
-			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
-			           filename,
-			           error->message);
-		} else {
-			g_info ("  Last crawl file:'%s' updated", filename);
-		}
-	} else {
-		g_info ("  Crawl not done yet, doesn't update last crawl file.");
-	}
-}
-
 static gboolean
 signal_handler (gpointer user_data)
 {
@@ -298,46 +237,6 @@ raise_file_descriptor_limit (void)
 		g_warning ("Failed to increase file descriptor limit: %m");
 }
 
-static gboolean
-should_crawl (TrackerMinerFiles *miner_files,
-              TrackerConfig     *config)
-{
-	gint crawling_interval;
-
-	crawling_interval = g_settings_get_int (G_SETTINGS (config), "crawling-interval");
-
-	TRACKER_NOTE (CONFIG, g_message ("Checking whether to crawl file system based on configured crawling interval:"));
-
-	if (crawling_interval == -2) {
-		TRACKER_NOTE (CONFIG, g_message ("  Disabled"));
-		return FALSE;
-	} else if (crawling_interval == -1) {
-		TRACKER_NOTE (CONFIG, g_message ("  Maybe (depends on a clean last shutdown)"));
-		return TRUE;
-	} else if (crawling_interval == 0) {
-		TRACKER_NOTE (CONFIG, g_message ("  Forced"));
-		return TRUE;
-	} else {
-		guint64 then, now;
-
-		then = get_last_crawl_done (miner_files);
-
-		if (then < 1) {
-			return TRUE;
-		}
-
-		now = (guint64) time (NULL);
-
-		if (now < then + (crawling_interval * SECONDS_PER_DAY)) {
-			TRACKER_NOTE (CONFIG, g_message ("  Postponed"));
-			return FALSE;
-		} else {
-			TRACKER_NOTE (CONFIG, g_message ("  (More than) %d days after last crawling, enabled", crawling_interval));
-			return TRUE;
-		}
-	}
-}
-
 static void
 miner_do_start (TrackerMiner *miner)
 {
@@ -368,8 +267,7 @@ miner_start_idle_cb (gpointer data)
 }
 
 static void
-miner_start (TrackerMiner  *miner,
-             TrackerConfig *config)
+miner_start (TrackerMiner *miner)
 {
 	/* If requesting to run as no-daemon, start right away */
 	if (no_daemon) {
@@ -445,10 +343,6 @@ static void
 miner_finished_cb (TrackerMinerFS *fs,
                    gpointer        user_data)
 {
-	if (do_crawling && !dry_run) {
-		set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
-	}
-
 	/* We're not sticking around for file updates, so stop
 	 * the mainloop and exit.
 	 */
@@ -921,11 +815,6 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* Check if we should crawl and if we should force mtime
-	 * checking based on the config.
-	 */
-	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files), config);
-
 	g_signal_connect (miner_files, "started",
 			  G_CALLBACK (miner_started_cb),
 			  NULL);
@@ -954,8 +843,7 @@ main (gint argc, gchar *argv[])
 	                                        "CREATE SILENT GRAPH tracker:Video ",
 	                                        NULL, graphs_created_cb, miner_files);
 
-	if (do_crawling)
-		miner_start (miner_files, config);
+	miner_start (miner_files);
 
 	initialize_signal_handler ();
 
