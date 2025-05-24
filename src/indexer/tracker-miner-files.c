@@ -108,9 +108,6 @@ static void        check_battery_status                 (TrackerMinerFiles    *f
 static void        battery_status_cb                    (GObject              *object,
                                                          GParamSpec           *pspec,
                                                          gpointer              user_data);
-static void        index_on_battery_cb                  (GObject    *object,
-                                                         GParamSpec *pspec,
-                                                         gpointer    user_data);
 #endif /* HAVE_POWER */
 static void        init_index_roots                     (TrackerMinerFiles    *miner);
 static void        init_stale_volume_removal            (TrackerMinerFiles    *miner);
@@ -676,24 +673,9 @@ check_battery_status (TrackerMinerFiles *mf)
 		should_pause = TRUE;
 		should_throttle = TRUE;
 	} else {
+		g_debug ("Running on battery");
 		should_throttle = TRUE;
-
-		/* Check if miner should be paused based on configuration */
-		if (!g_settings_get_boolean (G_SETTINGS (mf->private->config), "index-on-battery")) {
-			if (!g_settings_get_boolean (G_SETTINGS (mf->private->config), "index-on-battery-first-time")) {
-				g_message ("Running on battery, but not enabled, pausing");
-				should_pause = TRUE;
-			} else if (!mf->private->initial_index) {
-				g_debug ("Running on battery and first-time index "
-				         "already done, pausing");
-				should_pause = TRUE;
-			} else {
-				g_debug ("Running on battery, but first-time index not "
-				         "already finished, keeping on");
-			}
-		} else {
-			g_debug ("Running on battery");
-		}
+		should_pause = FALSE;
 	}
 
 	if (should_pause) {
@@ -718,17 +700,6 @@ static void
 battery_status_cb (GObject    *object,
                    GParamSpec *pspec,
                    gpointer    user_data)
-{
-	TrackerMinerFiles *mf = user_data;
-
-	check_battery_status (mf);
-}
-
-/* Called when battery-related configuration change is detected */
-static void
-index_on_battery_cb (GObject    *object,
-                     GParamSpec *pspec,
-                     gpointer    user_data)
 {
 	TrackerMinerFiles *mf = user_data;
 
@@ -1038,13 +1009,6 @@ miner_files_constructed (GObject *object)
 	                          mf);
 
 #ifdef HAVE_POWER
-	g_signal_connect (mf->private->config, "notify::index-on-battery",
-	                  G_CALLBACK (index_on_battery_cb),
-	                  mf);
-	g_signal_connect (mf->private->config, "notify::index-on-battery-first-time",
-	                  G_CALLBACK (index_on_battery_cb),
-	                  mf);
-
 	check_battery_status (mf);
 #endif /* HAVE_POWER */
 

@@ -123,9 +123,6 @@ log_option_values (TrackerConfig *config)
 		g_message ("Indexer options:");
 		g_message ("  Throttle level  .......................  %d",
 		           g_settings_get_int (G_SETTINGS (config), "throttle"));
-		g_message ("  Indexing while on battery  ............  %s (first time only = %s)",
-		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery") ? "yes" : "no",
-		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery-first-time") ? "yes" : "no");
 
 		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
 			g_message ("  Low disk space limit  .................  Disabled");

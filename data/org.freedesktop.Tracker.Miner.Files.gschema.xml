@@ -81,13 +81,13 @@ Boston, MA  02110-1301, USA.
 
     <key name="index-on-battery" type="b">
       <summary>Index when running on battery</summary>
-      <description>Set to true to index while running on battery</description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 
     <key name="index-on-battery-first-time" type="b">
       <summary>Perform initial indexing when running on battery</summary>
-      <description>Set to true to index while running on battery for the first time only</description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 
