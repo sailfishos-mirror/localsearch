@@ -69,8 +69,6 @@ static gboolean version;
 static guint miners_timeout_id = 0;
 static gboolean dry_run = FALSE;
 
-static gboolean slept = TRUE;
-static gboolean graphs_ready = FALSE;
 static gboolean corrupted = FALSE;
 
 static GOptionEntry entries[] = {
@@ -257,23 +255,13 @@ miner_do_start (TrackerMiner *miner)
 	}
 }
 
-static void
-miner_maybe_start (TrackerMiner *miner)
-{
-	if (!slept || !graphs_ready)
-		return;
-
-	miner_do_start (miner);
-}
-
 static gboolean
 miner_start_idle_cb (gpointer data)
 {
 	TrackerMiner *miner = data;
 
 	miners_timeout_id = 0;
-	slept = TRUE;
-	miner_maybe_start (miner);
+	miner_do_start (miner);
 	return G_SOURCE_REMOVE;
 }
 
@@ -282,17 +270,16 @@ miner_start (TrackerMiner *miner)
 {
 	/* If requesting to run as no-daemon, start right away */
 	if (no_daemon) {
-		miner_maybe_start (miner);
+		miner_do_start (miner);
 		return;
 	}
 
 	/* If no need to initially sleep, start right away */
 	if (initial_sleep <= 0) {
-		miner_maybe_start (miner);
+		miner_do_start (miner);
 		return;
 	}
 
-	slept = FALSE;
 	g_debug ("Performing initial sleep of %d seconds",
 	         initial_sleep);
 	miners_timeout_id = g_timeout_add_seconds (initial_sleep,
@@ -381,19 +368,6 @@ miner_corrupt_cb (TrackerMinerFS *fs)
 	g_warning ("Database corruption detected, bailing out");
 	corrupted = TRUE;
 	g_main_loop_quit (main_loop);
-}
-
-static void
-graphs_created_cb (GObject      *source,
-                   GAsyncResult *res,
-                   gpointer      user_data)
-{
-	TrackerMiner *miner = user_data;
-
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (source),
-	                                         res, NULL);
-	graphs_ready = TRUE;
-	miner_maybe_start (miner);
 }
 
 static gint
@@ -843,16 +817,6 @@ main (gint argc, gchar *argv[])
 	memory_monitor = g_memory_monitor_dup_default ();
 	g_signal_connect (memory_monitor, "low-memory-warning", G_CALLBACK (on_low_memory), NULL);
 #endif
-
-	/* Preempt creation of graphs */
-	tracker_sparql_connection_update_async (tracker_miner_get_connection (miner_files),
-	                                        "CREATE SILENT GRAPH tracker:FileSystem; "
-	                                        "CREATE SILENT GRAPH tracker:Software; "
-	                                        "CREATE SILENT GRAPH tracker:Documents; "
-	                                        "CREATE SILENT GRAPH tracker:Pictures; "
-	                                        "CREATE SILENT GRAPH tracker:Audio; "
-	                                        "CREATE SILENT GRAPH tracker:Video ",
-	                                        NULL, graphs_created_cb, miner_files);
 
 	miner_start (miner_files);
 
