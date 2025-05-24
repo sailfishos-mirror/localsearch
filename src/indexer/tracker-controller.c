@@ -42,7 +42,6 @@ struct _TrackerController
 	GSList *config_recursive_directories;
 	GSList *config_single_directories;
 
-	guint force_recheck_id;
 	guint volumes_changed_id;
 
 	guint index_removable_devices : 1;
@@ -427,13 +426,10 @@ index_single_directories_cb (TrackerConfig     *config,
 	controller->config_single_directories = tracker_gslist_copy_with_string_data (new_dirs);
 }
 
-static gboolean
-trigger_recheck_idle_cb (gpointer user_data)
+static void
+tracker_controller_check_all_roots (TrackerController *controller)
 {
-	TrackerController *controller = user_data;
 	GList *roots, *l;
-
-	update_filters (controller);
 
 	roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
 
@@ -443,24 +439,24 @@ trigger_recheck_idle_cb (gpointer user_data)
 		tracker_indexing_tree_notify_update (controller->indexing_tree, root, FALSE);
 	}
 
-	controller->force_recheck_id = 0;
 	g_list_free (roots);
-
-	return G_SOURCE_REMOVE;
 }
 
 static void
-trigger_recheck_cb (TrackerConfig     *config,
-                    GParamSpec        *pspec,
-                    TrackerController *controller)
+filter_changed_cb (TrackerConfig     *config,
+                   GParamSpec        *pspec,
+                   TrackerController *controller)
 {
-	TRACKER_NOTE (CONFIG, g_message ("Ignored content related configuration changed, checking index..."));
+	update_filters (controller);
+	tracker_controller_check_all_roots (controller);
+}
 
-	if (controller->force_recheck_id == 0) {
-		/* Set idle so multiple changes in the config lead to one recheck */
-		controller->force_recheck_id =
-			g_idle_add (trigger_recheck_idle_cb, controller);
-	}
+static void
+enable_monitor_changed_cb (TrackerConfig *config,
+                           GParamSpec        *pspec,
+                           TrackerController *controller)
+{
+	tracker_controller_check_all_roots (controller);
 }
 
 static gboolean
@@ -809,16 +805,16 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (index_single_directories_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::ignored-directories",
-	                  G_CALLBACK (trigger_recheck_cb),
+	                  G_CALLBACK (filter_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::ignored-directories-with-content",
-	                  G_CALLBACK (trigger_recheck_cb),
+	                  G_CALLBACK (filter_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::ignored-files",
-	                  G_CALLBACK (trigger_recheck_cb),
+	                  G_CALLBACK (filter_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::enable-monitors",
-	                  G_CALLBACK (trigger_recheck_cb),
+	                  G_CALLBACK (enable_monitor_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::index-removable-devices",
 	                  G_CALLBACK (index_volumes_changed_cb),
@@ -850,7 +846,6 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->control_proxy);
 	g_clear_pointer (&controller->control_proxy_folders, g_ptr_array_unref);
 
-	g_clear_handle_id (&controller->force_recheck_id, g_source_remove);
 	g_clear_handle_id (&controller->volumes_changed_id, g_source_remove);
 
 	g_clear_object (&controller->indexing_tree);
