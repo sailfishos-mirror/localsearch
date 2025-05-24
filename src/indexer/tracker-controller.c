@@ -45,7 +45,6 @@ struct _TrackerController
 	guint volumes_changed_id;
 
 	guint index_removable_devices : 1;
-	guint index_optical_discs : 1;
 };
 
 enum {
@@ -137,8 +136,8 @@ add_indexed_directory (TrackerController     *controller,
 }
 
 static void
-add_removable_or_optical_directory (TrackerController *controller,
-                                    GFile             *mount_file)
+add_removable_directory (TrackerController *controller,
+                         GFile             *mount_file)
 {
 	TrackerDirectoryFlags flags;
 	g_autofree gchar *uri = NULL;
@@ -152,7 +151,7 @@ add_removable_or_optical_directory (TrackerController *controller,
 	}
 
 	uri = g_file_get_uri (mount_file);
-	g_debug ("  Adding removable/optical: '%s'", uri);
+	g_debug ("  Adding removable: '%s'", uri);
 	tracker_indexing_tree_add (controller->indexing_tree,
 				   mount_file,
 				   flags);
@@ -174,9 +173,7 @@ mount_point_added_cb (TrackerController *controller,
 
 	if (removable && !controller->index_removable_devices) {
 		g_debug ("  Not crawling, removable devices disabled in config");
-	} else if (optical && !controller->index_optical_discs) {
-		g_debug ("  Not crawling, optical devices discs disabled in config");
-	} else if (!removable && !optical) {
+	} else if (!removable) {
 		TrackerDirectoryFlags flags;
 		GSList *l;
 
@@ -241,9 +238,8 @@ mount_point_added_cb (TrackerController *controller,
 			}
 		}
 	} else {
-		g_debug ("  Adding directories in removable/optical media to crawler's queue");
-		add_removable_or_optical_directory (controller,
-		                                    mount_point_file);
+		g_debug ("  Adding directories in removable media to crawler's queue");
+		add_removable_directory (controller, mount_point_file);
 	}
 }
 
@@ -466,23 +462,15 @@ index_volumes_changed_idle (gpointer user_data)
 	GSList *mounts_removed = NULL;
 	GSList *mounts_added = NULL;
 	gboolean new_index_removable_devices;
-	gboolean new_index_optical_discs;
 
 	TRACKER_NOTE (CONFIG, g_message ("Volume related configuration changed, updating..."));
 
-	/* Read new config values. Note that if removable devices is FALSE,
-	 * optical discs will also always be FALSE. */
 	new_index_removable_devices = g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
-	new_index_optical_discs = (new_index_removable_devices ?
-	                           g_settings_get_boolean (G_SETTINGS (controller->config), "index-optical-discs") :
-	                           FALSE);
 
 	/* Removable devices config changed? */
 	if (controller->index_removable_devices != new_index_removable_devices) {
 		GSList *m;
 
-		/* Get list of roots for currently mounted removable devices
-		 * (excluding optical) */
 		m = tracker_storage_get_device_roots (controller->storage,
 		                                      TRACKER_STORAGE_REMOVABLE,
 		                                      TRUE);
@@ -500,32 +488,6 @@ index_volumes_changed_idle (gpointer user_data)
 			 * from the store belonging to a removable device
 			 */
 			mounts_removed = m;
-		}
-	}
-
-	/* Optical discs config changed? */
-	if (controller->index_optical_discs != new_index_optical_discs) {
-		GSList *m;
-
-		/* Get list of roots for removable devices (excluding optical) */
-		m = tracker_storage_get_device_roots (controller->storage,
-		                                      TRACKER_STORAGE_REMOVABLE | TRACKER_STORAGE_OPTICAL,
-		                                      TRUE);
-
-		/* Set new config value */
-		controller->index_optical_discs = new_index_optical_discs;
-
-		if (controller->index_optical_discs) {
-			/* If previously not indexing and now indexing, need to re-check
-			 * current mounted volumes, add new monitors and index new files
-			 */
-			mounts_added = g_slist_concat (mounts_added, m);
-		} else {
-			/* If previously indexing and now not indexing, need to re-check
-			 * current mounted volumes, remove monitors and remove all resources
-			 * from the store belonging to a optical disc
-			 */
-			mounts_removed = g_slist_concat (mounts_removed, m);
 		}
 	}
 
@@ -550,8 +512,7 @@ index_volumes_changed_idle (gpointer user_data)
 			g_autoptr (GFile) mount_point_file = NULL;
 
 			mount_point_file = g_file_new_for_path (sl->data);
-			add_removable_or_optical_directory (controller,
-			                                    mount_point_file);
+			add_removable_directory (controller, mount_point_file);
 		}
 
 		g_slist_free_full (mounts_removed, g_free);
@@ -589,27 +550,11 @@ initialize_from_config (TrackerController *controller)
 	controller->index_removable_devices =
 		g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
 
-	/* Note that if removable devices not indexed, optical discs
-	 * will also never be indexed */
-	controller->index_optical_discs = (controller->index_removable_devices ?
-	                                   g_settings_get_boolean (G_SETTINGS (controller->config), "index-optical-discs") :
-	                                   FALSE);
-
 	if (controller->index_removable_devices) {
-		/* Get list of roots for removable devices (excluding optical) */
+		/* Get list of roots for removable devices */
 		mounts = tracker_storage_get_device_roots (controller->storage,
 		                                           TRACKER_STORAGE_REMOVABLE,
 		                                           TRUE);
-	}
-
-	if (controller->index_optical_discs) {
-		GSList *m;
-
-		/* Get list of roots for removable+optical devices */
-		m = tracker_storage_get_device_roots (controller->storage,
-		                                      TRACKER_STORAGE_OPTICAL | TRACKER_STORAGE_REMOVABLE,
-		                                      TRUE);
-		mounts = g_slist_concat (mounts, m);
 	}
 
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from config (IndexSingleDirectory)"));
@@ -657,8 +602,7 @@ initialize_from_config (TrackerController *controller)
 		g_autoptr (GFile) mount_point = NULL;
 
 		mount_point = g_file_new_for_path (l->data);
-		add_removable_or_optical_directory (controller,
-		                                    mount_point);
+		add_removable_directory (controller, mount_point);
 	}
 
 	g_slist_free_full (mounts, g_free);
@@ -817,9 +761,6 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (enable_monitor_changed_cb),
 	                  object);
 	g_signal_connect (controller->config, "notify::index-removable-devices",
-	                  G_CALLBACK (index_volumes_changed_cb),
-	                  object);
-	g_signal_connect (controller->config, "notify::index-optical-discs",
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 

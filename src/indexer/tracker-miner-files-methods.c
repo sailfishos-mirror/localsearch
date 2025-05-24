@@ -72,8 +72,6 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 
 	tracker_resource_set_boolean (resource, "tracker:isRemovable",
 	                              (storage_type & TRACKER_STORAGE_REMOVABLE) != 0);
-	tracker_resource_set_boolean (resource, "tracker:isOptical",
-	                              (storage_type & TRACKER_STORAGE_OPTICAL) != 0);
 }
 
 static void

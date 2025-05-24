@@ -72,10 +72,7 @@ Boston, MA  02110-1301, USA.
 
     <key name="index-optical-discs" type="b">
       <summary>Index optical discs</summary>
-      <description>
-	Set to true to enable indexing CDs, DVDs, and generally optical media
-	(if removable devices are not indexed, optical discs won’t be either)
-      </description>
+      <description>This setting is deprecated</description>
       <default>false</default>
     </key>
 

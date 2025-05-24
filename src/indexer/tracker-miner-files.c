@@ -526,19 +526,18 @@ init_index_roots (TrackerMinerFiles *miner_files)
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 		const gchar *uri;
-		gboolean is_removable, is_optical;
+		gboolean is_removable;
 		GFile *file;
 
 		uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 		is_removable = tracker_sparql_cursor_get_boolean (cursor, 1);
-		is_optical = tracker_sparql_cursor_get_boolean (cursor, 2);
 
 		file = g_file_new_for_uri (uri);
 		g_hash_table_add (handled, file);
 
 		if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
 			/* Directory is indexed and configured */
-			if (is_removable || is_optical) {
+			if (is_removable) {
 				set_up_mount_point (TRACKER_MINER_FILES (miner),
 				                    file,
 				                    TRUE,
@@ -547,10 +546,8 @@ init_index_roots (TrackerMinerFiles *miner_files)
 		} else {
 			/* Directory is indexed, but no longer configured */
 			if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") > 0 &&
-			    ((is_optical &&
-			      g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-optical-discs")) ||
-			     (!is_optical && is_removable &&
-			      g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices")))) {
+			    (is_removable &&
+			     g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices"))) {
 				/* Preserve */
 				set_up_mount_point (TRACKER_MINER_FILES (miner),
 				                    file, FALSE, batch);
@@ -845,9 +842,6 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
 	if ((type & TRACKER_STORAGE_REMOVABLE) != 0) {
 		if (!g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices"))
 			delete = TRUE;
-		else if ((type & TRACKER_STORAGE_OPTICAL) != 0 &&
-		         !g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-optical-discs"))
-			delete = TRUE;
 		else if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") == 0)
 			delete = TRUE;
 		else
@@ -1066,8 +1060,8 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 		g_autofree gchar *date;
 
 		date = g_date_time_format_iso8601 (datetime);
-		g_message ("  Removing all resources in store from removable or "
-			   "optical devices not mounted after '%s'",
+		g_message ("  Removing all resources in store from removable "
+			   "devices not mounted after '%s'",
 			   date);
 	}
 #endif
