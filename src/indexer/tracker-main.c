@@ -62,21 +62,15 @@
 static GMainLoop *main_loop;
 static guint cleanup_id;
 
-static gint initial_sleep = -1;
 static gboolean no_daemon;
 static gchar *eligible;
 static gboolean version;
-static guint miners_timeout_id = 0;
 static gboolean dry_run = FALSE;
 
 static gboolean corrupted = FALSE;
+static guint wait_settle_id = 0;
 
 static GOptionEntry entries[] = {
-	{ "initial-sleep", 's', 0,
-	  G_OPTION_ARG_INT, &initial_sleep,
-	  N_("Initial sleep time in seconds, "
-	     "0->1000 (default=15)"),
-	  NULL },
 	{ "no-daemon", 'n', 0,
 	  G_OPTION_ARG_NONE, &no_daemon,
 	  N_("Runs until all configured locations are indexed and then exits"),
@@ -115,10 +109,6 @@ log_option_values (TrackerConfig *config)
 #ifdef G_ENABLE_DEBUG
 	if (TRACKER_DEBUG_CHECK (CONFIG)) {
 		GSList *dirs, *l;
-
-		g_message ("General options:");
-		g_message ("  Initial Sleep  ........................  %d",
-		           initial_sleep);
 
 		g_message ("Indexer options:");
 
@@ -253,38 +243,6 @@ miner_do_start (TrackerMiner *miner)
 		g_debug ("Starting filesystem miner...");
 		tracker_miner_start (miner);
 	}
-}
-
-static gboolean
-miner_start_idle_cb (gpointer data)
-{
-	TrackerMiner *miner = data;
-
-	miners_timeout_id = 0;
-	miner_do_start (miner);
-	return G_SOURCE_REMOVE;
-}
-
-static void
-miner_start (TrackerMiner *miner)
-{
-	/* If requesting to run as no-daemon, start right away */
-	if (no_daemon) {
-		miner_do_start (miner);
-		return;
-	}
-
-	/* If no need to initially sleep, start right away */
-	if (initial_sleep <= 0) {
-		miner_do_start (miner);
-		return;
-	}
-
-	g_debug ("Performing initial sleep of %d seconds",
-	         initial_sleep);
-	miners_timeout_id = g_timeout_add_seconds (initial_sleep,
-	                                           miner_start_idle_cb,
-	                                           miner);
 }
 
 static void
@@ -635,6 +593,26 @@ setup_connection (GError **error)
 	return sparql_conn;
 }
 
+static void
+on_systemd_settled (TrackerMiner *miner)
+{
+	g_debug ("Systemd session started");
+	g_clear_handle_id (&wait_settle_id, g_source_remove);
+	miner_do_start (miner);
+}
+
+static gboolean
+wait_settle_cb (gpointer user_data)
+{
+	TrackerMiner *miner = user_data;
+
+	g_debug ("Waited 5 seconds for the system to settle");
+	wait_settle_id = 0;
+	miner_do_start (miner);
+
+	return G_SOURCE_REMOVE;
+}
+
 int
 main (gint argc, gchar *argv[])
 {
@@ -644,6 +622,7 @@ main (gint argc, gchar *argv[])
 	GError *error = NULL;
 	TrackerMinerProxy *proxy;
 	GDBusConnection *connection;
+	GDBusProxy *systemd_proxy = NULL;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
 	TrackerStorage *storage;
@@ -713,9 +692,6 @@ main (gint argc, gchar *argv[])
 
 	/* Initialize logging */
 	config = tracker_config_new ();
-
-	if (initial_sleep < 0)
-		initial_sleep = g_settings_get_int (G_SETTINGS (config), "initial-sleep");
 
 	log_option_values (config);
 
@@ -818,7 +794,46 @@ main (gint argc, gchar *argv[])
 	g_signal_connect (memory_monitor, "low-memory-warning", G_CALLBACK (on_low_memory), NULL);
 #endif
 
-	miner_start (miner_files);
+	if (!tracker_term_is_tty ()) {
+		gboolean wait_settle = TRUE;
+
+		systemd_proxy = g_dbus_proxy_new_for_bus_sync (TRACKER_IPC_BUS,
+		                                               G_DBUS_PROXY_FLAGS_NONE,
+		                                               NULL,
+		                                               "org.freedesktop.systemd1",
+		                                               "/org/freedesktop/systemd1",
+		                                               "org.freedesktop.systemd1.Manager",
+		                                               NULL, NULL);
+		if (systemd_proxy) {
+			const char *finished_states[] = { "running", "degraded", NULL };
+			g_autoptr (GVariant) v = NULL;
+			const char *state = NULL;
+
+			g_signal_connect (systemd_proxy,
+			                  "g-signal::StartupFinished",
+			                  G_CALLBACK (on_systemd_settled),
+			                  miner_files);
+			g_dbus_proxy_call_sync (systemd_proxy,
+			                        "Subscribe",
+			                        NULL,
+			                        G_DBUS_CALL_FLAGS_NONE,
+			                        -1,
+			                        NULL, NULL);
+
+			v = g_dbus_proxy_get_cached_property (systemd_proxy, "SystemState");
+			state = g_variant_get_string (v, NULL);
+			wait_settle = !g_strv_contains (finished_states, state);
+		}
+
+		if (wait_settle) {
+			g_debug ("Waiting for the system to settle");
+			wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, miner_files);
+		} else {
+			miner_do_start (miner_files);
+		}
+	} else {
+		miner_do_start (miner_files);
+	}
 
 	initialize_signal_handler ();
 
@@ -846,6 +861,7 @@ main (gint argc, gchar *argv[])
 
 	g_clear_object (&indexing_tree);
 	g_clear_object (&storage);
+	g_clear_object (&systemd_proxy);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);
