@@ -745,6 +745,39 @@ on_control_proxy_ready (GObject      *source,
 }
 
 static void
+log_config (TrackerConfig *config)
+{
+#ifdef G_ENABLE_DEBUG
+	if (TRACKER_DEBUG_CHECK (CONFIG)) {
+		GSList *dirs, *l;
+
+		g_message ("Indexer options:");
+
+		dirs = tracker_config_get_index_recursive_directories (config);
+		if (dirs)
+			g_message ("  Recursive folders:");
+		for (l = dirs; l; l = l->next)
+			g_message ("    %s\n", (char*) l->data);
+
+		dirs = tracker_config_get_index_recursive_directories (config);
+		if (dirs)
+			g_message ("  Non-recursive folders:");
+		for (l = dirs; l; l = l->next)
+			g_message ("    %s\n", (char*) l->data);
+
+		g_message ("  Index removable volumes: %s",
+		           g_settings_get_boolean (G_SETTINGS (config),
+		                                   "index-removable-devices") ?
+		           "on" : "off");
+		g_message ("  Monitor directories: %s",
+		           g_settings_get_boolean (G_SETTINGS (config),
+		                                   "enable-monitors") ?
+		           "on" : "off");
+	}
+#endif
+}
+
+static void
 tracker_controller_constructed (GObject *object)
 {
 	TrackerController *controller = TRACKER_CONTROLLER (object);
@@ -806,6 +839,8 @@ tracker_controller_constructed (GObject *object)
 	                          controller);
 
 	initialize_from_config (controller);
+
+	log_config (controller->config);
 }
 
 static void

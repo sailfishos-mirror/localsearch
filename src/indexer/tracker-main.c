@@ -38,7 +38,6 @@
 
 #include <tracker-common.h>
 
-#include "tracker-config.h"
 #include "tracker-controller.h"
 #include "tracker-miner-files.h"
 #include "tracker-files-interface.h"
@@ -102,39 +101,6 @@ typedef struct {
 } EndpointThreadData;
 
 static EndpointThreadData *endpoint_thread_data = NULL;
-
-static void
-log_option_values (TrackerConfig *config)
-{
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (CONFIG)) {
-		GSList *dirs, *l;
-
-		g_message ("Indexer options:");
-
-		dirs = tracker_config_get_index_recursive_directories (config);
-		if (dirs)
-			g_message ("  Recursive folders:");
-		for (l = dirs; l; l = l->next)
-			g_message ("    %s\n", (char*) l->data);
-
-		dirs = tracker_config_get_index_recursive_directories (config);
-		if (dirs)
-			g_message ("  Non-recursive folders:");
-		for (l = dirs; l; l = l->next)
-			g_message ("    %s\n", (char*) l->data);
-
-		g_message ("  Index removable volumes: %s",
-		           g_settings_get_boolean (G_SETTINGS (config),
-		                                   "index-removable-devices") ?
-		           "on" : "off");
-		g_message ("  Monitor directories: %s",
-		           g_settings_get_boolean (G_SETTINGS (config),
-		                                   "enable-monitors") ?
-		           "on" : "off");
-	}
-#endif
-}
 
 static GFile *
 get_cache_dir (void)
@@ -616,7 +582,6 @@ wait_settle_cb (gpointer user_data)
 int
 main (gint argc, gchar *argv[])
 {
-	TrackerConfig *config;
 	TrackerMiner *miner_files;
 	GOptionContext *context;
 	GError *error = NULL;
@@ -690,11 +655,6 @@ main (gint argc, gchar *argv[])
 
 	files_interface = tracker_files_interface_new (connection);
 
-	/* Initialize logging */
-	config = tracker_config_new ();
-
-	log_option_values (config);
-
 	main_loop = g_main_loop_new (NULL, FALSE);
 
 	if (no_daemon) {
@@ -751,7 +711,6 @@ main (gint argc, gchar *argv[])
 	if (error) {
 		g_critical ("Couldn't create miner proxy: %s", error->message);
 		g_error_free (error);
-		g_object_unref (config);
 		g_object_unref (miner_files);
 		return EXIT_FAILURE;
 	}
@@ -846,7 +805,6 @@ main (gint argc, gchar *argv[])
 	g_object_unref (files_interface);
 
 	g_main_loop_unref (main_loop);
-	g_object_unref (config);
 
 	g_object_unref (controller);
 
