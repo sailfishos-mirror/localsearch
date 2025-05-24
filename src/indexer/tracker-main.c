@@ -119,14 +119,6 @@ log_option_values (TrackerConfig *config)
 		g_message ("General options:");
 		g_message ("  Initial Sleep  ........................  %d",
 		           initial_sleep);
-
-		g_message ("Indexer options:");
-		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
-			g_message ("  Low disk space limit  .................  Disabled");
-		} else {
-			g_message ("  Low disk space limit  .................  %d%%",
-			           g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit"));
-		}
 	}
 #endif
 }

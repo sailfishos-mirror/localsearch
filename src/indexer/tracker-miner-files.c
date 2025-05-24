@@ -32,10 +32,11 @@
 #include "tracker-extract-watchdog.h"
 #include "tracker-utils.h"
 
-#define DISK_SPACE_CHECK_FREQUENCY 10
 #define SECONDS_PER_DAY 86400
 
 #define DEFAULT_GRAPH "tracker:FileSystem"
+
+#define RETRY_AFTER_DISK_FULL (60 * 15)
 
 #define FILE_ATTRIBUTES	  \
 	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
@@ -71,8 +72,7 @@ struct _TrackerMinerFilesPrivate {
 	GSettings *extract_settings;
 	GList *allowed_text_patterns;
 
-	guint disk_space_check_id;
-	gboolean disk_space_pause;
+	guint resume_after_disk_full_id;
 
 	gboolean low_battery_pause;
 	gboolean initial_index;
@@ -111,11 +111,6 @@ static void        battery_status_cb                    (GObject              *o
 #endif /* HAVE_POWER */
 static void        init_index_roots                     (TrackerMinerFiles    *miner);
 static void        init_stale_volume_removal            (TrackerMinerFiles    *miner);
-static void        disk_space_check_start               (TrackerMinerFiles    *mf);
-static void        disk_space_check_stop                (TrackerMinerFiles    *mf);
-static void        low_disk_space_limit_cb              (GObject              *gobject,
-                                                         GParamSpec           *arg1,
-                                                         gpointer              user_data);
 
 static void        miner_files_process_file             (TrackerMinerFS       *fs,
                                                          GFile                *file,
@@ -260,6 +255,26 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
 	}
 }
 
+static gboolean
+retry_after_disk_full_cb (gpointer user_data)
+{
+	TrackerMinerFiles *mf = user_data;
+
+	mf->private->resume_after_disk_full_id = 0;
+	tracker_miner_resume (TRACKER_MINER (mf));
+
+	return G_SOURCE_REMOVE;
+}
+
+static void
+on_no_space (TrackerMinerFiles *mf)
+{
+	tracker_miner_pause (TRACKER_MINER (mf));
+	mf->private->resume_after_disk_full_id =
+		g_timeout_add_seconds (RETRY_AFTER_DISK_FULL,
+		                       retry_after_disk_full_cb, mf);
+}
+
 static void
 tracker_miner_files_init (TrackerMinerFiles *mf)
 {
@@ -279,6 +294,9 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 		                  mf);
 	}
 #endif /* HAVE_POWER */
+
+	g_signal_connect (mf, "no-space",
+	                  G_CALLBACK (on_no_space), mf);
 }
 
 static void
@@ -377,13 +395,8 @@ miner_files_finalize (GObject *object)
 	g_clear_object (&priv->extract_watchdog);
 
 	if (priv->config) {
-		g_signal_handlers_disconnect_by_func (priv->config,
-		                                      low_disk_space_limit_cb,
-		                                      NULL);
 		g_object_unref (priv->config);
 	}
-
-	disk_space_check_stop (TRACKER_MINER_FILES (object));
 
 #ifdef HAVE_POWER
 	if (priv->power) {
@@ -696,119 +709,6 @@ battery_status_cb (GObject    *object,
 
 #endif /* HAVE_POWER */
 
-static GFile *
-get_cache_dir (TrackerMinerFiles *mf)
-{
-	TrackerSparqlConnection *conn;
-	GFile *cache;
-
-	conn = tracker_miner_get_connection (TRACKER_MINER (mf));
-	g_object_get (conn, "store-location", &cache, NULL);
-
-	return cache;
-}
-
-static gboolean
-disk_space_check (TrackerMinerFiles *mf)
-{
-	GFile *file;
-	gint limit;
-	gchar *data_dir;
-	gdouble remaining;
-
-	limit = g_settings_get_int (G_SETTINGS (mf->private->config), "low-disk-space-limit");
-
-	if (limit < 1) {
-		return FALSE;
-	}
-
-	/* Get % of remaining space in the partition where the cache is */
-	file = get_cache_dir (mf);
-	data_dir = g_file_get_path (file);
-	remaining = tracker_file_system_get_remaining_space_percentage (data_dir);
-	g_free (data_dir);
-	g_object_unref (file);
-
-	if (remaining <= limit) {
-		g_message ("WARNING: Available disk space (%lf%%) is below "
-		           "configured threshold for acceptable working (%d%%)",
-		           remaining, limit);
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-static gboolean
-disk_space_check_cb (gpointer user_data)
-{
-	TrackerMinerFiles *mf = user_data;
-
-	if (disk_space_check (mf)) {
-		/* Don't try to pause again */
-		if (!mf->private->disk_space_pause) {
-			mf->private->disk_space_pause = TRUE;
-			tracker_miner_pause (TRACKER_MINER (mf));
-		}
-	} else {
-		/* Don't try to resume again */
-		if (mf->private->disk_space_pause) {
-			tracker_miner_resume (TRACKER_MINER (mf));
-			mf->private->disk_space_pause = FALSE;
-		}
-	}
-
-	return TRUE;
-}
-
-static void
-disk_space_check_start (TrackerMinerFiles *mf)
-{
-	gint limit;
-
-	if (mf->private->disk_space_check_id != 0) {
-		return;
-	}
-
-	limit = g_settings_get_int (G_SETTINGS (mf->private->config), "low-disk-space-limit");
-
-	if (limit != -1) {
-		TRACKER_NOTE (CONFIG, g_message ("Starting disk space check for every %d seconds",
-		                      DISK_SPACE_CHECK_FREQUENCY));
-		mf->private->disk_space_check_id =
-			g_timeout_add_seconds (DISK_SPACE_CHECK_FREQUENCY,
-			                       disk_space_check_cb,
-			                       mf);
-
-		/* Call the function now too to make sure we have an
-		 * initial value too!
-		 */
-		disk_space_check_cb (mf);
-	} else {
-		TRACKER_NOTE (CONFIG, g_message ("Not setting disk space, configuration is set to -1 (disabled)"));
-	}
-}
-
-static void
-disk_space_check_stop (TrackerMinerFiles *mf)
-{
-	if (mf->private->disk_space_check_id) {
-		TRACKER_NOTE (CONFIG, g_message ("Stopping disk space check"));
-		g_source_remove (mf->private->disk_space_check_id);
-		mf->private->disk_space_check_id = 0;
-	}
-}
-
-static void
-low_disk_space_limit_cb (GObject    *gobject,
-                         GParamSpec *arg1,
-                         gpointer    user_data)
-{
-	TrackerMinerFiles *mf = user_data;
-
-	disk_space_check_cb (mf);
-}
-
 static void
 indexing_tree_directory_added_cb (TrackerIndexingTree *indexing_tree,
                                   GFile               *directory,
@@ -985,9 +885,6 @@ miner_files_constructed (GObject *object)
 	                  G_CALLBACK (indexing_tree_directory_removed_cb), object);
 
 	/* We want to get notified when config changes */
-	g_signal_connect (mf->private->config, "notify::low-disk-space-limit",
-	                  G_CALLBACK (low_disk_space_limit_cb),
-	                  mf);
 	g_signal_connect_swapped (mf->private->config,
 	                          "notify::removable-days-threshold",
 	                          G_CALLBACK (removable_days_threshold_changed),
@@ -996,8 +893,6 @@ miner_files_constructed (GObject *object)
 #ifdef HAVE_POWER
 	check_battery_status (mf);
 #endif /* HAVE_POWER */
-
-	disk_space_check_start (mf);
 
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),

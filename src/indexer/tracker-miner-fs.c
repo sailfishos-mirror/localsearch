@@ -130,6 +130,7 @@ typedef enum {
 enum {
 	FINISHED,
 	CORRUPT,
+	NO_SPACE,
 	LAST_SIGNAL
 };
 
@@ -265,6 +266,13 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 
 	signals[CORRUPT] =
 		g_signal_new ("corrupt",
+		              G_TYPE_FROM_CLASS (object_class),
+		              G_SIGNAL_RUN_LAST, 0,
+		              NULL, NULL,
+		              g_cclosure_marshal_VOID__VOID,
+		              G_TYPE_NONE, 0);
+	signals[NO_SPACE] =
+		g_signal_new ("no-space",
 		              G_TYPE_FROM_CLASS (object_class),
 		              G_SIGNAL_RUN_LAST, 0,
 		              NULL, NULL,
@@ -669,11 +677,17 @@ sparql_buffer_flush_cb (GObject      *object,
 	tasks = tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
 	                                            result, &error);
 
+	priv->flushing = FALSE;
+
 	if (error) {
 		g_warning ("Could not execute sparql: %s", error->message);
 
 		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
 			g_signal_emit (fs, signals[CORRUPT], 0);
+			return;
+		} else if (g_error_matches (error, TRACKER_SPARQL_ERROR,
+		                            TRACKER_SPARQL_ERROR_NO_SPACE)) {
+			g_signal_emit (fs, signals[NO_SPACE], 0);
 			return;
 		}
 	}
@@ -691,8 +705,6 @@ sparql_buffer_flush_cb (GObject      *object,
 			tracker_error_report_delete (task_file);
 		}
 	}
-
-	priv->flushing = FALSE;
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
 		if (tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),
