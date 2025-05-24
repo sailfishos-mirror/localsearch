@@ -28,7 +28,7 @@ Boston, MA  02110-1301, USA.
 
     <key name="throttle" type="i">
       <summary>Throttle</summary>
-      <description>Indexing speed, the higher the slower.</description>
+      <description>This setting is deprecated</description>
       <range min="0" max="20"/>
       <default>0</default>
     </key>

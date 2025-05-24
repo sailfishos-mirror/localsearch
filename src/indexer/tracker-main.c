@@ -121,9 +121,6 @@ log_option_values (TrackerConfig *config)
 		           initial_sleep);
 
 		g_message ("Indexer options:");
-		g_message ("  Throttle level  .......................  %d",
-		           g_settings_get_int (G_SETTINGS (config), "throttle"));
-
 		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
 			g_message ("  Low disk space limit  .................  Disabled");
 		} else {

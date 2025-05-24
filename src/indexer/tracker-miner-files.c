@@ -634,18 +634,9 @@ static void
 set_up_throttle (TrackerMinerFiles *mf,
                  gboolean           enable)
 {
-	gdouble throttle;
-	gint config_throttle;
+	gdouble throttle = 0;
 
-	config_throttle = g_settings_get_int (G_SETTINGS (mf->private->config), "throttle");
-	throttle = (1.0 / 20) * config_throttle;
-
-	if (enable) {
-		throttle += 0.25;
-	}
-
-	throttle = CLAMP (throttle, 0, 1);
-
+	throttle = enable ? 0.25 : 0;
 	g_debug ("Setting new throttle to %0.3f", throttle);
 	tracker_miner_fs_set_throttle (TRACKER_MINER_FS (mf), throttle);
 }
