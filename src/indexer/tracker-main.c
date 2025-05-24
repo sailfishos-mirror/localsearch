@@ -619,24 +619,6 @@ on_domain_vanished (GDBusConnection *connection,
 	g_main_loop_quit (loop);
 }
 
-TrackerSparqlConnectionFlags
-get_fts_connection_flags (void)
-{
-	TrackerSparqlConnectionFlags flags = 0;
-	g_autoptr (GSettings) settings = NULL;
-
-	settings = g_settings_new ("org.freedesktop.Tracker3.FTS");
-
-	if (g_settings_get_boolean (settings, "enable-stemmer"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER;
-	if (g_settings_get_boolean (settings, "enable-unaccent"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
-	if (g_settings_get_boolean (settings, "ignore-numbers"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS;
-
-	return flags;
-}
-
 gpointer
 endpoint_thread_func (gpointer user_data)
 {
@@ -730,12 +712,15 @@ setup_connection (GError **error)
 	TrackerSparqlConnection *sparql_conn;
 	g_autoptr (GFile) store = NULL, ontology = NULL;
 	GError *internal_error = NULL;
+	TrackerSparqlConnectionFlags flags =
+		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
+		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
 
 	if (!dry_run)
 		store = get_cache_dir ();
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
-	sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
+	sparql_conn = tracker_sparql_connection_new (flags,
 	                                             store,
 	                                             ontology,
 	                                             NULL,
@@ -757,7 +742,7 @@ setup_connection (GError **error)
 
 			path = g_file_get_path (backup_location);
 			g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
-			sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
+			sparql_conn = tracker_sparql_connection_new (flags,
 			                                             store,
 			                                             ontology,
 			                                             NULL,
