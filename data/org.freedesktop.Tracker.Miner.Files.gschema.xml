@@ -49,11 +49,7 @@ Boston, MA  02110-1301, USA.
 
     <key name="removable-days-threshold" type="i">
       <summary>Removable devices’ data permanence threshold</summary>
-      <description>
-	Threshold in days after which files from removables devices
-	will be removed from database if not mounted. 0 means never,
-	maximum is 365.
-      </description>
+      <description>This setting is deprecated</description>
       <range min="0" max="365"/>
       <default>3</default>
     </key>

@@ -38,6 +38,8 @@
 
 #define RETRY_AFTER_DISK_FULL (60 * 15)
 
+#define REMOVABLE_DEVICES_CHECK_DAYS 3
+
 #define FILE_ATTRIBUTES	  \
 	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
 	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
@@ -300,26 +302,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 }
 
 static void
-removable_days_threshold_changed (TrackerMinerFiles *mf)
-{
-	/* Check if the stale volume removal configuration changed from enabled to disabled
-	 * or from disabled to enabled */
-	if (g_settings_get_int (G_SETTINGS (mf->private->config), "removable-days-threshold") == 0 &&
-	    mf->private->stale_volumes_check_id != 0) {
-		/* From having the check enabled to having it disabled, remove the timeout */
-		TRACKER_NOTE (CONFIG, g_message ("Stale volume removal now disabled, removing timeout"));
-		g_source_remove (mf->private->stale_volumes_check_id);
-		mf->private->stale_volumes_check_id = 0;
-	} else if (g_settings_get_int (G_SETTINGS (mf->private->config), "removable-days-threshold") > 0 &&
-	           mf->private->stale_volumes_check_id == 0) {
-		TRACKER_NOTE (CONFIG, g_message ("Stale volume removal now enabled, initializing timeout"));
-		/* From having the check disabled to having it enabled, so fire up the
-		 * timeout. */
-		init_stale_volume_removal (TRACKER_MINER_FILES (mf));
-	}
-}
-
-static void
 miner_files_set_property (GObject      *object,
                           guint         prop_id,
                           const GValue *value,
@@ -558,9 +540,7 @@ init_index_roots (TrackerMinerFiles *miner_files)
 			}
 		} else {
 			/* Directory is indexed, but no longer configured */
-			if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") > 0 &&
-			    (is_removable &&
-			     g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices"))) {
+			if (is_removable) {
 				/* Preserve */
 				set_up_mount_point (TRACKER_MINER_FILES (miner),
 				                    file, FALSE, batch);
@@ -601,17 +581,11 @@ cleanup_stale_removable_volumes_cb (gpointer user_data)
 {
 	TrackerMinerFiles *miner = TRACKER_MINER_FILES (user_data);
 	g_autoptr (GDateTime) now = NULL, n_days_ago = NULL;
-	gint n_days_threshold;
-
-	n_days_threshold = g_settings_get_int (G_SETTINGS (miner->private->config), "removable-days-threshold");
-
-	if (n_days_threshold == 0)
-		return TRUE;
 
 	g_debug ("Running stale volumes check...");
 
 	now = g_date_time_new_now_utc ();
-	n_days_ago = g_date_time_add_days (now, -n_days_threshold);
+	n_days_ago = g_date_time_add_days (now, -REMOVABLE_DEVICES_CHECK_DAYS);
 	miner_files_in_removable_media_remove_by_date (miner, n_days_ago);
 
 	return TRUE;
@@ -620,12 +594,6 @@ cleanup_stale_removable_volumes_cb (gpointer user_data)
 static void
 init_stale_volume_removal (TrackerMinerFiles *miner)
 {
-	/* If disabled, make sure we don't do anything */
-	if (g_settings_get_int (G_SETTINGS (miner->private->config), "removable-days-threshold") == 0) {
-		g_debug ("Stale volume check is disabled");
-		return;
-	}
-
 	/* Run right away the first check */
 	cleanup_stale_removable_volumes_cb (miner);
 
@@ -730,33 +698,19 @@ indexing_tree_directory_removed_cb (TrackerIndexingTree *indexing_tree,
                                     gpointer             user_data)
 {
 	TrackerMinerFiles *miner_files = user_data;
-	TrackerStorage *storage = miner_files->private->storage;
-	TrackerStorageType type;
+	TrackerDirectoryFlags flags;
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerBatch) batch = NULL;
 	g_autoptr (GError) error = NULL;
-	gboolean delete = FALSE, update_mount = FALSE;
 
-	type = tracker_storage_get_type_for_file (storage, directory);
-
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0) {
-		if (!g_settings_get_boolean (G_SETTINGS (miner_files->private->config), "index-removable-devices"))
-			delete = TRUE;
-		else if (g_settings_get_int (G_SETTINGS (miner_files->private->config), "removable-days-threshold") == 0)
-			delete = TRUE;
-		else
-			update_mount = TRUE;
-	} else {
-		delete = TRUE;
-	}
-
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	conn = tracker_miner_get_connection (TRACKER_MINER (miner_files));
 	batch = tracker_sparql_connection_create_batch (conn);
 
-	if (delete)
-		delete_index_root (miner_files, directory, batch);
-	else if (update_mount)
+	if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) != 0)
 		set_up_mount_point (miner_files, directory, FALSE, batch);
+	else
+		delete_index_root (miner_files, directory, batch);
 
 	if (!tracker_batch_execute (batch, NULL, &error))
 		g_warning ("Error updating indexed folder: %s", error->message);
@@ -883,12 +837,6 @@ miner_files_constructed (GObject *object)
 	                  G_CALLBACK (indexing_tree_directory_added_cb), object);
 	g_signal_connect (indexing_tree, "directory-removed",
 	                  G_CALLBACK (indexing_tree_directory_removed_cb), object);
-
-	/* We want to get notified when config changes */
-	g_signal_connect_swapped (mf->private->config,
-	                          "notify::removable-days-threshold",
-	                          G_CALLBACK (removable_days_threshold_changed),
-	                          mf);
 
 #ifdef HAVE_POWER
 	check_battery_status (mf);
