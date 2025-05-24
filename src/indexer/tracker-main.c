@@ -597,7 +597,6 @@ main (gint argc, gchar *argv[])
 #endif
 	g_autofree char *dbus_name = NULL, *legacy_dbus_name = NULL;
 	TrackerFilesInterface *files_interface;
-	gboolean initial_index = TRUE;
 
 	main_loop = NULL;
 
@@ -676,7 +675,6 @@ main (gint argc, gchar *argv[])
 	if (!dry_run) {
 		GFile *store = get_cache_dir ();
 
-		initial_index = !g_file_query_exists (store, NULL);
 		tracker_error_report_init (store);
 		g_object_unref (store);
 	}
@@ -702,8 +700,7 @@ main (gint argc, gchar *argv[])
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
-	                                       storage,
-	                                       initial_index);
+	                                       storage);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);
 

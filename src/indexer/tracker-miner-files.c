@@ -73,7 +73,6 @@ struct _TrackerMinerFilesPrivate {
 	guint resume_after_disk_full_id;
 
 	gboolean low_battery_pause;
-	gboolean initial_index;
 
 #ifdef HAVE_POWER
 	TrackerPower *power;
@@ -85,7 +84,6 @@ struct _TrackerMinerFilesPrivate {
 enum {
 	PROP_0,
 	PROP_STORAGE,
-	PROP_INITIAL_INDEX,
 };
 
 #define TEXT_ALLOWLIST "text-allowlist"
@@ -187,13 +185,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	                                                      G_PARAM_READWRITE |
 	                                                      G_PARAM_CONSTRUCT_ONLY |
 	                                                      G_PARAM_STATIC_STRINGS));
-	g_object_class_install_property (object_class,
-	                                 PROP_INITIAL_INDEX,
-	                                 g_param_spec_boolean ("initial-index",
-	                                                       NULL, NULL, FALSE,
-	                                                       G_PARAM_WRITABLE |
-	                                                       G_PARAM_CONSTRUCT_ONLY |
-	                                                       G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -302,9 +293,6 @@ miner_files_set_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_STORAGE:
 		priv->storage = g_value_dup_object (value);
-		break;
-	case PROP_INITIAL_INDEX:
-		priv->initial_index = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -806,10 +794,9 @@ miner_files_constructed (GObject *object)
 }
 
 TrackerMiner *
-tracker_miner_files_new (TrackerSparqlConnection  *connection,
-                         TrackerIndexingTree      *indexing_tree,
-                         TrackerStorage           *storage,
-                         gboolean                  initial_index)
+tracker_miner_files_new (TrackerSparqlConnection *connection,
+                         TrackerIndexingTree     *indexing_tree,
+                         TrackerStorage          *storage)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -818,7 +805,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "indexing-tree", indexing_tree,
 	                     "storage", storage,
 	                     "file-attributes", FILE_ATTRIBUTES,
-	                     "initial-index", initial_index,
 	                     NULL);
 }
 
