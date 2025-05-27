@@ -30,10 +30,11 @@
 
 #include <tracker-common.h>
 
-#include "tracker-daemon.h"
 #include "tracker-extract.h"
+#include "tracker-help.h"
 #include "tracker-index.h"
 #include "tracker-info.h"
+#include "tracker-inhibit.h"
 #include "tracker-reset.h"
 #include "tracker-search.h"
 #include "tracker-status.h"
@@ -64,11 +65,12 @@ static int launch_external_command (int argc, const char **argv);
 static void print_usage (void);
 
 static struct cmd_struct commands[] = {
-	{ "daemon", tracker_daemon, N_("Start, stop, restart and list daemons responsible for indexing content") },
-	{ "extract", tracker_extract, N_("Extract metadata from a file") },
-	{ "index", tracker_index, N_("Trigger content indexing of a location") },
-	{ "info", tracker_info, N_("Retrieve all information available for a certain file") },
-	{ "reset", tracker_reset, N_("Reset the index and configuration") },
+	{ "help", tracker_help, N_("Show help on subcommands") },
+	{ "extract", tracker_extract, N_("Show metadata extractor output") },
+	{ "index", tracker_index, N_("List and change indexed folders") },
+	{ "info", tracker_info, N_("Retrieve information available for files and resources") },
+	{ "inhibit", tracker_inhibit, N_("Inhibit indexing temporarily") },
+	{ "reset", tracker_reset, N_("Erase the indexed data") },
 	{ "search", tracker_search, N_("Search for content") },
 	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },
 	{ "tag", tracker_tag, N_("Add, remove and list tags") },
@@ -129,83 +131,6 @@ print_usage_list_cmds (void)
                 mput_char (' ', longest - strlen (commands[i].cmd));
                 puts (_(commands[i].help));
         }
-
-#if 0
-	guint longest = 0;
-	GList *commands = NULL;
-	GList *c;
-	GFileEnumerator *enumerator;
-	GFileInfo *info;
-	GFile *dir;
-	GError *error = NULL;
-	const gchar *cli_metadata_dir;
-
-	cli_metadata_dir = g_getenv ("TRACKER_CLI_DIR");
-
-	if (!cli_metadata_dir) {
-		cli_metadata_dir = CLI_METADATA_DIR;
-	}
-
-	dir = g_file_new_for_path (cli_metadata_dir);
-	enumerator = g_file_enumerate_children (dir,
-	                                        G_FILE_ATTRIBUTE_STANDARD_NAME,
-	                                        G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                                        NULL, &error);
-	g_object_unref (dir);
-
-	if (enumerator) {
-		while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-			const gchar *filename;
-
-			filename = g_file_info_get_name (info);
-			if (g_str_has_suffix (filename, ".desktop")) {
-				gchar *path = NULL;
-				GDesktopAppInfo *desktop_info;
-
-				path = g_build_filename (cli_metadata_dir, filename, NULL);
-				desktop_info = g_desktop_app_info_new_from_filename (path);
-				if (desktop_info) {
-					commands = g_list_prepend (commands, desktop_info);
-				} else {
-					g_warning ("Unable to load command info: %s", path);
-				}
-
-				g_free (path);
-			}
-			g_object_unref (info);
-		}
-
-		g_object_unref (enumerator);
-	} else {
-		g_warning ("Failed to list commands: %s", error->message);
-	}
-
-	puts (_("Available localsearch commands are:"));
-
-	if (commands) {
-		commands = g_list_sort (commands, (GCompareFunc) compare_app_info);
-
-		for (c = commands; c; c = c->next) {
-			GDesktopAppInfo *desktop_info = c->data;
-			const gchar *name = g_app_info_get_name (G_APP_INFO (desktop_info));
-
-			if (longest < strlen (name))
-				longest = strlen (name);
-		}
-
-		for (c = commands; c; c = c->next) {
-			GDesktopAppInfo *desktop_info = c->data;
-			const gchar *name = g_app_info_get_name (G_APP_INFO (desktop_info));
-			const gchar *help = g_app_info_get_description (G_APP_INFO (desktop_info));
-
-			g_print ("   %s   ", name);
-			mput_char (' ', longest - strlen (name));
-			puts (help);
-		}
-
-		g_list_free_full (commands, g_object_unref);
-	}
-#endif
 }
 
 static void

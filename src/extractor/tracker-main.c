@@ -78,7 +78,7 @@ static GOptionEntry entries[] = {
 	  N_("MIME type for file (if not provided, this will be guessed)"),
 	  N_("MIME") },
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format_name,
-	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
+	  N_("Output results format: “turtle”, “trig” or “json-ld”"),
 	  N_("FORMAT") },
 	{ "socket-fd", 's', 0,
 	  G_OPTION_ARG_INT, &socket_fd,
@@ -169,7 +169,7 @@ run_standalone (void)
 	TrackerResource *resource = NULL;
 	GEnumClass *enum_class;
 	GEnumValue *enum_value;
-	TrackerSerializationFormat output_format;
+	TrackerRdfFormat output_format;
 	TrackerExtractInfo *info;
 
 	if (!output_format_name) {
@@ -177,7 +177,7 @@ run_standalone (void)
 	}
 
 	/* Look up the output format by name */
-	enum_class = g_type_class_ref (TRACKER_TYPE_SERIALIZATION_FORMAT);
+	enum_class = g_type_class_ref (TRACKER_TYPE_RDF_FORMAT);
 	enum_value = g_enum_get_value_by_nick (enum_class, output_format_name);
 	g_type_class_unref (enum_class);
 	if (!enum_value) {
@@ -217,26 +217,7 @@ run_standalone (void)
 	resource = tracker_extract_info_get_resource (info);
 
 	if (resource) {
-		if (output_format == TRACKER_SERIALIZATION_FORMAT_SPARQL) {
-			g_autofree char *text = NULL;
-			TrackerResource *file_resource;
-
-			/* Set up the corresponding nfo:FileDataObject resource appropriately,
-			 * so the SPARQL we generate is valid according to Nepomuk.
-			 */
-			file_resource = tracker_resource_get_first_relation (resource, "nie:isStoredAs");
-
-			if (!file_resource) {
-				file_resource = tracker_resource_new (uri);
-				tracker_resource_set_take_relation (resource, "nie:isStoredAs", file_resource);
-			}
-
-			tracker_resource_add_uri (file_resource, "rdf:type", "nfo:FileDataObject");
-
-			text = tracker_resource_print_sparql_update (resource, NULL, NULL);
-
-			g_print ("%s\n", text);
-		} else if (output_format == TRACKER_SERIALIZATION_FORMAT_TURTLE) {
+		if (output_format != TRACKER_RDF_FORMAT_JSON_LD) {
 			TrackerNamespaceManager *namespaces;
 			g_autofree char *turtle = NULL;
 
@@ -248,7 +229,7 @@ run_standalone (void)
 			G_GNUC_BEGIN_IGNORE_DEPRECATIONS
 			namespaces = tracker_namespace_manager_get_default ();
 			G_GNUC_END_IGNORE_DEPRECATIONS
-			turtle = tracker_resource_print_rdf (resource, namespaces, TRACKER_RDF_FORMAT_TURTLE, NULL);
+			turtle = tracker_resource_print_rdf (resource, namespaces, output_format, NULL);
 
 			g_print ("%s\n", turtle);
 		} else {

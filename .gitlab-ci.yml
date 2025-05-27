@@ -112,9 +112,9 @@ check-merge-request:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2025-02-24.2'
+    BASE_TAG: '2025-05-13.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config'
+    FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good redhat-rpm-config man-db'
     FDO_DISTRIBUTION_EXEC: |
       if [ -z $(command -v dnf5) ]; then
         dnf install -y 'dnf-command(builddep)' 'dnf-command(download)';
@@ -128,9 +128,9 @@ check-merge-request:
 
 .tracker-miners.debian@common:
   variables:
-    BASE_TAG: '2025-02-06.0'
+    BASE_TAG: '2025-05-13.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libavcodec-dev libavformat-dev libavutil-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'ca-certificates python3-tap python3-pip umockdev libumockdev-dev upower asciidoc-base git libavcodec-dev libavformat-dev libavutil-dev man-db'
     FDO_DISTRIBUTION_EXEC: |
       export DEBIAN_FRONTEND=noninteractive &&
       sed -i 's/^Types: deb$/Types: deb deb-src/' /etc/apt/sources.list.d/debian.sources &&
@@ -355,7 +355,7 @@ test-docs:
     - .tracker-miners.fedora:latest@x86_64
   stage: test
   script:
-    - ./docs/reference/build.py --output=website --man-pages ./docs/manpages/localsearch-*.txt
+    - ./docs/reference/build.py --output=website --man-pages ./docs/man1/localsearch-*.txt
   artifacts:
     expose_as: 'Documentation'
     paths:
@@ -377,7 +377,7 @@ test-dist:
       pushd tinysparql; meson setup build --libdir lib64 --prefix=/usr -Ddocs=false; ninja -C build install; popd
       meson setup --wipe build
       meson compile -C build
-      dbus-run-session meson dist -C build
+      meson devenv -C build dbus-run-session meson dist
   artifacts:
     expose_as: 'Tarball'
     paths:

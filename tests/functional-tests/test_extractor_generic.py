@@ -69,12 +69,11 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
     def __get_bugnumber(self):
         return self.spec["test"].get("Bugzilla")
 
-    def validate_sparql_update(self, sparql):
-        """Create a temporary database and run the given SPARQL update.
+    def validate_trig(self, trig):
+        """Create a temporary database and run the given RDF data.
 
         This gives us a smoke test to detect any situation where the
-        extractor generates invalid SPARQL.
-
+        extractor generates invalid RDF.
         """
         cancellable = None
         ontology = Tsparql.sparql_get_ontology_nepomuk()
@@ -84,7 +83,11 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
             ontology,
             cancellable,
         )
-        db.update(sparql, cancellable)
+
+        batch = db.create_batch()
+        istream = Gio.MemoryInputStream.new_from_data(bytearray(trig, 'utf-8'))
+        batch.add_rdf(Tsparql.DeserializeFlags.NONE, Tsparql.RdfFormat.TRIG, 'tracker:FileSystem', istream)
+        self.assertTrue(batch.execute(cancellable))
 
     def generic_test_extraction(self):
         abs_description = os.path.abspath(self.descfile)
@@ -104,10 +107,10 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
                 )
                 self.__assert_extraction_ok(jsonld)
 
-                sparql = fixtures.get_tracker_extract_output(
-                    extra_env, self.file_to_extract, output_format="sparql"
+                trig = fixtures.get_tracker_extract_output(
+                    extra_env, self.file_to_extract, output_format="trig"
                 )
-                self.validate_sparql_update(sparql)
+                self.validate_trig(trig)
             else:
                 # No output data is expected for this file
                 jsonld = None

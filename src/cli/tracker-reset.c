@@ -33,17 +33,18 @@
 
 #include "tracker-process.h"
 #include "tracker-color.h"
-#include "tracker-miner-manager.h"
+#include "tracker-control-proxy.h"
 
-static gboolean files = FALSE;
+#define ASK_FILE_QUERY \
+	"/org/freedesktop/LocalSearch/queries/ask-file.rq"
+#define DELETE_FOLDER_QUERY \
+	"/org/freedesktop/LocalSearch/queries/delete-folder-recursive.rq"
+
+static gboolean filesystem = FALSE;
 static gchar *filename = NULL;
 
-#define RESET_OPTIONS_ENABLED() \
-	(files || \
-	 filename)
-
 static GOptionEntry entries[] = {
-	{ "filesystem", 's', 0, G_OPTION_ARG_NONE, &files,
+	{ "filesystem", 's', 0, G_OPTION_ARG_NONE, &filesystem,
 	  N_("Remove filesystem indexer database"),
 	  NULL },
 	{ "file", 'f', 0, G_OPTION_ARG_FILENAME, &filename,
@@ -55,13 +56,14 @@ static GOptionEntry entries[] = {
 static int
 delete_info_recursively (GFile *file)
 {
-	TrackerSparqlConnection *connection;
-	TrackerMinerManager *miner_manager;
-	TrackerSparqlCursor *cursor;
-	gchar *query, *uri;
-	GError *error = NULL;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (TrackerSparqlStatement) ask_stmt = NULL, delete_stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (TrackerControlIndex) control_proxy = NULL;
+	g_autofree char *uri = NULL;
+	g_autoptr (GError) error = NULL;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
 
 	if (error)
@@ -70,68 +72,75 @@ delete_info_recursively (GFile *file)
 	uri = g_file_get_uri (file);
 
 	/* First, query whether the item exists */
-	query = g_strdup_printf ("SELECT ?u { ?u nie:url '%s' }", uri);
-	cursor = tracker_sparql_connection_query (connection, query,
-	                                          NULL, &error);
+	ask_stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                    ASK_FILE_QUERY,
+	                                                                    NULL,
+	                                                                    &error);
 
-	/* If the item doesn't exist, bail out. */
-	if (!cursor || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
-		g_clear_object (&cursor);
+	if (ask_stmt) {
+		tracker_sparql_statement_bind_string (ask_stmt, "url", uri);
+		cursor = tracker_sparql_statement_execute (ask_stmt, NULL, &error);
+	}
 
+	if (!cursor ||
+	    !tracker_sparql_cursor_next (cursor, NULL, &error) ||
+	    !tracker_sparql_cursor_get_boolean (cursor, 0)) {
 		if (error)
 			goto error;
 
 		return EXIT_SUCCESS;
 	}
 
-	g_object_unref (cursor);
-
 	/* Now, delete the element recursively */
 	g_print ("%s\n", _("Deleting…"));
-	query = g_strdup_printf ("DELETE { "
-	                         "  ?f a rdfs:Resource . "
-	                         "  ?ie a rdfs:Resource "
-	                         "} WHERE {"
-	                         "  ?f nie:url ?url . "
-	                         "  ?ie nie:isStoredAs ?f . "
-	                         "  FILTER (?url = '%s' ||"
-	                         "          STRSTARTS (?url, '%s/'))"
-	                         "}", uri, uri);
-	g_free (uri);
 
-	tracker_sparql_connection_update (connection, query, NULL, &error);
-	g_free (query);
+	delete_stmt =
+		tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                         DELETE_FOLDER_QUERY,
+		                                                         NULL,
+		                                                         &error);
+
+	if (delete_stmt) {
+		tracker_sparql_statement_bind_string (delete_stmt, "uri", uri);
+		tracker_sparql_statement_update (delete_stmt, NULL, &error);
+	}
 
 	if (error)
 		goto error;
-
-	g_object_unref (connection);
 
 	g_print ("%s\n", _("The indexed data for this file has been deleted "
 	                   "and will be reindexed again."));
 
 	/* Request reindexing of this data, it was previously in the store. */
-	miner_manager = tracker_miner_manager_new_full (FALSE, NULL);
-	tracker_miner_manager_index_location (miner_manager, file, NULL, TRACKER_INDEX_LOCATION_FLAGS_NONE, NULL, &error);
-	g_object_unref (miner_manager);
+	control_proxy =
+		tracker_control_index_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
+		                                              G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
+		                                              "org.freedesktop.Tracker3.Miner.Files.Control",
+		                                              "/org/freedesktop/Tracker3/Miner/Files/Index",
+		                                              NULL, &error);
 
-	if (error)
+	if (!control_proxy)
+		goto error;
+
+	if (!tracker_control_index_call_index_location_sync (control_proxy, uri,
+	                                                     (const char *[]) { "", NULL },
+	                                                     (const char *[]) { "", NULL },
+	                                                     NULL, &error))
 		goto error;
 
 	return EXIT_SUCCESS;
 
 error:
 	g_warning ("%s", error->message);
-	g_error_free (error);
 	return EXIT_FAILURE;
 }
 
 static void
 delete_location (GFile *dir)
 {
-	GFileEnumerator *enumerator;
-	GError *error = NULL;
-	GFileInfo *info;
+	g_autoptr (GFileEnumerator) enumerator = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autoptr (GFileInfo) info = NULL;
 
 	enumerator = g_file_enumerate_children (dir,
 	                                        G_FILE_ATTRIBUTE_STANDARD_NAME,
@@ -143,12 +152,11 @@ delete_location (GFile *dir)
 			            error->message);
 		}
 
-		g_error_free (error);
 		return;
 	}
 
 	while ((info = g_file_enumerator_next_file (enumerator, NULL, NULL)) != NULL) {
-		GFile *child;
+		g_autoptr (GFile) child = NULL;
 
 		child = g_file_enumerator_get_child (enumerator, info);
 
@@ -156,89 +164,32 @@ delete_location (GFile *dir)
 			g_critical ("Failed to delete '%s': %s",
 			            g_file_info_get_name (info),
 			            error->message);
-			g_error_free (error);
 		}
-
-		g_object_unref (child);
 	}
-
-	g_object_unref (enumerator);
 
 	if (!g_file_delete (dir, NULL, &error)) {
 		g_critical ("Failed to delete '%s': %s",
 		            g_file_info_get_name (info),
 		            error->message);
-		g_error_free (error);
 	}
 }
 
-static gint
-reset_run (void)
+static void
+delete_path (const char *path)
 {
-	if (filename) {
-		GFile *file;
-		gint retval;
+	g_autoptr (GFile) file = NULL;
 
-		file = g_file_new_for_commandline_arg (filename);
-		retval = delete_info_recursively (file);
-		g_object_unref (file);
-		return retval;
-	}
-
-	/* KILL processes first... */
-	if (files) {
-		/* FIXME: we might selectively kill affected miners */
-		tracker_process_stop (SIGKILL);
-	}
-
-	if (files) {
-		GFile *location;
-		gchar *dir;
-
-		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
-		location = g_file_new_for_path (dir);
-		delete_location (location);
-		g_object_unref (location);
-		g_free (dir);
-
-		dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
-		location = g_file_new_for_path (dir);
-		delete_location (location);
-		g_object_unref (location);
-		g_free (dir);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-static int
-reset_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, FALSE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
-static gboolean
-reset_options_enabled (void)
-{
-	return RESET_OPTIONS_ENABLED ();
+	file = g_file_new_for_path (path);
+	delete_location (file);
 }
 
 int
 tracker_reset (int          argc,
                const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *cache_dir = NULL, *errors_dir = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -248,21 +199,47 @@ tracker_reset (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Erase the indexed data"));
 
-	argv[0] = "tracker reset";
+	argv[0] = "localsearch reset";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
 
-	g_option_context_free (context);
+	if (filename) {
+		g_autoptr (GFile) file = NULL;
+		gint retval;
 
-	if (reset_options_enabled ()) {
-		return reset_run ();
+		file = g_file_new_for_commandline_arg (filename);
+		retval = delete_info_recursively (file);
+		return retval;
 	}
 
-	return reset_run_default ();
+	if (!filesystem && tracker_term_is_tty ()) {
+		char response[100] = { 0, };
+
+		g_print ("%s ", _("The LocalSearch indexed data is about to be deleted, proceed? [y/N]"));
+		fgets (response, 100, stdin);
+		response[strlen (response) - 1] = '\0';
+
+		/* TRANSLATORS: this is our test for a [y|N] question in the command line.
+		 * A partial or full match will be considered an affirmative answer,
+		 * it is intentionally lowercase, so please keep it like this.
+		 */
+		if (!g_str_has_prefix (_("yes"), response))
+			return EXIT_FAILURE;
+	}
+
+	/* Terminate and reset database */
+	tracker_process_stop (SIGKILL);
+
+	cache_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", "errors", NULL);
+	delete_path (cache_dir);
+
+	errors_dir = g_build_filename (g_get_user_cache_dir (), "tracker3", "files", NULL);
+	delete_path (errors_dir);
+
+	return EXIT_SUCCESS;
 }

@@ -39,7 +39,7 @@ static gchar **filenames;
 
 static GOptionEntry entries[] = {
 	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format,
-	  N_("Output results format: “sparql”, “turtle” or “json-ld”"),
+	  N_("Output results format: “turtle”, “trig” or “json-ld”"),
 	  N_("FORMAT") },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
@@ -63,14 +63,14 @@ extractor_child_setup (gpointer user_data)
 static gint
 extract_files (char *output_format)
 {
+	g_autofree char *tracker_extract_path = NULL;
+	g_autoptr (GError) error = NULL;
 	char **p;
-	char *tracker_extract_path;
-	GError *error = NULL;
 
 	tracker_term_pipe_to_pager ();
 
 	if (inside_build_tree) {
-		/* Developer convienence - use uninstalled version if running from build tree */
+		/* Developer convenience - use uninstalled version if running from build tree */
 		tracker_extract_path = g_build_filename(BUILDROOT, "src", "extractor", "localsearch-extractor-3", NULL);
 	} else {
 		tracker_extract_path = g_build_filename(LIBEXECDIR, "localsearch-extractor-3", NULL);
@@ -89,15 +89,12 @@ extract_files (char *output_format)
 			g_printerr ("%s: %s\n",
 			            _("Could not run tracker-extract: "),
 			            error->message);
-			g_error_free (error);
-			g_free (tracker_extract_path);
 			return EXIT_FAILURE;
 		}
 	}
 
 	tracker_term_pager_close ();
 
-	g_free (tracker_extract_path);
 	return EXIT_SUCCESS;
 }
 
@@ -105,22 +102,6 @@ static int
 extract_run (void)
 {
 	return extract_files (output_format);
-}
-
-static int
-extract_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, TRUE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
 }
 
 static gboolean
@@ -133,28 +114,29 @@ int
 tracker_extract (int          argc,
                  const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Extract metadata from a file"));
 
 	inside_build_tree = tracker_cli_check_inside_build_tree (argv[0]);
 
-	argv[0] = "tracker extract";
+	argv[0] = "localsearch extract";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (extract_options_enabled ()) {
 		return extract_run ();
 	}
 
-	return extract_run_default ();
+	help = g_option_context_get_help (context, TRUE, NULL);
+	g_printerr ("%s\n", help);
+
+	return EXIT_FAILURE;
 }

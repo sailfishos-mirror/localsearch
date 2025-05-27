@@ -37,6 +37,9 @@
 #include "tracker-cli-utils.h"
 #include "tracker-color.h"
 
+#define GET_INFORMATION_ELEMENT_QUERY \
+	"/org/freedesktop/LocalSearch/queries/get-information-element.rq"
+
 #define INFO_OPTIONS_ENABLED() \
 	(filenames && g_strv_length (filenames) > 0);
 
@@ -53,10 +56,8 @@ static gboolean inside_build_tree = FALSE;
 static gchar **filenames;
 static gboolean full_namespaces;
 static gboolean plain_text_content;
-static gboolean resource_is_iri;
-static gboolean turtle;
+static char *output_format = NULL;
 static gboolean eligible;
-static gchar *url_property;
 
 static gboolean output_is_tty;
 
@@ -69,50 +70,17 @@ static GOptionEntry entries[] = {
 	  N_("Show plain text content if available for resources"),
 	  NULL,
 	},
-	{ "resource-is-iri", 'i', 0, G_OPTION_ARG_NONE, &resource_is_iri,
-	  /* To translators:
-	   * IRI (International Resource Identifier) is a generalization
-	   * of the URI. While URI supports only ASCI encoding, IRI
-	   * fully supports international characters. In practice, UTF-8
-	   * is the most popular encoding used for IRI.
-	   */
-	  N_("Instead of looking up a file name, treat the FILE arguments as actual IRIs (e.g. <file:///path/to/some/file.txt>)"),
-	  NULL,
-	},
-	{ "turtle", 't', 0, G_OPTION_ARG_NONE, &turtle,
-	  N_("Output results as RDF in Turtle format"),
-	  NULL,
-	},
-	{ "url", 'u', 0, G_OPTION_ARG_STRING, &url_property,
-	  N_("RDF property to treat as URL (eg. “nie:url”)"),
-	  NULL,
-	},
+	{ "output-format", 'o', 0, G_OPTION_ARG_STRING, &output_format,
+	  N_("Output results format: “turtle”, “trig” or “json-ld”"),
+	  N_("FORMAT") },
 	{ "eligible", 'e', 0, G_OPTION_ARG_NONE, &eligible,
-	  N_("Checks if FILE is eligible for being mined based on configuration"),
+	  N_("Checks if FILE is eligible for being indexed"),
 	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
 	  N_("FILE")},
 	{ NULL }
 };
-
-static gboolean
-has_valid_uri_scheme (const gchar *uri)
-{
-	const gchar *s;
-
-	s = uri;
-
-	if (!g_ascii_isalpha (*s)) {
-		return FALSE;
-	}
-
-	do {
-		s++;
-	} while (g_ascii_isalnum (*s) || *s == '+' || *s == '.' || *s == '-');
-
-	return (*s == ':');
-}
 
 static TrackerSparqlStatement *
 describe_statement_for_urns (TrackerSparqlConnection *conn,
@@ -333,13 +301,6 @@ serialize_cb (GObject *object,
 	g_main_loop_quit (main_loop);
 }
 
-static TrackerSparqlConnection *
-create_connection (GError **error)
-{
-	return tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
-	                                          NULL, NULL, error);
-}
-
 static gboolean
 output_eligible_status_for_file (gchar   *path,
                                  GError **error)
@@ -347,8 +308,8 @@ output_eligible_status_for_file (gchar   *path,
 	g_autofree char *tracker_miner_fs_path = NULL;
 
 	if (inside_build_tree) {
-		/* Developer convienence - use uninstalled version if running from build tree */
-		tracker_miner_fs_path = g_build_filename (BUILDROOT, "src", "miners", "fs", "localsearch-3", NULL);
+		/* Developer convenience - use uninstalled version if running from build tree */
+		tracker_miner_fs_path = g_build_filename (BUILDROOT, "src", "indexer", "localsearch-3", NULL);
 	} else {
 		tracker_miner_fs_path = g_build_filename (LIBEXECDIR, "localsearch-3", NULL);
 	}
@@ -366,22 +327,21 @@ print_errors (GList       *keyfiles,
 {
 	GList *l;
 	GKeyFile *keyfile;
-	GFile *file;
+	g_autoptr (GFile) file = NULL;
 
 	file = g_file_new_for_uri (file_uri);
 
-
 	for (l = keyfiles; l; l = l->next) {
-		gchar *uri;
-		GFile *error_file;
+		g_autofree char *uri = NULL;
+		g_autoptr (GFile) error_file = NULL;
 
 		keyfile = l->data;
 		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
 		error_file = g_file_new_for_uri (uri);
 
 		if (g_file_equal (file, error_file)) {
-			gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
-			gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+			g_autofree char *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+			g_autofree char *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
 
 			if (message)
 				g_print (CRIT_BEGIN "%s\n%s: %s" CRIT_END "\n",
@@ -391,99 +351,54 @@ print_errors (GList       *keyfiles,
 			if (sparql)
 				g_print ("SPARQL: %s\n", sparql);
 			g_print ("\n");
-
-			g_free (message);
-			g_free (sparql);
 		}
-
-		g_free (uri);
-		g_object_unref (error_file);
 	}
-
-	g_object_unref (file);
-
 }
 
 
 static int
 info_run (void)
 {
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (GError) error = NULL;
 	GList *urns = NULL;
 	gchar **p;
 
 	tracker_term_pipe_to_pager ();
 
-	connection = create_connection (&error);
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
+	                                                NULL, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
+		            _("Could not connect to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
 	for (p = filenames; *p; p++) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (TrackerSparqlCursor) cursor = NULL;
-		g_autofree gchar *uri = NULL, *query = NULL;
+		g_autofree gchar *uri = NULL, *query = NULL, *uri_scheme = NULL;
 		g_autoptr (GList) keyfiles = NULL;
 		gboolean found = FALSE;
 
+		uri_scheme = g_uri_parse_scheme (*p);
+
 		/* support both, URIs and local file paths */
-		if (has_valid_uri_scheme (*p)) {
-			uri = g_strdup (*p);
-		} else if (resource_is_iri) {
+		if (uri_scheme) {
 			uri = g_strdup (*p);
 		} else {
-			GFile *file;
+			g_autoptr (GFile) file = NULL;
 
 			file = g_file_new_for_commandline_arg (*p);
 			uri = g_file_get_uri (file);
-			g_object_unref (file);
 		}
 
-		if (url_property) {
-			g_autoptr (TrackerSparqlStatement) stmt = NULL;
-			g_autoptr (TrackerSparqlCursor) cursor = NULL;
-
-			/* First check whether there's some entity with nie:url like this */
-			query = g_strdup_printf ("SELECT ?urn { ?urn %s ~value }", url_property);
-			stmt = tracker_sparql_connection_query_statement (connection, query,
-			                                                  NULL, &error);
-
-			if (stmt) {
-				tracker_sparql_statement_bind_string (stmt, "prop", url_property);
-				tracker_sparql_statement_bind_string (stmt, "value", uri);
-				cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
-			}
-
-			if (cursor && tracker_sparql_cursor_next (cursor, NULL, &error)) {
-				g_clear_pointer (&uri, g_free);
-				uri = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			}
-
-			if (error) {
-				g_printerr ("  %s, %s\n",
-				            _("Unable to retrieve URN for URI"),
-				            error->message);
-				g_clear_error (&error);
-				continue;
-			}
-		}
-
-		stmt = tracker_sparql_connection_query_statement (connection,
-		                                                  "SELECT DISTINCT ?urn {"
-		                                                  "  {"
-		                                                  "    BIND (~uri AS ?urn) . "
-		                                                  "    ?urn a rdfs:Resource . "
-		                                                  "  } UNION {"
-		                                                  "    ~uri nie:interpretedAs ?urn ."
-		                                                  "  }"
-		                                                  "}",
-		                                                  NULL, &error);
+		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+		                                                                GET_INFORMATION_ELEMENT_QUERY,
+		                                                                NULL,
+		                                                                &error);
 		if (stmt) {
 			tracker_sparql_statement_bind_string (stmt, "uri", uri);
 			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
@@ -507,7 +422,7 @@ info_run (void)
 		}
 
 		if (!found) {
-			if (turtle) {
+			if (output_format) {
 				g_print ("# No metadata available for <%s>\n", uri);
 			} else {
 				g_print ("  %s\n",
@@ -531,15 +446,27 @@ info_run (void)
 	if (!urns)
 		goto out;
 
-	if (turtle) {
+	if (output_format) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (GMainLoop) main_loop = NULL;
+		g_autoptr (GEnumClass) enum_class = NULL;
+		GEnumValue *enum_value;
+		TrackerRdfFormat rdf_format;
+
+		/* Look up the output format by name */
+		enum_class = g_type_class_ref (TRACKER_TYPE_RDF_FORMAT);
+		enum_value = g_enum_get_value_by_nick (enum_class, output_format);
+		if (!enum_value) {
+			g_printerr (N_("Unsupported serialization format “%s”\n"), output_format);
+			return EXIT_FAILURE;
+		}
+		rdf_format = enum_value->value;
 
 		stmt = describe_statement_for_urns (connection, urns);
 		main_loop = g_main_loop_new (NULL, FALSE);
 		tracker_sparql_statement_serialize_async (stmt,
 		                                          TRACKER_SERIALIZE_FLAGS_NONE,
-		                                          TRACKER_RDF_FORMAT_TURTLE,
+		                                          rdf_format,
 		                                          NULL,
 		                                          serialize_cb,
 		                                          main_loop);
@@ -559,7 +486,6 @@ info_run (void)
 
  out:
 	g_list_free_full (urns, g_free);
-	g_object_unref (connection);
 
 	tracker_term_pager_close ();
 
@@ -587,22 +513,6 @@ info_run_eligible (void)
 }
 
 
-static int
-info_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, TRUE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
 static gboolean
 info_options_enabled (void)
 {
@@ -613,8 +523,9 @@ int
 tracker_info (int          argc,
               const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 
 	output_is_tty = tracker_term_is_tty ();
 
@@ -626,19 +537,16 @@ tracker_info (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Retrieve information available for files and resources"));
 
 	inside_build_tree = tracker_cli_check_inside_build_tree (argv[0]);
 
-	argv[0] = "tracker info";
+	argv[0] = "localsearch info";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
-
-	g_option_context_free (context);
 
 	if (info_options_enabled ()) {
 		if (eligible)
@@ -647,5 +555,8 @@ tracker_info (int          argc,
 		return info_run ();
 	}
 
-	return info_run_default ();
+	help = g_option_context_get_help (context, TRUE, NULL);
+	g_printerr ("%s\n", help);
+
+	return EXIT_FAILURE;
 }

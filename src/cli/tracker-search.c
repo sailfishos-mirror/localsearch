@@ -38,38 +38,77 @@
 static gint limit = -1;
 static gint offset;
 static gchar **terms;
-static gboolean or_operator;
 static gboolean detailed;
 static gboolean all;
-static gboolean disable_snippets;
-static gboolean disable_fts;
-static gboolean disable_color;
 static gboolean files;
 static gboolean folders;
 static gboolean music_albums;
 static gboolean music_artists;
-static gboolean music_files;
+static gboolean audio_files;
 static gboolean image_files;
 static gboolean video_files;
 static gboolean document_files;
-static gboolean feeds;
 static gboolean software;
-static gboolean software_categories;
+static gboolean show_help;
 
-static const char *help_summary =
-	N_("Search for content matching TERMS, by type or across all types.");
+enum {
+	ALL,
+	DOCUMENTS,
+	FILES,
+	FOLDERS,
+	IMAGES,
+	MUSIC_ALBUMS,
+	MUSIC_ARTISTS,
+	MUSIC,
+	SOFTWARE,
+	VIDEOS,
+	N_QUERIES,
+};
 
-#define SEARCH_OPTIONS_ENABLED() \
-	(music_albums || music_artists || music_files || \
-	 feeds || \
-	 software || \
-	 software_categories || \
-	 image_files || \
-	 video_files || \
-	 document_files || \
-	 files || \
-	 folders || \
-	 (terms && g_strv_length (terms) > 0))
+static const char *list_queries[] = {
+	"/org/freedesktop/LocalSearch/queries/list-all.rq",
+	"/org/freedesktop/LocalSearch/queries/list-documents.rq",
+	"/org/freedesktop/LocalSearch/queries/list-files.rq",
+	"/org/freedesktop/LocalSearch/queries/list-folders.rq",
+	"/org/freedesktop/LocalSearch/queries/list-images.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music-albums.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music-artists.rq",
+	"/org/freedesktop/LocalSearch/queries/list-music.rq",
+	"/org/freedesktop/LocalSearch/queries/list-software.rq",
+	"/org/freedesktop/LocalSearch/queries/list-videos.rq",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (list_queries) == N_QUERIES);
+
+static const char *search_queries[] = {
+	"/org/freedesktop/LocalSearch/queries/search-all.rq",
+	"/org/freedesktop/LocalSearch/queries/search-documents.rq",
+	"/org/freedesktop/LocalSearch/queries/search-files.rq",
+	"/org/freedesktop/LocalSearch/queries/search-folders.rq",
+	"/org/freedesktop/LocalSearch/queries/search-images.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music-albums.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music-artists.rq",
+	"/org/freedesktop/LocalSearch/queries/search-music.rq",
+	"/org/freedesktop/LocalSearch/queries/search-software.rq",
+	"/org/freedesktop/LocalSearch/queries/search-videos.rq",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (search_queries) == N_QUERIES);
+
+static const char *titles[] = {
+	N_("Results"),
+	N_("Files"),
+	N_("Files"),
+	N_("Folders"),
+	N_("Files"),
+	N_("Albums"),
+	N_("Artists"),
+	N_("Files"),
+	N_("Files"),
+	N_("Files"),
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (titles) == N_QUERIES);
 
 static GOptionEntry entries_resource_type[] = {
 	/* Search types */
@@ -81,16 +120,16 @@ static GOptionEntry entries_resource_type[] = {
 	  N_("Search for folders"),
 	  NULL
 	},
-	{ "music", 'm', 0, G_OPTION_ARG_NONE, &music_files,
-	  N_("Search for music files"),
+	{ "audio", 'a', 0, G_OPTION_ARG_NONE, &audio_files,
+	  N_("Search for audio files"),
 	  NULL
 	},
 	{ "music-albums", 0, 0, G_OPTION_ARG_NONE, &music_albums,
-	  N_("Search for music albums (--all has no effect on this)"),
+	  N_("Search for music albums"),
 	  NULL
 	},
 	{ "music-artists", 0, 0, G_OPTION_ARG_NONE, &music_artists,
-	  N_("Search for music artists (--all has no effect on this)"),
+	  N_("Search for music artists"),
 	  NULL
 	},
 	{ "images", 'i', 0, G_OPTION_ARG_NONE, &image_files,
@@ -106,15 +145,7 @@ static GOptionEntry entries_resource_type[] = {
 	  NULL
 	},
 	{ "software", 0, 0, G_OPTION_ARG_NONE, &software,
-	  N_("Search for software (--all has no effect on this)"),
-	  NULL
-	},
-	{ "software-categories", 0, 0, G_OPTION_ARG_NONE, &software_categories,
-	  N_("Search for software categories (--all has no effect on this)"),
-	  NULL
-	},
-	{ "feeds", 0, 0, G_OPTION_ARG_NONE, &feeds,
-	  N_("Search for feeds (--all has no effect on this)"),
+	  N_("Search for software files"),
 	  NULL
 	},
 	{ NULL }
@@ -130,28 +161,16 @@ static GOptionEntry entries[] = {
 	  N_("Offset the results"),
 	  "0"
 	},
-	{ "or-operator", 'r', 0, G_OPTION_ARG_NONE, &or_operator,
-	  N_("Use OR for search terms instead of AND (the default)"),
-	  NULL
-	},
 	{ "detailed", 'd', 0, G_OPTION_ARG_NONE, &detailed,
-	  N_("Show URNs for results (doesn’t apply to --music-albums, --music-artists, --feeds, --software, --software-categories)"),
+	  N_("Show URNs for results"),
 	  NULL
 	},
 	{ "all", 'a', 0, G_OPTION_ARG_NONE, &all,
 	  N_("Return all non-existing matches too (i.e. include unmounted volumes)"),
 	  NULL
 	},
-	{ "disable-snippets", 0, 0, G_OPTION_ARG_NONE, &disable_snippets,
-	  N_("Disable showing snippets with results. This is only shown for some categories, e.g. Documents, Music…"),
-	  NULL,
-	},
-	{ "disable-fts", 0, 0, G_OPTION_ARG_NONE, &disable_fts,
-	  N_("Disable Full Text Search (FTS). Implies --disable-snippets"),
-	  NULL,
-	},
-	{ "disable-color", 0, 0, G_OPTION_ARG_NONE, &disable_color,
-	  N_("Disable color when printing snippets and results"),
+	{ "help", 'h', 0, G_OPTION_ARG_NONE, &show_help,
+	  N_("Show help options"),
 	  NULL,
 	},
 
@@ -165,15 +184,10 @@ static GOptionEntry entries[] = {
 };
 
 static gchar *
-get_fts_string (GStrv    search_words,
-                gboolean use_or_operator)
+get_fts_string (GStrv search_words)
 {
 	GString *fts;
 	gint i, len;
-
-	if (disable_fts) {
-		return NULL;
-	}
 
 	if (!search_words) {
 		return NULL;
@@ -192,11 +206,7 @@ get_fts_string (GStrv    search_words,
 		g_string_append (fts, escaped);
 
 		if (i < len - 1) {
-			if (use_or_operator) {
-				g_string_append (fts, " OR ");
-			} else {
-				g_string_append (fts, " ");
-			}
+			g_string_append (fts, " ");
 		}
 
 		g_free (escaped);
@@ -208,10 +218,6 @@ get_fts_string (GStrv    search_words,
 static inline void
 print_snippet (const gchar *snippet)
 {
-	if (disable_snippets) {
-		return;
-	}
-
 	if (!snippet || *snippet == '\0') {
 		return;
 	} else {
@@ -237,1324 +243,147 @@ print_snippet (const gchar *snippet)
 }
 
 static gboolean
-get_files_results (TrackerSparqlConnection *connection,
-                   const gchar             *query,
-                   gint                     search_limit,
-                   gboolean                 details)
+get_cursor_results (TrackerSparqlCursor *cursor,
+                    const char          *name,
+                    gint                 search_limit,
+                    gboolean             details)
 {
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
+	gboolean is_tty;
+	gint count = 0;
 
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
+	is_tty = tracker_term_is_tty ();
 
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
+	tracker_term_pipe_to_pager ();
 
-		return FALSE;
-	}
+	if (is_tty)
+		g_print (BOLD_BEGIN "%s:" BOLD_END "\n", name);
 
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No files were found"));
-	} else {
-		gint count = 0;
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		if (details) {
+			g_print ("%s (%s)\n",
+			         tracker_sparql_cursor_get_string (cursor, 1, NULL),
+			         tracker_sparql_cursor_get_string (cursor, 0, NULL));
 
-		g_print ("%s:\n", _("Files"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  %s%s%s (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-
-				if (tracker_sparql_cursor_get_n_columns (cursor) > 2)
-					print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-			} else {
-				g_print ("  %s%s%s\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         disable_color ? "" : TITLE_END);
-
-				if (tracker_sparql_cursor_get_n_columns (cursor) > 2)
-					print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-			}
-
-			count++;
+			if (tracker_sparql_cursor_get_n_columns (cursor) > 2)
+				print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
+		} else {
+			g_print ("%s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
 		}
 
-		g_print ("\n");
-
-
-		g_object_unref (cursor);
+		count++;
 	}
+
+	g_print ("\n");
+
+	tracker_term_pager_close ();
 
 	return TRUE;
 }
 
 static gboolean
-get_document_files (TrackerSparqlConnection *connection,
-                    GStrv                    search_terms,
-                    gboolean                 show_all,
-                    gint                     search_offset,
-                    gint                     search_limit,
-                    gboolean                 use_or_operator,
-                    gboolean                 details)
+query_data (TrackerSparqlConnection *connection,
+            const char              *resource_path,
+            const char              *name,
+            const char              *fts_match,
+            gboolean                 show_all,
+            gint                     search_offset,
+            gint                     search_limit,
+            gboolean                 details)
 {
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gboolean success;
-	gchar *limit_str;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autofree char *fts = NULL;
+	g_autoptr (GError) error = NULL;
 
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true .";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?document ?u fts:snippet(?document, \"%s\", \"%s\") "
-		                         "WHERE { "
-					 "  GRAPH tracker:Documents {"
-		                         "    ?document a nfo:Document ;"
-		                         "      nie:isStoredAs ?u ;"
-		                         "      fts:match \"%s\" ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?document ?u "
-		                         "WHERE { "
-					 "  GRAPH tracker:Documents {"
-		                         "    ?document a nfo:Document ;"
-		                         "      nie:isStoredAs ?u ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                resource_path,
+	                                                                NULL,
+	                                                                &error);
+	if (error) {
+		g_printerr ("%s\n", error->message);
+		return FALSE;
 	}
 
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
-
-	return success;
-}
-
-static gboolean
-get_video_files (TrackerSparqlConnection *connection,
-                 GStrv                    search_terms,
-                 gboolean                 show_all,
-                 gint                     search_offset,
-                 gint                     search_limit,
-                 gboolean                 use_or_operator,
-                 gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gboolean success;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true . ";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?video ?u fts:snippet(?video, \"%s\", \"%s\") "
-		                         "WHERE { "
-					 "  GRAPH tracker:Video {"
-		                         "    ?video a nfo:Video ;"
-		                         "      nie:isStoredAs ?u ;"
-		                         "      fts:match \"%s\" ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?video ?u "
-		                         "WHERE { "
-					 "  GRAPH tracker:Video {"
-		                         "    ?video a nfo:Video ;"
-		                         "      nie:isStoredAs ?u ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
+	if (fts_match) {
+		tracker_sparql_statement_bind_string (stmt, "match", fts_match);
+		tracker_sparql_statement_bind_int (stmt, "detailed", detailed);
 	}
 
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
+	tracker_sparql_statement_bind_int (stmt, "showAll", show_all);
+	tracker_sparql_statement_bind_int (stmt, "offset", search_offset);
+	tracker_sparql_statement_bind_int (stmt, "limit", limit);
 
-	return success;
-}
-
-static gboolean
-get_image_files (TrackerSparqlConnection *connection,
-                 GStrv                    search_terms,
-                 gboolean                 show_all,
-                 gint                     search_offset,
-                 gint                     search_limit,
-                 gboolean                 use_or_operator,
-                 gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gboolean success;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true . ";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?image ?u fts:snippet(?image, \"%s\", \"%s\") "
-		                         "WHERE { "
-					 "  GRAPH tracker:Pictures {"
-		                         "    ?image a nfo:Image ;"
-					 "      nie:isStoredAs ?u ;"
-		                         "      fts:match \"%s\" ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "}"
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?image ?u "
-		                         "WHERE { "
-					 "  GRAPH tracker:Pictures {"
-		                         "    ?image a nfo:Image ;"
-		                         "      nie:isStoredAs ?u ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "}"
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	}
-
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
-
-	return success;
-}
-
-static gboolean
-get_music_files (TrackerSparqlConnection *connection,
-                 GStrv                    search_terms,
-                 gboolean                 show_all,
-                 gint                     search_offset,
-                 gint                     search_limit,
-                 gboolean                 use_or_operator,
-                 gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gboolean success;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?u nie:dataSource/tracker:available true . ";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?song ?u fts:snippet(?song, \"%s\", \"%s\")"
-		                         "WHERE { "
-					 "  GRAPH tracker:Audio {"
-		                         "    ?song a nmm:MusicPiece ;"
-					 "      nie:isStoredAs ?u ;"
-		                         "      fts:match \"%s\" ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-					 "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?song ?u "
-		                         "WHERE { "
-					 "  GRAPH tracker:Audio {"
-		                         "    ?song a nmm:MusicPiece ;"
-					 "      nie:isStoredAs ?u ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-					 "  }"
-		                         "} "
-		                         "ORDER BY ASC(?u) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	}
-
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
-
-	return success;
-}
-
-static gboolean
-get_music_artists (TrackerSparqlConnection *connection,
-                   GStrv                    search_terms,
-                   gint                     search_offset,
-                   gint                     search_limit,
-                   gboolean                 use_or_operator,
-                   gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?artist ?title "
-		                         "WHERE {"
-		                         "  GRAPH tracker:Audio {"
-		                         "    ?artist a nmm:Artist ;"
-		                         "    nmm:artistName ?title ;"
-		                         "    fts:match \"%s\" . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?title) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?artist ?title "
-		                         "WHERE {"
-		                         "  GRAPH tracker:Audio {"
-		                         "    ?artist a nmm:Artist ;"
-		                         "    nmm:artistName ?title . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?title) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
+	cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
+		g_printerr ("%s\n", error->message);
 		return FALSE;
 	}
 
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No artists were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Artists"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  '%s%s%s' (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			} else {
-				g_print ("  '%s%s%s'\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         disable_color ? "" : TITLE_END);
-			}
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_music_albums (TrackerSparqlConnection *connection,
-                  GStrv                    search_words,
-                  gint                     search_offset,
-                  gint                     search_limit,
-                  gboolean                 use_or_operator,
-                  gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_words, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?album nie:title(?album) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Audio {"
-		                         "    ?album a nmm:MusicAlbum ;"
-		                         "    fts:match \"%s\" ."
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?album)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?album nie:title(?album) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Audio {"
-		                         "    ?album a nmm:MusicAlbum ."
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?album)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No music was found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Albums"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				g_print ("  '%s%s%s' (%s)\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-		                         disable_color ? "" : TITLE_END,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			} else {
-				g_print ("  '%s%s%s'\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 1, NULL),
-				         disable_color ? "" : TITLE_END);
-			}
-			count++;
-		}
-
-		g_print ("\n");
-
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_feeds (TrackerSparqlConnection *connection,
-           GStrv                    search_terms,
-           gint                     search_offset,
-           gint                     search_limit,
-           gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?feed nie:title(?feed) "
-		                         "WHERE {"
-		                         "  ?feed a mfo:FeedMessage ;"
-		                         "  fts:match \"%s\" . "
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?feed)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?feed nie:title(?feed) "
-		                         "WHERE {"
-		                         "  ?feed a mfo:FeedMessage ."
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?feed)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No feeds were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Feeds"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_software (TrackerSparqlConnection *connection,
-              GStrv                    search_terms,
-              gint                     search_offset,
-              gint                     search_limit,
-              gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?soft nie:title(?soft) fts:snippet(?soft, \"%s\", \"%s\") "
-		                         "WHERE {"
-					 "  GRAPH tracker:Software {"
-		                         "    ?soft a nfo:Software ;"
-		                         "    fts:match \"%s\" . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?soft)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?soft nie:title(?soft) "
-		                         "WHERE {"
-		                         "  ?soft a nfo:Software ."
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?soft)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No software was found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Software"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			print_snippet (tracker_sparql_cursor_get_string (cursor, 2, NULL));
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_software_categories (TrackerSparqlConnection *connection,
-                         GStrv                    search_terms,
-                         gint                     search_offset,
-                         gint                     search_limit,
-                         gboolean                 use_or_operator)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-	gchar *limit_str;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?cat nie:title(?cat) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Software {"
-		                         "    ?cat a nfo:SoftwareCategory ;"
-		                         "    fts:match \"%s\" . "
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?cat)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?cat nie:title(?cat) "
-		                         "WHERE {"
-					 "  GRAPH tracker:Software {"
-		                         "    ?cat a nfo:SoftwareCategory ."
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(nie:title(?cat)) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         search_offset,
-		                         limit_str);
-	}
-
-	g_free (fts);
-	g_free (limit_str);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No software categories were found"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Software Categories"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s%s%s (%s)\n",
-			         disable_color ? "" : TITLE_BEGIN,
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-			         disable_color ? "" : TITLE_END,
-			         tracker_sparql_cursor_get_string (cursor, 1, NULL));
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
-static gboolean
-get_files (TrackerSparqlConnection *connection,
-           GStrv                    search_terms,
-           gboolean                 show_all,
-           gint                     search_offset,
-           gint                     search_limit,
-           gboolean                 use_or_operator,
-           gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gchar *limit_str;
-	gboolean success;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?url nie:dataSource/tracker:available true . ";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT DISTINCT ?u ?url "
-		                         "WHERE { "
-		                         "  GRAPH ?g {"
-		                         "    ?u a nie:InformationElement ;"
-		                         "      nie:isStoredAs ?url ;"
-		                         "      fts:match \"%s\" ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?urn) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT DISTINCT ?u ?url "
-		                         "WHERE { "
-					 "  GRAPH ?g {"
-		                         "    ?u a nie:InformationElement ;"
-		                         "      nie:isStoredAs ?url ."
-		                         "  }"
-		                         "  GRAPH tracker:FileSystem {"
-		                         "    %s"
-		                         "  }"
-		                         "} "
-		                         "ORDER BY ASC(?urn) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	}
-
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
-
-	return success;
-}
-
-static gboolean
-get_folders (TrackerSparqlConnection *connection,
-             GStrv                    search_terms,
-             gboolean                 show_all,
-             gint                     search_offset,
-             gint                     search_limit,
-             gboolean                 use_or_operator,
-             gboolean                 details)
-{
-	gchar *fts;
-	gchar *query;
-	const gchar *show_all_str;
-	gchar *limit_str;
-	gboolean success;
-
-	if (search_limit != -1)
-		limit_str = g_strdup_printf ("LIMIT %d", search_limit);
-	else
-		limit_str = g_strdup_printf (" ");
-
-	show_all_str = show_all ? "" : "?url nie:dataSource/tracker:available true . ";
-	fts = get_fts_string (search_terms, use_or_operator);
-
-	if (fts) {
-		query = g_strdup_printf ("SELECT ?u ?url "
-		                         "WHERE { "
-					 "  GRAPH tracker:FileSystem {"
-		                         "    ?u a nfo:Folder ;"
-		                         "       nie:isStoredAs ?url ."
-		                         "    ?url fts:match \"%s\" ."
-		                         "    %s"
-					 "  }"
-		                         "} "
-		                         "ORDER BY ASC(?url) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         fts,
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	} else {
-		query = g_strdup_printf ("SELECT ?u ?url "
-		                         "WHERE { "
-					 "  GRAPH tracker:FileSystem {"
-		                         "    ?u a nfo:Folder ;"
-					 "       nie:isStoredAs ?url ."
-		                         "    %s"
-					 "  }"
-		                         "} "
-		                         "ORDER BY ASC(?url) "
-		                         "OFFSET %d "
-		                         "%s",
-		                         show_all_str,
-		                         search_offset,
-		                         limit_str);
-	}
-
-	success = get_files_results (connection, query, search_limit, details);
-	g_free (query);
-	g_free (fts);
-	g_free (limit_str);
-
-	return success;
-}
-
-static gboolean
-get_all_by_search (TrackerSparqlConnection *connection,
-                   GStrv                    search_words,
-                   gboolean                 show_all,
-                   gint                     search_offset,
-                   gint                     search_limit,
-                   gboolean                 use_or_operator,
-                   gboolean                 details)
-{
-	GError *error = NULL;
-	TrackerSparqlCursor *cursor;
-	gchar *fts;
-	gchar *query;
-
-	fts = get_fts_string (search_words, use_or_operator);
-	if (!fts) {
-		return FALSE;
-	}
-
-	if (search_limit < 0)
-		search_limit = G_MAXINT;
-
-	if (details) {
-		query = g_strdup_printf ("SELECT ?uri ?mimetype ?type ?snippet "
-		                         "WHERE {"
-					 "  {"
-					 "    SELECT (?s AS ?uri) ?mimetype ?type (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH tracker:FileSystem {"
-					 "        ?s a nfo:FileDataObject ;"
-					 "           fts:match \"%s\" ;"
-					 "           rdf:type ?type ;"
-					 "           nie:dataSource ?ds ."
-					 "         ?ie nie:isStoredAs ?s;"
-					 "           nie:mimeType ?mimetype ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available)) ."
-					 "      }"
-					 "    }"
-					 "  } UNION {"
-					 "    SELECT ?uri ?mimetype ?type (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH ?g {"
-					 "        ?s a nie:InformationElement ;"
-					 "           fts:match \"%s\" ;"
-					 "           rdf:type ?type ;"
-					 "           nie:mimeType ?mimetype ;"
-					 "           nie:isStoredAs ?uri ."
-		                         "      }"
-		                         "      GRAPH tracker:FileSystem {"
-					 "        ?uri nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available)) ."
-					 "      }"
-					 "    }"
-					 "  }"
-		                         "} "
-		                         "GROUP BY ?uri "
-		                         "ORDER BY ?uri "
-		                         "OFFSET %d "
-					 "LIMIT %d",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         search_offset,
-		                         search_limit);
-	} else {
-		query = g_strdup_printf ("SELECT ?uri SAMPLE(?snippet) "
-		                         "WHERE {"
-					 "  {"
-					 "    SELECT (?s AS ?uri) (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH tracker:FileSystem {"
-					 "        ?s a nfo:FileDataObject ;"
-					 "           fts:match \"%s\" ;"
-					 "           nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available))"
-					 "      }"
-					 "    }"
-					 "  } UNION {"
-					 "    SELECT ?uri (fts:snippet(?s, \"%s\", \"%s\") AS ?snippet) {"
-					 "      GRAPH ?g {"
-					 "        ?s a nie:InformationElement ;"
-					 "           fts:match \"%s\" ;"
-					 "           nie:isStoredAs ?uri ."
-		                         "      }"
-		                         "      GRAPH tracker:FileSystem {"
-					 "        ?uri nie:dataSource ?ds ."
-					 "        OPTIONAL { ?ds tracker:available ?available } ."
-					 "        FILTER (IF (%s, true, ?available))"
-					 "      }"
-					 "    }"
-					 "  }"
-		                         "} "
-		                         "GROUP BY ?uri "
-		                         "ORDER BY ?uri "
-		                         "OFFSET %d "
-					 "LIMIT %d",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         disable_color ? "" : SNIPPET_BEGIN,
-		                         disable_color ? "" : SNIPPET_END,
-		                         fts,
-		                         show_all ? "true" : "false",
-		                         search_offset,
-		                         search_limit);
-	}
-
-	g_free (fts);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get search results"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No results were found matching your query"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Results"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			if (details) {
-				const gchar *urn;
-				const gchar *mime_type;
-				const gchar *class;
-
-				g_print ("cols:%d\n", tracker_sparql_cursor_get_n_columns (cursor));
-
-				urn = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-				mime_type = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-				class = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-
-				if (mime_type && mime_type[0] == '\0') {
-					mime_type = NULL;
-				}
-
-				if (mime_type) {
-					g_print ("  %s%s%s\n"
-					         "    %s\n"
-					         "    %s\n",
-					         disable_color ? "" : TITLE_BEGIN,
-					         urn,
-					         disable_color ? "" : TITLE_END,
-					         mime_type,
-					         class);
-				} else {
-					g_print ("  %s%s%s\n"
-					         "    %s\n",
-					         disable_color ? "" : TITLE_BEGIN,
-					         urn,
-					         disable_color ? "" : TITLE_END,
-					         class);
-				}
-				print_snippet (tracker_sparql_cursor_get_string (cursor, 3, NULL));
-			} else {
-				g_print ("  %s%s%s\n",
-		                         disable_color ? "" : TITLE_BEGIN,
-				         tracker_sparql_cursor_get_string (cursor, 0, NULL),
-				         disable_color ? "" : TITLE_END);
-				print_snippet (tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			}
-
-			count++;
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
+	return get_cursor_results (cursor, name, search_limit, details);
 }
 
 static gint
 search_run (void)
 {
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autofree char *fts = NULL;
+	const char *resource_path = NULL, *title = NULL;
+	int query_type;
+	gboolean success;
+	g_autoptr (GError) error = NULL;
 
-	if (disable_fts) {
-		disable_snippets = TRUE;
-	}
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 							NULL, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
+		            _("Could not connect to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
-	tracker_term_pipe_to_pager ();
+	if (files)
+		query_type = FILES;
+	else if (folders)
+		query_type = FOLDERS;
+	else if (music_albums)
+		query_type = MUSIC_ALBUMS;
+	else if (music_artists)
+		query_type = MUSIC_ARTISTS;
+	else if (audio_files)
+		query_type = MUSIC;
+	else if (image_files)
+		query_type = IMAGES;
+	else if (document_files)
+		query_type = DOCUMENTS;
+	else if (video_files)
+		query_type = VIDEOS;
+	else
+		query_type = ALL;
 
-	if (files) {
-		gboolean success;
+	fts = get_fts_string (terms);
 
-		success = get_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
+	resource_path = fts ?
+		search_queries[query_type] :
+		list_queries[query_type];
 
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
+	title = titles[query_type];
 
-	if (folders) {
-		gboolean success;
+	success = query_data (connection, resource_path, _(title),
+			      fts, all, offset, limit, detailed);
 
-		success = get_folders (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_albums) {
-		gboolean success;
-
-		success = get_music_albums (connection, terms, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_artists) {
-		gboolean success;
-
-		success = get_music_artists (connection, terms, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (music_files) {
-		gboolean success;
-
-		success = get_music_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (feeds) {
-		gboolean success;
-
-		success = get_feeds (connection, terms, offset, limit, or_operator);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (image_files) {
-		gboolean success;
-
-		success = get_image_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (video_files) {
-		gboolean success;
-
-		success = get_video_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (document_files) {
-		gboolean success;
-
-		success = get_document_files (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (software) {
-		gboolean success;
-
-		success = get_software (connection, terms, offset, limit, or_operator);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (software_categories) {
-		gboolean success;
-
-		success = get_software_categories (connection, terms, offset, limit, or_operator);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (terms) {
-		gboolean success;
-
-		success = get_all_by_search (connection, terms, all, offset, limit, or_operator, detailed);
-		g_object_unref (connection);
-		tracker_term_pager_close ();
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	g_object_unref (connection);
-
-	/* All known options have their own exit points */
-	g_warn_if_reached ();
-
-	return EXIT_FAILURE;
-}
-
-static GOptionContext *
-search_option_context_new (void)
-{
-	GOptionContext *context;
-        GOptionGroup *resource_type;
-	context = g_option_context_new (NULL);
-        g_option_context_set_summary (context, help_summary);
-        resource_type = g_option_group_new ("resource-type",
-		"Resource Type Options:",
-		"Show help for resource type options",
-		NULL, NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-        g_option_context_add_group (context, resource_type);
-        g_option_group_add_entries (resource_type, entries_resource_type);
-        return context;
-}
-
-static int
-search_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-        context = search_option_context_new ();
-	help = g_option_context_get_help (context, FALSE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
-static gboolean
-search_options_enabled (void)
-{
-	return SEARCH_OPTIONS_ENABLED ();
+	return success ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
 int
 tracker_search (int          argc,
                 const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	GOptionGroup *resource_type;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 
 	setlocale (LC_ALL, "");
 
@@ -1562,22 +391,31 @@ tracker_search (int          argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	context = search_option_context_new ();
+	argv[0] = "localsearch search";
 
-	argv[0] = "tracker search";
+	context = g_option_context_new (NULL);
+        g_option_context_set_summary (context, _("Search for content"));
+        resource_type =
+	        g_option_group_new ("resource-type",
+	                            "Resource Type Options:",
+	                            "Show help for resource type options",
+	                            NULL, NULL);
+
+        g_option_context_set_help_enabled (context, FALSE);
+	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_add_group (context, resource_type);
+	g_option_group_add_entries (resource_type, entries_resource_type);
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
-		g_option_context_free (context);
+		help = g_option_context_get_help (context, FALSE, NULL);
+		g_printerr ("%s\n", help);
 		return EXIT_FAILURE;
+	} else if (show_help) {
+		help = g_option_context_get_help (context, FALSE, NULL);
+		g_printerr ("%s\n", help);
+		return EXIT_SUCCESS;
 	}
 
-	g_option_context_free (context);
-
-	if (search_options_enabled ()) {
-		return search_run ();
-	}
-
-	return search_run_default ();
+	return search_run ();
 }

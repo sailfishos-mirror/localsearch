@@ -197,6 +197,13 @@ endif
 
 functional_tests = [
   'test_cli',
+  'test_cli_index',
+  'test_cli_info',
+  'test_cli_inhibit',
+  'test_cli_reset',
+  'test_cli_search',
+  'test_cli_status',
+  'test_cli_tag',
   'test_extractor_decorator',
   'test_fts_basic',
   'test_fts_file_operations',
@@ -233,6 +240,7 @@ test_env.prepend('PYTHONPATH', tracker_uninstalled_testutils_dir)
 test_env.set('TRACKER_FUNCTIONAL_TEST_CONFIG', config_json_full_path)
 test_env.set('TRACKER_EXTRACT_DEADLINE', '30')
 test_env.set('TZ', 'Europe/Amsterdam')
+test_env.prepend('MANPATH', uninstalled_manpath)
 test_env.set('LOCALSEARCH_DEBUG', 'statistics')
 
 foreach t: extractor_tests

@@ -62,6 +62,8 @@ custom_target('tracker-miners-compile-schemas',
 
 tracker_miners_uninstalled_gsettings_schema_dir = meson.current_build_dir()
 
+indexer_dbus_interface = files ('org.freedesktop.Tracker3.Miner.xml')
+
 install_data(
-    'org.freedesktop.Tracker3.Miner.xml',
+    indexer_dbus_interface,
     install_dir: join_paths(get_option('prefix'), get_option('datadir'), 'dbus-1', 'interfaces'))

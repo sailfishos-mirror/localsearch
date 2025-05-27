@@ -31,25 +31,41 @@
 #include <tinysparql.h>
 
 #define TAG_OPTIONS_ENABLED() \
-	(resources || \
+	(resource || \
 	 add_tag || \
 	 remove_tag || \
 	 list)
 
+#define DELETE_TAG_FROM_FILE \
+	"/org/freedesktop/LocalSearch/queries/delete-tag-from-file.rq"
+#define DELETE_TAG \
+	"/org/freedesktop/LocalSearch/queries/delete-tag.rq"
+#define GET_FILES_WITH_TAG \
+	"/org/freedesktop/LocalSearch/queries/get-files-with-tag.rq"
+#define GET_TAGS \
+	"/org/freedesktop/LocalSearch/queries/get-tags.rq"
+#define GET_TAGS_FOR_FILE \
+	"/org/freedesktop/LocalSearch/queries/get-tags-for-file.rq"
+#define INSERT_TAG \
+	"/org/freedesktop/LocalSearch/queries/insert-tag.rq"
+#define INSERT_TAG_WITH_DESC \
+	"/org/freedesktop/LocalSearch/queries/insert-tag-with-desc.rq"
+#define INSERT_TAG_ON_FILE \
+	"/org/freedesktop/LocalSearch/queries/insert-tag-on-file.rq"
+
 static gint limit = 512;
 static gint offset;
-static gchar **resources;
-static gboolean and_operator;
+static gchar **resource;
 static gchar *add_tag;
 static gchar *remove_tag;
 static gchar *description;
-static gboolean *list;
+static gboolean list;
 static gboolean show_resources;
 
 static GOptionEntry entries[] = {
 	{ "list", 't', 0, G_OPTION_ARG_NONE, &list,
-	  N_("List all tags (using FILTER if specified; FILTER always uses logical OR)"),
-	  N_("FILTER"),
+	  N_("List all tags"),
+	  NULL,
 	},
 	{ "show-files", 's', 0, G_OPTION_ARG_NONE, &show_resources,
 	  N_("Show files associated with each tag (this is only used with --list)"),
@@ -75,473 +91,91 @@ static GOptionEntry entries[] = {
 	  N_("Offset the results"),
 	  "0"
 	},
-	{ "and-operator", 'n', 0, G_OPTION_ARG_NONE, &and_operator,
-	  N_("Use AND for search terms instead of OR (the default)"),
-	  NULL
-	},
 	{ G_OPTION_REMAINING, 0, 0,
-	  G_OPTION_ARG_FILENAME_ARRAY, &resources,
-	  N_("FILE…"),
-	  N_("FILE [FILE…]")},
+	  G_OPTION_ARG_FILENAME_ARRAY, &resource,
+	  N_("FILE…")},
 	{ NULL }
 };
-
-static void
-show_limit_warning (void)
-{
-	/* Display '...' so the user thinks there is
-	 * more items.
-	 */
-	g_print ("  ...\n");
-
-	/* Display warning so the user knows this is
-	 * not the WHOLE data set.
-	 */
-	g_printerr ("\n%s\n",
-	            _("NOTE: Limit was reached, there are more items in the database not listed here"));
-}
-
-static gchar *
-get_escaped_sparql_string (const gchar *str)
-{
-	GString *sparql;
-
-	sparql = g_string_new ("");
-	g_string_append_c (sparql, '"');
-
-	while (*str != '\0') {
-		gsize len = strcspn (str, "\t\n\r\"\\");
-		g_string_append_len (sparql, str, len);
-		str += len;
-		switch (*str) {
-		case '\t':
-			g_string_append (sparql, "\\t");
-			break;
-		case '\n':
-			g_string_append (sparql, "\\n");
-			break;
-		case '\r':
-			g_string_append (sparql, "\\r");
-			break;
-		case '"':
-			g_string_append (sparql, "\\\"");
-			break;
-		case '\\':
-			g_string_append (sparql, "\\\\");
-			break;
-		default:
-			continue;
-		}
-		str++;
-	}
-
-	g_string_append_c (sparql, '"');
-
-	return g_string_free (sparql, FALSE);
-}
-
-static gchar *
-get_filter_string (GStrv        resources,
-                   const gchar *subject,
-                   gboolean     resources_are_urns,
-                   const gchar *tag)
-{
-	GString *filter;
-	gint i, len;
-
-	if (!resources) {
-		return NULL;
-	}
-
-	len = g_strv_length (resources);
-
-	if (len < 1) {
-		return NULL;
-	}
-
-	filter = g_string_new ("");
-
-	g_string_append_printf (filter, "FILTER (");
-
-	if (tag) {
-		g_string_append (filter, "(");
-	}
-
-	for (i = 0; i < len; i++) {
-		g_string_append_printf (filter, "%s = %s%s%s",
-		                        subject,
-		                        resources_are_urns ? "<" : "\"",
-		                        resources[i],
-		                        resources_are_urns ? ">" : "\"");
-
-		if (i < len - 1) {
-			g_string_append (filter, " || ");
-		}
-	}
-
-	if (tag) {
-		g_string_append_printf (filter, ") && ?t = <%s>", tag);
-	}
-
-	g_string_append (filter, ")");
-
-	return g_string_free (filter, FALSE);
-}
-
-static GStrv
-get_uris (GStrv resources)
-{
-	GStrv uris;
-	gint len, i;
-
-	if (!resources) {
-		return NULL;
-	}
-
-	len = g_strv_length (resources);
-
-	if (len < 1) {
-		return NULL;
-	}
-
-	uris = g_new0 (gchar *, len + 1);
-
-	for (i = 0; resources[i]; i++) {
-		GFile *file;
-
-		file = g_file_new_for_commandline_arg (resources[i]);
-		uris[i] = g_file_get_uri (file);
-		g_object_unref (file);
-	}
-
-	return uris;
-}
-
-static TrackerSparqlCursor *
-get_file_urns (TrackerSparqlConnection *connection,
-	       GStrv                    uris,
-	       const gchar             *tag)
-{
-	TrackerSparqlCursor *cursor;
-	gchar *query, *filter;
-	GError *error = NULL;
-
-	filter = get_filter_string (uris, "?f", FALSE, tag);
-	query = g_strdup_printf ("SELECT ?urn ?f "
-	                         "WHERE { "
-	                         "  ?urn "
-	                         "    %s "
-	                         "    nie:url ?f . "
-	                         "  %s "
-	                         "}",
-	                         tag ? "nao:hasTag ?t ; " : "",
-	                         filter ? filter : "");
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-
-	g_free (query);
-	g_free (filter);
-
-	if (error) {
-		g_print ("    %s, %s\n",
-		         _("Could not get file URNs"),
-		         error->message);
-		g_error_free (error);
-		return NULL;
-	}
-
-	return cursor;
-}
-
-static GStrv
-result_to_strv (TrackerSparqlCursor *cursor,
-                gint                 n_col)
-{
-	GPtrArray *results;
-
-	if (!cursor) {
-		return NULL;
-	}
-
-	results = g_ptr_array_new ();
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		const gchar *str;
-
-		str = tracker_sparql_cursor_get_string (cursor, n_col, NULL);
-		g_ptr_array_add (results, g_strdup (str));
-	}
-
-	g_ptr_array_add (results, NULL);
-
-	return (GStrv) g_ptr_array_free (results, FALSE);
-}
 
 static void
 get_all_tags_show_tag_id (TrackerSparqlConnection *connection,
                           const gchar             *id)
 {
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-	gchar *query;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
 
-	/* Get resources associated */
-	query = g_strdup_printf ("SELECT ?uri WHERE {"
-	                         "  ?urn nao:hasTag \"%s\" . "
-	                         "  BIND (nie:isStoredAs(?urn) AS ?sa). "
-	                         "  BIND (COALESCE (?sa, ?urn) AS ?uri). "
-	                         "}",
-	                         id);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                GET_FILES_WITH_TAG,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "tag", id);
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	}
 
 	if (error) {
-		g_printerr ("    %s, %s\n",
+		g_printerr ("%s, %s\n",
 		            _("Could not get files related to tag"),
 		            error->message);
 		g_error_free (error);
 		return;
 	}
 
-	if (!cursor) {
-		/* To translators: This is to say there are no
-		 * tags found with a particular unique ID. */
-		g_print ("    %s\n", _("None"));
-		return;
-	}
-
-
-	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-		g_print ("    %s\n", tracker_sparql_cursor_get_string (cursor, 0, NULL));
-	}
-
-	g_object_unref (cursor);
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL))
+		g_print ("  %s\n", tracker_sparql_cursor_get_string (cursor, 0, NULL));
 }
-
-static inline gchar *
-get_filter_in_for_strv (GStrv        resources,
-                        const gchar *subject)
-{
-	gchar *filter, *filter_in;
-
-	/* e.g. '?label IN ("foo", "bar")' */
-	filter_in = g_strjoinv ("\",\"", resources);
-	filter = g_strdup_printf ("FILTER (%s IN (\"%s\"))", subject, filter_in);
-	g_free (filter_in);
-
-	return filter;
-}
-
-static gboolean
-get_all_resources_with_tags (TrackerSparqlConnection *connection,
-                             GStrv                    tags,
-                             gint                     search_offset,
-                             gint                     search_limit)
-{
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-	GStrv tag_urns, p;
-	GString *s;
-	gchar *filter, *query;
-
-	if (!tags) {
-		return FALSE;
-	}
-
-	/* First, get matching tags */
-	filter = get_filter_in_for_strv (tags, "?label");
-	query = g_strdup_printf ("SELECT ?t "
-	                         "WHERE { "
-	                         "  ?t a nao:Tag ;"
-	                         "     nao:prefLabel ?label ."
-	                         "  %s"
-	                         "}",
-	                         filter);
-	g_free (filter);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get all tags in the database"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	tag_urns = result_to_strv (cursor, 0);
-	if (!tag_urns || !*tag_urns) {
-		g_print ("%s\n",
-		         _("No files have been tagged"));
-
-		if (cursor) {
-			g_object_unref (cursor);
-		}
-
-		return TRUE;
-	}
-
-	s = g_string_new ("");
-
-	for (p = tag_urns; p && *p; p++) {
-		g_string_append_printf (s, "; nao:hasTag <%s>", *p);
-	}
-
-	s = g_string_append (s, " .");
-	filter = g_string_free (s, FALSE);
-	g_strfreev (tag_urns);
-
-	query = g_strdup_printf ("SELECT DISTINCT nie:url(?r) "
-	                         "WHERE {"
-	                         "  ?r a rdfs:Resource %s"
-	                         "} "
-	                         "OFFSET %d "
-	                         "LIMIT %d",
-	                         filter,
-	                         search_offset,
-	                         search_limit);
-	g_free (filter);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
-
-	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get files for matching tags"),
-		            error->message);
-		g_error_free (error);
-
-		return FALSE;
-	}
-
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No files were found matching ALL of those tags"));
-	} else {
-		gint count = 0;
-
-		g_print ("%s:\n", _("Files"));
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s\n",
-			         tracker_sparql_cursor_get_string (cursor, 0, NULL));
-			count++;
-		}
-
-		if (count == 0) {
-			/* To translators: This is to say there are no
-			 * files found associated with multiple tags, e.g.:
-			 *
-			 *   Files:
-			 *     None
-			 *
-			 */
-			g_print ("  %s\n", _("None"));
-		}
-
-		g_print ("\n");
-
-		if (count >= search_limit) {
-			show_limit_warning ();
-		}
-
-		g_object_unref (cursor);
-	}
-
-	return TRUE;
-}
-
 
 static gboolean
 get_all_tags (TrackerSparqlConnection *connection,
-              GStrv                    resources,
               gint                     search_offset,
               gint                     search_limit,
               gboolean                 show_resources)
 {
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-	gchar *query;
-	gchar *filter = NULL;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
 
-	if (resources && g_strv_length (resources) > 0) {
-		filter = get_filter_in_for_strv (resources, "?label");
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                GET_TAGS,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt) {
+		tracker_sparql_statement_bind_int (stmt, "limit", limit);
+		tracker_sparql_statement_bind_int (stmt, "offset", offset);
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 	}
-
-	/* You might be asking, why not logical AND here, why
-	 * logical OR for FILTER, well, tags can't have
-	 * multiple labels is the simple answer.
-	 */
-	query = g_strdup_printf ("SELECT ?tag ?label nao:description(?tag) COUNT(?urns) "
-	                         "WHERE {"
-	                         "  ?tag a nao:Tag ;"
-	                         "  nao:prefLabel ?label ."
-	                         "  OPTIONAL {"
-	                         "     ?urns nao:hasTag ?tag"
-	                         "  } ."
-	                         "  %s"
-	                         "} "
-	                         "GROUP BY ?tag "
-	                         "ORDER BY ASC(?label) "
-	                         "OFFSET %d "
-	                         "LIMIT %d",
-	                         filter ? filter : "",
-	                         search_offset,
-	                         search_limit);
-	g_free (filter);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
 
 	if (error) {
 		g_printerr ("%s, %s\n",
 		            _("Could not get all tags"),
 		            error->message);
-		g_error_free (error);
-
 		return FALSE;
 	}
 
-	if (!cursor) {
-		g_print ("%s\n",
-		         _("No tags were found"));
-	} else {
-		gint count = 0;
+	g_print ("%s:\n", _("Tags (shown by name)"));
 
-		g_print ("%s:\n", _("Tags (shown by name)"));
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
+		const gchar *id;
+		const gchar *tag;
+		const gchar *description;
+		gint n_resources = 0;
 
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			const gchar *id;
-			const gchar *tag;
-			const gchar *description;
-			const gchar *resources;
-			gint n_resources = 0;
+		id = tracker_sparql_cursor_get_string (cursor, 0, NULL);
+		tag = tracker_sparql_cursor_get_string (cursor, 1, NULL);
+		description = tracker_sparql_cursor_get_string (cursor, 2, NULL);
+		n_resources = tracker_sparql_cursor_get_integer (cursor, 3);
 
-			id = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-			resources = tracker_sparql_cursor_get_string (cursor, 3, NULL);
-			n_resources = atoi (resources);
+		g_print ("%s", tag);
+		if (description)
+			g_print (" (%s)", description);
+		g_print ("\n");
 
-			tag = tracker_sparql_cursor_get_string (cursor, 1, NULL);
-			description = tracker_sparql_cursor_get_string (cursor, 2, NULL);
-
-			if (description && *description == '\0') {
-				description = NULL;
-			}
-
-			g_print ("  %s %s%s%s\n",
-			         tag,
-			         description ? "(" : "",
-			         description ? description : "",
-			         description ? ")" : "");
-
-			if (show_resources && n_resources > 0) {
+		if (n_resources > 0) {
+			if (show_resources) {
 				get_all_tags_show_tag_id (connection, id);
 			} else {
-				g_print ("    %s\n", id);
-				g_print ("    ");
+				g_print ("  ");
 				g_print (g_dngettext (NULL,
 				                      "%d file",
 				                      "%d files",
@@ -549,325 +183,132 @@ get_all_tags (TrackerSparqlConnection *connection,
 				         n_resources);
 				g_print ("\n");
 			}
-
-			count++;
 		}
-
-		if (count == 0) {
-			/* To translators: This is to say there are no
-			 * resources found associated with this tag, e.g.:
-			 *
-			 *   Tags (shown by name):
-			 *     None
-			 *
-			 */
-			g_print ("  %s\n", _("None"));
-		}
-
-		g_print ("\n");
-
-		if (count >= search_limit) {
-			show_limit_warning ();
-		}
-
-		g_object_unref (cursor);
 	}
 
 	return TRUE;
 }
 
-static void
-print_file_report (TrackerSparqlConnection *connection,
-                   GStrv                    uris,
-                   const gchar             *urn,
-                   const gchar             *found_msg,
-                   const gchar             *not_found_msg)
-{
-	gint i;
-
-	if (!uris) {
-		g_print ("  %s\n", _("No files were modified"));
-		return;
-	}
-
-	for (i = 0; uris[i]; i++) {
-		g_autoptr (TrackerSparqlCursor) cursor = NULL;
-		gboolean found = FALSE;
-		gchar *arr[2] = { uris[i], NULL };
-
-		cursor = get_file_urns (connection, arr, urn);
-		found = cursor && tracker_sparql_cursor_next (cursor, NULL, NULL);
-		g_print ("  %s: %s\n",
-		         found ? found_msg : not_found_msg,
-		         uris[i]);
-	}
-
-
-
-}
-
 static gboolean
-add_tag_for_urns (TrackerSparqlConnection *connection,
-                  GStrv                    resources,
-                  const gchar             *tag,
-                  const gchar             *description)
+create_tag (TrackerSparqlConnection *connection,
+            const gchar             *tag,
+            const gchar             *description)
 {
-	g_autoptr (TrackerSparqlCursor) cursor = NULL;
-	GError *error = NULL;
-	GStrv  uris = NULL, urns_strv = NULL;
-	gchar *tag_escaped;
-	gchar *query;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (GError) error = NULL;
 
-	tag_escaped = get_escaped_sparql_string (tag);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                description ?
+	                                                                INSERT_TAG_WITH_DESC :
+	                                                                INSERT_TAG,
+	                                                                NULL,
+	                                                                &error);
 
-	if (resources) {
-		uris = get_uris (resources);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "tag", tag);
+		if (description)
+			tracker_sparql_statement_bind_string (stmt, "desc", description);
 
-		if (!uris) {
-			return FALSE;
-		}
-
-		cursor = get_file_urns (connection, uris, NULL);
-
-		if (!cursor) {
-			g_printerr ("%s\n", _("Files do not exist or aren’t indexed"));
-			g_strfreev (uris);
-			return FALSE;
-		}
-
-		urns_strv = result_to_strv (cursor, 0);
-
-		if (!urns_strv || g_strv_length (urns_strv) < 1) {
-			g_printerr ("%s\n", _("Files do not exist or aren’t indexed"));
-			g_strfreev (uris);
-			return FALSE;
-		}
+		tracker_sparql_statement_update (stmt, NULL, &error);
 	}
-
-	if (description) {
-		gchar *description_escaped;
-
-		description_escaped = get_escaped_sparql_string (description);
-
-		query = g_strdup_printf ("INSERT { "
-		                         "  _:tag a nao:Tag;"
-		                         "  nao:prefLabel %s ;"
-		                         "  nao:description %s ."
-		                         "} "
-		                         "WHERE {"
-		                         "  FILTER (!EXISTS { ?u nao:prefLabel %s }) "
-		                         "}",
-		                         tag_escaped,
-		                         description_escaped,
-		                         tag_escaped);
-
-		g_free (description_escaped);
-	} else {
-		query = g_strdup_printf ("INSERT { "
-		                         "  _:tag a nao:Tag;"
-		                         "  nao:prefLabel %s ."
-		                         "} "
-		                         "WHERE {"
-		                         "  FILTER (!EXISTS { ?u nao:prefLabel %s }) "
-		                         "}",
-		                         tag_escaped,
-		                         tag_escaped);
-	}
-
-	tracker_sparql_connection_update (connection, query, NULL, &error);
-	g_free (query);
 
 	if (error) {
 		g_printerr ("%s, %s\n",
 		            _("Could not add tag"),
 		            error->message);
-
-		g_error_free (error);
-		g_free (tag_escaped);
-		g_strfreev (urns_strv);
-		g_strfreev (uris);
-
 		return FALSE;
 	}
 
-	g_print ("%s\n",
-	         _("Tag was added successfully"));
-
-	/* First we check if the tag is already set and only add if it
-	 * is, then we add the urns specified to the new tag.
-	 */
-	if (urns_strv) {
-		gchar *filter;
-
-		filter = get_filter_string (urns_strv, "?urn", TRUE, NULL);
-
-		/* Add tag to specific urns */
-		query = g_strdup_printf ("INSERT { "
-		                         "  ?urn a rdfs:Resource ;"
-		                         "    nao:hasTag ?id "
-		                         "} "
-		                         "WHERE {"
-		                         "  ?urn nie:url ?f ."
-		                         "  ?id nao:prefLabel %s "
-		                         "  %s "
-		                         "}",
-		                         tag_escaped,
-		                         filter ? filter : "");
-
-		tracker_sparql_connection_update (connection, query, NULL, &error);
-		g_strfreev (urns_strv);
-		g_free (filter);
-		g_free (query);
-
-		if (error) {
-			g_printerr ("%s, %s\n",
-			            _("Could not add tag to files"),
-			            error->message);
-			g_object_unref (cursor);
-			g_error_free (error);
-			g_free (tag_escaped);
-			g_strfreev (uris);
-
-			return FALSE;
-		}
-
-		print_file_report (connection,
-		                   uris, NULL, _("Tagged"),
-		                   _("Not tagged, file is not indexed"));
-	}
-
-	g_strfreev (uris);
-	g_free (tag_escaped);
+	g_print ("%s\n", _("Tag was added successfully"));
 
 	return TRUE;
 }
 
 static gboolean
-remove_tag_for_urns (TrackerSparqlConnection *connection,
-                     GStrv                    resources,
-                     const gchar             *tag)
+add_tag_for_urn (TrackerSparqlConnection *connection,
+                 const char              *uri,
+                 const gchar             *tag)
 {
-	GError *error = NULL;
-	gchar *tag_escaped;
-	gchar *query;
-	g_autofree gchar *urn = NULL;
-	GStrv uris;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (GError) error = NULL;
 
-	tag_escaped = get_escaped_sparql_string (tag);
-	uris = get_uris (resources);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                INSERT_TAG_ON_FILE,
+	                                                                NULL,
+	                                                                &error);
 
-	if (uris && *uris) {
-		TrackerSparqlCursor *urns_cursor;
-		TrackerSparqlCursor *tag_cursor;
-		gchar *filter;
-		GStrv urns_strv;
-
-		/* Get all tags urns */
-		query = g_strdup_printf ("SELECT ?tag "
-		                         "WHERE {"
-		                         "  ?tag a nao:Tag ."
-		                         "  ?tag nao:prefLabel %s "
-		                         "}",
-		                         tag_escaped);
-
-		tag_cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-		g_free (query);
-
-		if (error) {
-			g_printerr ("%s, %s\n",
-			            _("Could not get tag by label"),
-			            error->message);
-			g_error_free (error);
-			g_free (tag_escaped);
-			g_strfreev (uris);
-
-			return FALSE;
-		}
-
-		if (!tag_cursor || !tracker_sparql_cursor_next (tag_cursor, NULL, NULL)) {
-			g_print ("%s\n",
-			         _("No tags were found by that name"));
-
-			g_free (tag_escaped);
-			g_strfreev (uris);
-
-			if (tag_cursor) {
-				g_object_unref (tag_cursor);
-			}
-
-			return TRUE;
-		}
-
-		urn = g_strdup (tracker_sparql_cursor_get_string (tag_cursor, 0, NULL));
-		urns_cursor = get_file_urns (connection, uris, urn);
-		urns_strv = result_to_strv (urns_cursor, 0);
-
-		if (!urns_strv || !*urns_strv) {
-			g_print ("%s\n",
-			         _("None of the files had this tag set"));
-
-			g_strfreev (uris);
-			g_free (tag_escaped);
-			g_object_unref (tag_cursor);
-
-			if (urns_cursor) {
-				g_object_unref (urns_cursor);
-			}
-
-			return TRUE;
-		}
-
-		filter = get_filter_string (urns_strv, "?urn", TRUE, urn);
-		g_strfreev (urns_strv);
-
-		query = g_strdup_printf ("DELETE { "
-		                         "  ?urn nao:hasTag ?t "
-		                         "} "
-		                         "WHERE { "
-		                         "  ?urn nao:hasTag ?t . "
-		                         "  %s "
-		                         "}",
-		                         filter ? filter : "");
-		g_free (filter);
-
-		g_object_unref (tag_cursor);
-	} else {
-		/* Remove tag completely */
-		query = g_strdup_printf ("DELETE { "
-		                         "  ?tag a rdfs:Resource . "
-		                         "  ?r nao:hasTag ?tag . "
-		                         "} "
-		                         "WHERE {"
-		                         "  ?tag nao:prefLabel %s . "
-		                         "  OPTIONAL { ?r nao:hasTag ?tag } . "
-		                         "}",
-		                         tag_escaped);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "uri", uri);
+		tracker_sparql_statement_bind_string (stmt, "tag", tag);
+		tracker_sparql_statement_update (stmt, NULL, &error);
 	}
 
-	g_free (tag_escaped);
+	if (error) {
+		g_printerr ("%s, %s\n",
+		            _("Could not add tag to files"),
+		            error->message);
+		return FALSE;
+	}
 
-	tracker_sparql_connection_update (connection, query, NULL, &error);
-	g_free (query);
+	g_print ("%s\n", _("Tagged"));
+
+	return TRUE;
+}
+
+static gboolean
+remove_tag_for_urn (TrackerSparqlConnection *connection,
+                    const gchar             *uri,
+                    const gchar             *tag)
+{
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (GError) error = NULL;
+
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                DELETE_TAG_FROM_FILE,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "uri", uri);
+		tracker_sparql_statement_bind_string (stmt, "tag", tag);
+		tracker_sparql_statement_update (stmt, NULL, &error);
+	}
 
 	if (error) {
 		g_printerr ("%s, %s\n",
 		            _("Could not remove tag"),
 		            error->message);
-		g_error_free (error);
-		g_strfreev (uris);
-
 		return FALSE;
 	}
 
 	g_print ("%s\n", _("Tag was removed successfully"));
 
-	if (uris && *uris) {
-		print_file_report (connection, uris, urn,
-		                   _("Untagged"),
-		                   _("File not indexed or already untagged"));
+	return TRUE;
+}
+
+static gboolean
+clear_tag (TrackerSparqlConnection *connection,
+           const gchar             *tag)
+{
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (GError) error = NULL;
+
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                DELETE_TAG,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "tag", tag);
+		tracker_sparql_statement_update (stmt, NULL, &error);
 	}
 
-	g_strfreev (uris);
+	if (error) {
+		g_printerr ("%s, %s\n",
+		            _("Could not remove tag"),
+		            error->message);
+		return FALSE;
+	}
+
+	g_print ("%s\n", _("Tag was removed successfully"));
 
 	return TRUE;
 }
@@ -876,22 +317,18 @@ static gboolean
 get_tags_by_file (TrackerSparqlConnection *connection,
                   const gchar             *uri)
 {
-	TrackerSparqlCursor *cursor;
-	GError *error = NULL;
-	gchar *query;
+	g_autoptr (TrackerSparqlStatement) stmt = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
 
-	query = g_strdup_printf ("SELECT ?tags ?labels "
-	                         "WHERE {"
-	                         "  ?urn nao:hasTag ?tags ;"
-	                         "  nie:url <%s> ."
-	                         "  ?tags a nao:Tag ;"
-	                         "  nao:prefLabel ?labels "
-	                         "} "
-	                         "ORDER BY ASC(?labels)",
-	                         uri);
-
-	cursor = tracker_sparql_connection_query (connection, query, NULL, &error);
-	g_free (query);
+	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
+	                                                                GET_TAGS_FOR_FILE,
+	                                                                NULL,
+	                                                                &error);
+	if (stmt) {
+		tracker_sparql_statement_bind_string (stmt, "uri", uri);
+		cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
+	}
 
 	if (error) {
 		g_printerr ("%s, %s\n",
@@ -902,32 +339,8 @@ get_tags_by_file (TrackerSparqlConnection *connection,
 		return FALSE;
 	}
 
-	if (!cursor) {
-		g_print ("  %s\n",
-		         _("No tags were found"));
-	} else {
-		gint count = 0;
-
-		while (tracker_sparql_cursor_next (cursor, NULL, NULL)) {
-			g_print ("  %s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
-			count++;
-		}
-
-		if (count == 0) {
-			/* To translators: This is to say there are no
-			 * tags found for a particular file, e.g.:
-			 *
-			 *   /path/to/some/file:
-			 *     None
-			 *
-			 */
-			g_print ("  %s\n", _("None"));
-		}
-
-		g_print ("\n");
-
-		g_object_unref (cursor);
-	}
+	while (tracker_sparql_cursor_next (cursor, NULL, NULL))
+		g_print ("%s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
 
 	return TRUE;
 }
@@ -935,110 +348,59 @@ get_tags_by_file (TrackerSparqlConnection *connection,
 static int
 tag_run (void)
 {
-	TrackerSparqlConnection *connection;
-	GError *error = NULL;
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *uri = NULL;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                NULL, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
-		            _("Could not establish a connection to Tracker"),
-		            error ? error->message : _("No error given"));
-		g_clear_error (&error);
+		            _("Could not establish a connection to LocalSearch"),
+		            error->message);
 		return EXIT_FAILURE;
 	}
 
+	if (resource && resource[0]) {
+		g_autoptr (GFile) file = NULL;
+
+		file = g_file_new_for_commandline_arg (resource[0]);
+		uri = g_file_get_uri (file);
+	}
+
 	if (list) {
-		gboolean success;
+		if (!get_all_tags (connection, offset, limit, show_resources))
+			return EXIT_FAILURE;
+	} else if (add_tag) {
+		if (!create_tag (connection, add_tag, description))
+			return EXIT_FAILURE;
 
-		if (G_UNLIKELY (and_operator)) {
-			success = get_all_resources_with_tags (connection, resources, offset, limit);
+		if (uri && !add_tag_for_urn (connection, uri, add_tag))
+			return EXIT_FAILURE;
+	} else if (remove_tag) {
+		if (uri) {
+			if (!remove_tag_for_urn (connection, uri, remove_tag))
+				return EXIT_FAILURE;
 		} else {
-			success = get_all_tags (connection, resources, offset, limit, show_resources);
+			if (!clear_tag (connection, remove_tag))
+				return EXIT_FAILURE;
 		}
-		g_object_unref (connection);
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
+	} else if (uri) {
+		if (!get_tags_by_file (connection, uri))
+			return EXIT_FAILURE;
 	}
 
-	if (add_tag) {
-		gboolean success;
-
-		success = add_tag_for_urns (connection, resources, add_tag, description);
-		g_object_unref (connection);
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (remove_tag) {
-		gboolean success;
-
-		success = remove_tag_for_urns (connection, resources, remove_tag);
-		g_object_unref (connection);
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	if (resources) {
-		gboolean success = TRUE;
-		gchar **p;
-
-		for (p = resources; *p; p++) {
-			GFile *file;
-			gchar *uri;
-			
-			file = g_file_new_for_commandline_arg (*p);
-			uri = g_file_get_uri (file);
-			g_object_unref (file);
-
-			g_print ("%s\n", uri);
-			success &= get_tags_by_file (connection, uri);
-
-			g_free (uri);
-		}
-
-		g_object_unref (connection);
-
-		return success ? EXIT_SUCCESS : EXIT_FAILURE;
-	}
-
-	g_object_unref (connection);
-
-	/* This is a failure because we should have done something.
-	 * This code should never be reached in practise.
-	 */
-	return EXIT_FAILURE;
-}
-
-static int
-tag_run_default (void)
-{
-	GOptionContext *context;
-	gchar *help;
-
-	context = g_option_context_new (NULL);
-	g_option_context_add_main_entries (context, entries, NULL);
-	help = g_option_context_get_help (context, TRUE, NULL);
-	g_option_context_free (context);
-	g_printerr ("%s\n", help);
-	g_free (help);
-
-	return EXIT_FAILURE;
-}
-
-static gboolean
-tag_options_enabled (void)
-{
-	return TAG_OPTIONS_ENABLED ();
+	return EXIT_SUCCESS;
 }
 
 int
 tracker_tag (int          argc,
              const char **argv)
 {
-	GOptionContext *context;
-	GError *error = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *help = NULL;
 	const gchar *failed;
 
 	setlocale (LC_ALL, "");
@@ -1049,22 +411,18 @@ tracker_tag (int          argc,
 
 	context = g_option_context_new (NULL);
 	g_option_context_add_main_entries (context, entries, NULL);
+	g_option_context_set_summary (context, _("Add, remove and list tags"));
 
-	argv[0] = "tracker tag";
+	argv[0] = "localsearch tag";
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
 		g_error_free (error);
-		g_option_context_free (context);
 		return EXIT_FAILURE;
 	}
 
-	g_option_context_free (context);
-
 	if (!list && show_resources) {
 		failed = _("The --list option is required for --show-files");
-	} else if (and_operator && (!list || !resources)) {
-		failed = _("The --and-operator option can only be used with --list and tag label arguments");
 	} else if (add_tag && remove_tag) {
 		failed = _("Add and delete actions can not be used together");
 	} else if (description && !add_tag) {
@@ -1078,9 +436,11 @@ tracker_tag (int          argc,
 		return EXIT_FAILURE;
 	}
 
-	if (tag_options_enabled ()) {
-		return tag_run ();
+	if (!TAG_OPTIONS_ENABLED () || g_strv_length (resource) > 1) {
+		help = g_option_context_get_help (context, TRUE, NULL);
+		g_printerr ("%s\n", help);
+		return EXIT_FAILURE;
 	}
 
-	return tag_run_default ();
+	return tag_run ();
 }
