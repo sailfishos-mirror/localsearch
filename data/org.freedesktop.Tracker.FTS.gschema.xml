@@ -35,7 +35,7 @@ Boston, MA  02110-1301, USA.
     <key name="ignore-numbers" type="b">
       <summary>Ignore numbers</summary>
       <description>If enabled, numbers will not be indexed.</description>
-      <default>true</default>
+      <default>false</default>
     </key>
 
   </schema>
