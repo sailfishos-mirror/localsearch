@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-05-10 20:50+0000\n"
-"PO-Revision-Date: 2025-05-31 18:50+0300\n"
+"PO-Revision-Date: 2025-05-31 19:05+0300\n"
 "Last-Translator: Yuras Shumovich <shumovichy@gmail.com>\n"
 "Language-Team: Belarusian\n"
 "Language: be\n"
@@ -1323,9 +1323,8 @@ msgstr "Паказвае інфармацыю пра версію"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/control/tracker-main.c:136
-#, fuzzy
 msgid "— start the tracker index proxy"
-msgstr "— запусціць проксі tracker index"
+msgstr "— запусціць проксі індэксавання tracker"
 
 #: src/extractor/tracker-main.c:74
 msgid "File to extract metadata for"
