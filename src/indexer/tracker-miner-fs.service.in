@@ -1,7 +1,7 @@
 [Unit]
 Description=Tracker file system data miner
-ConditionUser=!root
-ConditionUser=!gnome-initial-setup
+ConditionUser=!@system
+ConditionEnvironment=XDG_SESSION_CLASS=user
 After=gnome-session.target
 
 [Service]
