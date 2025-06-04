@@ -21,8 +21,6 @@ data.
 
 *help*::
   Show help on subcommands.
-*daemon*::
-  Start and stop the indexer.
 *extract*::
   Extract metadata from a file.
 *index*::
