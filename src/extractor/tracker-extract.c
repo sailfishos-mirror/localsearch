@@ -236,7 +236,7 @@ task_deadline_cb (gpointer user_data)
 	g_warning ("File '%s' took too long to process. Shutting down everything",
 	           task->file);
 
-	exit (EXIT_FAILURE);
+	_exit (EXIT_FAILURE);
 }
 
 static TrackerExtractTaskData *
@@ -270,7 +270,6 @@ extract_task_data_new (TrackerExtract *extract,
 			else
 				deadline_seconds = DEFAULT_DEADLINE_SECONDS;
 		}
-
 		task->deadline =
 			g_timeout_source_new_seconds (deadline_seconds);
 		g_source_set_callback (task->deadline, task_deadline_cb, task, NULL);
