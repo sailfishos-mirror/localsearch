@@ -44,8 +44,6 @@ TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
 gboolean tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
                                                       GFile             *file);
 
-GUdevClient * tracker_miner_files_get_udev_client (TrackerMinerFiles *mf);
-
 G_END_DECLS
 
 #endif /* __TRACKER_MINER_FS_FILES_H__ */
