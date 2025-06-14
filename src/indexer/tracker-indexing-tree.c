@@ -41,6 +41,7 @@ typedef struct _FindNodeData FindNodeData;
 struct _NodeData
 {
 	GFile *file;
+	char *id;
 	guint flags;
 	guint shallow : 1;
 	guint removing : 1;
@@ -103,6 +104,7 @@ static void
 node_data_free (NodeData *data)
 {
 	g_object_unref (data->file);
+	g_free (data->id);
 	g_slice_free (NodeData, data);
 }
 
@@ -600,7 +602,7 @@ tracker_indexing_tree_notify_update (TrackerIndexingTree *tree,
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
-	root = tracker_indexing_tree_get_root (tree, file, &flags);
+	root = tracker_indexing_tree_get_root (tree, file, NULL, &flags);
 
 	if (tracker_indexing_tree_file_is_root (tree, file)) {
 		g_signal_emit (tree, signals[DIRECTORY_UPDATED], 0, root);
@@ -800,7 +802,7 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
-	config_file = tracker_indexing_tree_get_root (tree, file, &config_flags);
+	config_file = tracker_indexing_tree_get_root (tree, file, NULL, &config_flags);
 	if (!config_file) {
 		/* Not under an added dir */
 		return FALSE;
@@ -943,24 +945,11 @@ tracker_indexing_tree_set_filter_hidden (TrackerIndexingTree *tree,
 	g_object_notify (G_OBJECT (tree), "filter-hidden");
 }
 
-/**
- * tracker_indexing_tree_get_root:
- * @tree: a #TrackerIndexingTree
- * @file: a #GFile
- * @directory_flags: (out): return location for the applying #TrackerDirectoryFlags
- *
- * Returns the #GFile that was previously added through tracker_indexing_tree_add()
- * and would equal or contain @file, or %NULL if none applies.
- *
- * If the return value is non-%NULL, @directory_flags would contain the
- * #TrackerDirectoryFlags applying to @file.
- *
- * Returns: (transfer none): the effective parent in @tree, or %NULL
- **/
 GFile *
-tracker_indexing_tree_get_root (TrackerIndexingTree   *tree,
-                                GFile                 *file,
-                                TrackerDirectoryFlags *directory_flags)
+tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
+                                GFile                  *file,
+                                const char            **id,
+                                TrackerDirectoryFlags  *directory_flags)
 {
 	TrackerIndexingTreePrivate *priv;
 	NodeData *data;
@@ -986,9 +975,10 @@ tracker_indexing_tree_get_root (TrackerIndexingTree   *tree,
 	    (file == data->file ||
 	     g_file_equal (file, data->file) ||
 	     g_file_has_prefix (file, data->file))) {
-		if (directory_flags) {
+		if (id)
+			*id = data->id;
+		if (directory_flags)
 			*directory_flags = data->flags;
-		}
 
 		return data->file;
 	}

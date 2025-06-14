@@ -973,7 +973,7 @@ miner_files_move_file (TrackerMinerFS      *fs,
 	} else {
 		GFile *root;
 
-		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 
 		if (root)
 			data_source = tracker_miner_fs_get_identifier (fs, root);

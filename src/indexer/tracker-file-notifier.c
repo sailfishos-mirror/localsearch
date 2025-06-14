@@ -766,7 +766,7 @@ tracker_index_root_crawl_next (TrackerIndexRoot *root)
 	g_set_object (&root->current_dir, directory);
 
 	tracker_indexing_tree_get_root (priv->indexing_tree,
-	                                directory, &flags);
+	                                directory, NULL, &flags);
 
 	if ((flags & TRACKER_DIRECTORY_FLAG_MONITOR) != 0)
 		tracker_monitor_add (priv->monitor, directory);
@@ -1224,7 +1224,7 @@ monitor_item_created_cb (TrackerMonitor *monitor,
 		 * Crawl new entire directory and add monitors
 		 */
 		tracker_indexing_tree_get_root (priv->indexing_tree,
-		                                file, &flags);
+		                                file, NULL, &flags);
 
 		if (flags & TRACKER_DIRECTORY_FLAG_RECURSE) {
 			notifier_queue_root (notifier, file, flags, TRUE);
@@ -1379,7 +1379,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 
 	notifier = user_data;
 	priv = tracker_file_notifier_get_instance_private (notifier);
-	tracker_indexing_tree_get_root (priv->indexing_tree, other_file, &flags);
+	tracker_indexing_tree_get_root (priv->indexing_tree, other_file, NULL, &flags);
 
 	if (!is_source_monitored) {
 		if (is_directory) {
@@ -1431,7 +1431,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 				gboolean dest_is_recursive;
 				TrackerDirectoryFlags flags;
 
-				tracker_indexing_tree_get_root (priv->indexing_tree, other_file, &flags);
+				tracker_indexing_tree_get_root (priv->indexing_tree, other_file, NULL, &flags);
 				dest_is_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
 				/* Source file was not stored, check dest file as new */
@@ -1462,7 +1462,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 				                      file, other_file);
 
 				tracker_indexing_tree_get_root (priv->indexing_tree,
-				                                file, &source_flags);
+				                                file, NULL, &source_flags);
 				source_is_recursive = (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 				dest_is_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
@@ -1502,7 +1502,7 @@ indexing_tree_directory_added (TrackerIndexingTree *indexing_tree,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerDirectoryFlags flags;
 
-	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	notifier_queue_root (notifier, directory, flags, FALSE);
 }
 
@@ -1514,7 +1514,7 @@ indexing_tree_directory_updated (TrackerIndexingTree *indexing_tree,
 	TrackerFileNotifier *notifier = user_data;
 	TrackerDirectoryFlags flags;
 
-	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	flags |= TRACKER_DIRECTORY_FLAG_CHECK_DELETED;
 	notifier_queue_root (notifier, directory, flags, FALSE);
 }
@@ -1532,7 +1532,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	priv = tracker_file_notifier_get_instance_private (notifier);
 
 	/* Flags are still valid at the moment of deletion */
-	tracker_indexing_tree_get_root (indexing_tree, directory, &flags);
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 
 	/* If the folder was being ignored, index/crawl it from scratch */
 	if (flags & TRACKER_DIRECTORY_FLAG_IGNORE) {
@@ -1544,7 +1544,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 			TrackerDirectoryFlags parent_flags;
 
 			tracker_indexing_tree_get_root (indexing_tree,
-			                                parent,
+			                                parent, NULL,
 			                                &parent_flags);
 
 			if (parent_flags & TRACKER_DIRECTORY_FLAG_RECURSE) {
@@ -1608,7 +1608,7 @@ indexing_tree_child_updated (TrackerIndexingTree *indexing_tree,
 		return;
 
 	child_type = g_file_info_get_file_type (child_info);
-	tracker_indexing_tree_get_root (indexing_tree, child, &flags);
+	tracker_indexing_tree_get_root (indexing_tree, child, NULL, &flags);
 
 	if (child_type == G_FILE_TYPE_DIRECTORY &&
 	    (flags & TRACKER_DIRECTORY_FLAG_RECURSE)) {

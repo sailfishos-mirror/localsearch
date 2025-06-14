@@ -53,7 +53,7 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 	} else {
 		GFile *root;
 
-		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 
 		if (root)
 			datasource_uri = tracker_miner_fs_get_identifier (fs, root);
