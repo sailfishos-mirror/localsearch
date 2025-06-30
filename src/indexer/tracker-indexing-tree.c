@@ -68,6 +68,7 @@ struct _TrackerIndexingTreePrivate
 	GNode *config_tree;
 	GList *filter_patterns;
 	GUdevClient *udev_client;
+	GList *allowed_text_patterns;
 
 	GFile *root;
 	guint filter_hidden : 1;
@@ -1112,4 +1113,46 @@ tracker_indexing_tree_list_roots (TrackerIndexingTree *tree)
 	                 prepend_config_root,
 	                 &nodes);
 	return nodes;
+}
+
+void
+tracker_indexing_tree_clear_allowed_text_patterns (TrackerIndexingTree *tree)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+
+	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) g_pattern_spec_free);
+	priv->allowed_text_patterns = NULL;
+}
+
+void
+tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
+                                                const char          *pattern_str)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+
+	priv->allowed_text_patterns =
+		g_list_prepend (priv->allowed_text_patterns,
+		                g_pattern_spec_new (pattern_str));
+}
+
+gboolean
+tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree,
+                                                       GFile               *file)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+	g_autofree gchar *basename = NULL;
+	GList *l;
+
+	basename = g_file_get_basename (file);
+
+	for (l = priv->allowed_text_patterns; l; l = l->next) {
+#if GLIB_CHECK_VERSION (2, 70, 0)
+		if (g_pattern_spec_match_string (l->data, basename))
+#else
+		if (g_pattern_match_string (l->data, basename))
+#endif
+			return TRUE;
+	}
+
+	return FALSE;
 }

@@ -21,43 +21,35 @@ Boston, MA  02110-1301, USA.
   <schema id="org.freedesktop.Tracker3.Miner.Files" path="/org/freedesktop/tracker/miner/files/" gettext-domain="tracker-miners">
     <key name="initial-sleep" type="i">
       <summary>Initial sleep</summary>
-      <description>Initial sleep time, in seconds.</description>
+      <description>This setting is deprecated</description>
       <range min="0" max="1000"/>
       <default>15</default>
     </key>
 
     <key name="throttle" type="i">
       <summary>Throttle</summary>
-      <description>Indexing speed, the higher the slower.</description>
+      <description>This setting is deprecated</description>
       <range min="0" max="20"/>
       <default>0</default>
     </key>
 
     <key name="low-disk-space-limit" type="i">
       <summary>Low disk space limit</summary>
-      <description>Disk space threshold in percent at which to pause indexing, or -1 to disable.</description>
+      <description>This setting is deprecated</description>
       <range min="-1" max="100"/>
       <default>-1</default>
     </key>
 
     <key name="crawling-interval" type="i">
       <summary>Crawling interval</summary>
-      <description>
-        Interval in days to check whether the filesystem is up to date in the database.
-	0 forces crawling anytime, -1 forces it only after unclean shutdowns, and -2
-	disables it entirely.
-      </description>
+      <description>This setting is deprecated</description>
       <range min="-2" max="365"/>
       <default>-1</default>
     </key>
 
     <key name="removable-days-threshold" type="i">
       <summary>Removable devices’ data permanence threshold</summary>
-      <description>
-	Threshold in days after which files from removables devices
-	will be removed from database if not mounted. 0 means never,
-	maximum is 365.
-      </description>
+      <description>This setting is deprecated</description>
       <range min="0" max="365"/>
       <default>3</default>
     </key>
@@ -76,22 +68,19 @@ Boston, MA  02110-1301, USA.
 
     <key name="index-optical-discs" type="b">
       <summary>Index optical discs</summary>
-      <description>
-	Set to true to enable indexing CDs, DVDs, and generally optical media
-	(if removable devices are not indexed, optical discs won’t be either)
-      </description>
+      <description>This setting is deprecated</description>
       <default>false</default>
     </key>
 
     <key name="index-on-battery" type="b">
       <summary>Index when running on battery</summary>
-      <description>Set to true to index while running on battery</description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 
     <key name="index-on-battery-first-time" type="b">
       <summary>Perform initial indexing when running on battery</summary>
-      <description>Set to true to index while running on battery for the first time only</description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 

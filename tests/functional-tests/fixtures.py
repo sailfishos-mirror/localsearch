@@ -105,10 +105,8 @@ class TrackerMinerTest(ut.TestCase):
                 "index-single-directories": GLib.Variant.new_strv(
                     [self.non_recursive_dir]
                 ),
-                "index-optical-discs": GLib.Variant.new_boolean(False),
                 "index-removable-devices": GLib.Variant.new_boolean(False),
                 "index-applications": GLib.Variant.new_boolean(False),
-                "throttle": GLib.Variant.new_int32(5),
             }
         }
         return settings

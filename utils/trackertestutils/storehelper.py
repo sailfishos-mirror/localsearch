@@ -314,7 +314,7 @@ class await_content_update():
                 # The after_predicates may match after the miner-fs creates
                 # the new resource, or they may only match once the extractor
                 # processes the resource. The latter will be an UPDATE event.
-                elif self.matched_delete and event.get_event_type() in [Tracker.NotifierEventType.CREATE, Tracker.NotifierEventType.UPDATE]:
+                elif event.get_event_type() == Tracker.NotifierEventType.UPDATE or (self.matched_delete and event.get_event_type() == Tracker.NotifierEventType.CREATE):
                     cursor = stmt_after.execute(None)
 
                     if cursor.next():

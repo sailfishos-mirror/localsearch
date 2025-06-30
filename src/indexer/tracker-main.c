@@ -38,7 +38,6 @@
 
 #include <tracker-common.h>
 
-#include "tracker-config.h"
 #include "tracker-controller.h"
 #include "tracker-miner-files.h"
 #include "tracker-files-interface.h"
@@ -55,35 +54,22 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
-#define SECONDS_PER_DAY 60 * 60 * 24
-
 #define DBUS_NAME_SUFFIX "LocalSearch3"
 #define LEGACY_DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
 
-#define LAST_CRAWL_FILENAME "last-crawl.txt"
-
 static GMainLoop *main_loop;
 static guint cleanup_id;
 
-static gint initial_sleep = -1;
 static gboolean no_daemon;
 static gchar *eligible;
 static gboolean version;
-static guint miners_timeout_id = 0;
-static gboolean do_crawling = FALSE;
 static gboolean dry_run = FALSE;
 
-static gboolean slept = TRUE;
-static gboolean graphs_ready = FALSE;
 static gboolean corrupted = FALSE;
+static guint wait_settle_id = 0;
 
 static GOptionEntry entries[] = {
-	{ "initial-sleep", 's', 0,
-	  G_OPTION_ARG_INT, &initial_sleep,
-	  N_("Initial sleep time in seconds, "
-	     "0->1000 (default=15)"),
-	  NULL },
 	{ "no-daemon", 'n', 0,
 	  G_OPTION_ARG_NONE, &no_daemon,
 	  N_("Runs until all configured locations are indexed and then exits"),
@@ -116,32 +102,6 @@ typedef struct {
 
 static EndpointThreadData *endpoint_thread_data = NULL;
 
-static void
-log_option_values (TrackerConfig *config)
-{
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (CONFIG)) {
-		g_message ("General options:");
-		g_message ("  Initial Sleep  ........................  %d",
-		           initial_sleep);
-
-		g_message ("Indexer options:");
-		g_message ("  Throttle level  .......................  %d",
-		           g_settings_get_int (G_SETTINGS (config), "throttle"));
-		g_message ("  Indexing while on battery  ............  %s (first time only = %s)",
-		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery") ? "yes" : "no",
-		           g_settings_get_boolean (G_SETTINGS (config), "index-on-battery-first-time") ? "yes" : "no");
-
-		if (g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit") == -1) {
-			g_message ("  Low disk space limit  .................  Disabled");
-		} else {
-			g_message ("  Low disk space limit  .................  %d%%",
-			           g_settings_get_int (G_SETTINGS (config), "low-disk-space-limit"));
-		}
-	}
-#endif
-}
-
 static GFile *
 get_cache_dir (void)
 {
@@ -159,62 +119,6 @@ get_cache_dir (void)
 	}
 
 	return cache;
-}
-
-static gchar *
-get_last_crawl_filename (TrackerMinerFiles *mf)
-{
-	g_autoptr (GFile) file = NULL, child = NULL;
-
-	file = get_cache_dir ();
-	child = g_file_get_child (file, LAST_CRAWL_FILENAME);
-
-	return g_file_get_path (child);
-}
-
-guint64
-get_last_crawl_done (TrackerMinerFiles *mf)
-{
-	g_autofree gchar *filename = NULL, *content = NULL;
-	guint64 then;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (!g_file_get_contents (filename, &content, NULL, NULL)) {
-		g_info ("  No previous timestamp, crawling forced");
-		return 0;
-	}
-
-	then = g_ascii_strtoull (content, NULL, 10);
-
-	return then;
-}
-
-void
-set_last_crawl_done (TrackerMinerFiles *mf,
-                     gboolean           done)
-{
-	g_autofree gchar *filename = NULL;
-
-	filename = get_last_crawl_filename (mf);
-
-	if (done) {
-		g_autoptr (GError) error = NULL;
-		g_autofree gchar *content = NULL;
-
-		content = g_strdup_printf ("%" G_GUINT64_FORMAT, (guint64) time (NULL));
-		g_info ("  Updating last crawl file:'%s'", filename);
-		/* Create/update time stamp file */
-		if (!g_file_set_contents (filename, content, -1, &error)) {
-			g_warning ("  Could not create/overwrite file:'%s' failed, %s",
-			           filename,
-			           error->message);
-		} else {
-			g_info ("  Last crawl file:'%s' updated", filename);
-		}
-	} else {
-		g_info ("  Crawl not done yet, doesn't update last crawl file.");
-	}
 }
 
 static gboolean
@@ -298,46 +202,6 @@ raise_file_descriptor_limit (void)
 		g_warning ("Failed to increase file descriptor limit: %m");
 }
 
-static gboolean
-should_crawl (TrackerMinerFiles *miner_files,
-              TrackerConfig     *config)
-{
-	gint crawling_interval;
-
-	crawling_interval = g_settings_get_int (G_SETTINGS (config), "crawling-interval");
-
-	TRACKER_NOTE (CONFIG, g_message ("Checking whether to crawl file system based on configured crawling interval:"));
-
-	if (crawling_interval == -2) {
-		TRACKER_NOTE (CONFIG, g_message ("  Disabled"));
-		return FALSE;
-	} else if (crawling_interval == -1) {
-		TRACKER_NOTE (CONFIG, g_message ("  Maybe (depends on a clean last shutdown)"));
-		return TRUE;
-	} else if (crawling_interval == 0) {
-		TRACKER_NOTE (CONFIG, g_message ("  Forced"));
-		return TRUE;
-	} else {
-		guint64 then, now;
-
-		then = get_last_crawl_done (miner_files);
-
-		if (then < 1) {
-			return TRUE;
-		}
-
-		now = (guint64) time (NULL);
-
-		if (now < then + (crawling_interval * SECONDS_PER_DAY)) {
-			TRACKER_NOTE (CONFIG, g_message ("  Postponed"));
-			return FALSE;
-		} else {
-			TRACKER_NOTE (CONFIG, g_message ("  (More than) %d days after last crawling, enabled", crawling_interval));
-			return TRUE;
-		}
-	}
-}
-
 static void
 miner_do_start (TrackerMiner *miner)
 {
@@ -345,50 +209,6 @@ miner_do_start (TrackerMiner *miner)
 		g_debug ("Starting filesystem miner...");
 		tracker_miner_start (miner);
 	}
-}
-
-static void
-miner_maybe_start (TrackerMiner *miner)
-{
-	if (!slept || !graphs_ready)
-		return;
-
-	miner_do_start (miner);
-}
-
-static gboolean
-miner_start_idle_cb (gpointer data)
-{
-	TrackerMiner *miner = data;
-
-	miners_timeout_id = 0;
-	slept = TRUE;
-	miner_maybe_start (miner);
-	return G_SOURCE_REMOVE;
-}
-
-static void
-miner_start (TrackerMiner  *miner,
-             TrackerConfig *config)
-{
-	/* If requesting to run as no-daemon, start right away */
-	if (no_daemon) {
-		miner_maybe_start (miner);
-		return;
-	}
-
-	/* If no need to initially sleep, start right away */
-	if (initial_sleep <= 0) {
-		miner_maybe_start (miner);
-		return;
-	}
-
-	slept = FALSE;
-	g_debug ("Performing initial sleep of %d seconds",
-	         initial_sleep);
-	miners_timeout_id = g_timeout_add_seconds (initial_sleep,
-	                                           miner_start_idle_cb,
-	                                           miner);
 }
 
 static void
@@ -445,10 +265,6 @@ static void
 miner_finished_cb (TrackerMinerFS *fs,
                    gpointer        user_data)
 {
-	if (do_crawling && !dry_run) {
-		set_last_crawl_done (TRACKER_MINER_FILES (fs), TRUE);
-	}
-
 	/* We're not sticking around for file updates, so stop
 	 * the mainloop and exit.
 	 */
@@ -476,19 +292,6 @@ miner_corrupt_cb (TrackerMinerFS *fs)
 	g_warning ("Database corruption detected, bailing out");
 	corrupted = TRUE;
 	g_main_loop_quit (main_loop);
-}
-
-static void
-graphs_created_cb (GObject      *source,
-                   GAsyncResult *res,
-                   gpointer      user_data)
-{
-	TrackerMiner *miner = user_data;
-
-	tracker_sparql_connection_update_finish (TRACKER_SPARQL_CONNECTION (source),
-	                                         res, NULL);
-	graphs_ready = TRUE;
-	miner_maybe_start (miner);
 }
 
 static gint
@@ -619,24 +422,6 @@ on_domain_vanished (GDBusConnection *connection,
 	g_main_loop_quit (loop);
 }
 
-TrackerSparqlConnectionFlags
-get_fts_connection_flags (void)
-{
-	TrackerSparqlConnectionFlags flags = 0;
-	g_autoptr (GSettings) settings = NULL;
-
-	settings = g_settings_new ("org.freedesktop.Tracker3.FTS");
-
-	if (g_settings_get_boolean (settings, "enable-stemmer"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER;
-	if (g_settings_get_boolean (settings, "enable-unaccent"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
-	if (g_settings_get_boolean (settings, "ignore-numbers"))
-		flags |= TRACKER_SPARQL_CONNECTION_FLAGS_FTS_IGNORE_NUMBERS;
-
-	return flags;
-}
-
 gpointer
 endpoint_thread_func (gpointer user_data)
 {
@@ -730,12 +515,15 @@ setup_connection (GError **error)
 	TrackerSparqlConnection *sparql_conn;
 	g_autoptr (GFile) store = NULL, ontology = NULL;
 	GError *internal_error = NULL;
+	TrackerSparqlConnectionFlags flags =
+		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
+		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
 
 	if (!dry_run)
 		store = get_cache_dir ();
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
-	sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
+	sparql_conn = tracker_sparql_connection_new (flags,
 	                                             store,
 	                                             ontology,
 	                                             NULL,
@@ -757,7 +545,7 @@ setup_connection (GError **error)
 
 			path = g_file_get_path (backup_location);
 			g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
-			sparql_conn = tracker_sparql_connection_new (get_fts_connection_flags (),
+			sparql_conn = tracker_sparql_connection_new (flags,
 			                                             store,
 			                                             ontology,
 			                                             NULL,
@@ -771,15 +559,35 @@ setup_connection (GError **error)
 	return sparql_conn;
 }
 
+static void
+on_systemd_settled (TrackerMiner *miner)
+{
+	g_debug ("Systemd session started");
+	g_clear_handle_id (&wait_settle_id, g_source_remove);
+	miner_do_start (miner);
+}
+
+static gboolean
+wait_settle_cb (gpointer user_data)
+{
+	TrackerMiner *miner = user_data;
+
+	g_debug ("Waited 5 seconds for the system to settle");
+	wait_settle_id = 0;
+	miner_do_start (miner);
+
+	return G_SOURCE_REMOVE;
+}
+
 int
 main (gint argc, gchar *argv[])
 {
-	TrackerConfig *config;
 	TrackerMiner *miner_files;
 	GOptionContext *context;
 	GError *error = NULL;
 	TrackerMinerProxy *proxy;
 	GDBusConnection *connection;
+	GDBusProxy *systemd_proxy = NULL;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
 	TrackerStorage *storage;
@@ -789,7 +597,6 @@ main (gint argc, gchar *argv[])
 #endif
 	g_autofree char *dbus_name = NULL, *legacy_dbus_name = NULL;
 	TrackerFilesInterface *files_interface;
-	gboolean initial_index = TRUE;
 
 	main_loop = NULL;
 
@@ -847,14 +654,6 @@ main (gint argc, gchar *argv[])
 
 	files_interface = tracker_files_interface_new (connection);
 
-	/* Initialize logging */
-	config = tracker_config_new ();
-
-	if (initial_sleep < 0)
-		initial_sleep = g_settings_get_int (G_SETTINGS (config), "initial-sleep");
-
-	log_option_values (config);
-
 	main_loop = g_main_loop_new (NULL, FALSE);
 
 	if (no_daemon) {
@@ -876,7 +675,6 @@ main (gint argc, gchar *argv[])
 	if (!dry_run) {
 		GFile *store = get_cache_dir ();
 
-		initial_index = !g_file_query_exists (store, NULL);
 		tracker_error_report_init (store);
 		g_object_unref (store);
 	}
@@ -902,9 +700,7 @@ main (gint argc, gchar *argv[])
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
-	                                       storage,
-	                                       config,
-	                                       initial_index);
+	                                       storage);
 
 	controller = tracker_controller_new (indexing_tree, storage, files_interface);
 
@@ -912,7 +708,6 @@ main (gint argc, gchar *argv[])
 	if (error) {
 		g_critical ("Couldn't create miner proxy: %s", error->message);
 		g_error_free (error);
-		g_object_unref (config);
 		g_object_unref (miner_files);
 		return EXIT_FAILURE;
 	}
@@ -936,11 +731,6 @@ main (gint argc, gchar *argv[])
 		return EXIT_FAILURE;
 	}
 
-	/* Check if we should crawl and if we should force mtime
-	 * checking based on the config.
-	 */
-	do_crawling = should_crawl (TRACKER_MINER_FILES (miner_files), config);
-
 	g_signal_connect (miner_files, "started",
 			  G_CALLBACK (miner_started_cb),
 			  NULL);
@@ -959,18 +749,46 @@ main (gint argc, gchar *argv[])
 	g_signal_connect (memory_monitor, "low-memory-warning", G_CALLBACK (on_low_memory), NULL);
 #endif
 
-	/* Preempt creation of graphs */
-	tracker_sparql_connection_update_async (tracker_miner_get_connection (miner_files),
-	                                        "CREATE SILENT GRAPH tracker:FileSystem; "
-	                                        "CREATE SILENT GRAPH tracker:Software; "
-	                                        "CREATE SILENT GRAPH tracker:Documents; "
-	                                        "CREATE SILENT GRAPH tracker:Pictures; "
-	                                        "CREATE SILENT GRAPH tracker:Audio; "
-	                                        "CREATE SILENT GRAPH tracker:Video ",
-	                                        NULL, graphs_created_cb, miner_files);
+	if (!tracker_term_is_tty ()) {
+		gboolean wait_settle = TRUE;
 
-	if (do_crawling)
-		miner_start (miner_files, config);
+		systemd_proxy = g_dbus_proxy_new_for_bus_sync (TRACKER_IPC_BUS,
+		                                               G_DBUS_PROXY_FLAGS_NONE,
+		                                               NULL,
+		                                               "org.freedesktop.systemd1",
+		                                               "/org/freedesktop/systemd1",
+		                                               "org.freedesktop.systemd1.Manager",
+		                                               NULL, NULL);
+		if (systemd_proxy) {
+			const char *finished_states[] = { "running", "degraded", NULL };
+			g_autoptr (GVariant) v = NULL;
+			const char *state = NULL;
+
+			g_signal_connect (systemd_proxy,
+			                  "g-signal::StartupFinished",
+			                  G_CALLBACK (on_systemd_settled),
+			                  miner_files);
+			g_dbus_proxy_call_sync (systemd_proxy,
+			                        "Subscribe",
+			                        NULL,
+			                        G_DBUS_CALL_FLAGS_NONE,
+			                        -1,
+			                        NULL, NULL);
+
+			v = g_dbus_proxy_get_cached_property (systemd_proxy, "SystemState");
+			state = g_variant_get_string (v, NULL);
+			wait_settle = !g_strv_contains (finished_states, state);
+		}
+
+		if (wait_settle) {
+			g_debug ("Waiting for the system to settle");
+			wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, miner_files);
+		} else {
+			miner_do_start (miner_files);
+		}
+	} else {
+		miner_do_start (miner_files);
+	}
 
 	initialize_signal_handler ();
 
@@ -984,7 +802,6 @@ main (gint argc, gchar *argv[])
 	g_object_unref (files_interface);
 
 	g_main_loop_unref (main_loop);
-	g_object_unref (config);
 
 	g_object_unref (controller);
 
@@ -998,6 +815,7 @@ main (gint argc, gchar *argv[])
 
 	g_clear_object (&indexing_tree);
 	g_clear_object (&storage);
+	g_clear_object (&systemd_proxy);
 
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	g_signal_handlers_disconnect_by_func (memory_monitor, on_low_memory, NULL);

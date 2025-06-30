@@ -22,19 +22,19 @@ Boston, MA  02110-1301, USA.
 
     <key name="enable-stemmer" type="b">
       <summary>Enable stemmer</summary>
-      <description>Simplify the words to their root to provide more results. E.g. “shelves” and “shelf” to “shel”</description>
+      <description>This setting is deprecated</description>
       <default>false</default>
     </key>
 
     <key name="enable-unaccent" type="b">
       <summary>Enable unaccent</summary>
-      <description>Translate accented characters to the equivalent unaccented. E.g. “Idéa” to “Idea” for improved matching. </description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 
     <key name="ignore-numbers" type="b">
       <summary>Ignore numbers</summary>
-      <description>If enabled, numbers will not be indexed.</description>
+      <description>This setting is deprecated</description>
       <default>true</default>
     </key>
 

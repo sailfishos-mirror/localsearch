@@ -119,6 +119,13 @@ gboolean  tracker_indexing_tree_file_is_root         (TrackerIndexingTree   *tre
 
 GList *   tracker_indexing_tree_list_roots           (TrackerIndexingTree   *tree);
 
+void tracker_indexing_tree_clear_allowed_text_patterns (TrackerIndexingTree *tree);
+
+void tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
+                                                     const char          *pattern_str);
+
+gboolean tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree,
+                                                                GFile               *file);
 
 G_END_DECLS
 

@@ -72,8 +72,6 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 
 	tracker_resource_set_boolean (resource, "tracker:isRemovable",
 	                              (storage_type & TRACKER_STORAGE_REMOVABLE) != 0);
-	tracker_resource_set_boolean (resource, "tracker:isOptical",
-	                              (storage_type & TRACKER_STORAGE_OPTICAL) != 0);
 }
 
 static void
@@ -247,6 +245,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		graph = tracker_extract_module_manager_get_graph (mime_type);
 
 	if (mime_type && graph && g_file_info_get_size (file_info) > 0) {
+		TrackerIndexingTree *indexing_tree;
 		TrackerResource *information_element;
 
 		/* This mimetype will be extracted by some module, pre-fill the
@@ -265,9 +264,11 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		                            g_file_info_get_size (file_info));
 		miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, graph_file);
 
+		indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+
 		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
 		                                                            "nfo:PlainTextDocument") &&
-		    !tracker_miner_files_check_allowed_text_file (TRACKER_MINER_FILES (fs), file)) {
+		    !tracker_indexing_tree_file_has_allowed_text_extension (indexing_tree, file)) {
 			/* We let disallowed text files have a shallow document nie:InformationElement */
 			information_element =
 				miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),

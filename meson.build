@@ -294,10 +294,8 @@ if get_option('domain_prefix') != 'org.freedesktop'
   else
     conf.set_quoted('MINER_FS_CACHE_LOCATION', get_option('miner_fs_cache_location'))
   endif
-  conf.set('MINER_FILES_INITIAL_SLEEP', '--initial-sleep 0')
 else
   conf.set_quoted('MINER_FS_CACHE_LOCATION', 'tracker3')
-  conf.set('MINER_FILES_INITIAL_SLEEP', '')
 endif
 
 conf.set('HAVE_GETLINE', cc.has_function('getline', prefix : '#include <stdio.h>'))

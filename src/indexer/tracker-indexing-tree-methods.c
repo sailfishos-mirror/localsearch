@@ -28,6 +28,7 @@
 #if !GLIB_CHECK_VERSION (2, 83, 0)
 #define g_unix_mount_entry_for g_unix_mount_for
 #define g_unix_mount_entry_at g_unix_mount_at
+#define g_unix_mount_entry_get_device_path g_unix_mount_get_device_path
 #endif
 
 char *

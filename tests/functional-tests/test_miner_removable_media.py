@@ -82,15 +82,6 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
 class MinerRemovableMediaTestNoPreserve(MinerRemovableMediaTest):
     """Tests for tracker-miner-fs with index-removable-devices feature."""
 
-    def config(self):
-        # The settings of this class command the indexer to delete
-        # removable devices immediately after unmount.
-        settings = super(MinerRemovableMediaTest, self).config()
-        settings["org.freedesktop.Tracker3.Miner.Files"][
-            "removable-days-threshold"
-        ] = GLib.Variant.new_int32(0)
-        return settings
-
     def __get_text_documents(self):
         return self.tracker.query(
             """
@@ -113,13 +104,18 @@ class MinerRemovableMediaTestNoPreserve(MinerRemovableMediaTest):
             self.ensure_document_inserted(path)
             assert self.data_source_available(path.as_uri())
 
-        id = self.tracker.get_resource_id_by_uri(self.device_path.as_uri())
-        with self.tracker.await_delete(fixtures.FILESYSTEM_GRAPH, id):
-            self.remove_removable_device(self.device_path)
+        uri = self.device_path.as_uri();
+        result = self.tracker.query(
+            'SELECT DISTINCT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % uri)
+        assert len(result) == 1
+        id = int(result[0][0])
 
-        # Ensure that all elements were deleted
-        result = self.__get_text_documents()
-        self.assertEqual(len(result), 0)
+        with self.tracker.await_content_update(
+                fixtures.FILESYSTEM_GRAPH, id,
+                f'tracker:available true',
+                f'tracker:available false'
+        ):
+            self.remove_removable_device(self.device_path)
 
 
 if __name__ == "__main__":
