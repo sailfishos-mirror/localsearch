@@ -525,22 +525,19 @@ get_user_special_dir_if_not_home (const gchar  *path,
 gchar *
 tracker_path_evaluate_name (const gchar *path)
 {
-	gchar        *special_dir_path;
-	gchar        *final_path;
-	gchar       **tokens;
-	gchar       **token;
-	gchar        *start;
-	gchar        *end;
-	const gchar  *env;
-	gchar        *expanded;
+	g_autofree gchar *eval_path = NULL;
+	g_autofree gchar *expanded = NULL;
+	g_auto (GStrv) tokens = NULL;
+	g_autoptr (GFile) file = NULL;
+	int i;
 
 	if (!path || path[0] == '\0') {
 		return NULL;
 	}
 
 	/* See if it is a special directory name. */
-	if (get_user_special_dir_if_not_home (path, &special_dir_path))
-		return special_dir_path;
+	if (get_user_special_dir_if_not_home (path, &eval_path))
+		goto end;
 
 	/* First check the simple case of using tilde */
 	if (path[0] == '~') {
@@ -555,10 +552,11 @@ tracker_path_evaluate_name (const gchar *path)
 			return NULL;
 		}
 
-		return g_build_path (G_DIR_SEPARATOR_S,
-		                     home,
-		                     path + 1,
-		                     NULL);
+		eval_path = g_build_path (G_DIR_SEPARATOR_S,
+					  home,
+					  path + 1,
+					  NULL);
+		goto end;
 	}
 
 	/* Second try to find any environment variables and expand
@@ -566,7 +564,12 @@ tracker_path_evaluate_name (const gchar *path)
 	 */
 	tokens = g_strsplit (path, G_DIR_SEPARATOR_S, -1);
 
-	for (token = tokens; *token; token++) {
+	for (i = 0; tokens[i]; i++) {
+		gchar **token, *start, *end;
+		const gchar *env;
+
+		token = &tokens[i];
+
 		if (**token != '$') {
 			continue;
 		}
@@ -580,36 +583,28 @@ tracker_path_evaluate_name (const gchar *path)
 		}
 
 		env = g_getenv (start);
-		g_free (*token);
 
-		/* Don't do g_strdup (s?s1:s2) as that doesn't work
-		 * with certain gcc 2.96 versions.
-		 */
-		*token = env ? g_strdup (env) : g_strdup ("");
+		/* If any element in the path fails evaluation, bail out */
+		if (!env)
+			return NULL;
+
+		g_free (*token);
+		*token = g_strdup (env);
 	}
 
-	/* Third get the real path removing any "../" and other
-	 * symbolic links to other places, returning only the REAL
-	 * location.
-	 */
 	expanded = g_strjoinv (G_DIR_SEPARATOR_S, tokens);
-	g_strfreev (tokens);
 
 	/* Only resolve relative paths if there is a directory
 	 * separator in the path, otherwise it is just a name.
 	 */
-	if (strchr (expanded, G_DIR_SEPARATOR)) {
-		GFile *file;
+	if (!strchr (expanded, G_DIR_SEPARATOR))
+		return NULL;
 
-		file = g_file_new_for_commandline_arg (expanded);
-		final_path = g_file_get_path (file);
-		g_object_unref (file);
-		g_free (expanded);
-	} else {
-		final_path = expanded;
-	}
+	file = g_file_new_for_commandline_arg (expanded);
+	eval_path = g_file_get_path (file);
 
-	return final_path;
+ end:
+	return g_steal_pointer (&eval_path);
 }
 
 gboolean

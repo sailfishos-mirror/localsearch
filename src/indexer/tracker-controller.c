@@ -346,7 +346,7 @@ update_directories_from_new_config (TrackerController *controller,
 			 * unmounts.
 			 */
 			tracker_indexing_tree_get_root (controller->indexing_tree,
-							file, &flags);
+			                                file, NULL, &flags);
 
 			if ((flags & TRACKER_DIRECTORY_FLAG_PRESERVE) != 0) {
 				flags &= ~(TRACKER_DIRECTORY_FLAG_PRESERVE);

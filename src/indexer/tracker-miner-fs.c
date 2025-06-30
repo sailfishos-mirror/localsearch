@@ -795,9 +795,9 @@ item_move (TrackerMinerFS *fs,
 	              g_message ("Moving item from '%s' to '%s'",
 	                         source_uri, uri));
 
-	tracker_indexing_tree_get_root (priv->indexing_tree, source_file, &source_flags);
+	tracker_indexing_tree_get_root (priv->indexing_tree, source_file, NULL, &source_flags);
 	source_recursive = (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
-	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, &flags);
+	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, NULL, &flags);
 	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
 	if (is_dir) {
@@ -1143,7 +1143,7 @@ miner_fs_get_queue_priority (TrackerMinerFS *fs,
 	TrackerDirectoryFlags flags;
 
 	tracker_indexing_tree_get_root (priv->indexing_tree,
-	                                file, &flags);
+	                                file, NULL, &flags);
 
 	return (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) ?
 	        G_PRIORITY_HIGH : G_PRIORITY_DEFAULT;

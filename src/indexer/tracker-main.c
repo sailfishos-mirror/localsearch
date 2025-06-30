@@ -557,7 +557,7 @@ check_eligible (TrackerIndexingTree *indexing_tree,
 		GFile *root, *parent;
 		GList *files = NULL, *l;
 
-		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 		parent = file;
 
 		/* Still, a parent folder might be filtered out, figure it out */

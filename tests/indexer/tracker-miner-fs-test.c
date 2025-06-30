@@ -80,7 +80,7 @@ test_miner_process_file (TrackerMinerFS      *miner,
 		tracker_resource_add_uri (resource, "rdf:type", "nie:DataSource");
 	}
 
-	root = tracker_indexing_tree_get_root (tree, file, NULL);
+	root = tracker_indexing_tree_get_root (tree, file, NULL, NULL);
 	if (root) {
 		root_uri = g_file_get_uri (root);
 		tracker_resource_set_uri (resource, "nie:dataSource", root_uri);

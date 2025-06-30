@@ -77,7 +77,6 @@ struct _TrackerMinerFilesPrivate {
 	gboolean low_battery_pause;
 	gboolean initial_index;
 
-	GUdevClient *udev_client;
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
@@ -283,8 +282,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 		                  mf);
 	}
 #endif /* HAVE_POWER */
-
-	priv->udev_client = g_udev_client_new (NULL);
 }
 
 static void
@@ -396,8 +393,6 @@ miner_files_finalize (GObject *object)
 		g_object_unref (priv->power);
 	}
 #endif /* HAVE_POWER */
-
-	g_clear_pointer (&priv->udev_client, g_object_unref);
 
 	if (priv->storage) {
 		g_object_unref (priv->storage);
@@ -973,7 +968,7 @@ miner_files_move_file (TrackerMinerFS      *fs,
 	} else {
 		GFile *root;
 
-		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL);
+		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 
 		if (root)
 			data_source = tracker_miner_fs_get_identifier (fs, root);
@@ -1156,10 +1151,4 @@ tracker_miner_files_check_allowed_text_file (TrackerMinerFiles *mf,
 	}
 
 	return FALSE;
-}
-
-GUdevClient *
-tracker_miner_files_get_udev_client (TrackerMinerFiles *mf)
-{
-	return mf->private->udev_client;
 }
