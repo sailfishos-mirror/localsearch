@@ -1,5 +1,20 @@
-NEW in 3.9.rc - 2025-03-16
-==========================
+NEW in 3.10.alpha - 2025-07-01
+==============================
+  * Systemd integration improvements
+  * A number of behavioral settings has been deprecated
+  * Fixes handling /var/home directories
+  * Many improvements to the command line tool
+  * The tracker:available property is again set on all graphs, for
+    indexed folders
+  * Fixes handling XML documents
+  * Fixes for possible crashes handling large PDF files
+  * Fixes for coverity warnings
+  * Code cleanups and refactors
+
+Translations: be, ca, uz
+
+NEW in 3.9.0 - 2025-03-16
+=========================
 Translations: ca
 
   Highlighted changes since 3.8.0:
