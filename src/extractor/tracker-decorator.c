@@ -436,7 +436,9 @@ decorator_commit_cb (GObject      *object,
 
 	decorator->updating = FALSE;
 
-	if (error) {
+	if (error && decorator->commit_buffer &&
+	    !g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_NO_SPACE) &&
+	    !g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
 		g_debug ("SPARQL error detected in batch, retrying one by one");
 		retry_synchronously (decorator, decorator->commit_buffer);
 	}
