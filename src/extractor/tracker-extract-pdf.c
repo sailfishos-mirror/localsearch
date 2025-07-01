@@ -208,13 +208,15 @@ extract_content_text (PopplerDocument *document,
 	     i++, elapsed = g_timer_elapsed (timer, NULL)) {
 		PopplerPage *page;
 		gsize written_bytes = 0;
-		gchar *text;
+		gchar *text = NULL;
 
 		page = poppler_document_get_page (document, i);
-		text = poppler_page_get_text (page);
+		if (page)
+			text = poppler_page_get_text (page);
 
 		if (!text) {
-			g_object_unref (page);
+			if (page)
+				g_object_unref (page);
 			continue;
 		}
 
