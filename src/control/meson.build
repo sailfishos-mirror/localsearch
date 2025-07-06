@@ -40,6 +40,7 @@ executable('localsearch-control-@0@'.format(tracker_api_major),
 tmp_conf = configuration_data()
 tmp_conf.merge_from(conf)
 tmp_conf.set('dbusname', 'LocalSearch3.Control')
+tmp_conf.set ('DOMAIN_PREFIX', get_option('domain_prefix'))
 if get_option('domain_prefix') == 'org.freedesktop'
   tmp_conf.set ('SYSTEMD_SERVICE', 'SystemdService=localsearch-control-3.service')
 else
@@ -56,6 +57,7 @@ dbus_service_file = configure_file(
 legacy_conf = configuration_data()
 legacy_conf.merge_from(conf)
 legacy_conf.set('dbusname', 'Tracker3.Miner.Files.Control')
+legacy_conf.set ('DOMAIN_PREFIX', get_option('domain_prefix'))
 if get_option('domain_prefix') == 'org.freedesktop'
   legacy_conf.set ('SYSTEMD_SERVICE', 'SystemdService=localsearch-control-3.service')
 else
