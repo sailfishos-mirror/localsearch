@@ -43,7 +43,7 @@ if libjpeg.found()
   modules += [['extract-jpeg', 'tracker-extract-jpeg.c', ['10-jpeg.rule'], [libjpeg, tracker_miners_common_dep]]]
 endif
 
-if not get_option('libav').disabled()
+if avformat.found()
   rules = ['15-libav-guess.rule', '90-libav-audio-generic.rule', '90-libav-video-generic.rule']
   extract_libav_files = ['tracker-extract-libav.c', 'tracker-cue-sheet.c']
   if gupnp_dlna.found()
