@@ -6,18 +6,37 @@ import re
 import subprocess
 import sys
 import tempfile
+from enum import Enum
+
+class Action(Enum):
+    WRITE = 1
+    PRINT = 2
+    FILTER = 3
 
 # Path relative to this script
 uncrustify_cfg = '.gitlab-ci/uncrustify.cfg'
 
 def run_diff(sha):
-    proc = subprocess.Popen(["git", "diff", "-U0", "--function-context", sha, "HEAD"], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    files = proc.stdout.read().strip().decode('utf-8')
-    return files.split('\n')
+    proc = subprocess.run(
+        ["git", "diff", "-U0", "--function-context", "--default-prefix", sha, "HEAD"],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        encoding="utf-8",
+    )
+    return proc.stdout.strip().splitlines()
+
+def generate_diff_of_whole_file(file):
+    proc = subprocess.run(
+        ["git", "diff", "-U0", "--function-context", "--default-prefix", "--no-index", "--", "/dev/null", file],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        encoding="utf-8",
+    )
+    return proc.stdout.strip().splitlines()
 
 def find_chunks(diff):
-    file_entry_re = re.compile('^\+\+\+ b/(.*)$')
-    diff_chunk_re = re.compile('^@@ -\d+,\d+ \+(\d+),(\d+)')
+    file_entry_re = re.compile(r'^\+\+\+ b/(.*)$')
+    diff_chunk_re = re.compile(r'^@@ -\d+,\d+ \+(\d+),(\d+)')
     file = None
     chunks = []
 
@@ -37,19 +56,20 @@ def find_chunks(diff):
 
     return chunks
 
-def reformat_chunks(chunks, rewrite):
+def reformat_chunks(chunks, action):
     # Creates temp file with INDENT-ON/OFF comments
     def create_temp_file(file, start, end):
         with open(file) as f:
             tmp = tempfile.NamedTemporaryFile()
-            tmp.write(b'/** *INDENT-OFF* **/\n')
-            for i, line in enumerate(f):
-                if i == start - 2:
+            if start > 1:
+                tmp.write(b'/** *INDENT-OFF* **/\n')
+            for i, line in enumerate(f, start=1):
+                if i == start - 1:
                     tmp.write(b'/** *INDENT-ON* **/\n')
 
                 tmp.write(bytes(line, 'utf-8'))
 
-                if i == end - 2:
+                if i == end - 1:
                     tmp.write(b'/** *INDENT-OFF* **/\n')
 
             tmp.seek(0)
@@ -75,40 +95,56 @@ def reformat_chunks(chunks, rewrite):
         tmp = create_temp_file(chunk['file'], chunk['start'], chunk['end'])
 
         # uncrustify chunk
-        proc = subprocess.Popen(["uncrustify", "-c", uncrustify_cfg, "-f", tmp.name], stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-        reindented = proc.stdout.readlines()
+        proc = subprocess.run(
+            ["uncrustify", "-c", uncrustify_cfg, "-f", tmp.name],
+            stdout=subprocess.PIPE,
+        )
+        reindented = proc.stdout.splitlines(keepends=True)
+        if proc.returncode != 0:
+            continue
+
         tmp.close()
 
         # Remove INDENT-ON/OFF comments
         formatted = remove_indent_comments(reindented)
 
-        if dry_run is True:
+        if action != Action.WRITE:
             # Show changes
-            proc = subprocess.Popen(["diff", "-up", "--color=always", chunk['file'], formatted.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            diff = proc.stdout.read().decode('utf-8')
+            proc = subprocess.run(
+                ["diff", "-up", "--color=always", chunk['file'], formatted.name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                encoding="utf-8",
+            )
+            diff = proc.stdout
             if diff != '':
-                output = re.sub('\t', '↦\t', diff)
-                print(output)
+                if action == Action.PRINT:
+                    output = re.sub('\t', '↦\t', diff)
+                    print(output)
                 changed = True
+            elif action == Action.FILTER:
+                chunks.remove(chunk)
         else:
             # Apply changes
-            diff = subprocess.Popen(["diff", "-up", chunk['file'], formatted.name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-            patch = subprocess.Popen(["patch", chunk['file']], stdin=diff.stdout)
-            diff.stdout.close()
-            patch.communicate()
+            diff = subprocess.run(
+                ["diff", "-up", chunk['file'], formatted.name],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+            )
+            patch = subprocess.run(["patch", chunk['file']], input=diff.stdout)
 
         formatted.close()
 
     return changed
 
 
-parser = argparse.ArgumentParser(description='Check code style.')
+parser = argparse.ArgumentParser(description='Check code style. Needs uncrustify installed.')
 parser.add_argument('--sha', metavar='SHA', type=str,
                     help='SHA for the commit to compare HEAD with')
-parser.add_argument('--dry-run', '-d', type=bool,
+parser.add_argument('--dry-run', '-d',
                     action=argparse.BooleanOptionalAction,
                     help='Only print changes to stdout, do not change code')
-parser.add_argument('--rewrite', '-r', type=bool,
+parser.add_argument('--rewrite', '-r',
                     action=argparse.BooleanOptionalAction,
                     help='Whether to amend the result to the last commit (e.g. \'git rebase --exec "%(prog)s -r"\')')
 
@@ -122,13 +158,44 @@ dry_run = args.dry_run
 
 diff = run_diff(sha)
 chunks = find_chunks(diff)
-changed = reformat_chunks(chunks, rewrite)
+changed = reformat_chunks(chunks, Action.FILTER)
+
+if changed:
+    last_file_changed = None
+    file_reformatted = False
+    for chunk in chunks:
+        file = chunk['file']
+        if file is not last_file_changed:
+            last_file_changed = file
+            super_diff = generate_diff_of_whole_file(file)
+            super_chunks = find_chunks(super_diff)
+            file_reformatted = reformat_chunks(super_chunks, Action.FILTER)
+        if not file_reformatted:
+            chunks.remove(chunk)
+
+    if dry_run:
+        action = Action.PRINT
+    else:
+        action = Action.WRITE
+    changed = reformat_chunks(chunks, action)
 
 if dry_run is not True and rewrite is True:
-    proc = subprocess.Popen(["git", "commit", "--all", "--amend", "-C", "HEAD"], stdout=subprocess.DEVNULL)
+    proc = subprocess.run(["git", "add", "-p"])
+    if proc.returncode == 0:
+        # Commit the added changes as a squash commit
+        subprocess.run(
+            ["git", "commit", "--squash", "HEAD", "-C", "HEAD"],
+            stdout=subprocess.DEVNULL)
+        # Delete the unapplied changes
+        subprocess.run(["git", "reset", "--hard"], stdout=subprocess.DEVNULL)
     os._exit(0)
 elif dry_run is True and changed is True:
-    print ("\nIssue the following command in your local tree to apply the suggested changes (needs uncrustify installed):\n\n $ git rebase origin/main --exec \"./check-style.py -r\" \n")
+    print(f"""
+Issue the following commands in your local tree to apply the suggested changes:
+
+    $ git rebase {sha} --exec "./check-style.py -r"
+    $ git rebase --autosquash {sha}
+""")
     os._exit(-1)
 
 os._exit(0)
