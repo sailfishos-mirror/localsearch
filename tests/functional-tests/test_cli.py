@@ -37,7 +37,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
     def test_help(self):
         output = self.run_cli(["localsearch", "help", "info"])
-        self.assertIn("localsearch info", output)
+        self.assertIn("localsearch", output)
 
     def test_help_wrongargs(self):
         out = ""

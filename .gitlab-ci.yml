@@ -1,5 +1,6 @@
 include:
   - remote: "https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/ci-fairy.yml"
+  - remote: 'https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/alpine.yml'
   - remote: 'https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/fedora.yml'
   - remote: 'https://gitlab.gnome.org/Infrastructure/freedesktop-ci-templates/-/raw/b61a03cabbf308e81289f7aaaf0b5a80a34ffb99/templates/debian.yml'
   - component: gitlab.gnome.org/GNOME/citemplates/release-service@master
@@ -126,6 +127,15 @@ check-merge-request:
       dnf clean all &&
       pip3 install beautifulsoup4 mkdocs mkdocs-cinder tap.py gcovr meson
 
+.tracker-miners.alpine@common:
+  variables:
+    BASE_TAG: '2025-07-17.0'
+    FDO_UPSTREAM_REPO: GNOME/localsearch
+    FDO_DISTRIBUTION_PACKAGES: 'alpine-sdk bash-completion dbus git json-glib-dev libsoup3-dev py3-gobject3 py3-setuptools py3-tappy py3-pip mandoc asciidoc dbus-dev enca-dev exempi-dev ffmpeg-dev flac-dev gexiv2-dev giflib-dev glib-dev gobject-introspection-dev gst-plugins-good gst-plugins-base-dev gstreamer-dev icu-dev libcue-dev libexif-dev libgsf-dev libgudev-dev libiptcdata-dev libjpeg-turbo-dev libosinfo-dev libpng-dev libseccomp-dev libvorbis-dev libxml2-dev meson poppler-dev shared-mime-info taglib-dev tiff-dev tinysparql tinysparql-dev totem-pl-parser-dev tzdata upower-dev zlib-dev'
+    FDO_DISTRIBUTION_EXEC: |
+      pip3 install gcovr &&
+      rm -f /usr/share/polkit-1/rules.d/50-default.rules
+
 .tracker-miners.debian@common:
   variables:
     BASE_TAG: '2025-05-13.0'
@@ -157,6 +167,12 @@ check-merge-request:
     FDO_DISTRIBUTION_TAG: "aarch64-${BASE_TAG}"
   tags:
     - aarch64
+
+.tracker-miners.alpine:latest@x86_64:
+  extends: .tracker-miners.alpine@common
+  variables:
+    FDO_DISTRIBUTION_VERSION: latest
+    FDO_DISTRIBUTION_TAG: "x86_64-${BASE_TAG}"
 
 .tracker-miners.debian:stable@x86_64:
   extends: .tracker-miners.debian@common
@@ -199,6 +215,17 @@ build-fedora-container@aarch64:
     - check-commit-log
     - check-merge-request
 
+build-alpine-container@x86_64:
+  extends:
+    - .fdo.container-build@alpine
+    - .tracker-miners.alpine:latest@x86_64
+  stage: prepare
+  variables:
+    GIT_STRATEGY: none
+  needs:
+    - check-commit-log
+    - check-merge-request
+
 build-debian-container@x86_64:
   extends:
     - .fdo.container-build@debian
@@ -229,7 +256,7 @@ check-code-style:
   script:
     - mkdir build
     - cd build
-    - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:avahi=disabled
+    - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:avahi=disabled ${BUILD_ARGS}
     - ninja
   artifacts:
     expire_in: 1 day
@@ -260,6 +287,16 @@ build-fedora@aarch64:
   needs:
     - build-fedora-container@aarch64
   allow_failure: true
+  <<: *build
+
+build-alpine-latest@x86_64:
+  extends:
+    - .fdo.distribution-image@alpine
+    - .tracker-miners.alpine:latest@x86_64
+  needs:
+    - build-alpine-container@x86_64
+  variables:
+    BUILD_ARGS: '-Dxps=disabled -Dsystemd_user_services=false'
   <<: *build
 
 build-debian-stable@x86_64:
@@ -338,6 +375,14 @@ test-fedora@aarch64:
   needs:
     - build-fedora@aarch64
   allow_failure: true
+  <<: *test
+
+test-alpine@x86_64:
+  extends:
+    - .fdo.distribution-image@alpine
+    - .tracker-miners.alpine:latest@x86_64
+  needs:
+    - build-alpine-latest@x86_64
   <<: *test
 
 test-debian@x86_64:
@@ -429,6 +474,15 @@ sandbox-fedora@aarch64:
   allow_failure: true
   <<: *sandbox
 
+sandbox-alpine@x86_64:
+  extends:
+    - .fdo.distribution-image@alpine
+    - .tracker-miners.alpine:latest@x86_64
+  needs:
+    - build-alpine-latest@x86_64
+  allow_failure: true
+  <<: *sandbox
+
 sandbox-debian@x86_64:
   extends:
     - .fdo.distribution-image@debian
@@ -467,6 +521,7 @@ coverage:
     - test-fedora@x86_64
     - test-fedora@aarch64
     - test-fedora-rawhide@x86_64
+    - test-alpine@x86_64
     # Currently breaks gcovr
     #- test-debian@x86_64
 
