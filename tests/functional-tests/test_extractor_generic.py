@@ -30,6 +30,7 @@ from gi.repository import Gio
 from gi.repository import Tsparql
 
 import json
+import logging
 import os
 import shutil
 import sys
@@ -148,6 +149,10 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
 
 
 def run_suite(suite):
+    if cfg.tests_verbose():
+        # Output all logs to stderr
+        logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
+
     if cfg.tap_protocol_enabled():
         try:
             from tap import TAPTestRunner

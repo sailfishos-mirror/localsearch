@@ -471,6 +471,7 @@ def get_tracker_extract_output(
         )
 
     if output_format == "json-ld":
+        log.debug("Extracted JSON-LD output:\n%s", output)
         try:
             return json.loads(output)
         except ValueError as e:
