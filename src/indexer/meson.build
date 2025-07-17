@@ -82,6 +82,7 @@ if get_option('domain_prefix') != 'org.freedesktop'
     tmp_conf = configuration_data()
     tmp_conf.merge_from(conf)
     tmp_conf.set ('DBUS_NAME', 'LocalSearch3')
+    tmp_conf.set ('DOMAIN_PREFIX', get_option('domain_prefix'))
 
     domain_ontology_localsearch_service_file = configure_file(
         input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
@@ -110,6 +111,7 @@ if get_option('domain_prefix') != 'org.freedesktop'
     legacy_conf = configuration_data()
     legacy_conf.merge_from(conf)
     legacy_conf.set ('DBUS_NAME', 'Tracker3.Miner.Files')
+    legacy_conf.set ('DOMAIN_PREFIX', get_option('domain_prefix'))
 
     legacy_domain_ontology_service_file = configure_file(
         input: 'org.freedesktop.Tracker3.Miner.Files.service.in',
