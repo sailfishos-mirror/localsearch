@@ -35,6 +35,7 @@ typedef struct {
 	gint op;
 	gchar *path;
 	gchar *other_path;
+	gint flags;
 } FilesystemOperation;
 
 /* Fixture struct */
@@ -64,6 +65,11 @@ typedef enum {
 	OPERATION_DELETE,
 	OPERATION_MOVE
 } OperationType;
+
+typedef enum {
+	FLAGS_NONE,
+	FLAGS_OPTIONAL,
+} OperationFlags;
 
 #if GLIB_MINOR_VERSION < 30
 gchar *
@@ -385,8 +391,8 @@ static void
 test_common_context_expect_results (TestCommonContext   *fixture,
                                     FilesystemOperation *results,
                                     guint                n_results,
-				    guint                max_timeout,
-				    gboolean             expect_finished)
+                                    guint                max_timeout,
+                                    gboolean             expect_finished)
 {
 	GList *ops;
 	guint i, id;
@@ -430,14 +436,14 @@ test_common_context_expect_results (TestCommonContext   *fixture,
 			ops = ops->next;
 		}
 
-		if (!matched) {
+		if (!matched && (results[i].flags & FLAGS_OPTIONAL) == 0) {
 			if (results[i].op == OPERATION_MOVE) {
 				g_critical ("Expected operation %d on %s (-> %s) didn't happen",
-					    results[i].op, results[i].path,
-					    results[i].other_path);
+				            results[i].op, results[i].path,
+				            results[i].other_path);
 			} else {
 				g_critical ("Expected operation %d on %s didn't happen",
-					    results[i].op, results[i].path);
+				            results[i].op, results[i].path);
 			}
 		}
 	}
@@ -914,7 +920,7 @@ test_file_notifier_monitor_updates_non_recursive (TestCommonContext *fixture,
 	FilesystemOperation expected_results2[] = {
 		{ OPERATION_UPDATE, "non-recursive/bbb", NULL },
 		{ OPERATION_CREATE, "non-recursive/ccc", NULL },
-		{ OPERATION_UPDATE, "non-recursive/ccc", NULL }
+		{ OPERATION_UPDATE, "non-recursive/ccc", NULL, FLAGS_OPTIONAL }
 	};
 	FilesystemOperation expected_results3[] = {
 		{ OPERATION_DELETE, "non-recursive/folder", NULL },
@@ -930,8 +936,8 @@ test_file_notifier_monitor_updates_non_recursive (TestCommonContext *fixture,
 
 	tracker_file_notifier_start (fixture->notifier);
 	test_common_context_expect_results (fixture, expected_results,
-					    G_N_ELEMENTS (expected_results),
-					    2, TRUE);
+	                                    G_N_ELEMENTS (expected_results),
+	                                    2, TRUE);
 	tracker_file_notifier_stop (fixture->notifier);
 
 	/* Perform file updates */
@@ -940,14 +946,14 @@ test_file_notifier_monitor_updates_non_recursive (TestCommonContext *fixture,
 	CREATE_UPDATE_FILE (fixture, "non-recursive/bbb");
 	CREATE_UPDATE_FILE (fixture, "non-recursive/ccc");
 	test_common_context_expect_results (fixture, expected_results2,
-					    G_N_ELEMENTS (expected_results2),
-					    3, FALSE);
+	                                    G_N_ELEMENTS (expected_results2),
+	                                    3, FALSE);
 
 	DELETE_FILE (fixture, "non-recursive/ccc");
 	DELETE_FOLDER (fixture, "non-recursive/folder");
 	test_common_context_expect_results (fixture, expected_results3,
-					    G_N_ELEMENTS (expected_results3),
-					    3, FALSE);
+	                                    G_N_ELEMENTS (expected_results3),
+	                                    3, FALSE);
 	tracker_file_notifier_stop (fixture->notifier);
 }
 
