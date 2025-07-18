@@ -23,6 +23,7 @@
 #include <ctype.h>
 
 #include "tracker-exif.h"
+#include "tracker-resource-helpers.h"
 #include "tracker-utils.h"
 
 #ifdef HAVE_LIBEXIF
@@ -659,6 +660,70 @@ tracker_exif_new (const guchar *buffer,
 	}
 
 	return data;
+}
+
+void
+tracker_exif_apply_to_resource (TrackerResource *resource,
+                                TrackerExifData *exif)
+{
+	if (!exif)
+		return;
+
+	if (exif->time_original)
+		tracker_resource_set_string (resource, "nie:contentCreated", exif->time_original);
+
+	if (exif->orientation)
+		tracker_resource_set_string (resource, "nfo:orientation", exif->orientation);
+
+	if (exif->make || exif->model) {
+		TrackerResource *equipment = tracker_extract_new_equipment (exif->make, exif->model);
+		tracker_resource_set_relation (resource, "nfo:equipment", equipment);
+		g_object_unref (equipment);
+	}
+
+	if (exif->artist) {
+		TrackerResource *artist = tracker_extract_new_contact (exif->artist);
+		tracker_resource_set_relation (resource, "nco:creator", artist);
+		g_object_unref (artist);
+	}
+
+	if (exif->description)
+		tracker_resource_set_string (resource, "nie:description", exif->description);
+
+	if (exif->copyright)
+		tracker_resource_set_string (resource, "nie:copyright", exif->copyright);
+
+	if (exif->fnumber)
+		tracker_resource_set_string (resource, "nmm:fnumber", exif->fnumber);
+
+	if (exif->flash)
+		tracker_resource_set_string (resource, "nmm:flash", exif->flash);
+
+	if (exif->focal_length)
+		tracker_resource_set_string (resource, "nmm:focalLength", exif->focal_length);
+
+	if (exif->iso_speed_ratings)
+		tracker_resource_set_string (resource, "nmm:isoSpeed", exif->iso_speed_ratings);
+
+	if (exif->exposure_time)
+		tracker_resource_set_string (resource, "nmm:exposureTime", exif->exposure_time);
+
+	if (exif->metering_mode)
+		tracker_resource_set_string (resource, "nmm:meteringMode", exif->metering_mode);
+
+	if (exif->white_balance)
+		tracker_resource_set_string (resource, "nmm:whiteBalance", exif->white_balance);
+
+	if (exif->gps_latitude || exif->gps_longitude || exif->gps_altitude) {
+		TrackerResource *location = tracker_extract_new_location (
+			NULL, NULL, NULL, NULL,
+			exif->gps_altitude, exif->gps_latitude, exif->gps_longitude);
+		tracker_resource_set_relation (resource, "slo:location", location);
+		g_object_unref (location);
+	}
+
+	if (exif->gps_direction)
+		tracker_resource_set_string (resource, "nfo:heading", exif->gps_direction);
 }
 
 /**

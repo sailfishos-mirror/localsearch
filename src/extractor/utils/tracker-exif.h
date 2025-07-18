@@ -20,7 +20,7 @@
 #ifndef __LIBTRACKER_EXTRACT_EXIF_H__
 #define __LIBTRACKER_EXTRACT_EXIF_H__
 
-#include <glib.h>
+#include <tinysparql.h>
 
 G_BEGIN_DECLS
 
@@ -108,6 +108,9 @@ gboolean          tracker_exif_read  (const unsigned char *buffer,
                                       TrackerExifData     *data) G_GNUC_DEPRECATED;
 
 #endif /* TRACKER_DISABLE_DEPRECATED */
+
+void tracker_exif_apply_to_resource (TrackerResource *resource,
+                                     TrackerExifData *exif);
 
 G_END_DECLS
 

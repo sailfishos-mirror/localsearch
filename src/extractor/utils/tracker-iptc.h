@@ -21,6 +21,7 @@
 #define __LIBTRACKER_EXTRACT_IPTC_H__
 
 #include <glib.h>
+#include "tracker-extract.h"
 
 /* IPTC Information Interchange Model */
 
@@ -71,6 +72,9 @@ gboolean         tracker_iptc_read  (const unsigned char *buffer,
 				     TrackerIptcData     *data) G_GNUC_DEPRECATED;
 
 #endif /* TRACKER_DISABLE_DEPRECATED */
+
+void tracker_iptc_apply_to_resource (TrackerResource *resource,
+                                     TrackerIptcData *iptc);
 
 G_END_DECLS
 
