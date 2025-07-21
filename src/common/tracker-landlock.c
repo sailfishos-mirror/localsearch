@@ -204,6 +204,11 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		  (LANDLOCK_ACCESS_FS_EXECUTE |
 		   LANDLOCK_ACCESS_FS_READ_FILE |
 		   LANDLOCK_ACCESS_FS_READ_DIR) },
+		/* Required for the rtld on non-usrmerge systems */
+		{ "/lib",
+		  (LANDLOCK_ACCESS_FS_EXECUTE |
+		   LANDLOCK_ACCESS_FS_READ_FILE |
+		   LANDLOCK_ACCESS_FS_READ_DIR) },
 		/* Data dir, to access miscellaneous files. Extends to /usr */
 		{ PREFIX "/" DATADIR,
 		  (LANDLOCK_ACCESS_FS_READ_FILE |
