@@ -22,6 +22,7 @@
 #include <string.h>
 
 #include "tracker-iptc.h"
+#include "tracker-resource-helpers.h"
 #include "tracker-utils.h"
 
 #ifdef HAVE_LIBIPTCDATA
@@ -332,4 +333,48 @@ tracker_iptc_free (TrackerIptcData *data)
 	g_free (data->contact);
 
 	g_free (data);
+}
+
+void
+tracker_iptc_apply_to_resource (TrackerResource *resource,
+                                TrackerIptcData *iptc)
+{
+	if (!iptc)
+		return;
+
+	if (iptc->keywords)
+		tracker_resource_set_string (resource, "nao:keywords", iptc->keywords);
+
+	if (iptc->date_created)
+		tracker_resource_set_string (resource, "nie:contentCreated", iptc->date_created);
+
+	if (iptc->byline)
+		tracker_resource_set_string (resource, "nco:creator", iptc->byline);
+
+	if (iptc->credit)
+		tracker_resource_set_string (resource, "nfo:credit", iptc->credit);
+
+	if (iptc->copyright_notice)
+		tracker_resource_set_string (resource, "nie:copyright", iptc->copyright_notice);
+
+	if (iptc->image_orientation)
+		tracker_resource_set_string (resource, "nfo:orientation", iptc->image_orientation);
+
+	if (iptc->byline_title)
+		tracker_resource_set_string (resource, "nfo:bylineTitle", iptc->byline_title);
+
+	if (iptc->city)
+		tracker_resource_set_string (resource, "nco:locality", iptc->city);
+
+	if (iptc->state)
+		tracker_resource_set_string (resource, "nco:region", iptc->state);
+
+	if (iptc->sublocation)
+		tracker_resource_set_string (resource, "nco:sublocation", iptc->sublocation);
+
+	if (iptc->country_name)
+		tracker_resource_set_string (resource, "nco:country", iptc->country_name);
+
+	if (iptc->contact)
+		tracker_resource_set_string (resource, "nco:contact", iptc->contact);
 }

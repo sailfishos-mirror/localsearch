@@ -96,6 +96,10 @@ if libcue.found()
   modules += [['extract-disc-generic', 'tracker-extract-disc-generic.c', ['90-disc-generic.rule'], [libcue, tracker_miners_common_dep]]]
 endif
 
+if webp.found()
+  modules += [['extract-webp', 'tracker-extract-webp.c', ['10-webp.rule'], [webp, tracker_miners_common_dep]]]
+endif
+
 enabled_rule_files = []
 
 foreach module : modules

@@ -74,6 +74,8 @@ option('xps', type: 'feature', value: 'auto',
        description: 'Support extracting metadata from XPS documents')
 option('libav', type: 'feature', value: 'auto',
        description: 'Support extracting metadata using FFmpeg/libav')
+option('webp', type: 'feature', value: 'auto',
+       description: 'Support webp images')
 
 option('battery_detection', type: 'combo', choices: ['upower', 'hal', 'none'], value: 'upower',
        description: 'Enable upower or HAL for battery/mains power detection')

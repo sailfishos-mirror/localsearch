@@ -113,6 +113,10 @@ if gexiv2.found()
   extractor_tests += 'images/raw-cr2'
 endif
 
+if webp.found()
+  extractor_tests += 'images/webp-basic-1'
+endif
+
 if libtiff.found()
   extractor_tests += 'images/tiff-basic'
   extractor_tests += 'images/tiff-photo-1'
