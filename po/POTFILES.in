@@ -4,11 +4,10 @@ data/org.freedesktop.Tracker.Extract.gschema.xml
 data/org.freedesktop.Tracker.FTS.gschema.xml
 data/org.freedesktop.Tracker.Miner.Files.gschema.xml
 src/cli/main.c
-src/cli/tracker-daemon.c
-src/cli/tracker-dbus.c
 src/cli/tracker-extract.c
 src/cli/tracker-index.c
 src/cli/tracker-info.c
+src/cli/tracker-inhibit.c
 src/cli/tracker-process.c
 src/cli/tracker-reset.c
 src/cli/tracker-search.c
