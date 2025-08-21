@@ -63,38 +63,12 @@ typedef enum {
  */
 #define TRACKER_STORAGE_TYPE_IS_OPTICAL(type) ((type & TRACKER_STORAGE_OPTICAL) ? TRUE : FALSE)
 
+#define TRACKER_TYPE_STORAGE (tracker_storage_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerStorage,
+                      tracker_storage,
+                      TRACKER, STORAGE,
+                      GObject)
 
-#define TRACKER_TYPE_STORAGE         (tracker_storage_get_type ())
-#define TRACKER_STORAGE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_STORAGE, TrackerStorage))
-#define TRACKER_STORAGE_CLASS(k)     (G_TYPE_CHECK_CLASS_CAST ((k), TRACKER_TYPE_STORAGE, TrackerStorageClass))
-#define TRACKER_IS_STORAGE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_STORAGE))
-#define TRACKER_IS_STORAGE_CLASS(k)  (G_TYPE_CHECK_CLASS_TYPE ((k), TRACKER_TYPE_STORAGE))
-#define TRACKER_STORAGE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_STORAGE, TrackerStorageClass))
-
-typedef struct _TrackerStorage TrackerStorage;
-typedef struct _TrackerStorageClass TrackerStorageClass;
-
-/**
- * TrackerStorage:
- * @parent: parent object
- *
- * A storage API for using mount points and devices
- **/
-struct _TrackerStorage {
-	GObject parent;
-};
-
-/**
- * TrackerStorageClass:
- * @parent_class: parent object class
- *
- * A storage class for #TrackerStorage.
- **/
-struct _TrackerStorageClass {
-	GObjectClass parent_class;
-};
-
-GType              tracker_storage_get_type                 (void) G_GNUC_CONST;
 TrackerStorage *   tracker_storage_new                      (void);
 GSList *           tracker_storage_get_device_roots         (TrackerStorage     *storage,
                                                              TrackerStorageType  type,

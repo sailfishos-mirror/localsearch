@@ -37,6 +37,10 @@
  * The API is built upon the top of GIO's #GMount, #GDrive and #GVolume API.
  **/
 
+struct _TrackerStorage {
+	GObject parent_instance;
+};
+
 #define TRACKER_STORAGE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TRACKER_TYPE_STORAGE, TrackerStoragePrivate))
 
 typedef struct {
