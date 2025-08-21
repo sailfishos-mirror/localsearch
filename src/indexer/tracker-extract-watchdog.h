@@ -23,7 +23,6 @@
 #include <tinysparql.h>
 
 #include "tracker-indexing-tree.h"
-#include "tracker-storage.h"
 
 G_BEGIN_DECLS
 
@@ -35,8 +34,7 @@ G_DECLARE_FINAL_TYPE (TrackerExtractWatchdog,
 		      GObject)
 
 TrackerExtractWatchdog * tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
-                                                       TrackerIndexingTree     *indexing_tree,
-                                                       TrackerStorage          *storage);
+                                                       TrackerIndexingTree     *indexing_tree);
 
 void tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog);
 

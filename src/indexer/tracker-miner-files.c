@@ -771,8 +771,7 @@ miner_files_constructed (GObject *object)
 
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),
-		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)),
-		                              mf->private->storage);
+		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)));
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",
