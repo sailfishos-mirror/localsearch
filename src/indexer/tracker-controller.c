@@ -115,6 +115,7 @@ add_indexed_directory (TrackerController     *controller,
                        TrackerDirectoryFlags  flags)
 {
 	g_autofree gchar *path = NULL;
+	TrackerStorageType type;
 
 	path = g_file_get_path (file);
 
@@ -131,6 +132,11 @@ add_indexed_directory (TrackerController     *controller,
 			return;
 		}
 	}
+
+	type = tracker_storage_get_type_for_file (controller->storage, file);
+
+	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+		flags |= TRACKER_DIRECTORY_FLAG_IS_VOLUME;
 
 	g_debug ("  Adding:'%s'", path);
 
