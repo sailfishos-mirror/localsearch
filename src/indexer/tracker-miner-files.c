@@ -508,16 +508,15 @@ init_index_roots (TrackerMinerFiles *miner_files)
 	roots = tracker_indexing_tree_list_roots (indexing_tree);
 
 	for (l = roots; l; l = l->next) {
-		TrackerStorage *storage = miner_files->private->storage;
-		TrackerStorageType type;
+		TrackerDirectoryFlags flags;
 		GFile *file = l->data;
 
 		if (g_hash_table_contains (handled, file))
 			continue;
 
-		type = tracker_storage_get_type_for_file (storage, file);
+		tracker_indexing_tree_get_root (indexing_tree, file, NULL, &flags);
 
-		if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+		if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
 			set_up_mount_point (miner_files, file, TRUE, NULL);
 	}
 
@@ -634,12 +633,11 @@ indexing_tree_directory_added_cb (TrackerIndexingTree *indexing_tree,
                                   gpointer             user_data)
 {
 	TrackerMinerFiles *miner_files = user_data;
-	TrackerStorage *storage = miner_files->private->storage;
-	TrackerStorageType type;
+	TrackerDirectoryFlags flags;
 
-	type = tracker_storage_get_type_for_file (storage, directory);
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+	if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
 		set_up_mount_point (miner_files, directory, TRUE, NULL);
 }
 
