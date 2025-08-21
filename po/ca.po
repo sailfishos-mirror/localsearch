@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-02-13 03:36+0000\n"
-"PO-Revision-Date: 2025-03-03 00:21+0200\n"
+"PO-Revision-Date: 2025-08-21 00:21+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -37,7 +37,7 @@ msgstr "Fitxer de text de llista de permesos"
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:31
 msgid "Filename patterns for plain text documents that should be indexed"
 msgstr ""
-"Patrons de nom fitxer per a documents de text sense format que s'han "
+"Patrons de nom de fitxer per a documents de text sense format que s'han "
 "d'indexar"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:37
@@ -53,7 +53,7 @@ msgid ""
 "wait to get meta-data later."
 msgstr ""
 "Si és «true» (cert), el tracker-extract esperarà que el tracker-miner-fs "
-"acabi la indexació abans d'extreure metadades. Aquesta opció és útil en "
+"acabi el rastreig abans d'extreure metadades. Aquesta opció és útil en "
 "entorns restringits quan és important llistar els fitxers ràpidament i es "
 "pot esperar per a obtenir les metadades més tard."
 
@@ -99,7 +99,7 @@ msgstr "Temps d'espera inicial, en segons."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
 msgid "Throttle"
-msgstr "Accelerador"
+msgstr "Limitació"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
 msgid "Indexing speed, the higher the slower."
@@ -118,7 +118,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
 msgid "Crawling interval"
-msgstr "Interval d'indexació"
+msgstr "Interval de rastreig"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
 msgid ""
@@ -127,7 +127,7 @@ msgid ""
 "shutdowns, and -2 disables it entirely."
 msgstr ""
 "Interval, en dies, per a comprovar si el sistema de fitxers està actualitzat "
-"a la base de dades. El 0 força la indexació en qualsevol moment, el -1 la "
+"a la base de dades. El 0 força el rastreig en qualsevol moment, el -1 la "
 "força només després d'aturades incorrectes i el -2 la desactiva completament."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
@@ -246,7 +246,7 @@ msgstr "Directoris a ignorar"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
 msgid "List of directories to avoid"
-msgstr "Llista de directores que s'han d'ignorar"
+msgstr "Llista de directoris que s'han d'ignorar"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
 msgid "Ignored directories with content"
@@ -330,12 +330,12 @@ msgstr "S'està recollint…"
 #: src/cli/tracker-daemon.c:103
 #, c-format
 msgid "Crawling single directory “%s”"
-msgstr "S'està arrossegant el directori «%s»"
+msgstr "S'està rastrejant el directori «%s»"
 
 #: src/cli/tracker-daemon.c:104
 #, c-format
 msgid "Crawling recursively directory “%s”"
-msgstr "S'està arrossegant de forma recursiva el directori «%s»"
+msgstr "S'està rastrejant el directori «%s» de forma recursiva"
 
 #: src/cli/tracker-daemon.c:105
 msgid "Paused"
@@ -818,7 +818,7 @@ msgstr "S'està suprimint…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
-"Les dades indexades per a aquest fitxer han estat esborrades i re-indexades "
+"Les dades indexades per a aquest fitxer han estat esborrades i es reindexaran "
 "de nou."
 
 #: src/cli/tracker-search.c:60
@@ -1088,7 +1088,7 @@ msgstr[1] "%d fallades enregistrades"
 
 #: src/cli/tracker-status.c:524
 msgid "No reports found"
-msgstr "No cap informe"
+msgstr "No s'ha trobat cap informe"
 
 #: src/cli/tracker-tag.c:51
 msgid ""
@@ -1436,7 +1436,7 @@ msgstr "El fitxer no és apte per a ser indexat (fitxer amagat)"
 
 #: src/indexer/tracker-main.c:567
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "El directori no és apte per a ser indexat (no és una carpeta indexada)"
+msgstr "El fitxer no és apte per a ser indexat (no és una carpeta indexada)"
 
 #: src/indexer/tracker-main.c:591
 #, c-format
