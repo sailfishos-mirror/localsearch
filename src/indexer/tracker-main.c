@@ -708,8 +708,7 @@ main (gint argc, gchar *argv[])
 	/* Create new TrackerMinerFiles object */
 	miner_files = tracker_miner_files_new (sparql_conn,
 	                                       indexing_tree,
-	                                       monitor,
-	                                       storage);
+	                                       monitor);
 
 	controller = tracker_controller_new (indexing_tree, monitor, storage, files_interface);
 

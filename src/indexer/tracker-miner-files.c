@@ -28,7 +28,6 @@
 #include "tracker-miner-files.h"
 #include "tracker-miner-files-methods.h"
 #include "tracker-config.h"
-#include "tracker-storage.h"
 #include "tracker-extract-watchdog.h"
 #include "tracker-utils.h"
 
@@ -53,8 +52,6 @@ struct _TrackerMinerFiles {
 static GQuark miner_files_error_quark = 0;
 
 struct _TrackerMinerFilesPrivate {
-	TrackerStorage *storage;
-
 	TrackerExtractWatchdog *extract_watchdog;
 	guint grace_period_timeout_id;
 
@@ -69,21 +66,8 @@ struct _TrackerMinerFilesPrivate {
 	guint stale_volumes_check_id;
 };
 
-enum {
-	PROP_0,
-	PROP_STORAGE,
-};
-
 #define TEXT_ALLOWLIST "text-allowlist"
 
-static void        miner_files_set_property             (GObject              *object,
-                                                         guint                 param_id,
-                                                         const GValue         *value,
-                                                         GParamSpec           *pspec);
-static void        miner_files_get_property             (GObject              *object,
-                                                         guint                 param_id,
-                                                         GValue               *value,
-                                                         GParamSpec           *pspec);
 static void        miner_files_constructed              (GObject              *object);
 static void        miner_files_finalize                 (GObject              *object);
 #ifdef HAVE_POWER
@@ -151,8 +135,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 
 	object_class->constructed = miner_files_constructed;
 	object_class->finalize = miner_files_finalize;
-	object_class->get_property = miner_files_get_property;
-	object_class->set_property = miner_files_set_property;
 
 	miner_class->started = miner_files_started;
 
@@ -164,15 +146,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	miner_fs_class->move_file = miner_files_move_file;
 	miner_fs_class->finish_directory = miner_files_finish_directory;
 	miner_fs_class->get_content_identifier = miner_files_get_content_identifier;
-
-	g_object_class_install_property (object_class,
-	                                 PROP_STORAGE,
-	                                 g_param_spec_object ("storage",
-	                                                      NULL, NULL,
-	                                                      TRACKER_TYPE_STORAGE,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -269,46 +242,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 }
 
 static void
-miner_files_set_property (GObject      *object,
-                          guint         prop_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
-{
-	TrackerMinerFilesPrivate *priv;
-
-	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
-
-	switch (prop_id) {
-	case PROP_STORAGE:
-		priv->storage = g_value_dup_object (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-miner_files_get_property (GObject    *object,
-                          guint       prop_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
-{
-	TrackerMinerFilesPrivate *priv;
-
-	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
-
-	switch (prop_id) {
-	case PROP_STORAGE:
-		g_value_set_object (value, priv->storage);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
 miner_files_finalize (GObject *object)
 {
 	TrackerMinerFiles *mf;
@@ -336,10 +269,6 @@ miner_files_finalize (GObject *object)
 		g_object_unref (priv->power);
 	}
 #endif /* HAVE_POWER */
-
-	if (priv->storage) {
-		g_object_unref (priv->storage);
-	}
 
 	if (priv->stale_volumes_check_id) {
 		g_source_remove (priv->stale_volumes_check_id);
@@ -781,8 +710,7 @@ miner_files_constructed (GObject *object)
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
-                         TrackerMonitor           *monitor,
-                         TrackerStorage           *storage)
+                         TrackerMonitor           *monitor)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -790,7 +718,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
 	                     "monitor", monitor,
-	                     "storage", storage,
 	                     NULL);
 }
 
@@ -833,10 +760,4 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);
-}
-
-TrackerStorage *
-tracker_miner_files_get_storage (TrackerMinerFiles *mf)
-{
-	return mf->private->storage;
 }

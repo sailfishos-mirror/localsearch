@@ -36,10 +36,7 @@ G_DECLARE_FINAL_TYPE (TrackerMinerFiles, tracker_miner_files, TRACKER, MINER_FIL
 
 TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,
-                                        TrackerMonitor          *monitor,
-                                        TrackerStorage          *storage);
-
-TrackerStorage * tracker_miner_files_get_storage (TrackerMinerFiles *mf);
+                                        TrackerMonitor          *monitor);
 
 G_END_DECLS
 
