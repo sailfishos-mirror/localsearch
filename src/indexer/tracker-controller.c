@@ -193,18 +193,18 @@ mount_point_added_cb (TrackerController *controller,
 				 *  then add the config path to re-check */
 				g_debug ("  Re-check of configured path '%s' needed (recursively)",
 				         (gchar *) l->data);
-				tracker_indexing_tree_add (controller->indexing_tree,
-							   config_file,
-							   flags);
+				add_indexed_directory (controller,
+				                       config_file,
+				                       flags);
 			} else if (g_file_has_prefix (mount_point_file, config_file)) {
 				/* If the mount path is contained inside the config path,
 				 *  then add the mount path to re-check */
 				g_debug ("  Re-check of path '%s' needed (inside configured path '%s')",
 				         mount_point,
 				         (gchar *) l->data);
-				tracker_indexing_tree_add (controller->indexing_tree,
-							   config_file,
-							   flags);
+				add_indexed_directory (controller,
+				                       config_file,
+				                       flags);
 			}
 		}
 
@@ -222,9 +222,9 @@ mount_point_added_cb (TrackerController *controller,
 			    g_file_has_prefix (config_file, mount_point_file)) {
 				g_debug ("  Re-check of configured path '%s' needed (non-recursively)",
 				         (gchar *) l->data);
-				tracker_indexing_tree_add (controller->indexing_tree,
-							   config_file,
-							   flags);
+				add_indexed_directory (controller,
+				                       config_file,
+				                       flags);
 			}
 		}
 	} else {
@@ -367,7 +367,7 @@ update_directories_from_new_config (TrackerController *controller,
 			TRACKER_NOTE (CONFIG, g_message ("  Adding directory:'%s'", path));
 
 			file = g_file_new_for_path (path);
-			tracker_indexing_tree_add (controller->indexing_tree, file, flags);
+			add_indexed_directory (controller, file, flags);
 		}
 	}
 }
@@ -664,9 +664,9 @@ update_indexed_files_from_proxy (TrackerController *controller,
 		if (g_file_info_get_file_type (file_info) == G_FILE_TYPE_DIRECTORY) {
 			if (!tracker_indexing_tree_file_is_indexable (indexing_tree,
 			                                              file, file_info)) {
-				tracker_indexing_tree_add (indexing_tree,
-				                           file,
-				                           TRACKER_DIRECTORY_FLAG_RECURSE);
+				add_indexed_directory (controller,
+				                       file,
+				                       TRACKER_DIRECTORY_FLAG_RECURSE);
 				g_ptr_array_add (controller->control_proxy_folders,
 				                 g_object_ref (file));
 			} else {
