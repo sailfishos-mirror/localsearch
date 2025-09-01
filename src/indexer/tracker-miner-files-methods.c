@@ -61,17 +61,18 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
                             TrackerResource   *resource,
                             GFile             *file)
 {
-	TrackerStorage *storage;
-	TrackerStorageType storage_type;
+	TrackerIndexingTree *indexing_tree;
+	TrackerDirectoryFlags flags;
+	gboolean is_removable;
 
-	storage = tracker_miner_files_get_storage (miner);
-	storage_type = tracker_storage_get_type_for_file (storage, file);
+	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	tracker_indexing_tree_get_root (indexing_tree, file, NULL, &flags);
+	is_removable = !!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME);
 
-	if (storage_type == 0)
+	if (!is_removable)
 		return;
 
-	tracker_resource_set_boolean (resource, "tracker:isRemovable",
-	                              (storage_type & TRACKER_STORAGE_REMOVABLE) != 0);
+	tracker_resource_set_boolean (resource, "tracker:isRemovable", is_removable);
 }
 
 static void

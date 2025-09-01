@@ -4,6 +4,7 @@
 #include <glib-object.h>
 
 #include "tracker-indexing-tree.h"
+#include "tracker-monitor.h"
 #include "tracker-storage.h"
 #include "tracker-files-interface.h"
 
@@ -13,6 +14,7 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (TrackerController, tracker_controller, TRACKER, CONTROLLER, GObject)
 
 TrackerController * tracker_controller_new (TrackerIndexingTree   *tree,
+                                            TrackerMonitor        *monitor,
                                             TrackerStorage        *storage,
                                             TrackerFilesInterface *files_interface);
 

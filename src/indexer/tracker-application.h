@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016, Red Hat Inc.
+ * Copyright (C) 2025, Red Hat Inc.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,27 +17,14 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#ifndef __TRACKER_EXTRACT_WATCHDOG_H__
-#define __TRACKER_EXTRACT_WATCHDOG_H__
+#include <gio/gio.h>
 
-#include <tinysparql.h>
+#define TRACKER_TYPE_APPLICATION (tracker_application_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerApplication,
+                      tracker_application,
+                      TRACKER, APPLICATION,
+                      GApplication)
 
-#include "tracker-indexing-tree.h"
+GApplication * tracker_application_new (GError **error);
 
-G_BEGIN_DECLS
-
-#define TRACKER_TYPE_EXTRACT_WATCHDOG (tracker_extract_watchdog_get_type ())
-
-G_DECLARE_FINAL_TYPE (TrackerExtractWatchdog,
-		      tracker_extract_watchdog,
-		      TRACKER, EXTRACT_WATCHDOG,
-		      GObject)
-
-TrackerExtractWatchdog * tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
-                                                       TrackerIndexingTree     *indexing_tree);
-
-void tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog);
-
-G_END_DECLS
-
-#endif /* __TRACKER_EXTRACT_WATCHDOG_H__ */
+gboolean tracker_application_exit_in_error (TrackerApplication *app);

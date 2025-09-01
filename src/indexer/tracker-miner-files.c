@@ -28,7 +28,6 @@
 #include "tracker-miner-files.h"
 #include "tracker-miner-files-methods.h"
 #include "tracker-config.h"
-#include "tracker-storage.h"
 #include "tracker-extract-watchdog.h"
 #include "tracker-utils.h"
 
@@ -39,18 +38,6 @@
 #define RETRY_AFTER_DISK_FULL (60 * 15)
 
 #define REMOVABLE_DEVICES_CHECK_DAYS 3
-
-#define FILE_ATTRIBUTES	  \
-	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
-	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
-	G_FILE_ATTRIBUTE_STANDARD_NAME "," \
-	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
-	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
-	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
-	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
-	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
-	G_FILE_ATTRIBUTE_TIME_CREATED "," \
-	G_FILE_ATTRIBUTE_TIME_ACCESS
 
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
 
@@ -65,8 +52,6 @@ struct _TrackerMinerFiles {
 static GQuark miner_files_error_quark = 0;
 
 struct _TrackerMinerFilesPrivate {
-	TrackerStorage *storage;
-
 	TrackerExtractWatchdog *extract_watchdog;
 	guint grace_period_timeout_id;
 
@@ -81,21 +66,8 @@ struct _TrackerMinerFilesPrivate {
 	guint stale_volumes_check_id;
 };
 
-enum {
-	PROP_0,
-	PROP_STORAGE,
-};
-
 #define TEXT_ALLOWLIST "text-allowlist"
 
-static void        miner_files_set_property             (GObject              *object,
-                                                         guint                 param_id,
-                                                         const GValue         *value,
-                                                         GParamSpec           *pspec);
-static void        miner_files_get_property             (GObject              *object,
-                                                         guint                 param_id,
-                                                         GValue               *value,
-                                                         GParamSpec           *pspec);
 static void        miner_files_constructed              (GObject              *object);
 static void        miner_files_finalize                 (GObject              *object);
 #ifdef HAVE_POWER
@@ -163,8 +135,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 
 	object_class->constructed = miner_files_constructed;
 	object_class->finalize = miner_files_finalize;
-	object_class->get_property = miner_files_get_property;
-	object_class->set_property = miner_files_set_property;
 
 	miner_class->started = miner_files_started;
 
@@ -176,15 +146,6 @@ tracker_miner_files_class_init (TrackerMinerFilesClass *klass)
 	miner_fs_class->move_file = miner_files_move_file;
 	miner_fs_class->finish_directory = miner_files_finish_directory;
 	miner_fs_class->get_content_identifier = miner_files_get_content_identifier;
-
-	g_object_class_install_property (object_class,
-	                                 PROP_STORAGE,
-	                                 g_param_spec_object ("storage",
-	                                                      NULL, NULL,
-	                                                      TRACKER_TYPE_STORAGE,
-	                                                      G_PARAM_READWRITE |
-	                                                      G_PARAM_CONSTRUCT_ONLY |
-	                                                      G_PARAM_STATIC_STRINGS));
 
 	miner_files_error_quark = g_quark_from_static_string ("TrackerMinerFiles");
 }
@@ -281,46 +242,6 @@ tracker_miner_files_init (TrackerMinerFiles *mf)
 }
 
 static void
-miner_files_set_property (GObject      *object,
-                          guint         prop_id,
-                          const GValue *value,
-                          GParamSpec   *pspec)
-{
-	TrackerMinerFilesPrivate *priv;
-
-	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
-
-	switch (prop_id) {
-	case PROP_STORAGE:
-		priv->storage = g_value_dup_object (value);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-miner_files_get_property (GObject    *object,
-                          guint       prop_id,
-                          GValue     *value,
-                          GParamSpec *pspec)
-{
-	TrackerMinerFilesPrivate *priv;
-
-	priv = TRACKER_MINER_FILES_GET_PRIVATE (object);
-
-	switch (prop_id) {
-	case PROP_STORAGE:
-		g_value_set_object (value, priv->storage);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
 miner_files_finalize (GObject *object)
 {
 	TrackerMinerFiles *mf;
@@ -348,10 +269,6 @@ miner_files_finalize (GObject *object)
 		g_object_unref (priv->power);
 	}
 #endif /* HAVE_POWER */
-
-	if (priv->storage) {
-		g_object_unref (priv->storage);
-	}
 
 	if (priv->stale_volumes_check_id) {
 		g_source_remove (priv->stale_volumes_check_id);
@@ -520,16 +437,15 @@ init_index_roots (TrackerMinerFiles *miner_files)
 	roots = tracker_indexing_tree_list_roots (indexing_tree);
 
 	for (l = roots; l; l = l->next) {
-		TrackerStorage *storage = miner_files->private->storage;
-		TrackerStorageType type;
+		TrackerDirectoryFlags flags;
 		GFile *file = l->data;
 
 		if (g_hash_table_contains (handled, file))
 			continue;
 
-		type = tracker_storage_get_type_for_file (storage, file);
+		tracker_indexing_tree_get_root (indexing_tree, file, NULL, &flags);
 
-		if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+		if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
 			set_up_mount_point (miner_files, file, TRUE, NULL);
 	}
 
@@ -646,12 +562,11 @@ indexing_tree_directory_added_cb (TrackerIndexingTree *indexing_tree,
                                   gpointer             user_data)
 {
 	TrackerMinerFiles *miner_files = user_data;
-	TrackerStorage *storage = miner_files->private->storage;
-	TrackerStorageType type;
+	TrackerDirectoryFlags flags;
 
-	type = tracker_storage_get_type_for_file (storage, directory);
+	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+	if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
 		set_up_mount_point (miner_files, directory, TRUE, NULL);
 }
 
@@ -785,8 +700,7 @@ miner_files_constructed (GObject *object)
 
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),
-		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)),
-		                              mf->private->storage);
+		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)));
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",
@@ -794,17 +708,16 @@ miner_files_constructed (GObject *object)
 }
 
 TrackerMiner *
-tracker_miner_files_new (TrackerSparqlConnection *connection,
-                         TrackerIndexingTree     *indexing_tree,
-                         TrackerStorage          *storage)
+tracker_miner_files_new (TrackerSparqlConnection  *connection,
+                         TrackerIndexingTree      *indexing_tree,
+                         TrackerMonitor           *monitor)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
 	return g_object_new (TRACKER_TYPE_MINER_FILES,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
-	                     "storage", storage,
-	                     "file-attributes", FILE_ATTRIBUTES,
+	                     "monitor", monitor,
 	                     NULL);
 }
 
@@ -847,10 +760,4 @@ miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
 	tracker_sparql_statement_update_async (stmt, NULL,
 	                                       remove_files_in_removable_media_cb,
 	                                       NULL);
-}
-
-TrackerStorage *
-tracker_miner_files_get_storage (TrackerMinerFiles *mf)
-{
-	return mf->private->storage;
 }

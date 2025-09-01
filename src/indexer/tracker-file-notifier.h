@@ -23,54 +23,31 @@
 #define __TRACKER_FILE_NOTIFIER_H__
 
 #include <gio/gio.h>
+#include <tinysparql.h>
 #include "tracker-indexing-tree.h"
-#include "tracker-miner-fs.h"
+#include "tracker-monitor.h"
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_FILE_NOTIFIER         (tracker_file_notifier_get_type ())
-#define TRACKER_FILE_NOTIFIER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifier))
-#define TRACKER_FILE_NOTIFIER_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c),    TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifierClass))
-#define TRACKER_IS_FILE_NOTIFIER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_FILE_NOTIFIER))
-#define TRACKER_IS_FILE_NOTIFIER_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),    TRACKER_TYPE_FILE_NOTIFIER))
-#define TRACKER_FILE_NOTIFIER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o),  TRACKER_TYPE_FILE_NOTIFIER, TrackerFileNotifierClass))
+#define INDEXER_FILE_ATTRIBUTES	\
+	G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT "," \
+	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
+	G_FILE_ATTRIBUTE_STANDARD_NAME "," \
+	G_FILE_ATTRIBUTE_STANDARD_TYPE "," \
+	G_FILE_ATTRIBUTE_STANDARD_DISPLAY_NAME "," \
+	G_FILE_ATTRIBUTE_STANDARD_SIZE "," \
+	G_FILE_ATTRIBUTE_STANDARD_IS_HIDDEN "," \
+	G_FILE_ATTRIBUTE_TIME_MODIFIED "," \
+	G_FILE_ATTRIBUTE_TIME_MODIFIED_USEC "," \
+	G_FILE_ATTRIBUTE_TIME_CREATED "," \
+	G_FILE_ATTRIBUTE_TIME_CREATED_USEC "," \
+	G_FILE_ATTRIBUTE_TIME_ACCESS
 
-typedef struct _TrackerFileNotifier TrackerFileNotifier;
-typedef struct _TrackerFileNotifierClass TrackerFileNotifierClass;
-typedef enum _TrackerFileNotifierType TrackerFileNotifierType;
-
-struct _TrackerFileNotifier {
-	GObject parent_instance;
-};
-
-struct _TrackerFileNotifierClass {
-	GObjectClass parent_class;
-
-	void (* file_created) (TrackerFileNotifier *notifier,
-	                       GFile               *file,
-	                       GFileInfo           *info);
-	void (* file_updated) (TrackerFileNotifier *notifier,
-	                       GFile               *file,
-	                       GFileInfo           *info,
-	                       gboolean             attributes_only);
-	void (* file_deleted) (TrackerFileNotifier *notifier,
-	                       GFile               *file);
-	void (* file_moved)   (TrackerFileNotifier *notifier,
-	                       GFile               *from,
-	                       GFile               *to);
-
-	/* Directory notifications */
-	void (* root_started)  (TrackerFileNotifier *notifier,
-	                        GFile               *directory);
-	void (* root_finished) (TrackerFileNotifier *notifier,
-	                        GFile               *directory,
-	                        guint                directories_found,
-	                        guint                directories_ignored,
-	                        guint                files_found,
-	                        guint                files_ignored);
-
-	void (* finished)           (TrackerFileNotifier *notifier);
-};
+#define TRACKER_TYPE_FILE_NOTIFIER (tracker_file_notifier_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerFileNotifier,
+                      tracker_file_notifier,
+                      TRACKER, FILE_NOTIFIER,
+                      GObject);
 
 typedef enum
 {
@@ -78,12 +55,9 @@ typedef enum
 	TRACKER_FILE_NOTIFIER_STATUS_CHECKING,
 } TrackerFileNotifierStatus;
 
-GType         tracker_file_notifier_get_type     (void) G_GNUC_CONST;
-
-TrackerFileNotifier *
-              tracker_file_notifier_new          (TrackerIndexingTree     *indexing_tree,
-                                                  TrackerSparqlConnection *connection,
-                                                  const gchar             *file_attributes);
+TrackerFileNotifier * tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
+                                                 TrackerSparqlConnection *connection,
+                                                 TrackerMonitor          *monitor);
 
 gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notifier);
 void          tracker_file_notifier_stop         (TrackerFileNotifier     *notifier);
