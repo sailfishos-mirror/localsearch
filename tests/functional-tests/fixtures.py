@@ -42,10 +42,12 @@ import sys
 import tempfile
 import time
 import unittest as ut
+import dbusmock
 
 import trackertestutils.helpers
 import configuration as cfg
 from minerhelper import MinerFsHelper
+from dbusmock import DBusTestCase
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +90,7 @@ def tracker_test_main():
     ut.main(testRunner=runner, failfast=True, verbosity=2)
 
 
-class TrackerMinerTest(ut.TestCase):
+class TrackerMinerTest(DBusTestCase):
     def __init__(self, *args, **kwargs):
         super(TrackerMinerTest, self).__init__(*args, **kwargs)
 

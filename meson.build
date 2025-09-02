@@ -4,6 +4,7 @@ project('localsearch', 'c',
 
 gnome = import('gnome')
 i18n = import('i18n')
+python = import('python')
 cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
@@ -48,6 +49,9 @@ webp = dependency('libwebpdemux', required: false)
 
 libgif = cc.find_library('gif', required: get_option('gif'))
 libmath = cc.find_library('m', required: false)
+
+dbusmock = python.find_installation(
+  'python3', modules: ['dbusmock'], required: get_option('functional_tests'))
 
 have_tracker_extract = get_option('extract')
 have_tracker_miner_fs = get_option('miner_fs')
