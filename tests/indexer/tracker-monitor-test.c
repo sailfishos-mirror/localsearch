@@ -25,6 +25,10 @@
 
 #include <tracker-monitor.h>
 
+#ifdef USE_GLIB
+#include <tracker-monitor-glib.h>
+#endif
+
 /* -------------- COMMON FOR ALL FILE EVENT TESTS ----------------- */
 
 #define TEST_TIMEOUT 5 /* seconds */
@@ -379,11 +383,26 @@ test_monitor_events_moved_cb (TrackerMonitor *monitor,
 	check_events (fixture, TRUE);
 }
 
+static TrackerMonitor *
+create_monitor (void)
+{
+	TrackerMonitor *monitor;
+	GError *error = NULL;
+
+#ifndef USE_GLIB
+	monitor = tracker_monitor_new (&error);
+#else
+	monitor = g_initable_new (TRACKER_TYPE_MONITOR_GLIB, NULL, &error, NULL);
+#endif
+	g_assert_no_error (error);
+
+	return monitor;
+}
+
 static void
 test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
                            gconstpointer              data)
 {
-	GError *error = NULL;
 	gchar *basename;
 
 	/* Create hash tables to store expected results */
@@ -403,8 +422,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	                                         NULL);
 
 	/* Create and setup the tracker monitor */
-	fixture->monitor = tracker_monitor_new (&error);
-	g_assert_no_error (error);
+	fixture->monitor = create_monitor ();
 	g_assert_true (fixture->monitor != NULL);
 
 	g_signal_connect (fixture->monitor, "item-created",
@@ -1264,7 +1282,6 @@ test_monitor_basic (void)
 	gchar *path_for_monitor;
 	GFile *file_for_monitor;
 	GFile *file_for_tmp;
-	GError *error = NULL;
 
 	/* Setup directories */
 	basename = g_strdup_printf ("monitor-test-%d", getpid ());
@@ -1279,8 +1296,7 @@ test_monitor_basic (void)
 	g_assert_true (G_IS_FILE (file_for_tmp));
 
 	/* Create a monitor */
-	monitor = tracker_monitor_new (&error);
-	g_assert_no_error (error);
+	monitor = create_monitor ();
 	g_assert_true (monitor != NULL);
 
 	/* Test general API with monitors enabled */
