@@ -17,4 +17,3 @@ tracker_writeback_test_dbus_service_file = configure_file(
     output: 'org.freedesktop.Tracker3.Writeback.service',
     configuration: conf)
 
-subdir('miners')
