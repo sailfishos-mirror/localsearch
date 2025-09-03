@@ -216,6 +216,7 @@ functional_tests = [
   'test_miner_removable_media',
   'test_miner_resource_removal',
   'test_power',
+  'test_systemd',
 ]
 
 if libcue.found()
