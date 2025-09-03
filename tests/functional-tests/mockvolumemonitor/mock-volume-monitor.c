@@ -106,6 +106,9 @@ remove_mock_mount (MockVolumeMonitor *self, const gchar *uri)
 	volume = g_mount_get_volume (G_MOUNT (mount));
 	drive = g_volume_get_drive (volume);
 
+	g_signal_emit_by_name (mount, "pre-unmount");
+	g_signal_emit_by_name (self, "mount-pre-unmount", mount);
+
 	mock_mount_unmounted (mount);
 	mock_volume_removed (MOCK_VOLUME (volume));
 	mock_drive_disconnected (MOCK_DRIVE (drive));
