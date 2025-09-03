@@ -612,8 +612,7 @@ check_eligible (const char *eligible)
 
 			dir_path = g_file_get_path (l->data);
 
-			if (is_dir &&
-			    tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, l->data)) {
+			if (tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, l->data)) {
 				g_print (_("Parent directory “%s” is NOT eligible to be indexed (based on filters)"),
 				         dir_path);
 				g_print ("\n");
