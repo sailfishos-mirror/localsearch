@@ -632,7 +632,7 @@ class TrackerWritebackTest(TrackerMinerTest):
     Start all processes including writeback, miner pointing to WRITEBACK_TMP_DIR
     """
 
-    WRITEBACK_BUSNAME = "org.freedesktop.Tracker3.Writeback"
+    WRITEBACK_BUSNAME = "org.freedesktop.LocalSearch3.Writeback"
     WRITEBACK_PATH = "/org/freedesktop/Tracker3/Writeback"
     WRITEBACK_IFACE = "org.freedesktop.Tracker3.Writeback"
 

@@ -1,4 +1,4 @@
 [D-BUS Service]
-Name=org.freedesktop.Tracker3.Writeback
+Name=org.freedesktop.LocalSearch3.Writeback
 Exec=@abs_top_builddir@/src/writeback/localsearch-writeback-3
 SystemdService=localsearch-writeback-3.service

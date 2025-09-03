@@ -46,7 +46,7 @@ if __name__ == "__main__":
     cancellable = None
 
     miner_fs = Tracker.SparqlConnection.bus_new(
-        "org.freedesktop.Tracker3.Miner.Files", None, cancellable)
+        "org.freedesktop.LocalSearch3", None, cancellable)
     cursor = miner_fs.query_async(
         "SELECT nie:isStoredAs(?doc) ?title "
         "FROM tracker:Documents "
