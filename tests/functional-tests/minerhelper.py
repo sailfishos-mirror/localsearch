@@ -76,10 +76,8 @@ class MinerFsHelper:
         )
 
     def start(self):
-        self.miner_fs.Start()
-
-    def stop(self):
-        self.miner_fs.Stop()
+        # Ensure the miner service is enabled through an action-less call
+        self.miner_fs.GetStatus()
 
     def get_sparql_connection(self):
         return Tsparql.SparqlConnection.bus_new(
