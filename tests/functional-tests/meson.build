@@ -212,6 +212,7 @@ functional_tests = [
   'test_fts_basic',
   'test_fts_file_operations',
   'test_fts_stopwords',
+  'test_memory_pressure',
   'test_miner_basic',
   'test_miner_removable_media',
   'test_miner_resource_removal',
