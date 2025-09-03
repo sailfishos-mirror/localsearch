@@ -507,10 +507,10 @@ tracker_application_dbus_register (GApplication     *application,
 			g_autoptr (GVariant) v = NULL;
 			const char *state = NULL;
 
-			g_signal_connect (app->systemd_proxy,
-			                  "g-signal::StartupFinished",
-			                  G_CALLBACK (on_systemd_settled),
-			                  app);
+			g_signal_connect_swapped (app->systemd_proxy,
+			                          "g-signal::StartupFinished",
+			                          G_CALLBACK (on_systemd_settled),
+			                          app);
 			g_dbus_proxy_call_sync (app->systemd_proxy,
 			                        "Subscribe",
 			                        NULL,
