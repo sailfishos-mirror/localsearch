@@ -891,7 +891,12 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 	                          NULL, NULL);
 
-	if (info) {
+	if (info &&
+	    ((file_type == G_FILE_TYPE_DIRECTORY &&
+	      check_directory_contents (notifier, file) &&
+	      check_directory (notifier, file, info)) ||
+	     (file_type != G_FILE_TYPE_DIRECTORY &&
+	      check_file (notifier, file, info)))) {
 		g_autoptr (GDateTime) disk_mtime = NULL;
 		GFileType file_type;
 
