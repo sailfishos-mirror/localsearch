@@ -138,9 +138,9 @@ config_constructed (GObject *object)
 
 	(G_OBJECT_CLASS (tracker_config_parent_class)->constructed) (object);
 
-	g_signal_connect (config, "notify::index-recursive-directories",
+	g_signal_connect (config, "changed::index-recursive-directories",
 	                  G_CALLBACK (update_directories), NULL);
-	g_signal_connect (config, "notify::index-single-directories",
+	g_signal_connect (config, "changed::index-single-directories",
 	                  G_CALLBACK (update_directories), NULL);
 
 	update_directories (config);
