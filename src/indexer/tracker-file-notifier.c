@@ -53,6 +53,7 @@ typedef enum
 {
 	TRACKER_ROOT_FLAG_NONE = 0,
 	TRACKER_ROOT_FLAG_IGNORE_ROOT_FILE = 1 << 0,
+	TRACKER_ROOT_FLAG_FULL_CHECK = 1 << 1,
 } TrackerRootFlags;
 
 static guint signals[LAST_SIGNAL] = { 0 };
@@ -930,8 +931,9 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 			tracker_monitor_add (notifier->monitor, file);
 		}
 
-		if ((file_data->state == FILE_STATE_CREATE ||
-		     file_data->state == FILE_STATE_UPDATE)) {
+		if ((root->root_flags & TRACKER_ROOT_FLAG_FULL_CHECK) != 0 ||
+		    file_data->state == FILE_STATE_CREATE ||
+		    file_data->state == FILE_STATE_UPDATE) {
 			/* Updated directory, needs crawling */
 			g_queue_push_head (root->pending_dirs, g_object_ref (file));
 		}
@@ -1433,7 +1435,7 @@ indexing_tree_directory_updated (TrackerIndexingTree *indexing_tree,
 
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	notifier_queue_root (notifier, directory, flags,
-	                     TRACKER_ROOT_FLAG_NONE);
+	                     TRACKER_ROOT_FLAG_FULL_CHECK);
 }
 
 static void
