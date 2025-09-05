@@ -9,9 +9,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: HEAD\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/tracker/issues/\n"
-"POT-Creation-Date: 2024-09-08 14:50+0000\n"
-"PO-Revision-Date: 2024-09-08 21:54+0300\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
+"POT-Creation-Date: 2025-08-16 12:26+0000\n"
+"PO-Revision-Date: 2025-09-05 22:30+0300\n"
 "Last-Translator: Aurimas Černius <aurisc4@gmail.com>\n"
 "Language-Team: Lietuvių <gnome-lt@lists.akl.lt>\n"
 "Language: lt\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
 "(n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 3.4.4\n"
+"X-Generator: Poedit 3.7\n"
 "X-Project-Style: gnome\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -62,142 +62,85 @@ msgid "Enable stemmer"
 msgstr "Įjungti žodžių kamienų nustatymo funkciją"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:25
-msgid ""
-"Simplify the words to their root to provide more results. E.g. “shelves” and "
-"“shelf” to “shel”"
-msgstr ""
-"Supaprastinti žodžius iki jų šaknies, siekiant gauti daugiau rezultatų. "
-"Pavyzdžiui, žodžius „vietos“ ir „vieta“ iki „viet“"
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:52
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:71
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:77
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:83
+msgid "This setting is deprecated"
+msgstr "Ši nuostata yra pasenusi"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
 msgid "Enable unaccent"
 msgstr "Įjungti diakritinių ženklų pašalinimą"
 
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
-msgid ""
-"Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
-"“Idea” for improved matching."
-msgstr ""
-"Išversti simbolius su diakritiniais ženklais į atitikmenis be jų, siekiant "
-"gauti daugiau atitikmenų. Pavyzdžiui, žodį „idėja“ versti į „ideja“."
-
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
 msgid "Ignore numbers"
 msgstr "Nepaisyti skaičių"
-
-#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
-msgid "If enabled, numbers will not be indexed."
-msgstr "Jei įjungta, skaičiai bus indeksuojami."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
 msgid "Initial sleep"
 msgstr "Pradinis laukimas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
-msgid "Initial sleep time, in seconds."
-msgstr "Pradinis laukimo laikas sekundėmis."
-
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
 msgid "Throttle"
 msgstr "Stabdymas"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
-msgid "Indexing speed, the higher the slower."
-msgstr "Indeksavimo greitis. Kuo didesnis, tuo labiau apkraunama sistema."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
 msgid "Low disk space limit"
 msgstr "Laisvos vietos diske riba"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
-msgid ""
-"Disk space threshold in percent at which to pause indexing, or -1 to disable."
-msgstr ""
-"Laisvos disko vietos riba megabaitais, kai reikia pristabdyti indeksavimą "
-"arba „-1“ išjungimui."
-
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
 msgid "Crawling interval"
 msgstr "Perėjimo intervalas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
-msgid ""
-"Interval in days to check whether the filesystem is up to date in the "
-"database. 0 forces crawling anytime, -1 forces it only after unclean "
-"shutdowns, and -2 disables it entirely."
-msgstr ""
-"Intervalas dienomis patikrinimui, ar failų sistema nepasenusi duomenų "
-"bazėje. 0 verčia perėjimą bet kada, -1 verčia tik po neaiškių išjungimų, -2 "
-"visiškai išjungia."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:55
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:51
 msgid "Removable devices’ data permanence threshold"
 msgstr "Išimamų laikmenų duomenų saugojimo slenkstis"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:56
-msgid ""
-"Threshold in days after which files from removables devices will be removed "
-"from database if not mounted. 0 means never, maximum is 365."
-msgstr ""
-"Slenkstis dienomis, po kurio failai iš išimamų įrenginių bus pašalinti iš "
-"duomenų bazės, jei neprijungti. 0 reikšia niekada, daugiausia 365."
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:66
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:58
 msgid "Enable monitors"
 msgstr "Įjungti stebėtojus"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:67
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:59
 msgid "Set to false to completely disable any file monitoring"
 msgstr "Nustatykite neigiamą visiškam bet kokių failų stebėjimui"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:72
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:64
 msgid "Index removable devices"
 msgstr "Indeksuoti išimamas laikmenas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:73
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:65
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
 "Nustatykite teigiamą prijungtų katalogų ir išimamų įrenginių indeksavimui "
 "įjungti."
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:78
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:70
 msgid "Index optical discs"
 msgstr "Indeksuoti optinius diskus"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:79
-msgid ""
-"Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-"removable devices are not indexed, optical discs won’t be either)"
-msgstr ""
-"Nustatykite teigiamą CD, DVD ir kitų optinių laikmenų indeksavimui įjungti "
-"(jei išimami įrenginiai nėra indeksuojami, optiniai diskai taip pat nebus)"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:87
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:76
 msgid "Index when running on battery"
 msgstr "Indeksuoti naudojant baterijos energiją"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
-msgid "Set to true to index while running on battery"
-msgstr "Nustatykite teigiamą indeksavimui, kai naudojama baterijos energija"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:93
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:82
 msgid "Perform initial indexing when running on battery"
 msgstr "Vykdyti pradinį indeksavimą, kai naudojama baterijos energija"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:94
-msgid "Set to true to index while running on battery for the first time only"
-msgstr ""
-"Nustatykite teigiamą indeksavimui naudojant baterijos energiją tik pirmą "
-"kartą"
-
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:99
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
 msgid "Directories to index recursively"
 msgstr "Katalogai rekursyviam indeksavimui"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:91
 msgid ""
 "List of directories to index recursively, Special values include: "
 "‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -206,16 +149,16 @@ msgid ""
 msgstr ""
 "Sąrašas katalogų rekursyviam indeksavimui, specialios reikšmės: &DESKTOP, "
 "&DOCUMENTS, &DOWNLOAD, &MUSIC, &PICTURES, &PUBLIC_SHARE, &TEMPLATES, "
-"&VIDEOS. Žiūrėkite /etc/xdg/user-dirs.defaults ir $HOME/.config/user-dirs."
-"default"
+"&VIDEOS. Žiūrėkite /etc/xdg/user-dirs.defaults ir $HOME/.config/user-"
+"dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:113
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid "Directories to index non-recursively"
 msgstr "Katalogai nerekursyviam indeksavimui"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:105
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
@@ -224,436 +167,370 @@ msgid ""
 msgstr ""
 "Sąrašas katalogų indeksavimui be pakatalogių, specialios reikšmės: "
 "„&DESKTOP“, „&DOCUMENTS“, „&DOWNLOAD“, „&MUSIC“, „&PICTURES“, "
-"„&PUBLIC_SHARE“, „&TEMPLATES“, „&VIDEOS“. Žiūrėkite /etc/xdg/user-dirs."
-"defaults ir $HOME/.config/user-dirs.default"
+"„&PUBLIC_SHARE“, „&TEMPLATES“, „&VIDEOS“. Žiūrėkite /etc/xdg/user-"
+"dirs.defaults ir $HOME/.config/user-dirs.default"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:127
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid "Ignored files"
 msgstr "Nepaisomi failai"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:117
 msgid "List of file patterns to avoid"
 msgstr "Vengiamų šablonų sąrašas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:133
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:122
 msgid "Ignored directories"
 msgstr "Nepaisomi katalogai"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:134
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
 msgid "List of directories to avoid"
 msgstr "Vengiamų katalogų sąrašas"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:139
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "Ignored directories with content"
 msgstr "Nepaisomi katalogai su turiniu"
 
-#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:140
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:129
 msgid "Avoid any directory containing a file blocklisted here"
 msgstr "Vengti bet kokių katalogų, turinčių čia nurodytą failą"
 
-#: src/libtracker-miners-common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Neatpažintas slapukas neatpažintas sustabdyto rinkiklio pratęsimui"
-
-#: src/libtracker-miners-common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "Stabdyti programą dėl tos pačios priežasties, kaip jau esama pauzė"
-
-#: src/libtracker-miners-common/tracker-utils.c:101
-#: src/libtracker-miners-common/tracker-utils.c:152
-msgid "less than one second"
-msgstr "mažiau nei sekundė"
-
-#. Translators: this is %d days
-#: src/libtracker-miners-common/tracker-utils.c:116
-#, c-format
-msgid " %dd"
-msgstr " %dd"
-
-#. Translators: this is %2.2d hours
-#: src/libtracker-miners-common/tracker-utils.c:120
-#, c-format
-msgid " %2.2dh"
-msgstr " %2.2d val"
-
-#. Translators: this is %2.2d minutes
-#: src/libtracker-miners-common/tracker-utils.c:124
-#, c-format
-msgid " %2.2dm"
-msgstr " %2.2d min"
-
-#. Translators: this is %2.2d seconds
-#: src/libtracker-miners-common/tracker-utils.c:128
-#, c-format
-msgid " %2.2ds"
-msgstr " %2.2d s"
-
-#: src/libtracker-miners-common/tracker-utils.c:132
-#, c-format
-msgid " %d day"
-msgid_plural " %d days"
-msgstr[0] " %d dieną"
-msgstr[1] " %d dienas"
-msgstr[2] " %d dienų"
-
-#: src/libtracker-miners-common/tracker-utils.c:136
-#, c-format
-msgid " %2.2d hour"
-msgid_plural " %2.2d hours"
-msgstr[0] " %2.2d valandą"
-msgstr[1] " %2.2d valandas"
-msgstr[2] " %2.2d valandų"
-
-#: src/libtracker-miners-common/tracker-utils.c:140
-#, c-format
-msgid " %2.2d minute"
-msgid_plural " %2.2d minutes"
-msgstr[0] " %2.2d minutę"
-msgstr[1] " %2.2d minutes"
-msgstr[2] " %2.2d minučių"
-
-#: src/libtracker-miners-common/tracker-utils.c:144
-#, c-format
-msgid " %2.2d second"
-msgid_plural " %2.2d seconds"
-msgstr[0] " %2.2d sekundę"
-msgstr[1] " %2.2d sekundes"
-msgstr[2] " %2.2d sekundžių"
-
-#: src/miners/fs/tracker-main.c:89
-msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-msgstr "Pradinis miegojimo laikas sekundėmis, 0->1000 (numatytasis=15)"
-
-#: src/miners/fs/tracker-main.c:94
-msgid "Runs until all configured locations are indexed and then exits"
-msgstr ""
-"Veikia iki kol visos nustatytos vietos yra suindeksuotos ir tuomet baigia "
-"darbą"
-
-#: src/miners/fs/tracker-main.c:98 src/tracker/tracker-info.c:91
-msgid "Checks if FILE is eligible for being mined based on configuration"
-msgstr "Tikrina, ar FAILAS yra tinkamas apdorojimui pagal nustatymus"
-
-#: src/miners/fs/tracker-main.c:99 src/tracker-extract/tracker-main.c:80
-#: src/tracker/tracker-extract.c:49 src/tracker/tracker-extract.c:50
-#: src/tracker/tracker-index.c:60 src/tracker/tracker-index.c:61
-#: src/tracker/tracker-info.c:94 src/tracker/tracker-info.c:95
-#: src/tracker/tracker-reset.c:56
-msgid "FILE"
-msgstr "FAILAS"
-
-#: src/miners/fs/tracker-main.c:102 src/miners/rss/tracker-main.c:63
-#: src/tracker-extract/tracker-main.c:94
-msgid "Runs for a specific domain ontology"
-msgstr "Vykdomas specifinei domeno ontologijai"
-
-#: src/miners/fs/tracker-main.c:106
-msgid "Avoids changes in the filesystem"
-msgstr "Vendia failų sistemos pakeitimų"
-
-#: src/miners/fs/tracker-main.c:110 src/tracker-control/tracker-main.c:61
-#: src/tracker-extract/tracker-main.c:102
-#: src/tracker-writeback/tracker-main.c:50
-msgid "Displays version information"
-msgstr "Rodo versijos informaciją"
-
-#: src/miners/fs/tracker-main.c:555
-#, c-format
-msgid "Data object “%s” currently exists"
-msgstr "Duomenų objektas „%s“ šiuo metu jau yra"
-
-#: src/miners/fs/tracker-main.c:556
-#, c-format
-msgid "Data object “%s” currently does not exist"
-msgstr "Šiuo metu nėra duomenų objekto „%s“"
-
-#: src/miners/fs/tracker-main.c:566
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "Katalogas NETINKAMAS indeksavimui (pagal filtrus)"
-
-#: src/miners/fs/tracker-main.c:570
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "Failas NETINKAMAS indeksavimui (pagal filtrus)"
-
-#: src/miners/fs/tracker-main.c:573
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "Failas NETINKAMAS indeksavimui (paslėptas failas)"
-
-#: src/miners/fs/tracker-main.c:575
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "Failas NETINKAMAS indeksavimui (neindeksuojamas aplankas)"
-
-#: src/miners/fs/tracker-main.c:599
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (pagal filtrus)"
-
-#: src/miners/fs/tracker-main.c:605
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (paslėptas failas)"
-
-#: src/miners/fs/tracker-main.c:611
-#, c-format
-msgid ""
-"Parent directory “%s” is NOT eligible to be indexed (based on content "
-"filters)"
-msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (pagal turinio filtrus)"
-
-#: src/miners/fs/tracker-main.c:630
-msgid "Directory is eligible to be indexed"
-msgstr "Katalogas yra tinkamas indeksavimui"
-
-#: src/miners/fs/tracker-main.c:631
-msgid "File is eligible to be indexed"
-msgstr "Failas yra tinkamas indeksavimui"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/miners/fs/tracker-main.c:857
-msgid "— start the tracker indexer"
-msgstr "– paleisti tracker indeksavimo programą"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:45
-msgid "Add feed"
-msgstr "Pridėti sklaidos kanalą"
-
-#: src/miners/rss/tracker-main.c:46 src/miners/rss/tracker-main.c:60
-msgid "URL"
-msgstr "URL"
-
-#: src/miners/rss/tracker-main.c:49
-msgid "Title to use (must be used with --add-feed)"
-msgstr "Naudotinas pavadinimas (reikia naudoti su --add-feed)"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:54
-msgid "List feeds"
-msgstr "Išvardinti kanalus"
-
-#. Translators: this is a "feed" as in RSS
-#: src/miners/rss/tracker-main.c:59
-msgid "Delete feed"
-msgstr "Ištrinti kanalą"
-
-#: src/miners/rss/tracker-main.c:162 src/miners/rss/tracker-main.c:214
-#: src/miners/rss/tracker-main.c:251 src/tracker/tracker-info.c:421
-#: src/tracker/tracker-search.c:1378 src/tracker/tracker-status.c:92
-#: src/tracker/tracker-status.c:205 src/tracker/tracker-tag.c:946
-msgid "Could not establish a connection to Tracker"
-msgstr "Nepavyko užmegzti ryšio su „Tracker“ sistema"
-
-#: src/miners/rss/tracker-main.c:163 src/miners/rss/tracker-main.c:215
-#: src/miners/rss/tracker-main.c:252 src/tracker/tracker-daemon.c:449
-#: src/tracker/tracker-daemon.c:510 src/tracker/tracker-daemon.c:545
-#: src/tracker/tracker-daemon.c:614 src/tracker/tracker-daemon.c:713
-#: src/tracker/tracker-daemon.c:760 src/tracker/tracker-daemon.c:981
-#: src/tracker/tracker-dbus.c:45 src/tracker/tracker-dbus.c:63
-#: src/tracker/tracker-info.c:422 src/tracker/tracker-process.c:219
-#: src/tracker/tracker-search.c:1379 src/tracker/tracker-status.c:93
-#: src/tracker/tracker-status.c:206 src/tracker/tracker-status.c:252
-#: src/tracker/tracker-status.c:281 src/tracker/tracker-tag.c:947
-msgid "No error given"
-msgstr "Nenurodyta klaida"
-
-#: src/miners/rss/tracker-main.c:188
-msgid "Could not add feed"
-msgstr "Nepavyko pridėti sklaidos kanalo"
-
-#: src/miners/rss/tracker-main.c:226
-msgid "Could not remove feed"
-msgstr "Nepavyko pašalinti kanalo"
-
-#: src/miners/rss/tracker-main.c:294
-msgid "Could not list feeds"
-msgstr "Nepavyko išvardinti kanalų"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/miners/rss/tracker-main.c:422
-msgid "— start the feeds indexer"
-msgstr "– paleisti sklaidos kanalų indeksavimo programą"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-control/tracker-main.c:136
-msgid "— start the tracker index proxy"
-msgstr "– paleisti tracker indeksavimo programą"
-
-#: src/tracker-extract/tracker-extract.c:721
-msgid "Metadata extraction failed"
-msgstr "Metaduomenų išgavavimas nepavyko"
-
-#: src/tracker-extract/tracker-extract.c:803
-msgid "No metadata or extractor modules found to handle this file"
-msgstr "Nerasta metaduomenų išgavėjo modulių šio failo apdorojimui"
-
-#: src/tracker-extract/tracker-main.c:79
-msgid "File to extract metadata for"
-msgstr "Failas metaduomenų išgavimui"
-
-#: src/tracker-extract/tracker-main.c:83
-msgid "MIME type for file (if not provided, this will be guessed)"
-msgstr "MIME tipas failui (jei nepateiktas, bus nuspėtas)"
-
-#: src/tracker-extract/tracker-main.c:84
-msgid "MIME"
-msgstr "MIME"
-
-#: src/tracker-extract/tracker-main.c:87
-msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-msgstr "Priverstinai naudoti modulį rinkimui (pvz., „foo“ reiškia „foo.so“)"
-
-#: src/tracker-extract/tracker-main.c:88
-msgid "MODULE"
-msgstr "MODULIS"
-
-#: src/tracker-extract/tracker-main.c:90 src/tracker/tracker-extract.c:46
-msgid "Output results format: “sparql”, “turtle” or “json-ld”"
-msgstr "Išvesties rezultatų formatas: „sparql“, „turtle“ arba „json-ld“"
-
-#: src/tracker-extract/tracker-main.c:91 src/tracker/tracker-extract.c:47
-msgid "FORMAT"
-msgstr "FORMATAS"
-
-#: src/tracker-extract/tracker-main.c:98
-msgid "Socket file descriptor for peer-to-peer communication"
-msgstr "Lizdo failo deskriptorius porininkų ryšiui"
-
-#: src/tracker-extract/tracker-main.c:99
-msgid "FD"
-msgstr "FD"
-
-#: src/tracker-extract/tracker-main.c:194
-#, c-format
-msgid "Unsupported serialization format “%s”\n"
-msgstr "Nepalaikomas serializacijos formatas „%s“\n"
-
-#. Translators: this message will appear immediately after the
-#. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/tracker-extract/tracker-main.c:313
-msgid "— Extract file meta data"
-msgstr "– gauti failo metaduomenis"
-
-#: src/tracker-extract/tracker-main.c:328
-msgid "Filename and mime type must be provided together"
-msgstr "Failas ir mime tipas turi būti pateikti kartu"
-
-#: src/tracker-writeback/tracker-main.c:54
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr ""
-"Rašomas žurnalas, 0 = tik klaidos, 1 = mažiausias, 2 = detalus ir 3 = "
-"derinimo (numatytasis=0)"
-
-#: src/tracker-writeback/tracker-main.c:61
-msgid "Disable shutting down after 30 seconds of inactivity"
-msgstr "Uždrausti išjungimą po 30 sekundžių neaktyvumo"
-
-#. Translators: this message will appear immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/tracker-writeback/tracker-main.c:93
-msgid "— start the tracker writeback service"
-msgstr "– paleisti tracker rašymo posistemę"
-
-#: src/tracker/main.c:67
-msgid "Start, stop, restart and list daemons responsible for indexing content"
-msgstr ""
-"Paleisti, sustabdyti, perleisti bei išvardinti turinio indeksavimo tarnybas"
-
-#: src/tracker/main.c:68
-msgid "Extract metadata from a file"
-msgstr "Išgauti metaduomenis iš failų"
-
-#: src/tracker/main.c:69
-msgid "Trigger content indexing of a location"
-msgstr "Sukelia turinio indeksavimą vietoje"
-
-#: src/tracker/main.c:70
-msgid "Retrieve all information available for a certain file"
-msgstr "Gauti visą informaciją apie konkretų failą"
-
-#: src/tracker/main.c:71
-msgid "Reset the index and configuration"
-msgstr "Atstatyti indeksą bei konfigūracija"
-
-#: src/tracker/main.c:72
+#: src/cli/main.c:68
+msgid "Show help on subcommands"
+msgstr "Rodyti po-komandų žinyną"
+
+#: src/cli/main.c:69
+msgid "Show metadata extractor output"
+msgstr "Rodyti metaduomenų išgavėjo išvestį"
+
+#: src/cli/main.c:70 src/cli/tracker-index.c:374
+msgid "List and change indexed folders"
+msgstr "Išvardinti ir pakeisti indeksuojamus aplankus"
+
+#: src/cli/main.c:71 src/cli/tracker-info.c:540
+msgid "Retrieve information available for files and resources"
+msgstr "Gauti visą informaciją apie konkretų failus bei išteklius"
+
+#: src/cli/main.c:72 src/cli/tracker-inhibit.c:98
+msgid "Inhibit indexing temporarily"
+msgstr "Laikinai pristabdyti indeksavimą"
+
+#: src/cli/main.c:73 src/cli/tracker-reset.c:202
+msgid "Erase the indexed data"
+msgstr "Išvalyti indeksuotus duomenis"
+
+#: src/cli/main.c:74 src/cli/tracker-search.c:397
 msgid "Search for content"
 msgstr "Ieškoti turinio"
 
-#: src/tracker/main.c:73
+#: src/cli/main.c:75 src/cli/tracker-status.c:748
 msgid "Provide status and statistics on the data indexed"
 msgstr "Rodyti būseną bei statistiką apie indeksuojamus duomenis"
 
-#: src/tracker/main.c:74
+#: src/cli/main.c:76 src/cli/tracker-tag.c:414
 msgid "Add, remove and list tags"
 msgstr "Pridėti, šalinti arba išvardinti žymas"
 
-#: src/tracker/main.c:75
+#: src/cli/main.c:77
 msgid "Sandbox for a testing environment"
 msgstr "Smėlio dėžė testavimo aplinkai"
 
-#: src/tracker/main.c:120 src/tracker/main.c:183
+#: src/cli/main.c:122
 msgid "Available localsearch commands are:"
 msgstr "Galimos localsearch komandos yra:"
 
-#: src/tracker/main.c:216
+#: src/cli/main.c:141
 msgid "See “localsearch help <command>” to read about a specific subcommand."
 msgstr ""
 "Daugiau apie šią po-komandą galite perskaityti įvykdę „localsearch help "
-"<komanda>“"
+"<komanda>“."
 
-#: src/tracker/main.c:259
+#: src/cli/main.c:184
 #, c-format
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "„%s“ nėra localsearch komanda. Žiūrėti „localsearch --help“"
 
-#: src/tracker/tracker-daemon.c:99
-msgid "Unavailable"
-msgstr "Nepasiekiama"
+#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
+#: src/extractor/tracker-main.c:81
+msgid "Output results format: “turtle”, “trig” or “json-ld”"
+msgstr "Išvesties rezultatų formatas: „turtle“, „trig“ arba „json-ld“"
 
-#. generic
-#: src/tracker/tracker-daemon.c:100
-msgid "Initializing"
-msgstr "Inicijuojama"
+#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
+msgid "FORMAT"
+msgstr "FORMATAS"
 
-#: src/tracker/tracker-daemon.c:101
-msgid "Processing…"
-msgstr "Apdorojama…"
+#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
+#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
+#: src/indexer/tracker-main.c:80
+msgid "FILE"
+msgstr "FAILAS"
 
-#: src/tracker/tracker-daemon.c:102
-msgid "Fetching…"
-msgstr "Įkeliama…"
+#: src/cli/tracker-extract.c:90
+msgid "Could not run tracker-extract: "
+msgstr "Nepavyko paleisti tracker-extract: "
 
-#. miner/rss
-#: src/tracker/tracker-daemon.c:103
+#: src/cli/tracker-extract.c:123
+msgid "Extract metadata from a file"
+msgstr "Išgauti metaduomenis iš failų"
+
+#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
+#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
+#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+msgid "Unrecognized options"
+msgstr "Neatpažinti parametrai"
+
+#: src/cli/tracker-index.c:51
+msgid "Adds FILE as an indexed location"
+msgstr "Prideda FAILĄ kaip indeksuotą vietą"
+
+#: src/cli/tracker-index.c:54
+msgid "Removes FILE from indexed locations"
+msgstr "Pašalina FAILĄ iš indeksuotų vietų"
+
+#: src/cli/tracker-index.c:57
+msgid "Makes indexing recursive"
+msgstr "Padaro indeksavimą rekursyvų"
+
+#: src/cli/tracker-index.c:195
 #, c-format
-msgid "Crawling single directory “%s”"
-msgstr "Peržvelgiamas vienas katalogas „%s“"
+msgid "“%s” is not a directory"
+msgstr "„%s“ nėra katalogas"
 
-#: src/tracker/tracker-daemon.c:104
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:273
+msgid "Either --add or --remove must be provided"
+msgstr "Turi būti nurodytas arba --add, arba --remove"
+
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:277
+msgid "--add and --remove are mutually exclusive"
+msgstr "--add ir --remove negali būti naudojami kartu"
+
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:287
+msgid "--recursive requires --add"
+msgstr "--recursive reikalauja --add"
+
+#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+msgid "Path"
+msgstr "Kelias"
+
+#: src/cli/tracker-index.c:346
+msgid "Recursive"
+msgstr "Rekursyviai"
+
+#: src/cli/tracker-index.c:388
+msgid "Please specify one or more locations to index."
+msgstr "Nurodykite vieną ar daugiau vietų indeksavimui."
+
+#: src/cli/tracker-info.c:66
+msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
+msgstr ""
+"Rodyti pilnas vardų sritis (pvz. nenaudoti nie:title, naudoti pilą URL)"
+
+#: src/cli/tracker-info.c:70
+msgid "Show plain text content if available for resources"
+msgstr "Resursams rodyti grynojo teksto turinį, jei prieinamas"
+
+#: src/cli/tracker-info.c:77
+msgid "Checks if FILE is eligible for being indexed"
+msgstr "Tikrina, ar FAILAS yra tinkamas indeksavimui"
+
+#: src/cli/tracker-info.c:349
+msgid "Error message"
+msgstr "Klaidos pranešimas"
+
+#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
+#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+msgid "Could not connect to LocalSearch"
+msgstr "Nepavyko prisijungti prie LocalSearch sistemos"
+
+#: src/cli/tracker-info.c:419
+msgid "Unable to retrieve data for URI"
+msgstr "Nepavyko gauti duomenų apie URI"
+
+#: src/cli/tracker-info.c:429
+msgid "No metadata available for that URI"
+msgstr "Nėra metaduomenų šiam URI"
+
+#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+msgid "Could not get eligible status: "
+msgstr "Nepavyko gauti galimybės būsenos: "
+
+#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
 #, c-format
-msgid "Crawling recursively directory “%s”"
-msgstr "Rekursyviai peržvelgiamas katalogas „%s“"
+msgid "Unsupported serialization format “%s”\n"
+msgstr "Nepalaikomas serializacijos formatas „%s“\n"
 
-#: src/tracker/tracker-daemon.c:105
-msgid "Paused"
-msgstr "Sustabdyta"
+#: src/cli/tracker-inhibit.c:39
+msgid "List inhibitions"
+msgstr "Išvardinti pristabdymus"
 
-#: src/tracker/tracker-daemon.c:106
-msgid "Idle"
-msgstr "Nedirba"
+#: src/cli/tracker-inhibit.c:45
+msgid "command"
+msgstr "komanda"
 
-#: src/tracker/tracker-daemon.c:112
+#: src/cli/tracker-inhibit.c:46
+msgid "COMMAND"
+msgstr "KOMANDA"
+
+#: src/cli/tracker-inhibit.c:65
+msgid "Application"
+msgstr "Programa"
+
+#: src/cli/tracker-inhibit.c:66
+msgid "Reason"
+msgstr "Priežastis"
+
+#: src/cli/tracker-inhibit.c:136
+msgid "Indexing inhibited through command line"
+msgstr "Indeksavimas pristabdytas per komandų eilutę"
+
+#: src/cli/tracker-inhibit.c:160
+msgid "Failed to inhibit indexer"
+msgstr "Nepavyko pristabdyti indeksuotojo"
+
+#: src/cli/tracker-process.c:89
+msgid "Could not terminate indexer"
+msgstr "Nepavyko išjungti indeksuotojo"
+
+#: src/cli/tracker-process.c:92
+msgid "Indexer process terminated"
+msgstr "Indeksuotojo procesas išjungtas"
+
+#: src/cli/tracker-reset.c:48
+msgid "Remove filesystem indexer database"
+msgstr "Pašalinti failų sistemos indeksuotojo duomenų bazę"
+
+#: src/cli/tracker-reset.c:51
+msgid ""
+"Erase indexed information about a file, works recursively for directories"
+msgstr ""
+"Ištrinti indeksuotą informaciją apie failą, veikia rekursyviai aplankams"
+
+#. Now, delete the element recursively
+#: src/cli/tracker-reset.c:95
+msgid "Deleting…"
+msgstr "Trinama…"
+
+#: src/cli/tracker-reset.c:111
+msgid ""
+"The indexed data for this file has been deleted and will be reindexed again."
+msgstr ""
+"Indeksuoti šio failo duomenys buvo ištrinti ir bus suindeksuoti iš naujo."
+
+#: src/cli/tracker-reset.c:223
+msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
+msgstr "LocalSearch indeksuoti duomenys tuoj bus ištrinti, tęsti? [t/N]"
+
+#. TRANSLATORS: this is our test for a [y|N] question in the command line.
+#. * A partial or full match will be considered an affirmative answer,
+#. * it is intentionally lowercase, so please keep it like this.
+#.
+#: src/cli/tracker-reset.c:231
+msgid "yes"
+msgstr "taip"
+
+#: src/cli/tracker-search.c:99
+msgid "Results"
+msgstr "Rezultatai"
+
+#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
+#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
+#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+msgid "Files"
+msgstr "Failai"
+
+#: src/cli/tracker-search.c:102
+msgid "Folders"
+msgstr "Aplankai"
+
+#: src/cli/tracker-search.c:104
+msgid "Albums"
+msgstr "Albumai"
+
+#: src/cli/tracker-search.c:105
+msgid "Artists"
+msgstr "Atlikėjai"
+
+#: src/cli/tracker-search.c:116
+msgid "Search for files"
+msgstr "Ieškoti failų"
+
+#: src/cli/tracker-search.c:120
+msgid "Search for folders"
+msgstr "Ieškoti aplankų"
+
+#: src/cli/tracker-search.c:124
+msgid "Search for audio files"
+msgstr "Ieškoti garso failų"
+
+#: src/cli/tracker-search.c:128
+msgid "Search for music albums"
+msgstr "Ieškoti muzikos albumų"
+
+#: src/cli/tracker-search.c:132
+msgid "Search for music artists"
+msgstr "Ieškoti muzikos atlikėjų"
+
+#: src/cli/tracker-search.c:136
+msgid "Search for image files"
+msgstr "Ieškoti paveikslėlių failų"
+
+#: src/cli/tracker-search.c:140
+msgid "Search for video files"
+msgstr "Ieškoti vaizdo failų"
+
+#: src/cli/tracker-search.c:144
+msgid "Search for document files"
+msgstr "Ieškoti dokumentų failų"
+
+#: src/cli/tracker-search.c:148
+msgid "Search for software files"
+msgstr "Ieškoti programinės įrangos failų"
+
+#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+msgid "Limit the number of results shown"
+msgstr "Apriboti rodomų rezultatų skaičių"
+
+#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+msgid "Offset the results"
+msgstr "Paslinkti rezultatus per"
+
+#: src/cli/tracker-search.c:165
+msgid "Show URNs for results"
+msgstr "Rodyti rezultatų URN"
+
+#: src/cli/tracker-search.c:169
+msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
+msgstr ""
+"Taip pat grąžinti visus neesamus atitikimus (pvz. įtraukti neprijungtas "
+"laikmenas)"
+
+#: src/cli/tracker-search.c:173
+msgid "Show help options"
+msgstr "Rodyti žinyno parinktis"
+
+#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+msgid "search terms"
+msgstr "paieškos terminai"
+
+#: src/cli/tracker-search.c:181
+msgid "TERMS"
+msgstr "TERMINAI"
+
+#: src/cli/tracker-status.c:67
 msgid "Follow status changes as they happen"
 msgstr "Sekti būsenos pasikeitimus, kai jie įvyksta"
 
-#: src/tracker/tracker-daemon.c:116
+#: src/cli/tracker-status.c:71
+msgid "Show statistics for current index / data set"
+msgstr "Rodyti statistiką dabartiniam indeksui / duomenims"
+
+#: src/cli/tracker-status.c:75
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -661,641 +538,24 @@ msgstr ""
 "Realiu laiku stebėti duomenų bazės pasikeitimus (pvz. pridedamus išteklius "
 "ar failus)"
 
-#: src/tracker/tracker-daemon.c:120
-msgid "List common statuses for miners"
-msgstr "Išvardinti dažnas gavėjų būsenas"
-
-#: src/tracker/tracker-daemon.c:125
-msgid "Pause a miner (you must use this with --miner)"
-msgstr "Pristabdyti gavėją (reikia naudoti kartu su --miner)"
-
-#: src/tracker/tracker-daemon.c:126 src/tracker/tracker-daemon.c:130
-msgid "REASON"
-msgstr "PRIEŽASTIS"
-
-#: src/tracker/tracker-daemon.c:129
-msgid ""
-"Pause a miner while the calling process is alive or until resumed (you must "
-"use this with --miner)"
-msgstr ""
-"Stabdyti gavėją kol kviečiantis procesas gyvas arba iki pratęsimo (turite "
-"naudoti kartu su --miner)"
-
-#: src/tracker/tracker-daemon.c:133
-msgid "Resume a miner (you must use this with --miner)"
-msgstr "Pratęsti gavėją (turite naudoti kartu su --miner)"
-
-#: src/tracker/tracker-daemon.c:134
-msgid "COOKIE"
-msgstr "SLAPUKAS"
-
-#: src/tracker/tracker-daemon.c:137
-msgid ""
-"Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
-"Applications)"
-msgstr ""
-"Gavėjas, naudotinas su --resume arba --pause (galite naudoti priesagas, "
-"pvz., „Failai“ arba „Programos“)"
-
-#: src/tracker/tracker-daemon.c:138
-msgid "MINER"
-msgstr "GAVĖJAS"
-
-#: src/tracker/tracker-daemon.c:141
-msgid "List all miners currently running"
-msgstr "Išvardinti visus šiuo metu veikiančius gavėjus"
-
-#: src/tracker/tracker-daemon.c:145
-msgid "List all miners installed"
-msgstr "Išvardinti visus įdiegtus gavėjus"
-
-#: src/tracker/tracker-daemon.c:149
-msgid "List pause reasons"
-msgstr "Išvardinti sustojimo priežastis"
-
-#: src/tracker/tracker-daemon.c:154
-msgid "List all Tracker processes"
-msgstr "Parodyti visus „Tracker“ procesus"
-
-#: src/tracker/tracker-daemon.c:156
-msgid "Use SIGKILL to stop all miners"
-msgstr "Naudoti SIGKILL visiems gavėjams sustabdyti"
-
-#: src/tracker/tracker-daemon.c:157 src/tracker/tracker-daemon.c:160
-msgid "APPS"
-msgstr "PROGRAMOS"
-
-#: src/tracker/tracker-daemon.c:159
-msgid "Use SIGTERM to stop all miners"
-msgstr "Naudoti SIGTERM visiems gavėjams sustabdyti"
-
-#: src/tracker/tracker-daemon.c:162
-msgid "Starts miners"
-msgstr "Paleidžia gavėjus"
-
-#: src/tracker/tracker-daemon.c:214
-#, c-format
-msgid "Could not get status from miner: %s"
-msgstr "Nepavyko gauti gavėjo būsenos: %s"
-
-#. Translators: %s is a time string
-#: src/tracker/tracker-daemon.c:276
-#, c-format
-msgid "%s remaining"
-msgstr "liko %s"
-
-#: src/tracker/tracker-daemon.c:279
-msgid "unknown time left"
-msgstr "likęs nežinomas laikas"
-
-#. Work out lengths for output spacing
-#: src/tracker/tracker-daemon.c:292 src/tracker/tracker-daemon.c:770
-msgid "PAUSED"
-msgstr "SUSTABDYTAS"
-
-#: src/tracker/tracker-daemon.c:309
-msgid "Not running or is a disabled plugin"
-msgstr "Neveikiantis arba išjungtas įskiepis"
-
-#: src/tracker/tracker-daemon.c:448
-#, c-format
-msgid "Could not pause miner, manager could not be created, %s"
-msgstr "Nepavyko sustabdyti gavėjo, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:455
-#, c-format
-msgid "Attempting to pause miner “%s” with reason “%s”"
-msgstr "Bandoma stabdyti gavėją „%s“ dėl priežasties „%s“"
-
-#: src/tracker/tracker-daemon.c:463 src/tracker/tracker-daemon.c:469
-#, c-format
-msgid "Could not pause miner: %s"
-msgstr "Nepavyko sustabdyti gavėjo: %s"
-
-#: src/tracker/tracker-daemon.c:475
-#, c-format
-msgid "Cookie is %d"
-msgstr "Sausainis yra %d"
-
-#: src/tracker/tracker-daemon.c:482 src/tracker/tracker-daemon.c:725
-#: src/tracker/tracker-daemon.c:842
-msgid "Press Ctrl+C to stop"
-msgstr "Spauskite Vald+C sustojimui"
-
-#: src/tracker/tracker-daemon.c:509
-#, c-format
-msgid "Could not resume miner, manager could not be created, %s"
-msgstr "Nepavyko pratęsti gavėjo, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:516
-#, c-format
-msgid "Attempting to resume miner %s with cookie %d"
-msgstr "Bandoma pratęsti gavėją %s su sausainiu %d"
-
-#: src/tracker/tracker-daemon.c:523
-#, c-format
-msgid "Could not resume miner: %s"
-msgstr "Nepavyko pratęsti gavėjo: %s"
-
-#: src/tracker/tracker-daemon.c:527
-msgid "Done"
-msgstr "Atlikta"
-
-#: src/tracker/tracker-daemon.c:544
-#, c-format
-msgid "Could not list miners, manager could not be created, %s"
-msgstr "Nepavyko išvardinti gavėjų, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:558
-#, c-format
-msgid "Found %d miner installed"
-msgid_plural "Found %d miners installed"
-msgstr[0] "Rastas %d įdiegtas gavėjas"
-msgstr[1] "Rasti %d įdiegti gavėjai"
-msgstr[2] "Rasta %d įdiegtų gavėjų"
-
-#: src/tracker/tracker-daemon.c:581
-#, c-format
-msgid "Found %d miner running"
-msgid_plural "Found %d miners running"
-msgstr[0] "Rastas %d veikiantis gavėjas"
-msgstr[1] "Rasti %d veikiantys gavėjai"
-msgstr[2] "Rasta %d veikiančių gavėjų"
-
-#: src/tracker/tracker-daemon.c:613
-#, c-format
-msgid "Could not get pause details, manager could not be created, %s"
-msgstr ""
-"Nepavyko gauti sustojimo informacijos, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:623
-msgid "No miners are running"
-msgstr "Nėra veikiančių gavėjų"
-
-#. Display states
-#: src/tracker/tracker-daemon.c:663 src/tracker/tracker-daemon.c:780
-msgid "Miners"
-msgstr "Gavėjai"
-
-#: src/tracker/tracker-daemon.c:670
-msgid "Application"
-msgstr "Programa"
-
-#: src/tracker/tracker-daemon.c:672
-msgid "Reason"
-msgstr "Priežastis"
-
-#: src/tracker/tracker-daemon.c:681
-msgid "No miners are paused"
-msgstr "Nėra sustabdytų gavėjų"
-
-#: src/tracker/tracker-daemon.c:712
-msgid "Could not get SPARQL connection"
-msgstr "Nepavyko gauti SPARQL ryšio"
-
-#: src/tracker/tracker-daemon.c:723
-msgid "Now listening for resource updates to the database"
-msgstr "Dabar stebimi išteklių atnaujinimai duomenų bazėje"
-
-#: src/tracker/tracker-daemon.c:724
-msgid "All nie:plainTextContent properties are omitted"
-msgstr "Praleidžiamos visos nie:plainTextContent savybės"
-
-#: src/tracker/tracker-daemon.c:741
-msgid "Common statuses include"
-msgstr "Dažnos būsenos yra"
-
-#: src/tracker/tracker-daemon.c:759 src/tracker/tracker-status.c:280
-#, c-format
-msgid "Could not get status, manager could not be created, %s"
-msgstr "Nepavyko gauti gavėjo būsenos, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:788
-#, c-format
-msgid "Could not get display name for miner “%s”"
-msgstr "Nepavyko gauti gavėjo „%s“ pavadinimo"
-
-#: src/tracker/tracker-daemon.c:882
-msgid "You can not use miner pause and resume switches together"
-msgstr "Negalima kartu naudoti gavėjo stabdymo ir pratęsimo parametrų"
-
-#: src/tracker/tracker-daemon.c:888
-msgid "You must provide the miner for pause or resume commands"
-msgstr "Stabdymo arba pratęsimo komandoms turite pateikti gavėją"
-
-#: src/tracker/tracker-daemon.c:894
-msgid "You must provide a pause or resume command for the miner"
-msgstr "Turite pateikti gavėjui stabdymo arba pratęsimo komandą"
-
-#: src/tracker/tracker-daemon.c:928
-msgid "You can not use the --kill and --terminate arguments together"
-msgstr "Negalima kartu naudoti --kill ir --terminate argumentų"
-
-#: src/tracker/tracker-daemon.c:939 src/tracker/tracker-process.c:197
-#, c-format
-msgid "Found %d PID…"
-msgid_plural "Found %d PIDs…"
-msgstr[0] "Rastas %d PID…"
-msgstr[1] "Rasti %d PID…"
-msgstr[2] "Rasta %d PID…"
-
-#: src/tracker/tracker-daemon.c:949
-#, c-format
-msgid "Found process ID %d for “%s”"
-msgstr "Rastas proceso ID %d programai „%s“"
-
-#: src/tracker/tracker-daemon.c:975
-msgid "Starting miners…"
-msgstr "Paleidžiami gavėjai…"
-
-#: src/tracker/tracker-daemon.c:980
-#, c-format
-msgid "Could not start miners, manager could not be created, %s"
-msgstr "Nepavyko paleisti gavėjų, nepavyko sukurti tvarkytuvės, %s"
-
-#: src/tracker/tracker-daemon.c:1005
-msgid "perhaps a disabled plugin?"
-msgstr "galbūt išjungtas įskiepis?"
-
-#: src/tracker/tracker-daemon.c:1056
-msgid "If no arguments are given, the status of the data miners is shown"
-msgstr "Jei nepateikiami argumentai, rodomi gavėjai ir saugyklos duomenys"
-
-#: src/tracker/tracker-daemon.c:1061 src/tracker/tracker-extract.c:155
-#: src/tracker/tracker-index.c:396 src/tracker/tracker-info.c:636
-#: src/tracker/tracker-reset.c:271 src/tracker/tracker-search.c:1570
-#: src/tracker/tracker-status.c:561 src/tracker/tracker-tag.c:1056
-msgid "Unrecognized options"
-msgstr "Neatpažinti parametrai"
-
-#: src/tracker/tracker-dbus.c:44
-msgid "Could not get D-Bus connection"
-msgstr "Nepavyko užmegzti D-Bus ryšio"
-
-#: src/tracker/tracker-dbus.c:62
-msgid "Could not create D-Bus proxy to tracker-store"
-msgstr "Nepavyko sukurti D-Bus tarpininko tracker-store sistemai"
-
-#: src/tracker/tracker-extract.c:94
-msgid "Could not run tracker-extract: "
-msgstr "Nepavyko paleisti tracker-extract: "
-
-#: src/tracker/tracker-index.c:51
-msgid "Adds FILE as an indexed location"
-msgstr "Prideda FAILĄ kaip indeksuotą vietą"
-
-#: src/tracker/tracker-index.c:54
-msgid "Removes FILE from indexed locations"
-msgstr "Pašalina FAILĄ iš indeksuotų vietų"
-
-#: src/tracker/tracker-index.c:57
-msgid "Makes indexing recursive"
-msgstr "Padaro indeksavimą rekursyvų"
-
-#: src/tracker/tracker-index.c:193
-#, c-format
-msgid "“%s” is not a directory"
-msgstr "„%s“ nėra katalogas"
-
-#. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:283
-msgid "Either --add or --remove must be provided"
-msgstr "Turi būti nurodytas arba --add, arba --remove"
-
-#. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:287
-msgid "--add and --remove are mutually exclusive"
-msgstr "--add ir --remove negali būti naudojami kartu"
-
-#. TRANSLATORS: These are commandline options
-#: src/tracker/tracker-index.c:297
-msgid "--recursive requires --add"
-msgstr "--recursive reikalauja --add"
-
-#: src/tracker/tracker-index.c:357 src/tracker/tracker-status.c:331
-msgid "Path"
-msgstr "Kelias"
-
-#: src/tracker/tracker-index.c:358
-msgid "Recursive"
-msgstr "Rekursyviai"
-
-#: src/tracker/tracker-index.c:409
-msgid "Please specify one or more locations to index."
-msgstr "Nurodykite vieną ar daugiau vietų indeksavimui."
-
-#: src/tracker/tracker-info.c:65
-msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
-msgstr ""
-"Rodyti pilnas vardų sritis (pvz. nenaudoti nie:title, naudoti pilą URL)"
-
-#: src/tracker/tracker-info.c:69
-msgid "Show plain text content if available for resources"
-msgstr "Resursams rodyti grynojo teksto turinį, jei prieinamas"
-
-#. To translators:
-#. * IRI (International Resource Identifier) is a generalization
-#. * of the URI. While URI supports only ASCI encoding, IRI
-#. * fully supports international characters. In practice, UTF-8
-#. * is the most popular encoding used for IRI.
-#.
-#: src/tracker/tracker-info.c:79
-msgid ""
-"Instead of looking up a file name, treat the FILE arguments as actual IRIs "
-"(e.g. <file:///path/to/some/file.txt>)"
-msgstr ""
-"Užuot ieškojus failo pavadinimo, traktuoti failų argumentus kaip faktinius "
-"IRI (pvz. <file:///path/to/some/file.txt>)"
-
-#: src/tracker/tracker-info.c:83
-msgid "Output results as RDF in Turtle format"
-msgstr "Išvesti rezultatus RDF „Turtle“ formatu"
-
-#: src/tracker/tracker-info.c:87
-msgid "RDF property to treat as URL (eg. “nie:url”)"
-msgstr "RDF savybė, traktuojama kaip URL (pvz. „nie:url“)"
-
-#: src/tracker/tracker-info.c:388
-msgid "Error message"
-msgstr "Klaidos pranešimas"
-
-#: src/tracker/tracker-info.c:471
-msgid "Unable to retrieve URN for URI"
-msgstr "Nepavyko gauti URN URI adresui"
-
-#: src/tracker/tracker-info.c:505
-msgid "Unable to retrieve data for URI"
-msgstr "Nepavyko gauti duomenų apie URI"
-
-#: src/tracker/tracker-info.c:515
-msgid "No metadata available for that URI"
-msgstr "Nėra metaduomenų šiam URI"
-
-#: src/tracker/tracker-info.c:520 src/tracker/tracker-info.c:581
-msgid "Could not get eligible status: "
-msgstr "Nepavyko gauti galimybės būsenos: "
-
-#: src/tracker/tracker-process.c:216
-#, c-format
-msgid "Could not kill process %d — “%s”"
-msgstr "Nepavyko nutraukti proceso %d – „%s“"
-
-#: src/tracker/tracker-process.c:222
-#, c-format
-msgid "Killed process %d — “%s”"
-msgstr "Nutrauktas procesas %d – „%s“"
-
-#: src/tracker/tracker-reset.c:49
-msgid "Remove filesystem indexer database"
-msgstr "Pašalinti failų sistemos indeksuotojo duomenų bazę"
-
-#: src/tracker/tracker-reset.c:52
-msgid "Remove RSS indexer database"
-msgstr "Pašalinti RSS indeksuotojo duomenų bazę"
-
-#: src/tracker/tracker-reset.c:55
-msgid ""
-"Erase indexed information about a file, works recursively for directories"
-msgstr ""
-"Ištrinti indeksuotą informaciją apie failą, veikia rekursyviai aplankams"
-
-#. Now, delete the element recursively
-#: src/tracker/tracker-reset.c:95
-msgid "Deleting…"
-msgstr "Trinama…"
-
-#: src/tracker/tracker-reset.c:115
-msgid ""
-"The indexed data for this file has been deleted and will be reindexed again."
-msgstr ""
-"Indeksuoti šio failo duomenys buvo ištrinti ir bus suindeksuoti iš naujo."
-
-#: src/tracker/tracker-search.c:60
-msgid "Search for content matching TERMS, by type or across all types."
-msgstr "Ieškoti turinio pagal TERMINUS, tipą ar per visus tipus."
-
-#: src/tracker/tracker-search.c:77
-msgid "Search for files"
-msgstr "Ieškoti failų"
-
-#: src/tracker/tracker-search.c:81
-msgid "Search for folders"
-msgstr "Ieškoti aplankų"
-
-#: src/tracker/tracker-search.c:85
-msgid "Search for music files"
-msgstr "Ieškoti muzikos failų"
-
-#: src/tracker/tracker-search.c:89
-msgid "Search for music albums (--all has no effect on this)"
-msgstr "Ieškoti muzikos albumų (--all neturi poveikio)"
-
-#: src/tracker/tracker-search.c:93
-msgid "Search for music artists (--all has no effect on this)"
-msgstr "Ieškoti muzikos atlikėjų (--all neturi poveikio)"
-
-#: src/tracker/tracker-search.c:97
-msgid "Search for image files"
-msgstr "Ieškoti paveikslėlių failų"
-
-#: src/tracker/tracker-search.c:101
-msgid "Search for video files"
-msgstr "Ieškoti vaizdo failų"
-
-#: src/tracker/tracker-search.c:105
-msgid "Search for document files"
-msgstr "Ieškoti dokumentų failų"
-
-#: src/tracker/tracker-search.c:109
-msgid "Search for software (--all has no effect on this)"
-msgstr "Ieškoti programinės įrangos (--all neturi poveikio)"
-
-#: src/tracker/tracker-search.c:113
-msgid "Search for software categories (--all has no effect on this)"
-msgstr "Ieškoti programinės įrangos kategorijų (--all neturi poveikio)"
-
-#: src/tracker/tracker-search.c:117
-msgid "Search for feeds (--all has no effect on this)"
-msgstr "Ieškoti įrašų (--all neturi poveikio)"
-
-#: src/tracker/tracker-search.c:126 src/tracker/tracker-tag.c:71
-msgid "Limit the number of results shown"
-msgstr "Apriboti rodomų rezultatų skaičių"
-
-#: src/tracker/tracker-search.c:130 src/tracker/tracker-tag.c:75
-msgid "Offset the results"
-msgstr "Paslinkti rezultatus per"
-
-#: src/tracker/tracker-search.c:134
-msgid "Use OR for search terms instead of AND (the default)"
-msgstr "Naudoti ARBA sąlygą ieškomiems terminams vietoje IR (numatytasis)"
-
-#: src/tracker/tracker-search.c:138
-msgid ""
-"Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
-"feeds, --software, --software-categories)"
-msgstr ""
-"Rodyti rezultatų URN (netaikoma --music-albums, --music-artists, --feeds, --"
-"software, --software-categories)"
-
-#: src/tracker/tracker-search.c:142
-msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
-msgstr ""
-"Taip pat grąžinti visus neesamus atitikimus (pvz. įtraukti neprijungtas "
-"laikmenas)"
-
-#: src/tracker/tracker-search.c:146
-msgid ""
-"Disable showing snippets with results. This is only shown for some "
-"categories, e.g. Documents, Music…"
-msgstr ""
-"Išjungti ištraukų rodymą su rezultatais. Tai yra rodoma tik kai kurioms "
-"kategorijoms, pvz. dokumentams, muzikai…"
-
-#: src/tracker/tracker-search.c:150
-msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
-msgstr "Išjungti viso teksto paiešką (FTS). Įtraukia --disable-snippets"
-
-#: src/tracker/tracker-search.c:154
-msgid "Disable color when printing snippets and results"
-msgstr "Išjungti spalvas atspausdinant ištraukas ir rezultatus"
-
-#: src/tracker/tracker-search.c:161 src/tracker/tracker-status.c:58
-msgid "search terms"
-msgstr "paieškos terminai"
-
-#: src/tracker/tracker-search.c:162
-msgid "TERMS"
-msgstr "TERMINAI"
-
-#: src/tracker/tracker-search.c:252 src/tracker/tracker-search.c:642
-#: src/tracker/tracker-search.c:738 src/tracker/tracker-search.c:830
-#: src/tracker/tracker-search.c:919 src/tracker/tracker-search.c:1008
-#: src/tracker/tracker-search.c:1295
-msgid "Could not get search results"
-msgstr "Nepavyko gauti paieškos rezultatų"
-
-#: src/tracker/tracker-search.c:261
-msgid "No files were found"
-msgstr "Nerasti failai"
-
-#: src/tracker/tracker-search.c:265 src/tracker/tracker-tag.c:426
-msgid "Files"
-msgstr "Failai"
-
-#: src/tracker/tracker-search.c:651
-msgid "No artists were found"
-msgstr "Nerasta atlikėjų"
-
-#: src/tracker/tracker-search.c:655
-msgid "Artists"
-msgstr "Atlikėjai"
-
-#: src/tracker/tracker-search.c:747
-msgid "No music was found"
-msgstr "Nerasta muzikos"
-
-#: src/tracker/tracker-search.c:751
-msgid "Albums"
-msgstr "Albumai"
-
-#: src/tracker/tracker-search.c:839
-msgid "No feeds were found"
-msgstr "Nerasti įrašų"
-
-#: src/tracker/tracker-search.c:843
-msgid "Feeds"
-msgstr "Įrašai"
-
-#: src/tracker/tracker-search.c:928
-msgid "No software was found"
-msgstr "Nerasta programinės įrangos"
-
-#: src/tracker/tracker-search.c:932
-msgid "Software"
-msgstr "Programinė įranga"
-
-#: src/tracker/tracker-search.c:1017
-msgid "No software categories were found"
-msgstr "Nerasta programinės įrangos kategorijų"
-
-#: src/tracker/tracker-search.c:1021
-msgid "Software Categories"
-msgstr "Programinės įrangos kategorijos"
-
-#: src/tracker/tracker-search.c:1304
-msgid "No results were found matching your query"
-msgstr "Užklausos atitinkančių rezultatų nerasta"
-
-#: src/tracker/tracker-search.c:1308
-msgid "Results"
-msgstr "Rezultatai"
-
-#: src/tracker/tracker-status.c:53
-msgid "Show statistics for current index / data set"
-msgstr "Rodyti statistiką dabartiniam indeksui / duomenims"
-
-#: src/tracker/tracker-status.c:59
+#: src/cli/tracker-status.c:81
 msgid "EXPRESSION"
 msgstr "IŠRAIŠKA"
 
-#: src/tracker/tracker-status.c:106
-msgid "Could not get Tracker statistics"
-msgstr "Nepavyko gauti Tracker statistikos"
+#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
+#: src/cli/tracker-status.c:289
+msgid "Could not get LocalSearch statistics"
+msgstr "Nepavyko gauti LocalSearch statistikos"
 
-#: src/tracker/tracker-status.c:113
-msgid "No statistics available"
-msgstr "Nėra statistikos"
-
-#. To translators: This is to say there are no
-#. * statistics found. We use a "Statistics:
-#. * None" with multiple print statements
-#: src/tracker/tracker-status.c:154
-msgid "Statistics:"
-msgstr "Statistika:"
-
-#. To translators: This is to say there are no
-#. * tags found with a particular unique ID.
-#. To translators: This is to say there are no
-#. * files found associated with multiple tags, e.g.:
-#. *
-#. *   Files:
-#. *     None
-#. *
-#.
-#. To translators: This is to say there are no
-#. * resources found associated with this tag, e.g.:
-#. *
-#. *   Tags (shown by name):
-#. *     None
-#. *
-#.
-#. To translators: This is to say there are no
-#. * tags found for a particular file, e.g.:
-#. *
-#. *   /path/to/some/file:
-#. *     None
-#. *
-#.
-#: src/tracker/tracker-status.c:157 src/tracker/tracker-tag.c:310
-#: src/tracker/tracker-tag.c:442 src/tracker/tracker-tag.c:564
-#: src/tracker/tracker-tag.c:924
-msgid "None"
-msgstr "Joks"
-
-#: src/tracker/tracker-status.c:226 src/tracker/tracker-status.c:251
-msgid "Could not get basic status for Tracker"
-msgstr "Nepavyko gauti pagrindinės Tracker būsenos"
-
-#: src/tracker/tracker-status.c:332 src/tracker/tracker-status.c:499
+#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
 msgid "Message"
 msgstr "Pranešimas"
 
-#: src/tracker/tracker-status.c:391
+#: src/cli/tracker-status.c:406
 msgid "Currently indexed"
 msgstr "Šiuo metu indeksuojama"
 
-#: src/tracker/tracker-status.c:394 src/tracker/tracker-tag.c:546
+#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
@@ -1303,7 +563,7 @@ msgstr[0] "%d failas"
 msgstr[1] "%d failai"
 msgstr[2] "%d failų"
 
-#: src/tracker/tracker-status.c:400
+#: src/cli/tracker-status.c:415
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
@@ -1311,24 +571,23 @@ msgstr[0] "%d aplankas"
 msgstr[1] "%d aplankai"
 msgstr[2] "%d aplankų"
 
-#: src/tracker/tracker-status.c:414
+#: src/cli/tracker-status.c:429
 msgid "Remaining space on database partition"
 msgstr "Likusi vieta duomenų bazės skirsnyje"
 
-#: src/tracker/tracker-status.c:426
+#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+msgid "Indexer is paused"
+msgstr "Indeksuotojas pristabdytas"
+
+#: src/cli/tracker-status.c:440
 msgid "Data is still being indexed"
 msgstr "Duomenys yra indeksuojami"
 
-#: src/tracker/tracker-status.c:427
-#, c-format
-msgid "Estimated %s left"
-msgstr "Įvertinta, kad liko %s"
+#: src/cli/tracker-status.c:442
+msgid "Indexer is idle"
+msgstr "Indeksuotojas nieko neveikia"
 
-#: src/tracker/tracker-status.c:431
-msgid "All data miners are idle, indexing complete"
-msgstr "Visi duomenų gavėjai nieko neveikia, indeksavimas baigtas"
-
-#: src/tracker/tracker-status.c:438
+#: src/cli/tracker-status.c:449
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
@@ -1336,173 +595,839 @@ msgstr[0] "%d įrašyta klaida"
 msgstr[1] "%d įrašytos klaidos"
 msgstr[2] "%d įrašytų klaidų"
 
-#: src/tracker/tracker-status.c:524
+#: src/cli/tracker-status.c:533
 msgid "No reports found"
 msgstr "Nėra įrašų"
 
-#: src/tracker/tracker-tag.c:51
-msgid ""
-"List all tags (using FILTER if specified; FILTER always uses logical OR)"
-msgstr ""
-"Išvardinti visas žymas (naudojant FILTRĄ, jei nurodytas; FILTRAS visada "
-"naudoja loginį ARBA)"
+#: src/cli/tracker-status.c:705
+msgid "Could not get SPARQL connection"
+msgstr "Nepavyko gauti SPARQL ryšio"
 
-#: src/tracker/tracker-tag.c:52
-msgid "FILTER"
-msgstr "FILTRAS"
+#: src/cli/tracker-status.c:714
+msgid "Now listening to database updates"
+msgstr "Dabar stebimi atnaujinimai duomenų bazėje"
 
-#: src/tracker/tracker-tag.c:55
+#: src/cli/tracker-status.c:715
+msgid "Press Ctrl+C to stop"
+msgstr "Spauskite Vald+C sustojimui"
+
+#: src/cli/tracker-tag.c:67
+msgid "List all tags"
+msgstr "Išvardinti visas žymas"
+
+#: src/cli/tracker-tag.c:71
 msgid "Show files associated with each tag (this is only used with --list)"
 msgstr "Rodyti failus, susietus su kiekviena žyma (naudojami tik su --list)"
 
-#: src/tracker/tracker-tag.c:59
+#: src/cli/tracker-tag.c:75
 msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
 msgstr ""
 "Pridėti žymą (jei FAILAI praleidžiami, ŽYMA nebus susieta su jokiu failu)"
 
-#: src/tracker/tracker-tag.c:60 src/tracker/tracker-tag.c:64
+#: src/cli/tracker-tag.c:76 src/cli/tracker-tag.c:80
 msgid "TAG"
 msgstr "ŽYMA"
 
-#: src/tracker/tracker-tag.c:63
+#: src/cli/tracker-tag.c:79
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
 msgstr "Ištrinti žymą (jei FAILAI praleisti, ŽYMA bus pašalinta iš visų failų)"
 
-#: src/tracker/tracker-tag.c:67
+#: src/cli/tracker-tag.c:83
 msgid "Description for a tag (this is only used with --add)"
 msgstr "Žymos aprašymas (naudojami tik su --add)"
 
-#: src/tracker/tracker-tag.c:68
+#: src/cli/tracker-tag.c:84
 msgid "STRING"
 msgstr "EILUTĖ"
 
-#: src/tracker/tracker-tag.c:79
-msgid "Use AND for search terms instead of OR (the default)"
-msgstr "Naudoti AND sąlygą ieškomiems terminams vietoje OR (numatytasis)"
-
-#: src/tracker/tracker-tag.c:84
+#: src/cli/tracker-tag.c:96
 msgid "FILE…"
 msgstr "FAILAS…"
 
-#: src/tracker/tracker-tag.c:85
-msgid "FILE [FILE…]"
-msgstr "FAILAS [FAILAS...]"
-
-#: src/tracker/tracker-tag.c:101
-msgid ""
-"NOTE: Limit was reached, there are more items in the database not listed here"
-msgstr "PASTABA: pasiekta riba, duomenų bazėje yra daugiau įrašų, nei rodoma"
-
-#: src/tracker/tracker-tag.c:247
-msgid "Could not get file URNs"
-msgstr "Nepavyko gauti URN"
-
-#: src/tracker/tracker-tag.c:301
+#: src/cli/tracker-tag.c:119
 msgid "Could not get files related to tag"
 msgstr "Nepavyko gauti failų, susijusių su žyma"
 
-#: src/tracker/tracker-tag.c:368
-msgid "Could not get all tags in the database"
-msgstr "Nepavyko gauti visų žymų duomenų bazėje"
-
-#: src/tracker/tracker-tag.c:378
-msgid "No files have been tagged"
-msgstr "Nėra pažymėtų failų"
-
-#: src/tracker/tracker-tag.c:413
-msgid "Could not get files for matching tags"
-msgstr "Nepavyko gauti failų, susijusių su žymomis"
-
-#: src/tracker/tracker-tag.c:422
-msgid "No files were found matching ALL of those tags"
-msgstr "Nerasta failų, atitinkančių visas šias žymas"
-
-#: src/tracker/tracker-tag.c:501 src/tracker/tracker-tag.c:898
+#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
 msgid "Could not get all tags"
 msgstr "Nepavyko gauti visų žymų"
 
-#: src/tracker/tracker-tag.c:510 src/tracker/tracker-tag.c:907
-msgid "No tags were found"
-msgstr "Nerasta žymų"
-
-#: src/tracker/tracker-tag.c:514
+#: src/cli/tracker-tag.c:156
 msgid "Tags (shown by name)"
 msgstr "Žymos (rodomos pagal vardą)"
 
-#: src/tracker/tracker-tag.c:589
-msgid "No files were modified"
-msgstr "Nebuvo pakeistų failų"
-
-#: src/tracker/tracker-tag.c:633 src/tracker/tracker-tag.c:641
-msgid "Files do not exist or aren’t indexed"
-msgstr "Failų nėra arba neindeksuojami"
-
-#: src/tracker/tracker-tag.c:682
+#: src/cli/tracker-tag.c:217
 msgid "Could not add tag"
 msgstr "Nepavyko pridėti žymos"
 
-#: src/tracker/tracker-tag.c:694
+#: src/cli/tracker-tag.c:222
 msgid "Tag was added successfully"
 msgstr "Žyma sėkmingai pridėta"
 
-#: src/tracker/tracker-tag.c:724
+#: src/cli/tracker-tag.c:248
 msgid "Could not add tag to files"
 msgstr "Nepavyko pridėti žymos failams"
 
-#: src/tracker/tracker-tag.c:735
+#: src/cli/tracker-tag.c:253
 msgid "Tagged"
 msgstr "Pažymėta"
 
-#: src/tracker/tracker-tag.c:736
-msgid "Not tagged, file is not indexed"
-msgstr "Nepažymėta, failas nėra indeksuojamas"
-
-#: src/tracker/tracker-tag.c:778
-msgid "Could not get tag by label"
-msgstr "Nepavyko gauti žymos pagal etiketę"
-
-#: src/tracker/tracker-tag.c:789
-msgid "No tags were found by that name"
-msgstr "Nerasta žymų pagal šį pavadinimą"
-
-#: src/tracker/tracker-tag.c:807
-msgid "None of the files had this tag set"
-msgstr "Nė vienas iš failų neturi šios žymos"
-
-#: src/tracker/tracker-tag.c:854
+#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
 msgid "Could not remove tag"
 msgstr "Nepavyko pašalinti žymos"
 
-#: src/tracker/tracker-tag.c:862
+#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
 msgid "Tag was removed successfully"
 msgstr "Žyma sėkmingai pašalinta"
 
-#: src/tracker/tracker-tag.c:866
-msgid "Untagged"
-msgstr "Atžymėta"
+#: src/cli/tracker-tag.c:360
+msgid "Could not establish a connection to LocalSearch"
+msgstr "Nepavyko užmegzti ryšio su LocalSearch sistema"
 
-#: src/tracker/tracker-tag.c:867
-msgid "File not indexed or already untagged"
-msgstr "Failas neindeksuojamas arba jau atžymėtas"
-
-#: src/tracker/tracker-tag.c:1065
+#: src/cli/tracker-tag.c:425
 msgid "The --list option is required for --show-files"
 msgstr "Parametras --list yra privalomas su --show-files"
 
-#: src/tracker/tracker-tag.c:1067
-msgid ""
-"The --and-operator option can only be used with --list and tag label "
-"arguments"
-msgstr ""
-"Parametrą --and-operator galima naudoti tik su --list ir žymų argumentais"
-
-#: src/tracker/tracker-tag.c:1069
+#: src/cli/tracker-tag.c:427
 msgid "Add and delete actions can not be used together"
 msgstr "Pridėjimo ir trynimo veiksmai negali būti naudojami kartu"
 
-#: src/tracker/tracker-tag.c:1071
+#: src/cli/tracker-tag.c:429
 msgid "The --description option can only be used with --add"
 msgstr "Parametras --description gali būti naudojamas tik su --add"
+
+#: src/common/tracker-miner-proxy.c:349
+msgid "Cookie not recognized to resume paused miner"
+msgstr "Neatpažintas slapukas neatpažintas sustabdyto rinkiklio pratęsimui"
+
+#: src/common/tracker-miner-proxy.c:406
+msgid "Pause application and reason match an already existing pause request"
+msgstr "Stabdyti programą dėl tos pačios priežasties, kaip jau esama pauzė"
+
+#: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
+msgid "less than one second"
+msgstr "mažiau nei sekundė"
+
+#. Translators: this is %d days
+#: src/common/tracker-utils.c:116
+#, c-format
+msgid " %dd"
+msgstr " %dd"
+
+#. Translators: this is %2.2d hours
+#: src/common/tracker-utils.c:120
+#, c-format
+msgid " %2.2dh"
+msgstr " %2.2d val"
+
+#. Translators: this is %2.2d minutes
+#: src/common/tracker-utils.c:124
+#, c-format
+msgid " %2.2dm"
+msgstr " %2.2d min"
+
+#. Translators: this is %2.2d seconds
+#: src/common/tracker-utils.c:128
+#, c-format
+msgid " %2.2ds"
+msgstr " %2.2d s"
+
+#: src/common/tracker-utils.c:132
+#, c-format
+msgid " %d day"
+msgid_plural " %d days"
+msgstr[0] " %d dieną"
+msgstr[1] " %d dienas"
+msgstr[2] " %d dienų"
+
+#: src/common/tracker-utils.c:136
+#, c-format
+msgid " %2.2d hour"
+msgid_plural " %2.2d hours"
+msgstr[0] " %2.2d valandą"
+msgstr[1] " %2.2d valandas"
+msgstr[2] " %2.2d valandų"
+
+#: src/common/tracker-utils.c:140
+#, c-format
+msgid " %2.2d minute"
+msgid_plural " %2.2d minutes"
+msgstr[0] " %2.2d minutę"
+msgstr[1] " %2.2d minutes"
+msgstr[2] " %2.2d minučių"
+
+#: src/common/tracker-utils.c:144
+#, c-format
+msgid " %2.2d second"
+msgid_plural " %2.2d seconds"
+msgstr[0] " %2.2d sekundę"
+msgstr[1] " %2.2d sekundes"
+msgstr[2] " %2.2d sekundžių"
+
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
+#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+msgid "Displays version information"
+msgstr "Rodo versijos informaciją"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/control/tracker-main.c:136
+msgid "— start the tracker index proxy"
+msgstr "– paleisti tracker indeksavimo programą"
+
+#: src/extractor/tracker-main.c:74
+msgid "File to extract metadata for"
+msgstr "Failas metaduomenų išgavimui"
+
+#: src/extractor/tracker-main.c:78
+msgid "MIME type for file (if not provided, this will be guessed)"
+msgstr "MIME tipas failui (jei nepateiktas, bus nuspėtas)"
+
+#: src/extractor/tracker-main.c:79
+msgid "MIME"
+msgstr "MIME"
+
+#: src/extractor/tracker-main.c:85
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr "Lizdo failo deskriptorius porininkų ryšiui"
+
+#: src/extractor/tracker-main.c:86
+msgid "FD"
+msgstr "FD"
+
+#: src/extractor/tracker-main.c:257
+msgid "No metadata or extractor modules found to handle this file"
+msgstr "Nerasta metaduomenų išgavėjo modulių šio failo apdorojimui"
+
+#: src/extractor/tracker-main.c:265
+msgid "Metadata extraction failed"
+msgstr "Metaduomenų išgavavimas nepavyko"
+
+#. Translators: this message will appear immediately after the
+#. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
+#: src/extractor/tracker-main.c:327
+msgid "— Extract file meta data"
+msgstr "– gauti failo metaduomenis"
+
+#: src/extractor/tracker-main.c:341
+msgid "Filename and mime type must be provided together"
+msgstr "Failas ir mime tipas turi būti pateikti kartu"
+
+#: src/indexer/tracker-main.c:75
+msgid "Runs until all configured locations are indexed and then exits"
+msgstr ""
+"Veikia iki kol visos nustatytos vietos yra suindeksuotos ir tuomet baigia "
+"darbą"
+
+#: src/indexer/tracker-main.c:79
+msgid "Checks if FILE is eligible for being mined based on configuration"
+msgstr "Tikrina, ar FAILAS yra tinkamas apdorojimui pagal nustatymus"
+
+#: src/indexer/tracker-main.c:83
+msgid "Avoids changes in the filesystem"
+msgstr "Vendia failų sistemos pakeitimų"
+
+#: src/indexer/tracker-main.c:335
+#, c-format
+msgid "Data object “%s” currently exists"
+msgstr "Duomenų objektas „%s“ šiuo metu jau yra"
+
+#: src/indexer/tracker-main.c:336
+#, c-format
+msgid "Data object “%s” currently does not exist"
+msgstr "Šiuo metu nėra duomenų objekto „%s“"
+
+#: src/indexer/tracker-main.c:346
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "Katalogas NETINKAMAS indeksavimui (pagal filtrus)"
+
+#: src/indexer/tracker-main.c:350
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "Failas NETINKAMAS indeksavimui (pagal filtrus)"
+
+#: src/indexer/tracker-main.c:353
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "Failas NETINKAMAS indeksavimui (paslėptas failas)"
+
+#: src/indexer/tracker-main.c:355
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "Failas NETINKAMAS indeksavimui (neindeksuojamas aplankas)"
+
+#: src/indexer/tracker-main.c:379
+#, c-format
+msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
+msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (pagal filtrus)"
+
+#: src/indexer/tracker-main.c:385
+#, c-format
+msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
+msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (paslėptas failas)"
+
+#: src/indexer/tracker-main.c:391
+#, c-format
+msgid ""
+"Parent directory “%s” is NOT eligible to be indexed (based on content "
+"filters)"
+msgstr "Tėvinis katalogas „%s“ NETINKAMAS indeksavimui (pagal turinio filtrus)"
+
+#: src/indexer/tracker-main.c:408
+msgid "Directory is eligible to be indexed"
+msgstr "Katalogas yra tinkamas indeksavimui"
+
+#: src/indexer/tracker-main.c:409
+msgid "File is eligible to be indexed"
+msgstr "Failas yra tinkamas indeksavimui"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/indexer/tracker-main.c:623
+msgid "— start the tracker indexer"
+msgstr "– paleisti tracker indeksavimo programą"
+
+#: src/writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr ""
+"Rašomas žurnalas, 0 = tik klaidos, 1 = mažiausias, 2 = detalus ir 3 = "
+"derinimo (numatytasis=0)"
+
+#: src/writeback/tracker-main.c:61
+msgid "Disable shutting down after 30 seconds of inactivity"
+msgstr "Uždrausti išjungimą po 30 sekundžių neaktyvumo"
+
+#. Translators: this message will appear immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/writeback/tracker-main.c:93
+msgid "— start the tracker writeback service"
+msgstr "– paleisti tracker rašymo posistemę"
+
+#~ msgid ""
+#~ "Simplify the words to their root to provide more results. E.g. “shelves” "
+#~ "and “shelf” to “shel”"
+#~ msgstr ""
+#~ "Supaprastinti žodžius iki jų šaknies, siekiant gauti daugiau rezultatų. "
+#~ "Pavyzdžiui, žodžius „vietos“ ir „vieta“ iki „viet“"
+
+#~ msgid ""
+#~ "Translate accented characters to the equivalent unaccented. E.g. “Idéa” "
+#~ "to “Idea” for improved matching."
+#~ msgstr ""
+#~ "Išversti simbolius su diakritiniais ženklais į atitikmenis be jų, "
+#~ "siekiant gauti daugiau atitikmenų. Pavyzdžiui, žodį „idėja“ versti į "
+#~ "„ideja“."
+
+#~ msgid "If enabled, numbers will not be indexed."
+#~ msgstr "Jei įjungta, skaičiai bus indeksuojami."
+
+#~ msgid "Initial sleep time, in seconds."
+#~ msgstr "Pradinis laukimo laikas sekundėmis."
+
+#~ msgid "Indexing speed, the higher the slower."
+#~ msgstr "Indeksavimo greitis. Kuo didesnis, tuo labiau apkraunama sistema."
+
+#~ msgid ""
+#~ "Disk space threshold in percent at which to pause indexing, or -1 to "
+#~ "disable."
+#~ msgstr ""
+#~ "Laisvos disko vietos riba megabaitais, kai reikia pristabdyti indeksavimą "
+#~ "arba „-1“ išjungimui."
+
+#~ msgid ""
+#~ "Interval in days to check whether the filesystem is up to date in the "
+#~ "database. 0 forces crawling anytime, -1 forces it only after unclean "
+#~ "shutdowns, and -2 disables it entirely."
+#~ msgstr ""
+#~ "Intervalas dienomis patikrinimui, ar failų sistema nepasenusi duomenų "
+#~ "bazėje. 0 verčia perėjimą bet kada, -1 verčia tik po neaiškių išjungimų, "
+#~ "-2 visiškai išjungia."
+
+#~ msgid ""
+#~ "Threshold in days after which files from removables devices will be "
+#~ "removed from database if not mounted. 0 means never, maximum is 365."
+#~ msgstr ""
+#~ "Slenkstis dienomis, po kurio failai iš išimamų įrenginių bus pašalinti iš "
+#~ "duomenų bazės, jei neprijungti. 0 reikšia niekada, daugiausia 365."
+
+#~ msgid ""
+#~ "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
+#~ "removable devices are not indexed, optical discs won’t be either)"
+#~ msgstr ""
+#~ "Nustatykite teigiamą CD, DVD ir kitų optinių laikmenų indeksavimui "
+#~ "įjungti (jei išimami įrenginiai nėra indeksuojami, optiniai diskai taip "
+#~ "pat nebus)"
+
+#~ msgid "Set to true to index while running on battery"
+#~ msgstr "Nustatykite teigiamą indeksavimui, kai naudojama baterijos energija"
+
+#~ msgid ""
+#~ "Set to true to index while running on battery for the first time only"
+#~ msgstr ""
+#~ "Nustatykite teigiamą indeksavimui naudojant baterijos energiją tik pirmą "
+#~ "kartą"
+
+#~ msgid "Initial sleep time in seconds, 0->1000 (default=15)"
+#~ msgstr "Pradinis miegojimo laikas sekundėmis, 0->1000 (numatytasis=15)"
+
+#~ msgid "Runs for a specific domain ontology"
+#~ msgstr "Vykdomas specifinei domeno ontologijai"
+
+#~ msgid "Add feed"
+#~ msgstr "Pridėti sklaidos kanalą"
+
+#~ msgid "URL"
+#~ msgstr "URL"
+
+#~ msgid "Title to use (must be used with --add-feed)"
+#~ msgstr "Naudotinas pavadinimas (reikia naudoti su --add-feed)"
+
+#~ msgid "List feeds"
+#~ msgstr "Išvardinti kanalus"
+
+#~ msgid "Delete feed"
+#~ msgstr "Ištrinti kanalą"
+
+#~ msgid "No error given"
+#~ msgstr "Nenurodyta klaida"
+
+#~ msgid "Could not add feed"
+#~ msgstr "Nepavyko pridėti sklaidos kanalo"
+
+#~ msgid "Could not remove feed"
+#~ msgstr "Nepavyko pašalinti kanalo"
+
+#~ msgid "Could not list feeds"
+#~ msgstr "Nepavyko išvardinti kanalų"
+
+#~ msgid "— start the feeds indexer"
+#~ msgstr "– paleisti sklaidos kanalų indeksavimo programą"
+
+#~ msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
+#~ msgstr "Priverstinai naudoti modulį rinkimui (pvz., „foo“ reiškia „foo.so“)"
+
+#~ msgid "MODULE"
+#~ msgstr "MODULIS"
+
+#~ msgid ""
+#~ "Start, stop, restart and list daemons responsible for indexing content"
+#~ msgstr ""
+#~ "Paleisti, sustabdyti, perleisti bei išvardinti turinio indeksavimo "
+#~ "tarnybas"
+
+#~ msgid "Trigger content indexing of a location"
+#~ msgstr "Sukelia turinio indeksavimą vietoje"
+
+#~ msgid "Reset the index and configuration"
+#~ msgstr "Atstatyti indeksą bei konfigūracija"
+
+#~ msgid "Unavailable"
+#~ msgstr "Nepasiekiama"
+
+#~ msgid "Initializing"
+#~ msgstr "Inicijuojama"
+
+#~ msgid "Processing…"
+#~ msgstr "Apdorojama…"
+
+#~ msgid "Fetching…"
+#~ msgstr "Įkeliama…"
+
+#, c-format
+#~ msgid "Crawling single directory “%s”"
+#~ msgstr "Peržvelgiamas vienas katalogas „%s“"
+
+#, c-format
+#~ msgid "Crawling recursively directory “%s”"
+#~ msgstr "Rekursyviai peržvelgiamas katalogas „%s“"
+
+#~ msgid "Paused"
+#~ msgstr "Sustabdyta"
+
+#~ msgid "Idle"
+#~ msgstr "Nedirba"
+
+#~ msgid "List common statuses for miners"
+#~ msgstr "Išvardinti dažnas gavėjų būsenas"
+
+#~ msgid "Pause a miner (you must use this with --miner)"
+#~ msgstr "Pristabdyti gavėją (reikia naudoti kartu su --miner)"
+
+#~ msgid "REASON"
+#~ msgstr "PRIEŽASTIS"
+
+#~ msgid ""
+#~ "Pause a miner while the calling process is alive or until resumed (you "
+#~ "must use this with --miner)"
+#~ msgstr ""
+#~ "Stabdyti gavėją kol kviečiantis procesas gyvas arba iki pratęsimo (turite "
+#~ "naudoti kartu su --miner)"
+
+#~ msgid "Resume a miner (you must use this with --miner)"
+#~ msgstr "Pratęsti gavėją (turite naudoti kartu su --miner)"
+
+#~ msgid "COOKIE"
+#~ msgstr "SLAPUKAS"
+
+#~ msgid ""
+#~ "Miner to use with --resume or --pause (you can use suffixes, e.g. Files "
+#~ "or Applications)"
+#~ msgstr ""
+#~ "Gavėjas, naudotinas su --resume arba --pause (galite naudoti priesagas, "
+#~ "pvz., „Failai“ arba „Programos“)"
+
+#~ msgid "MINER"
+#~ msgstr "GAVĖJAS"
+
+#~ msgid "List all miners currently running"
+#~ msgstr "Išvardinti visus šiuo metu veikiančius gavėjus"
+
+#~ msgid "List all miners installed"
+#~ msgstr "Išvardinti visus įdiegtus gavėjus"
+
+#~ msgid "List pause reasons"
+#~ msgstr "Išvardinti sustojimo priežastis"
+
+#~ msgid "List all Tracker processes"
+#~ msgstr "Parodyti visus „Tracker“ procesus"
+
+#~ msgid "Use SIGKILL to stop all miners"
+#~ msgstr "Naudoti SIGKILL visiems gavėjams sustabdyti"
+
+#~ msgid "APPS"
+#~ msgstr "PROGRAMOS"
+
+#~ msgid "Use SIGTERM to stop all miners"
+#~ msgstr "Naudoti SIGTERM visiems gavėjams sustabdyti"
+
+#~ msgid "Starts miners"
+#~ msgstr "Paleidžia gavėjus"
+
+#, c-format
+#~ msgid "Could not get status from miner: %s"
+#~ msgstr "Nepavyko gauti gavėjo būsenos: %s"
+
+#, c-format
+#~ msgid "%s remaining"
+#~ msgstr "liko %s"
+
+#~ msgid "unknown time left"
+#~ msgstr "likęs nežinomas laikas"
+
+#~ msgid "PAUSED"
+#~ msgstr "SUSTABDYTAS"
+
+#~ msgid "Not running or is a disabled plugin"
+#~ msgstr "Neveikiantis arba išjungtas įskiepis"
+
+#, c-format
+#~ msgid "Could not pause miner, manager could not be created, %s"
+#~ msgstr "Nepavyko sustabdyti gavėjo, nepavyko sukurti tvarkytuvės, %s"
+
+#, c-format
+#~ msgid "Attempting to pause miner “%s” with reason “%s”"
+#~ msgstr "Bandoma stabdyti gavėją „%s“ dėl priežasties „%s“"
+
+#, c-format
+#~ msgid "Could not pause miner: %s"
+#~ msgstr "Nepavyko sustabdyti gavėjo: %s"
+
+#, c-format
+#~ msgid "Cookie is %d"
+#~ msgstr "Sausainis yra %d"
+
+#, c-format
+#~ msgid "Could not resume miner, manager could not be created, %s"
+#~ msgstr "Nepavyko pratęsti gavėjo, nepavyko sukurti tvarkytuvės, %s"
+
+#, c-format
+#~ msgid "Attempting to resume miner %s with cookie %d"
+#~ msgstr "Bandoma pratęsti gavėją %s su sausainiu %d"
+
+#, c-format
+#~ msgid "Could not resume miner: %s"
+#~ msgstr "Nepavyko pratęsti gavėjo: %s"
+
+#~ msgid "Done"
+#~ msgstr "Atlikta"
+
+#, c-format
+#~ msgid "Could not list miners, manager could not be created, %s"
+#~ msgstr "Nepavyko išvardinti gavėjų, nepavyko sukurti tvarkytuvės, %s"
+
+#, c-format
+#~ msgid "Found %d miner installed"
+#~ msgid_plural "Found %d miners installed"
+#~ msgstr[0] "Rastas %d įdiegtas gavėjas"
+#~ msgstr[1] "Rasti %d įdiegti gavėjai"
+#~ msgstr[2] "Rasta %d įdiegtų gavėjų"
+
+#, c-format
+#~ msgid "Found %d miner running"
+#~ msgid_plural "Found %d miners running"
+#~ msgstr[0] "Rastas %d veikiantis gavėjas"
+#~ msgstr[1] "Rasti %d veikiantys gavėjai"
+#~ msgstr[2] "Rasta %d veikiančių gavėjų"
+
+#, c-format
+#~ msgid "Could not get pause details, manager could not be created, %s"
+#~ msgstr ""
+#~ "Nepavyko gauti sustojimo informacijos, nepavyko sukurti tvarkytuvės, %s"
+
+#~ msgid "No miners are running"
+#~ msgstr "Nėra veikiančių gavėjų"
+
+#~ msgid "Miners"
+#~ msgstr "Gavėjai"
+
+#~ msgid "No miners are paused"
+#~ msgstr "Nėra sustabdytų gavėjų"
+
+#~ msgid "All nie:plainTextContent properties are omitted"
+#~ msgstr "Praleidžiamos visos nie:plainTextContent savybės"
+
+#~ msgid "Common statuses include"
+#~ msgstr "Dažnos būsenos yra"
+
+#, c-format
+#~ msgid "Could not get status, manager could not be created, %s"
+#~ msgstr "Nepavyko gauti gavėjo būsenos, nepavyko sukurti tvarkytuvės, %s"
+
+#, c-format
+#~ msgid "Could not get display name for miner “%s”"
+#~ msgstr "Nepavyko gauti gavėjo „%s“ pavadinimo"
+
+#~ msgid "You can not use miner pause and resume switches together"
+#~ msgstr "Negalima kartu naudoti gavėjo stabdymo ir pratęsimo parametrų"
+
+#~ msgid "You must provide the miner for pause or resume commands"
+#~ msgstr "Stabdymo arba pratęsimo komandoms turite pateikti gavėją"
+
+#~ msgid "You must provide a pause or resume command for the miner"
+#~ msgstr "Turite pateikti gavėjui stabdymo arba pratęsimo komandą"
+
+#~ msgid "You can not use the --kill and --terminate arguments together"
+#~ msgstr "Negalima kartu naudoti --kill ir --terminate argumentų"
+
+#, c-format
+#~ msgid "Found %d PID…"
+#~ msgid_plural "Found %d PIDs…"
+#~ msgstr[0] "Rastas %d PID…"
+#~ msgstr[1] "Rasti %d PID…"
+#~ msgstr[2] "Rasta %d PID…"
+
+#, c-format
+#~ msgid "Found process ID %d for “%s”"
+#~ msgstr "Rastas proceso ID %d programai „%s“"
+
+#~ msgid "Starting miners…"
+#~ msgstr "Paleidžiami gavėjai…"
+
+#, c-format
+#~ msgid "Could not start miners, manager could not be created, %s"
+#~ msgstr "Nepavyko paleisti gavėjų, nepavyko sukurti tvarkytuvės, %s"
+
+#~ msgid "perhaps a disabled plugin?"
+#~ msgstr "galbūt išjungtas įskiepis?"
+
+#~ msgid "If no arguments are given, the status of the data miners is shown"
+#~ msgstr "Jei nepateikiami argumentai, rodomi gavėjai ir saugyklos duomenys"
+
+#~ msgid "Could not get D-Bus connection"
+#~ msgstr "Nepavyko užmegzti D-Bus ryšio"
+
+#~ msgid "Could not create D-Bus proxy to tracker-store"
+#~ msgstr "Nepavyko sukurti D-Bus tarpininko tracker-store sistemai"
+
+#~ msgid ""
+#~ "Instead of looking up a file name, treat the FILE arguments as actual "
+#~ "IRIs (e.g. <file:///path/to/some/file.txt>)"
+#~ msgstr ""
+#~ "Užuot ieškojus failo pavadinimo, traktuoti failų argumentus kaip "
+#~ "faktinius IRI (pvz. <file:///path/to/some/file.txt>)"
+
+#~ msgid "Output results as RDF in Turtle format"
+#~ msgstr "Išvesti rezultatus RDF „Turtle“ formatu"
+
+#~ msgid "RDF property to treat as URL (eg. “nie:url”)"
+#~ msgstr "RDF savybė, traktuojama kaip URL (pvz. „nie:url“)"
+
+#~ msgid "Unable to retrieve URN for URI"
+#~ msgstr "Nepavyko gauti URN URI adresui"
+
+#, c-format
+#~ msgid "Could not kill process %d — “%s”"
+#~ msgstr "Nepavyko nutraukti proceso %d – „%s“"
+
+#, c-format
+#~ msgid "Killed process %d — “%s”"
+#~ msgstr "Nutrauktas procesas %d – „%s“"
+
+#~ msgid "Remove RSS indexer database"
+#~ msgstr "Pašalinti RSS indeksuotojo duomenų bazę"
+
+#~ msgid "Search for content matching TERMS, by type or across all types."
+#~ msgstr "Ieškoti turinio pagal TERMINUS, tipą ar per visus tipus."
+
+#~ msgid "Search for music albums (--all has no effect on this)"
+#~ msgstr "Ieškoti muzikos albumų (--all neturi poveikio)"
+
+#~ msgid "Search for music artists (--all has no effect on this)"
+#~ msgstr "Ieškoti muzikos atlikėjų (--all neturi poveikio)"
+
+#~ msgid "Search for software (--all has no effect on this)"
+#~ msgstr "Ieškoti programinės įrangos (--all neturi poveikio)"
+
+#~ msgid "Search for software categories (--all has no effect on this)"
+#~ msgstr "Ieškoti programinės įrangos kategorijų (--all neturi poveikio)"
+
+#~ msgid "Search for feeds (--all has no effect on this)"
+#~ msgstr "Ieškoti įrašų (--all neturi poveikio)"
+
+#~ msgid "Use OR for search terms instead of AND (the default)"
+#~ msgstr "Naudoti ARBA sąlygą ieškomiems terminams vietoje IR (numatytasis)"
+
+#~ msgid ""
+#~ "Show URNs for results (doesn’t apply to --music-albums, --music-artists, "
+#~ "--feeds, --software, --software-categories)"
+#~ msgstr ""
+#~ "Rodyti rezultatų URN (netaikoma --music-albums, --music-artists, --feeds, "
+#~ "--software, --software-categories)"
+
+#~ msgid ""
+#~ "Disable showing snippets with results. This is only shown for some "
+#~ "categories, e.g. Documents, Music…"
+#~ msgstr ""
+#~ "Išjungti ištraukų rodymą su rezultatais. Tai yra rodoma tik kai kurioms "
+#~ "kategorijoms, pvz. dokumentams, muzikai…"
+
+#~ msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
+#~ msgstr "Išjungti viso teksto paiešką (FTS). Įtraukia --disable-snippets"
+
+#~ msgid "Disable color when printing snippets and results"
+#~ msgstr "Išjungti spalvas atspausdinant ištraukas ir rezultatus"
+
+#~ msgid "Could not get search results"
+#~ msgstr "Nepavyko gauti paieškos rezultatų"
+
+#~ msgid "No files were found"
+#~ msgstr "Nerasti failai"
+
+#~ msgid "No artists were found"
+#~ msgstr "Nerasta atlikėjų"
+
+#~ msgid "No music was found"
+#~ msgstr "Nerasta muzikos"
+
+#~ msgid "No feeds were found"
+#~ msgstr "Nerasti įrašų"
+
+#~ msgid "Feeds"
+#~ msgstr "Įrašai"
+
+#~ msgid "No software was found"
+#~ msgstr "Nerasta programinės įrangos"
+
+#~ msgid "Software"
+#~ msgstr "Programinė įranga"
+
+#~ msgid "No software categories were found"
+#~ msgstr "Nerasta programinės įrangos kategorijų"
+
+#~ msgid "Software Categories"
+#~ msgstr "Programinės įrangos kategorijos"
+
+#~ msgid "No results were found matching your query"
+#~ msgstr "Užklausos atitinkančių rezultatų nerasta"
+
+#~ msgid "No statistics available"
+#~ msgstr "Nėra statistikos"
+
+#~ msgid "Statistics:"
+#~ msgstr "Statistika:"
+
+#~ msgid "None"
+#~ msgstr "Joks"
+
+#~ msgid "Could not get basic status for Tracker"
+#~ msgstr "Nepavyko gauti pagrindinės Tracker būsenos"
+
+#, c-format
+#~ msgid "Estimated %s left"
+#~ msgstr "Įvertinta, kad liko %s"
+
+#~ msgid "All data miners are idle, indexing complete"
+#~ msgstr "Visi duomenų gavėjai nieko neveikia, indeksavimas baigtas"
+
+#~ msgid ""
+#~ "List all tags (using FILTER if specified; FILTER always uses logical OR)"
+#~ msgstr ""
+#~ "Išvardinti visas žymas (naudojant FILTRĄ, jei nurodytas; FILTRAS visada "
+#~ "naudoja loginį ARBA)"
+
+#~ msgid "FILTER"
+#~ msgstr "FILTRAS"
+
+#~ msgid "Use AND for search terms instead of OR (the default)"
+#~ msgstr "Naudoti AND sąlygą ieškomiems terminams vietoje OR (numatytasis)"
+
+#~ msgid "FILE [FILE…]"
+#~ msgstr "FAILAS [FAILAS...]"
+
+#~ msgid ""
+#~ "NOTE: Limit was reached, there are more items in the database not listed "
+#~ "here"
+#~ msgstr ""
+#~ "PASTABA: pasiekta riba, duomenų bazėje yra daugiau įrašų, nei rodoma"
+
+#~ msgid "Could not get file URNs"
+#~ msgstr "Nepavyko gauti URN"
+
+#~ msgid "Could not get all tags in the database"
+#~ msgstr "Nepavyko gauti visų žymų duomenų bazėje"
+
+#~ msgid "No files have been tagged"
+#~ msgstr "Nėra pažymėtų failų"
+
+#~ msgid "Could not get files for matching tags"
+#~ msgstr "Nepavyko gauti failų, susijusių su žymomis"
+
+#~ msgid "No files were found matching ALL of those tags"
+#~ msgstr "Nerasta failų, atitinkančių visas šias žymas"
+
+#~ msgid "No tags were found"
+#~ msgstr "Nerasta žymų"
+
+#~ msgid "No files were modified"
+#~ msgstr "Nebuvo pakeistų failų"
+
+#~ msgid "Files do not exist or aren’t indexed"
+#~ msgstr "Failų nėra arba neindeksuojami"
+
+#~ msgid "Not tagged, file is not indexed"
+#~ msgstr "Nepažymėta, failas nėra indeksuojamas"
+
+#~ msgid "Could not get tag by label"
+#~ msgstr "Nepavyko gauti žymos pagal etiketę"
+
+#~ msgid "No tags were found by that name"
+#~ msgstr "Nerasta žymų pagal šį pavadinimą"
+
+#~ msgid "None of the files had this tag set"
+#~ msgstr "Nė vienas iš failų neturi šios žymos"
+
+#~ msgid "Untagged"
+#~ msgstr "Atžymėta"
+
+#~ msgid "File not indexed or already untagged"
+#~ msgstr "Failas neindeksuojamas arba jau atžymėtas"
+
+#~ msgid ""
+#~ "The --and-operator option can only be used with --list and tag label "
+#~ "arguments"
+#~ msgstr ""
+#~ "Parametrą --and-operator galima naudoti tik su --list ir žymų argumentais"
 
 #~ msgid "daemon"
 #~ msgstr "daemon"
@@ -1632,9 +1557,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 
 #~ msgid "Could not (re)index file, manager could not be created, %s"
 #~ msgstr "Nepavyko (per)indeksuoti failo, nepavyko sukurti tvarkytuvės, %s"
-
-#~ msgid "Could not (re)index file"
-#~ msgstr "Nepavyko (per)indeksuoti failo"
 
 #~ msgid "(Re)indexing file was successful"
 #~ msgstr "Failo (per)indeksavimas sėkmingas"
@@ -1798,9 +1720,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 
 #~ msgid "Fetch RSS/ATOM feeds"
 #~ msgstr "Parsiųsti RSS/ATOM įrašus"
-
-#~ msgid "Metadata extractor"
-#~ msgstr "Metaduomenų išgavėjas"
 
 #~ msgid ""
 #~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
@@ -2162,9 +2081,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ msgid "Mail"
 #~ msgstr "El. laiškai"
 
-#~ msgid "Folders"
-#~ msgstr "Aplankai"
-
 #~ msgid "Items"
 #~ msgstr "Elementai"
 
@@ -2363,8 +2279,8 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ "Most commonly this is used to ignore directories like *~, *.o, *.la, etc"
 #~ msgstr ""
 #~ "Čia galima naudoti visuotinius šablonus, pavyzdžiui: „*bat*“.\n"
-#~ "Dažniausiai tai yra naudojama katalogų nepaisymui, tokių kaip *~, *.o, *."
-#~ "la, ir kt."
+#~ "Dažniausiai tai yra naudojama katalogų nepaisymui, tokių kaip *~, *.o, "
+#~ "*.la, ir kt."
 
 #~ msgid "Ignored Content"
 #~ msgstr "Nepaisomas turinys"
@@ -2588,9 +2504,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ msgid "[y|N]"
 #~ msgstr "[t|N]"
 
-#~ msgid "yes"
-#~ msgstr "taip"
-
 #~ msgid "Removing configuration files…"
 #~ msgstr "Šalinami konfigūracijos failai…"
 
@@ -2622,11 +2535,11 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ msgstr "Gauti klasių priešdėlius"
 
 #~ msgid ""
-#~ "Retrieve properties for a class, prefixes can be used too (e.g. rdfs:"
-#~ "Resource)"
+#~ "Retrieve properties for a class, prefixes can be used too (e.g. "
+#~ "rdfs:Resource)"
 #~ msgstr ""
-#~ "Gauti klasės savybes, priešdėliai taip pat gali būti naudojami (pvz. rdfs:"
-#~ "Resource)"
+#~ "Gauti klasės savybes, priešdėliai taip pat gali būti naudojami (pvz. "
+#~ "rdfs:Resource)"
 
 #~ msgid "CLASS"
 #~ msgstr "CLASS"
@@ -2702,11 +2615,11 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ msgstr "Priešdėliai"
 
 #~ msgid ""
-#~ "Could not find property for class prefix, e.g. :Resource in “rdfs:"
-#~ "Resource”"
+#~ "Could not find property for class prefix, e.g. :Resource in "
+#~ "“rdfs:Resource”"
 #~ msgstr ""
-#~ "Nepavyko rasti klasės priešdėlio savybės, pvz. :Resource in \"rdfs:"
-#~ "Resource\""
+#~ "Nepavyko rasti klasės priešdėlio savybės, pvz. :Resource in "
+#~ "\"rdfs:Resource\""
 
 #~ msgid "Could not list properties"
 #~ msgstr "Nepavyko išvardinti savybių"
@@ -2728,9 +2641,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 
 #~ msgid "No indexes were found"
 #~ msgstr "Nerasta indeksų"
-
-#~ msgid "Indexes"
-#~ msgstr "Indeksai"
 
 #~ msgid "Could not search classes"
 #~ msgstr "Nepavyko ieškoti klasių"
@@ -2777,9 +2687,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 
 #~ msgid "SQL"
 #~ msgstr "SQL"
-
-#~ msgid "Failed to initialize data manager"
-#~ msgstr "Nepavyko inicijuoti duomenų tvarkytuvės"
 
 #~ msgid "Empty result set"
 #~ msgstr "Tuščias rezultatas"
@@ -2828,9 +2735,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 #~ msgstr ""
 #~ "„Indeksas“ yra rikiuotos nuorodos į duomenis. Indeksai naudojami greitam "
 #~ "informacijos bei turinio pasiekimui."
-
-#~ msgid "Reset Indexed Data"
-#~ msgstr "Atstatyti indeksuotus duomenis"
 
 #~ msgid "_Delay"
 #~ msgstr "_Delsa"
@@ -2909,9 +2813,6 @@ msgstr "Parametras --description gali būti naudojamas tik su --add"
 
 #~ msgid "General options"
 #~ msgstr "Bendrosios parinktys"
-
-#~ msgid "Show general options"
-#~ msgstr "Rodyti bendrąsias parinktis"
 
 #~ msgid "Miner options"
 #~ msgstr "Gavėjo parinktys"
