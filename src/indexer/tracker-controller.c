@@ -152,7 +152,8 @@ add_removable_directory (TrackerController *controller,
 
 	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
 		TRACKER_DIRECTORY_FLAG_PRESERVE |
-		TRACKER_DIRECTORY_FLAG_PRIORITY;
+		TRACKER_DIRECTORY_FLAG_PRIORITY |
+		TRACKER_DIRECTORY_FLAG_IS_VOLUME;
 
 	uri = g_file_get_uri (mount_file);
 	g_debug ("  Adding removable: '%s'", uri);
