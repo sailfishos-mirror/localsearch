@@ -21,16 +21,14 @@
 
 #include <string.h>
 
+#include "tracker-gexiv-compat.h"
 #include "tracker-iptc.h"
 #include "tracker-resource-helpers.h"
 #include "tracker-utils.h"
 
-#ifdef HAVE_LIBIPTCDATA
+#include <gexiv2/gexiv2.h>
 
-#include <libiptcdata/iptc-data.h>
-#include <libiptcdata/iptc-dataset.h>
-
-#define IPTC_DATE_FORMAT "%Y %m %d"
+#define IPTC_DATE_FORMAT "%Y-%m-%d"
 
 /**
  * SECTION:tracker-iptc
@@ -80,194 +78,48 @@ fix_iptc_orientation (const gchar *orientation)
 	return "nfo:orientation-top"; /* We take this as default */
 }
 
-static void
-foreach_dataset (IptcDataSet *dataset,
-                 void        *user_data)
+TrackerIptcData *
+tracker_iptc_new_from_metadata (GExiv2Metadata *metadata)
 {
-	TrackerIptcData *data = user_data;
-	gchar mbuffer[1024];
+	TrackerIptcData *data;
+	GError *error = NULL;
 
-	/* The meaning of dataset->tag DEPENDS on the value of dataset->record.
-	 * See iptc-tag.h for the relationship.
-	 *
-	 * Now, We only want record-2 tags, otherwise we'll end up mixing
-	 * for example IPTC_TAG_CITY and IPTC_TAG_CHARACTER_SET, which BOTH
-	 * have a value of 90. */
-	if (dataset->record != IPTC_RECORD_APP_2)
-		return;
+	g_return_val_if_fail (metadata != NULL, NULL);
 
-	switch (dataset->tag) {
-	case IPTC_TAG_KEYWORDS:
-		if (!data->keywords) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->keywords = g_strdup (mbuffer);
-		} else {
-			gchar *tmp = data->keywords;
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->keywords = g_strdup_printf ("%s, %s", data->keywords, mbuffer);
-			g_free (tmp);
-		}
-		break;
+	data = g_new0 (TrackerIptcData, 1);
 
-	case IPTC_TAG_DATE_CREATED:
-		if (!data->date_created) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			/* From: ex; date "2007 04 15"
-			 * To : ex. "2007-04-15T00:00:00+0200 where +0200 is offset w.r.t gmt */
-			data->date_created = tracker_date_format_to_iso8601 (mbuffer, IPTC_DATE_FORMAT);
-		}
-		break;
+	data->keywords = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.Keywords", NULL);
+	data->byline = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.Byline", NULL);
+	data->credit = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.Credit", NULL);
+	data->copyright_notice = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.Copyright", NULL);
+	data->byline_title = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.BylineTitle", NULL);
+	data->city = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.City", NULL);
+	data->state = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.ProvinceState", NULL);
+	data->sublocation = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.SubLocation", NULL);
+	data->country_name = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.CountryName", NULL);
+	data->contact = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.Contact", NULL);
 
-	case IPTC_TAG_BYLINE:
-		if (!data->byline) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->byline = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_CREDIT:
-		if (!data->credit) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->credit = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_COPYRIGHT_NOTICE:
-		if (!data->copyright_notice) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->copyright_notice = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_IMAGE_ORIENTATION:
-		if (!data->image_orientation) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->image_orientation = g_strdup (fix_iptc_orientation (mbuffer));
-		}
-		break;
-
-	case IPTC_TAG_BYLINE_TITLE:
-		if (!data->byline_title) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->byline_title = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_CITY:
-		if (!data->city) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->city = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_STATE:
-		if (!data->state) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->state = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_SUBLOCATION:
-		if (!data->sublocation) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->sublocation = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_COUNTRY_NAME:
-		if (!data->country_name) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->country_name = g_strdup (mbuffer);
-		}
-		break;
-
-	case IPTC_TAG_CONTACT:
-		if (!data->contact) {
-			iptc_dataset_get_as_str (dataset, mbuffer, 1024);
-			data->contact = g_strdup (mbuffer);
-		}
-		break;
-
-	default:
-		break;
-	}
-}
-
-#endif /* HAVE_LIBIPTCDATA */
-
-static gboolean
-parse_iptc (const unsigned char *buffer,
-            size_t               len,
-            const gchar         *uri,
-            TrackerIptcData     *data)
-{
-#ifdef HAVE_LIBIPTCDATA
-	IptcData *iptc;
-#endif /* HAVE_LIBIPTCDATA */
-
-	memset (data, 0, sizeof (TrackerIptcData));
-
-#ifdef HAVE_LIBIPTCDATA
-
-	/* FIXME According to valgrind this is leaking (together with the unref).
-	 * Problem in libiptc (I replaced this with the _free equivalent) */
-
-	iptc = iptc_data_new ();
-
-	if (!iptc)
-		return FALSE;
-
-	if (iptc_data_load (iptc, buffer, len) < 0) {
-		iptc_data_free (iptc);
-		return FALSE;
+	char *date_created = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.DateCreated", NULL);
+	if (date_created) {
+		data->date_created = tracker_date_format_to_iso8601 (date_created, IPTC_DATE_FORMAT);
+		g_free (date_created);
 	}
 
-	iptc_data_foreach_dataset (iptc, foreach_dataset, data);
-	iptc_data_free (iptc);
-#endif /* HAVE_LIBIPTCDATA */
+	gchar *img_orientation = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.ImageOrientation", NULL);
+	if (img_orientation) {
+		data->image_orientation = g_strdup (fix_iptc_orientation (img_orientation));
+		g_free (img_orientation);
+	}
 
-	return TRUE;
+	if (error) { g_error_free (error); error = NULL; }
+
+	if (!(data->keywords || data->byline || data->copyright_notice || data->city)) {
+		tracker_iptc_free (data);
+		return NULL;
+	}
+
+	return data;
 }
-
-#ifndef TRACKER_DISABLE_DEPRECATED
-
-// LCOV_EXCL_START
-
-/**
- * tracker_iptc_read:
- * @buffer: a chunk of data with iptc data in it.
- * @len: the size of @buffer.
- * @uri: the URI this is related to.
- * @data: a pointer to a TrackerIptcData struture to populate.
- *
- * This function takes @len bytes of @buffer and runs it through the
- * IPTC library. The result is that @data is populated with the IPTC
- * data found in @uri.
- *
- * Returns: %TRUE if the @data was populated successfully, otherwise
- * %FALSE is returned.
- *
- * Since: 0.8
- *
- * Deprecated: 0.9. Use tracker_iptc_new() instead.
- **/
-gboolean
-tracker_iptc_read (const unsigned char *buffer,
-                   size_t               len,
-                   const gchar         *uri,
-                   TrackerIptcData     *data)
-{
-	g_return_val_if_fail (buffer != NULL, FALSE);
-	g_return_val_if_fail (len > 0, FALSE);
-	g_return_val_if_fail (uri != NULL, FALSE);
-	g_return_val_if_fail (data != NULL, FALSE);
-
-	return parse_iptc (buffer, len, uri, data);
-}
-
-// LCOV_EXCL_STOP
-
-#endif /* TRACKER_DISABLE_DEPRECATED */
 
 /**
  * tracker_iptc_new:
@@ -289,19 +141,24 @@ tracker_iptc_new (const guchar *buffer,
                   gsize         len,
                   const gchar  *uri)
 {
-	TrackerIptcData *data;
+	GError *error = NULL;
+	TrackerIptcData *data = NULL;
+	GExiv2Metadata *metadata = NULL;
 
 	g_return_val_if_fail (buffer != NULL, NULL);
 	g_return_val_if_fail (len > 0, NULL);
 	g_return_val_if_fail (uri != NULL, NULL);
 
-	data = g_new0 (TrackerIptcData, 1);
-
-	if (!parse_iptc (buffer, len, uri, data)) {
-		tracker_iptc_free (data);
+	metadata = gexiv2_metadata_new ();
+	if (!gexiv2_metadata_open_buf (metadata, buffer, len, &error)) {
+		g_clear_object (&metadata);
+		g_propagate_error (NULL, error);
 		return NULL;
 	}
 
+	data = tracker_iptc_new_from_metadata (metadata);
+
+	g_clear_object (&metadata);
 	return data;
 }
 

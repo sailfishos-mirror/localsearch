@@ -272,7 +272,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GFile *file;
 	int fd;
 
-#ifdef HAVE_LIBIPTCDATA
+#ifdef HAVE_GEXIV2
 	gchar *iptc_offset;
 	guint32 iptc_size;
 #endif
@@ -314,7 +314,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	uri = g_file_get_uri (file);
 
-#ifdef HAVE_LIBIPTCDATA
+#ifdef HAVE_GEXIV2
 	if (TIFFGetField (image,
 	                  TIFFTAG_RICHTIFFIPTC,
 	                  &iptc_size,
@@ -338,7 +338,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			id = tracker_iptc_new (iptc_offset, iptc_size, uri);
 		}
 	}
-#endif /* HAVE_LIBIPTCDATA */
+
+#endif /* HAVE_GEXIV2 */
 
 	if (!id) {
 		id = g_new0 (TrackerIptcData, 1);
@@ -364,6 +365,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 		}
 	}
+
 #endif /* HAVE_EXEMPI */
 
 	if (!xd) {
@@ -515,8 +517,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		TrackerResource *location;
 
 		location = tracker_extract_new_location (md.address, md.state,
-				md.city, md.country, md.gps_altitude, md.gps_latitude,
-				md.gps_longitude);
+		                                         md.city, md.country, md.gps_altitude, md.gps_latitude,
+		                                         md.gps_longitude);
 
 		tracker_resource_set_relation (metadata, "slo:location", location);
 

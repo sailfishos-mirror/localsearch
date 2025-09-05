@@ -76,7 +76,7 @@ if libjpeg.found() and exempi.found() and libexif.found()
     'images/jpeg-xmp-sidecar-1',
   ]
 
-  if libiptcdata.found()
+  if gexiv2.found()
     extractor_tests += [
       'images/jpeg-iptc-tags',
       'images/jpeg-iptcdata',
