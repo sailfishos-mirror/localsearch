@@ -22,6 +22,7 @@ import logging
 import pathlib
 
 import fixtures
+from fixtures import UnmountFlags
 
 from gi.repository import GLib
 
@@ -78,6 +79,36 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
             assert not self.data_source_available(path.as_uri()), (
                 "Path %s should be marked unavailable" % path.as_uri()
             )
+
+    def test_remove_busy_device(self):
+        """Check that a busy device becomes indexed again."""
+
+        files = self.create_test_data()
+
+        self.add_removable_device(self.device_path)
+
+        for f in files:
+            path = self.device_path.joinpath(f)
+            self.ensure_document_inserted(path)
+            assert self.data_source_available(path.as_uri())
+
+        with self.await_device_removed(self.device_path.as_uri()):
+            self.remove_removable_device(self.device_path, UnmountFlags.EMULATE_BUSY)
+
+        uri = self.device_path.as_uri();
+        result = self.tracker.query(
+            'SELECT DISTINCT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % uri)
+        assert len(result) == 1
+        resource_id = int(result[0][0])
+
+        with self.tracker.await_content_update(
+            fixtures.FILESYSTEM_GRAPH,
+            resource_id,
+            f'tracker:available false',
+            f'tracker:available true'
+        ):
+            # no-op
+            resource_id = 0
 
 class MinerRemovableMediaTestNoPreserve(MinerRemovableMediaTest):
     """Tests for tracker-miner-fs with index-removable-devices feature."""
