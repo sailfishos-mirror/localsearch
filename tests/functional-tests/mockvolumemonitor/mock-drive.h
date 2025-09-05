@@ -36,7 +36,8 @@ G_BEGIN_DECLS
 G_DECLARE_FINAL_TYPE (MockDrive, mock_drive, MOCK, DRIVE, GObject)
 
 MockDrive *mock_drive_new             (MockVolumeMonitor *monitor,
-                                       const gchar       *name);
+                                       const gchar       *name,
+                                       gboolean           removable);
 void       mock_drive_disconnected    (MockDrive         *drive);
 void       mock_drive_set_volume      (MockDrive         *drive,
                                        MockVolume        *volume);
