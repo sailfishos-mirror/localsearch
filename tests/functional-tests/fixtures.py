@@ -348,6 +348,11 @@ class MountFlags(IntEnum):
     NON_REMOVABLE = 1 << 0
 
 
+class UnmountFlags(IntEnum):
+    NONE = 0
+    EMULATE_BUSY = 1 << 0
+
+
 class TrackerMinerRemovableMediaTest(TrackerMinerTest):
     """
     Fixture to test removable device handling in tracker-miner-fs.
@@ -385,7 +390,7 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
             cancellable,
         )
 
-    def remove_removable_device(self, path):
+    def remove_removable_device(self, path, flags=UnmountFlags.NONE):
         conn = self.sandbox.get_session_bus_connection()
         timeout = cfg.AWAIT_TIMEOUT * 1000
         cancellable = None
@@ -394,7 +399,7 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
             self.MOCK_VOLUME_MONITOR_OBJECT_PATH,
             self.MOCK_VOLUME_MONITOR_IFACE,
             "RemoveMount",
-            GLib.Variant("(s)", [self.uri(path)]),
+            GLib.Variant("(su)", [self.uri(path), flags]),
             None,
             Gio.DBusCallFlags.NONE,
             timeout,

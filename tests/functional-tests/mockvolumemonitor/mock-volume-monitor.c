@@ -29,6 +29,11 @@ typedef enum {
 	MOUNT_FLAG_NON_REMOVABLE = 1 << 0,
 } MountFlags;
 
+typedef enum {
+	UNMOUNT_FLAG_NONE = 0,
+	UNMOUNT_FLAG_EMULATE_BUSY = 1 << 0,
+} UnmountFlags;
+
 struct _MockVolumeMonitor {
 	GNativeVolumeMonitor parent;
 
@@ -93,7 +98,8 @@ match_mount_by_root (gconstpointer a, gconstpointer b)
 
 static void
 remove_mock_mount (MockVolumeMonitor *self,
-                   const gchar       *uri)
+                   const gchar       *uri,
+                   UnmountFlags       flags)
 {
 	GList *node;
 	g_autoptr(GDrive) drive = NULL;
@@ -111,13 +117,17 @@ remove_mock_mount (MockVolumeMonitor *self,
 		return;
 	}
 
-	mount = MOCK_MOUNT (node->data);
-	volume = g_mount_get_volume (G_MOUNT (mount));
+	volume = g_mount_get_volume (G_MOUNT (node->data));
 	drive = g_volume_get_drive (volume);
 
-	g_signal_emit_by_name (mount, "pre-unmount");
-	g_signal_emit_by_name (self, "mount-pre-unmount", mount);
+	g_signal_emit_by_name (node->data, "pre-unmount");
+	g_signal_emit_by_name (self, "mount-pre-unmount", node->data);
 
+	if ((flags & UNMOUNT_FLAG_EMULATE_BUSY) != 0) {
+		return;
+	}
+
+	mount = MOCK_MOUNT (node->data);
 	mock_mount_unmounted (mount);
 	mock_volume_removed (MOCK_VOLUME (volume));
 	mock_drive_disconnected (MOCK_DRIVE (drive));
@@ -150,6 +160,7 @@ static const gchar dbus_xml[] =
 	"    </method>"
 	"    <method name='RemoveMount'>"
 	"      <arg type='s' name='path' direction='in' />"
+	"      <arg type='u' name='flags' direction='in' />"
 	"    </method>"
 	"  </interface>"
 	"</node>";
@@ -178,10 +189,11 @@ on_dbus_method_call (GDBusConnection       *connection,
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	} else if (g_strcmp0 (method_name, "RemoveMount") == 0) {
 		g_autofree gchar *uri = NULL;
+		uint32_t flags;
 
-		g_variant_get (parameters, "(s)", &uri);
+		g_variant_get (parameters, "(su)", &uri, &flags);
 
-		remove_mock_mount (self, uri);
+		remove_mock_mount (self, uri, flags);
 
 		g_dbus_method_invocation_return_value (invocation, NULL);
 	} else {
