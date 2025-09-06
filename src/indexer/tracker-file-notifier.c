@@ -1353,7 +1353,7 @@ monitor_item_moved_cb (TrackerMonitor *monitor,
 
 				/* Source file was not stored, check dest file as new */
 				if (!is_directory || !dest_is_recursive) {
-					g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, NULL);
+					g_signal_emit (notifier, signals[FILE_UPDATED], 0, other_file, NULL, FALSE);
 				} else if (is_directory) {
 					/* Crawl dest directory */
 					notifier_queue_root (notifier, other_file, flags,
