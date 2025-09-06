@@ -697,7 +697,7 @@ status_watch (void)
 	g_autoptr (TrackerNotifier) notifier = NULL;
 	g_autoptr (GError) error = NULL;
 
-	sparql_connection = tracker_sparql_connection_bus_new ("org.freedesktop.Tracker3.Miner.Files",
+	sparql_connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
 	                                                       NULL, NULL, &error);
 
 	if (!sparql_connection) {

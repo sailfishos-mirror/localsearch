@@ -73,7 +73,7 @@ tracker_process_find (void)
 
 	connection = g_bus_get_sync (G_BUS_TYPE_SESSION, NULL, NULL);
 
-	return get_pid_for_service (connection, "org.freedesktop.Tracker3.Miner.Files");
+	return get_pid_for_service (connection, "org.freedesktop.LocalSearch3");
 }
 
 gint

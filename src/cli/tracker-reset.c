@@ -115,7 +115,7 @@ delete_info_recursively (GFile *file)
 	control_proxy =
 		tracker_control_index_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
 		                                              G_DBUS_PROXY_FLAGS_DO_NOT_CONNECT_SIGNALS,
-		                                              "org.freedesktop.Tracker3.Miner.Files.Control",
+		                                              "org.freedesktop.LocalSearch3.Control",
 		                                              "/org/freedesktop/Tracker3/Miner/Files/Index",
 		                                              NULL, &error);
 
