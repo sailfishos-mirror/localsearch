@@ -808,7 +808,7 @@ tracker_controller_constructed (GObject *object)
 	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
 	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
 	                          NULL,
-	                          "org.freedesktop.Tracker3.Miner.Files.Control",
+	                          "org.freedesktop.LocalSearch3.Control",
 	                          "/org/freedesktop/Tracker3/Miner/Files/Proxy",
 	                          "org.freedesktop.Tracker3.Miner.Files.Proxy",
 	                          NULL,
