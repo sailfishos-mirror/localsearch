@@ -10,7 +10,7 @@ msgid ""
 msgstr "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-08-16 12:26+0000\n"
-"PO-Revision-Date: 2025-09-04 10:00+0100\n"
+"PO-Revision-Date: 2025-09-07 10:00+0100\n"
 "Last-Translator: Asier Saratsua Garmendia <asiersarasua@ni.eus>\n"
 "Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
@@ -179,7 +179,6 @@ msgid "Show help on subcommands"
 msgstr "Erakutsi laguntza azpikomandoetan"
 
 #: src/cli/main.c:69
-#| msgid "Metadata extractor"
 msgid "Show metadata extractor output"
 msgstr "Erakutsi metadatu-erauzlearen irteera"
 
@@ -188,16 +187,14 @@ msgid "List and change indexed folders"
 msgstr "Zerrendatu eta aldatu indexatutako karpetak"
 
 #: src/cli/main.c:71 src/cli/tracker-info.c:540
-#| msgid "Retrieve all information available for a certain file"
 msgid "Retrieve information available for files and resources"
-msgstr "Eskuratu fitxategietarako eta baliabideetarako dagoen informazioa"
+msgstr "Eskuratu fitxategien eta baliabideen informazioa"
 
 #: src/cli/main.c:72 src/cli/tracker-inhibit.c:98
 msgid "Inhibit indexing temporarily"
-msgstr "Galarazi indexatzea behin-behinean"
+msgstr "Galazari indexatzea aldi baterako"
 
 #: src/cli/main.c:73 src/cli/tracker-reset.c:202
-#| msgid "Reset Indexed Data"
 msgid "Erase the indexed data"
 msgstr "Ezabatu indexatutako datuak"
 
@@ -232,7 +229,6 @@ msgstr "“%s” ez da localsearch komandoa. Ikus “localsearch --help”"
 
 #: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
 #: src/extractor/tracker-main.c:81
-#| msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Irteerako emaitzen formatua: “turtle”, “trig” edo “json-ld”"
 
@@ -317,7 +313,6 @@ msgid "Show plain text content if available for resources"
 msgstr "Erakutsi testu soileko edukia baliabideentzako eskuragarri egonez gero"
 
 #: src/cli/tracker-info.c:77
-#| msgid "Checks if FILE is eligible for being mined based on configuration"
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "FITXATEGIA indexatzeko hautagaia den egiaztatzen du"
 
@@ -327,9 +322,8 @@ msgstr "Errore-mezua"
 
 #: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
 #: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
-#| msgid "Could not establish a connection to Tracker"
 msgid "Could not connect to LocalSearch"
-msgstr "Ezin izan da LocalSearch aplikazioarekin konektatu"
+msgstr "Ezin da LocalSearch zerbitzuarekin konektatu"
 
 #: src/cli/tracker-info.c:419
 msgid "Unable to retrieve data for URI"
@@ -350,7 +344,7 @@ msgstr "“%s” serializazio-formatua onartu gabe\n"
 
 #: src/cli/tracker-inhibit.c:39
 msgid "List inhibitions"
-msgstr "Zerrendatu galarazteak"
+msgstr "Zerrendatu galarazpenak"
 
 #: src/cli/tracker-inhibit.c:45
 msgid "command"
@@ -370,21 +364,19 @@ msgstr "Arrazoia"
 
 #: src/cli/tracker-inhibit.c:136
 msgid "Indexing inhibited through command line"
-msgstr "Indexatzea komando-lerroaren bidez galarazi da"
+msgstr "Indexatzea galarazi da komando-lerroaren bidez"
 
 #: src/cli/tracker-inhibit.c:160
-#| msgid "Failed to initialize data manager"
 msgid "Failed to inhibit indexer"
 msgstr "Huts egin du indexatzailea galarazteak"
 
 #: src/cli/tracker-process.c:89
-#| msgid "Could not (re)index file"
 msgid "Could not terminate indexer"
-msgstr "Ezin izan da indexatzailea gelditu"
+msgstr "Ezin da indexatzailea gelditu"
 
 #: src/cli/tracker-process.c:92
 msgid "Indexer process terminated"
-msgstr "Indexatzailearen prozesua gelditu da"
+msgstr "Indexatzaile-prozesua gelditu da"
 
 #: src/cli/tracker-reset.c:48
 msgid "Remove filesystem indexer database"
@@ -407,7 +399,7 @@ msgstr "Fitxategi honen indexatutako datuak ezabatu egin dira eta berriro indexa
 
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
-msgstr "LocalSearh aplikazioak indexatutako datuak ezabatuko dira, jarraitu? [b/E]"
+msgstr "LocalSearch zerbitzuak indexatutako datuak ezabatuko dira, jarraitu? [b/E]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
@@ -448,17 +440,14 @@ msgid "Search for folders"
 msgstr "Bilatu karpetak"
 
 #: src/cli/tracker-search.c:124
-#| msgid "Search for video files"
 msgid "Search for audio files"
 msgstr "Bilatu audio-fitxategiak"
 
 #: src/cli/tracker-search.c:128
-#| msgid "Search for music files"
 msgid "Search for music albums"
 msgstr "Bilatu musika-albumak"
 
 #: src/cli/tracker-search.c:132
-#| msgid "Search for music files"
 msgid "Search for music artists"
 msgstr "Bilatu musikariak"
 
@@ -475,7 +464,6 @@ msgid "Search for document files"
 msgstr "Bilatu dokumentuak"
 
 #: src/cli/tracker-search.c:148
-#| msgid "Search for image files"
 msgid "Search for software files"
 msgstr "Bilatu software-fitxategiak"
 
@@ -496,7 +484,6 @@ msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "Itzuli bat ez datozen guztiak ere (adib. desmuntatutako bolumenak)"
 
 #: src/cli/tracker-search.c:173
-#| msgid "Show general options"
 msgid "Show help options"
 msgstr "Erakutsi laguntza-aukerak"
 
@@ -528,7 +515,6 @@ msgstr "ADIERAZPENA"
 
 #: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
 #: src/cli/tracker-status.c:289
-#| msgid "Could not get Tracker statistics"
 msgid "Could not get LocalSearch statistics"
 msgstr "Ezin dira LocalSearch estatistikak eskuratu"
 
@@ -567,9 +553,8 @@ msgid "Data is still being indexed"
 msgstr "Datuak oraindik indexatzen ari dira"
 
 #: src/cli/tracker-status.c:442
-#| msgid "Indexes"
 msgid "Indexer is idle"
-msgstr "Insexatzailea inaktibo dago"
+msgstr "Indexatzailea inaktibo dago"
 
 #: src/cli/tracker-status.c:449
 #, c-format
@@ -587,9 +572,8 @@ msgid "Could not get SPARQL connection"
 msgstr "Ezin izan da SPARQL konexioa eskuratu"
 
 #: src/cli/tracker-status.c:714
-#| msgid "Now listening for resource updates to the database"
 msgid "Now listening to database updates"
-msgstr "Orain datu-baseen eguneratzeei entzuten"
+msgstr "Datu-basearen eguneratzeei entzuten"
 
 #: src/cli/tracker-status.c:715
 msgid "Press Ctrl+C to stop"
@@ -664,13 +648,12 @@ msgid "Tag was removed successfully"
 msgstr "Etiketa ongi kendu da"
 
 #: src/cli/tracker-tag.c:360
-#| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
-msgstr ""
+msgstr "Ezin da LocalSearch-ekin konektatu"
 
 #: src/cli/tracker-tag.c:425
 msgid "The --list option is required for --show-files"
-msgstr "--list aukera behar da --show-files aukerarekin"
+msgstr "--show-files komandoak --list aukera behar du"
 
 #: src/cli/tracker-tag.c:427
 msgid "Add and delete actions can not be used together"
@@ -682,11 +665,11 @@ msgstr "--description aukera soilik --add aukerarekin erabil daiteke"
 
 #: src/common/tracker-miner-proxy.c:349
 msgid "Cookie not recognized to resume paused miner"
-msgstr "'Cookie'a ez da ezaguna pausatutako biltzaileak jarraitzeko"
+msgstr "Cookiea ez da ezaguna pausatutako biltzaileak jarraitzeko"
 
 #: src/common/tracker-miner-proxy.c:406
 msgid "Pause application and reason match an already existing pause request"
-msgstr "Aplikazioa eta pausuaren zergatia pausatzeko eskaera bati dagokio"
+msgstr "Aplikazioa pausatzeko arrazoia lehendik dagoen pausatze-eskari batekin bat dator"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -727,21 +710,21 @@ msgstr[1] " %d egun"
 #, c-format
 msgid " %2.2d hour"
 msgid_plural " %2.2d hours"
-msgstr[0] " ordu  %2.2d"
+msgstr[0] " Ordu  %2.2d"
 msgstr[1] " %2.2d ordu"
 
 #: src/common/tracker-utils.c:140
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
-msgstr[0] " minutu %2.2d"
+msgstr[0] " Minutu %2.2d"
 msgstr[1] " %2.2d minutu"
 
 #: src/common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
-msgstr[0] " segundo %2.2d"
+msgstr[0] " Segundo %2.2d"
 msgstr[1] " %2.2d segundo"
 
 #: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
