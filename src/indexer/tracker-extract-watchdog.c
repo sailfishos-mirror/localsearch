@@ -157,8 +157,10 @@ indexed_directory_removed_cb (TrackerIndexingTree    *tree,
 	/* Terminate extractor process, so it can abandon activity early on
 	 * pre-unmount.
 	 */
-	if (watchdog->extract_process)
+	if (watchdog->extract_process) {
 		g_subprocess_send_signal (watchdog->extract_process, SIGTERM);
+		clear_process_state (watchdog);
+	}
 }
 
 static void
