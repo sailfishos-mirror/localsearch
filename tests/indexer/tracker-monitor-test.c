@@ -764,6 +764,7 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 	gchar *source_path;
 	GFile *dest_file;
 	gchar *dest_path;
+	GError *error = NULL;
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &source_file);
@@ -795,7 +796,9 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 
 	/* Cleanup environment */
 	tracker_monitor_set_enabled (fixture->monitor, FALSE);
-	g_assert_cmpint (g_file_delete (dest_file, NULL, NULL), ==, TRUE);
+	g_file_delete (dest_file, NULL, &error);
+	if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		g_assert_no_error (error);
 	g_object_unref (source_file);
 	g_object_unref (dest_file);
 	g_free (source_path);
@@ -1180,6 +1183,7 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	gchar *source_path;
 	GFile *dest_dir;
 	gchar *dest_path;
+	GError *error = NULL;
 
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
@@ -1216,7 +1220,9 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	g_assert_cmpint (tracker_monitor_remove (fixture->monitor, source_dir), ==, TRUE);
 	/* Note that monitor is NOT in dest_dir, so FAIL if we could remove it */
 	g_assert_cmpint (tracker_monitor_remove (fixture->monitor, dest_dir), !=, TRUE);
-	g_assert_cmpint (g_file_delete (dest_dir, NULL, NULL), ==, TRUE);
+	g_file_delete (dest_dir, NULL, &error);
+	if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		g_assert_no_error (error);
 	g_object_unref (source_dir);
 	g_object_unref (dest_dir);
 	g_free (source_path);
