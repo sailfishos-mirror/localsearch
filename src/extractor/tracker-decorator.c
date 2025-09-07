@@ -1138,3 +1138,9 @@ tracker_decorator_set_throttled (TrackerDecorator *decorator,
 {
 	decorator->throttled = !!throttled;
 }
+
+void
+tracker_decorator_check_unextracted (TrackerDecorator *decorator)
+{
+	decorator_maybe_restart_query (decorator);
+}

@@ -44,6 +44,8 @@ void tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
 void tracker_decorator_set_throttled (TrackerDecorator *decorator,
                                       gboolean          throttled);
 
+void tracker_decorator_check_unextracted (TrackerDecorator *decorator);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_DECORATOR_H__ */
