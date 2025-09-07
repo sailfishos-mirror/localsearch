@@ -9,15 +9,15 @@ msgstr ""
 "Project-Id-Version: tracker-miners\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-08-16 12:26+0000\n"
-"PO-Revision-Date: 2025-09-06 13:12+0900\n"
-"Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
+"PO-Revision-Date: 2025-09-07 13:53+0900\n"
+"Last-Translator: Seong-ho Cho <shcho@gnome.org>\n"
 "Language-Team: Gnome Korea <gnome-kr@googlegroups.com>\n"
 "Language: ko\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Poedit 3.7\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -370,7 +370,7 @@ msgstr "명령"
 
 #: src/cli/tracker-inhibit.c:46
 msgid "COMMAND"
-msgstr "[명령]"
+msgstr "<명령>"
 
 #: src/cli/tracker-inhibit.c:65
 msgid "Application"
@@ -527,8 +527,7 @@ msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
-"데이터베이스에서 바뀐 내용을 실제 이름으로 감시합니다(예: 자원 또는 파일 추"
-"가)"
+"데이터베이스에서 바뀐 내용을 실시간으로 감시합니다(예: 자원 또는 파일 추가)"
 
 #: src/cli/tracker-status.c:81
 msgid "EXPRESSION"
@@ -537,7 +536,7 @@ msgstr "<표현식>"
 #: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
 #: src/cli/tracker-status.c:289
 msgid "Could not get LocalSearch statistics"
-msgstr "로컬서치"
+msgstr "로컬서치 통계를 가져올 수 없습니다"
 
 #: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
 msgid "Message"
@@ -682,7 +681,7 @@ msgstr "추가 삭제 동작은 함께 사용할 수 없습니다"
 
 #: src/cli/tracker-tag.c:429
 msgid "The --description option can only be used with --add"
-msgstr "--description 옵션은 --add하고만 사용할 수 있습니다"
+msgstr "--description 옵션은 --add만 함께 사용할 수 있습니다"
 
 #: src/common/tracker-miner-proxy.c:349
 msgid "Cookie not recognized to resume paused miner"
