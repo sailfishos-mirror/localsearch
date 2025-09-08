@@ -572,9 +572,13 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         new_ie_urn = self.__get_file_urn(directory)
         self.assertNotEqual(new_ie_urn, ie_urn)
 
-        self.assertResourceMissing(ie_urn)
         self.assertResourceExists(new_ie_urn)
         self.assertResourceExists(document_uri)
+
+        # Check the old URN is not a folder anymore
+        query = "ASK { <%s> a nfo:Folder }"
+        result = self.tracker.query(query)
+        self.assertEqual(result, [['false']])
 
         query = "SELECT ?u { ?u nie:isStoredAs <%s> }" % self.uri(directory)
         result = self.tracker.query(query)
