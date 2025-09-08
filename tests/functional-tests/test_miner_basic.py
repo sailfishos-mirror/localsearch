@@ -384,6 +384,10 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
 
         # Check everything is fine
         result = self.__get_text_documents()
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/file2.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
         self.assertEqual(len(result), 3)
 
     def test_10_folder_update(self):
