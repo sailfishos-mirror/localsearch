@@ -15,7 +15,7 @@ tracker_versioned_name = 'localsearch@0@'.format(tracker_api_major)
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
-glib_required = '2.62.0'
+glib_required = '2.76.0'
 
 tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
