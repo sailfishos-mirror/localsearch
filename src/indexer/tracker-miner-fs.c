@@ -774,7 +774,7 @@ item_remove (TrackerMinerFS *fs,
 
 	if (is_dir) {
 		tracker_lru_remove_foreach (priv->urn_lru,
-		                            (GEqualFunc) g_file_has_parent,
+		                            (GEqualFunc) g_file_has_prefix,
 		                            file);
 	}
 
@@ -811,7 +811,7 @@ item_move (TrackerMinerFS *fs,
 
 	if (is_dir) {
 		tracker_lru_remove_foreach (priv->urn_lru,
-		                            (GEqualFunc) g_file_has_parent,
+		                            (GEqualFunc) g_file_has_prefix,
 		                            source_file);
 	}
 
