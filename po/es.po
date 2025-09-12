@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker.master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-26 17:35+0000\n"
-"PO-Revision-Date: 2025-09-11 14:24+0200\n"
+"POT-Creation-Date: 2025-09-10 21:38+0000\n"
+"PO-Revision-Date: 2025-09-12 09:03+0200\n"
 "Last-Translator: Daniel Mustieles García <daniel.mustieles@gmail.com>\n"
 "Language-Team: Spanish - Spain <gnome-es-list@gnome.org>\n"
 "Language: es_ES\n"
@@ -196,7 +196,7 @@ msgstr "Evitar cualquier carpeta que contenga un archivo en esta lista negra"
 
 #: src/cli/main.c:68
 msgid "Show help on subcommands"
-msgstr "Mostrar ayuda en subcomandos"
+msgstr "Mostrar la ayuda en subcomandos"
 
 #: src/cli/main.c:69
 msgid "Show metadata extractor output"
@@ -212,7 +212,7 @@ msgstr "Obtener información disponible para archivos y recursos"
 
 #: src/cli/main.c:72 src/cli/tracker-inhibit.c:98
 msgid "Inhibit indexing temporarily"
-msgstr "Inhibir la indexación temporalmente"
+msgstr "Indexación inhibida temporalmente"
 
 #: src/cli/main.c:73 src/cli/tracker-reset.c:202
 msgid "Erase the indexed data"
@@ -252,7 +252,7 @@ msgstr "«%s» no es un comando de localsearch. Consulte «localsearch --help»"
 #: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
 #: src/extractor/tracker-main.c:81
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
-msgstr "Formato de resultados de salida: “turtle”, “trig” or “json-ld”"
+msgstr "Formato de resultados de salida: \"turtle\", \"trig\" o \"json-ld\""
 
 #: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
 #: src/extractor/tracker-main.c:82
@@ -263,7 +263,6 @@ msgstr "FORMATO"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
 msgid "FILE"
 msgstr "ARCHIVO"
 
@@ -339,7 +338,7 @@ msgstr ""
 
 #: src/cli/tracker-info.c:77
 msgid "Checks if FILE is eligible for being indexed"
-msgstr "Comprobaciones si ARCHIVO se puede indexar"
+msgstr "Comprueba si ARCHIVO es elegible para indexarse"
 
 #: src/cli/tracker-info.c:349
 msgid "Error message"
@@ -369,7 +368,7 @@ msgstr "Formato «%s» de serialización no soportado\n"
 
 #: src/cli/tracker-inhibit.c:39
 msgid "List inhibitions"
-msgstr "Mostrar inhibiciones"
+msgstr "Listar inhibiciones"
 
 #: src/cli/tracker-inhibit.c:45
 msgid "command"
@@ -389,7 +388,7 @@ msgstr "Razón"
 
 #: src/cli/tracker-inhibit.c:136
 msgid "Indexing inhibited through command line"
-msgstr "Indexación inhibida a través de la línea de comandos"
+msgstr "Indexación inhibida por línea de comandos"
 
 #: src/cli/tracker-inhibit.c:160
 msgid "Failed to inhibit indexer"
@@ -401,7 +400,7 @@ msgstr "El indexador no pudo terminar"
 
 #: src/cli/tracker-process.c:92
 msgid "Indexer process terminated"
-msgstr "Poceso del indexador terminado"
+msgstr "El proceso del indexador terminado"
 
 #: src/cli/tracker-reset.c:48
 msgid "Remove filesystem indexer database"
@@ -429,7 +428,8 @@ msgstr ""
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
 msgstr ""
-"Los datos indexados de LocalSearch se van a eliminar, ¿continuar? [y/N]"
+"Los datos indexados de LocalSearch están a punto de eliminarse, ¿continuar? "
+"[y/N]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
@@ -478,7 +478,7 @@ msgstr "Buscar álbumes de música"
 
 #: src/cli/tracker-search.c:132
 msgid "Search for music artists"
-msgstr "Buscar artistas musicales"
+msgstr "Buscar artistas de música"
 
 #: src/cli/tracker-search.c:136
 msgid "Search for image files"
@@ -494,7 +494,7 @@ msgstr "Buscar archivos de documentos"
 
 #: src/cli/tracker-search.c:148
 msgid "Search for software files"
-msgstr "Buscar archivos de software"
+msgstr "Buscar álbumes de software"
 
 #: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
@@ -506,7 +506,7 @@ msgstr "Compensar los resultados"
 
 #: src/cli/tracker-search.c:165
 msgid "Show URNs for results"
-msgstr "Mostrar URN para resultados"
+msgstr "Mostrar URN para los resultados"
 
 #: src/cli/tracker-search.c:169
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
@@ -579,7 +579,7 @@ msgstr "Espacio libre en la partición de la base de datos"
 
 #: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
 msgid "Indexer is paused"
-msgstr "El indexador está pausado"
+msgstr "El indexador está en pausa"
 
 #: src/cli/tracker-status.c:440
 msgid "Data is still being indexed"
@@ -687,7 +687,7 @@ msgstr "Etiqueta quitada correctamente"
 
 #: src/cli/tracker-tag.c:360
 msgid "Could not establish a connection to LocalSearch"
-msgstr "Nose  pudo establecer una conexión con LocalSearch"
+msgstr "No se pudo establecer una conexión con LocalSearch"
 
 #: src/cli/tracker-tag.c:425
 msgid "The --list option is required for --show-files"
@@ -768,7 +768,7 @@ msgstr[0] " %2.2d segundo"
 msgstr[1] " %2.2d segundos"
 
 #: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Muestra información de la versión"
 
@@ -818,80 +818,6 @@ msgstr "- Extraer los metadatos del archivo"
 msgid "Filename and mime type must be provided together"
 msgstr "Se debe proporcionar tanto el nombre como el tipo MIME"
 
-#: src/indexer/tracker-main.c:75
-msgid "Runs until all configured locations are indexed and then exits"
-msgstr ""
-"Se ejecuta hasta que todas las ubicaciones configuradas se indexan, y sale"
-
-#: src/indexer/tracker-main.c:79
-msgid "Checks if FILE is eligible for being mined based on configuration"
-msgstr ""
-"Comprueba si el ARCHIVO es elegible para ser escrutado según la configuración"
-
-#: src/indexer/tracker-main.c:83
-msgid "Avoids changes in the filesystem"
-msgstr "Evita cambios en el sistema de archivos"
-
-#: src/indexer/tracker-main.c:335
-#, c-format
-msgid "Data object “%s” currently exists"
-msgstr "El objeto de datos «%s» ya existe"
-
-#: src/indexer/tracker-main.c:336
-#, c-format
-msgid "Data object “%s” currently does not exist"
-msgstr "El objeto de datos «%s» no existe actualmente"
-
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "La carpeta NO es elegible para indexarla (según los filtros)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "El archivo NO es elegible para indexarlo (según los filtros)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "El archivo NO es elegible para indexarlo (archivo oculto)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "El archivo NO es elegible para indexarlo (no es una carpeta indexada)"
-
-#: src/indexer/tracker-main.c:379
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr ""
-"La carpeta padre «%s» NO es elegible para indexarla (según los filtros)"
-
-#: src/indexer/tracker-main.c:385
-#, c-format
-msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr "La carpeta padre «%s» NO es elegible para indexarlo (archivo oculto)"
-
-#: src/indexer/tracker-main.c:391
-#, c-format
-msgid ""
-"Parent directory “%s” is NOT eligible to be indexed (based on content "
-"filters)"
-msgstr ""
-"La carpeta padre «%s» NO es elegible para indexarlo (según los filtros de "
-"contenido)"
-
-#: src/indexer/tracker-main.c:408
-msgid "Directory is eligible to be indexed"
-msgstr "La carpeta es elegible para indexarla"
-
-#: src/indexer/tracker-main.c:409
-msgid "File is eligible to be indexed"
-msgstr "El archivo es elegible para indexarlo"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "- iniciar el indexador de tracker"
-
 #: src/writeback/tracker-main.c:54
 msgid ""
 "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
@@ -913,8 +839,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid ""
 #~ "Simplify the words to their root to provide more results. E.g. “shelves” "
 #~ "and “shelf” to “shel”"
-#~ msgstr ""
-#~ "Simplifique las palabras en su raíz para proporcionar más resultados. "
+#~ msgstr "Simplify the words to their root to provide more results. "
 
 #, fuzzy
 #~ msgid ""
@@ -924,15 +849,15 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "If enabled, numbers will not be indexed."
-#~ msgstr "Si está habilitado, los números no serán indexados."
+#~ msgstr "If enabled, numbers will not be indexed."
 
 #, fuzzy
 #~ msgid "Initial sleep time, in seconds."
-#~ msgstr "Tiempo de sueño inicial, en segundos."
+#~ msgstr "Initial sleep time, in seconds."
 
 #, fuzzy
 #~ msgid "Indexing speed, the higher the slower."
-#~ msgstr "Velocidad de indexación, cuanto mayor sea más lento."
+#~ msgstr "Indexing speed, the higher the slower."
 
 #, fuzzy
 #~ msgid ""
@@ -964,32 +889,92 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 #~ "removable devices are not indexed, optical discs won’t be either)"
 #~ msgstr ""
-#~ "Establecer en verdadero para habilitar la indexación de CD, DVD y medios "
-#~ "ópticos, en general, si los dispositivos extraíbles no están indexados, "
-#~ "los discos ópticos tampoco lo serán)"
+#~ "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
+#~ "removable devices are not indexed, optical discs won’t be either)"
 
 #, fuzzy
 #~ msgid "Set to true to index while running on battery"
-#~ msgstr "Establecer en True to Index mientras se ejecuta con batería"
+#~ msgstr "Set to true to index while running on battery"
 
 #, fuzzy
 #~ msgid ""
 #~ "Set to true to index while running on battery for the first time only"
 #~ msgstr ""
-#~ "Establecer en True to Index mientras se ejecuta en batería por primera "
-#~ "vez solo"
+#~ "Set to true to index while running on battery for the first time only"
 
 #, fuzzy
 #~ msgid "Initial sleep time in seconds, 0->1000 (default=15)"
 #~ msgstr "Tiempo de sueño inicial en segundos, 0-> 1000 (predeterminado = 15)"
 
 #, fuzzy
+#~ msgid "Runs until all configured locations are indexed and then exits"
+#~ msgstr "Runs until all configured locations are indexed and then exits"
+
+#, fuzzy
 #~ msgid "Runs for a specific domain ontology"
-#~ msgstr "Se ejecuta para una ontología de dominio específica"
+#~ msgstr "Runs for a specific domain ontology"
+
+#, fuzzy
+#~ msgid "Avoids changes in the filesystem"
+#~ msgstr "Avoids changes in the filesystem"
+
+#, fuzzy, c-format
+#~ msgid "Data object “%s” currently exists"
+#~ msgstr "Data object “%s” currently exists"
+
+#, fuzzy, c-format
+#~ msgid "Data object “%s” currently does not exist"
+#~ msgstr "Data object “%s” currently does not exist"
+
+#, fuzzy
+#~ msgid "Directory is NOT eligible to be indexed (based on filters)"
+#~ msgstr "Directory is NOT eligible to be indexed (based on filters)"
+
+#, fuzzy
+#~ msgid "File is NOT eligible to be indexed (based on filters)"
+#~ msgstr "File is NOT eligible to be indexed (based on filters)"
+
+#, fuzzy
+#~ msgid "File is NOT eligible to be indexed (hidden file)"
+#~ msgstr "File is NOT eligible to be indexed (hidden file)"
+
+#, fuzzy
+#~ msgid "File is NOT eligible to be indexed (not an indexed folder)"
+#~ msgstr "File is NOT eligible to be indexed (not an indexed folder)"
+
+#, fuzzy, c-format
+#~ msgid ""
+#~ "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
+#~ msgstr ""
+#~ "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
+
+#, fuzzy, c-format
+#~ msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
+#~ msgstr "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
+
+#, fuzzy, c-format
+#~ msgid ""
+#~ "Parent directory “%s” is NOT eligible to be indexed (based on content "
+#~ "filters)"
+#~ msgstr ""
+#~ "Parent directory “%s” is NOT eligible to be indexed (based on content "
+#~ "filters)"
+
+#, fuzzy
+#~ msgid "Directory is eligible to be indexed"
+#~ msgstr "Directory is eligible to be indexed"
+
+#, fuzzy
+#~ msgid "File is eligible to be indexed"
+#~ msgstr "File is eligible to be indexed"
+
+#, fuzzy
+#~ msgid "— start the tracker indexer"
+#~ msgstr "— start the tracker indexer"
 
 #, fuzzy
 #~ msgid "Add feed"
-#~ msgstr "Agregar feed"
+#~ msgstr "Add feed"
 
 #, fuzzy
 #~ msgid "URL"
@@ -997,7 +982,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Title to use (must be used with --add-feed)"
-#~ msgstr "Título para usar (debe usarse con --Add-feed)"
+#~ msgstr "Title to use (must be used with --add-feed)"
 
 #, fuzzy
 #~ msgid "List feeds"
@@ -1005,7 +990,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Delete feed"
-#~ msgstr "Eliminar alimento"
+#~ msgstr "Delete feed"
 
 #, fuzzy
 #~ msgid "No error given"
@@ -1017,21 +1002,19 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Could not remove feed"
-#~ msgstr "No pudo eliminar la alimentación"
+#~ msgstr "Could not remove feed"
 
 #, fuzzy
 #~ msgid "Could not list feeds"
-#~ msgstr "No pudo enumerar los alimentos"
+#~ msgstr "Could not list feeds"
 
 #, fuzzy
 #~ msgid "— start the feeds indexer"
-#~ msgstr "- Inicie el indexador de feeds"
+#~ msgstr "— start the feeds indexer"
 
 #, fuzzy
 #~ msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-#~ msgstr ""
-#~ "Forzar un módulo a usar para la extracción (por ejemplo, \"foo\" para "
-#~ "\"foo.so\")"
+#~ msgstr "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
 
 #, fuzzy
 #~ msgid "MODULE"
@@ -1041,12 +1024,11 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid ""
 #~ "Start, stop, restart and list daemons responsible for indexing content"
 #~ msgstr ""
-#~ "Iniciar, detener, reiniciar y enumerar los demonios responsables de "
-#~ "indexar contenido"
+#~ "Start, stop, restart and list daemons responsible for indexing content"
 
 #, fuzzy
 #~ msgid "Trigger content indexing of a location"
-#~ msgstr "Despletero de la indexación de contenido de una ubicación"
+#~ msgstr "Trigger content indexing of a location"
 
 #, fuzzy
 #~ msgid "Reset the index and configuration"
@@ -1070,7 +1052,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy, c-format
 #~ msgid "Crawling single directory “%s”"
-#~ msgstr "Directorio individual \"%s\""
+#~ msgstr "Crawling single directory “%s”"
 
 #, fuzzy, c-format
 #~ msgid "Crawling recursively directory “%s”"
@@ -1286,55 +1268,56 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Starting miners…"
-#~ msgstr "Starting miners…"
+#~ msgstr "Mineros iniciales ..."
 
 #, fuzzy, c-format
 #~ msgid "Could not start miners, manager could not be created, %s"
-#~ msgstr "Could not start miners, manager could not be created, %s"
+#~ msgstr "No se pudo comenzar a los mineros, el gerente no se pudo crear, %s"
 
 #, fuzzy
 #~ msgid "perhaps a disabled plugin?"
-#~ msgstr "perhaps a disabled plugin?"
+#~ msgstr "¿Quizás un complemento para discapacitados?"
 
 #, fuzzy
 #~ msgid "If no arguments are given, the status of the data miners is shown"
-#~ msgstr "If no arguments are given, the status of the data miners is shown"
+#~ msgstr ""
+#~ "Si no se dan argumentos, se muestra el estado de los mineros de datos"
 
 #, fuzzy
 #~ msgid "Could not get D-Bus connection"
-#~ msgstr "Could not get D-Bus connection"
+#~ msgstr "No se pudo obtener la conexión D-bus"
 
 #, fuzzy
 #~ msgid "Could not create D-Bus proxy to tracker-store"
-#~ msgstr "Could not create D-Bus proxy to tracker-store"
+#~ msgstr "No se pudo crear proxy D-bus para la tienda de rastreadores"
 
 #, fuzzy
 #~ msgid ""
 #~ "Instead of looking up a file name, treat the FILE arguments as actual "
 #~ "IRIs (e.g. <file:///path/to/some/file.txt>)"
 #~ msgstr ""
-#~ "Instead of looking up a file name, treat the FILE arguments as actual "
-#~ "IRIs (e.g. <file:///path/to/some/file.txt>)"
+#~ "En lugar de buscar un nombre de archivo, trate los argumentos del archivo "
+#~ "como iris real (por ejemplo, <archivo: ///path/to/some/file.txt>)"
 
 #, fuzzy
 #~ msgid "Output results as RDF in Turtle format"
-#~ msgstr "Output results as RDF in Turtle format"
+#~ msgstr "Resultados de salida como RDF en formato de tortuga"
 
 #, fuzzy
 #~ msgid "RDF property to treat as URL (eg. “nie:url”)"
-#~ msgstr "RDF property to treat as URL (eg. “nie:url”)"
+#~ msgstr "Propiedad RDF para tratar como URL (por ejemplo, \"Nie: URL\")"
 
 #, fuzzy
 #~ msgid "Unable to retrieve URN for URI"
-#~ msgstr "Unable to retrieve URN for URI"
+#~ msgstr "Incapaz de recuperar Urna para URI"
 
 #, fuzzy, c-format
 #~ msgid "Could not kill process %d — “%s”"
-#~ msgstr "Could not kill process %d — “%s”"
+#~ msgstr "No se pudo matar el proceso %d - \" %s\""
 
 #, fuzzy, c-format
 #~ msgid "Killed process %d — “%s”"
-#~ msgstr "Killed process %d — “%s”"
+#~ msgstr "Proceso asesinado %d - \" %s\""
 
 #, fuzzy
 #~ msgid "Remove RSS indexer database"
@@ -1636,7 +1619,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "unknown time"
-#~ msgstr "tiempo desconocido"
+#~ msgstr "unknown time"
 
 #, fuzzy
 #~ msgid "Directory is eligible to be mined (based on contents)"
@@ -1644,8 +1627,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Directory is eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "El directorio es elegible para ser monitoreado (según la configuración)"
+#~ msgstr "Directory is eligible to be monitored (based on config)"
 
 #, fuzzy
 #~ msgid "Directory is NOT eligible to be monitored (based on config)"
@@ -1654,8 +1636,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "File is eligible to be monitored (based on config)"
-#~ msgstr ""
-#~ "El archivo es elegible para ser monitoreado (según la configuración)"
+#~ msgstr "File is eligible to be monitored (based on config)"
 
 #, fuzzy
 #~ msgid "File is NOT eligible to be monitored (based on config)"
@@ -1688,31 +1669,32 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Would be monitored"
-#~ msgstr "Would be monitored"
+#~ msgstr "Sería monitoreado"
 
 #, fuzzy
 #~ msgid "Does nothing, provided for compatibility with Tracker 2.0"
-#~ msgstr "Does nothing, provided for compatibility with Tracker 2.0"
+#~ msgstr "No hace nada, proporcionado para la compatibilidad con Tracker 2.0"
 
 #, fuzzy
 #~ msgid "Could not (re)index file, manager could not be created, %s"
-#~ msgstr "Could not (re)index file, manager could not be created, %s"
+#~ msgstr ""
+#~ "No se pudo (re) archivo de índice, el administrador no se pudo crear, %s"
 
 #, fuzzy
 #~ msgid "(Re)indexing file was successful"
-#~ msgstr "(Re)indexing file was successful"
+#~ msgstr "(Re) El archivo de indexación fue exitoso"
 
 #, fuzzy
 #~ msgid "Could not open /proc"
-#~ msgstr "Could not open /proc"
+#~ msgstr "No pudo abrir /proc"
 
 #, fuzzy
 #~ msgid "Could not stat() file"
-#~ msgstr "Could not stat() file"
+#~ msgstr "No se pudo stat () archivo"
 
 #, fuzzy
 #~ msgid "Could not open “%s”"
-#~ msgstr "Could not open “%s”"
+#~ msgstr "No pudo abrir \"%s\""
 
 #, fuzzy
 #~ msgid "Could not terminate process %d — “%s”"
@@ -2051,7 +2033,9 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Setting log verbosity for all components to “%s”…"
-#~ msgstr "Setting log verbosity for all components to “%s”…"
+#~ msgstr ""
+#~ "Configuración de verbosidad de registro para todos los componentes en "
+#~ "\"%s\" ..."
 
 #, fuzzy
 #~ msgid "Kill all Tracker processes and remove all databases"
@@ -2068,17 +2052,15 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid ""
 #~ "Remove all configuration files so they are re-generated on next start"
 #~ msgstr ""
-#~ "Eliminar todos los archivos de configuración para que se vuelvan a "
-#~ "generar en el próximo inicio"
+#~ "Remove all configuration files so they are re-generated on next start"
 
 #, fuzzy
 #~ msgid "You can not use the --hard and --soft arguments together"
-#~ msgstr "No puede usar los argumentos - -hard y -suave juntos"
+#~ msgstr "You can not use the --hard and --soft arguments together"
 
 #, fuzzy
 #~ msgid "CAUTION: This process may irreversibly delete data."
-#~ msgstr ""
-#~ "PRECAUCIÓN: Este proceso puede eliminar irreversiblemente los datos."
+#~ msgstr "CAUTION: This process may irreversibly delete data."
 
 #, fuzzy
 #~ msgid ""
@@ -2086,9 +2068,9 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "can’t be assured that this is the case for all data. Be aware that you "
 #~ "may be incurring in a data loss situation, proceed at your own risk."
 #~ msgstr ""
-#~ "Aunque la mayoría del contenido indexado por el rastreador se puede "
-#~ "reinexar de forma segura, no se puede asegurar que este es el caso de "
-#~ "todos los datos. "
+#~ "Although most content indexed by Tracker can be safely reindexed, it "
+#~ "can’t be assured that this is the case for all data. Be aware that you "
+#~ "may be incurring in a data loss situation, proceed at your own risk."
 
 #, fuzzy
 #~ msgid "Are you sure you want to proceed?"
@@ -2107,8 +2089,8 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "Stop words are common words which may be ignored during the indexing "
 #~ "process."
 #~ msgstr ""
-#~ "Las palabras de parada son palabras comunes que pueden ignorarse durante "
-#~ "el proceso de indexación."
+#~ "Stop words are common words which may be ignored during the indexing "
+#~ "process."
 
 #, fuzzy
 #~ msgid "Configuration"
@@ -2671,11 +2653,13 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Find search criteria in file titles"
-#~ msgstr "Find search criteria in file titles"
+#~ msgstr "Encontrar criterios de búsqueda en títulos de archivos"
 
 #, fuzzy
 #~ msgid "Find search criteria in file tags only (separated by comma)"
-#~ msgstr "Find search criteria in file tags only (separated by comma)"
+#~ msgstr ""
+#~ "Encuentre los criterios de búsqueda solo en etiquetas de archivo "
+#~ "(separados por coma)"
 
 #, fuzzy
 #~ msgid "_Search:"
@@ -2683,7 +2667,9 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Show tagging panel which allows editing tags of selected results"
-#~ msgstr "Show tagging panel which allows editing tags of selected results"
+#~ msgstr ""
+#~ "Mostrar panel de etiquetado que permite la edición de etiquetas de "
+#~ "resultados seleccionados"
 
 #, fuzzy
 #~ msgid "_Set the tags you want to associate with the %d selected items:"
@@ -2697,15 +2683,15 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Remove selected tag"
-#~ msgstr "Remove selected tag"
+#~ msgstr "Eliminar la etiqueta seleccionada"
 
 #, fuzzy
 #~ msgid "Search criteria was too generic"
-#~ msgstr "Search criteria was too generic"
+#~ msgstr "Los criterios de búsqueda eran demasiado genéricos"
 
 #, fuzzy
 #~ msgid "Only the first 500 items will be displayed"
-#~ msgstr "Only the first 500 items will be displayed"
+#~ msgstr "Solo se mostrarán los primeros 500 elementos"
 
 #, fuzzy
 #~ msgid "Print version"
@@ -2875,7 +2861,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Last Changed"
-#~ msgstr "Last Changed"
+#~ msgstr "Último cambio"
 
 #, fuzzy
 #~ msgid "Size"
@@ -2921,7 +2907,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "_Tags…"
-#~ msgstr "_Tags…"
+#~ msgstr "_Tags ..."
 
 #, fuzzy
 #~ msgid "Search and Indexing"
@@ -2937,19 +2923,19 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "_Monitor file and directory changes"
-#~ msgstr "_Monitor file and directory changes"
+#~ msgstr "_ Cambios de archivo y directorio"
 
 #, fuzzy
 #~ msgid "Enable when running on _battery"
-#~ msgstr "Enable when running on _battery"
+#~ msgstr "Habilitar cuando se ejecute en _Battery"
 
 #, fuzzy
 #~ msgid "Enable for _initial data population"
-#~ msgstr "Enable for _initial data population"
+#~ msgstr "Habilitar para la población de datos _initiales"
 
 #, fuzzy
 #~ msgid "Include _removable media"
-#~ msgstr "Include _removable media"
+#~ msgstr "Incluir medios _removables"
 
 #, fuzzy
 #~ msgid "This covers ALL removable media, memory cards, CDs, DVDs, etc."
@@ -2958,7 +2944,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Include optical di_scs"
-#~ msgstr "Include optical di_scs"
+#~ msgstr "Incluir di_scs ópticos"
 
 #, fuzzy
 #~ msgid "Semantics"
@@ -2973,30 +2959,27 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "This option allows you to make Tracker take a back seat and not eat up "
 #~ "too much CPU time if you have other applications more deserving of it."
 #~ msgstr ""
-#~ "The  scheduler  is  the kernel component that decides which runnable "
-#~ "application will be executed by the CPU next.  Each application has an "
-#~ "associated scheduling  policy and priority.\n"
-#~ "\n"
-#~ "This option allows you to make Tracker take a back seat and not eat up "
-#~ "too much CPU time if you have other applications more deserving of it."
+#~ "El planificador es el componente del núcleo que decide qué aplicación "
+#~ "ejecutable será ejecutada por la CPU a continuación.  "
 
 #, fuzzy
 #~ msgid "O_nly when computer is not being used"
-#~ msgstr "O_nly when computer is not being used"
+#~ msgstr "O_NLY cuando la computadora no se está utilizando"
 
 #, fuzzy
 #~ msgid ""
 #~ "Indexing content will be <b>much slower</b> but other applications will "
 #~ "have priority."
 #~ msgstr ""
-#~ "Indexing content will be <b>much slower</b> but other applications will "
-#~ "have priority."
+#~ "El contenido de indexación será <b> mucho más lento </b> pero otras "
+#~ "aplicaciones tendrán prioridad."
 
 #, fuzzy
 #~ msgid ""
 #~ "_While other applications are running, except for initial data population"
 #~ msgstr ""
-#~ "_While other applications are running, except for initial data population"
+#~ "_ Aunque otras aplicaciones se están ejecutando, excepto para la "
+#~ "población de datos inicial"
 
 #, fuzzy
 #~ msgid ""
@@ -3004,25 +2987,24 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "have priority. This will only be the case on the <b>first index</b> of "
 #~ "your content after you start your computer from a new install"
 #~ msgstr ""
-#~ "Indexing content will be <b>much slower</b> but other applications will "
-#~ "have priority. This will only be the case on the <b>first index</b> of "
-#~ "your content after you start your computer from a new install"
+#~ "El contenido de indexación será <b> mucho más lento </b> pero otras "
+#~ "aplicaciones tendrán prioridad. "
 
 #, fuzzy
 #~ msgid "While _other applications are running"
-#~ msgstr "While _other applications are running"
+#~ msgstr "Mientras que otras aplicaciones se están ejecutando"
 
 #, fuzzy
 #~ msgid ""
 #~ "Indexing content will be as <b>fast</b> as possible but other "
 #~ "applications may suffer and be slower as a result."
 #~ msgstr ""
-#~ "Indexing content will be as <b>fast</b> as possible but other "
-#~ "applications may suffer and be slower as a result."
+#~ "El contenido de indexación será lo más rápido posible </b>, pero otras "
+#~ "aplicaciones pueden sufrir y ser más lentas como resultado."
 
 #, fuzzy
 #~ msgid "Stop indexing when _disk space is below:"
-#~ msgstr "Stop indexing when _disk space is below:"
+#~ msgstr "Deje de indexar cuando el espacio _disk esté debajo:"
 
 #, fuzzy
 #~ msgid "Limitations"
@@ -3033,16 +3015,17 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "Indexed content from removable devices that have not been inserted for a "
 #~ "while, are cleaned up to avoid build up of unused resources."
 #~ msgstr ""
-#~ "Indexed content from removable devices that have not been inserted for a "
-#~ "while, are cleaned up to avoid build up of unused resources."
+#~ "El contenido indexado de dispositivos extraíbles que no se han insertado "
+#~ "durante un tiempo se limpian para evitar la acumulación de recursos no "
+#~ "utilizados."
 
 #, fuzzy
 #~ msgid "Days before deleting removable devices:"
-#~ msgstr "Days before deleting removable devices:"
+#~ msgstr "Días antes de eliminar dispositivos extraíbles:"
 
 #, fuzzy
 #~ msgid "Garbage Collection"
-#~ msgstr "Garbage Collection"
+#~ msgstr "Recolección de basura"
 
 #, fuzzy
 #~ msgid "Indexing"
@@ -3058,61 +3041,54 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "directories underneath it will also be indexed. Otherwise, only files "
 #~ "immediately in that directory will be indexed."
 #~ msgstr ""
-#~ "Special locations such as your <b>Home</b>, <b>Desktop</b> or "
-#~ "<b>Documents</b> directory, can be easily toggled below. This will add or "
-#~ "remove their real paths from the list underneath.\n"
-#~ "\n"
-#~ "If a directory is toggled to <b>Recurse</b>, it means that all sub-"
-#~ "directories underneath it will also be indexed. Otherwise, only files "
-#~ "immediately in that directory will be indexed."
+#~ "Las ubicaciones especiales como su <b> Home </b>, <b> Desktop </b> o <b> "
+#~ "Documentos </b> se pueden alternar fácilmente a continuación. "
 
 #, fuzzy
 #~ msgid "Index Home Directory"
-#~ msgstr "Index Home Directory"
+#~ msgstr "Directorio de inicio del índice"
 
 #, fuzzy
 #~ msgid "Index Desktop Directory"
-#~ msgstr "Index Desktop Directory"
+#~ msgstr "Directorio de escritorio índice"
 
 #, fuzzy
 #~ msgid "Index Documents Directory"
-#~ msgstr "Index Documents Directory"
+#~ msgstr "Directorio de documentos de índice"
 
 #, fuzzy
 #~ msgid "Index Music Directory"
-#~ msgstr "Index Music Directory"
+#~ msgstr "Directorio de música índice"
 
 #, fuzzy
 #~ msgid "Index Pictures Directory"
-#~ msgstr "Index Pictures Directory"
+#~ msgstr "Directorio de imágenes de índice"
 
 #, fuzzy
 #~ msgid "Index Videos Directory"
-#~ msgstr "Index Videos Directory"
+#~ msgstr "Directorio de videos de índice"
 
 #, fuzzy
 #~ msgid "Index Download Directory"
-#~ msgstr "Index Download Directory"
+#~ msgstr "Directorio de descarga de índice"
 
 #, fuzzy
 #~ msgid ""
 #~ "One or more special locations have the same path.\n"
 #~ "Those which are the same are disabled!"
-#~ msgstr ""
-#~ "One or more special locations have the same path.\n"
-#~ "Those which are the same are disabled!"
+#~ msgstr "Una o más ubicaciones especiales tienen el mismo camino.\n"
 
 #, fuzzy
 #~ msgid "Add directory to be indexed"
-#~ msgstr "Add directory to be indexed"
+#~ msgstr "Agregar directorio para ser indexado"
 
 #, fuzzy
 #~ msgid "Remove directory from being indexed"
-#~ msgstr "Remove directory from being indexed"
+#~ msgstr "Eliminar el directorio de la indexación"
 
 #, fuzzy
 #~ msgid "Where is your content?"
-#~ msgstr "Where is your content?"
+#~ msgstr "¿Dónde está tu contenido?"
 
 #, fuzzy
 #~ msgid "Locations"
@@ -3120,19 +3096,19 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Glob patterns to ignore:"
-#~ msgstr "Glob patterns to ignore:"
+#~ msgstr "Patrones del globo para ignorar:"
 
 #, fuzzy
 #~ msgid "Opens text entry for glob patterns"
-#~ msgstr "Opens text entry for glob patterns"
+#~ msgstr "Abre la entrada de texto para patrones de globas"
 
 #, fuzzy
 #~ msgid "Opens the filechooser dialogue"
-#~ msgstr "Opens the filechooser dialogue"
+#~ msgstr "Abre el diálogo Filecooser"
 
 #, fuzzy
 #~ msgid "With specific files:"
-#~ msgstr "With specific files:"
+#~ msgstr "Con archivos específicos:"
 
 #, fuzzy
 #~ msgid "Directories"
@@ -3300,15 +3276,15 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid " - Manage Tracker processes and data"
-#~ msgstr " - Manage Tracker processes and data"
+#~ msgstr "- Administrar procesos y datos de rastreadores"
 
 #, fuzzy
 #~ msgid "General and Status options cannot be used together"
-#~ msgstr "General and Status options cannot be used together"
+#~ msgstr "Las opciones generales y de estado no se pueden usar juntas"
 
 #, fuzzy
 #~ msgid "General and Miners options cannot be used together"
-#~ msgstr "General and Miners options cannot be used together"
+#~ msgstr "Las opciones generales y de mineros no se pueden usar juntas"
 
 #, fuzzy
 #~ msgid "Status and Miners options cannot be used together"
@@ -3557,7 +3533,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Minimum length of a word to be indexed"
-#~ msgstr "Longitud mínima de una palabra a indexar"
+#~ msgstr "Minimum length of a word to be indexed"
 
 #, fuzzy
 #~ msgid "Words with less characters than this will be ignored by the indexer."
@@ -3567,7 +3543,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Tags..."
-#~ msgstr "Etiquetas ..."
+#~ msgstr "Tags..."
 
 #, fuzzy
 #~ msgid "Tag one or more files"
@@ -3635,8 +3611,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid ""
 #~ "When toggled, this makes sure your home directory is included in the list."
 #~ msgstr ""
-#~ "Cuando se alterna, esto asegura que su directorio de inicio esté incluido "
-#~ "en la lista."
+#~ "When toggled, this makes sure your home directory is included in the list."
 
 #, fuzzy
 #~ msgid ""
@@ -3663,8 +3638,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Display results by files found in a grid view"
-#~ msgstr ""
-#~ "Mostrar resultados por archivos encontrados en una vista de cuadrícula"
+#~ msgstr "Display results by files found in a grid view"
 
 #, fuzzy
 #~ msgid "No options specified"
@@ -3672,8 +3646,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Include details with state updates (only applies to --follow)"
-#~ msgstr ""
-#~ "Incluya detalles con actualizaciones de estado (solo se aplica a --follow)"
+#~ msgstr "Include details with state updates (only applies to --follow)"
 
 #, fuzzy
 #~ msgid "Tracker Status Icon"
@@ -3681,15 +3654,15 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Tracker Status Notification Application"
-#~ msgstr "Aplicación de notificación de estado del rastreador"
+#~ msgstr "Tracker Status Notification Application"
 
 #, fuzzy
 #~ msgid "<b>Notification area</b>"
-#~ msgstr "<b> Área de notificación </b>"
+#~ msgstr "<b>Notification area</b>"
 
 #, fuzzy
 #~ msgid "Al_ways display icon"
-#~ msgstr "Icono de visualización de al_ways"
+#~ msgstr "Al_ways display icon"
 
 #, fuzzy
 #~ msgid "_Never display icon"
@@ -3697,7 +3670,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "_Only display when indexing content"
-#~ msgstr "_Tonly Mostrar al indexar contenido"
+#~ msgstr "_Only display when indexing content"
 
 #, fuzzy
 #~ msgid "Desktop search tool using Tracker"
@@ -3754,7 +3727,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "translator-credits"
-#~ msgstr "créditos de traductor"
+#~ msgstr "translator-credits"
 
 #, fuzzy
 #~ msgid "_Pause All Indexing"
@@ -3774,11 +3747,11 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "List pause reasons and applications for a miner"
-#~ msgstr "Lista de razones de pausa y aplicaciones para un minero"
+#~ msgstr "List pause reasons and applications for a miner"
 
 #, fuzzy
 #~ msgid "- Monitor and control status"
-#~ msgstr "- Monitorear y controlar el estado"
+#~ msgstr "- Monitor and control status"
 
 #, fuzzy
 #~ msgid "Needle"
@@ -3786,7 +3759,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "All Files"
-#~ msgstr "Todos los archivos"
+#~ msgstr "All Files"
 
 #, fuzzy
 #~ msgid "Clear the search text"
@@ -3802,7 +3775,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Modified:"
-#~ msgstr "Modificado:"
+#~ msgstr "Modified:"
 
 #, fuzzy
 #~ msgid "Height:"
@@ -3983,7 +3956,8 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Search all of your documents with Tracker Search Tool"
-#~ msgstr "Search all of your documents with Tracker Search Tool"
+#~ msgstr ""
+#~ "Busque todos sus documentos con la herramienta de búsqueda de rastreadores"
 
 #, fuzzy
 #~ msgid "Tracker Search"
@@ -4074,7 +4048,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Codec : <b>%s</b>"
-#~ msgstr "Códec: <b>%s </b>"
+#~ msgstr "Codec : <b>%s</b>"
 
 #, fuzzy
 #~ msgid " taken with a <span size='large'><i>%s</i></span>"
@@ -4086,19 +4060,19 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Dimensions : <b>%d x %d</b>"
-#~ msgstr "Dimensiones: <b> %d x %d </b>"
+#~ msgstr "Dimensions : <b>%d x %d</b>"
 
 #, fuzzy
 #~ msgid "Date Taken : <b>%s</b>"
-#~ msgstr "Fecha tomada: <b>%s </b>"
+#~ msgstr "Date Taken : <b>%s</b>"
 
 #, fuzzy
 #~ msgid "Orientation : <b>%s</b>"
-#~ msgstr "Orientación: <b>%s </b>"
+#~ msgstr "Orientation : <b>%s</b>"
 
 #, fuzzy
 #~ msgid "Flash : <b>%s</b>"
-#~ msgstr "Flash: <b>%s </b>"
+#~ msgstr "Flash : <b>%s</b>"
 
 #, fuzzy
 #~ msgid "Focal Length : <b>%s</b>"
@@ -4126,7 +4100,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Subject : <b>%s</b>"
-#~ msgstr "Subject : <b>%s</b>"
+#~ msgstr "Asunto: <b>%s </b>"
 
 #, fuzzy
 #~ msgid "Word Count : <b>%s</b>"
@@ -4142,7 +4116,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "%.1f KB"
-#~ msgstr "%.1F KB"
+#~ msgstr "%.1f KB"
 
 #, fuzzy
 #~ msgid "%.1f MB"
@@ -4154,7 +4128,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Type tags you want to add here, separated by commas"
-#~ msgstr "Escriba etiquetas que desea agregar aquí, separadas por comas"
+#~ msgstr "Type tags you want to add here, separated by commas"
 
 #, fuzzy
 #~ msgid "Tags :"
@@ -4271,13 +4245,13 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid "Prefix: %d"
 #~ msgid_plural "Prefixes: %d"
 #~ msgstr[0] "Prefijo: %D"
-#~ msgstr[1] "Prefixes: %d"
+#~ msgstr[1] "Prefijos: %D"
 
 #, fuzzy
 #~ msgid "Property: %d"
 #~ msgid_plural "Properties: %d"
-#~ msgstr[0] "Property: %d"
-#~ msgstr[1] "Properties: %d"
+#~ msgstr[0] "Propiedad: %D"
+#~ msgstr[1] "Propiedades: %D"
 
 #, fuzzy
 #~ msgid "Websites"
@@ -4285,33 +4259,34 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Create thumbnails from images and videos"
-#~ msgstr "Create thumbnails from images and videos"
+#~ msgstr "Crear miniaturas a partir de imágenes y videos"
 
 #, fuzzy
 #~ msgid ""
 #~ "Follow changes made to files and new files created by watching directories"
 #~ msgstr ""
-#~ "Follow changes made to files and new files created by watching directories"
+#~ "Siga los cambios realizados en archivos y nuevos archivos creados viendo "
+#~ "directorios"
 
 #, fuzzy
 #~ msgid ""
 #~ "If this is unchecked, then Tracker will be paused while the device is "
 #~ "using battery instead of AC power"
 #~ msgstr ""
-#~ "If this is unchecked, then Tracker will be paused while the device is "
-#~ "using battery instead of AC power"
+#~ "Si esto no se controla, el rastreador se detendrá mientras el dispositivo "
+#~ "usa la batería en lugar de la alimentación de CA"
 
 #, fuzzy
 #~ msgid ""
 #~ "Removable devices are always considered separately. This applies to "
 #~ "directories mounted within the file system which are NOT removable devices"
-#~ msgstr ""
-#~ "Removable devices are always considered separately. This applies to "
-#~ "directories mounted within the file system which are NOT removable devices"
+#~ msgstr "Los dispositivos extraíbles siempre se consideran por separado. "
 
 #, fuzzy
 #~ msgid "Removable devices include memory cards and USB sticks for example"
-#~ msgstr "Removable devices include memory cards and USB sticks for example"
+#~ msgstr ""
+#~ "Los dispositivos extraíbles incluyen tarjetas de memoria y palos USB, por "
+#~ "ejemplo,"
 
 #, fuzzy
 #~ msgid ""
@@ -4433,8 +4408,8 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #, fuzzy
 #~ msgid "This will open %d separate window."
 #~ msgid_plural "This will open %d separate windows."
-#~ msgstr[0] "This will open %d separate window."
-#~ msgstr[1] "This will open %d separate windows."
+#~ msgstr[0] "Esto se abrirá %d ventana separada."
+#~ msgstr[1] "Esto se abrirá %d ventanas separadas."
 
 #, fuzzy
 #~ msgid "Could not open document \"%s\"."
@@ -4460,7 +4435,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ msgid "Are you sure you want to open %d folder?"
 #~ msgid_plural "Are you sure you want to open %d folders?"
 #~ msgstr[0] "¿Estás seguro de que quieres abrir %d de la carpeta?"
-#~ msgstr[1] "¿Estás seguro de que quieres abrir carpetas %D?"
+#~ msgstr[1] "¿Estás seguro de que quieres abrir carpetas %d?"
 
 #, fuzzy
 #~ msgid "Could not move \"%s\" to trash."
@@ -4480,23 +4455,23 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Could not save document."
-#~ msgstr "Could not save document."
+#~ msgstr "No pudo guardar documento."
 
 #, fuzzy
 #~ msgid "You did not select a document name."
-#~ msgstr "You did not select a document name."
+#~ msgstr "No seleccionó un nombre de documento."
 
 #, fuzzy
 #~ msgid "Could not save \"%s\" document to \"%s\"."
-#~ msgstr "Could not save \"%s\" document to \"%s\"."
+#~ msgstr "No pudo ahorrar documento \"%s\" a \"%s\"."
 
 #, fuzzy
 #~ msgid "The document \"%s\" already exists.  Would you like to replace it?"
-#~ msgstr "The document \"%s\" already exists.  Would you like to replace it?"
+#~ msgstr "El documento \"%s\" ya existe.  "
 
 #, fuzzy
 #~ msgid "If you replace an existing file, its contents will be overwritten."
-#~ msgstr "If you replace an existing file, its contents will be overwritten."
+#~ msgstr "Si reemplaza un archivo existente, su contenido se sobrescribirá."
 
 #, fuzzy
 #~ msgid "_Replace"
@@ -4504,11 +4479,11 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "The document name you selected is a folder."
-#~ msgstr "The document name you selected is a folder."
+#~ msgstr "El nombre del documento que seleccionó es una carpeta."
 
 #, fuzzy
 #~ msgid "You may not have write permissions to the document."
-#~ msgstr "You may not have write permissions to the document."
+#~ msgstr "Es posible que no tenga permisos de escritura al documento."
 
 #, fuzzy
 #~ msgid ""
@@ -4520,7 +4495,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "today at %-I:%M %p"
-#~ msgstr "today at %-I:%M %p"
+#~ msgstr "hoy en %-i: %m %p"
 
 #, fuzzy
 #~ msgid "yesterday at %-I:%M %p"
@@ -4592,7 +4567,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Tracker Search Tool-"
-#~ msgstr "Herramienta de búsqueda de rastreadores-"
+#~ msgstr "Tracker Search Tool-"
 
 #, fuzzy
 #~ msgid "no search performed"
@@ -4677,7 +4652,7 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Search for files with specified tag"
-#~ msgstr "Search for files with specified tag"
+#~ msgstr "Buscar archivos con etiqueta especificada"
 
 #, fuzzy
 #~ msgid "FILE..."
@@ -4688,16 +4663,16 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "To add, remove, or search for multiple tags at the same time, join "
 #~ "multiple options, for example:"
 #~ msgstr ""
-#~ "To add, remove, or search for multiple tags at the same time, join "
-#~ "multiple options, for example:"
+#~ "Para agregar, eliminar o buscar varias etiquetas al mismo tiempo, une "
+#~ "múltiples opciones, por ejemplo:"
 
 #, fuzzy
 #~ msgid "Files are not needed with searching"
-#~ msgstr "Files are not needed with searching"
+#~ msgstr "No se necesitan archivos para buscar"
 
 #, fuzzy
 #~ msgid "Could not remove all tags for '%s'"
-#~ msgstr "Could not remove all tags for '%s'"
+#~ msgstr "No pudo eliminar todas las etiquetas para '%s'"
 
 #, fuzzy
 #~ msgid ""
@@ -4705,21 +4680,20 @@ msgstr "- iniciar el servicio de escritura en diferido"
 #~ "files. Click the Reindex button to start reindexing now, otherwise this "
 #~ "action will be performed the next time the Tracker daemon is restarted."
 #~ msgstr ""
-#~ "In order for your changes to take effect, Tracker must reindex your "
-#~ "files. Click the Reindex button to start reindexing now, otherwise this "
-#~ "action will be performed the next time the Tracker daemon is restarted."
+#~ "Para que sus cambios entren en vigencia, el rastreador debe reindexar sus "
+#~ "archivos. "
 
 #, fuzzy
 #~ msgid "Tracker daemon must be restarted"
-#~ msgstr "Tracker daemon must be restarted"
+#~ msgstr "Se debe reiniciar el demonio del rastreador"
 
 #, fuzzy
 #~ msgid ""
 #~ "In order for your changes to take effect, the Tracker daemon has to be "
 #~ "restarted. Click the Restart button to restart the daemon now."
 #~ msgstr ""
-#~ "In order for your changes to take effect, the Tracker daemon has to be "
-#~ "restarted. Click the Restart button to restart the daemon now."
+#~ "Para que sus cambios entren en vigencia, el Daemon Tracker debe "
+#~ "reiniciarse. "
 
 #, fuzzy
 #~ msgid "_Restart"
@@ -4727,47 +4701,47 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "<b>Crawled Directories</b>"
-#~ msgstr "<b>Crawled Directories</b>"
+#~ msgstr "<b> Directorios de rastreo </b>"
 
 #, fuzzy
 #~ msgid "<b>Ignored File Patterns</b>"
-#~ msgstr "<b>Ignored File Patterns</b>"
+#~ msgstr "<b> Patrones de archivo ignorados </b>"
 
 #, fuzzy
 #~ msgid "<b>Ignored Paths</b>"
-#~ msgstr "<b>Ignored Paths</b>"
+#~ msgstr "<b> rutas ignoradas </b>"
 
 #, fuzzy
 #~ msgid "<b>Index Merging</b>"
-#~ msgstr "<b>Index Merging</b>"
+#~ msgstr "<b> Índice fusionando </b>"
 
 #, fuzzy
 #~ msgid "<b>Indexing Limits (per file)</b>"
-#~ msgstr "<b>Indexing Limits (per file)</b>"
+#~ msgstr "<b> Límites de indexación (por archivo) </b>"
 
 #, fuzzy
 #~ msgid "<b>Indexing Options</b>"
-#~ msgstr "<b>Indexing Options</b>"
+#~ msgstr "<b> Opciones de indexación </b>"
 
 #, fuzzy
 #~ msgid "<b>Power management</b>"
-#~ msgstr "<b>Power management</b>"
+#~ msgstr "<b> Gestión de energía </b>"
 
 #, fuzzy
 #~ msgid "<b>Resource Usage</b>"
-#~ msgstr "<b>Resource Usage</b>"
+#~ msgstr "<b> Uso de recursos </b>"
 
 #, fuzzy
 #~ msgid "<b>Stemming</b>"
-#~ msgstr "<b>Stemming</b>"
+#~ msgstr "<b> Stemming </b>"
 
 #, fuzzy
 #~ msgid "<b>Throttling</b>"
-#~ msgstr "<b>Throttling</b>"
+#~ msgstr "<b> estrangulamiento </b>"
 
 #, fuzzy
 #~ msgid "Additional mbox style mailboxes to index:"
-#~ msgstr "Additional mbox style mailboxes to index:"
+#~ msgstr "Indexes adicionales de estilo Mbox Style para indexar:"
 
 #, fuzzy
 #~ msgid "Additional paths to index and watch:"
@@ -4870,18 +4844,21 @@ msgstr "- iniciar el servicio de escritura en diferido"
 
 #, fuzzy
 #~ msgid "Tracker: %s (%s)"
-#~ msgstr "Rastreador: %s ( %s)"
+#~ msgstr "Tracker: %s (%s)"
 
 #, fuzzy
 #~ msgid "Tracker: %s"
-#~ msgstr "Rastreador: %s"
+#~ msgstr "Tracker: %s"
 
 #, fuzzy
 #~ msgid ""
 #~ "Done: %d of %d\n"
 #~ "Estimated: %s\n"
 #~ "Elapsed: %s"
-#~ msgstr "Hecho: %D de %D\n"
+#~ msgstr ""
+#~ "Done: %d of %d\n"
+#~ "Estimated: %s\n"
+#~ "Elapsed: %s"
 
 #, fuzzy
 #~ msgid "Re-index your system?"
