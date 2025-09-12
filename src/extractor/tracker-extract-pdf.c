@@ -46,9 +46,6 @@
 
 #include "tracker-main.h"
 
-/* Time in seconds before we stop processing content */
-#define EXTRACTION_PROCESS_TIMEOUT 10
-
 typedef struct {
 	gchar *title;
 	gchar *subject;
@@ -194,18 +191,13 @@ extract_content_text (PopplerDocument *document,
                       gsize            n_bytes)
 {
 	GString *string;
-	GTimer *timer;
 	gsize remaining_bytes;
 	gint n_pages, i;
-	gdouble elapsed;
 
 	n_pages = poppler_document_get_n_pages (document);
 	string = g_string_new ("");
-	timer = g_timer_new ();
 
-	for (i = 0, remaining_bytes = n_bytes, elapsed = g_timer_elapsed (timer, NULL);
-	     i < n_pages && remaining_bytes > 0 && elapsed < EXTRACTION_PROCESS_TIMEOUT;
-	     i++, elapsed = g_timer_elapsed (timer, NULL)) {
+	for (i = 0, remaining_bytes = n_bytes; i < n_pages && remaining_bytes > 0; i++) {
 		PopplerPage *page;
 		gsize written_bytes = 0;
 		gchar *text = NULL;
@@ -237,18 +229,11 @@ extract_content_text (PopplerDocument *document,
 		g_object_unref (page);
 	}
 
-	if (elapsed >= EXTRACTION_PROCESS_TIMEOUT) {
-		g_debug ("Extraction timed out, %d seconds reached", EXTRACTION_PROCESS_TIMEOUT);
-	}
-
-	g_debug ("Content extraction finished: %d/%d pages indexed in %2.2f seconds, "
+	g_debug ("Content extraction finished: %d/%d pages indexed, "
 	         "%" G_GSIZE_FORMAT " bytes extracted",
 	         i,
 	         n_pages,
-	         g_timer_elapsed (timer, NULL),
 	         (n_bytes - remaining_bytes));
-
-	g_timer_destroy (timer);
 
 	return g_string_free (string, FALSE);
 }
