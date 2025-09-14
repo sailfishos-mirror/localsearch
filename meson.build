@@ -1,5 +1,5 @@
 project('localsearch', 'c',
-        version: '3.10.rc',
+        version: '3.10.0',
         meson_version: '>=0.51')
 
 gnome = import('gnome')

@@ -1,3 +1,14 @@
+NEW in 3.10.0 - 2025-09-14
+==========================
+  * Fixes to handling of configuration changes
+  * Improvements to the test suite
+
+Translations: da, en_GB, eo, es, eu, fa, he, hu, ka, ko, lt, nl, pt_BR, ru, sv, tr, uk, zh_CN
+
+Notable changes since 3.9.0:
+  * A number of behavioral settings has been deprecated
+  * Webp file format now has a metadata extractor
+
 NEW in 3.10.rc - 2025-09-01
 ===========================
   * Webp file format now has a metadata extractor
