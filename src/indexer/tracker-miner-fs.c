@@ -679,7 +679,8 @@ sparql_buffer_flush_cb (GObject      *object,
 	if (error) {
 		g_warning ("Could not execute sparql: %s", error->message);
 
-		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
+		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT) ||
+		    g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CONSTRAINT)) {
 			g_signal_emit (fs, signals[CORRUPT], 0);
 			return;
 		} else if (g_error_matches (error, TRACKER_SPARQL_ERROR,
