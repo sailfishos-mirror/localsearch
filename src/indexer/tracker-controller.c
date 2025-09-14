@@ -152,7 +152,8 @@ add_removable_directory (TrackerController *controller,
 
 	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
 		TRACKER_DIRECTORY_FLAG_PRESERVE |
-		TRACKER_DIRECTORY_FLAG_PRIORITY;
+		TRACKER_DIRECTORY_FLAG_PRIORITY |
+		TRACKER_DIRECTORY_FLAG_IS_VOLUME;
 
 	uri = g_file_get_uri (mount_file);
 	g_debug ("  Adding removable: '%s'", uri);
@@ -778,25 +779,25 @@ tracker_controller_constructed (GObject *object)
 	                         G_CONNECT_SWAPPED);
 
 	controller->config = tracker_config_new ();
-	g_signal_connect (controller->config, "notify::index-recursive-directories",
+	g_signal_connect (controller->config, "changed::index-recursive-directories",
 	                  G_CALLBACK (index_recursive_directories_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::index-single-directories",
+	g_signal_connect (controller->config, "changed::index-single-directories",
 	                  G_CALLBACK (index_single_directories_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::ignored-directories",
+	g_signal_connect (controller->config, "changed::ignored-directories",
 	                  G_CALLBACK (filter_changed_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::ignored-directories-with-content",
+	g_signal_connect (controller->config, "changed::ignored-directories-with-content",
 	                  G_CALLBACK (filter_changed_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::ignored-files",
+	g_signal_connect (controller->config, "changed::ignored-files",
 	                  G_CALLBACK (filter_changed_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::enable-monitors",
+	g_signal_connect (controller->config, "changed::enable-monitors",
 	                  G_CALLBACK (enable_monitors_changed_cb),
 	                  object);
-	g_signal_connect (controller->config, "notify::index-removable-devices",
+	g_signal_connect (controller->config, "changed::index-removable-devices",
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 
@@ -808,7 +809,7 @@ tracker_controller_constructed (GObject *object)
 	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
 	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
 	                          NULL,
-	                          "org.freedesktop.Tracker3.Miner.Files.Control",
+	                          "org.freedesktop.LocalSearch3.Control",
 	                          "/org/freedesktop/Tracker3/Miner/Files/Proxy",
 	                          "org.freedesktop.Tracker3.Miner.Files.Proxy",
 	                          NULL,

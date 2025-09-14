@@ -73,6 +73,95 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         self.assertIn("http://tracker.api.gnome.org/ontology/v3/nfo#PlainTextDocument", output)
         self.assertNotIn("nfo:PlainTextDocument", output)
 
+    def test_info_eligible(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("currently exists", output)
+        self.assertIn("File is eligible", output)
+
+    def test_info_eligible_nonexistent(self):
+        target = self.path("test-monitored/non-existent.txt")
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("does not exist", output)
+        self.assertIn("File is eligible", output)
+
+    def test_info_non_eligible(self):
+        # Non-existent file
+        target = "/non-existent.txt"
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("does not exist", output)
+        self.assertIn("not an indexed folder", output)
+
+        # Hidden file
+        target = self.path("test-monitored/.hidden.txt")
+        with open(target, "w") as f:
+            f.write("Foo bar baz")
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("currently exist", output)
+        self.assertIn("hidden file", output)
+
+        # File ineligible by glob filter
+        target = self.path("test-monitored/backup.txt~")
+        with open(target, "w") as f:
+            f.write("Foo bar baz")
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("currently exist", output)
+        self.assertIn("based on filters", output)
+
+        # Directory ineligible by glob filter
+        target = pathlib.Path(self.path("test-monitored/lost+found"))
+        target.mkdir(parents=True, exist_ok=True)
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("currently exist", output)
+        self.assertIn("based on filters", output)
+
+        # File filtered by parent-dir filter
+        nomedia = self.path("test-monitored/.nomedia")
+        with open(nomedia, "w") as f:
+            f.write("")
+        target = self.path("test-monitored/file.txt")
+        with open(target, "w") as f:
+            f.write("Foo bar baz")
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("currently exist", output)
+        self.assertIn("based on content filters", output)
+
+
+    def test_info_non_eligible_parent(self):
+        # Hidden parent folder
+        target = pathlib.Path(self.path("test-monitored/.folder/file.txt"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('foo bar baz')
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("Parent directory", output)
+        self.assertIn("hidden file", output)
+
+        # Parent folder ineligible by filter
+        target = pathlib.Path(self.path("test-monitored/lost+found/file.txt"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('foo bar baz')
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("Parent directory", output)
+        self.assertIn("based on filters", output)
+
+        # Parent folder ineligible by content filter
+        target = pathlib.Path(self.path("test-monitored/a/b/file.txt"))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text('foo bar baz')
+        nomedia = pathlib.Path(self.path("test-monitored/a/.nomedia"))
+        nomedia.write_text('')
+        output = self.run_cli(["localsearch", "info", "--eligible", target])
+        self.assertIn("Parent directory", output)
+        self.assertIn("based on content filters", output)
+
+
     def test_info_noargs(self):
         err = None
         out = None

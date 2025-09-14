@@ -31,7 +31,7 @@ from gi.repository import Tracker
 cancellable = None
 
 miner_fs = Tracker.SparqlConnection.bus_new(
-    "org.freedesktop.Tracker3.Miner.Files", None, cancellable)
+    "org.freedesktop.LocalSearch3", None, cancellable)
 cursor = miner_fs.query(
     "SELECT ?album ?title "
     "FROM tracker:Audio "

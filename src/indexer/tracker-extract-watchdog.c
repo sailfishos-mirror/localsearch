@@ -157,8 +157,10 @@ indexed_directory_removed_cb (TrackerIndexingTree    *tree,
 	/* Terminate extractor process, so it can abandon activity early on
 	 * pre-unmount.
 	 */
-	if (watchdog->extract_process)
+	if (watchdog->extract_process) {
 		g_subprocess_send_signal (watchdog->extract_process, SIGTERM);
+		clear_process_state (watchdog);
+	}
 }
 
 static void
@@ -452,6 +454,20 @@ setup_context (TrackerExtractWatchdog  *watchdog,
 	return TRUE;
 }
 
+static void
+on_check_finished (GObject      *object,
+                   GAsyncResult *res,
+                   gpointer      user_data)
+{
+	g_autoptr (GVariant) ignore = NULL;
+	g_autoptr (GError) error = NULL;
+
+	ignore = g_dbus_connection_call_finish (G_DBUS_CONNECTION (object),
+	                                        res, &error);
+	if (error)
+		g_warning ("Could not ask extractor to update: %s", error->message);
+}
+
 void
 tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 {
@@ -459,8 +475,23 @@ tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 	g_autofree gchar *current_dir = NULL;
 	const gchar *extract_path;
 
-	if (watchdog->extract_process)
+	if (watchdog->extract_process) {
+		if (watchdog->conn) {
+			g_dbus_connection_call (watchdog->conn,
+			                        NULL,
+			                        "/org/freedesktop/Tracker3/Extract",
+			                        "org.freedesktop.Tracker3.Extract",
+			                        "Check",
+			                        NULL, NULL,
+			                        G_DBUS_CALL_FLAGS_NONE,
+			                        -1,
+			                        NULL,
+			                        on_check_finished,
+			                        watchdog);
+		}
+
 		return;
+	}
 
 	if (!setup_context (watchdog, &error)) {
 		g_critical ("Could not setup context to spawn metadata extractor: %s", error->message);

@@ -461,6 +461,7 @@ tracker_application_dbus_register (GApplication     *application,
 {
 	TrackerApplication *app = TRACKER_APPLICATION (application);
 	g_autofree char *legacy_dbus_name = NULL;
+	gboolean wait_settle = FALSE;
 
 	if (!app->no_daemon &&
 	    g_strcmp0 (DOMAIN_PREFIX, "org.freedesktop") != 0) {
@@ -494,8 +495,6 @@ tracker_application_dbus_register (GApplication     *application,
 		return FALSE;
 
 	if (!tracker_term_is_tty ()) {
-		gboolean wait_settle = TRUE;
-
 		app->systemd_proxy = g_dbus_proxy_new_for_bus_sync (TRACKER_IPC_BUS,
 		                                                    G_DBUS_PROXY_FLAGS_NONE,
 		                                                    NULL,
@@ -508,10 +507,10 @@ tracker_application_dbus_register (GApplication     *application,
 			g_autoptr (GVariant) v = NULL;
 			const char *state = NULL;
 
-			g_signal_connect (app->systemd_proxy,
-			                  "g-signal::StartupFinished",
-			                  G_CALLBACK (on_systemd_settled),
-			                  app);
+			g_signal_connect_swapped (app->systemd_proxy,
+			                          "g-signal::StartupFinished",
+			                          G_CALLBACK (on_systemd_settled),
+			                          app);
 			g_dbus_proxy_call_sync (app->systemd_proxy,
 			                        "Subscribe",
 			                        NULL,
@@ -520,16 +519,17 @@ tracker_application_dbus_register (GApplication     *application,
 			                        NULL, NULL);
 
 			v = g_dbus_proxy_get_cached_property (app->systemd_proxy, "SystemState");
-			state = g_variant_get_string (v, NULL);
-			wait_settle = !g_strv_contains (finished_states, state);
-		}
 
-		if (wait_settle) {
-			g_debug ("Waiting for the system to settle");
-			app->wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, app);
-		} else {
-			start_indexer (app);
+			if (v) {
+				state = g_variant_get_string (v, NULL);
+				wait_settle = !g_strv_contains (finished_states, state);
+			}
 		}
+	}
+
+	if (wait_settle) {
+		g_debug ("Waiting for the system to settle");
+		app->wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, app);
 	} else {
 		start_indexer (app);
 	}
@@ -612,8 +612,7 @@ check_eligible (const char *eligible)
 
 			dir_path = g_file_get_path (l->data);
 
-			if (is_dir &&
-			    tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, l->data)) {
+			if (tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, l->data)) {
 				g_print (_("Parent directory “%s” is NOT eligible to be indexed (based on filters)"),
 				         dir_path);
 				g_print ("\n");

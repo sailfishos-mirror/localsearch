@@ -25,6 +25,10 @@
 
 #include <tracker-monitor.h>
 
+#ifdef USE_GLIB
+#include <tracker-monitor-glib.h>
+#endif
+
 /* -------------- COMMON FOR ALL FILE EVENT TESTS ----------------- */
 
 #define TEST_TIMEOUT 5 /* seconds */
@@ -379,11 +383,26 @@ test_monitor_events_moved_cb (TrackerMonitor *monitor,
 	check_events (fixture, TRUE);
 }
 
+static TrackerMonitor *
+create_monitor (void)
+{
+	TrackerMonitor *monitor;
+	GError *error = NULL;
+
+#ifndef USE_GLIB
+	monitor = tracker_monitor_new (&error);
+#else
+	monitor = g_initable_new (TRACKER_TYPE_MONITOR_GLIB, NULL, &error, NULL);
+#endif
+	g_assert_no_error (error);
+
+	return monitor;
+}
+
 static void
 test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
                            gconstpointer              data)
 {
-	GError *error = NULL;
 	gchar *basename;
 
 	/* Create hash tables to store expected results */
@@ -403,8 +422,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	                                         NULL);
 
 	/* Create and setup the tracker monitor */
-	fixture->monitor = tracker_monitor_new (&error);
-	g_assert_no_error (error);
+	fixture->monitor = create_monitor ();
 	g_assert_true (fixture->monitor != NULL);
 
 	g_signal_connect (fixture->monitor, "item-created",
@@ -746,6 +764,7 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 	gchar *source_path;
 	GFile *dest_file;
 	gchar *dest_path;
+	GError *error = NULL;
 
 	/* Create file to test with, before setting up environment */
 	set_file_contents (fixture->monitored_directory, "created.txt", "foo", &source_file);
@@ -777,7 +796,9 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 
 	/* Cleanup environment */
 	tracker_monitor_set_enabled (fixture->monitor, FALSE);
-	g_assert_cmpint (g_file_delete (dest_file, NULL, NULL), ==, TRUE);
+	g_file_delete (dest_file, NULL, &error);
+	if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		g_assert_no_error (error);
 	g_object_unref (source_file);
 	g_object_unref (dest_file);
 	g_free (source_path);
@@ -1162,6 +1183,7 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	gchar *source_path;
 	GFile *dest_dir;
 	gchar *dest_path;
+	GError *error = NULL;
 
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
@@ -1198,7 +1220,9 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	g_assert_cmpint (tracker_monitor_remove (fixture->monitor, source_dir), ==, TRUE);
 	/* Note that monitor is NOT in dest_dir, so FAIL if we could remove it */
 	g_assert_cmpint (tracker_monitor_remove (fixture->monitor, dest_dir), !=, TRUE);
-	g_assert_cmpint (g_file_delete (dest_dir, NULL, NULL), ==, TRUE);
+	g_file_delete (dest_dir, NULL, &error);
+	if (!g_error_matches (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND))
+		g_assert_no_error (error);
 	g_object_unref (source_dir);
 	g_object_unref (dest_dir);
 	g_free (source_path);
@@ -1264,7 +1288,6 @@ test_monitor_basic (void)
 	gchar *path_for_monitor;
 	GFile *file_for_monitor;
 	GFile *file_for_tmp;
-	GError *error = NULL;
 
 	/* Setup directories */
 	basename = g_strdup_printf ("monitor-test-%d", getpid ());
@@ -1279,8 +1302,7 @@ test_monitor_basic (void)
 	g_assert_true (G_IS_FILE (file_for_tmp));
 
 	/* Create a monitor */
-	monitor = tracker_monitor_new (&error);
-	g_assert_no_error (error);
+	monitor = create_monitor ();
 	g_assert_true (monitor != NULL);
 
 	/* Test general API with monitors enabled */

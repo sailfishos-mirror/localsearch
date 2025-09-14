@@ -208,13 +208,17 @@ functional_tests = [
   'test_cli_search',
   'test_cli_status',
   'test_cli_tag',
+  'test_config_changes',
   'test_extractor_decorator',
   'test_fts_basic',
   'test_fts_file_operations',
   'test_fts_stopwords',
+  'test_memory_pressure',
   'test_miner_basic',
   'test_miner_removable_media',
   'test_miner_resource_removal',
+  'test_power',
+  'test_systemd',
 ]
 
 if libcue.found()

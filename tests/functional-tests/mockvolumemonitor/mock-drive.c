@@ -32,6 +32,7 @@ struct _MockDrive
 	GList              *volumes; /* entries in list are owned by volume monitor */
 
 	const gchar *name;
+	gboolean removable;
 };
 
 static void mock_drive_drive_iface_init (GDriveIface *iface);
@@ -77,13 +78,15 @@ emit_changed (MockDrive *drive)
 
 MockDrive *
 mock_drive_new (MockVolumeMonitor *monitor,
-                const gchar       *name)
+                const gchar       *name,
+                gboolean           removable)
 {
 	MockDrive *drive;
 
 	drive = g_object_new (MOCK_TYPE_DRIVE, NULL);
 	drive->monitor = monitor;
 	drive->name = g_strdup (name);
+	drive->removable = removable;
 
 	return drive;
 }
@@ -166,13 +169,17 @@ mock_drive_has_volumes (GDrive *_drive)
 static gboolean
 mock_drive_is_removable (GDrive *_drive)
 {
-	return TRUE;
+	MockDrive *drive = MOCK_DRIVE (_drive);
+
+	return drive->removable;
 }
 
 static gboolean
 mock_drive_is_media_removable (GDrive *_drive)
 {
-	return TRUE;
+	MockDrive *drive = MOCK_DRIVE (_drive);
+
+	return drive->removable;
 }
 
 static gboolean

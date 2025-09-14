@@ -55,6 +55,7 @@ struct _TrackerExtractController {
 static const gchar *introspection_xml =
 	"<node>"
 	"  <interface name='org.freedesktop.Tracker3.Extract'>"
+	"    <method name='Check' />"
 	"    <signal name='Error'>"
 	"      <arg type='a{sv}' name='data' direction='out' />"
 	"    </signal>"
@@ -169,6 +170,30 @@ set_up_persistence (TrackerExtractController  *controller,
 	return TRUE;
 }
 
+static void
+interface_method_call (GDBusConnection       *connection,
+                       const gchar           *sender,
+                       const gchar           *object_path,
+                       const gchar           *interface_name,
+                       const gchar           *method_name,
+                       GVariant              *parameters,
+                       GDBusMethodInvocation *invocation,
+                       gpointer               user_data)
+{
+	TrackerExtractController *controller = user_data;
+
+	if (g_strcmp0 (method_name, "Check") == 0) {
+		tracker_decorator_check_unextracted (controller->decorator);
+		g_dbus_method_invocation_return_value (invocation, NULL);
+	} else {
+		g_dbus_method_invocation_return_error (invocation,
+		                                       G_DBUS_ERROR,
+		                                       G_DBUS_ERROR_UNKNOWN_METHOD,
+		                                       "Unknown method %s",
+		                                       method_name);
+	}
+}
+
 static gboolean
 tracker_extract_controller_initable_init (GInitable     *initable,
                                           GCancellable  *cancellable,
@@ -177,7 +202,7 @@ tracker_extract_controller_initable_init (GInitable     *initable,
 	TrackerExtractController *controller;
 	g_autoptr (GDBusNodeInfo) introspection_data = NULL;
 	GDBusInterfaceVTable interface_vtable = {
-		NULL, NULL, NULL
+		interface_method_call, NULL, NULL
 	};
 
 	controller = TRACKER_EXTRACT_CONTROLLER (initable);

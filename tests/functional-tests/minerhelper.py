@@ -43,10 +43,10 @@ DEFAULT_TIMEOUT = 10
 
 class MinerFsHelper:
 
-    MINERFS_BUSNAME = "org.freedesktop.Tracker3.Miner.Files"
+    MINERFS_BUSNAME = "org.freedesktop.LocalSearch3"
     MINERFS_OBJ_PATH = "/org/freedesktop/Tracker3/Miner/Files"
     MINER_IFACE = "org.freedesktop.Tracker3.Miner"
-    MINERFS_CONTROL_BUSNAME = "org.freedesktop.Tracker3.Miner.Files.Control"
+    MINERFS_CONTROL_BUSNAME = "org.freedesktop.LocalSearch3.Control"
     MINERFS_INDEX_OBJ_PATH = "/org/freedesktop/Tracker3/Miner/Files/Index"
     MINER_INDEX_IFACE = "org.freedesktop.Tracker3.Miner.Files.Index"
 
@@ -76,14 +76,12 @@ class MinerFsHelper:
         )
 
     def start(self):
-        self.miner_fs.Start()
-
-    def stop(self):
-        self.miner_fs.Stop()
+        # Ensure the miner service is enabled through an action-less call
+        self.miner_fs.GetStatus()
 
     def get_sparql_connection(self):
         return Tsparql.SparqlConnection.bus_new(
-            "org.freedesktop.Tracker3.Miner.Files", None, self.bus
+            self.MINERFS_BUSNAME, None, self.bus
         )
 
     def start_watching_progress(self):

@@ -93,6 +93,7 @@ struct _TrackerDecorator {
 	guint processing : 1;
 	guint querying   : 1;
 	guint extracting : 1;
+	guint needs_query_restart : 1;
 };
 
 enum {
@@ -444,7 +445,11 @@ decorator_commit_cb (GObject      *object,
 	}
 
 	g_clear_pointer (&decorator->commit_buffer, g_ptr_array_unref);
-	decorator_check_commit (decorator);
+
+	if (!decorator_check_commit (decorator) && decorator->needs_query_restart) {
+		decorator_maybe_restart_query (decorator);
+		return;
+	}
 }
 
 static gboolean
@@ -706,9 +711,12 @@ decorator_maybe_restart_query (TrackerDecorator *decorator)
 {
 	if (decorator->querying ||
 	    decorator->updating ||
-	    decorator->next_item)
+	    decorator->next_item) {
+		decorator->needs_query_restart = TRUE;
 		return;
+	}
 
+	decorator->needs_query_restart = FALSE;
 	decorator->querying = TRUE;
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Counting items which still need processing"));
@@ -1129,4 +1137,10 @@ tracker_decorator_set_throttled (TrackerDecorator *decorator,
                                  gboolean          throttled)
 {
 	decorator->throttled = !!throttled;
+}
+
+void
+tracker_decorator_check_unextracted (TrackerDecorator *decorator)
+{
+	decorator_maybe_restart_query (decorator);
 }

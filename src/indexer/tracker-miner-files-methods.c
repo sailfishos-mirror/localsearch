@@ -245,7 +245,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	if (mime_type)
 		graph = tracker_extract_module_manager_get_graph (mime_type);
 
-	if (mime_type && graph && g_file_info_get_size (file_info) > 0) {
+	if (mime_type && graph) {
 		TrackerIndexingTree *indexing_tree;
 		TrackerResource *information_element;
 

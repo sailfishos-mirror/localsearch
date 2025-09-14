@@ -4,6 +4,7 @@ project('localsearch', 'c',
 
 gnome = import('gnome')
 i18n = import('i18n')
+python = import('python')
 cc = meson.get_compiler('c')
 
 # This is the X.Y used in -llibtracker-FOO-X.Y
@@ -14,7 +15,7 @@ tracker_versioned_name = 'localsearch@0@'.format(tracker_api_major)
 libdir = join_paths(get_option('prefix'), get_option('libdir'))
 datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
-glib_required = '2.62.0'
+glib_required = '2.76.0'
 
 tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
@@ -48,6 +49,9 @@ webp = dependency('libwebpdemux', required: false)
 
 libgif = cc.find_library('gif', required: get_option('gif'))
 libmath = cc.find_library('m', required: false)
+
+dbusmock = python.find_installation(
+  'python3', modules: ['dbusmock'], required: get_option('functional_tests'))
 
 have_tracker_extract = get_option('extract')
 have_tracker_miner_fs = get_option('miner_fs')
@@ -384,7 +388,6 @@ subdir('tests')
 run_uninstalled_conf = configuration_data()
 run_uninstalled_conf.set('tracker_uninstalled_cli_dir', tracker_uninstalled_cli_dir)
 run_uninstalled_conf.set('tracker_uninstalled_domain_rule', meson.current_build_dir() / 'tests' / 'functional-tests' / 'config' / 'test-domain.rule')
-run_uninstalled_conf.set('tracker_uninstalled_miner_services_dir', tracker_uninstalled_miner_services_dir)
 run_uninstalled_conf.set('tracker_uninstalled_testutils_dir', tracker_uninstalled_testutils_dir)
 
 if have_tracker_extract

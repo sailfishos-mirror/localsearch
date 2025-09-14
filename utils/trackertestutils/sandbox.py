@@ -37,8 +37,8 @@ from . import psutil_mini as psutil
 
 log = logging.getLogger(__name__)
 
-TRACKER_DBUS_PREFIX = 'org.freedesktop.Tracker3'
-TRACKER_MINER_FS_BUSNAME = 'org.freedesktop.Tracker3.Miner.Files'
+TRACKER_DBUS_PREFIX = 'org.freedesktop.LocalSearch3'
+TRACKER_MINER_FS_BUSNAME = 'org.freedesktop.LocalSearch3'
 
 _process_list = []
 

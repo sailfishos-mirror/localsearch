@@ -30,6 +30,8 @@ gi.require_version("Gio", "2.0")
 from gi.repository import GLib, Gio
 from gi.repository import Tsparql
 
+from enum import IntEnum
+
 import contextlib
 import errno
 import json
@@ -42,10 +44,12 @@ import sys
 import tempfile
 import time
 import unittest as ut
+import dbusmock
 
 import trackertestutils.helpers
 import configuration as cfg
 from minerhelper import MinerFsHelper
+from dbusmock import DBusTestCase
 
 log = logging.getLogger(__name__)
 
@@ -88,7 +92,7 @@ def tracker_test_main():
     ut.main(testRunner=runner, failfast=True, verbosity=2)
 
 
-class TrackerMinerTest(ut.TestCase):
+class TrackerMinerTest(DBusTestCase):
     def __init__(self, *args, **kwargs):
         super(TrackerMinerTest, self).__init__(*args, **kwargs)
 
@@ -339,6 +343,16 @@ class TrackerMinerFTSTest(TrackerMinerTest):
         return int(result[0][0])
 
 
+class MountFlags(IntEnum):
+    NONE = 0
+    NON_REMOVABLE = 1 << 0
+
+
+class UnmountFlags(IntEnum):
+    NONE = 0
+    EMULATE_BUSY = 1 << 0
+
+
 class TrackerMinerRemovableMediaTest(TrackerMinerTest):
     """
     Fixture to test removable device handling in tracker-miner-fs.
@@ -360,7 +374,7 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
         extra_env["GIO_USE_VOLUME_MONITOR"] = "mockvolumemonitor"
         return extra_env
 
-    def add_removable_device(self, path):
+    def add_removable_device(self, path, flags=MountFlags.NONE):
         conn = self.sandbox.get_session_bus_connection()
         timeout = cfg.AWAIT_TIMEOUT * 1000
         cancellable = None
@@ -369,14 +383,14 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
             self.MOCK_VOLUME_MONITOR_OBJECT_PATH,
             self.MOCK_VOLUME_MONITOR_IFACE,
             "AddMount",
-            GLib.Variant("(s)", [self.uri(path)]),
+            GLib.Variant("(su)", [self.uri(path), flags]),
             None,
             Gio.DBusCallFlags.NONE,
             timeout,
             cancellable,
         )
 
-    def remove_removable_device(self, path):
+    def remove_removable_device(self, path, flags=UnmountFlags.NONE):
         conn = self.sandbox.get_session_bus_connection()
         timeout = cfg.AWAIT_TIMEOUT * 1000
         cancellable = None
@@ -385,7 +399,7 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
             self.MOCK_VOLUME_MONITOR_OBJECT_PATH,
             self.MOCK_VOLUME_MONITOR_IFACE,
             "RemoveMount",
-            GLib.Variant("(s)", [self.uri(path)]),
+            GLib.Variant("(su)", [self.uri(path), flags]),
             None,
             Gio.DBusCallFlags.NONE,
             timeout,
@@ -630,7 +644,7 @@ class TrackerWritebackTest(TrackerMinerTest):
     Start all processes including writeback, miner pointing to WRITEBACK_TMP_DIR
     """
 
-    WRITEBACK_BUSNAME = "org.freedesktop.Tracker3.Writeback"
+    WRITEBACK_BUSNAME = "org.freedesktop.LocalSearch3.Writeback"
     WRITEBACK_PATH = "/org/freedesktop/Tracker3/Writeback"
     WRITEBACK_IFACE = "org.freedesktop.Tracker3.Writeback"
 
