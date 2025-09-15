@@ -161,11 +161,8 @@ add_removable_directory (TrackerController *controller,
 
 static void
 mount_point_added_cb (TrackerController *controller,
-                      const gchar       *uuid,
                       const gchar       *mount_point,
-                      const gchar       *mount_name,
                       gboolean           removable,
-                      gboolean           optical,
                       TrackerStorage    *storage)
 {
 	g_autoptr (GFile) mount_point_file = NULL;
@@ -239,7 +236,6 @@ mount_point_added_cb (TrackerController *controller,
 
 static void
 mount_point_removed_cb (TrackerController *controller,
-                        const gchar       *uuid,
                         const gchar       *mount_point,
                         TrackerStorage    *storage)
 {

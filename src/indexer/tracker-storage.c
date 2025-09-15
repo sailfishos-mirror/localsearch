@@ -122,11 +122,8 @@ tracker_storage_class_init (TrackerStorageClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              5,
+		              2,
 		              G_TYPE_STRING,
-		              G_TYPE_STRING,
-                              G_TYPE_STRING,
-		              G_TYPE_BOOLEAN,
 		              G_TYPE_BOOLEAN);
 
 	signals[MOUNT_POINT_REMOVED] =
@@ -137,9 +134,7 @@ tracker_storage_class_init (TrackerStorageClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              2,
-		              G_TYPE_STRING,
-		              G_TYPE_STRING);
+		              1, G_TYPE_STRING);
 }
 
 static void
@@ -357,11 +352,8 @@ mount_add_new (TrackerStorage *storage,
 	g_signal_emit (storage,
 	               signals[MOUNT_POINT_ADDED],
 	               0,
-	               uuid,
 	               mount_point,
-                       mount_name,
 	               removable_device,
-	               optical_disc,
 	               NULL);
 }
 
@@ -772,7 +764,7 @@ mount_remove (TrackerStorage *storage,
 		                         info->uuid,
 		                         mount_point));
 
-		g_signal_emit (storage, signals[MOUNT_POINT_REMOVED], 0, info->uuid, mount_point, NULL);
+		g_signal_emit (storage, signals[MOUNT_POINT_REMOVED], 0, mount_point, NULL);
 
 		g_hash_table_remove (priv->mounts_by_uuid, info->uuid);
 		mount_node_free (node);
