@@ -43,6 +43,11 @@ struct _TrackerStorage {
 
 #define TRACKER_STORAGE_GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), TRACKER_TYPE_STORAGE, TrackerStoragePrivate))
 
+typedef enum {
+	TRACKER_STORAGE_REMOVABLE = 1 << 0,
+	TRACKER_STORAGE_OPTICAL   = 1 << 1
+} TrackerStorageType;
+
 typedef struct {
 	GVolumeMonitor *volume_monitor;
 
@@ -897,23 +902,8 @@ get_mount_point_by_uuid_foreach (gpointer key,
 	}
 }
 
-/**
- * tracker_storage_get_device_roots:
- * @storage: A #TrackerStorage
- * @type: A #TrackerStorageType
- * @exact_match: if all devices should exactly match the types
- *
- * Returns: (transfer full) (element-type utf8): a #GSList of strings
- * containing the root directories for devices with @type based on
- * @exact_match. Each element must be freed using g_free() and the
- * list itself through g_slist_free().
- *
- * Since: 0.8
- **/
 GSList *
-tracker_storage_get_device_roots (TrackerStorage     *storage,
-                                  TrackerStorageType  type,
-                                  gboolean            exact_match)
+tracker_storage_get_removable_mount_points (TrackerStorage *storage)
 {
 	TrackerStoragePrivate *priv;
 	GetRoots gr;
@@ -923,8 +913,8 @@ tracker_storage_get_device_roots (TrackerStorage     *storage,
 	priv = tracker_storage_get_instance_private (storage);
 
 	gr.roots = NULL;
-	gr.type = type;
-	gr.exact_match = exact_match;
+	gr.type = TRACKER_STORAGE_REMOVABLE;
+	gr.exact_match = TRUE;
 
 	g_hash_table_foreach (priv->mounts_by_uuid,
 	                      get_mount_point_by_uuid_foreach,
@@ -933,9 +923,9 @@ tracker_storage_get_device_roots (TrackerStorage     *storage,
 	return gr.roots;
 }
 
-TrackerStorageType
-tracker_storage_get_type_for_file (TrackerStorage *storage,
-                                   GFile          *file)
+gboolean
+tracker_storage_is_removable_mount_point (TrackerStorage *storage,
+                                          GFile          *file)
 {
 	TrackerStoragePrivate *priv;
 	g_autofree gchar *path = NULL;
@@ -964,11 +954,5 @@ tracker_storage_get_type_for_file (TrackerStorage *storage,
 	if (!info)
 		return type;
 
-	if (info->removable)
-		type |= TRACKER_STORAGE_REMOVABLE;
-	if (info->optical)
-		type |= TRACKER_STORAGE_OPTICAL;
-
-	return type;
+	return info->removable;
 }
-

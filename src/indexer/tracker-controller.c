@@ -115,7 +115,6 @@ add_indexed_directory (TrackerController     *controller,
                        TrackerDirectoryFlags  flags)
 {
 	g_autofree gchar *path = NULL;
-	TrackerStorageType type;
 
 	path = g_file_get_path (file);
 
@@ -133,9 +132,7 @@ add_indexed_directory (TrackerController     *controller,
 		}
 	}
 
-	type = tracker_storage_get_type_for_file (controller->storage, file);
-
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+	if (tracker_storage_is_removable_mount_point (controller->storage, file))
 		flags |= TRACKER_DIRECTORY_FLAG_IS_VOLUME;
 
 	g_debug ("  Adding:'%s'", path);
@@ -450,9 +447,8 @@ index_volumes_changed_idle (gpointer user_data)
 	if (controller->index_removable_devices != new_index_removable_devices) {
 		GSList *m;
 
-		m = tracker_storage_get_device_roots (controller->storage,
-		                                      TRACKER_STORAGE_REMOVABLE,
-		                                      TRUE);
+		m = tracker_storage_get_removable_mount_points (controller->storage);
+
 		/* Set new config value */
 		controller->index_removable_devices = new_index_removable_devices;
 
@@ -553,9 +549,7 @@ initialize_from_config (TrackerController *controller)
 
 	if (controller->index_removable_devices) {
 		/* Get list of roots for removable devices */
-		mounts = tracker_storage_get_device_roots (controller->storage,
-		                                           TRACKER_STORAGE_REMOVABLE,
-		                                           TRUE);
+		mounts = tracker_storage_get_removable_mount_points (controller->storage);
 	}
 
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from config (IndexSingleDirectory)"));

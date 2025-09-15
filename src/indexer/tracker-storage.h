@@ -25,57 +25,18 @@
 
 G_BEGIN_DECLS
 
-/**
- * TrackerStorageType:
- * @TRACKER_STORAGE_REMOVABLE: Storage is a removable media
- * @TRACKER_STORAGE_OPTICAL: Storage is an optical disc
- *
- * Flags specifying properties of the type of storage.
- *
- * Since: 0.8
- */
-typedef enum {
-	TRACKER_STORAGE_REMOVABLE = 1 << 0,
-	TRACKER_STORAGE_OPTICAL   = 1 << 1
-} TrackerStorageType;
-
-/**
- * TRACKER_STORAGE_TYPE_IS_REMOVABLE:
- * @type: Mask of TrackerStorageType flags
- *
- * Check if the given storage type is marked as being removable media.
- *
- * Returns: %TRUE if the storage is marked as removable media, %FALSE otherwise
- *
- * Since: 0.10
- */
-#define TRACKER_STORAGE_TYPE_IS_REMOVABLE(type) ((type & TRACKER_STORAGE_REMOVABLE) ? TRUE : FALSE)
-
-/**
- * TRACKER_STORAGE_TYPE_IS_OPTICAL:
- * @type: Mask of TrackerStorageType flags
- *
- * Check if the given storage type is marked as being optical disc
- *
- * Returns: %TRUE if the storage is marked as optical disc, %FALSE otherwise
- *
- * Since: 0.10
- */
-#define TRACKER_STORAGE_TYPE_IS_OPTICAL(type) ((type & TRACKER_STORAGE_OPTICAL) ? TRUE : FALSE)
-
 #define TRACKER_TYPE_STORAGE (tracker_storage_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerStorage,
                       tracker_storage,
                       TRACKER, STORAGE,
                       GObject)
 
-TrackerStorage *   tracker_storage_new                      (void);
-GSList *           tracker_storage_get_device_roots         (TrackerStorage     *storage,
-                                                             TrackerStorageType  type,
-                                                             gboolean            exact_match);
+TrackerStorage * tracker_storage_new (void);
 
-TrackerStorageType tracker_storage_get_type_for_file (TrackerStorage *storage,
-                                                      GFile          *file);
+GSList * tracker_storage_get_removable_mount_points (TrackerStorage *storage);
+
+gboolean tracker_storage_is_removable_mount_point (TrackerStorage *storage,
+                                                   GFile          *file);
 
 G_END_DECLS
 
