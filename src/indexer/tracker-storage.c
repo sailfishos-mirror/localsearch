@@ -108,7 +108,7 @@ mount_add (TrackerStorage *storage,
 	g_signal_emit (storage,
 	               signals[MOUNT_POINT_ADDED],
 	               0,
-	               g_file_peek_path (root),
+	               root,
 	               removable,
 	               NULL);
 }
@@ -118,6 +118,7 @@ mount_remove (TrackerStorage *storage,
               GMount         *mount)
 {
 	g_autoptr (GFile) root = NULL;
+	gboolean removable;
 	GList *elem;
 
 	if (!mount_is_eligible (mount))
@@ -131,6 +132,7 @@ mount_remove (TrackerStorage *storage,
 
 	elem = g_list_find (storage->removable_mount_points,
 	                    mount);
+	removable = elem != NULL;
 
 	if (elem) {
 		storage->removable_mount_points =
@@ -143,7 +145,8 @@ mount_remove (TrackerStorage *storage,
 	g_signal_emit (storage,
 	               signals[MOUNT_POINT_REMOVED],
 	               0,
-	               g_file_peek_path (root),
+	               root,
+	               removable,
 	               NULL);
 }
 
@@ -259,8 +262,7 @@ tracker_storage_class_init (TrackerStorageClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              2,
-		              G_TYPE_STRING,
+		              2, G_TYPE_FILE,
 		              G_TYPE_BOOLEAN);
 
 	signals[MOUNT_POINT_REMOVED] =
@@ -271,7 +273,8 @@ tracker_storage_class_init (TrackerStorageClass *klass)
 		              NULL, NULL,
 		              NULL,
 		              G_TYPE_NONE,
-		              1, G_TYPE_STRING);
+		              2, G_TYPE_FILE,
+		              G_TYPE_BOOLEAN);
 }
 
 static void
@@ -311,7 +314,7 @@ tracker_storage_get_removable_mount_points (TrackerStorage *storage)
 	for (l = storage->removable_mount_points; l; l = l->next) {
 		g_autoptr (GFile) root = g_mount_get_root (l->data);
 
-		retval = g_slist_prepend (retval, g_file_get_path (root));
+		retval = g_slist_prepend (retval, g_object_ref (root));
 	}
 
 	return retval;

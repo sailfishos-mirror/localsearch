@@ -161,15 +161,10 @@ add_removable_directory (TrackerController *controller,
 
 static void
 mount_point_added_cb (TrackerController *controller,
-                      const gchar       *mount_point,
+                      GFile             *mount_point_file,
                       gboolean           removable,
                       TrackerStorage    *storage)
 {
-	g_autoptr (GFile) mount_point_file = NULL;
-
-	g_debug ("Mount point added for path '%s'", mount_point);
-	mount_point_file = g_file_new_for_path (mount_point);
-
 	if (removable && !controller->index_removable_devices) {
 		g_debug ("  Not crawling, removable devices disabled in config");
 	} else if (!removable) {
@@ -201,7 +196,7 @@ mount_point_added_cb (TrackerController *controller,
 				/* If the mount path is contained inside the config path,
 				 *  then add the mount path to re-check */
 				g_debug ("  Re-check of path '%s' needed (inside configured path '%s')",
-				         mount_point,
+				         g_file_peek_path (mount_point_file),
 				         (gchar *) l->data);
 				add_indexed_directory (controller,
 				                       config_file,
@@ -236,14 +231,10 @@ mount_point_added_cb (TrackerController *controller,
 
 static void
 mount_point_removed_cb (TrackerController *controller,
-                        const gchar       *mount_point,
+                        GFile             *mount_point_file,
+                        gboolean           removable,
                         TrackerStorage    *storage)
 {
-	g_autoptr (GFile) mount_point_file = NULL;
-
-	g_debug ("Mount point removed for path '%s'", mount_point);
-
-	mount_point_file = g_file_new_for_path (mount_point);
 	tracker_indexing_tree_remove (controller->indexing_tree, mount_point_file);
 }
 
@@ -466,27 +457,21 @@ index_volumes_changed_idle (gpointer user_data)
 		GSList *sl;
 
 		for (sl = mounts_removed; sl; sl = g_slist_next (sl)) {
-			g_autoptr (GFile) mount_point_file = NULL;
-
-			mount_point_file = g_file_new_for_path (sl->data);
 			tracker_indexing_tree_remove (controller->indexing_tree,
-						      mount_point_file);
+						      sl->data);
 		}
 
-		g_slist_free_full (mounts_removed, g_free);
+		g_slist_free_full (mounts_removed, g_object_unref);
 	}
 
 	if (mounts_added) {
 		GSList *sl;
 
 		for (sl = mounts_added; sl; sl = g_slist_next (sl)) {
-			g_autoptr (GFile) mount_point_file = NULL;
-
-			mount_point_file = g_file_new_for_path (sl->data);
-			add_removable_directory (controller, mount_point_file);
+			add_removable_directory (controller, sl->data);
 		}
 
-		g_slist_free_full (mounts_removed, g_free);
+		g_slist_free_full (mounts_removed, g_object_unref);
 	}
 
 	controller->volumes_changed_id = 0;
@@ -556,13 +541,15 @@ initialize_from_config (TrackerController *controller)
 	for (; dirs; dirs = dirs->next) {
 		g_autoptr (GFile) file = NULL;
 
-		if (g_slist_find_custom (mounts, dirs->data, (GCompareFunc) g_strcmp0)) {
+		file = g_file_new_for_path (dirs->data);
+
+		if (controller->index_removable_devices &&
+		    tracker_storage_is_removable_mount_point (controller->storage, file)) {
 			g_debug ("  Duplicate found:'%s' - same as removable device path",
-			         (gchar*) dirs->data);
+			         g_file_peek_path (file));
 			continue;
 		}
 
-		file = g_file_new_for_path (dirs->data);
 		add_indexed_directory (controller, file,
 		                       TRACKER_DIRECTORY_FLAG_NONE);
 	}
@@ -575,13 +562,15 @@ initialize_from_config (TrackerController *controller)
 	for (; dirs; dirs = dirs->next) {
 		g_autoptr (GFile) file = NULL;
 
-		if (g_slist_find_custom (mounts, dirs->data, (GCompareFunc) g_strcmp0)) {
+		file = g_file_new_for_path (dirs->data);
+
+		if (controller->index_removable_devices &&
+		    tracker_storage_is_removable_mount_point (controller->storage, file)) {
 			g_debug ("  Duplicate found:'%s' - same as removable device path",
 			         (gchar*) dirs->data);
 			continue;
 		}
 
-		file = g_file_new_for_path (dirs->data);
 		add_indexed_directory (controller, file,
 		                       TRACKER_DIRECTORY_FLAG_RECURSE);
 	}
@@ -589,14 +578,10 @@ initialize_from_config (TrackerController *controller)
 	/* Add mounts */
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from devices/discs"));
 
-	for (l = mounts; l; l = l->next) {
-		g_autoptr (GFile) mount_point = NULL;
+	for (l = mounts; l; l = l->next)
+		add_removable_directory (controller, l->data);
 
-		mount_point = g_file_new_for_path (l->data);
-		add_removable_directory (controller, mount_point);
-	}
-
-	g_slist_free_full (mounts, g_free);
+	g_slist_free_full (mounts, g_object_unref);
 }
 
 static void
