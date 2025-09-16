@@ -49,7 +49,7 @@ if avformat.found()
   if gupnp_dlna.found()
     extract_libav_files += ['tracker-gupnp.c']
   endif
-  modules += [['extract-libav', extract_libav_files, rules, [avformat, libcue, gupnp_dlna, tracker_miners_common_dep]]]
+  modules += [['extract-libav', extract_libav_files, rules, [avcodec, avformat, libcue, gupnp_dlna, tracker_miners_common_dep]]]
 endif
 
 if get_option('icon')

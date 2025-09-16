@@ -23,6 +23,7 @@
 
 #include <tracker-common.h>
 
+#include <libavcodec/avcodec.h>
 #include <libavformat/avformat.h>
 
 #include "tracker-cue-sheet.h"
@@ -143,6 +144,26 @@ find_tag (AVFormatContext *format,
 	return tag;
 }
 
+static void
+set_codec_metadata (TrackerResource *resource,
+                    AVStream        *stream)
+{
+	const AVCodecDescriptor *cd;
+
+	cd = avcodec_descriptor_get (stream->codecpar->codec_id);
+
+	if (!cd)
+		return;
+
+	tracker_resource_set_string (resource, "nfo:codec", cd->name);
+
+	if (cd->props & AV_CODEC_PROP_LOSSY) {
+		tracker_resource_set_uri (resource, "nfo:compressionType", "nfo:lossyCompressionType");
+	} else if (cd->props & AV_CODEC_PROP_LOSSLESS) {
+		tracker_resource_set_uri (resource, "nfo:compressionType", "nfo:losslessCompressionType");
+	}
+}
+
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
@@ -206,6 +227,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if (audio_stream->codecpar->ch_layout.nb_channels > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->ch_layout.nb_channels);
 		}
+
+		if (!video_stream || (video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC))
+			set_codec_metadata (metadata, audio_stream);
 	}
 
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
@@ -217,6 +241,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			tracker_resource_set_int64 (metadata, "nfo:width", video_stream->codecpar->width);
 			tracker_resource_set_int64 (metadata, "nfo:height", video_stream->codecpar->height);
 		}
+
+		set_codec_metadata (metadata, video_stream);
 
 		if (video_stream->avg_frame_rate.num > 0) {
 			gdouble frame_rate = (gdouble) video_stream->avg_frame_rate.num

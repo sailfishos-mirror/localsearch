@@ -200,6 +200,7 @@ endif
 # Check for tracker-extract: libav
 ####################################################################
 
+avcodec = dependency('libavcodec', version: '>= 0.8.4', required: get_option('libav'))
 avformat = dependency('libavformat', version: '>= 0.8.4', required: get_option('libav'))
 
 ##################################################################
