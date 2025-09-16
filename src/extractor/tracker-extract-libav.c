@@ -224,6 +224,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if (audio_stream->codecpar->sample_rate > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:sampleRate", audio_stream->codecpar->sample_rate);
 		}
+
 		if (audio_stream->codecpar->ch_layout.nb_channels > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:channels", audio_stream->codecpar->ch_layout.nb_channels);
 		}
@@ -235,7 +236,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
 		guint64 hash;
 
-		tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
+		tracker_resource_add_uri (metadata, "rdf:type", "nmm:Video");
 
 		if (video_stream->codecpar->width > 0 && video_stream->codecpar->height > 0) {
 			tracker_resource_set_int64 (metadata, "nfo:width", video_stream->codecpar->width);
@@ -251,8 +252,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 
 		if (video_stream->duration > 0) {
-			gint64 duration = av_rescale(video_stream->duration, video_stream->time_base.num,
-			                             video_stream->time_base.den);
+			gint64 duration = av_rescale (video_stream->duration, video_stream->time_base.num,
+			                              video_stream->time_base.den);
 			tracker_resource_set_int64 (metadata, "nfo:duration", duration);
 		}
 
@@ -316,8 +317,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_add_uri (metadata, "rdf:type", "nfo:Audio");
 
 		if (audio_stream->duration > 0) {
-			gint64 duration = av_rescale(audio_stream->duration, audio_stream->time_base.num,
-			                             audio_stream->time_base.den);
+			gint64 duration = av_rescale (audio_stream->duration, audio_stream->time_base.num,
+			                              audio_stream->time_base.den);
 			tracker_resource_set_int64 (metadata, "nfo:duration", duration);
 		}
 
@@ -498,6 +499,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		if (profile_name)
 			tracker_resource_set_string (metadata, "nmm:dlnaProfile", profile_name);
 	}
+
 #endif
 
 	avformat_close_input (&format);
