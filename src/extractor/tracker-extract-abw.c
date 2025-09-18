@@ -195,6 +195,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_autoptr (GString) content = NULL;
 	g_autofree char *resource_uri = NULL, *uri = NULL, *path = NULL;
 	AbwParserData data = { 0 };
+	const char *buffer;
 
 	file = g_object_ref (tracker_extract_info_get_file (info));
 	path = g_file_get_path (file);
@@ -203,7 +204,25 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (!stream)
 		return FALSE;
 
-	read_stream = buffered_stream = g_buffered_input_stream_new_sized (stream, BUFFER_SIZE);
+	buffered_stream = g_buffered_input_stream_new_sized (stream, BUFFER_SIZE);
+
+	if (g_buffered_input_stream_fill (G_BUFFERED_INPUT_STREAM (buffered_stream),
+					  BUFFER_SIZE, NULL, error) == -1)
+		return FALSE;
+
+	buffer = g_buffered_input_stream_peek_buffer (G_BUFFERED_INPUT_STREAM (buffered_stream), NULL);
+	if (buffer[0] == '<') {
+		/* Uncompressed XML */
+		read_stream = buffered_stream;
+	} else {
+		g_autoptr (GZlibDecompressor) decompressor = NULL;
+
+		/* Compressed data(?) */
+		decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
+		converter_stream = g_converter_input_stream_new (buffered_stream,
+								 G_CONVERTER (decompressor));
+		read_stream = converter_stream;
+	}
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	resource = tracker_resource_new (resource_uri);
