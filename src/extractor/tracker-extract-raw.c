@@ -19,6 +19,7 @@
 
 #include "config-miners.h"
 
+#include <math.h>
 #include <string.h>
 
 #include <gexiv2/gexiv2.h>
@@ -26,6 +27,7 @@
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
+#include "utils/tracker-gexiv-compat.h"
 
 #include "tracker-main.h"
 
@@ -240,77 +242,82 @@ parse_exif_data (GExiv2Metadata *metadata)
 	glong flash = G_MAXLONG;
 	glong metering_mode = G_MAXLONG;
 	glong white_balance = G_MAXLONG;
+	 /* Necessary for gexiv2 compat paths, see support for older versions on top of file */
+	G_GNUC_UNUSED double tmp_gps;
 
 	ed = raw_exif_data_new ();
 
 	if (!gexiv2_metadata_has_exif (metadata))
 		goto out;
 
-	ed->document_name = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DocumentName");
+	ed->document_name = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DocumentName", NULL);
 
-	time = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTime");
+	time = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTime", NULL);
 	if (time != NULL)
 		ed->time = tracker_date_format_to_iso8601 (time, EXIF_DATE_FORMAT);
 
-	time_original = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTimeOriginal");
+	time_original = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTimeOriginal", NULL);
 	if (time_original == NULL)
-		time_original = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTimeOriginal");
+		time_original = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTimeOriginal", NULL);
 	if (time_original != NULL)
 		ed->time_original = tracker_date_format_to_iso8601 (time_original, EXIF_DATE_FORMAT);
 
-	ed->artist = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Artist");
-	ed->user_comment = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.UserComment");
-	ed->description = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.ImageDescription");
-	ed->make = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Make");
-	ed->model = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Model");
+	ed->artist = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Artist", NULL);
+	ed->user_comment = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.UserComment", NULL);
+	ed->description = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.ImageDescription", NULL);
+	ed->make = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Make", NULL);
+	ed->model = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Model", NULL);
 
-	if (gexiv2_metadata_get_exposure_time (metadata, &exposure_time_nom, &exposure_time_den))
+	if (gexiv2_metadata_get_exposure_time (metadata, &exposure_time_nom, &exposure_time_den, NULL))
 		ed->exposure_time = (gdouble) exposure_time_nom / (double) exposure_time_den;
 
-	ed->fnumber = gexiv2_metadata_get_fnumber (metadata);
+	ed->fnumber = gexiv2_metadata_get_fnumber (metadata, NULL);
 
-	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.Flash"))
-		flash = gexiv2_metadata_get_tag_long (metadata, "Exif.Image.Flash");
-	else if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.Flash"))
-		flash = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.Flash");
+	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.Flash", NULL))
+		flash = gexiv2_metadata_get_tag_long (metadata, "Exif.Image.Flash", NULL);
+	else if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.Flash", NULL))
+		flash = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.Flash", NULL);
 	if (flash != G_MAXLONG)
 		ed->flash = parse_flash ((gushort) flash);
 
-	ed->focal_length = gexiv2_metadata_get_focal_length (metadata);
+	ed->focal_length = gexiv2_metadata_get_focal_length (metadata, NULL);
 
-	if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.ISOSpeedRatings"))
-		ed->iso_speed_ratings = (gdouble) gexiv2_metadata_get_iso_speed (metadata);
+	if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.ISOSpeedRatings", NULL))
+		ed->iso_speed_ratings = (gdouble) gexiv2_metadata_get_iso_speed (metadata, NULL);
 
-	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.MeteringMode"))
-		metering_mode = gexiv2_metadata_get_tag_long (metadata, "Exif.Image.MeteringMode");
-	else if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.MeteringMode"))
-		metering_mode = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.MeteringMode");
+	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.MeteringMode", NULL))
+		metering_mode = gexiv2_metadata_get_tag_long (metadata, "Exif.Image.MeteringMode", NULL);
+	else if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.MeteringMode", NULL))
+		metering_mode = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.MeteringMode", NULL);
 	if (metering_mode != G_MAXLONG)
 		ed->metering_mode = parse_metering_mode ((gushort) metering_mode);
 
-	if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.WhiteBalance"))
-		white_balance = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.WhiteBalance");
+	if (gexiv2_metadata_has_tag (metadata, "Exif.Photo.WhiteBalance", NULL))
+		white_balance = gexiv2_metadata_get_tag_long (metadata, "Exif.Photo.WhiteBalance", NULL);
 	if (white_balance != G_MAXLONG)
 		ed->white_balance = parse_white_balance ((gushort) white_balance);
 
-	ed->copyright = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Copyright");
+	ed->copyright = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.Copyright", NULL);
 
-	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.ResolutionUnit"))
-		ed->resolution_unit = (gint) gexiv2_metadata_get_tag_long (metadata, "Exif.Image.ResolutionUnit");
+	if (gexiv2_metadata_has_tag (metadata, "Exif.Image.ResolutionUnit", NULL))
+		ed->resolution_unit = (gint) gexiv2_metadata_get_tag_long (metadata, "Exif.Image.ResolutionUnit", NULL);
 
-	ed->x_resolution = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.XResolution");
-	ed->y_resolution = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.YResolution");
+	ed->x_resolution = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.XResolution", NULL);
+	ed->y_resolution = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.YResolution", NULL);
 
-	if (gexiv2_metadata_get_gps_altitude (metadata, &gps_altitude))
+	gps_altitude = gexiv2_metadata_get_gps_altitude (metadata, NULL);
+	if (!isnan (gps_altitude) && !isinf (gps_altitude))
 		ed->gps_altitude = g_strdup_printf ("%f", gps_altitude);
 
-	if (gexiv2_metadata_get_gps_latitude (metadata, &gps_latitude))
+	gps_latitude = gexiv2_metadata_get_gps_latitude (metadata, NULL);
+	if (!isnan (gps_latitude) && !isinf (gps_latitude))
 		ed->gps_latitude = g_strdup_printf ("%f", gps_latitude);
 
-	if (gexiv2_metadata_get_gps_longitude (metadata, &gps_longitude))
+	gps_longitude = gexiv2_metadata_get_gps_longitude (metadata, NULL);
+	if (!isnan (gps_longitude) && !isinf (gps_longitude))
 		ed->gps_longitude = g_strdup_printf ("%f", gps_longitude);
 
-	ed->gps_direction = gexiv2_metadata_get_tag_string (metadata, "Exif.GPSInfo.GPSImgDirection");
+	ed->gps_direction = gexiv2_metadata_get_tag_string (metadata, "Exif.GPSInfo.GPSImgDirection", NULL);
 
 out:
 	g_free (time);
@@ -356,7 +363,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	height = gexiv2_metadata_get_pixel_height (metadata);
 	tracker_resource_set_int (resource, "nfo:height", height);
 
-	orientation = gexiv2_metadata_get_orientation (metadata);
+	orientation = gexiv2_metadata_get_orientation (metadata, NULL);
 	nfo_orientation = convert_exiv2_orientation_to_nfo (orientation);
 	tracker_resource_set_uri (resource, "nfo:orientation", nfo_orientation);
 
