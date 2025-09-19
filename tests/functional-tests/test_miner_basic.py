@@ -26,7 +26,6 @@ Monitor a test directory and copy/move/remove/update files and folders there.
 Check the basic data of the files is updated accordingly in tracker.
 """
 
-
 import itertools
 import logging
 import os
@@ -688,6 +687,51 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         new_urn = self.__get_file_urn(dest)
         self.assertNotEqual(urn, new_urn)
 
+    def test_20_recover_corruption(self):
+        """
+        Trick a constraint corruption. See how it fares
+        """
+
+        # Insert a blank node with a nie:url
+        path = self.path("test-monitored/test.txt")
+        uri = self.uri("test-monitored/test.txt")
+        self.tracker.update(
+            "INSERT DATA { GRAPH tracker:FileSystem { _:u a nfo:FileDataObject ; nie:url '%s' } }" % uri)
+
+        pid = self.sandbox.session_bus.get_connection_unix_process_id_sync(
+            'org.freedesktop.LocalSearch3')
+
+        # Create a file on that url, see it fail
+        with open(path, "w") as f:
+            f.write(DEFAULT_TEXT)
+
+        # Ensure the process is gone
+        pid_exists = True
+        attempts = 0
+        while pid_exists:
+            if attempts == 10:
+                raise RuntimeError("Took too long for indexer to die")
+
+            try:
+                time.sleep(1)
+                program = os.readlink("/proc/" + str(pid) + "/exe")
+                pid_exists = os.path.basename(program) == "localsearch-3"
+                if pid_exists:
+                    attempts += 1
+            except:
+                pid_exists = False
+
+        # Restart the indexer
+        with self.await_document_inserted(path) as resource:
+            conn = self.miner_fs.get_sparql_connection()
+
+        result = self.__get_text_documents()
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/test.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/file2.txt"), unpacked_result)
+        self.assertIn(self.uri("test-monitored/dir1/dir2/file3.txt"), unpacked_result)
+        self.assertEqual(len(result), 4)
 
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
