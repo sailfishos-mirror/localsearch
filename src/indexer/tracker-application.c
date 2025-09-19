@@ -303,6 +303,9 @@ setup_connection (TrackerApplication  *app,
 									     &internal_error);
 			}
 		}
+
+		if (sparql_conn)
+			tracker_error_report_init (store);
 	}
 
 	if (internal_error)
@@ -449,11 +452,6 @@ tracker_application_constructed (GObject *object)
 	g_autoptr (GError) error = NULL;
 
 	app->storage = tracker_storage_new ();
-
-	if (!app->dry_run) {
-		g_autoptr (GFile) store = get_cache_dir ();
-		tracker_error_report_init (store);
-	}
 
 	app->monitor = tracker_monitor_new (&error);
 
