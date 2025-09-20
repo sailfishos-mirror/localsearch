@@ -1,7 +1,7 @@
 # Turkish translation for LocalSearch.
 # Copyright (c) 2008 Rosetta Contributors and Canonical Ltd 2008
 # Copyright (C) 2014-2023 tracker-miners's COPYRIGHT HOLDER
-# Copyright (C) 2024 LocalSearch's COPYRIGHT HOLDER
+# Copyright (C) 2024-2025 LocalSearch's COPYRIGHT HOLDER
 # This file is distributed under the same license as the LocalSearch package.
 #
 # Gökhan Gurbetoğlu <ggurbet@gmail.com>, 2014.
@@ -15,7 +15,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: LocalSearch master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-26 17:35+0000\n"
+"POT-Creation-Date: 2025-09-13 09:49+0000\n"
 "PO-Revision-Date: 2025-09-08 08:00+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <takim@gnome.org.tr>\n"
@@ -265,7 +265,7 @@ msgstr "BİÇİM"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
+#: src/indexer/tracker-application.c:55
 msgid "FILE"
 msgstr "DOSYA"
 
@@ -424,8 +424,7 @@ msgstr "Bu dosya için dizinlenmiş veri silindi ve yeniden dizinlenecek."
 
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
-msgstr ""
-"LocalSearch dizinlenmiş verileri silinmek üzere, sürdürülsün mü? [e/H]"
+msgstr "LocalSearch dizinlenmiş verileri silinmek üzere, sürdürülsün mü? [e/H]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
@@ -755,7 +754,7 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d saniye"
 
 #: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/indexer/tracker-application.c:62 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Sürüm bilgisini görüntüler"
 
@@ -805,75 +804,68 @@ msgstr "— Dosya üst verisini ayıkla"
 msgid "Filename and mime type must be provided together"
 msgstr "Dosya adı ve mime türü birlikte sağlanmalıdır"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:50
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Tüm yapılandırılmış konumlar dizinlenene dek çalışır ve sonra çıkar"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:54
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "DOSYA değişkeninde yapılandırmaya göre çalışılmasını denetler"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:58
 msgid "Avoids changes in the filesystem"
 msgstr "Dosya sistemindeki değişiklikleri dışlar"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:589
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” veri nesnesi, şu anda var"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:590
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” veri nesnesi, şu anda yok"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "Dizin, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "Dosya, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "Dosya, dizinlenmeye uygun DEĞİL (gizli dosya)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "Dosya, dizinlenmeye uygun DEĞİL (dizinlenmiş klasör değil)"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:617
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:623
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (gizli dosya)"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:629
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "“%s” üst dizini, dizinlenmeye uygun DEĞİL (içerik süzgeçlerine göre)"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:644
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "Dizin, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
+
+#: src/indexer/tracker-application.c:648
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "Dosya, dizinlenmeye uygun DEĞİL (süzgeçlere göre)"
+
+#: src/indexer/tracker-application.c:651
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "Dosya, dizinlenmeye uygun DEĞİL (gizli dosya)"
+
+#: src/indexer/tracker-application.c:653
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "Dosya, dizinlenmeye uygun DEĞİL (dizinlenmiş klasör değil)"
+
+#: src/indexer/tracker-application.c:661
 msgid "Directory is eligible to be indexed"
 msgstr "Dizin, dizinlenmeye uygun"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:662
 msgid "File is eligible to be indexed"
 msgstr "Dosya dizinlenmeye uygun"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "— tracker dizinleyicisini çalıştır"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
