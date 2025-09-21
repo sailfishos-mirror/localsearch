@@ -68,7 +68,6 @@ static GOptionEntry entries[] = {
 };
 
 typedef struct {
-	TrackerSparqlConnection *sparql_conn;
 	GDBusConnection *dbus_conn;
 	GMainLoop *main_loop;
 	GMutex mutex;
@@ -78,14 +77,13 @@ typedef struct {
 	GError *error;
 } EndpointThreadData;
 
-static EndpointThreadData *endpoint_thread_data = NULL;
-
 typedef struct _IndexerInstance IndexerInstance;
 struct _IndexerInstance
 {
 	TrackerMiner *indexer;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
+	EndpointThreadData endpoint_thread;
 };
 
 struct _TrackerApplication
@@ -118,14 +116,15 @@ G_DEFINE_TYPE (TrackerApplication, tracker_application, G_TYPE_APPLICATION)
 gpointer
 endpoint_thread_func (gpointer user_data)
 {
-	EndpointThreadData *data = user_data;
+	IndexerInstance *instance = user_data;
+	EndpointThreadData *data = &instance->endpoint_thread;
 	TrackerEndpointDBus *endpoint;
 	GMainContext *main_context;
 
 	main_context = g_main_context_new ();
 	g_main_context_push_thread_default (main_context);
 
-	endpoint = tracker_endpoint_dbus_new (data->sparql_conn,
+	endpoint = tracker_endpoint_dbus_new (instance->sparql_conn,
 	                                      data->dbus_conn,
 	                                      NULL,
 	                                      NULL,
@@ -142,7 +141,6 @@ endpoint_thread_func (gpointer user_data)
 		g_main_loop_run (data->main_loop);
 
 	g_main_context_pop_thread_default (main_context);
-	g_main_loop_unref (data->main_loop);
 	g_main_context_unref (main_context);
 	g_clear_object (&endpoint);
 
@@ -150,22 +148,21 @@ endpoint_thread_func (gpointer user_data)
 }
 
 gboolean
-start_endpoint_thread (TrackerSparqlConnection  *conn,
-                       GDBusConnection          *dbus_conn,
-                       GError                  **error)
+start_endpoint_thread (IndexerInstance  *instance,
+                       GDBusConnection  *dbus_conn,
+                       GError          **error)
 {
-	g_assert (endpoint_thread_data == NULL);
+	EndpointThreadData *endpoint_thread_data;
 
-	endpoint_thread_data = g_new0 (EndpointThreadData, 1);
+	endpoint_thread_data = &instance->endpoint_thread;
 	g_mutex_init (&endpoint_thread_data->mutex);
 	g_cond_init (&endpoint_thread_data->cond);
-	endpoint_thread_data->sparql_conn = conn;
 	endpoint_thread_data->dbus_conn = dbus_conn;
 
 	endpoint_thread_data->thread =
 		g_thread_try_new ("SPARQL endpoint",
 		                  endpoint_thread_func,
-		                  endpoint_thread_data,
+		                  instance,
 		                  error);
 
 	if (!endpoint_thread_data->thread)
@@ -183,7 +180,6 @@ start_endpoint_thread (TrackerSparqlConnection  *conn,
 	if (endpoint_thread_data->error) {
 		g_propagate_error (error, endpoint_thread_data->error);
 		g_thread_join (endpoint_thread_data->thread);
-		g_clear_pointer (&endpoint_thread_data, g_free);
 		return FALSE;
 	}
 
@@ -191,16 +187,11 @@ start_endpoint_thread (TrackerSparqlConnection  *conn,
 }
 
 void
-finish_endpoint_thread (void)
+finish_endpoint_thread (EndpointThreadData *endpoint_thread_data)
 {
-	if (!endpoint_thread_data)
-		return;
-
 	g_main_loop_quit (endpoint_thread_data->main_loop);
-
 	g_thread_join (endpoint_thread_data->thread);
-
-	g_clear_pointer (&endpoint_thread_data, g_free);
+	g_main_loop_unref (endpoint_thread_data->main_loop);
 }
 
 static GFile *
@@ -416,7 +407,7 @@ static void
 shutdown_main_instance (TrackerApplication *app,
                         IndexerInstance    *instance)
 {
-	finish_endpoint_thread ();
+	finish_endpoint_thread (&instance->endpoint_thread);
 
 	if (!app->dry_run &&
 	    app->main_instance.indexing_tree) {
@@ -458,7 +449,7 @@ initialize_main_instance (TrackerApplication  *app,
 		                                             app->monitor);
 	}
 
-	if (!start_endpoint_thread (instance->sparql_conn, dbus_conn, error))
+	if (!start_endpoint_thread (instance, dbus_conn, error))
 		return FALSE;
 
 	g_signal_connect_swapped (instance->indexer, "started",
