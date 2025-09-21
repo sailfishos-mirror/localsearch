@@ -23,6 +23,8 @@
 
 #include "tracker-config.h"
 
+#include "tracker-storage.h"
+
 #include <tracker-common.h>
 
 struct _TrackerController
@@ -51,7 +53,6 @@ struct _TrackerController
 enum {
 	PROP_0,
 	PROP_INDEXING_TREE,
-	PROP_STORAGE,
 	PROP_FILES_INTERFACE,
 	PROP_MONITOR,
 	N_PROPS,
@@ -72,9 +73,6 @@ tracker_controller_set_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_INDEXING_TREE:
 		controller->indexing_tree = g_value_dup_object (value);
-		break;
-	case PROP_STORAGE:
-		controller->storage = g_value_dup_object (value);
 		break;
 	case PROP_FILES_INTERFACE:
 		controller->files_interface = g_value_dup_object (value);
@@ -99,9 +97,6 @@ tracker_controller_get_property (GObject    *object,
 	switch (prop_id) {
 	case PROP_INDEXING_TREE:
 		g_value_set_object (value, controller->indexing_tree);
-		break;
-	case PROP_STORAGE:
-		g_value_set_object (value, controller->storage);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -732,6 +727,7 @@ tracker_controller_constructed (GObject *object)
 
 	G_OBJECT_CLASS (tracker_controller_parent_class)->constructed (object);
 
+	controller->storage = tracker_storage_new ();
 	g_signal_connect_object (controller->storage,
 	                         "mount-point-added",
 	                         G_CALLBACK (mount_point_added_cb),
@@ -828,14 +824,6 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
-	props[PROP_STORAGE] =
-		g_param_spec_object ("storage",
-		                     "Storage",
-		                     "Storage",
-		                     TRACKER_TYPE_STORAGE,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_CONSTRUCT_ONLY |
-		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_FILES_INTERFACE] =
 		g_param_spec_object ("files-interface",
 		                     NULL, NULL,
@@ -864,13 +852,11 @@ tracker_controller_init (TrackerController *controller)
 TrackerController *
 tracker_controller_new (TrackerIndexingTree   *tree,
                         TrackerMonitor        *monitor,
-                        TrackerStorage        *storage,
                         TrackerFilesInterface *files_interface)
 {
 	return g_object_new (TRACKER_TYPE_CONTROLLER,
 			     "indexing-tree", tree,
 	                     "monitor", monitor,
-	                     "storage", storage,
 	                     "files-interface", files_interface,
 			     NULL);
 }

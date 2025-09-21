@@ -96,7 +96,6 @@ struct _TrackerApplication
 	TrackerMinerProxy *proxy;
 	GDBusProxy *systemd_proxy;
 	TrackerMonitor *monitor;
-	TrackerStorage *storage;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	GMemoryMonitor *memory_monitor;
@@ -490,7 +489,6 @@ tracker_application_finalize (GObject *object)
 	g_clear_object (&app->files_interface);
 	g_clear_object (&app->controller);
 	g_clear_object (&app->proxy);
-	g_clear_object (&app->storage);
 	g_clear_object (&app->systemd_proxy);
 	g_clear_object (&app->monitor);
 
@@ -523,7 +521,7 @@ tracker_application_dbus_register (GApplication     *application,
 	app->files_interface = tracker_files_interface_new (dbus_conn);
 
 	app->controller = tracker_controller_new (app->main_instance.indexing_tree,
-	                                          app->monitor, app->storage,
+	                                          app->monitor,
 	                                          app->files_interface);
 
 	app->proxy = tracker_miner_proxy_new (app->main_instance.indexer,
@@ -571,7 +569,6 @@ static gint
 check_eligible (const char *eligible)
 {
 	g_autoptr (TrackerIndexingTree) indexing_tree = NULL;
-	g_autoptr (TrackerStorage) storage = NULL;
 	g_autoptr (TrackerController) controller = NULL;
 	g_autoptr (GFile) file = NULL;
 	g_autoptr (GFileInfo) info = NULL;
@@ -583,9 +580,8 @@ check_eligible (const char *eligible)
 	gboolean is_dir;
 
 	indexing_tree = tracker_indexing_tree_new ();
-	storage = tracker_storage_new ();
 
-	controller = tracker_controller_new (indexing_tree, NULL, storage, NULL);
+	controller = tracker_controller_new (indexing_tree, NULL, NULL);
 
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
@@ -772,8 +768,6 @@ tracker_application_init (TrackerApplication *application)
 	g_autoptr (GError) error = NULL;
 
 	g_application_add_main_option_entries (G_APPLICATION (application), entries);
-
-	application->storage = tracker_storage_new ();
 
 	application->monitor = tracker_monitor_new (&error);
 
