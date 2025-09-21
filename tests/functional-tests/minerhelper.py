@@ -21,7 +21,7 @@
 import gi
 
 gi.require_version("Tsparql", "3.0")
-from gi.repository import Gio, GLib
+from gi.repository import Gio, GLib, GObject
 from gi.repository import Tsparql
 
 import logging
@@ -34,12 +34,52 @@ import configuration
 log = logging.getLogger(__name__)
 
 
+class AwaitException(RuntimeError):
+    pass
+
 class WakeupCycleTimeoutException(RuntimeError):
     pass
 
-
 DEFAULT_TIMEOUT = 10
 
+class await_endpoint():
+    def __init__(self, proxy, dbus_signal, uri, timeout=DEFAULT_TIMEOUT):
+        self.proxy = proxy
+        self.dbus_signal = dbus_signal
+        self.uri = uri
+        self.timeout = timeout
+        self.result = False
+        self.loop = trackertestutils.mainloop.MainLoop()
+
+    def __enter__(self):
+        def dbus_signal_cb(proxy, service, method, data):
+            if method == self.dbus_signal:
+                [uri, object_path] = data
+                if self.uri == uri:
+                    self.result = True
+                    self.loop.quit()
+
+        def timeout_cb():
+            log.info("Timeout fired after %s seconds", self.timeout)
+            self.loop.quit()
+            raise Exception(
+                f"Timeout ({self.timeout}s) awaiting new endpoint for {self.uri}")
+
+        self.signal_id = self.proxy.connect('g-signal', dbus_signal_cb)
+        self.timeout_id = GLib.timeout_add_seconds(self.timeout, timeout_cb)
+
+        return self.result
+
+    def __exit__(self, etype, evalue, etraceback):
+        if etype is not None:
+            return False
+
+        while not self.result:
+            self.loop.run_checked()
+
+        GLib.source_remove(self.timeout_id)
+        GObject.signal_handler_disconnect(self.proxy, self.signal_id)
+        return True
 
 class MinerFsHelper:
 
@@ -164,3 +204,19 @@ class MinerFsHelper:
 
     def index_location(self, uri, graphs=None, flags=None):
         return self.index.IndexLocation("(sasas)", uri, graphs or [], flags or [])
+
+    def removable_device_object_path(self, mountpoint_path):
+        path = str(mountpoint_path)
+        object_path = ''
+        for c in path:
+            if (c >= 'a' and c <= 'z') or (c >= 'A' and c <= 'Z') or (c >= '0' and c <= '9'):
+                object_path += c
+            else:
+                object_path += '_%x' % ord(c)
+        return '/org/freedesktop/LocalSearch3/%s' % object_path
+
+    def await_endpoint_added (self, uri):
+        return await_endpoint(self.miner_fs, 'EndpointAdded', uri)
+
+    def await_endpoint_removed (self, uri):
+        return await_endpoint(self.miner_fs, 'EndpointRemoved', uri)

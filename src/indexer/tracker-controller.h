@@ -16,6 +16,8 @@ TrackerController * tracker_controller_new (TrackerIndexingTree   *tree,
                                             TrackerMonitor        *monitor,
                                             TrackerFilesInterface *files_interface);
 
+void tracker_controller_initialize_removable_devices (TrackerController *controller);
+
 void tracker_controller_register_indexing_tree (TrackerController   *controller,
 						TrackerIndexingTree *indexing_tree);
 

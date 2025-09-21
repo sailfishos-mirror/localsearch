@@ -280,18 +280,27 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
 
         # Ensure the file was not indexed
         time.sleep(3)
-        self.assertResourceMissing(path.as_uri())
+
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
+        endpoint_helper = None
+
+        try:
+            endpoint_helper = self.helper_for_endpoint(object_path)
+        except:
+            pass
+
+        assert not endpoint_helper
 
         dconf = self.sandbox.get_dconf_client()
 
-        # File should be indexed with the config change
-        with self.await_document_inserted(path):
+        # Mountpoint should be indexed with the config change
+        with self.miner_fs.await_endpoint_added(self.device_path.as_uri()):
             dconf.write (
                 'org.freedesktop.Tracker3.Miner.Files',
                 'index-removable-devices', GLib.Variant.new_boolean(True))
 
         # The "device" should be "removed", with the config change
-        with self.await_device_removed(self.device_path.as_uri()):
+        with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
             dconf.write (
                 'org.freedesktop.Tracker3.Miner.Files',
                 'index-removable-devices', GLib.Variant.new_boolean(False))
@@ -384,9 +393,14 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
             self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
 
         self.assertResourceExists(self.device_path.as_uri())
-        resource_id = self.tracker.get_resource_id_by_uri(self.device_path.as_uri())
+        resource_id = self.tracker.get_content_resource_id(self.device_path.as_uri())
 
-        with self.await_device_removed(self.device_path.as_uri()):
+        with self.tracker.await_content_update(
+            fixtures.FILESYSTEM_GRAPH,
+            resource_id,
+            f'tracker:available true',
+            f'tracker:available false'
+        ):
             self.remove_removable_device(self.device_path)
             self.device_path.rmdir()
 

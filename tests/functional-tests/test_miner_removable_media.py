@@ -26,6 +26,8 @@ from fixtures import UnmountFlags
 
 from gi.repository import GLib
 
+import time
+
 log = logging.getLogger(__name__)
 
 
@@ -38,16 +40,24 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
         self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
         self.device_path.mkdir()
 
-    def data_source_available(self, uri):
-        """Check tracker:available set on the datasource containing `uri`"""
-        result = self.tracker.query(
-            """
-          SELECT tracker:available(?folder) WHERE {
-              <%s> nie:dataSource ?folder
-          }"""
-            % uri
+    def ensure_document_in_removable(self, endpoint_helper, uri):
+        return endpoint_helper.ensure_resource(
+            fixtures.DOCUMENTS_GRAPH, f"nie:isStoredAs <{uri}>",
         )
-        return True if result[0][0] == "true" else False
+
+    def data_source_available(self, endpoint_helper, uri):
+        """Check that `uri` exists in the device database"""
+
+        try:
+            result = endpoint_helper.query(
+                """
+                SELECT ?u { ?u nie:url <%s> }
+                """
+                % uri
+            )
+            return True if len(result) > 0 and result[0][0] == uri else False
+        except:
+            return False
 
     def create_test_data(self):
         files = ["file1.txt", "dir1/file2.txt"]
@@ -64,19 +74,21 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
 
         files = self.create_test_data()
 
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
         self.add_removable_device(self.device_path)
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+        endpoint_helper = self.helper_for_endpoint(object_path)
 
         for f in files:
             path = self.device_path.joinpath(f)
-            self.ensure_document_inserted(path)
-            assert self.data_source_available(path.as_uri())
+            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
+            assert self.data_source_available(endpoint_helper, path.as_uri())
 
-        with self.await_device_removed(self.device_path.as_uri()):
+        with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
             self.remove_removable_device(self.device_path)
 
         for f in files:
-            self.ensure_document_inserted(path)
-            assert not self.data_source_available(path.as_uri()), (
+            assert not self.data_source_available(endpoint_helper, path.as_uri()), (
                 "Path %s should be marked unavailable" % path.as_uri()
             )
 
@@ -85,68 +97,37 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
 
         files = self.create_test_data()
 
-        self.add_removable_device(self.device_path)
+        with self.miner_fs.await_endpoint_added(self.device_path.as_uri()):
+            self.add_removable_device(self.device_path)
+
+        object_path = self.miner_fs.removable_device_object_path(self.device_path)
+        endpoint_helper = self.helper_for_endpoint(object_path)
 
         for f in files:
             path = self.device_path.joinpath(f)
-            self.ensure_document_inserted(path)
-            assert self.data_source_available(path.as_uri())
+            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
+            assert self.data_source_available(endpoint_helper, path.as_uri())
 
-        with self.await_device_removed(self.device_path.as_uri()):
+        with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
             self.remove_removable_device(self.device_path, UnmountFlags.EMULATE_BUSY)
 
         uri = self.device_path.as_uri();
-        result = self.tracker.query(
-            'SELECT DISTINCT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % uri)
-        assert len(result) == 1
-        resource_id = int(result[0][0])
+        result = None
 
-        with self.tracker.await_content_update(
-            fixtures.FILESYSTEM_GRAPH,
-            resource_id,
-            f'tracker:available false',
-            f'tracker:available true'
-        ):
-            # no-op
-            resource_id = 0
+        try:
+            result = endpoint_helper.query('SELECT (1 AS ?u) {}')
+        except Exception:
+            pass
 
-class MinerRemovableMediaTestNoPreserve(MinerRemovableMediaTest):
-    """Tests for tracker-miner-fs with index-removable-devices feature."""
+        self.assertIsNone(result)
 
-    def __get_text_documents(self):
-        return self.tracker.query(
-            """
-          SELECT DISTINCT ?url WHERE {
-              ?u a nfo:TextDocument ;
-                 nie:isStoredAs/nie:url ?url.
-          }
-          """
-        )
-
-    def test_add_remove_device(self):
-        """Device should be indexed, then deleted."""
-
-        files = self.create_test_data()
-
-        self.add_removable_device(self.device_path)
+        with self.miner_fs.await_endpoint_added(self.device_path.as_uri()):
+            foo = 0
 
         for f in files:
             path = self.device_path.joinpath(f)
-            self.ensure_document_inserted(path)
-            assert self.data_source_available(path.as_uri())
-
-        uri = self.device_path.as_uri();
-        result = self.tracker.query(
-            'SELECT DISTINCT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % uri)
-        assert len(result) == 1
-        id = int(result[0][0])
-
-        with self.tracker.await_content_update(
-                fixtures.FILESYSTEM_GRAPH, id,
-                f'tracker:available true',
-                f'tracker:available false'
-        ):
-            self.remove_removable_device(self.device_path)
+            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
+            assert self.data_source_available(endpoint_helper, path.as_uri())
 
 
 if __name__ == "__main__":

@@ -62,6 +62,14 @@ enum {
 
 static GParamSpec *props[N_PROPS] = { 0, };
 
+enum {
+	REMOVABLE_POINT_ADDED,
+	REMOVABLE_POINT_REMOVED,
+	N_SIGNALS,
+};
+
+static guint signals[N_SIGNALS] = { 0, };
+
 G_DEFINE_TYPE (TrackerController, tracker_controller, G_TYPE_OBJECT)
 
 static void
@@ -141,19 +149,7 @@ static void
 add_removable_directory (TrackerController *controller,
                          GFile             *mount_file)
 {
-	TrackerDirectoryFlags flags;
-	g_autofree gchar *uri = NULL;
-
-	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
-		TRACKER_DIRECTORY_FLAG_PRESERVE |
-		TRACKER_DIRECTORY_FLAG_PRIORITY |
-		TRACKER_DIRECTORY_FLAG_IS_VOLUME;
-
-	uri = g_file_get_uri (mount_file);
-	g_debug ("  Adding removable: '%s'", uri);
-	tracker_indexing_tree_add (controller->indexing_tree,
-				   mount_file,
-				   flags);
+	g_signal_emit (controller, signals[REMOVABLE_POINT_ADDED], 0, mount_file);
 }
 
 static void
@@ -232,7 +228,24 @@ mount_point_removed_cb (TrackerController *controller,
                         gboolean           removable,
                         TrackerStorage    *storage)
 {
-	tracker_indexing_tree_remove (controller->indexing_tree, mount_point_file);
+	if (removable) {
+		g_signal_emit (controller, signals[REMOVABLE_POINT_REMOVED], 0, mount_point_file);
+	} else {
+		GList *roots, *l;
+
+		roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
+
+		for (l = roots; l; l = l->next) {
+			if (!g_file_equal (l->data, mount_point_file) &&
+			    !g_file_has_prefix (l->data, mount_point_file))
+				continue;
+
+			tracker_indexing_tree_remove (controller->indexing_tree,
+			                              l->data);
+		}
+
+		g_list_free (roots);
+	}
 }
 
 static void
@@ -452,8 +465,7 @@ index_volumes_changed_idle (gpointer user_data)
 		GSList *sl;
 
 		for (sl = mounts_removed; sl; sl = g_slist_next (sl)) {
-			tracker_indexing_tree_remove (controller->indexing_tree,
-						      sl->data);
+			g_signal_emit (controller, signals[REMOVABLE_POINT_REMOVED], 0, sl->data);
 		}
 
 		g_slist_free_full (mounts_removed, g_object_unref);
@@ -505,7 +517,6 @@ enable_monitors_changed_cb (GSettings         *config,
 static void
 initialize_from_config (TrackerController *controller)
 {
-	GSList *mounts = NULL, *l;
 	GSList *dirs;
 
 	update_filters (controller, controller->indexing_tree);
@@ -522,11 +533,6 @@ initialize_from_config (TrackerController *controller)
 	 */
 	controller->index_removable_devices =
 		g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
-
-	if (controller->index_removable_devices) {
-		/* Get list of roots for removable devices */
-		mounts = tracker_storage_get_removable_mount_points (controller->storage);
-	}
 
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from config (IndexSingleDirectory)"));
 
@@ -569,14 +575,6 @@ initialize_from_config (TrackerController *controller)
 		add_indexed_directory (controller, file,
 		                       TRACKER_DIRECTORY_FLAG_RECURSE);
 	}
-
-	/* Add mounts */
-	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from devices/discs"));
-
-	for (l = mounts; l; l = l->next)
-		add_removable_directory (controller, l->data);
-
-	g_slist_free_full (mounts, g_object_unref);
 }
 
 static void
@@ -819,6 +817,21 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 	object_class->constructed = tracker_controller_constructed;
 	object_class->finalize = tracker_controller_finalize;
 
+	signals[REMOVABLE_POINT_ADDED] =
+		g_signal_new ("removable-point-added",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE,
+		              1, G_TYPE_FILE);
+	signals[REMOVABLE_POINT_REMOVED] =
+		g_signal_new ("removable-point-removed",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE,
+		              1, G_TYPE_FILE);
+
 	props[PROP_INDEXING_TREE] =
 		g_param_spec_object ("indexing-tree",
 		                     "Indexing tree",
@@ -862,6 +875,20 @@ tracker_controller_new (TrackerIndexingTree   *tree,
 	                     "monitor", monitor,
 	                     "files-interface", files_interface,
 			     NULL);
+}
+
+void
+tracker_controller_initialize_removable_devices (TrackerController *controller)
+{
+	GSList *mounts, *l;
+
+	if (!g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices"))
+		return;
+
+	mounts = tracker_storage_get_removable_mount_points (controller->storage);
+
+	for (l = mounts; l; l = l->next)
+		add_removable_directory (controller, l->data);
 }
 
 void
