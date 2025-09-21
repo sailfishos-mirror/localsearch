@@ -132,11 +132,7 @@ main (gint argc, gchar *argv[])
 	 */
 	raise_file_descriptor_limit ();
 
-	app = tracker_application_new (&error);
-	if (!app) {
-		g_warning ("Failed to initialize: %s", error->message);
-		return EXIT_FAILURE;
-	}
+	app = tracker_application_new ();
 
 	initialize_signal_handler (app);
 

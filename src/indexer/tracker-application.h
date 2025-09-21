@@ -25,6 +25,6 @@ G_DECLARE_FINAL_TYPE (TrackerApplication,
                       TRACKER, APPLICATION,
                       GApplication)
 
-GApplication * tracker_application_new (GError **error);
+GApplication * tracker_application_new (void);
 
 gboolean tracker_application_exit_in_error (TrackerApplication *app);
