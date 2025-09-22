@@ -2,7 +2,7 @@
 # Copyright © 2005, 2006 Free Software Foundation, Inc.
 # This file is distributed under the same license as the tracker package.
 # Gil Forcada <gilforcada@guifi.net>, 2007, 2008, 2010, 2013, 2014.
-# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2015
+# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2015, 2025
 # Jordi Serratosa <jordis@softcatala.cat>, 2017.
 #
 # data miner -> extractor de dades
@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2025-09-13 09:49+0000\n"
-"PO-Revision-Date: 2025-09-16 19:59+0200\n"
+"PO-Revision-Date: 2025-09-22 19:59+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -161,7 +161,7 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid "Ignored files"
-msgstr "Fitxers a ignorar"
+msgstr "Fitxers ignorats"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:117
 msgid "List of file patterns to avoid"
@@ -169,7 +169,7 @@ msgstr "Llista de patrons de noms de fitxer que s'han d'ignorar"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:122
 msgid "Ignored directories"
-msgstr "Directoris a ignorar"
+msgstr "Directoris ignorats"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
 msgid "List of directories to avoid"
@@ -177,7 +177,7 @@ msgstr "Llista de directoris que s'han d'ignorar"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
 msgid "Ignored directories with content"
-msgstr "Directoris amb contingut a ignorar"
+msgstr "Directoris ignorats amb contingut"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:129
 msgid "Avoid any directory containing a file blocklisted here"
@@ -218,7 +218,7 @@ msgstr "Proporciona l'estat i estadístiques de les dades indexades"
 
 #: src/cli/main.c:76 src/cli/tracker-tag.c:414
 msgid "Add, remove and list tags"
-msgstr "Afegeix, suprimeix o llista etiquetes"
+msgstr "Afegeix, suprimeix i llista etiquetes"
 
 #: src/cli/main.c:77
 msgid "Sandbox for a testing environment"
