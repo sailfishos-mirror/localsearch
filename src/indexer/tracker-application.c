@@ -255,7 +255,7 @@ static TrackerSparqlConnection *
 setup_connection (TrackerApplication  *app,
                   GError             **error)
 {
-	TrackerSparqlConnection *sparql_conn;
+	TrackerSparqlConnection *sparql_conn = NULL;
 	g_autoptr (GFile) store = NULL, ontology = NULL, corrupt = NULL;
 	g_autoptr (GError) internal_error = NULL;
 	gboolean is_corrupted;
