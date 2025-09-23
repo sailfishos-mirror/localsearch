@@ -44,6 +44,8 @@
 	"\n" \
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
+#define CORRUPT_FILE_NAME ".localsearch.corrupted"
+
 static GOptionEntry entries[] = {
 	{ "no-daemon", 'n', 0,
 	  G_OPTION_ARG_NONE, NULL,
@@ -254,8 +256,9 @@ setup_connection (TrackerApplication  *app,
                   GError             **error)
 {
 	TrackerSparqlConnection *sparql_conn;
-	g_autoptr (GFile) store = NULL, ontology = NULL;
+	g_autoptr (GFile) store = NULL, ontology = NULL, corrupt = NULL;
 	g_autoptr (GError) internal_error = NULL;
+	gboolean is_corrupted;
 	TrackerSparqlConnectionFlags flags =
 		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
 		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
@@ -264,34 +267,45 @@ setup_connection (TrackerApplication  *app,
 		store = get_cache_dir ();
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
-	sparql_conn = tracker_sparql_connection_new (flags,
-	                                             store,
-	                                             ontology,
-	                                             NULL,
-	                                             &internal_error);
+	corrupt = g_file_get_child (store, CORRUPT_FILE_NAME);
+	is_corrupted = g_file_query_exists (corrupt, NULL);
 
-	if (store && g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
-		g_autoptr (GFile) backup_location = NULL, parent = NULL;
-		g_autofree gchar *filename = NULL;
+	if (!store || !is_corrupted) {
+		sparql_conn = tracker_sparql_connection_new (flags,
+							     store,
+							     ontology,
+							     NULL,
+							     &internal_error);
+	}
 
-		/* Move the database directory away, for possible forensics */
-		parent = g_file_get_parent (store);
-		filename = g_strdup_printf ("files.%" G_GINT64_FORMAT, g_get_monotonic_time ());
-		backup_location = g_file_get_child (parent, filename);
+	if (store) {
+		if (is_corrupted ||
+		    g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
+			g_autoptr (GFile) backup_location = NULL, parent = NULL;
+			g_autofree gchar *filename = NULL;
 
-		if (g_file_move (store, backup_location,
-		                 G_FILE_COPY_NONE,
-		                 NULL, NULL, NULL, NULL)) {
-			g_autofree gchar *path = NULL;
+			/* Move the database directory away, for possible forensics */
+			parent = g_file_get_parent (store);
+			filename = g_strdup_printf ("files.%" G_GINT64_FORMAT, g_get_monotonic_time ());
+			backup_location = g_file_get_child (parent, filename);
 
-			path = g_file_get_path (backup_location);
-			g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
-			sparql_conn = tracker_sparql_connection_new (flags,
-			                                             store,
-			                                             ontology,
-			                                             NULL,
-			                                             &internal_error);
+			if (g_file_move (store, backup_location,
+					 G_FILE_COPY_NONE,
+					 NULL, NULL, NULL, NULL)) {
+				g_autofree gchar *path = NULL;
+
+				path = g_file_get_path (backup_location);
+				g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
+				sparql_conn = tracker_sparql_connection_new (flags,
+									     store,
+									     ontology,
+									     NULL,
+									     &internal_error);
+			}
 		}
+
+		if (sparql_conn)
+			tracker_error_report_init (store);
 	}
 
 	if (internal_error)
@@ -378,6 +392,14 @@ indexer_status_cb (TrackerApplication *app)
 static void
 indexer_corrupt_cb (TrackerApplication *app)
 {
+	g_autoptr (GFile) cache_dir = NULL, corrupt_file = NULL;
+	g_autoptr (GError) error = NULL;
+
+	cache_dir = get_cache_dir ();
+	corrupt_file = g_file_get_child (cache_dir, CORRUPT_FILE_NAME);
+	if (!g_file_set_contents (g_file_peek_path (corrupt_file), "", -1, &error))
+		g_warning ("Could not mark database as corrupt: %s", error->message);
+
 	g_warning ("Database corruption detected, bailing out");
 	app->got_error = TRUE;
 	g_application_quit (G_APPLICATION (app));
@@ -430,11 +452,6 @@ tracker_application_constructed (GObject *object)
 	g_autoptr (GError) error = NULL;
 
 	app->storage = tracker_storage_new ();
-
-	if (!app->dry_run) {
-		g_autoptr (GFile) store = get_cache_dir ();
-		tracker_error_report_init (store);
-	}
 
 	app->monitor = tracker_monitor_new (&error);
 
