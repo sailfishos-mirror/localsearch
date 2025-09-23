@@ -33,40 +33,54 @@
 #include "tracker-xmp.h"
 #include "tracker-resource-helpers.h"
 
+#define BUFFER_SIZE (256 * 1024)
+
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	GFile *file;
-	gchar *filename;
-	FILE *f = NULL;
-	uint8_t *data = NULL;
-	size_t data_size = 0;
 	gboolean success = FALSE;
-	TrackerResource *metadata = NULL;
+	g_autoptr (GFileInputStream) stream = NULL;
+	g_autoptr (GBytes) bytes = NULL;
+	g_autoptr (TrackerResource) metadata = NULL;
+	g_autofree char *uri = NULL;
 	g_autofree char *resource_uri = NULL;
 	WebPDemuxer *demux = NULL;
 	WebPData webp_data;
+	WebPDemuxState demux_state;
 	uint32_t width, height, flags;
 	WebPChunkIterator chunk_iter;
 
 	file = tracker_extract_info_get_file (info);
-	filename = g_file_get_path (file);
-	f = fopen (filename, "rb");
-	if (!f)
+	uri = g_file_get_uri (file);
+
+	stream = g_file_read (file, NULL, error);
+	if (!stream)
 		goto cleanup;
 
-	fseek (f, 0, SEEK_END);
-	data_size = ftell (f);
-	fseek (f, 0, SEEK_SET);
-	data = malloc (data_size);
-	if (fread (data, 1, data_size, f) != data_size)
+	bytes = g_input_stream_read_bytes (G_INPUT_STREAM (stream),
+	                                   BUFFER_SIZE,
+	                                   NULL,
+	                                   error);
+	if (!bytes)
 		goto cleanup;
 
-	webp_data = (WebPData) { data, data_size };
-	demux = WebPDemux (&webp_data);
-	if (!demux)
+	webp_data = (WebPData) {
+		g_bytes_get_data (bytes, NULL),
+		g_bytes_get_size (bytes)
+	};
+
+	demux = WebPDemuxPartial (&webp_data, &demux_state);
+
+	if (!demux ||
+	    (demux_state != WEBP_DEMUX_PARSED_HEADER && demux_state != WEBP_DEMUX_DONE)) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_INVALID_DATA,
+		             "WebP header not found in the first 64KB");
 		goto cleanup;
+	}
 
 	width = WebPDemuxGetI (demux, WEBP_FF_CANVAS_WIDTH);
 	height = WebPDemuxGetI (demux, WEBP_FF_CANVAS_HEIGHT);
@@ -82,7 +96,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if ((flags & EXIF_FLAG) && WebPDemuxGetChunk (demux, "EXIF", 1, &chunk_iter)) {
 		TrackerExifData *exif;
 
-		exif = tracker_exif_new (chunk_iter.chunk.bytes, chunk_iter.chunk.size, filename);
+		exif = tracker_exif_new (chunk_iter.chunk.bytes, chunk_iter.chunk.size, uri);
 
 		if (exif) {
 			tracker_exif_apply_to_resource (metadata, exif);
@@ -95,7 +109,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if ((flags & XMP_FLAG) && WebPDemuxGetChunk (demux, "XMP ", 1, &chunk_iter)) {
 		TrackerXmpData *xmp;
 
-		xmp = tracker_xmp_new ((const gchar *) chunk_iter.chunk.bytes, chunk_iter.chunk.size, filename);
+		xmp = tracker_xmp_new ((const gchar *) chunk_iter.chunk.bytes, chunk_iter.chunk.size, uri);
 
 		if (xmp) {
 			tracker_xmp_apply_to_resource (metadata, xmp);
@@ -109,15 +123,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	success = TRUE;
 
 cleanup:
-	if (demux)
-		WebPDemuxDelete (demux);
 
-	if (f)
-		fclose (f);
-
-	free (data);
-	g_free (filename);
-	g_clear_object (&metadata);
+	g_clear_pointer (&demux, WebPDemuxDelete);
 
 	return success;
 }
