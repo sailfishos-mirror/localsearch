@@ -35,6 +35,8 @@
 
 #include "utils/tracker-extract.h"
 
+#define BUFFER_SIZE (8 * 1024)
+
 typedef struct AbwParserData AbwParserData;
 typedef enum {
 	ABW_PARSER_TAG_UNHANDLED,
@@ -183,99 +185,77 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	int fd;
-	gchar *filename, *contents;
-	gboolean retval = FALSE;
-	GFile *f;
-	gsize len;
-	struct stat st;
+	g_autoptr (GInputStream) stream = NULL, buffered_stream = NULL, converter_stream = NULL;
+	GInputStream *read_stream;
+	g_autoptr (GMappedFile) mapped_file = NULL;
+	g_autoptr (GFile) file = NULL;
+	g_autoptr (GMarkupParseContext) context = NULL;
+	g_autoptr (TrackerResource) resource = NULL;
+	g_autoptr (GBytes) bytes = NULL;
+	g_autoptr (GString) content = NULL;
+	g_autofree char *resource_uri = NULL, *uri = NULL, *path = NULL;
+	AbwParserData data = { 0 };
+	const char *buffer;
 
-	f = tracker_extract_info_get_file (info);
-	filename = g_file_get_path (f);
+	file = g_object_ref (tracker_extract_info_get_file (info));
+	path = g_file_get_path (file);
 
-	fd = tracker_file_open_fd (filename);
+	stream = G_INPUT_STREAM (g_file_read (file, NULL, error));
+	if (!stream)
+		return FALSE;
 
-	if (fd == -1) {
-		g_set_error (error,
-		             G_IO_ERROR,
-		             g_io_error_from_errno (errno),
-		             "Could not open abw file: %s",
-		             g_strerror (errno));
-		g_free (filename);
-		return retval;
-	}
+	buffered_stream = g_buffered_input_stream_new_sized (stream, BUFFER_SIZE);
 
-	if (fstat (fd, &st) == -1) {
-		g_set_error (error,
-		             G_IO_ERROR,
-		             g_io_error_from_errno (errno),
-		             "Could not fstat abw file: %s",
-		             g_strerror (errno));
-		close (fd);
-		g_free (filename);
-		return retval;
-	}
+	if (g_buffered_input_stream_fill (G_BUFFERED_INPUT_STREAM (buffered_stream),
+					  BUFFER_SIZE, NULL, error) == -1)
+		return FALSE;
 
-	if (st.st_size == 0) {
-		contents = NULL;
-		len = 0;
+	buffer = g_buffered_input_stream_peek_buffer (G_BUFFERED_INPUT_STREAM (buffered_stream), NULL);
+	if (buffer[0] == '<') {
+		/* Uncompressed XML */
+		read_stream = buffered_stream;
 	} else {
-		contents = (gchar *) mmap (NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-		if (contents == MAP_FAILED) {
-			g_set_error (error,
-			             G_IO_ERROR,
-			             g_io_error_from_errno (errno),
-			             "Could not mmap abw file: %s",
-			             g_strerror (errno));
-			close (fd);
-			g_free (filename);
-			return retval;
-		}
-		len = st.st_size;
+		g_autoptr (GZlibDecompressor) decompressor = NULL;
+
+		/* Compressed data(?) */
+		decompressor = g_zlib_decompressor_new (G_ZLIB_COMPRESSOR_FORMAT_GZIP);
+		converter_stream = g_converter_input_stream_new (buffered_stream,
+								 G_CONVERTER (decompressor));
+		read_stream = converter_stream;
 	}
 
-	g_free (filename);
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
+	resource = tracker_resource_new (resource_uri);
+	uri = g_file_get_uri (file);
+	content = g_string_new ("");
 
-	if (contents) {
-		GError *error = NULL;
-		GMarkupParseContext *context;
-		AbwParserData data = { 0 };
-		gchar *resource_uri;
+	data.uri = uri;
+	data.resource = resource;
+	data.content = content;
 
-		data.uri = g_file_get_uri (f);
-		resource_uri = tracker_extract_info_get_content_id (info, NULL);
-		data.resource = tracker_resource_new (resource_uri);
-		g_free (resource_uri);
+	tracker_resource_add_uri (data.resource, "rdf:type", "nfo:Document");
+	context = g_markup_parse_context_new (&parser, 0, &data, NULL);
 
-		tracker_resource_add_uri (data.resource, "rdf:type", "nfo:Document");
+	while ((bytes = g_input_stream_read_bytes (read_stream, BUFFER_SIZE, NULL, error)) != NULL) {
+		if (g_bytes_get_size (bytes) == 0)
+			break;
 
-		context = g_markup_parse_context_new (&parser, 0, &data, NULL);
-		g_markup_parse_context_parse (context, contents, len, &error);
+		if (!g_markup_parse_context_parse (context,
+						   g_bytes_get_data (bytes, NULL),
+						   g_bytes_get_size (bytes),
+						   error))
+			return FALSE;
 
-		if (error) {
-			g_warning ("Could not parse abw file: %s\n", error->message);
-			g_error_free (error);
-		} else {
-			if (data.content) {
-				tracker_resource_set_string (data.resource, "nie:plainTextContent", data.content->str);
-				g_string_free (data.content, TRUE);
-			}
-
-			retval = TRUE;
-		}
-
-		g_markup_parse_context_free (context);
-		g_free (data.uri);
-
-		tracker_extract_info_set_resource (info, data.resource);
-		g_object_unref (data.resource);
+		g_clear_pointer (&bytes, g_bytes_unref);
 	}
 
-	if (contents) {
-		munmap (contents, len);
-	}
+	if (!g_markup_parse_context_end_parse (context, error))
+		return FALSE;
 
-	close (fd);
+	if (content->len > 0)
+		tracker_resource_set_string (data.resource, "nie:plainTextContent", content->str);
 
-	return retval;
+	tracker_extract_info_set_resource (info, resource);
+
+	return TRUE;
 }

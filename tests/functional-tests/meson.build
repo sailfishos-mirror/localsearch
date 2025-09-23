@@ -54,6 +54,8 @@ extractor_tests = [
 
 if get_option('abiword')
   extractor_tests += 'office/abw-1'
+  extractor_tests += 'office/abw-2'
+  extractor_tests += 'office/abw-3'
 endif
 
 # Gstreamer 1.17/1.18 introduced support for some additional
