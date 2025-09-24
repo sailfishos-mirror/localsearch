@@ -20,7 +20,10 @@ glib_required = '2.76.0'
 tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
-gexiv2 = dependency('gexiv2', required: get_option('raw'))
+gexiv2 = dependency('gexiv2-0.16', required: false)
+if not gexiv2.found()
+  gexiv2 = dependency('gexiv2', required: get_option('raw'))
+endif
 gio = dependency('gio-2.0', version: '>=' + glib_required)
 gio_unix = dependency('gio-unix-2.0', version: '>=' + glib_required)
 glib = dependency('glib-2.0', version: '>=' + glib_required)
