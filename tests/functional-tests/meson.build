@@ -79,6 +79,7 @@ if libjpeg.found() and exempi.found() and libexif.found()
   if libiptcdata.found()
     extractor_tests += [
       'images/jpeg-iptc-tags',
+      'images/jpeg-iptcdata',
       'images/jpeg-iptcdata-records',
     ]
   endif
