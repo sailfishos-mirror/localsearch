@@ -29,13 +29,3 @@ foreach base_name: libtracker_extract_tests
       suite: 'extract')
 endforeach
 
-if libiptcdata.found() and libjpeg.found()
-  iptc_test = executable('tracker-iptc-test',
-    'tracker-iptc-test.c',
-    dependencies: libtracker_extract_test_deps + [libjpeg],
-    c_args: test_c_args,
-  )
-  test('extract-iptc', iptc_test,
-    protocol: test_protocol,
-    suite: 'extract')
-endif
