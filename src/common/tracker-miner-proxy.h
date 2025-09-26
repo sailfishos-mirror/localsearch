@@ -54,4 +54,12 @@ TrackerMinerProxy * tracker_miner_proxy_new      (TrackerMiner     *miner,
                                                   GCancellable     *cancellable,
                                                   GError          **error);
 
+void tracker_miner_proxy_emit_endpoint_added (TrackerMinerProxy *proxy,
+                                              GFile             *file,
+                                              const char        *object_path);
+
+void tracker_miner_proxy_emit_endpoint_removed (TrackerMinerProxy *proxy,
+                                                GFile             *file,
+                                                const char        *object_path);
+
 #endif /* __TRACKER_MINER_PROXY_H__ */

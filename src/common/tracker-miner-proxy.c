@@ -115,6 +115,14 @@ static const gchar introspection_xml[] =
   "      <arg type='d' name='progress' />"
   "      <arg type='i' name='remaining_time' />"
   "    </signal>"
+  "    <signal name='EndpointAdded'>"
+  "      <arg type='s' name='mount_uri' />"
+  "      <arg type='o' name='object_path' />"
+  "    </signal>"
+  "    <signal name='EndpointRemoved'>"
+  "      <arg type='s' name='mount_uri' />"
+  "      <arg type='o' name='object_path' />"
+  "    </signal>"
   "  </interface>"
   "</node>";
 
@@ -796,4 +804,28 @@ tracker_miner_proxy_new (TrackerMiner     *miner,
 	                       "dbus-connection", connection,
 	                       "dbus-path", dbus_path,
 	                       NULL);
+}
+
+void
+tracker_miner_proxy_emit_endpoint_added (TrackerMinerProxy *proxy,
+                                         GFile             *file,
+                                         const char        *object_path)
+{
+	g_autofree char *uri = NULL;
+
+	uri = g_file_get_uri (file);
+	emit_dbus_signal (proxy, "EndpointAdded",
+	                  g_variant_new ("(so)", uri, object_path));
+}
+
+void
+tracker_miner_proxy_emit_endpoint_removed (TrackerMinerProxy *proxy,
+                                           GFile             *file,
+                                           const char        *object_path)
+{
+	g_autofree char *uri = NULL;
+
+	uri = g_file_get_uri (file);
+	emit_dbus_signal (proxy, "EndpointRemoved",
+	                  g_variant_new ("(so)", uri, object_path));
 }
