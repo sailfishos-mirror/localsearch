@@ -80,16 +80,17 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
         endpoint_helper = self.helper_for_endpoint(object_path)
 
         for f in files:
-            path = self.device_path.joinpath(f)
-            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
-            assert self.data_source_available(endpoint_helper, path.as_uri())
+            rel_uri = self.get_relative_uri(f)
+            self.ensure_document_in_removable(endpoint_helper, rel_uri)
+            assert self.data_source_available(endpoint_helper, rel_uri)
 
         with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
             self.remove_removable_device(self.device_path)
 
         for f in files:
-            assert not self.data_source_available(endpoint_helper, path.as_uri()), (
-                "Path %s should be marked unavailable" % path.as_uri()
+            rel_uri = self.get_relative_uri(f)
+            assert not self.data_source_available(endpoint_helper, rel_uri), (
+                "Path %s should be marked unavailable" % rel_uri
             )
 
     def test_remove_busy_device(self):
@@ -104,9 +105,9 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
         endpoint_helper = self.helper_for_endpoint(object_path)
 
         for f in files:
-            path = self.device_path.joinpath(f)
-            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
-            assert self.data_source_available(endpoint_helper, path.as_uri())
+            rel_uri = self.get_relative_uri(f)
+            self.ensure_document_in_removable(endpoint_helper, rel_uri)
+            assert self.data_source_available(endpoint_helper, rel_uri)
 
         with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
             self.remove_removable_device(self.device_path, UnmountFlags.EMULATE_BUSY)
@@ -125,9 +126,9 @@ class MinerRemovableMediaTest(fixtures.TrackerMinerRemovableMediaTest):
             foo = 0
 
         for f in files:
-            path = self.device_path.joinpath(f)
-            self.ensure_document_in_removable(endpoint_helper, path.as_uri())
-            assert self.data_source_available(endpoint_helper, path.as_uri())
+            rel_uri = self.get_relative_uri(f)
+            self.ensure_document_in_removable(endpoint_helper, rel_uri)
+            assert self.data_source_available(endpoint_helper, rel_uri)
 
 
 if __name__ == "__main__":

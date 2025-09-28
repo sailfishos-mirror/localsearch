@@ -57,7 +57,8 @@ typedef enum
 
 TrackerFileNotifier * tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
                                                  TrackerSparqlConnection *connection,
-                                                 TrackerMonitor          *monitor);
+                                                 TrackerMonitor          *monitor,
+                                                 GFile                   *root);
 
 gboolean      tracker_file_notifier_start        (TrackerFileNotifier     *notifier);
 void          tracker_file_notifier_stop         (TrackerFileNotifier     *notifier);
@@ -73,6 +74,9 @@ gboolean tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
                                            guint                      *files_updated,
                                            guint                      *files_ignored,
                                            guint                      *files_reindexed);
+
+char * tracker_file_notifier_get_file_resource_uri (TrackerFileNotifier *notifier,
+                                                    GFile               *file);
 
 G_END_DECLS
 

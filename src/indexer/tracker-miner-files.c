@@ -621,7 +621,8 @@ miner_files_constructed (GObject *object)
 
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),
-		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)));
+		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)),
+		                              tracker_miner_fs_get_root (TRACKER_MINER_FS (mf)));
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",
@@ -631,7 +632,8 @@ miner_files_constructed (GObject *object)
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
-                         TrackerMonitor           *monitor)
+                         TrackerMonitor           *monitor,
+                         GFile                    *root)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -639,5 +641,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
 	                     "monitor", monitor,
+	                     "root", root,
 	                     NULL);
 }

@@ -413,6 +413,10 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
         )
         return trackertestutils.helpers.StoreHelper(conn)
 
+    def get_relative_uri(self, path):
+        f = Gio.File.new_for_uri('file:///' + str(path))
+        return f.get_uri().replace("///", "")
+
 
 def get_tracker_extract_output(
     extra_env, filename, output_format="json-ld", mime_type=None

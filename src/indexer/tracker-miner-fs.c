@@ -88,6 +88,9 @@ struct _TrackerMinerFSPrivate {
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
 
+	/* Root for relative URIs */
+	GFile *root;
+
 	/* Sparql insertion tasks */
 	TrackerSparqlBuffer *sparql_buffer;
 
@@ -139,6 +142,7 @@ enum {
 	PROP_THROTTLE,
 	PROP_INDEXING_TREE,
 	PROP_MONITOR,
+	PROP_ROOT,
 	N_PROPS,
 };
 
@@ -248,6 +252,12 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	props[PROP_MONITOR] =
 		g_param_spec_object ("monitor", NULL, NULL,
 		                     TRACKER_TYPE_MONITOR,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ROOT] =
+		g_param_spec_object ("root", NULL, NULL,
+		                     G_TYPE_FILE,
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
@@ -473,7 +483,8 @@ fs_constructed (GObject *object)
 	                  object);
 
 	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 BUFFER_POOL_LIMIT);
+	                                                 BUFFER_POOL_LIMIT,
+	                                                 priv->root);
 	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
 	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
 	                  object);
@@ -481,7 +492,8 @@ fs_constructed (GObject *object)
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 priv->monitor);
+	                                                 priv->monitor,
+	                                                 priv->root);
 
 	g_signal_connect (priv->file_notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created),
@@ -529,6 +541,9 @@ fs_set_property (GObject      *object,
 		break;
 	case PROP_MONITOR:
 		priv->monitor = g_value_dup_object (value);
+		break;
+	case PROP_ROOT:
+		priv->root = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -1478,4 +1493,24 @@ tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 
 	return priv->indexing_tree;
+}
+
+GFile *
+tracker_miner_fs_get_root (TrackerMinerFS *fs)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	return priv->root;
+}
+
+char *
+tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
+                                        GFile          *file)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	return tracker_file_notifier_get_file_resource_uri (priv->file_notifier,
+	                                                    file);
 }

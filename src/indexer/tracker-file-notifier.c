@@ -34,6 +34,7 @@ enum {
 	PROP_INDEXING_TREE,
 	PROP_CONNECTION,
 	PROP_MONITOR,
+	PROP_ROOT,
 	N_PROPS,
 };
 
@@ -111,6 +112,7 @@ struct _TrackerFileNotifier
 	TrackerSparqlConnection *connection;
 
 	TrackerMonitor *monitor;
+	GFile *root;
 
 	TrackerSparqlStatement *content_query;
 	TrackerSparqlStatement *deleted_query;
@@ -159,6 +161,9 @@ tracker_file_notifier_set_property (GObject      *object,
 		break;
 	case PROP_MONITOR:
 		notifier->monitor = g_value_dup_object (value);
+		break;
+	case PROP_ROOT:
+		notifier->root = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -535,7 +540,7 @@ notifier_query_file_exists (TrackerFileNotifier  *notifier,
 	if (!stmt)
 		return FALSE;
 
-	uri = g_file_get_uri (file);
+	uri = tracker_file_notifier_get_file_resource_uri (notifier, file);
 	tracker_sparql_statement_bind_string (stmt, "file", uri);
 	cursor = tracker_sparql_statement_execute (stmt, NULL, NULL);
 
@@ -892,7 +897,11 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 
 	notifier = root->notifier;
 	uri = tracker_sparql_cursor_get_string (cursor, 0, NULL);
-	file = g_file_new_for_uri (uri);
+
+	if (notifier->root)
+		file = tracker_file_resolve_relative_uri (notifier->root, uri);
+	else
+		file = g_file_new_for_uri (uri);
 
 	/* If the file is contained in a deleted dir, skip it */
 	if (g_queue_find_custom (&root->deleted_dirs, file,
@@ -1068,7 +1077,7 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 
 	g_timer_reset (root->timer);
 
-	uri = g_file_get_uri (directory);
+	uri = tracker_file_notifier_get_file_resource_uri (notifier, directory);
 	tracker_sparql_statement_bind_string (notifier->content_query, "root", uri);
 
 	notifier->active = TRUE;
@@ -1235,9 +1244,9 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 
 	if (!is_directory) {
 		TrackerSparqlStatement *stmt;
-		TrackerSparqlCursor *cursor = NULL;
+		g_autoptr (TrackerSparqlCursor) cursor = NULL;
 		const gchar *mimetype;
-		gchar *uri;
+		g_autofree char *uri = NULL;
 
 		/* TrackerMonitor only knows about monitored folders,
 		 * query the data if we don't know that much.
@@ -1245,18 +1254,15 @@ monitor_item_deleted_cb (TrackerMonitor *monitor,
 		stmt = sparql_deleted_ensure_statement (notifier, NULL);
 
 		if (stmt) {
-			uri = g_file_get_uri (file);
+			uri = tracker_file_notifier_get_file_resource_uri (notifier, file);
 			tracker_sparql_statement_bind_string (stmt, "uri", uri);
 			cursor = tracker_sparql_statement_execute (stmt, NULL, NULL);
-			g_free (uri);
 		}
 
 		if (cursor && tracker_sparql_cursor_next (cursor, NULL, NULL)) {
 			mimetype = tracker_sparql_cursor_get_string (cursor, 0, NULL);
 			is_directory = g_strcmp0 (mimetype, "inode/directory") == 0;
 		}
-
-		g_clear_object (&cursor);
 	}
 
 	/* Note: We might theoretically do live handling of files triggering
@@ -1537,10 +1543,8 @@ tracker_file_notifier_finalize (GObject *object)
 {
 	TrackerFileNotifier *notifier = TRACKER_FILE_NOTIFIER (object);
 
-	if (notifier->indexing_tree) {
-		g_object_unref (notifier->indexing_tree);
-	}
-
+	g_clear_object (&notifier->indexing_tree);
+	g_clear_object (&notifier->root);
 	g_clear_object (&notifier->content_query);
 	g_clear_object (&notifier->deleted_query);
 	g_clear_object (&notifier->file_exists_query);
@@ -1667,6 +1671,12 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ROOT] =
+		g_param_spec_object ("root", NULL, NULL,
+		                     G_TYPE_FILE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -1680,7 +1690,8 @@ tracker_file_notifier_init (TrackerFileNotifier *notifier)
 TrackerFileNotifier *
 tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
                            TrackerSparqlConnection *connection,
-                           TrackerMonitor          *monitor)
+                           TrackerMonitor          *monitor,
+                           GFile                   *root)
 {
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (indexing_tree), NULL);
 
@@ -1688,6 +1699,7 @@ tracker_file_notifier_new (TrackerIndexingTree     *indexing_tree,
 	                     "indexing-tree", indexing_tree,
 	                     "connection", connection,
 	                     "monitor", monitor,
+	                     "root", root,
 	                     NULL);
 }
 
@@ -1798,4 +1810,14 @@ tracker_file_notifier_get_status (TrackerFileNotifier        *notifier,
 		*files_reindexed = notifier->current_index_root->files_reindexed;
 
 	return TRUE;
+}
+
+char *
+tracker_file_notifier_get_file_resource_uri (TrackerFileNotifier *notifier,
+                                             GFile               *file)
+{
+	if (notifier->root)
+		return tracker_file_get_relative_uri (file, notifier->root);
+	else
+		return g_file_get_uri (file);
 }

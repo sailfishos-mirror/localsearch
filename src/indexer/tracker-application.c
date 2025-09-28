@@ -464,7 +464,8 @@ initialize_main_instance (TrackerApplication  *app,
 		instance->indexing_tree = tracker_indexing_tree_new ();
 		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
 		                                             instance->indexing_tree,
-		                                             app->monitor);
+		                                             app->monitor,
+		                                             NULL);
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -537,7 +538,8 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 
 		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
 		                                             instance->indexing_tree,
-		                                             app->monitor);
+		                                             app->monitor,
+		                                             instance->root);
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))

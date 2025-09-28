@@ -77,6 +77,11 @@ void                  tracker_miner_fs_set_throttle          (TrackerMinerFS  *f
 const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
                                                GFile          *file);
 
+char * tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
+                                               GFile          *file);
+
+GFile * tracker_miner_fs_get_root (TrackerMinerFS *fs);
+
 /* Progress */
 gboolean              tracker_miner_fs_has_items_to_process  (TrackerMinerFS  *fs);
 
