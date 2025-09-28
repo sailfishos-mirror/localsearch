@@ -40,6 +40,14 @@ gboolean tracker_file_is_hidden                             (GFile       *file);
 gint     tracker_file_cmp                                   (GFile       *file_a,
                                                              GFile       *file_b);
 
+char * tracker_file_get_relative_uri (GFile *file,
+                                      GFile *root);
+
+GFile * tracker_file_resolve_relative_uri (GFile      *root,
+                                           const char *relative_uri);
+
+gboolean tracker_file_is_relative_uri (const char *uri);
+
 /* Path utils */
 gboolean tracker_path_is_in_path                            (const gchar *path,
                                                              const gchar *in_path);

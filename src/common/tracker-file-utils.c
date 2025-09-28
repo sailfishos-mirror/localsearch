@@ -644,6 +644,74 @@ tracker_file_cmp (GFile *file_a,
 	return !g_file_equal (file_a, file_b);
 }
 
+/* Gets a non-standard relative file URI (file: schema with no '///')
+ * for a GFile.
+ */
+char *
+tracker_file_get_relative_uri (GFile *file,
+                               GFile *root)
+{
+	g_autofree char *root_uri = NULL, *file_uri = NULL;
+	int root_len, file_len;
+
+	root_uri = g_file_get_uri (root);
+	file_uri = g_file_get_uri (file);
+
+	root_len = strlen (root_uri);
+	file_len = strlen (file_uri);
+
+	if (root_len > file_len)
+		return NULL;
+	if (strncmp (file_uri, root_uri, root_len) != 0)
+		return NULL;
+
+	if (root_len == file_len)
+		return g_strdup ("file:");
+	else if (file_uri[root_len] == '/')
+		return g_strconcat ("file:", &file_uri[root_len + 1], NULL);
+	else
+		return NULL;
+}
+
+/* Resolves a non-standard relative file URI (file: schema with no '///')
+ * to a GFile.
+ */
+GFile *
+tracker_file_resolve_relative_uri (GFile      *root,
+                                   const char *relative_uri)
+{
+	g_autofree char *root_uri = NULL, *file_uri = NULL;
+	int schema_len;
+
+	schema_len = strlen ("file:");
+
+	if (!tracker_file_is_relative_uri (relative_uri))
+		return NULL;
+
+	root_uri = g_file_get_uri (root);
+	file_uri = g_strconcat (root_uri, "/", &relative_uri[schema_len], NULL);
+
+	return g_file_new_for_uri (file_uri);
+}
+
+gboolean
+tracker_file_is_relative_uri (const char *uri)
+{
+	int schema_len, uri_len;
+
+	schema_len = strlen ("file:");
+	uri_len = strlen (uri);
+
+	if (uri_len < schema_len)
+		return FALSE;
+	if (strncmp (uri, "file:", schema_len) != 0)
+		return FALSE;
+	if (uri[schema_len] == '/')
+		return FALSE;
+
+	return TRUE;
+}
+
 /**
  * tracker_filename_casecmp_without_extension:
  * @a: a string containing a file name
