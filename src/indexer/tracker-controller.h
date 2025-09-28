@@ -16,6 +16,12 @@ TrackerController * tracker_controller_new (TrackerIndexingTree   *tree,
                                             TrackerMonitor        *monitor,
                                             TrackerFilesInterface *files_interface);
 
+void tracker_controller_register_indexing_tree (TrackerController   *controller,
+						TrackerIndexingTree *indexing_tree);
+
+void tracker_controller_unregister_indexing_tree (TrackerController   *controller,
+						  TrackerIndexingTree *indexing_tree);
+
 G_END_DECLS
 
 #endif /* __TRACKER_CONTROLLER_H__ */

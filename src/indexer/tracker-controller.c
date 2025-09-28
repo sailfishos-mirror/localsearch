@@ -38,6 +38,8 @@ struct _TrackerController
 	GSettings *extractor_settings;
 	TrackerFilesInterface *files_interface;
 
+	GList *registered_indexing_trees;
+
 	GDBusProxy *control_proxy;
 	GCancellable *control_proxy_cancellable;
 	GPtrArray *control_proxy_folders;
@@ -259,31 +261,32 @@ text_allowlist_update (TrackerIndexingTree *indexing_tree,
 }
 
 static void
-update_filters (TrackerController *controller)
+update_filters (TrackerController   *controller,
+		TrackerIndexingTree *indexing_tree)
 {
 	GStrv strv;
 
 	/* Always ignore hidden */
-	tracker_indexing_tree_set_filter_hidden (controller->indexing_tree, TRUE);
+	tracker_indexing_tree_set_filter_hidden (indexing_tree, TRUE);
 
 	/* Ignored files */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-files");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_FILE, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_FILE, strv);
 	g_strfreev (strv);
 
 	/* Ignored directories */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_DIRECTORY, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, strv);
 	g_strfreev (strv);
 
 	/* Directories with content */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories-with-content");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
 	g_strfreev (strv);
 
 	/* Allowed text patterns */
 	strv = g_settings_get_strv (controller->extractor_settings, "text-allowlist");
-	text_allowlist_update (controller->indexing_tree, strv);
+	text_allowlist_update (indexing_tree, strv);
 	g_strfreev (strv);
 }
 
@@ -397,20 +400,17 @@ index_single_directories_cb (TrackerConfig     *config,
 }
 
 static void
-filter_changed_cb (GSettings         *config,
-                   GParamSpec        *pspec,
-                   TrackerController *controller)
+filter_changed_cb (TrackerController *controller)
 {
-	update_filters (controller);
-	tracker_indexing_tree_update_all (controller->indexing_tree);
-}
+	GList *l;
 
-static void
-text_allowlist_changed_cb (TrackerConfig *config,
-                           GParamSpec        *pspec,
-                           TrackerController *controller)
-{
+	update_filters (controller, controller->indexing_tree);
 	tracker_indexing_tree_update_all (controller->indexing_tree);
+
+	for (l = controller->registered_indexing_trees; l; l = l->next) {
+		update_filters (controller, l->data);
+		tracker_indexing_tree_update_all (l->data);
+	}
 }
 
 static gboolean
@@ -498,7 +498,7 @@ enable_monitors_changed_cb (GSettings         *config,
 	if (enable != tracker_monitor_get_enabled (controller->monitor)) {
 		tracker_monitor_set_enabled (controller->monitor, enable);
 		if (enable)
-			filter_changed_cb (config, pspec, controller);
+			filter_changed_cb (controller);
 	}
 }
 
@@ -508,7 +508,7 @@ initialize_from_config (TrackerController *controller)
 	GSList *mounts = NULL, *l;
 	GSList *dirs;
 
-	update_filters (controller);
+	update_filters (controller, controller->indexing_tree);
 
 	if (controller->monitor) {
 		tracker_monitor_set_enabled (controller->monitor,
@@ -746,15 +746,6 @@ tracker_controller_constructed (GObject *object)
 	g_signal_connect (controller->config, "changed::index-single-directories",
 	                  G_CALLBACK (index_single_directories_cb),
 	                  object);
-	g_signal_connect (controller->config, "changed::ignored-directories",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
-	g_signal_connect (controller->config, "changed::ignored-directories-with-content",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
-	g_signal_connect (controller->config, "changed::ignored-files",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
 	g_signal_connect (controller->config, "changed::enable-monitors",
 	                  G_CALLBACK (enable_monitors_changed_cb),
 	                  object);
@@ -762,10 +753,20 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 
+	g_signal_connect_swapped (controller->config, "changed::ignored-directories",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+	g_signal_connect_swapped (controller->config, "changed::ignored-directories-with-content",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+	g_signal_connect_swapped (controller->config, "changed::ignored-files",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+
 	controller->extractor_settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
-	g_signal_connect (controller->extractor_settings, "changed::text-allowlist",
-	                  G_CALLBACK (text_allowlist_changed_cb),
-	                  object);
+	g_signal_connect_swapped (controller->extractor_settings, "changed::text-allowlist",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
 
 	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
 	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
@@ -791,6 +792,8 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->control_proxy_cancellable);
 	g_clear_object (&controller->control_proxy);
 	g_clear_pointer (&controller->control_proxy_folders, g_ptr_array_unref);
+
+	g_list_free (controller->registered_indexing_trees);
 
 	g_clear_handle_id (&controller->volumes_changed_id, g_source_remove);
 
@@ -859,4 +862,21 @@ tracker_controller_new (TrackerIndexingTree   *tree,
 	                     "monitor", monitor,
 	                     "files-interface", files_interface,
 			     NULL);
+}
+
+void
+tracker_controller_register_indexing_tree (TrackerController   *controller,
+					   TrackerIndexingTree *indexing_tree)
+{
+	controller->registered_indexing_trees =
+		g_list_prepend (controller->registered_indexing_trees, indexing_tree);
+	update_filters (controller, indexing_tree);
+}
+
+void
+tracker_controller_unregister_indexing_tree (TrackerController   *controller,
+					     TrackerIndexingTree *indexing_tree)
+{
+	controller->registered_indexing_trees =
+		g_list_remove (controller->registered_indexing_trees, indexing_tree);
 }
