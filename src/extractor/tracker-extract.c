@@ -61,8 +61,9 @@ struct _TrackerExtract {
 
 typedef struct {
 	TrackerExtract *extract;
+	GFile *file;
+	gchar *file_id;
 	gchar *content_id;
-	gchar *file;
 	gchar *mimetype;
 	const gchar *graph;
 	gint max_text;
@@ -194,13 +195,14 @@ get_file_metadata (TrackerExtractTaskData  *task,
                    GError                 **error)
 {
 	g_autoptr (TrackerExtractInfo) info = NULL;
-	g_autoptr (GFile) file = NULL;
 	gboolean success = FALSE;
 
 	*info_out = NULL;
 
-	file = g_file_new_for_uri (task->file);
-	info = tracker_extract_info_new (file, task->content_id, task->mimetype, task->graph, task->max_text);
+	info = tracker_extract_info_new (task->file,
+	                                 task->file_id, task->content_id,
+	                                 task->mimetype, task->graph,
+	                                 task->max_text);
 
 	if (!task->mimetype || !*task->mimetype)
 		return FALSE;
@@ -234,14 +236,15 @@ task_deadline_cb (gpointer user_data)
 	TrackerExtractTaskData *task = user_data;
 
 	g_warning ("File '%s' took too long to process. Shutting down everything",
-	           task->file);
+	           task->file_id);
 
 	_exit (EXIT_FAILURE);
 }
 
 static TrackerExtractTaskData *
 extract_task_data_new (TrackerExtract *extract,
-                       const gchar    *uri,
+                       GFile          *file,
+                       const gchar    *file_id,
                        const gchar    *content_id,
                        const gchar    *mimetype,
                        const gchar    *graph)
@@ -249,7 +252,13 @@ extract_task_data_new (TrackerExtract *extract,
 	TrackerExtractTaskData *task;
 
 	task = g_new0 (TrackerExtractTaskData, 1);
-	task->file = g_strdup (uri);
+	g_set_object (&task->file, file);
+
+	if (file_id)
+		task->file_id = g_strdup (file_id);
+	else
+		task->file_id = g_file_get_uri (file);
+
 	task->content_id = g_strdup (content_id);
 	task->mimetype = g_strdup (mimetype);
 	task->graph = graph;
@@ -288,8 +297,9 @@ extract_task_data_free (TrackerExtractTaskData *data)
 		g_source_unref (data->deadline);
 	}
 
+	g_clear_object (&data->file);
 	g_free (data->mimetype);
-	g_free (data->file);
+	g_free (data->file_id);
 	g_free (data->content_id);
 	g_free (data);
 }
@@ -338,7 +348,7 @@ get_metadata (GTask *task)
 			                         tracker_extract_error_quark (),
 			                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
 			                         "Could not get any metadata for uri:'%s' and mime:'%s'",
-			                         data->file, data->mimetype);
+			                         data->file_id, data->mimetype);
 		}
 	}
 
@@ -394,7 +404,8 @@ metadata_thread_func (GMainLoop *loop)
 
 void
 tracker_extract_file (TrackerExtract      *extract,
-                      const gchar         *file,
+                      GFile               *file,
+                      const gchar         *file_id,
                       const gchar         *content_id,
                       const gchar         *mimetype,
                       GCancellable        *cancellable,
@@ -411,27 +422,29 @@ tracker_extract_file (TrackerExtract      *extract,
 	g_return_if_fail (cb != NULL);
 
 	if (!mimetype) {
+		g_autofree char *uri = g_file_get_uri (file);
 		g_task_report_new_error (extract, cb, user_data, NULL,
 		                         TRACKER_EXTRACT_ERROR,
 		                         TRACKER_EXTRACT_ERROR_NO_MIMETYPE,
 		                         "No mimetype for '%s'",
-		                         file);
+		                         uri);
 		return;
 	}
 
 	graph = tracker_extract_module_manager_get_graph (mimetype);
 
 	if (!graph) {
+		g_autofree char *uri = g_file_get_uri (file);
 		g_task_report_new_error (extract, cb, user_data, NULL,
 		                         TRACKER_EXTRACT_ERROR,
 		                         TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
 		                         "Unknown target graph for uri:'%s' and mime:'%s'",
-		                         file, mimetype);
+		                         uri, mimetype);
 		return;
 	}
 
 	task = g_task_new (extract, cancellable, cb, user_data);
-	data = extract_task_data_new (extract, file, content_id, mimetype, graph);
+	data = extract_task_data_new (extract, file, file_id, content_id, mimetype, graph);
 	g_task_set_task_data (task, data, (GDestroyNotify) extract_task_data_free);
 
 #ifdef G_ENABLE_DEBUG
@@ -463,7 +476,8 @@ tracker_extract_file (TrackerExtract      *extract,
 
 TrackerExtractInfo *
 tracker_extract_file_sync (TrackerExtract  *object,
-                           const gchar     *uri,
+                           GFile           *file,
+                           const gchar     *file_id,
                            const gchar     *content_id,
                            const gchar     *mimetype,
                            GError         **error)
@@ -472,13 +486,14 @@ tracker_extract_file_sync (TrackerExtract  *object,
 	TrackerExtractInfo *info;
 	const char *graph = NULL;
 
-	g_return_val_if_fail (uri != NULL, NULL);
+	g_return_val_if_fail (G_IS_FILE (file), NULL);
 	g_return_val_if_fail (content_id != NULL, NULL);
 
 	if (mimetype)
 		graph = tracker_extract_module_manager_get_graph (mimetype);
 
 	if (!graph) {
+		g_autofree char *uri = g_file_get_uri (file);
 		g_set_error (error,
 		             TRACKER_EXTRACT_ERROR,
 		             TRACKER_EXTRACT_ERROR_NO_EXTRACTOR,
@@ -487,7 +502,9 @@ tracker_extract_file_sync (TrackerExtract  *object,
 		return NULL;
 	}
 
-	task = extract_task_data_new (object, uri, content_id, mimetype, graph);
+	task = extract_task_data_new (object, file,
+	                              file_id, content_id,
+	                              mimetype, graph);
 
 	if (!get_file_metadata (task, &info, error))
 		return NULL;

@@ -50,7 +50,8 @@
 typedef struct _TrackerDecoratorInfo TrackerDecoratorInfo;
 struct _TrackerDecoratorInfo {
 	TrackerDecorator *decorator;
-	gchar *url;
+	GFile *file;
+	gchar *file_id;
 	gchar *content_id;
 	gchar *mime_type;
 };
@@ -72,6 +73,7 @@ struct _TrackerDecorator {
 	TrackerDecoratorInfo *item; /* Pre-extracted info for the next element */
 	TrackerDecoratorInfo *next_item; /* Pre-extracted info for the next element */
 
+	GFile *root;
 	GStrv priority_graphs;
 
 	GPtrArray *buffer; /* Array of TrackerExtractInfo */
@@ -100,6 +102,7 @@ enum {
 	PROP_0,
 	PROP_EXTRACTOR,
 	PROP_PERSISTENCE,
+	PROP_ROOT,
 	N_PROPS,
 };
 
@@ -145,9 +148,16 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 
 	info = g_new0 (TrackerDecoratorInfo, 1);
 	info->decorator = decorator;
-	info->url = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
+	info->file_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 0, NULL));
 	info->content_id = g_strdup (tracker_sparql_cursor_get_string (cursor, 1, NULL));
 	info->mime_type = g_strdup (tracker_sparql_cursor_get_string (cursor, 2, NULL));
+
+	if (decorator->root && tracker_file_is_relative_uri (info->file_id)) {
+		info->file = tracker_file_resolve_relative_uri (decorator->root,
+		                                                info->file_id);
+	} else {
+		info->file = g_file_new_for_uri (info->file_id);
+	}
 
 	return info;
 }
@@ -155,7 +165,8 @@ tracker_decorator_info_new (TrackerDecorator    *decorator,
 void
 tracker_decorator_info_free (TrackerDecoratorInfo *info)
 {
-	g_free (info->url);
+	g_clear_object (&info->file);
+	g_free (info->file_id);
 	g_free (info->content_id);
 	g_free (info->mime_type);
 	g_free (info);
@@ -167,7 +178,8 @@ tracker_decorator_info_complete (TrackerDecoratorInfo *info,
 {
 	TrackerDecorator *decorator = info->decorator;
 
-	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s completed successfully", info->url));
+	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s completed successfully",
+	                                    info->file_id));
 
 	if (!decorator->buffer) {
 		decorator->buffer =
@@ -184,16 +196,14 @@ tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
                                        GError               *error)
 {
 	TrackerDecorator *decorator = info->decorator;
-	g_autoptr (GFile) file = NULL;
 
 	TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Task for %s failed: %s",
-	                                    info->url, error->message));
+	                                    info->file_id, error->message));
 
 	g_warning ("Task for '%s' finished with error: %s\n",
-	           info->url, error->message);
+	           info->file_id, error->message);
 
-	file = g_file_new_for_uri (info->url);
-	tracker_decorator_raise_error (decorator, file,
+	tracker_decorator_raise_error (decorator, info->file,
 	                               error->message, NULL);
 	decorator_finish_current_item (decorator);
 }
@@ -228,10 +238,7 @@ static void
 tracker_decorator_info_hint_needed (TrackerDecoratorInfo *info,
                                     gboolean              needed)
 {
-	g_autoptr (GFile) file = NULL;
-
-	file = g_file_new_for_uri (info->url);
-	hint_file_needed (file, needed);
+	hint_file_needed (info->file, needed);
 }
 
 static void
@@ -295,10 +302,8 @@ tracker_decorator_update (TrackerDecorator   *decorator,
                           TrackerExtractInfo *info)
 {
 	TrackerResource *resource;
-	const gchar *graph, *mime_type, *hash;
-	g_autofree gchar *uri = NULL;
+	const gchar *graph, *mime_type, *hash, *uri;
 	TrackerBatch *batch;
-	GFile *file;
 
 	batch = tracker_decorator_get_batch (decorator);
 
@@ -306,8 +311,7 @@ tracker_decorator_update (TrackerDecorator   *decorator,
 	hash = tracker_extract_module_manager_get_hash (mime_type);
 	graph = tracker_extract_info_get_graph (info);
 	resource = tracker_extract_info_get_resource (info);
-	file = tracker_extract_info_get_file (info);
-	uri = g_file_get_uri (file);
+	uri = tracker_extract_info_get_file_id (info);
 
 	tracker_batch_add_statement (batch,
 	                             decorator->update_hash,
@@ -824,7 +828,7 @@ tracker_decorator_next (TrackerDecorator  *decorator)
 
 	if (decorator->item) {
 		TRACKER_NOTE (DECORATOR, g_message ("[Decorator] Next item %s",
-		                                    decorator->item->url));
+		                                    decorator->item->file_id));
 	}
 
 	/* Preempt next item */
@@ -838,7 +842,6 @@ decorator_get_next_file (TrackerDecorator *decorator)
 {
 	TrackerDecoratorInfo *info;
 	g_autoptr (GError) error = NULL;
-	g_autoptr (GFile) file = NULL;
 
 	if (!tracker_miner_is_started (TRACKER_MINER (decorator)) ||
 	    tracker_miner_is_paused (TRACKER_MINER (decorator)))
@@ -852,13 +855,11 @@ decorator_get_next_file (TrackerDecorator *decorator)
 	if (!info)
 		return;
 
-	file = g_file_new_for_uri (info->url);
-
-	if (!g_file_is_native (file)) {
+	if (!g_file_has_uri_scheme (info->file, "file")) {
 		error = g_error_new (TRACKER_DECORATOR_ERROR,
 		                     TRACKER_DECORATOR_ERROR_INVALID_FILE,
 		                     "URI '%s' is not native",
-		                     info->url);
+		                     info->file_id);
 		tracker_decorator_info_complete_error (info, error);
 		decorator_get_next_file (decorator);
 		return;
@@ -868,12 +869,13 @@ decorator_get_next_file (TrackerDecorator *decorator)
 
 	TRACKER_NOTE (DECORATOR,
 	              g_message ("[Decorator] Extracting metadata for '%s'",
-	                         info->url));
+	                         info->file_id));
 
-	tracker_extract_persistence_set_file (decorator->persistence, file);
+	tracker_extract_persistence_set_file (decorator->persistence, info->file);
 
 	tracker_extract_file (decorator->extractor,
-	                      info->url,
+	                      info->file,
+	                      info->file_id,
 	                      info->content_id,
 	                      info->mime_type,
 	                      decorator->cancellable,
@@ -895,6 +897,9 @@ tracker_decorator_set_property (GObject      *object,
 		break;
 	case PROP_PERSISTENCE:
 		decorator->persistence = g_value_dup_object (value);
+		break;
+	case PROP_ROOT:
+		decorator->root = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -980,6 +985,7 @@ tracker_decorator_finalize (GObject *object)
 	g_clear_pointer (&decorator->next_item, tracker_decorator_info_free);
 
 	g_clear_object (&decorator->batch);
+	g_clear_object (&decorator->root);
 
 	g_clear_pointer (&decorator->buffer, g_ptr_array_unref);
 	g_clear_pointer (&decorator->commit_buffer, g_ptr_array_unref);
@@ -1076,6 +1082,12 @@ tracker_decorator_class_init (TrackerDecoratorClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ROOT] =
+		g_param_spec_object ("root", NULL, NULL,
+		                     G_TYPE_FILE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 
@@ -1114,12 +1126,14 @@ tracker_decorator_init (TrackerDecorator *decorator)
 TrackerDecorator *
 tracker_decorator_new (TrackerSparqlConnection   *connection,
                        TrackerExtract            *extract,
-                       TrackerExtractPersistence *persistence)
+                       TrackerExtractPersistence *persistence,
+                       GFile                     *root)
 {
 	return g_object_new (TRACKER_TYPE_DECORATOR,
 			     "connection", connection,
 			     "extractor", extract,
 	                     "persistence", persistence,
+	                     "root", root,
 			     NULL);
 }
 

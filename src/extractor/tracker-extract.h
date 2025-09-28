@@ -43,7 +43,8 @@ GQuark          tracker_extract_error_quark             (void);
 TrackerExtract *tracker_extract_new                     (void);
 
 void            tracker_extract_file                    (TrackerExtract         *extract,
-                                                         const gchar            *file,
+                                                         GFile                  *file,
+                                                         const gchar            *file_id,
                                                          const gchar            *content_id,
                                                          const gchar            *mimetype,
                                                          GCancellable           *cancellable,
@@ -58,7 +59,8 @@ void            tracker_extract_set_max_text            (TrackerExtract *extract
                                                          gint            max_text);
 
 TrackerExtractInfo * tracker_extract_file_sync (TrackerExtract  *object,
-                                                const gchar     *uri,
+                                                GFile           *file,
+                                                const gchar     *file_id,
                                                 const gchar     *content_id,
                                                 const gchar     *mimetype,
                                                 GError         **error);
