@@ -28,6 +28,8 @@
 
 #define REMOTE_FD_NUMBER 3
 
+#define EXECUTABLE_NAME "localsearch-extractor-3"
+
 enum {
 	STATUS,
 	LOST,
@@ -406,7 +408,7 @@ extractor_child_setup (gpointer user_data)
 #ifdef HAVE_LANDLOCK
 	const gchar * const *indexed_folders = user_data;
 
-	if (!tracker_landlock_init (indexed_folders)) {
+	if (!tracker_landlock_init (EXECUTABLE_NAME, indexed_folders, NULL)) {
 		g_critical ("Refusing to extract file data since Landlock could not be enabled. "
 		            "Update your kernel to fix this warning.");
 		_exit (0);
@@ -517,9 +519,9 @@ tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 	current_dir = g_get_current_dir ();
 
 	if (g_strcmp0 (current_dir, BUILDROOT) == 0)
-		extract_path = BUILD_EXTRACTDIR "/localsearch-extractor-3";
+		extract_path = BUILD_EXTRACTDIR "/" EXECUTABLE_NAME;
 	else
-		extract_path = LIBEXECDIR "/localsearch-extractor-3";
+		extract_path = LIBEXECDIR "/" EXECUTABLE_NAME;
 
 	strv_builder = g_strv_builder_new ();
 	g_strv_builder_add (strv_builder, extract_path);

@@ -24,6 +24,8 @@
 
 #include <glib.h>
 
-gboolean tracker_landlock_init (const gchar * const *allowed_paths);
+gboolean tracker_landlock_init (const gchar         *executable_name,
+                                const gchar * const *allowed_paths,
+                                const gchar * const *writable_folders);
 
 #endif /* __TRACKER_LANDLOCK_H__ */

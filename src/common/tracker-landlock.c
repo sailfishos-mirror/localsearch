@@ -182,13 +182,11 @@ apply_ruleset (int landlock_fd)
 }
 
 gboolean
-tracker_landlock_init (const gchar * const *indexed_folders)
+tracker_landlock_init (const gchar         *executable_name,
+                       const gchar * const *indexed_folders,
+                       const gchar * const *writable_folders)
 {
 	TrackerLandlockRule stock_rules[] = {
-		/* Allow access to the executable itself */
-		{ LIBEXECDIR "/localsearch-extractor-3",
-		  LANDLOCK_ACCESS_FS_READ_FILE |
-		  LANDLOCK_ACCESS_FS_EXECUTE },
 		/* Library dirs, as we shockingly use libraries. Extends to /usr */
 		{ PREFIX "/" LIBDIR,
 		  (LANDLOCK_ACCESS_FS_EXECUTE |
@@ -236,7 +234,7 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		{ ".pki", LANDLOCK_ACCESS_FS_READ_DIR },
 		{ ".gnupg", LANDLOCK_ACCESS_FS_READ_DIR },
 	};
-	g_autofree gchar *current_dir = NULL, *cache_dir = NULL;
+	g_autofree gchar *current_dir = NULL, *cache_dir = NULL, *executable_path = NULL;
 	g_auto (GStrv) library_paths = NULL;
 	const gchar *ld_library_path = NULL;
 	int i, landlock_fd;
@@ -249,6 +247,12 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 
 	if (!create_ruleset (&landlock_fd))
 		return FALSE;
+
+	/* Allow access to the executable itself */
+	executable_path = g_strconcat (LIBEXECDIR, "/", executable_name, NULL);
+	add_rule (landlock_fd, executable_path,
+	          LANDLOCK_ACCESS_FS_READ_FILE |
+	          LANDLOCK_ACCESS_FS_EXECUTE);
 
 	/* Populate ruleset */
 	for (i = 0; i < G_N_ELEMENTS (stock_rules); i++) {
@@ -269,6 +273,18 @@ tracker_landlock_init (const gchar * const *indexed_folders)
 		          indexed_folders[i],
 		          LANDLOCK_ACCESS_FS_READ_FILE |
 		          LANDLOCK_ACCESS_FS_READ_DIR);
+	}
+
+	for (i = 0; writable_folders && writable_folders[i]; i++) {
+		add_rule (landlock_fd,
+		          writable_folders[i],
+		          LANDLOCK_ACCESS_FS_READ_DIR |
+		          LANDLOCK_ACCESS_FS_READ_FILE |
+		          LANDLOCK_ACCESS_FS_WRITE_FILE |
+		          LANDLOCK_ACCESS_FS_REMOVE_FILE |
+		          LANDLOCK_ACCESS_FS_MAKE_DIR |
+		          LANDLOCK_ACCESS_FS_MAKE_REG |
+		          LANDLOCK_ACCESS_FS_TRUNCATE);
 	}
 
 	/* Cater for development environments */

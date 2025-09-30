@@ -34,6 +34,8 @@ static gboolean inside_build_tree = FALSE;
 static gchar *output_format = "turtle";
 static gchar **filenames;
 
+#define EXTRACTOR_NAME "localsearch-extractor-3"
+
 #define EXTRACT_OPTIONS_ENABLED()	  \
 	((filenames && g_strv_length (filenames) > 0))
 
@@ -55,7 +57,7 @@ extractor_child_setup (gpointer user_data)
 
 	folder = g_path_get_dirname (user_data);
 
-	if (!tracker_landlock_init ((const gchar*[]) { folder, NULL }))
+	if (!tracker_landlock_init (EXTRACTOR_NAME, (const gchar*[]) { folder, NULL }, NULL))
 		g_assert_not_reached ();
 #endif
 }
@@ -72,9 +74,9 @@ extract_files (char *output_format)
 
 	if (inside_build_tree) {
 		/* Developer convenience - use uninstalled version if running from build tree */
-		tracker_extract_path = g_build_filename(BUILDROOT, "src", "extractor", "localsearch-extractor-3", NULL);
+		tracker_extract_path = g_build_filename(BUILDROOT, "src", "extractor", EXTRACTOR_NAME, NULL);
 	} else {
-		tracker_extract_path = g_build_filename(LIBEXECDIR, "localsearch-extractor-3", NULL);
+		tracker_extract_path = g_build_filename(LIBEXECDIR, EXTRACTOR_NAME, NULL);
 	}
 
 	for (p = filenames; *p; p++) {
