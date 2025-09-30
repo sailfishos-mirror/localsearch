@@ -62,6 +62,20 @@ tracker_miner_fs_deps = [
     tracker_miner_dep,
 ]
 
+executable('localsearch-endpoint-@0@'.format(tracker_api_major),
+    'tracker-endpoint-helper.c',
+    dependencies: [
+        tracker_miners_common_dep,
+        tracker_sparql
+    ],
+    c_args: [
+        tracker_c_args,
+    ],
+    install: true,
+    install_dir: get_option('libexecdir'),
+    install_rpath: tracker_internal_libs_dir,
+)
+
 executable('localsearch-@0@'.format(tracker_api_major),
     sources,
     miner_fs_resources[0], miner_fs_resources[1],
@@ -70,6 +84,7 @@ executable('localsearch-@0@'.format(tracker_api_major),
     c_args: [
         tracker_c_args,
         '-DBUILDROOT="@0@"'.format(meson.global_build_root()),
+        '-DBUILDDIR="@0@"'.format(meson.current_build_dir()),
         '-DBUILD_EXTRACTDIR="@0@"'.format(meson.project_build_root() / 'src' / 'extractor'),
         '-DLIBEXECDIR="@0@"'.format(get_option('prefix') / get_option('libexecdir')),
     ],

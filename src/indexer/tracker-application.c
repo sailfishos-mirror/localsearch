@@ -29,10 +29,13 @@
 #endif
 
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
+#include <sys/socket.h>
 
 #define DBUS_NAME_SUFFIX "LocalSearch3"
 #define LEGACY_DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
+#define REMOTE_FD_NUMBER 3
 
 #define ABOUT	  \
 	"LocalSearch " PACKAGE_VERSION "\n"
@@ -87,6 +90,12 @@ struct _IndexerInstance
 	TrackerController *controller;
 	GFile *root;
 	char *object_path;
+
+	struct {
+		GDBusConnection *dbus_conn;
+		GSubprocessLauncher *launcher;
+		GSubprocess *subprocess;
+	} sandbox;
 };
 
 struct _TrackerApplication
@@ -230,33 +239,129 @@ get_cache_dir (void)
 	return cache;
 }
 
-static TrackerSparqlConnection *
+static gboolean
+open_connection (TrackerApplication  *app,
+                 IndexerInstance     *instance,
+                 GFile               *store,
+                 gboolean             sandboxed,
+                 GError             **error)
+{
+	int fd_pair[2] = { -1, -1 };
+
+	if (sandboxed) {
+		g_autoptr (GSocket) socket = NULL;
+		g_autoptr (GIOStream) stream = NULL;
+		g_autoptr (GFile) location = NULL;
+		g_autofree char *guid = NULL, *current_dir = NULL;
+		const char *helper_path;
+
+		g_assert (instance->root);
+
+		if (socketpair (AF_LOCAL, SOCK_STREAM, 0, fd_pair)) {
+			g_set_error (error,
+			             G_IO_ERROR,
+			             G_IO_ERROR_FAILED,
+			             "socketpair failed: %m");
+			goto error;
+		}
+
+		instance->sandbox.launcher =
+			g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
+		g_subprocess_launcher_take_fd (instance->sandbox.launcher,
+		                               g_steal_fd (&fd_pair[1]),
+		                               REMOTE_FD_NUMBER);
+
+		socket = g_socket_new_from_fd (fd_pair[0], error);
+		if (!socket)
+			goto error;
+
+		fd_pair[0] = -1;
+		stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
+
+		guid = g_dbus_generate_guid ();
+
+		current_dir = g_get_current_dir ();
+
+		if (g_strcmp0 (current_dir, BUILDROOT) == 0)
+			helper_path = BUILDDIR "/localsearch-endpoint-3";
+		else
+			helper_path = LIBEXECDIR "/localsearch-endpoint-3";
+
+		location = g_file_get_child (instance->root, ".localsearch3");
+
+		instance->sandbox.subprocess =
+			g_subprocess_launcher_spawn (instance->sandbox.launcher, error,
+			                             helper_path,
+			                             "--location", g_file_peek_path (location),
+			                             "--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),
+			                             NULL);
+		if (!instance->sandbox.subprocess)
+			goto error;
+
+		instance->sandbox.dbus_conn =
+			g_dbus_connection_new_sync (stream,
+			                            guid,
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER |
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS |
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER,
+			                            NULL, NULL,
+			                            error);
+		if (!instance->sandbox.dbus_conn)
+			goto error;
+
+		instance->sparql_conn =
+			tracker_sparql_connection_bus_new (NULL,
+			                                   NULL,
+			                                   instance->sandbox.dbus_conn,
+			                                   error);
+	} else {
+		TrackerSparqlConnectionFlags flags =
+			TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
+			TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
+		g_autoptr (GFile) ontology = NULL;
+
+		ontology = tracker_sparql_get_ontology_nepomuk ();
+		instance->sparql_conn =
+			tracker_sparql_connection_new (flags,
+			                               store,
+			                               ontology,
+			                               NULL,
+			                               error);
+	}
+
+	g_clear_fd (&fd_pair[0], NULL);
+	g_clear_fd (&fd_pair[1], NULL);
+
+	if (instance->sparql_conn)
+		return TRUE;
+ error:
+	g_clear_object (&instance->sandbox.dbus_conn);
+	g_clear_object (&instance->sandbox.launcher);
+	g_clear_object (&instance->sandbox.subprocess);
+
+	return FALSE;
+}
+
+static gboolean
 setup_connection (TrackerApplication  *app,
+                  IndexerInstance     *instance,
                   GFile               *store,
+                  gboolean             sandboxed,
                   GError             **error)
 {
-	TrackerSparqlConnection *sparql_conn = NULL;
 	g_autoptr (GFile) ontology = NULL, corrupt = NULL;
 	g_autoptr (GError) internal_error = NULL;
-	gboolean is_corrupted;
-	TrackerSparqlConnectionFlags flags =
-		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
-		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
+	gboolean is_corrupted, retval = FALSE;
 
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
 	corrupt = g_file_get_child (store, CORRUPT_FILE_NAME);
 	is_corrupted = g_file_query_exists (corrupt, NULL);
 
-	if (!store || !is_corrupted) {
-		sparql_conn = tracker_sparql_connection_new (flags,
-							     store,
-							     ontology,
-							     NULL,
-							     &internal_error);
-	}
+	if (!store || !is_corrupted)
+		retval = open_connection (app, instance, store, sandboxed, error);
 
-	if (store) {
+	if (!retval && store) {
 		if (is_corrupted ||
 		    g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
 			g_autoptr (GFile) backup_location = NULL;
@@ -274,11 +379,7 @@ setup_connection (TrackerApplication  *app,
 
 				path = g_file_get_path (backup_location);
 				g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
-				sparql_conn = tracker_sparql_connection_new (flags,
-									     store,
-									     ontology,
-									     NULL,
-									     &internal_error);
+				retval = open_connection (app, instance, store, sandboxed, error);
 			}
 		}
 	}
@@ -286,7 +387,7 @@ setup_connection (TrackerApplication  *app,
 	if (internal_error)
 		g_propagate_error (error, g_steal_pointer (&internal_error));
 
-	return sparql_conn;
+	return retval;
 }
 
 static void
@@ -456,8 +557,8 @@ initialize_main_instance (TrackerApplication  *app,
 	}
 
 	instance->controller = app->controller;
-	instance->sparql_conn = setup_connection (app, store, error);
-	if (!instance->sparql_conn)
+
+	if (!setup_connection (app, instance, store, FALSE, error))
 		return FALSE;
 
 	if (instance->sparql_conn) {
@@ -492,6 +593,10 @@ indexer_instance_free (IndexerInstance *instance)
 {
 	g_assert (instance->root != NULL);
 	finish_endpoint_thread (&instance->endpoint_thread);
+
+	if (instance->indexer)
+		tracker_miner_stop (instance->indexer);
+
 	g_clear_object (&instance->indexer);
 	tracker_controller_unregister_indexing_tree (instance->controller,
 						     instance->indexing_tree);
@@ -499,6 +604,16 @@ indexer_instance_free (IndexerInstance *instance)
 	g_clear_object (&instance->sparql_conn);
 	g_clear_object (&instance->root);
 	g_clear_pointer (&instance->object_path, g_free);
+
+	if (instance->sandbox.subprocess) {
+		g_subprocess_send_signal (instance->sandbox.subprocess, SIGTERM);
+		g_subprocess_wait (instance->sandbox.subprocess, NULL, NULL);
+	}
+
+	g_clear_object (&instance->sandbox.subprocess);
+	g_clear_object (&instance->sandbox.launcher);
+	g_clear_object (&instance->sandbox.dbus_conn);
+
 	g_free (instance);
 }
 
@@ -527,8 +642,7 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 		}
 	}
 
-	instance->sparql_conn = setup_connection (app, store, error);
-	if (!instance->sparql_conn)
+	if (!setup_connection (app, instance, store, TRUE, error))
 		goto error;
 
 	if (instance->sparql_conn) {
