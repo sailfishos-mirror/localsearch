@@ -125,7 +125,7 @@ initialize_sigsys_handler (void)
 }
 
 gboolean
-tracker_seccomp_init (void)
+tracker_seccomp_init (gboolean readonly)
 {
 	scmp_filter_ctx ctx;
 	const gchar *current_syscall = NULL;
@@ -203,13 +203,6 @@ tracker_seccomp_init (void)
 	ALLOW_RULE (fsync);
 	ALLOW_RULE (umask);
 	ALLOW_RULE (chdir);
-	ERROR_RULE (fchown, EPERM);
-	ERROR_RULE (fchmod, EPERM);
-	ERROR_RULE (chmod, EPERM);
-	ERROR_RULE (mkdir, EPERM);
-	ERROR_RULE (mkdirat, EPERM);
-	ERROR_RULE (rename, EPERM);
-	ERROR_RULE (unlink, EPERM);
 	/* Processes and threads */
 	ALLOW_RULE (clone);
 	ALLOW_RULE (clone3);
@@ -307,20 +300,44 @@ tracker_seccomp_init (void)
 #endif
 	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, FS_IOC_GETFSUUID));
 
-	/* Special requirements for open/openat, allow O_RDONLY calls,
-         * but fail if write permissions are requested.
-	 */
-	CUSTOM_RULE (open, SCMP_ACT_ALLOW,
-	             SCMP_CMP (1, SCMP_CMP_MASKED_EQ,
-	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
-	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
-	CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
+	if (readonly) {
+		/* Special requirements for open/openat, allow O_RDONLY calls,
+		 * but fail if write permissions are requested.
+		 */
+		CUSTOM_RULE (open, SCMP_ACT_ALLOW,
+		             SCMP_CMP (1, SCMP_CMP_MASKED_EQ,
+		                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
+		CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
+		CUSTOM_RULE (open, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(1, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
 
-	CUSTOM_RULE (openat, SCMP_ACT_ALLOW,
-	             SCMP_CMP (2, SCMP_CMP_MASKED_EQ,
-	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
-	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
-	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
+		CUSTOM_RULE (openat, SCMP_ACT_ALLOW,
+		             SCMP_CMP (2, SCMP_CMP_MASKED_EQ,
+		                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
+		CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
+		CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
+
+		ERROR_RULE (fchown, EPERM);
+		ERROR_RULE (fchmod, EPERM);
+		ERROR_RULE (chmod, EPERM);
+		ERROR_RULE (mkdir, EPERM);
+		ERROR_RULE (mkdirat, EPERM);
+		ERROR_RULE (rename, EPERM);
+		ERROR_RULE (unlink, EPERM);
+	} else {
+		ALLOW_RULE (open);
+		ALLOW_RULE (openat);
+		ALLOW_RULE (pwrite64);
+		ALLOW_RULE (fdatasync);
+		ALLOW_RULE (ftruncate);
+		ALLOW_RULE (setsockopt);
+		ALLOW_RULE (fchown);
+		ALLOW_RULE (fchmod);
+		ALLOW_RULE (chmod);
+		ALLOW_RULE (mkdir);
+		ALLOW_RULE (mkdirat);
+		ALLOW_RULE (rename);
+		ALLOW_RULE (unlink);
+	}
 
 #if defined(__linux__) && defined(__x86_64__)
 	/* Allow arch_prctl only on ARCH_SHSTK_DISABLE, to allow usage of
@@ -353,7 +370,7 @@ out:
 #else /* HAVE_LIBSECCOMP */
 
 gboolean
-tracker_seccomp_init (void)
+tracker_seccomp_init (gboolean readonly)
 {
 	g_warning ("No seccomp support compiled-in.");
 	return TRUE;

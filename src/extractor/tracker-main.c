@@ -463,7 +463,7 @@ main (int argc, char *argv[])
 	/* This makes sure we don't steal all the system's resources */
 	initialize_priority_and_scheduling ();
 
-	if (!tracker_seccomp_init ())
+	if (!tracker_seccomp_init (TRUE))
 		g_assert_not_reached ();
 
 	return do_main (argc, argv);
