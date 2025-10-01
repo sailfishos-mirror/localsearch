@@ -22,6 +22,7 @@
 #include "tracker-application.h"
 
 #include "tracker-controller.h"
+#include "tracker-dbus-interface.h"
 #include "tracker-miner-files.h"
 
 #ifdef HAVE_MALLOC_TRIM
@@ -99,12 +100,23 @@ struct _IndexerInstance
 	} sandbox;
 };
 
+typedef struct _PauseRequest PauseRequest;
+
+struct _PauseRequest {
+	TrackerApplication *app;
+	int cookie_id;
+	char *application;
+	char *reason;
+	char *watch_name;
+	guint watch_name_id;
+};
+
 struct _TrackerApplication
 {
 	GApplication parent_instance;
 
 	TrackerMiner *miner_files;
-	TrackerMinerProxy *proxy;
+	TrackerDBusMiner *indexer_iface;
 	GDBusProxy *systemd_proxy;
 	TrackerMonitor *monitor;
 	TrackerController *controller;
@@ -117,6 +129,8 @@ struct _TrackerApplication
 	IndexerInstance main_instance;
 	IndexerInstance *active_instance;
 
+	GList *pause_requests;
+
 	guint wait_settle_id;
 	guint cleanup_id;
 	guint domain_watch_id;
@@ -124,6 +138,7 @@ struct _TrackerApplication
 	guint no_daemon : 1;
 	guint dry_run : 1;
 	guint got_error : 1;
+	guint paused_by_clients : 1;
 };
 
 G_DEFINE_TYPE (TrackerApplication, tracker_application, G_TYPE_APPLICATION)
@@ -471,6 +486,126 @@ resume_removable_instances (TrackerApplication *app,
 }
 
 static void
+sync_client_pause_state (TrackerApplication *app)
+{
+	gboolean paused_by_clients;
+
+	paused_by_clients = app->pause_requests != NULL;
+
+	if (paused_by_clients == app->paused_by_clients)
+		return;
+
+	app->paused_by_clients = paused_by_clients;
+
+	if (app->paused_by_clients) {
+		tracker_miner_pause (app->main_instance.indexer);
+		pause_removable_instances (app, NULL);
+		tracker_dbus_miner_emit_paused (app->indexer_iface);
+	} else {
+		tracker_miner_resume (app->main_instance.indexer);
+		resume_removable_instances (app, NULL);
+		tracker_dbus_miner_emit_resumed (app->indexer_iface);
+	}
+}
+
+static PauseRequest *
+find_pause_request (TrackerApplication *app,
+                    int                 cookie_id)
+{
+	GList *l;
+
+	for (l = app->pause_requests; l; l = l->next) {
+		PauseRequest *request = l->data;
+
+		if (request->cookie_id == cookie_id)
+			return request;
+	}
+
+	return NULL;
+}
+
+static void
+pause_request_free (PauseRequest *request)
+{
+	g_clear_handle_id (&request->watch_name_id, g_bus_unwatch_name);
+	g_free (request->watch_name);
+	g_free (request->reason);
+	g_free (request->application);
+	g_free (request);
+}
+
+static void
+pause_process_disappeared_cb (GDBusConnection *connection,
+                              const gchar     *name,
+                              gpointer         user_data)
+{
+	PauseRequest *request = user_data;
+	TrackerApplication *app = request->app;
+
+	app->pause_requests = g_list_remove (app->pause_requests, request);
+	pause_request_free (request);
+	sync_client_pause_state (app);
+}
+
+static PauseRequest *
+pause_request_new (TrackerApplication *app,
+                   const char         *application,
+                   const char         *reason,
+                   const char         *watch_name)
+{
+	PauseRequest *request;
+	int cookie_id;
+
+	request = g_new0 (PauseRequest, 1);
+
+	/* Make sure to pick an unused cookie ID */
+	do {
+		cookie_id = g_random_int ();
+	} while (find_pause_request (app, cookie_id) != NULL);
+
+	request->app = app;
+	request->cookie_id = cookie_id;
+	request->application = g_strdup (application);
+	request->reason = g_strdup (reason);
+	request->watch_name = g_strdup (watch_name);
+
+	request->watch_name_id =
+		g_bus_watch_name_on_connection (g_application_get_dbus_connection (G_APPLICATION (app)),
+		                                request->watch_name,
+		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
+		                                NULL,
+		                                pause_process_disappeared_cb,
+		                                request,
+		                                NULL);
+
+	return request;
+}
+
+static void
+indexer_progress_cb (TrackerMiner    *miner,
+                     GParamSpec      *pspec,
+                     IndexerInstance *instance)
+{
+	TrackerApplication *app = instance->app;
+
+	if (instance == app->active_instance) {
+		g_autofree char *status = NULL;
+		int remaining_time;
+		double progress;
+
+		g_object_get (G_OBJECT (instance->indexer),
+		              "status", &status,
+		              "progress", &progress,
+		              "remaining-time", &remaining_time,
+		              NULL);
+
+		tracker_dbus_miner_emit_progress (app->indexer_iface,
+		                                  status, progress,
+		                                  remaining_time);
+	}
+}
+
+static void
 indexer_active_cb (TrackerMiner    *miner,
                    GParamSpec      *pspec,
                    IndexerInstance *instance)
@@ -506,6 +641,9 @@ indexer_active_cb (TrackerMiner    *miner,
 		}
 	} else {
 		start_cleanup_timeout (app);
+
+		/* Signal last progress */
+		indexer_progress_cb (miner, NULL, instance);
 
 		if (instance == app->active_instance) {
 			resume_removable_instances (app, app->active_instance);
@@ -583,6 +721,15 @@ track_instance_state (TrackerApplication *app,
 {
 	g_signal_connect (instance->indexer, "notify::active",
 	                  G_CALLBACK (indexer_active_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::status",
+	                  G_CALLBACK (indexer_progress_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::progress",
+	                  G_CALLBACK (indexer_progress_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::remaining-time",
+	                  G_CALLBACK (indexer_progress_cb),
 	                  instance);
 }
 
@@ -742,6 +889,8 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 	/* Sync paused state */
 	if (app->active_instance)
 		tracker_miner_pause (instance->indexer);
+	if (app->paused_by_clients)
+		tracker_miner_pause (instance->indexer);
 
 	tracker_miner_start (instance->indexer);
 
@@ -758,6 +907,7 @@ removable_point_added_cb (TrackerApplication *app,
 	IndexerInstance *instance;
 	GDBusConnection *dbus_conn;
 	g_autoptr (GError) error = NULL;
+	g_autofree char *uri = NULL;
 
 	dbus_conn = g_application_get_dbus_connection (G_APPLICATION (app));
 	instance = indexer_instance_new_for_mountpoint (app, location,
@@ -769,10 +919,11 @@ removable_point_added_cb (TrackerApplication *app,
 		return;
 	}
 
+	uri = g_file_get_uri (location);
 	app->removable_instances = g_list_prepend (app->removable_instances,
 	                                           instance);
-	tracker_miner_proxy_emit_endpoint_added (app->proxy, location,
-	                                         instance->object_path);
+	tracker_dbus_miner_emit_endpoint_added (app->indexer_iface, uri,
+	                                        instance->object_path);
 }
 
 static void
@@ -784,7 +935,7 @@ removable_point_removed_cb (TrackerApplication *app,
 	for (l = app->removable_instances; l; l = l->next) {
 		IndexerInstance *instance = l->data;
 		g_autoptr (GFile) root = NULL;
-		g_autofree char *object_path = NULL;
+		g_autofree char *object_path = NULL, *uri = NULL;
 
 		if (!g_file_equal (location, instance->root))
 			continue;
@@ -796,10 +947,155 @@ removable_point_removed_cb (TrackerApplication *app,
 		                                          instance);
 		indexer_instance_free (instance);
 
-		tracker_miner_proxy_emit_endpoint_removed (app->proxy, location,
-		                                           object_path);
+		uri = g_file_get_uri (root);
+		tracker_dbus_miner_emit_endpoint_removed (app->indexer_iface,
+		                                          uri, object_path);
 		break;
 	}
+}
+
+static gboolean
+dbus_iface_handle_start (TrackerDBusMiner      *dbus_iface,
+                         GDBusMethodInvocation *invocation,
+                         TrackerApplication    *app)
+{
+	g_dbus_method_invocation_return_value (invocation, NULL);
+	tracker_dbus_miner_emit_started (app->indexer_iface);
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_status (TrackerDBusMiner      *dbus_iface,
+                              GDBusMethodInvocation *invocation,
+                              TrackerApplication    *app)
+{
+	char *status = NULL;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "status", &status,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(s)",
+	                                                      status ?
+	                                                      status : "Idle"));
+	g_free (status);
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_progress (TrackerDBusMiner      *dbus_iface,
+                                GDBusMethodInvocation *invocation,
+                                TrackerApplication    *app)
+{
+	double progress = 1;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "progress", &progress,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(d)", progress));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_remaining_time (TrackerDBusMiner      *dbus_iface,
+                                      GDBusMethodInvocation *invocation,
+                                      TrackerApplication    *app)
+{
+	int remaining_time = -1;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "remaining-time", &remaining_time,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(i)", remaining_time));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_pause_details (TrackerDBusMiner      *dbus_iface,
+                                     GDBusMethodInvocation *invocation,
+                                     TrackerApplication    *app)
+{
+	GVariantBuilder apps, reasons;
+	GList *l;
+
+	g_variant_builder_init (&apps, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&reasons, G_VARIANT_TYPE ("as"));
+
+	for (l = app->pause_requests; l; l = l->next) {
+		PauseRequest *request = l->data;
+
+		g_variant_builder_add (&apps, "s", request->application);
+		g_variant_builder_add (&reasons, "s", request->reason);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(asas)",
+	                                                      &apps, &reasons));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_pause (TrackerDBusMiner      *dbus_iface,
+                         GDBusMethodInvocation *invocation,
+                         const char            *app_name,
+                         const char            *reason,
+                         TrackerApplication    *app)
+{
+	PauseRequest *request;
+
+	request = pause_request_new (app, app_name, reason,
+	                             g_dbus_method_invocation_get_sender (invocation));
+	app->pause_requests = g_list_prepend (app->pause_requests, request);
+
+	sync_client_pause_state (app);
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(i)", request->cookie_id));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_resume (TrackerDBusMiner      *dbus_iface,
+                          GDBusMethodInvocation *invocation,
+                          int                    cookie_id,
+                          TrackerApplication    *app)
+{
+	PauseRequest *request;
+
+	request = find_pause_request (app, cookie_id);
+
+	if (request) {
+		app->pause_requests =
+			g_list_remove (app->pause_requests, request);
+		pause_request_free (request);
+
+		sync_client_pause_state (app);
+
+		g_dbus_method_invocation_return_value (invocation, NULL);
+	} else {
+		g_dbus_method_invocation_return_error (invocation,
+		                                       tracker_miner_error_quark (),
+		                                       TRACKER_MINER_ERROR_INVALID_COOKIE,
+		                                       "Not a valid pause cookie");
+	}
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
 }
 
 static void
@@ -810,11 +1106,13 @@ tracker_application_finalize (GObject *object)
 	g_clear_list (&app->removable_instances, (GDestroyNotify) indexer_instance_free);
 	shutdown_main_instance (app, &app->main_instance);
 
+	g_clear_list (&app->pause_requests, (GDestroyNotify) pause_request_free);
+
 	g_clear_handle_id (&app->domain_watch_id, g_bus_unwatch_name);
 
 	g_clear_object (&app->files_interface);
 	g_clear_object (&app->controller);
-	g_clear_object (&app->proxy);
+	g_clear_object (&app->indexer_iface);
 	g_clear_object (&app->systemd_proxy);
 	g_clear_object (&app->monitor);
 
@@ -854,9 +1152,26 @@ tracker_application_dbus_register (GApplication     *application,
 	g_signal_connect_swapped (app->controller, "removable-point-removed",
 	                          G_CALLBACK (removable_point_removed_cb), app);
 
-	app->proxy = tracker_miner_proxy_new (app->main_instance.indexer,
-	                                      dbus_conn, DBUS_PATH, NULL, error);
-	if (!app->proxy)
+	app->indexer_iface = tracker_dbus_miner_skeleton_new ();
+	g_signal_connect (app->indexer_iface, "handle-start",
+	                  G_CALLBACK (dbus_iface_handle_start), app);
+	g_signal_connect (app->indexer_iface, "handle-get-status",
+	                  G_CALLBACK (dbus_iface_handle_get_status), app);
+	g_signal_connect (app->indexer_iface, "handle-get-progress",
+	                  G_CALLBACK (dbus_iface_handle_get_progress), app);
+	g_signal_connect (app->indexer_iface, "handle-get-remaining-time",
+	                  G_CALLBACK (dbus_iface_handle_get_remaining_time), app);
+	g_signal_connect (app->indexer_iface, "handle-get-pause-details",
+	                  G_CALLBACK (dbus_iface_handle_get_pause_details), app);
+	g_signal_connect (app->indexer_iface, "handle-pause",
+	                  G_CALLBACK (dbus_iface_handle_pause), app);
+	g_signal_connect (app->indexer_iface, "handle-pause-for-process",
+	                  G_CALLBACK (dbus_iface_handle_pause), app);
+	g_signal_connect (app->indexer_iface, "handle-resume",
+	                  G_CALLBACK (dbus_iface_handle_resume), app);
+
+	if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (app->indexer_iface),
+	                                       dbus_conn, DBUS_PATH, error))
 		return FALSE;
 
 	if (!app->dry_run) {

@@ -39,7 +39,6 @@
 #endif
 
 #include "tracker-miner.h"
-#include "tracker-miner-proxy.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
 #include "tracker-systemd.h"
