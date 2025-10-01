@@ -13,6 +13,13 @@ miner_fs_resources = gnome.compile_resources(
     c_name: 'tracker_miner_fs',
 )
 
+indexer_dbus_sources = gnome.gdbus_codegen(
+    'tracker-dbus-interface',
+    'org.freedesktop.Tracker3.Miner.Files.xml',
+    interface_prefix: 'org.freedesktop.Tracker3',
+    namespace: 'TrackerDBus',
+)
+
 private_sources = [
     'tracker-file-notifier.c',
     'tracker-files-interface.c',
@@ -36,6 +43,7 @@ libtracker_miner_private = static_library(
     'tracker-miner-private',
     miner_fs_resources[0], miner_fs_resources[1],
     miner_fs_enums[0], miner_fs_enums[1],
+    indexer_dbus_sources,
     private_sources,
     dependencies: [tracker_miners_common_dep, tracker_sparql, gmodule],
     c_args: tracker_c_args,
