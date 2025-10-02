@@ -9,6 +9,4 @@ Type=notify
 BusName=org.freedesktop.LocalSearch3
 ExecStart=@libexecdir@/localsearch-3
 Restart=on-failure
-# Don't restart after tracker daemon -k (aka tracker-control -k)
-RestartPreventExitStatus=SIGKILL
 Slice=background.slice
