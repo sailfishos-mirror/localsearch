@@ -136,7 +136,12 @@ main (gint argc, gchar *argv[])
 
 	initialize_signal_handler (app);
 
+	tracker_systemd_notify ("READY=1");
+
 	retval = g_application_run (app, argc, argv);
+
+	tracker_systemd_notify ("STOPPING=1");
+
 	if (retval == EXIT_SUCCESS) {
 		retval = tracker_application_exit_in_error (TRACKER_APPLICATION (app)) ?
 			EXIT_FAILURE : EXIT_SUCCESS;
