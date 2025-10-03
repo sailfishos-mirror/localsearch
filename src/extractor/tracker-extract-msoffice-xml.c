@@ -89,7 +89,6 @@ typedef struct {
 	gulong bytes_pending;
 	gboolean style_element_present;
 	gboolean preserve_attribute_present;
-	GTimer *timer;
 	GList *parts;
 } MsOfficeXMLParserInfo;
 
@@ -791,10 +790,6 @@ extract_content (MsOfficeXMLParserInfo *info)
 			g_debug ("Skipping '%s' as already reached max bytes to extract",
 			         part_name);
 			break;
-		} else if (g_timer_elapsed (info->timer, NULL) > 5) {
-			g_debug ("Skipping '%s' as already reached max time to extract",
-			         part_name);
-			break;
 		} else {
 			xml_read (info, part_name, MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA);
 		}
@@ -848,7 +843,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	                                      &info,
 	                                      NULL);
 
-	info.timer = g_timer_new ();
 	/* Load the internal XML file from the Zip archive, and parse it
 	 * using the given context */
 	tracker_gsf_parse_xml_in_zip (uri,
@@ -880,7 +874,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 		g_list_free (info.parts);
 	}
 
-	g_timer_destroy (info.timer);
 	g_markup_parse_context_free (context);
 	g_free (uri);
 
