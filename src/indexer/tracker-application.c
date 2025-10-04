@@ -88,6 +88,7 @@ struct _IndexerInstance
 	TrackerIndexingTree *indexing_tree;
 	EndpointThreadData endpoint_thread;
 	TrackerController *controller;
+	TrackerApplication *app;
 	GFile *root;
 	char *object_path;
 
@@ -114,6 +115,7 @@ struct _TrackerApplication
 
 	GList *removable_instances;
 	IndexerInstance main_instance;
+	IndexerInstance *active_instance;
 
 	guint wait_settle_id;
 	guint cleanup_id;
@@ -437,18 +439,78 @@ on_low_memory (GMemoryMonitor            *monitor,
 #endif
 
 static void
-indexer_active_cb (TrackerMiner       *miner,
-                   GParamSpec         *pspec,
-                   TrackerApplication *app)
+pause_removable_instances (TrackerApplication *app,
+                           IndexerInstance    *not_this_one)
 {
+	GList *l;
+
+	for (l = app->removable_instances; l; l = l->next) {
+		IndexerInstance *instance = l->data;
+
+		if (l->data == not_this_one)
+			continue;
+
+		tracker_miner_pause (instance->indexer);
+	}
+}
+
+static void
+resume_removable_instances (TrackerApplication *app,
+                            IndexerInstance    *not_this_one)
+{
+	GList *l;
+
+	for (l = app->removable_instances; l; l = l->next) {
+		IndexerInstance *instance = l->data;
+
+		if (l->data == not_this_one)
+			continue;
+
+		tracker_miner_resume (instance->indexer);
+	}
+}
+
+static void
+indexer_active_cb (TrackerMiner    *miner,
+                   GParamSpec      *pspec,
+                   IndexerInstance *instance)
+{
+	TrackerApplication *app = instance->app;
 	gboolean active;
 
 	g_object_get (G_OBJECT (miner), "active", &active, NULL);
 
 	if (active) {
 		stop_cleanup_timeout (app);
+
+		if (instance == &app->main_instance) {
+			if (app->active_instance != instance) {
+				/* Any active removable instance already paused every
+				 * other removable instances, we should not pause
+				 * these twice.
+				 */
+				if (app->active_instance)
+					tracker_miner_pause (app->active_instance->indexer);
+				else
+					pause_removable_instances (app, NULL);
+			}
+
+			/* Let the main instance take over always */
+			app->active_instance = instance;
+		} else {
+			/* Removable instances pause each other, never the main isntance */
+			if (!app->active_instance) {
+				pause_removable_instances (app, instance);
+				app->active_instance = instance;
+			}
+		}
 	} else {
 		start_cleanup_timeout (app);
+
+		if (instance == app->active_instance) {
+			resume_removable_instances (app, app->active_instance);
+			app->active_instance = NULL;
+		}
 
 		if (app->no_daemon) {
 			/* We're not sticking around for file updates, so stop
@@ -516,6 +578,26 @@ on_domain_vanished (GDBusConnection *connection,
 }
 
 static void
+track_instance_state (TrackerApplication *app,
+                      IndexerInstance    *instance)
+{
+	g_signal_connect (instance->indexer, "notify::active",
+	                  G_CALLBACK (indexer_active_cb),
+	                  instance);
+}
+
+static void
+untrack_instance_state (TrackerApplication *app,
+                        IndexerInstance    *instance)
+{
+	if (instance->indexer) {
+		g_signal_handlers_disconnect_by_func (instance->indexer,
+		                                      indexer_active_cb,
+		                                      instance);
+	}
+}
+
+static void
 shutdown_main_instance (TrackerApplication *app,
                         IndexerInstance    *instance)
 {
@@ -532,6 +614,7 @@ shutdown_main_instance (TrackerApplication *app,
 		                                   config, NULL);
 	}
 
+	untrack_instance_state (app, instance);
 	g_clear_object (&instance->indexer);
 	g_clear_object (&instance->indexing_tree);
 	g_clear_object (&instance->sparql_conn);
@@ -550,6 +633,7 @@ initialize_main_instance (TrackerApplication  *app,
 		tracker_error_report_init (store);
 	}
 
+	instance->app = app;
 	instance->controller = app->controller;
 
 	if (!setup_connection (app, instance, store, FALSE, error))
@@ -566,9 +650,8 @@ initialize_main_instance (TrackerApplication  *app,
 	if (!start_endpoint_thread (instance, dbus_conn, error))
 		return FALSE;
 
-	g_signal_connect (instance->indexer, "notify::active",
-	                  G_CALLBACK (indexer_active_cb),
-	                  app);
+	track_instance_state (app, instance);
+
 	g_signal_connect_swapped (instance->indexer, "corrupt",
 	                          G_CALLBACK (indexer_corrupt_cb),
 	                          app);
@@ -581,6 +664,7 @@ indexer_instance_free (IndexerInstance *instance)
 {
 	g_assert (instance->root != NULL);
 	finish_endpoint_thread (&instance->endpoint_thread);
+	untrack_instance_state (instance->app, instance);
 
 	if (instance->indexer)
 		tracker_miner_stop (instance->indexer);
@@ -615,6 +699,7 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 	IndexerInstance *instance;
 
 	instance = g_new0 (IndexerInstance, 1);
+	instance->app = app;
 	instance->root = g_object_ref (mount_point);
 	instance->controller = app->controller;
 
@@ -651,6 +736,12 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 	                           instance->root,
 	                           TRACKER_DIRECTORY_FLAG_RECURSE |
 	                           TRACKER_DIRECTORY_FLAG_IS_VOLUME);
+
+	track_instance_state (app, instance);
+
+	/* Sync paused state */
+	if (app->active_instance)
+		tracker_miner_pause (instance->indexer);
 
 	tracker_miner_start (instance->indexer);
 
