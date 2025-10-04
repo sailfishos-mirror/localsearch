@@ -179,10 +179,15 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
                      TrackerMinerFiles      *mf)
 {
 	if (!tracker_miner_is_paused (TRACKER_MINER (mf))) {
+		gboolean is_active;
+
+		is_active = g_strcmp0 (status, "Idle") != 0;
+
 		g_object_set (mf,
 		              "status", status,
 		              "progress", progress,
 		              "remaining-time", remaining,
+		              "active", is_active,
 		              NULL);
 	}
 }

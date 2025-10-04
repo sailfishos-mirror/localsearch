@@ -437,32 +437,26 @@ on_low_memory (GMemoryMonitor            *monitor,
 #endif
 
 static void
-indexer_started_cb (TrackerApplication *app)
+indexer_active_cb (TrackerMiner       *miner,
+                   GParamSpec         *pspec,
+                   TrackerApplication *app)
 {
-	stop_cleanup_timeout (app);
-}
+	gboolean active;
 
-static void
-indexer_finished_cb (TrackerApplication *app)
-{
-	if (app->no_daemon) {
-		/* We're not sticking around for file updates, so stop
-		 * the mainloop and exit.
-		 */
-		g_application_release (G_APPLICATION (app));
-	}
-}
+	g_object_get (G_OBJECT (miner), "active", &active, NULL);
 
-static void
-indexer_status_cb (TrackerApplication *app)
-{
-	g_autofree gchar *status = NULL;
-
-	g_object_get (G_OBJECT (app->main_instance.indexer), "status", &status, NULL);
-	if (g_strcmp0 (status, "Idle") == 0)
-		start_cleanup_timeout (app);
-	else
+	if (active) {
 		stop_cleanup_timeout (app);
+	} else {
+		start_cleanup_timeout (app);
+
+		if (app->no_daemon) {
+			/* We're not sticking around for file updates, so stop
+			 * the mainloop and exit.
+			 */
+			g_application_release (G_APPLICATION (app));
+		}
+	}
 }
 
 static void
@@ -572,15 +566,9 @@ initialize_main_instance (TrackerApplication  *app,
 	if (!start_endpoint_thread (instance, dbus_conn, error))
 		return FALSE;
 
-	g_signal_connect_swapped (instance->indexer, "started",
-	                          G_CALLBACK (indexer_started_cb),
-	                          app);
-	g_signal_connect_swapped (instance->indexer, "finished",
-	                          G_CALLBACK (indexer_finished_cb),
-	                          app);
-	g_signal_connect_swapped (instance->indexer, "notify::status",
-	                          G_CALLBACK (indexer_status_cb),
-	                          app);
+	g_signal_connect (instance->indexer, "notify::active",
+	                  G_CALLBACK (indexer_active_cb),
+	                  app);
 	g_signal_connect_swapped (instance->indexer, "corrupt",
 	                          G_CALLBACK (indexer_corrupt_cb),
 	                          app);
