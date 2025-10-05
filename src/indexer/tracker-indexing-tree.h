@@ -129,6 +129,12 @@ gboolean tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingT
 
 void tracker_indexing_tree_update_all (TrackerIndexingTree *tree);
 
+gboolean tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
+                                            GFile                *config,
+                                            GError              **error);
+
+gboolean tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
+                                             GFile               *config);
 
 G_END_DECLS
 
