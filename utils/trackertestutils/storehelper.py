@@ -519,7 +519,7 @@ class StoreHelper():
 
         """
         result = self.query(
-            'SELECT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % url)
+            'SELECT DISTINCT tracker:id(?r) WHERE { ?r a nie:InformationElement; nie:isStoredAs "%s" }' % url)
         if len(result) == 1:
             return int(result[0][0])
         elif len(result) == 0:

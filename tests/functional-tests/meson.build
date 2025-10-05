@@ -212,6 +212,7 @@ functional_tests = [
   'test_cli_status',
   'test_cli_tag',
   'test_config_changes',
+  'test_offline_config_changes',
   'test_extractor_decorator',
   'test_fts_basic',
   'test_fts_file_operations',
