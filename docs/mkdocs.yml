@@ -13,6 +13,7 @@ nav:
   - Miscellaneous D-Bus API: 'dbus-api.md'
   - Commandline reference: 'commandline.md'
   - Handling of corrupted databases: 'corruption.md'
+  - Removable devices: 'removable-devices.md'
 
 theme:
   name: readthedocs
