@@ -50,6 +50,7 @@ static gboolean video_files;
 static gboolean document_files;
 static gboolean software;
 static gboolean show_help;
+static char *mount;
 
 enum {
 	ALL,
@@ -182,6 +183,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "all", 'a', 0, G_OPTION_ARG_NONE, &all,
 	  N_("Return all non-existing matches too (i.e. include unmounted volumes)"),
+	  NULL
+	},
+	{ "mount", 'm', 0, G_OPTION_ARG_FILENAME, &mount,
+	  N_("Removable device mount point to query"),
 	  NULL
 	},
 	{ "help", 'h', 0, G_OPTION_ARG_NONE, &show_help,
@@ -342,14 +347,26 @@ static gint
 search_run (void)
 {
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
-	g_autofree char *fts = NULL;
+	g_autofree char *fts = NULL, *dbus_path = NULL;
 	const char *resource_path = NULL, *title = NULL;
 	int query_type = ALL, i;
 	gboolean success;
 	g_autoptr (GError) error = NULL;
 
+	if (mount) {
+		g_autofree char *path = NULL, *encoded_uri = NULL;
+		g_autoptr (GFile) mount_root = NULL;
+
+		mount_root = g_file_new_for_commandline_arg (mount);
+		path = g_file_get_path (mount_root);
+		encoded_uri = tracker_encode_for_object_path (path);
+
+		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
+		                         encoded_uri, NULL);
+	}
+
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-							NULL, NULL, &error);
+							dbus_path, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
