@@ -34,6 +34,10 @@ not have to be an absolute path.
   information about the content of the resource, which could be the
   contents of a file on the disk), then this option displays that in the
   output.
+*-m, --mount=<__FILE__>*::
+  If a removable device mount path is specified, the information will be
+  retrieved from the specific database for this mount point. If it is not
+  specified, the data will be obtained from the main instance.
 *-o, --output-format=<__FORMAT__>*::
   Choose which format to use to output results. Supported formats are
   _turtle_, _trig_ and _json-ld_.
