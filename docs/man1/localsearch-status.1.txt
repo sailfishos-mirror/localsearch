@@ -38,6 +38,10 @@ how many of each exist for data set that has been indexed. For example,
 *-w, --watch*::
   Watch changes that happen to the database in real time. This requires
   Ctrl+C to stop and return to the command line.
+*-m, --mount=<__FILE__>*::
+  If a removable device mount path is specified, the information will be
+  retrieved from the specific database for this mount point. If it is not
+  specified, the data will be obtained from the main instance.
 
 This option is implied if search terms are provided to filter ALL
 possible statistics.
