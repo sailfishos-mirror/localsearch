@@ -42,6 +42,7 @@
 #include "tracker-miner-proxy.h"
 #include "tracker-sched.h"
 #include "tracker-seccomp.h"
+#include "tracker-systemd.h"
 #include "tracker-term-utils.h"
 #include "tracker-type-utils.h"
 #include "tracker-utils.h"
