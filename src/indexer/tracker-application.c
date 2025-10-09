@@ -113,10 +113,7 @@ struct _TrackerApplication
 	guint got_error : 1;
 };
 
-static void tracker_application_initable_iface_init (GInitableIface *iface);
-
-G_DEFINE_TYPE_WITH_CODE (TrackerApplication, tracker_application, G_TYPE_APPLICATION,
-                         G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE, tracker_application_initable_iface_init));
+G_DEFINE_TYPE (TrackerApplication, tracker_application, G_TYPE_APPLICATION)
 
 gpointer
 endpoint_thread_func (gpointer user_data)
@@ -206,32 +203,6 @@ finish_endpoint_thread (void)
 	g_clear_pointer (&endpoint_thread_data, g_free);
 }
 
-static void
-tracker_application_finalize (GObject *object)
-{
-	TrackerApplication *app = TRACKER_APPLICATION (object);
-
-	finish_endpoint_thread ();
-
-	g_clear_handle_id (&app->domain_watch_id, g_bus_unwatch_name);
-
-	g_clear_object (&app->files_interface);
-
-	g_clear_object (&app->controller);
-
-	g_clear_object (&app->main_instance.indexer);
-
-	g_clear_object (&app->proxy);
-
-	g_clear_object (&app->main_instance.indexing_tree);
-	g_clear_object (&app->main_instance.sparql_conn);
-	g_clear_object (&app->storage);
-	g_clear_object (&app->systemd_proxy);
-	g_clear_object (&app->monitor);
-
-	G_OBJECT_CLASS (tracker_application_parent_class)->finalize (object);
-}
-
 static GFile *
 get_cache_dir (void)
 {
@@ -253,18 +224,17 @@ get_cache_dir (void)
 
 static TrackerSparqlConnection *
 setup_connection (TrackerApplication  *app,
+                  GFile               *store,
                   GError             **error)
 {
 	TrackerSparqlConnection *sparql_conn = NULL;
-	g_autoptr (GFile) store = NULL, ontology = NULL, corrupt = NULL;
+	g_autoptr (GFile) ontology = NULL, corrupt = NULL;
 	g_autoptr (GError) internal_error = NULL;
 	gboolean is_corrupted;
 	TrackerSparqlConnectionFlags flags =
 		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
 		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
 
-	if (!app->dry_run)
-		store = get_cache_dir ();
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
 	corrupt = g_file_get_child (store, CORRUPT_FILE_NAME);
@@ -281,13 +251,13 @@ setup_connection (TrackerApplication  *app,
 	if (store) {
 		if (is_corrupted ||
 		    g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
-			g_autoptr (GFile) backup_location = NULL, parent = NULL;
-			g_autofree gchar *filename = NULL;
+			g_autoptr (GFile) backup_location = NULL;
+			g_autofree gchar *uri, *backup_uri = NULL;
 
 			/* Move the database directory away, for possible forensics */
-			parent = g_file_get_parent (store);
-			filename = g_strdup_printf ("files.%" G_GINT64_FORMAT, g_get_monotonic_time ());
-			backup_location = g_file_get_child (parent, filename);
+			uri = g_file_get_uri (store);
+			backup_uri = g_strdup_printf ("%s.%" G_GINT64_FORMAT, uri, g_get_monotonic_time ());
+			backup_location = g_file_new_for_uri (backup_uri);
 
 			if (g_file_move (store, backup_location,
 					 G_FILE_COPY_NONE,
@@ -303,9 +273,6 @@ setup_connection (TrackerApplication  *app,
 									     &internal_error);
 			}
 		}
-
-		if (sparql_conn)
-			tracker_error_report_init (store);
 	}
 
 	if (internal_error)
@@ -446,28 +413,75 @@ on_domain_vanished (GDBusConnection *connection,
 }
 
 static void
-tracker_application_constructed (GObject *object)
+shutdown_main_instance (TrackerApplication *app,
+                        IndexerInstance    *instance)
 {
-	TrackerApplication *app = TRACKER_APPLICATION (object);
-	g_autoptr (GError) error = NULL;
+	finish_endpoint_thread ();
+	g_clear_object (&instance->indexer);
+	g_clear_object (&instance->indexing_tree);
+	g_clear_object (&instance->sparql_conn);
+}
 
-	app->storage = tracker_storage_new ();
+static gboolean
+initialize_main_instance (TrackerApplication  *app,
+                          IndexerInstance     *instance,
+                          GDBusConnection     *dbus_conn,
+                          GError             **error)
+{
+	g_autoptr (GFile) store = NULL;
 
-	app->monitor = tracker_monitor_new (&error);
-
-	if (!app->monitor) {
-		g_warning ("Failed to initialize file monitoring: %s", error->message);
-		g_clear_error (&error);
+	if (!app->dry_run) {
+		store = get_cache_dir ();
+		tracker_error_report_init (store);
 	}
 
-	app->main_instance.indexing_tree = tracker_indexing_tree_new ();
+	instance->sparql_conn = setup_connection (app, store, error);
+	if (!instance->sparql_conn)
+		return FALSE;
 
-#if GLIB_CHECK_VERSION (2, 64, 0)
-	app->memory_monitor = g_memory_monitor_dup_default ();
-	g_signal_connect (app->memory_monitor, "low-memory-warning", G_CALLBACK (on_low_memory), NULL);
-#endif
+	if (instance->sparql_conn) {
+		instance->indexing_tree = tracker_indexing_tree_new ();
+		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
+		                                             instance->indexing_tree,
+		                                             app->monitor);
+	}
 
-	G_OBJECT_CLASS (tracker_application_parent_class)->constructed (object);
+	if (!start_endpoint_thread (instance->sparql_conn, dbus_conn, error))
+		return FALSE;
+
+	g_signal_connect_swapped (instance->indexer, "started",
+	                          G_CALLBACK (indexer_started_cb),
+	                          app);
+	g_signal_connect_swapped (instance->indexer, "finished",
+	                          G_CALLBACK (indexer_finished_cb),
+	                          app);
+	g_signal_connect_swapped (instance->indexer, "notify::status",
+	                          G_CALLBACK (indexer_status_cb),
+	                          app);
+	g_signal_connect_swapped (instance->indexer, "corrupt",
+	                          G_CALLBACK (indexer_corrupt_cb),
+	                          app);
+
+	return TRUE;
+}
+
+static void
+tracker_application_finalize (GObject *object)
+{
+	TrackerApplication *app = TRACKER_APPLICATION (object);
+
+	shutdown_main_instance (app, &app->main_instance);
+
+	g_clear_handle_id (&app->domain_watch_id, g_bus_unwatch_name);
+
+	g_clear_object (&app->files_interface);
+	g_clear_object (&app->controller);
+	g_clear_object (&app->proxy);
+	g_clear_object (&app->storage);
+	g_clear_object (&app->systemd_proxy);
+	g_clear_object (&app->monitor);
+
+	G_OBJECT_CLASS (tracker_application_parent_class)->finalize (object);
 }
 
 static gboolean
@@ -479,6 +493,9 @@ tracker_application_dbus_register (GApplication     *application,
 	TrackerApplication *app = TRACKER_APPLICATION (application);
 	g_autofree char *legacy_dbus_name = NULL;
 	gboolean wait_settle = FALSE;
+
+	if (!initialize_main_instance (app, &app->main_instance, dbus_conn, error))
+		return FALSE;
 
 	if (!app->no_daemon &&
 	    g_strcmp0 (DOMAIN_PREFIX, "org.freedesktop") != 0) {
@@ -504,9 +521,6 @@ tracker_application_dbus_register (GApplication     *application,
 
 	/* Request legacy DBus name */
 	legacy_dbus_name = g_strconcat (DOMAIN_PREFIX, ".", LEGACY_DBUS_NAME_SUFFIX, NULL);
-
-	if (!start_endpoint_thread (app->main_instance.sparql_conn, dbus_conn, error))
-		return FALSE;
 
 	if (!tracker_dbus_request_name (dbus_conn, legacy_dbus_name, error))
 		return FALSE;
@@ -719,7 +733,6 @@ tracker_application_class_init (TrackerApplicationClass *klass)
 	GApplicationClass *application_class = G_APPLICATION_CLASS (klass);
 
 	object_class->finalize = tracker_application_finalize;
-	object_class->constructed = tracker_application_constructed;
 
 	application_class->dbus_register  = tracker_application_dbus_register;
 	application_class->dbus_unregister = tracker_application_dbus_unregister;
@@ -727,62 +740,40 @@ tracker_application_class_init (TrackerApplicationClass *klass)
 	application_class->startup = tracker_application_startup;
 }
 
-static gboolean
-tracker_application_initable_init (GInitable     *initable,
-                                   GCancellable  *cancellable,
-                                   GError       **error)
-{
-	TrackerApplication *app = TRACKER_APPLICATION (initable);
-
-	app->main_instance.sparql_conn = setup_connection (app, error);
-	if (!app->main_instance.sparql_conn)
-		return FALSE;
-
-	/* Create new TrackerMinerFiles object */
-	app->main_instance.indexer = tracker_miner_files_new (app->main_instance.sparql_conn,
-	                                                      app->main_instance.indexing_tree,
-	                                                      app->monitor);
-
-	g_signal_connect_swapped (app->main_instance.indexer, "started",
-	                          G_CALLBACK (indexer_started_cb),
-	                          app);
-	g_signal_connect_swapped (app->main_instance.indexer, "finished",
-	                          G_CALLBACK (indexer_finished_cb),
-	                          app);
-	g_signal_connect_swapped (app->main_instance.indexer, "notify::status",
-	                          G_CALLBACK (indexer_status_cb),
-	                          app);
-	g_signal_connect_swapped (app->main_instance.indexer, "corrupt",
-	                          G_CALLBACK (indexer_corrupt_cb),
-	                          app);
-
-	return TRUE;
-}
-
-static void
-tracker_application_initable_iface_init (GInitableIface *iface)
-{
-	iface->init = tracker_application_initable_init;
-}
-
 static void
 tracker_application_init (TrackerApplication *application)
 {
+	g_autoptr (GError) error = NULL;
+
 	g_application_add_main_option_entries (G_APPLICATION (application), entries);
+
+	application->storage = tracker_storage_new ();
+
+	application->monitor = tracker_monitor_new (&error);
+
+	if (!application->monitor) {
+		g_warning ("Failed to initialize file monitoring: %s", error->message);
+		g_clear_error (&error);
+	}
+
+#if GLIB_CHECK_VERSION (2, 64, 0)
+	application->memory_monitor = g_memory_monitor_dup_default ();
+	g_signal_connect (application->memory_monitor, "low-memory-warning",
+	                  G_CALLBACK (on_low_memory), NULL);
+#endif
 }
 
 GApplication *
-tracker_application_new (GError **error)
+tracker_application_new (void)
 {
 	g_autofree char *dbus_name = NULL;
 
 	dbus_name = g_strconcat (DOMAIN_PREFIX, ".", DBUS_NAME_SUFFIX, NULL);
 
-	return g_initable_new (TRACKER_TYPE_APPLICATION,
-	                       NULL, error,
-	                       "application-id", dbus_name,
-	                       "flags", G_APPLICATION_IS_SERVICE,
-	                       NULL);
+	return g_object_new (TRACKER_TYPE_APPLICATION,
+	                     "application-id", dbus_name,
+	                     "flags", G_APPLICATION_IS_SERVICE,
+	                     NULL);
 }
 
 gboolean

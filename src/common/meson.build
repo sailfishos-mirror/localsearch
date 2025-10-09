@@ -17,6 +17,7 @@ tracker_miners_common_sources = [
   'tracker-miner-proxy.c',
   'tracker-module-manager.c',
   'tracker-sched.c',
+  'tracker-systemd.c',
   'tracker-term-utils.c',
   'tracker-type-utils.c',
   'tracker-utils.c',
