@@ -33,17 +33,14 @@
 
 #define CMS_PER_INCH            2.54
 
-#ifdef HAVE_LIBEXIF
-#define EXIF_NAMESPACE          "Exif"
-#define EXIF_NAMESPACE_LENGTH   4
-#endif /* HAVE_LIBEXIF */
-
 #ifdef HAVE_EXEMPI
 #define XMP_NAMESPACE           "http://ns.adobe.com/xap/1.0/\x00"
 #define XMP_NAMESPACE_LENGTH    29
 #endif /* HAVE_EXEMPI */
 
 #ifdef HAVE_GEXIV2
+#define EXIF_NAMESPACE          "Exif"
+#define EXIF_NAMESPACE_LENGTH   4
 #define PS3_NAMESPACE           "Photoshop 3.0\0"
 #define PS3_NAMESPACE_LENGTH    14
 #include <gexiv2/gexiv2.h>
@@ -224,11 +221,16 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			str = (gchar*) marker->data;
 			len = marker->data_length;
 
-#ifdef HAVE_LIBEXIF
-			if (!ed && strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
-				ed = tracker_exif_new ((guchar *) marker->data, len, uri);
+#ifdef HAVE_GEXIV2
+			if (len > 0 && strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
+				GExiv2Metadata *metadata = gexiv2_metadata_new ();
+
+				if (gexiv2_metadata_from_app1_segment (metadata, (const guint8 *) str, len, NULL))
+					ed = tracker_exif_new_from_metadata (metadata);
+
+				g_object_unref (metadata);
 			}
-#endif /* HAVE_LIBEXIF */
+#endif /* HAVE_GEXIV2 */
 
 #ifdef HAVE_EXEMPI
 			if (!xd && strncmp (XMP_NAMESPACE, str, XMP_NAMESPACE_LENGTH) == 0) {
@@ -598,7 +600,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	tracker_extract_info_set_resource (info, metadata);
 
-fail:
+	fail :
 	jpeg_destroy_decompress (&cinfo);
 
 	g_clear_pointer (&ed, tracker_exif_free);

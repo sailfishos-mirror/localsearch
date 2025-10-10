@@ -19,10 +19,6 @@ if exempi.found()
   tracker_extract_dependencies += exempi
 endif
 
-if libexif.found()
-  tracker_extract_dependencies += libexif
-endif
-
 if gexiv2.found()
   libtracker_extract_sources += 'tracker-iptc.c'
   tracker_extract_dependencies += gexiv2

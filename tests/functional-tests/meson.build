@@ -68,7 +68,7 @@ else
   extractor_tests += 'audio/vorbis'
 endif
 
-if libjpeg.found() and exempi.found() and libexif.found()
+if libjpeg.found() and exempi.found() and gexiv2.found()
   extractor_tests += [
     'images/jpeg-no-metadata',
     'images/jpeg-basic',
@@ -232,7 +232,7 @@ if libcue.found()
   functional_tests += 'test_extractor_flac_cuesheet'
 endif
 
-if have_tracker_writeback and libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and exempi.found() and libexif.found()
+if have_tracker_writeback and libjpeg.found() and libgif.found() and libpng.found() and libtiff.found() and exempi.found() and gexiv2.found()
   functional_tests += [
     'test_writeback_images',
   ]

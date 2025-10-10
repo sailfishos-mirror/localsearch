@@ -36,7 +36,6 @@ gstreamer_audio = dependency('gstreamer-audio-1.0', required: false)
 gstreamer_tag = dependency('gstreamer-tag-1.0', required: false)
 gupnp_dlna = dependency('gupnp-dlna-2.0', version: '>= 0.9.4', required: false)
 libcue = dependency('libcue', version: '>= 2.0.0', required: get_option('cue'))
-libexif = dependency('libexif', version: '>= 0.6', required: get_option('exif'))
 libgsf = dependency('libgsf-1', version: '>= 1.14.24', required: get_option('gsf'))
 libgxps = dependency('libgxps', required: get_option('xps'))
 libjpeg = dependency('libjpeg', required: get_option('jpeg'))
@@ -286,7 +285,6 @@ conf.set('HAVE_GSTREAMER_1_20', gstreamer.version() >= '1.20.0')
 conf.set('HAVE_POWER', battery_detection_library_name != 'none')
 conf.set('HAVE_LIBCUE', libcue.found())
 conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
-conf.set('HAVE_LIBEXIF', libexif.found())
 conf.set('HAVE_GEXIV2', gexiv2.found())
 conf.set('HAVE_LIBSECCOMP', seccomp_required and libseccomp.found())
 conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
@@ -442,11 +440,11 @@ if have_tracker_extract
     '    Support XPS:                            ' + libgxps.found().to_string(),
     '    Support GIF:                            @0@ (xmp: @1@)'.format(libgif.found().to_string(), exempi.found().to_string()),
     '    Support JPEG:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
-        libjpeg.found().to_string(), exempi.found().to_string(), libexif.found().to_string(), gexiv2.found().to_string()),
+        libjpeg.found().to_string(), exempi.found().to_string(), gexiv2.found().to_string(), gexiv2.found().to_string()),
     '    Support WEBP:                           ' + webp.found().to_string(),
     '    Support RAW:                            ' + gexiv2.found().to_string(),
     '    Support TIFF:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
-        libtiff.found().to_string(), exempi.found().to_string(), libexif.found().to_string(), gexiv2.found().to_string()),
+        libtiff.found().to_string(), exempi.found().to_string(), gexiv2.found().to_string(), gexiv2.found().to_string()),
     '    Support MS & Open Office:               ' + libgsf.found().to_string(),
     '    Support XML / HTML:                     ' + libxml2.found().to_string(),
     '    Support embedded / sidecar XMP:         ' + exempi.found().to_string(),
