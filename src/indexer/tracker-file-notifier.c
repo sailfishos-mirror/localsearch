@@ -1666,33 +1666,7 @@ tracker_file_notifier_class_init (TrackerFileNotifierClass *klass)
 static void
 tracker_file_notifier_init (TrackerFileNotifier *notifier)
 {
-	GError *error = NULL;
-
 	notifier->stopped = TRUE;
-
-	/* Set up monitor */
-	notifier->monitor = tracker_monitor_new (&error);
-
-	if (!notifier->monitor) {
-		g_warning ("Could not init monitor: %s", error->message);
-		g_error_free (error);
-	} else {
-		g_signal_connect (notifier->monitor, "item-created",
-		                  G_CALLBACK (monitor_item_created_cb),
-		                  notifier);
-		g_signal_connect (notifier->monitor, "item-updated",
-		                  G_CALLBACK (monitor_item_updated_cb),
-		                  notifier);
-		g_signal_connect (notifier->monitor, "item-attribute-updated",
-		                  G_CALLBACK (monitor_item_attribute_updated_cb),
-		                  notifier);
-		g_signal_connect (notifier->monitor, "item-deleted",
-		                  G_CALLBACK (monitor_item_deleted_cb),
-		                  notifier);
-		g_signal_connect (notifier->monitor, "item-moved",
-		                  G_CALLBACK (monitor_item_moved_cb),
-		                  notifier);
-	}
 }
 
 TrackerFileNotifier *
