@@ -1151,3 +1151,19 @@ tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree
 
 	return FALSE;
 }
+
+void
+tracker_indexing_tree_update_all (TrackerIndexingTree *tree)
+{
+	GList *roots, *l;
+
+	roots = tracker_indexing_tree_list_roots (tree);
+
+	for (l = roots; l; l = l->next) {
+		GFile *root = l->data;
+
+		tracker_indexing_tree_notify_update (tree, root, FALSE);
+	}
+
+	g_list_free (roots);
+}

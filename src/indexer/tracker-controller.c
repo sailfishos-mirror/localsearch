@@ -418,28 +418,12 @@ index_single_directories_cb (TrackerConfig     *config,
 }
 
 static void
-tracker_controller_check_all_roots (TrackerController *controller)
-{
-	GList *roots, *l;
-
-	roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
-
-	for (l = roots; l; l = l->next)	{
-		GFile *root = l->data;
-
-		tracker_indexing_tree_notify_update (controller->indexing_tree, root, FALSE);
-	}
-
-	g_list_free (roots);
-}
-
-static void
 filter_changed_cb (GSettings         *config,
                    GParamSpec        *pspec,
                    TrackerController *controller)
 {
 	update_filters (controller);
-	tracker_controller_check_all_roots (controller);
+	tracker_indexing_tree_update_all (controller->indexing_tree);
 }
 
 static void
@@ -447,7 +431,7 @@ text_allowlist_changed_cb (TrackerConfig *config,
                            GParamSpec        *pspec,
                            TrackerController *controller)
 {
-	tracker_controller_check_all_roots (controller);
+	tracker_indexing_tree_update_all (controller->indexing_tree);
 }
 
 static gboolean
