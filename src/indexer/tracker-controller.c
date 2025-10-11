@@ -538,6 +538,12 @@ initialize_from_config (TrackerController *controller)
 
 	update_filters (controller);
 
+	if (controller->monitor) {
+		tracker_monitor_set_enabled (controller->monitor,
+		                             g_settings_get_boolean (G_SETTINGS (controller->config),
+		                                                     "enable-monitors"));
+	}
+
 	/* Setup mount points, we MUST have config set up before we
 	 * init mount points because the config is used in that
 	 * function.
