@@ -323,23 +323,6 @@ delete_index_root (TrackerMinerFiles *miner,
 }
 
 static void
-init_index_roots_cb (GObject      *source,
-                     GAsyncResult *result,
-                     gpointer      user_data)
-{
-	g_autofree GError *error = NULL;
-
-	tracker_batch_execute_finish (TRACKER_BATCH (source), result, &error);
-
-	if (error) {
-		g_critical ("Could not initialize currently active mount points: %s",
-		            error->message);
-	} else {
-		init_stale_volume_removal (user_data);
-	}
-}
-
-static void
 init_index_roots (TrackerMinerFiles *miner_files)
 {
 	TrackerMiner *miner = TRACKER_MINER (miner_files);
@@ -423,10 +406,12 @@ init_index_roots (TrackerMinerFiles *miner_files)
 			set_up_mount_point (miner_files, file, TRUE, batch);
 	}
 
-	tracker_batch_execute_async (batch,
-	                             NULL,
-	                             init_index_roots_cb,
-	                             miner);
+	if (tracker_batch_execute (batch, NULL, &error)) {
+		init_stale_volume_removal (miner_files);
+	} else {
+		g_critical ("Could not initialize currently active mount points: %s",
+		            error->message);
+	}
 }
 
 static gboolean
