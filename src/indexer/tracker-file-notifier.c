@@ -1081,8 +1081,8 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 		notifier->pending_index_roots = g_list_append (notifier->pending_index_roots, root);
 	}
 
-	if (!notifier->current_index_root)
-		notifier_check_next_root (notifier);
+       if (!notifier->current_index_root && !notifier->stopped)
+               notifier_check_next_root (notifier);
 }
 
 static GFileInfo *
@@ -1432,6 +1432,16 @@ indexing_tree_directory_updated (TrackerIndexingTree *indexing_tree,
 {
 	TrackerFileNotifier *notifier = user_data;
 	TrackerDirectoryFlags flags;
+	GList *l;
+
+	for (l = notifier->pending_index_roots; l; l = l->next) {
+		TrackerIndexRoot *root = l->data;
+
+		if (g_file_equal (root->root, directory)) {
+			root->root_flags |= TRACKER_ROOT_FLAG_FULL_CHECK;
+			return;
+		}
+	}
 
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	notifier_queue_root (notifier, directory, flags,
