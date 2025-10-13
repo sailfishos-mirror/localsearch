@@ -418,28 +418,12 @@ index_single_directories_cb (TrackerConfig     *config,
 }
 
 static void
-tracker_controller_check_all_roots (TrackerController *controller)
-{
-	GList *roots, *l;
-
-	roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
-
-	for (l = roots; l; l = l->next)	{
-		GFile *root = l->data;
-
-		tracker_indexing_tree_notify_update (controller->indexing_tree, root, FALSE);
-	}
-
-	g_list_free (roots);
-}
-
-static void
 filter_changed_cb (GSettings         *config,
                    GParamSpec        *pspec,
                    TrackerController *controller)
 {
 	update_filters (controller);
-	tracker_controller_check_all_roots (controller);
+	tracker_indexing_tree_update_all (controller->indexing_tree);
 }
 
 static void
@@ -447,7 +431,7 @@ text_allowlist_changed_cb (TrackerConfig *config,
                            GParamSpec        *pspec,
                            TrackerController *controller)
 {
-	tracker_controller_check_all_roots (controller);
+	tracker_indexing_tree_update_all (controller->indexing_tree);
 }
 
 static gboolean
@@ -553,6 +537,12 @@ initialize_from_config (TrackerController *controller)
 	GSList *dirs;
 
 	update_filters (controller);
+
+	if (controller->monitor) {
+		tracker_monitor_set_enabled (controller->monitor,
+		                             g_settings_get_boolean (G_SETTINGS (controller->config),
+		                                                     "enable-monitors"));
+	}
 
 	/* Setup mount points, we MUST have config set up before we
 	 * init mount points because the config is used in that

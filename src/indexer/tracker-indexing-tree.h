@@ -127,6 +127,15 @@ void tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
 gboolean tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree,
                                                                 GFile               *file);
 
+void tracker_indexing_tree_update_all (TrackerIndexingTree *tree);
+
+gboolean tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
+                                            GFile                *config,
+                                            GError              **error);
+
+gboolean tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
+                                             GFile               *config);
+
 G_END_DECLS
 
 #endif /* __TRACKER_INDEXING_TREE_H__ */

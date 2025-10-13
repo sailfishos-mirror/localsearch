@@ -133,6 +133,7 @@ pattern_data_new (const gchar *string,
 	case TRACKER_FILTER_FILE:
 	case TRACKER_FILTER_DIRECTORY:
 		data->pattern = g_pattern_spec_new (string);
+		data->string = g_strdup (string);
 		break;
 	case TRACKER_FILTER_PARENT_DIRECTORY:
 		data->string = g_strdup (string);
@@ -148,6 +149,16 @@ pattern_data_free (PatternData *data)
 	g_clear_pointer (&data->pattern, g_pattern_spec_free);
 	g_free (data->string);
 	g_slice_free (PatternData, data);
+}
+
+static int
+pattern_data_compare (const PatternData *data1,
+                      const PatternData *data2)
+{
+	if (data1->type != data2->type)
+		return -1;
+
+	return g_strcmp0 (data2->string, data2->string);
 }
 
 static void
@@ -221,6 +232,10 @@ tracker_indexing_tree_finalize (GObject *object)
 
 	tree = TRACKER_INDEXING_TREE (object);
 	priv = tree->priv;
+
+	g_list_free_full (priv->allowed_text_patterns,
+	                  (GDestroyNotify) pattern_data_free);
+	priv->allowed_text_patterns = NULL;
 
 	g_list_foreach (priv->filter_patterns, (GFunc) pattern_data_free, NULL);
 	g_list_free (priv->filter_patterns);
@@ -1115,7 +1130,7 @@ tracker_indexing_tree_clear_allowed_text_patterns (TrackerIndexingTree *tree)
 {
 	TrackerIndexingTreePrivate *priv = tree->priv;
 
-	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) g_pattern_spec_free);
+	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
 	priv->allowed_text_patterns = NULL;
 }
 
@@ -1124,10 +1139,11 @@ tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
                                                 const char          *pattern_str)
 {
 	TrackerIndexingTreePrivate *priv = tree->priv;
+	PatternData *pattern;
 
+	pattern = pattern_data_new (pattern_str, 0);
 	priv->allowed_text_patterns =
-		g_list_prepend (priv->allowed_text_patterns,
-		                g_pattern_spec_new (pattern_str));
+		g_list_prepend (priv->allowed_text_patterns, pattern);
 }
 
 gboolean
@@ -1141,13 +1157,252 @@ tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree
 	basename = g_file_get_basename (file);
 
 	for (l = priv->allowed_text_patterns; l; l = l->next) {
+		PatternData *pattern = l->data;
+
 #if GLIB_CHECK_VERSION (2, 70, 0)
-		if (g_pattern_spec_match_string (l->data, basename))
+		if (g_pattern_spec_match_string (pattern->pattern, basename))
 #else
-		if (g_pattern_match_string (l->data, basename))
+		if (g_pattern_match_string (pattern->pattern, basename))
 #endif
 			return TRUE;
 	}
 
+	return FALSE;
+}
+
+void
+tracker_indexing_tree_update_all (TrackerIndexingTree *tree)
+{
+	GList *roots, *l;
+
+	roots = tracker_indexing_tree_list_roots (tree);
+
+	for (l = roots; l; l = l->next) {
+		GFile *root = l->data;
+
+		tracker_indexing_tree_notify_update (tree, root, FALSE);
+	}
+
+	g_list_free (roots);
+}
+
+gboolean
+tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
+                                   GFile                *config,
+                                   GError              **error)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+	GVariantBuilder builder, text_allowlist, single_dirs, recursive_dirs;
+	GVariantBuilder ignored_files, ignored_dirs, ignored_dirs_with_content;
+	g_autoptr (GVariant) variant = NULL;
+	g_autofree char *str = NULL;
+	GList *l, *roots;
+
+	g_variant_builder_init (&builder, G_VARIANT_TYPE ("a{sv}"));
+	g_variant_builder_init (&text_allowlist, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&ignored_files, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&ignored_dirs, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&ignored_dirs_with_content, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&single_dirs, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&recursive_dirs, G_VARIANT_TYPE ("as"));
+
+	for (l = priv->allowed_text_patterns; l; l = l->next) {
+		PatternData *pattern = l->data;
+		g_variant_builder_add (&text_allowlist, "s", pattern->string);
+	}
+
+	for (l = priv->filter_patterns; l; l = l->next) {
+		PatternData *pattern = l->data;
+
+		if (pattern->type == TRACKER_FILTER_FILE)
+			g_variant_builder_add (&ignored_files, "s", pattern->string);
+		else if (pattern->type == TRACKER_FILTER_DIRECTORY)
+			g_variant_builder_add (&ignored_dirs, "s", pattern->string);
+		else if (pattern->type == TRACKER_FILTER_PARENT_DIRECTORY)
+			g_variant_builder_add (&ignored_dirs_with_content, "s", pattern->string);
+	}
+
+	roots = tracker_indexing_tree_list_roots (tree);
+
+	for (l = roots; l; l = l->next) {
+		TrackerDirectoryFlags flags;
+
+		tracker_indexing_tree_get_root (tree,
+		                                l->data, NULL, &flags);
+
+		if (!!(flags & TRACKER_DIRECTORY_FLAG_RECURSE)) {
+			g_variant_builder_add (&recursive_dirs, "s",
+			                       g_file_peek_path (l->data));
+		} else {
+			g_variant_builder_add (&single_dirs, "s",
+			                       g_file_peek_path (l->data));
+		}
+	}
+
+	g_list_free (roots);
+
+	g_variant_builder_add (&builder, "{sv}", "text-allowlist",
+	                       g_variant_builder_end (&text_allowlist));
+	g_variant_builder_add (&builder, "{sv}", "ignored-files",
+	                       g_variant_builder_end (&ignored_files));
+	g_variant_builder_add (&builder, "{sv}", "ignored-directories",
+	                       g_variant_builder_end (&ignored_dirs));
+	g_variant_builder_add (&builder, "{sv}", "ignored-directories-with-content",
+	                       g_variant_builder_end (&ignored_dirs_with_content));
+	g_variant_builder_add (&builder, "{sv}", "index-single-directories",
+	                       g_variant_builder_end (&single_dirs));
+	g_variant_builder_add (&builder, "{sv}", "index-recursive-directories",
+	                       g_variant_builder_end (&recursive_dirs));
+
+	variant = g_variant_builder_end (&builder);
+	str = g_variant_print (variant, FALSE);
+
+	return g_file_set_contents (g_file_peek_path (config), str, -1, error);
+}
+
+static gboolean
+compare_filter (TrackerIndexingTree *tree,
+                GVariant            *variant,
+                const char          *key,
+                TrackerFilterType    type,
+                int                 *n_items_found_inout)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+	g_auto (GStrv) strv = NULL;
+	int n_filters = 0, i;
+
+	if (g_variant_lookup (variant, key, "^as", &strv)) {
+		for (i = 0; strv[i]; i++) {
+			PatternData match = { 0, };
+
+			match.type = type;
+			match.string = strv[i];
+
+			if (!g_list_find_custom (priv->filter_patterns, &match,
+			                         (GCompareFunc) pattern_data_compare))
+				return FALSE;
+
+			n_filters++;
+		}
+
+		g_clear_pointer (&strv, g_strfreev);
+	}
+
+	(*n_items_found_inout) += n_filters;
+	return TRUE;
+}
+
+static gboolean
+compare_directories (TrackerIndexingTree   *tree,
+                     GVariant              *variant,
+                     const char            *key,
+                     TrackerDirectoryFlags  mask,
+                     TrackerDirectoryFlags  value,
+                     int                   *n_roots_inout)
+{
+	g_auto (GStrv) strv = NULL;
+	int n_roots = 0, i;
+
+	if (g_variant_lookup (variant, key, "^as", &strv)) {
+		for (i = 0; strv[i]; i++) {
+			g_autoptr (GFile) file = NULL;
+			TrackerDirectoryFlags flags;
+			GFile *root;
+
+			file = g_file_new_for_path (strv[i]);
+			root = tracker_indexing_tree_get_root (tree, file, NULL, &flags);
+
+			if (!root || !g_file_equal (file, root) ||
+			    (flags & mask) != value)
+				return FALSE;
+
+			n_roots++;
+		}
+
+		g_clear_pointer (&strv, g_strfreev);
+	}
+
+	(*n_roots_inout) += n_roots;
+	return TRUE;
+}
+
+gboolean
+tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
+                                    GFile               *config)
+{
+	TrackerIndexingTreePrivate *priv = tree->priv;
+	g_autoptr (GVariant) variant = NULL;
+	g_autofree char *str = NULL;
+	g_auto (GStrv) strv = NULL;
+	GList *roots;
+	int i, n_filters = 0, n_roots = 0, cur_n_roots;
+	size_t len;
+
+	if (!g_file_get_contents (g_file_peek_path (config), &str, &len, NULL))
+		goto update;
+
+	variant = g_variant_parse (G_VARIANT_TYPE ("a{sv}"),
+	                           str, &str[len], NULL, NULL);
+	if (!variant)
+		goto update;
+
+	if (g_variant_lookup (variant, "text-allowlist", "^as", &strv)) {
+		for (i = 0; strv[i]; i++) {
+			PatternData match = { 0, };
+
+			match.string = strv[i];
+
+			if (!g_list_find_custom (priv->allowed_text_patterns, &match,
+			                         (GCompareFunc) pattern_data_compare))
+				goto update;
+		}
+
+		if (g_strv_length (strv) != g_list_length (priv->allowed_text_patterns))
+			goto update;
+
+		g_clear_pointer (&strv, g_strfreev);
+	} else if (priv->allowed_text_patterns) {
+		goto update;
+	}
+
+	if (!compare_filter (tree, variant, "ignored-files",
+	                     TRACKER_FILTER_FILE, &n_filters))
+		goto update;
+
+	if (!compare_filter (tree, variant, "ignored-directories",
+	                     TRACKER_FILTER_DIRECTORY, &n_filters))
+		goto update;
+
+	if (!compare_filter (tree, variant, "ignored-directories-with-content",
+	                     TRACKER_FILTER_PARENT_DIRECTORY, &n_filters))
+		goto update;
+
+	if (n_filters != g_list_length (priv->filter_patterns))
+		goto update;
+
+	if (!compare_directories (tree, variant, "index-single-directories",
+	                          TRACKER_DIRECTORY_FLAG_RECURSE,
+	                          TRACKER_DIRECTORY_FLAG_NONE,
+	                          &n_roots))
+		goto update;
+
+	if (!compare_directories (tree, variant, "index-recursive-directories",
+	                          TRACKER_DIRECTORY_FLAG_RECURSE,
+	                          TRACKER_DIRECTORY_FLAG_RECURSE,
+	                          &n_roots))
+		goto update;
+
+	roots = tracker_indexing_tree_list_roots (tree);
+	cur_n_roots = g_list_length (roots);
+	g_list_free (roots);
+
+	if (n_roots != cur_n_roots)
+		goto update;
+
+	/* Everything matches, nothing to do */
+	return TRUE;
+
+ update:
+	tracker_indexing_tree_update_all (tree);
 	return FALSE;
 }

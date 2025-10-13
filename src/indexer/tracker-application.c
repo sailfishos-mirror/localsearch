@@ -45,6 +45,7 @@
 	"  http://www.gnu.org/licenses/gpl.txt\n"
 
 #define CORRUPT_FILE_NAME ".localsearch.corrupted"
+#define CONFIG_FILE ".config.gvariant"
 
 static GOptionEntry entries[] = {
 	{ "no-daemon", 'n', 0,
@@ -417,6 +418,18 @@ shutdown_main_instance (TrackerApplication *app,
                         IndexerInstance    *instance)
 {
 	finish_endpoint_thread ();
+
+	if (!app->dry_run &&
+	    app->main_instance.indexing_tree) {
+		g_autoptr (GFile) store, config;
+
+		store = get_cache_dir ();
+		config = g_file_get_child (store, CONFIG_FILE);
+
+		tracker_indexing_tree_save_config (app->main_instance.indexing_tree,
+		                                   config, NULL);
+	}
+
 	g_clear_object (&instance->indexer);
 	g_clear_object (&instance->indexing_tree);
 	g_clear_object (&instance->sparql_conn);
@@ -518,6 +531,16 @@ tracker_application_dbus_register (GApplication     *application,
 	                                      dbus_conn, DBUS_PATH, NULL, error);
 	if (!app->proxy)
 		return FALSE;
+
+	if (!app->dry_run) {
+		g_autoptr (GFile) store, config;
+
+		store = get_cache_dir ();
+		config = g_file_get_child (store, CONFIG_FILE);
+
+		tracker_indexing_tree_check_config (app->main_instance.indexing_tree,
+		                                    config);
+	}
 
 	/* Request legacy DBus name */
 	legacy_dbus_name = g_strconcat (DOMAIN_PREFIX, ".", LEGACY_DBUS_NAME_SUFFIX, NULL);
