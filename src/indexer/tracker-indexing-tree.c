@@ -222,6 +222,10 @@ tracker_indexing_tree_finalize (GObject *object)
 	tree = TRACKER_INDEXING_TREE (object);
 	priv = tree->priv;
 
+	g_list_free_full (priv->allowed_text_patterns,
+	                  (GDestroyNotify) pattern_data_free);
+	priv->allowed_text_patterns = NULL;
+
 	g_list_foreach (priv->filter_patterns, (GFunc) pattern_data_free, NULL);
 	g_list_free (priv->filter_patterns);
 
@@ -1115,7 +1119,7 @@ tracker_indexing_tree_clear_allowed_text_patterns (TrackerIndexingTree *tree)
 {
 	TrackerIndexingTreePrivate *priv = tree->priv;
 
-	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) g_pattern_spec_free);
+	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
 	priv->allowed_text_patterns = NULL;
 }
 
@@ -1124,10 +1128,11 @@ tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
                                                 const char          *pattern_str)
 {
 	TrackerIndexingTreePrivate *priv = tree->priv;
+	PatternData *pattern;
 
+	pattern = pattern_data_new (pattern_str, 0);
 	priv->allowed_text_patterns =
-		g_list_prepend (priv->allowed_text_patterns,
-		                g_pattern_spec_new (pattern_str));
+		g_list_prepend (priv->allowed_text_patterns, pattern);
 }
 
 gboolean
@@ -1141,10 +1146,12 @@ tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree
 	basename = g_file_get_basename (file);
 
 	for (l = priv->allowed_text_patterns; l; l = l->next) {
+		PatternData *pattern = l->data;
+
 #if GLIB_CHECK_VERSION (2, 70, 0)
-		if (g_pattern_spec_match_string (l->data, basename))
+		if (g_pattern_spec_match_string (pattern->pattern, basename))
 #else
-		if (g_pattern_match_string (l->data, basename))
+		if (g_pattern_match_string (pattern->pattern, basename))
 #endif
 			return TRUE;
 	}
