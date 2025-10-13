@@ -1,3 +1,15 @@
+NEW in 3.10.1 - 2025-10-13
+==========================
+  * Improvements to the handling of corrupted databases
+  * Avoid session startup issues if database initialization takes long
+  * Handle compressed Abiword documents
+  * Memory usage improvements indexing WEBP files
+  * Support gexiv2 >= 0.16
+  * Unify metadata extraction deadline mechanisms
+  * Test suite improvements
+
+Translations: bg, ca, es, kab, pt, ro, tr, ug
+
 NEW in 3.10.0 - 2025-09-14
 ==========================
   * Fixes to handling of configuration changes
