@@ -8,6 +8,7 @@ during indexing, and to power fast queries across file metadata
 ## Table of contents
 
 - [Overview](overview.md)
+- [Indexed data](indexed-data.md)
 - [Querying LocalSearch](endpoint.md)
 - [Miscellaneous D-Bus API](dbus-api.md)
 - [Commandline reference](commandline.md)
