@@ -186,27 +186,27 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         resource_id = self.tracker.get_content_resource_id(dir_uri)
 
         dconf = self.sandbox.get_dconf_client()
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-single-directories', GLib.Variant.new_strv([]))
 
         with self.tracker.await_delete(
             fixtures.DOCUMENTS_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-single-directories', GLib.Variant.new_strv([]))
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
         self.assertResourceMissing(dir_uri)
         self.assertResourceMissing(uri)
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-single-directories', GLib.Variant.new_strv([self.non_recursive_dir]))
-
-        self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
         with self.await_document_inserted(path):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-single-directories', GLib.Variant.new_strv([self.non_recursive_dir]))
+
+            self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
         self.assertResourceExists(dir_uri)
@@ -227,31 +227,30 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         resource_id = self.tracker.get_content_resource_id(dir_uri)
 
         dconf = self.sandbox.get_dconf_client()
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-recursive-directories', GLib.Variant.new_strv([]))
-
-        self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
 
         # Remove directory from configuration, file should disappear
         with self.tracker.await_delete(
             fixtures.DOCUMENTS_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-recursive-directories', GLib.Variant.new_strv([]))
+
+            self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
         self.assertResourceMissing(dir_uri)
         self.assertResourceMissing(uri)
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-recursive-directories', GLib.Variant.new_strv([self.indexed_dir]))
-
-        self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
-
         # Ensure that dir and file are back after configuring it again
         with self.await_document_inserted(path):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-recursive-directories', GLib.Variant.new_strv([self.indexed_dir]))
+
+            self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
         self.assertResourceExists(dir_uri)
