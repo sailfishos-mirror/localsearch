@@ -204,6 +204,7 @@ endif
 
 functional_tests = [
   'test_cli',
+  'test_cli_extract',
   'test_cli_index',
   'test_cli_info',
   'test_cli_inhibit',

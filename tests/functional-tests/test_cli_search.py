@@ -81,5 +81,45 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         self.assertIn(target1.as_uri(), search_output)
         self.assertNotIn(target2.as_uri(), search_output)
 
+    def test_search_detailed(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        file1 = datadir.joinpath("text/mango.txt")
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        # Check we get fts context
+        search_output = self.run_cli(["localsearch", "search", "--detailed", "lorem"])
+        self.assertIn(target1.as_uri(), search_output)
+        self.assertIn("dolor", search_output)
+
+    def test_search_noargs(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        file1 = datadir.joinpath("text/mango.txt")
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        search_output = self.run_cli(["localsearch", "search"])
+        self.assertIn(self.uri(self.indexed_dir), search_output)
+        self.assertIn(target1.as_uri(), search_output)
+
+    def test_search_wrongargs(self):
+        err = None
+        out = None
+        try:
+            out = self.run_cli(["localsearch", "search", "--asdf"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("Usage", err);
+            self.assertIsNone(out)
+
+    def test_search_help(self):
+        output = self.run_cli(["localsearch", "search", "--help"])
+        self.assertIn("Usage", output)
+
 if __name__ == "__main__":
     fixtures.tracker_test_main()

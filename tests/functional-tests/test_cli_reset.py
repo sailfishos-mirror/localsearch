@@ -92,10 +92,38 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             shutil.copy(file, target2)
 
         # Both files should exist
-        print (self.uri(target))
         self.assertResourceExists(self.uri(target))
-        print (self.uri(target2))
         self.assertResourceExists(self.uri(target2))
+
+    def test_reset_file_not_indexed(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        not_indexed = pathlib.Path(os.path.join(self.non_recursive_dir, 'folder', 'mango3.txt'))
+        not_indexed.parent.mkdir(parents=True)
+        with self.await_document_inserted(target):
+            shutil.copy(file, target)
+            shutil.copy(file, not_indexed)
+
+        self.assertResourceExists(self.uri(target))
+        self.assertResourceMissing(self.uri(not_indexed))
+
+        output = self.run_cli(["localsearch", "status"])
+        # State should be idle
+        self.assertIn("idle", output)
+
+        # Reset a file that should not be indexed in the first place
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, 'mango2.txt'))
+        with self.await_document_inserted(target2):
+            self.run_cli(["localsearch", "reset", "--file", not_indexed])
+            shutil.copy(file, target2)
+
+        # Non indexed file should stay not indexed
+        self.assertResourceExists(self.uri(target))
+        self.assertResourceExists(self.uri(target2))
+        self.assertResourceMissing(self.uri(not_indexed))
 
     def test_reset_wrongargs(self):
         err = None
