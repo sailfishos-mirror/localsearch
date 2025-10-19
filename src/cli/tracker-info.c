@@ -363,6 +363,7 @@ info_run (void)
 	g_autoptr (GError) error = NULL;
 	GList *urns = NULL;
 	gchar **p;
+	int retval = EXIT_FAILURE;
 
 	tracker_term_pipe_to_pager ();
 
@@ -373,7 +374,7 @@ info_run (void)
 		g_printerr ("%s: %s\n",
 		            _("Could not connect to LocalSearch"),
 		            error->message);
-		return EXIT_FAILURE;
+		goto out;
 	}
 
 	for (p = filenames; *p; p++) {
@@ -458,7 +459,7 @@ info_run (void)
 		enum_value = g_enum_get_value_by_nick (enum_class, output_format);
 		if (!enum_value) {
 			g_printerr (N_("Unsupported serialization format “%s”\n"), output_format);
-			return EXIT_FAILURE;
+			goto out;
 		}
 		rdf_format = enum_value->value;
 
@@ -484,12 +485,14 @@ info_run (void)
 		print_plain (cursor, namespaces);
 	}
 
+	retval = EXIT_SUCCESS;
+
  out:
 	g_list_free_full (urns, g_free);
 
 	tracker_term_pager_close ();
 
-	return EXIT_SUCCESS;
+	return retval;
 }
 
 static int
