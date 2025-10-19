@@ -413,7 +413,7 @@ tracker_search (int          argc,
 		return EXIT_FAILURE;
 	} else if (show_help) {
 		help = g_option_context_get_help (context, FALSE, NULL);
-		g_printerr ("%s\n", help);
+		g_print ("%s\n", help);
 		return EXIT_SUCCESS;
 	}
 
