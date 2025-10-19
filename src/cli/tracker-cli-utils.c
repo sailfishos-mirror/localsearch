@@ -19,6 +19,7 @@
  *
  */
 
+#include "config-miners.h"
 
 #include <glib.h>
 #include <glib/gi18n.h>
@@ -26,6 +27,13 @@
 
 #include "tracker-cli-utils.h"
 
+#include "tracker-common.h"
+#include "tracker-color.h"
+
+#define GROUP "Report"
+#define KEY_URI "Uri"
+#define KEY_MESSAGE "Message"
+#define KEY_SPARQL "Sparql"
 
 static gint
 sort_by_date (gconstpointer a,
@@ -105,6 +113,84 @@ tracker_cli_get_error_keyfiles (void)
 	g_list_free_full (infos, g_object_unref);
 
 	return keyfiles;
+}
+
+static gboolean
+file_matches (GFile *file,
+              GStrv  terms)
+{
+	g_autofree char *uri = NULL, *path = NULL;
+	int i;
+
+	uri = g_file_get_uri (file);
+	path = g_file_get_path (file);
+
+	if (!terms)
+		return TRUE;
+
+	for (i = 0; terms[i]; i++) {
+		if (strstr (path, terms[i]))
+			return TRUE;
+		if (strstr (uri, terms[i]))
+			return TRUE;
+	}
+
+	return FALSE;
+}
+
+gboolean
+tracker_cli_print_errors (GList    *keyfiles,
+                          GStrv     terms,
+                          gboolean  piped)
+{
+	GList *l;
+	GKeyFile *keyfile;
+	gboolean found = FALSE;
+
+	for (l = keyfiles; l; l = l->next) {
+		g_autoptr(GFile) file = NULL;
+		g_autofree gchar *uri = NULL, *path = NULL;
+
+		keyfile = l->data;
+		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
+		file = g_file_new_for_uri (uri);
+
+		if (!g_file_query_exists (file, NULL)) {
+			tracker_error_report_delete (file);
+			continue;
+		}
+
+		if (file_matches (file, terms)) {
+			gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
+			gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
+
+			found = TRUE;
+			g_print (!piped ?
+			         BOLD_BEGIN "URI:" BOLD_END " %s\n" :
+			         "URI: %s\n", uri);
+
+			if (message) {
+				g_print (!piped ?
+				         BOLD_BEGIN "%s:" BOLD_END " %s\n" :
+				         "%s: %s\n",
+				         _("Message"), message);
+			}
+
+			if (sparql) {
+				g_print (!piped ?
+				         BOLD_BEGIN "SPARQL:" BOLD_END " %s\n" :
+				         "SPARQL: %s\n",
+				         sparql);
+			}
+
+			g_print ("\n");
+
+			g_free (sparql);
+			g_free (message);
+		}
+	}
+
+	return found;
 }
 
 gboolean

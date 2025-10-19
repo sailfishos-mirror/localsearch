@@ -321,41 +321,6 @@ output_eligible_status_for_file (gchar   *path,
 	}
 }
 
-static void
-print_errors (GList       *keyfiles,
-              const gchar *file_uri)
-{
-	GList *l;
-	GKeyFile *keyfile;
-	g_autoptr (GFile) file = NULL;
-
-	file = g_file_new_for_uri (file_uri);
-
-	for (l = keyfiles; l; l = l->next) {
-		g_autofree char *uri = NULL;
-		g_autoptr (GFile) error_file = NULL;
-
-		keyfile = l->data;
-		uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
-		error_file = g_file_new_for_uri (uri);
-
-		if (g_file_equal (file, error_file)) {
-			g_autofree char *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
-			g_autofree char *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
-
-			if (message)
-				g_print (CRIT_BEGIN "%s\n%s: %s" CRIT_END "\n",
-					 ERROR_MESSAGE,
-					 _("Error message"),
-					 message);
-			if (sparql)
-				g_print ("SPARQL: %s\n", sparql);
-			g_print ("\n");
-		}
-	}
-}
-
-
 static int
 info_run (void)
 {
@@ -381,7 +346,6 @@ info_run (void)
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
 		g_autoptr (TrackerSparqlCursor) cursor = NULL;
 		g_autofree gchar *uri = NULL, *query = NULL, *uri_scheme = NULL;
-		g_autoptr (GList) keyfiles = NULL;
 		gboolean found = FALSE;
 
 		uri_scheme = g_uri_parse_scheme (*p);
@@ -427,6 +391,9 @@ info_run (void)
 			            _("No metadata available for that URI"));
 
 			if (!output_format) {
+				gchar *terms[] = { uri, NULL };
+				GList *keyfiles;
+
 				output_eligible_status_for_file (*p, &error);
 
 				if (error) {
@@ -437,8 +404,11 @@ info_run (void)
 				}
 
 				keyfiles = tracker_cli_get_error_keyfiles ();
-				if (keyfiles)
-					print_errors (keyfiles, uri);
+				tracker_cli_print_errors (keyfiles,
+				                          (GStrv) terms,
+				                          FALSE);
+				g_list_free_full (keyfiles,
+				                  (GDestroyNotify) g_key_file_unref);
 			}
 		}
 	}
