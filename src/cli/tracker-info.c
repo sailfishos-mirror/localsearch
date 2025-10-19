@@ -423,11 +423,10 @@ info_run (void)
 		}
 
 		if (!found) {
-			if (output_format) {
-				g_print ("# No metadata available for <%s>\n", uri);
-			} else {
-				g_print ("  %s\n",
-				         _("No metadata available for that URI"));
+			g_printerr ("  %s\n",
+			            _("No metadata available for that URI"));
+
+			if (!output_format) {
 				output_eligible_status_for_file (*p, &error);
 
 				if (error) {
