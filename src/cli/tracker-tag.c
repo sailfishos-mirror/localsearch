@@ -417,7 +417,6 @@ tracker_tag (int          argc,
 
 	if (!g_option_context_parse (context, &argc, (char***) &argv, &error)) {
 		g_printerr ("%s, %s\n", _("Unrecognized options"), error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
