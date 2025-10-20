@@ -19,4 +19,11 @@ DELETE {
       ?ie nie:isStoredAs ?f
     }
   }
+};
+
+DELETE WHERE {
+  GRAPH ?g {
+    ?root a rdfs:Resource ;
+      nie:isStoredAs ~rootFolder
+  }
 }

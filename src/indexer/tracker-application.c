@@ -505,7 +505,6 @@ tracker_application_dbus_register (GApplication     *application,
 {
 	TrackerApplication *app = TRACKER_APPLICATION (application);
 	g_autofree char *legacy_dbus_name = NULL;
-	gboolean wait_settle = FALSE;
 
 	if (!initialize_main_instance (app, &app->main_instance, dbus_conn, error))
 		return FALSE;
@@ -556,36 +555,6 @@ tracker_application_dbus_register (GApplication     *application,
 		                                                    "/org/freedesktop/systemd1",
 		                                                    "org.freedesktop.systemd1.Manager",
 		                                                    NULL, NULL);
-		if (app->systemd_proxy) {
-			const char *finished_states[] = { "running", "degraded", NULL };
-			g_autoptr (GVariant) v = NULL;
-			const char *state = NULL;
-
-			g_signal_connect_swapped (app->systemd_proxy,
-			                          "g-signal::StartupFinished",
-			                          G_CALLBACK (on_systemd_settled),
-			                          app);
-			g_dbus_proxy_call_sync (app->systemd_proxy,
-			                        "Subscribe",
-			                        NULL,
-			                        G_DBUS_CALL_FLAGS_NONE,
-			                        -1,
-			                        NULL, NULL);
-
-			v = g_dbus_proxy_get_cached_property (app->systemd_proxy, "SystemState");
-
-			if (v) {
-				state = g_variant_get_string (v, NULL);
-				wait_settle = !g_strv_contains (finished_states, state);
-			}
-		}
-	}
-
-	if (wait_settle) {
-		g_debug ("Waiting for the system to settle");
-		app->wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, app);
-	} else {
-		start_indexer (app);
 	}
 
 	return TRUE;
@@ -744,6 +713,40 @@ tracker_application_handle_local_options (GApplication *application,
 static void
 tracker_application_startup (GApplication *application)
 {
+	TrackerApplication *app = TRACKER_APPLICATION (application);
+	gboolean wait_settle = FALSE;
+
+	if (app->systemd_proxy) {
+		const char *finished_states[] = { "running", "degraded", NULL };
+		g_autoptr (GVariant) v = NULL;
+		const char *state = NULL;
+
+		g_signal_connect_swapped (app->systemd_proxy,
+		                          "g-signal::StartupFinished",
+		                          G_CALLBACK (on_systemd_settled),
+		                          app);
+		g_dbus_proxy_call_sync (app->systemd_proxy,
+		                        "Subscribe",
+		                        NULL,
+		                        G_DBUS_CALL_FLAGS_NONE,
+		                        -1,
+		                        NULL, NULL);
+
+		v = g_dbus_proxy_get_cached_property (app->systemd_proxy, "SystemState");
+
+		if (v) {
+			state = g_variant_get_string (v, NULL);
+			wait_settle = !g_strv_contains (finished_states, state);
+		}
+	}
+
+	if (wait_settle) {
+		g_debug ("Waiting for the system to settle");
+		app->wait_settle_id = g_timeout_add_seconds (5, wait_settle_cb, app);
+	} else {
+		start_indexer (app);
+	}
+
 	g_application_hold (application);
 
 	G_APPLICATION_CLASS (tracker_application_parent_class)->startup (application);

@@ -279,22 +279,6 @@ miner_files_finalize (GObject *object)
 }
 
 static void
-set_up_mount_point_cb (GObject      *source,
-                       GAsyncResult *result,
-                       gpointer      user_data)
-{
-	g_autofree GError *error = NULL;
-
-	tracker_sparql_statement_update_finish (TRACKER_SPARQL_STATEMENT (source),
-	                                        result, &error);
-
-	if (error) {
-		g_critical ("Could not set mount point in database, %s",
-		            error->message);
-	}
-}
-
-static void
 set_up_mount_point (TrackerMinerFiles *miner,
                     GFile             *mount_point,
                     gboolean           mounted,
@@ -315,21 +299,11 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
 	stmt = tracker_load_statement (conn, "update-mountpoint.rq", NULL);
 
-	if (batch) {
-		tracker_batch_add_statement (batch, stmt,
-		                             "mountPoint", G_TYPE_STRING, uri,
-		                             "mounted", G_TYPE_BOOLEAN, mounted,
-		                             "currentDate", G_TYPE_DATE_TIME, now,
-		                             NULL);
-	} else {
-		tracker_sparql_statement_bind_string (stmt, "mountPoint", uri);
-		tracker_sparql_statement_bind_boolean (stmt, "mounted", mounted);
-		tracker_sparql_statement_bind_datetime (stmt, "currentDate", now);
-		tracker_sparql_statement_update_async (stmt,
-		                                       NULL,
-		                                       set_up_mount_point_cb,
-		                                       NULL);
-	}
+	tracker_batch_add_statement (batch, stmt,
+	                             "mountPoint", G_TYPE_STRING, uri,
+	                             "mounted", G_TYPE_BOOLEAN, mounted,
+	                             "currentDate", G_TYPE_DATE_TIME, now,
+	                             NULL);
 }
 
 static void
@@ -346,23 +320,6 @@ delete_index_root (TrackerMinerFiles *miner,
 	tracker_batch_add_statement (batch, stmt,
 	                             "rootFolder", G_TYPE_STRING, uri,
 	                             NULL);
-}
-
-static void
-init_index_roots_cb (GObject      *source,
-                     GAsyncResult *result,
-                     gpointer      user_data)
-{
-	g_autofree GError *error = NULL;
-
-	tracker_batch_execute_finish (TRACKER_BATCH (source), result, &error);
-
-	if (error) {
-		g_critical ("Could not initialize currently active mount points: %s",
-		            error->message);
-	} else {
-		init_stale_volume_removal (user_data);
-	}
 }
 
 static void
@@ -446,13 +403,15 @@ init_index_roots (TrackerMinerFiles *miner_files)
 		tracker_indexing_tree_get_root (indexing_tree, file, NULL, &flags);
 
 		if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
-			set_up_mount_point (miner_files, file, TRUE, NULL);
+			set_up_mount_point (miner_files, file, TRUE, batch);
 	}
 
-	tracker_batch_execute_async (batch,
-	                             NULL,
-	                             init_index_roots_cb,
-	                             miner);
+	if (tracker_batch_execute (batch, NULL, &error)) {
+		init_stale_volume_removal (miner_files);
+	} else {
+		g_critical ("Could not initialize currently active mount points: %s",
+		            error->message);
+	}
 }
 
 static gboolean
@@ -566,8 +525,20 @@ indexing_tree_directory_added_cb (TrackerIndexingTree *indexing_tree,
 
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 
-	if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
-		set_up_mount_point (miner_files, directory, TRUE, NULL);
+	if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME)) {
+		TrackerSparqlConnection *conn;
+		TrackerBatch *batch;
+		g_autoptr (GError) error = NULL;
+
+		conn = tracker_miner_get_connection (user_data);
+		batch = tracker_sparql_connection_create_batch (conn);
+		set_up_mount_point (miner_files, directory, TRUE, batch);
+
+		if (!tracker_batch_execute (batch, NULL, &error)) {
+			g_critical ("Could not set mount point in database, %s",
+			            error->message);
+		}
+	}
 }
 
 static void
