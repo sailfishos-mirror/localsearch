@@ -38,8 +38,8 @@
 /* ICU language detection aid */
 #mesondefine HAVE_LIBICU_CHARSET_DETECTION
 
-/* Define if we have libiptcdata */
-#mesondefine HAVE_LIBIPTCDATA
+/* Define if we have gexiv2 */
+#mesondefine HAVE_GEXIV2
 
 /* Define if we have libseccomp */
 #mesondefine HAVE_LIBSECCOMP

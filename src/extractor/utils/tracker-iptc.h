@@ -20,6 +20,7 @@
 #ifndef __LIBTRACKER_EXTRACT_IPTC_H__
 #define __LIBTRACKER_EXTRACT_IPTC_H__
 
+#include <gexiv2/gexiv2.h>
 #include <glib.h>
 #include "tracker-extract.h"
 
@@ -58,6 +59,8 @@ typedef struct {
 	gchar *country_name;
 	gchar *contact;
 } TrackerIptcData;
+
+TrackerIptcData *tracker_iptc_new_from_metadata (GExiv2Metadata *metadata);
 
 TrackerIptcData *tracker_iptc_new   (const guchar    *buffer,
 				     gsize            len,

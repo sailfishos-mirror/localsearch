@@ -31,6 +31,8 @@
 
 #include "tracker-main.h"
 
+#include "tracker-iptc.h"
+
 #define CMS_PER_INCH            2.54
 #define EXIF_DATE_FORMAT        "%Y:%m:%d %H:%M:%S"
 
@@ -229,7 +231,7 @@ parse_white_balance (gushort white_balance_value)
 }
 
 static RawExifData *
-parse_exif_data (GExiv2Metadata *metadata)
+parse_metadata (GExiv2Metadata *metadata)
 {
 	RawExifData *ed = NULL;
 	gchar *time = NULL;
@@ -334,6 +336,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	GExiv2Metadata *metadata = NULL;
 	GExiv2Orientation orientation;
 	RawExifData *ed = NULL;
+	TrackerIptcData *iptc_data;
 	TrackerResource *resource = NULL;
 	gboolean retval = FALSE;
 	const gchar *time_content_created;
@@ -367,7 +370,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	nfo_orientation = convert_exiv2_orientation_to_nfo (orientation);
 	tracker_resource_set_uri (resource, "nfo:orientation", nfo_orientation);
 
-	ed = parse_exif_data (metadata);
+	ed = parse_metadata (metadata);
+
+	iptc_data = tracker_iptc_new_from_metadata(metadata);
+	if (iptc_data) {
+		tracker_iptc_apply_to_resource(resource, iptc_data);
+		tracker_iptc_free(iptc_data);
+	}
 
 	if (ed->make != NULL || ed->model != NULL) {
 		TrackerResource *equipment;

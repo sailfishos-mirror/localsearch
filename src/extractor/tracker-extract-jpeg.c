@@ -43,11 +43,11 @@
 #define XMP_NAMESPACE_LENGTH    29
 #endif /* HAVE_EXEMPI */
 
-#ifdef HAVE_LIBIPTCDATA
+#ifdef HAVE_GEXIV2
 #define PS3_NAMESPACE           "Photoshop 3.0\0"
 #define PS3_NAMESPACE_LENGTH    14
-#include <libiptcdata/iptc-jpeg.h>
-#endif /* HAVE_LIBIPTCDATA */
+#include <gexiv2/gexiv2.h>
+#endif /* HAVE_GEXIV2 */
 
 enum {
 	JPEG_RESOLUTION_UNIT_UNKNOWN = 0,
@@ -213,10 +213,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	while (marker) {
 		gchar *str;
 		gsize len;
-#ifdef HAVE_LIBIPTCDATA
-		gsize offset;
-		guint sublen;
-#endif /* HAVE_LIBIPTCDATA */
 
 		switch (marker->marker) {
 		case JPEG_COM:
@@ -247,14 +243,24 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		case JPEG_APP0 + 13:
 			str = (gchar*) marker->data;
 			len = marker->data_length;
-#ifdef HAVE_LIBIPTCDATA
-			if (len > 0 && strncmp (PS3_NAMESPACE, str, PS3_NAMESPACE_LENGTH) == 0) {
-				offset = iptc_jpeg_ps3_find_iptc (str, len, &sublen);
-				if (offset > 0 && sublen > 0) {
-					id = tracker_iptc_new (str + offset, sublen, uri);
+#ifdef HAVE_GEXIV2
+			if (len > 0 && strncmp(PS3_NAMESPACE, str, PS3_NAMESPACE_LENGTH) == 0) {
+				const gchar *filepath = g_file_peek_path(file);
+				GError *error = NULL;
+				GExiv2Metadata *metadata = gexiv2_metadata_new();
+
+				if (gexiv2_metadata_open_path(metadata, filepath, &error)) {
+					id = tracker_iptc_new_from_metadata(metadata);
+					g_object_unref(metadata);
+				} else {
+					g_object_unref(metadata);
+					if (error) {
+						g_error_free(error);
+					}
+					id = NULL;
 				}
 			}
-#endif /* HAVE_LIBIPTCDATA */
+#endif /* HAVE_GEXIV2 */
 
 			break;
 

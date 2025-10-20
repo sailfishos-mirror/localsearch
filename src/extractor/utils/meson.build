@@ -24,8 +24,8 @@ if libexif.found()
   tracker_extract_dependencies += libexif
 endif
 
-if libiptcdata.found()
-  tracker_extract_dependencies += libiptcdata
+if gexiv2.found()
+  tracker_extract_dependencies += gexiv2
 endif
 
 libtracker_extract = library('tracker-extract',
