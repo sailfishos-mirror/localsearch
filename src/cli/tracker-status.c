@@ -82,8 +82,9 @@ static GOptionEntry entries[] = {
 	{ NULL }
 };
 
-static int show_errors (gchar    **terms,
-                        gboolean   piped);
+static int show_errors (GList    *keyfiles,
+                        GStrv     terms,
+                        gboolean  piped);
 
 typedef struct {
 	char *graph;
@@ -396,12 +397,12 @@ get_no_args (void)
 	GList *keyfiles;
 	gboolean use_pager, paused;
 
-	use_pager = tracker_term_pipe_to_pager ();
-
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
 		return EXIT_FAILURE;
 	}
+
+	use_pager = tracker_term_pipe_to_pager ();
 
 	g_print (_("Currently indexed"));
 	g_print (": ");
@@ -456,8 +457,7 @@ get_no_args (void)
 		if (use_pager) {
 			print_errors (keyfiles);
 		} else {
-			gchar *all[2] = { "", NULL };
-			show_errors ((GStrv) all, TRUE);
+			show_errors (keyfiles, NULL, TRUE);
 		}
 
 		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
@@ -469,64 +469,11 @@ get_no_args (void)
 }
 
 static int
-show_errors (gchar    **terms,
-             gboolean   piped)
+show_errors (GList    *keyfiles,
+             GStrv     terms,
+             gboolean  piped)
 {
-	GList *keyfiles, *l;
-	GKeyFile *keyfile;
-	guint i;
-	gboolean found = FALSE;
-
-	keyfiles = tracker_cli_get_error_keyfiles ();
-
-	for (i = 0; terms[i] != NULL; i++) {
-		for (l = keyfiles; l; l = l->next) {
-			g_autoptr(GFile) file = NULL;
-			g_autofree gchar *uri = NULL, *path = NULL;
-
-			keyfile = l->data;
-			uri = g_key_file_get_string (keyfile, GROUP, KEY_URI, NULL);
-			file = g_file_new_for_uri (uri);
-
-			if (!g_file_query_exists (file, NULL)) {
-				tracker_error_report_delete (file);
-				continue;
-			}
-
-			path = g_file_get_path (file);
-
-			if (strstr (path, terms[i])) {
-				gchar *sparql = g_key_file_get_string (keyfile, GROUP, KEY_SPARQL, NULL);
-				gchar *message = g_key_file_get_string (keyfile, GROUP, KEY_MESSAGE, NULL);
-
-				found = TRUE;
-				g_print (!piped ?
-				         BOLD_BEGIN "URI:" BOLD_END " %s\n" :
-				         "URI: %s\n", uri);
-
-				if (message) {
-					g_print (!piped ?
-					         BOLD_BEGIN "%s:" BOLD_END " %s\n" :
-					         "%s: %s\n",
-					         _("Message"), message);
-				}
-
-				if (sparql) {
-					g_print (!piped ?
-					         BOLD_BEGIN "SPARQL:" BOLD_END " %s\n" :
-					         "SPARQL: %s\n",
-					         sparql);
-				}
-
-				g_print ("\n");
-
-				g_free (sparql);
-				g_free (message);
-			}
-		}
-	}
-
-	if (!found) {
+	if (!tracker_cli_print_errors (keyfiles, terms, piped)) {
 		g_print (!piped ?
 		         BOLD_BEGIN "%s" BOLD_END "\n" :
 		         "%s\n",
@@ -763,11 +710,15 @@ tracker_status (int          argc,
 	}
 
 	if (terms) {
+		GList *keyfiles;
 		gint result;
 
 		tracker_term_pipe_to_pager ();
-		result = show_errors (terms, FALSE);
+		keyfiles = tracker_cli_get_error_keyfiles ();
+		result = show_errors (keyfiles, terms, FALSE);
 		tracker_term_pager_close ();
+
+		g_list_free_full (keyfiles, (GDestroyNotify) g_key_file_unref);
 
 		return result;
 	}

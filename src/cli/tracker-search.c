@@ -65,6 +65,21 @@ enum {
 	N_QUERIES,
 };
 
+static gboolean *arg_checks[] = {
+	&all,
+	&document_files,
+	&files,
+	&folders,
+	&image_files,
+	&music_albums,
+	&music_artists,
+	&audio_files,
+	&software,
+	&video_files,
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (arg_checks) == N_QUERIES);
+
 static const char *list_queries[] = {
 	"/org/freedesktop/LocalSearch/queries/list-all.rq",
 	"/org/freedesktop/LocalSearch/queries/list-documents.rq",
@@ -329,7 +344,7 @@ search_run (void)
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autofree char *fts = NULL;
 	const char *resource_path = NULL, *title = NULL;
-	int query_type;
+	int query_type = ALL, i;
 	gboolean success;
 	g_autoptr (GError) error = NULL;
 
@@ -343,25 +358,14 @@ search_run (void)
 		return EXIT_FAILURE;
 	}
 
-	if (files)
-		query_type = FILES;
-	else if (folders)
-		query_type = FOLDERS;
-	else if (music_albums)
-		query_type = MUSIC_ALBUMS;
-	else if (music_artists)
-		query_type = MUSIC_ARTISTS;
-	else if (audio_files)
-		query_type = MUSIC;
-	else if (image_files)
-		query_type = IMAGES;
-	else if (document_files)
-		query_type = DOCUMENTS;
-	else if (video_files)
-		query_type = VIDEOS;
-	else
-		query_type = ALL;
+	for (i = 0; i < N_QUERIES; i++) {
+		if (*arg_checks[i]) {
+			query_type = i;
+			break;
+		}
+	}
 
+	g_assert (query_type >=0 && query_type < N_QUERIES);
 	fts = get_fts_string (terms);
 
 	resource_path = fts ?
@@ -413,7 +417,7 @@ tracker_search (int          argc,
 		return EXIT_FAILURE;
 	} else if (show_help) {
 		help = g_option_context_get_help (context, FALSE, NULL);
-		g_printerr ("%s\n", help);
+		g_print ("%s\n", help);
 		return EXIT_SUCCESS;
 	}
 

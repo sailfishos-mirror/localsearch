@@ -65,6 +65,7 @@ extract_files (char *output_format)
 {
 	g_autofree char *tracker_extract_path = NULL;
 	g_autoptr (GError) error = NULL;
+	int retval = EXIT_SUCCESS;
 	char **p;
 
 	tracker_term_pipe_to_pager ();
@@ -77,25 +78,30 @@ extract_files (char *output_format)
 	}
 
 	for (p = filenames; *p; p++) {
+		int wait_status;
 		char *argv[] = {tracker_extract_path,
 		                "--output-format", output_format,
 		                "--file", *p, NULL };
 
 		g_spawn_sync (NULL, argv, NULL, G_SPAWN_DEFAULT,
 		              extractor_child_setup, *p,
-		              NULL, NULL, NULL, &error);
+		              NULL, NULL, &wait_status, &error);
 
 		if (error) {
 			g_printerr ("%s: %s\n",
 			            _("Could not run tracker-extract: "),
 			            error->message);
-			return EXIT_FAILURE;
+			retval = EXIT_FAILURE;
 		}
+
+		/* The subprocess should already have printed its own errors */
+		if (!g_spawn_check_wait_status (wait_status, NULL))
+			retval = EXIT_FAILURE;
 	}
 
 	tracker_term_pager_close ();
 
-	return EXIT_SUCCESS;
+	return retval;
 }
 
 static int

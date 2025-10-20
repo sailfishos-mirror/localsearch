@@ -80,6 +80,53 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             output = self.run_cli(["localsearch", "inhibit", "--list"])
             self.assertEqual("", output)
 
+    def test_inhibit_terminated(self):
+        """Test that terminating `localsearch inhibit` resumes indexing"""
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        with subprocess.Popen(
+                ["localsearch", "inhibit", "cat"],
+                stdin=subprocess.PIPE,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL) as proc:
+            paused = False
+            n_tries = 0
+            while not paused:
+                [apps, reasons] = self.miner_fs.miner_fs.GetPauseDetails()
+                if len(apps) > 0:
+                    paused = True
+                else:
+                    n_tries += 1
+                    if n_tries > 30:
+                        proc.stdin.close()
+                        raise RuntimeError("did not pause")
+                    time.sleep(1)
+
+            # Check that the command appears in the list
+            output = self.run_cli(["localsearch", "inhibit", "--list"])
+            self.assertIn("cat", output)
+
+            # Check that status is paused
+            output = self.run_cli(["localsearch", "status"])
+            self.assertIn("Indexer is paused", output)
+
+            file = datadir.joinpath("text/mango.txt")
+            target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+            shutil.copy(file, self.indexed_dir)
+
+            # Wait some time and check that the resource is still missing
+            time.sleep(3)
+            self.assertResourceMissing(self.uri(target))
+
+            # Check that the file gets indexed after the inhibition is gone
+            with self.await_document_inserted(target):
+                # Terminate the process
+                proc.terminate()
+
+            # List should now be empty
+            output = self.run_cli(["localsearch", "inhibit", "--list"])
+            self.assertEqual("", output)
+
     def test_inhibit_wrongargs(self):
         err = None
         out = None
@@ -90,6 +137,18 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             err = str(e)
         finally:
             self.assertIn("--asdf", err);
+            self.assertIsNone(out)
+
+    def test_inhibit_noargs(self):
+        err = None
+        out = None
+        try:
+            # Pass no command
+            out = self.run_cli(["localsearch", "inhibit"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("Usage", err);
             self.assertIsNone(out)
 
 if __name__ == "__main__":

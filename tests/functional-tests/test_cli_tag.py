@@ -126,6 +126,10 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         assert tag_infos[0].file_count == 1
         assert tag_infos[0].files[0] == target1.as_uri()
 
+        # List the tag on the file specifically
+        output = self.run_cli(["localsearch", "tag", target1])
+        self.assertEqual("test_tag_1", output.strip())
+
         # Delete the tag from the file
         output = self.run_cli(
             [
@@ -156,6 +160,65 @@ class TestCliSearch(fixtures.TrackerCommandLineTestCase):
         # We should have no tags again.
         output = self.run_cli(["localsearch", "tag", "--list"])
         parser.assert_tag_list_empty(output)
+
+    def test_tag_noargs(self):
+        err = None
+        out = None
+        try:
+            out = self.run_cli(["localsearch", "tag"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("Usage", err)
+            self.assertIsNone(out)
+
+    def test_tag_wrongargs(self):
+        err = None
+        out = None
+        try:
+            # Pass unknown arg
+            out = self.run_cli(["localsearch", "tag", "--asdf"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("--asdf", err);
+            self.assertIsNone(out)
+
+    def test_tag_detailed_wrongargs1(self):
+        err = None
+        out = None
+        try:
+            # Pass description with no add, not allowed
+            out = self.run_cli(["localsearch", "tag", "--description", "foo"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("--add", err);
+            self.assertIsNone(out)
+
+    def test_tag_show_files_wrongargs1(self):
+        err = None
+        out = None
+        try:
+            # Pass --show-files without --list, not allowed
+            out = self.run_cli(["localsearch", "tag", "--show-files"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("--list", err);
+            self.assertIsNone(out)
+
+    def test_tag_add_wrongargs1(self):
+        err = None
+        out = None
+        try:
+            # Pass --add and --delete, not allowed
+            out = self.run_cli(["localsearch", "tag", "--add", "foo", "--delete", "bar"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("can not be used together", err);
+            self.assertIsNone(out)
 
 
 if __name__ == "__main__":

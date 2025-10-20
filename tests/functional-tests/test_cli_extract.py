@@ -1,4 +1,4 @@
-# Copyright (C) 2020, Sam Thursfield <sam@afuera.me.uk>
+# Copyright (C) 2025, Red Hat Inc.
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License
@@ -14,9 +14,11 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
+#
+# Author: Carlos Garnacho <carlosg@gnome.org>
 
 """
-Test `localsearch` commandline tool
+Test `localsearch extract` subcommand
 """
 
 from typing import *
@@ -31,44 +33,42 @@ import shutil
 
 
 class TestCli(fixtures.TrackerCommandLineTestCase):
-    def test_noargs(self):
-        out = self.run_cli(["localsearch"])
-        self.assertIn("Available localsearch commands are", out)
-
-    def test_arg_help(self):
-        out = self.run_cli(["localsearch", "--help"])
-        self.assertIn("Available localsearch commands are", out)
-
-    def test_wrongargs(self):
+    def test_extract_noargs(self):
         out = ""
         err = ""
         try:
-            out = self.run_cli(["localsearch", "asdf"])
+            out = self.run_cli(["localsearch", "extract"])
         except Exception as e:
             err = str(e)
 
         self.assertEqual("", out)
         self.assertIn("CLI command failed", err)
 
-    def test_arg_version(self):
-        out = self.run_cli(["localsearch", "--version"])
-        self.assertIn("LocalSearch 3", out)
-        self.assertIn("General Public License", out)
+    def test_extract_help(self):
+        out = self.run_cli(["localsearch", "extract", "--help"])
+        self.assertIn("Usage", out)
 
-    def test_help(self):
-        output = self.run_cli(["localsearch", "help", "info"])
-        self.assertIn("localsearch", output)
-
-    def test_help_wrongargs(self):
+    def test_extract_wrongargs(self):
         out = ""
         err = ""
         try:
-            out = self.run_cli(["localsearch", "help", "asdf"])
+            out = self.run_cli(["localsearch", "extract", "--asdf"])
         except Exception as e:
             err = str(e)
 
         self.assertEqual("", out)
         self.assertIn("CLI command failed", err)
+
+    def test_extract_nonexistent(self):
+        out = ""
+        err = ""
+        try:
+            out = self.run_cli(["localsearch", "extract", "/.abc"])
+        except Exception as e:
+            err = str(e)
+
+        self.assertEqual("", out)
+        self.assertIn("Metadata extraction failed", err)
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

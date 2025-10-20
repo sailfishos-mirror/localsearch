@@ -21,6 +21,11 @@
 Test `localsearch info` subcommand
 """
 
+import gi
+gi.require_version("Tsparql", "3.0")
+from gi.repository import Gio
+from gi.repository import Tsparql
+
 from typing import *
 import dataclasses
 import pathlib
@@ -32,7 +37,29 @@ import configuration
 import fixtures
 import shutil
 
+import configuration as cfg
+
 class TestCli(fixtures.TrackerCommandLineTestCase):
+    def validate_trig(self, trig):
+        """Create a temporary database and run the given RDF data.
+
+        This gives us a smoke test to detect any situation where the
+        extractor generates invalid RDF.
+        """
+        cancellable = None
+        ontology = Tsparql.sparql_get_ontology_nepomuk()
+        db = Tsparql.SparqlConnection.new(
+            Tsparql.SparqlConnectionFlags.NONE,
+            None,  # create in-memory database,
+            ontology,
+            cancellable,
+        )
+
+        batch = db.create_batch()
+        istream = Gio.MemoryInputStream.new_from_data(bytearray(trig, 'utf-8'))
+        batch.add_rdf(Tsparql.DeserializeFlags.NONE, Tsparql.RdfFormat.TRIG, 'tracker:FileSystem', istream)
+        self.assertTrue(batch.execute(cancellable))
+
     def test_info(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
@@ -161,6 +188,17 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         self.assertIn("Parent directory", output)
         self.assertIn("based on content filters", output)
 
+    def test_info_nonexistent(self):
+        err = None
+        out = None
+        try:
+            target = pathlib.Path(os.path.join(self.indexed_dir, 'nonexistent.txt'))
+            out = self.run_cli(["localsearch", "info", target])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("No metadata available for that URI", err)
+            self.assertIsNone(out)
 
     def test_info_noargs(self):
         err = None
@@ -183,6 +221,40 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             err = str(e)
         finally:
             self.assertIn("--asdf", err);
+            self.assertIsNone(out)
+
+    def test_info_rdf(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        output = self.run_cli(["localsearch", "info", target, "--output-format", "trig"])
+        self.assertIn("@prefix", output)
+        self.assertIn("mango.txt", output)
+        self.assertIn("monkey", output)
+        self.validate_trig(output)
+
+    def test_info_rdf_wrongarg(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        err = None
+        out = None
+        try:
+            output = self.run_cli(["localsearch", "info", target, "--output-format", "asdf"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("Unsupported serialization format", err);
             self.assertIsNone(out)
 
 if __name__ == "__main__":
