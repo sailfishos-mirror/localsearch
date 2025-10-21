@@ -29,7 +29,6 @@
 #include "tracker-extract.h"
 #include "tracker-guarantee.h"
 #include "tracker-exif.h"
-#include "tracker-iptc.h"
 #include "tracker-xmp.h"
 #include "tracker-resource-helpers.h"
 
