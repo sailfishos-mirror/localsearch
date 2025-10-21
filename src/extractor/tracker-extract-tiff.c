@@ -259,7 +259,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	TrackerResource *metadata;
 	TIFF *image;
 	TrackerXmpData *xd = NULL;
-	TrackerIptcData *id = NULL;
 	TrackerExifData *ed = NULL;
 	MergeData md = { 0 };
 	TiffData td = { 0 };
@@ -273,6 +272,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	int fd;
 
 #ifdef HAVE_GEXIV2
+	TrackerIptcData *id = NULL;
 	gchar *iptc_offset;
 	guint32 iptc_size;
 #endif
@@ -340,10 +340,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 #endif /* HAVE_GEXIV2 */
-
-	if (!id) {
-		id = g_new0 (TrackerIptcData, 1);
-	}
 
 	/* FIXME There are problems between XMP data embedded with different tools
 	   due to bugs in the original spec (type) */
@@ -529,6 +525,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_string (metadata, "nfo:heading", md.gps_direction);
 	}
 
+#ifdef HAVE_GEXIV2
 	if (id->contact) {
 		TrackerResource *contact = tracker_extract_new_contact (id->contact);
 
@@ -540,6 +537,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (id->keywords) {
 		tracker_keywords_parse (keywords, id->keywords);
 	}
+
+#endif /* HAVE_GEXIV2 */
 
 	for (i = 0; i < keywords->len; i++) {
 		TrackerResource *tag;
@@ -693,7 +692,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	tiff_data_free (&td);
 	tracker_exif_free (ed);
 	tracker_xmp_free (xd);
+#ifdef HAVE_GEXIV2
 	tracker_iptc_free (id);
+#endif /* HAVE_GEXIV2 */
 	g_free (uri);
 	close (fd);
 
