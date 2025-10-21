@@ -28,7 +28,9 @@
 #include "tracker-encoding.h"
 #include "tracker-exif.h"
 #include "tracker-guarantee.h"
+#ifdef HAVE_GEXIV2
 #include "tracker-iptc.h"
+#endif /* HAVE_GEXIV2 */
 #include "tracker-resource-helpers.h"
 #include "tracker-utils.h"
 #include "tracker-xmp.h"
