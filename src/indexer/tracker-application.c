@@ -91,6 +91,7 @@ struct _IndexerInstance
 	TrackerController *controller;
 	TrackerApplication *app;
 	GFile *root;
+	GFile *config_file;
 	char *object_path;
 
 	struct {
@@ -750,15 +751,10 @@ shutdown_main_instance (TrackerApplication *app,
 {
 	finish_endpoint_thread (&instance->endpoint_thread);
 
-	if (!app->dry_run &&
-	    app->main_instance.indexing_tree) {
-		g_autoptr (GFile) store, config;
-
-		store = get_cache_dir ();
-		config = g_file_get_child (store, CONFIG_FILE);
-
-		tracker_indexing_tree_save_config (app->main_instance.indexing_tree,
-		                                   config, NULL);
+	if (instance->config_file && instance->indexing_tree) {
+		tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                   instance->config_file, NULL);
+		g_clear_object (&instance->config_file);
 	}
 
 	untrack_instance_state (app, instance);
@@ -799,6 +795,9 @@ initialize_main_instance (TrackerApplication  *app,
 
 	track_instance_state (app, instance);
 
+	if (store)
+		instance->config_file = g_file_get_child (store, CONFIG_FILE);
+
 	g_signal_connect_swapped (instance->indexer, "corrupt",
 	                          G_CALLBACK (indexer_corrupt_cb),
 	                          app);
@@ -819,6 +818,13 @@ indexer_instance_free (IndexerInstance *instance)
 	g_clear_object (&instance->indexer);
 	tracker_controller_unregister_indexing_tree (instance->controller,
 						     instance->indexing_tree);
+
+	if (instance->config_file && instance->indexing_tree) {
+		tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                   instance->config_file, NULL);
+		g_clear_object (&instance->config_file);
+	}
+
 	g_clear_object (&instance->indexing_tree);
 	g_clear_object (&instance->sparql_conn);
 	g_clear_object (&instance->root);
@@ -885,6 +891,13 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 	                           TRACKER_DIRECTORY_FLAG_IS_VOLUME);
 
 	track_instance_state (app, instance);
+
+	if (store) {
+		instance->config_file = g_file_get_child (store, CONFIG_FILE);
+		tracker_indexing_tree_check_config (instance->indexing_tree,
+		                                    instance->config_file,
+		                                    FALSE);
+	}
 
 	/* Sync paused state */
 	if (app->active_instance)
@@ -1174,14 +1187,10 @@ tracker_application_dbus_register (GApplication     *application,
 	                                       dbus_conn, DBUS_PATH, error))
 		return FALSE;
 
-	if (!app->dry_run) {
-		g_autoptr (GFile) store, config;
-
-		store = get_cache_dir ();
-		config = g_file_get_child (store, CONFIG_FILE);
-
+	if (app->main_instance.config_file) {
 		tracker_indexing_tree_check_config (app->main_instance.indexing_tree,
-		                                    config);
+		                                    app->main_instance.config_file,
+		                                    TRUE);
 	}
 
 	/* Request legacy DBus name */
