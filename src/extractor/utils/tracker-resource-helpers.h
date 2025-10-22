@@ -33,6 +33,15 @@ TrackerResource *tracker_extract_new_location (const char *address, const char *
 TrackerResource *tracker_extract_new_music_album_disc (const char *album_title, TrackerResource *album_artist, int disc_number, const char *date);
 TrackerResource *tracker_extract_new_tag (const char *label);
 
+void tracker_extract_merge_location (TrackerResource *location,
+                                     const char      *street_address,
+                                     const char      *state,
+                                     const char      *city,
+                                     const char      *country,
+                                     const char      *gps_altitude,
+                                     const char      *gps_latitude,
+                                     const char      *gps_longitude);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_EXTRACT_RESOURCE_HELPERS_H__ */

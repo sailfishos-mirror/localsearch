@@ -1140,10 +1140,23 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	    data->gps_altitude || data->gps_latitude || data->gps_longitude) {
 		TrackerResource *geopoint;
 
-		geopoint = tracker_extract_new_location (data->address, data->state, data->city,
-		        data->country, data->gps_altitude, data->gps_latitude, data->gps_longitude);
-		tracker_resource_set_relation (resource, "slo:location", geopoint);
-		g_object_unref (geopoint);
+		geopoint = tracker_resource_get_first_relation (resource, "slo:location");
+
+		if (geopoint) {
+			tracker_extract_merge_location (geopoint,
+			                                data->address, data->state,
+			                                data->city, data->country,
+			                                data->gps_altitude,
+			                                data->gps_latitude,
+			                                data->gps_longitude);
+		} else {
+			geopoint = tracker_extract_new_location (data->address, data->state,
+			                                         data->city, data->country,
+			                                         data->gps_altitude,
+			                                         data->gps_latitude,
+			                                         data->gps_longitude);
+			tracker_resource_set_take_relation (resource, "slo:location", geopoint);
+		}
 	}
 
 	if (data->gps_direction) {
