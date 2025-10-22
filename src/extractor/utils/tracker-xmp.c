@@ -1023,7 +1023,7 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->license) {
-		tracker_resource_set_string (resource, "dc:license", data->license);
+		tracker_resource_set_string (resource, "nie:license", data->license);
 	}
 
 	if (data->make || data->model) {
@@ -1140,6 +1140,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 
 	if (data->regions) {
 		tracker_xmp_apply_regions_to_resource (resource, data);
+	}
+
+	if (data->rating) {
+		tracker_resource_set_string (resource, "nao:numericRating", data->rating);
 	}
 
 	return TRUE;
