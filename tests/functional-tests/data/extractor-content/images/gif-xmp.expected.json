@@ -12,9 +12,23 @@
 		],
 		"nie:description": "Test file for the tracker XMP extraction",
 		"nie:title": "A random GIF",
-		"nao:hasTag": {
-		    "nao:prefLabel": "nice"
-		},
+                "nao:hasTag": [
+                    {
+                        "@id": "urn:tag:Cool",
+                        "nao:prefLabel": "Cool",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:favourite",
+                        "nao:prefLabel": "favourite",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:nice",
+                        "nao:prefLabel": "nice",
+                        "@type": "nao:Tag"
+                    }
+                ],
 		"dc:identifier": "test-file-01-world-domination-path",
 		"dc:source": "http://www.fotonatura.org/revista/articulos/293/3/",
 		"dc:language": "es_ES",
