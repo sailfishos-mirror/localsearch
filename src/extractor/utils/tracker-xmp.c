@@ -1065,7 +1065,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->fnumber) {
-		tracker_resource_set_string (resource, "nmm:fnumber", data->fnumber);
+		gdouble value;
+
+		value = g_strtod (data->fnumber, NULL);
+		tracker_resource_set_double (resource, "nmm:fnumber", value);
 	}
 
 	if (data->flash) {
@@ -1077,7 +1080,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->focal_length) {
-		tracker_resource_set_string (resource, "nmm:focalLength", data->focal_length);
+		gdouble value;
+
+		value = g_strtod (data->focal_length, NULL);
+		tracker_resource_set_double (resource, "nmm:focalLength", value);
 	}
 
 	if (data->artist || data->contributor) {
@@ -1090,11 +1096,17 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->exposure_time) {
-		tracker_resource_set_string (resource, "nmm:exposureTime", data->exposure_time);
+		gdouble value;
+
+		value = g_strtod (data->exposure_time, NULL);
+		tracker_resource_set_double (resource, "nmm:exposureTime", value);
 	}
 
 	if (data->iso_speed_ratings) {
-		tracker_resource_set_string (resource, "nmm:isoSpeed", data->iso_speed_ratings);
+		gdouble value;
+
+		value = g_strtod (data->iso_speed_ratings, NULL);
+		tracker_resource_set_double (resource, "nmm:isoSpeed", value);
 	}
 
 	if (data->date || data->time_original) {
