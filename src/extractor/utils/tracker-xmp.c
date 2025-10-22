@@ -979,7 +979,7 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 		p = g_ptr_array_index (keywords, i);
 		label = tracker_extract_new_tag (p);
 
-		tracker_resource_set_relation (resource, "nao:hasTag", label);
+		tracker_resource_add_relation (resource, "nao:hasTag", label);
 
 		g_free (p);
 		g_object_unref (label);
