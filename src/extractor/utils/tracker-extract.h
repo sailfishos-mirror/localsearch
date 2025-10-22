@@ -31,7 +31,6 @@
 #include "tracker-iptc.h"
 #include "tracker-resource-helpers.h"
 #include "tracker-utils.h"
-#include "tracker-xmp.h"
 
 #undef __LIBTRACKER_EXTRACT_INSIDE__
 

@@ -28,8 +28,6 @@
 #include "tracker-xmp.h"
 #include "tracker-utils.h"
 
-#ifdef HAVE_EXEMPI
-
 #define NS_XMP_REGIONS "http://www.metadataworkinggroup.com/schemas/regions/"
 #define NS_ST_DIM "http://ns.adobe.com/xap/1.0/sType/Dimensions#"
 #define NS_ST_AREA "http://ns.adobe.com/xmp/sType/Area#"
@@ -663,21 +661,15 @@ register_namespace (const gchar *ns_uri,
         }
 }
 
-#endif /* HAVE_EXEMPI */
-
 static gboolean
 parse_xmp (const gchar    *buffer,
            size_t          len,
            const gchar    *uri,
            TrackerXmpData *data)
 {
-#ifdef HAVE_EXEMPI
 	XmpPtr xmp;
-#endif /* HAVE_EXEMPI */
 
 	memset (data, 0, sizeof (TrackerXmpData));
-
-#ifdef HAVE_EXEMPI
 
 	xmp_init ();
 
@@ -698,7 +690,6 @@ parse_xmp (const gchar    *buffer,
 	}
 
 	xmp_terminate ();
-#endif /* HAVE_EXEMPI */
 
 	return TRUE;
 }

@@ -4,7 +4,6 @@ libtracker_extract_sources = [
   'tracker-guarantee.c',
   'tracker-resource-helpers.c',
   'tracker-utils.c',
-  'tracker-xmp.c',
 ]
 
 if charset_library_name == 'enca'
@@ -16,6 +15,7 @@ endif
 tracker_extract_dependencies = [charset_library, gmodule, tracker_sparql]
 
 if exempi.found()
+  libtracker_extract_sources += ['tracker-xmp.c']
   tracker_extract_dependencies += exempi
 endif
 
