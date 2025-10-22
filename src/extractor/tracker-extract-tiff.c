@@ -35,6 +35,10 @@
 
 #include "utils/tracker-extract.h"
 
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
+#endif
+
 #define CMS_PER_INCH        2.54
 
 typedef enum {
@@ -258,7 +262,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 {
 	TrackerResource *metadata;
 	TIFF *image;
+#ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
+#endif
 	TrackerIptcData *id = NULL;
 	TrackerExifData *ed = NULL;
 	MergeData md = { 0 };
@@ -368,10 +374,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 #endif /* HAVE_EXEMPI */
 
-	if (!xd) {
-		xd = g_new0 (TrackerXmpData, 1);
-	}
-
 	ed = g_new0 (TrackerExifData, 1);
 
 	/* Get Tiff specifics */
@@ -411,34 +413,33 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	TIFFClose (image);
 	g_free (filename);
 
-	md.title = tracker_coalesce_strip (5, xd->title, xd->pdf_title, td.title, ed->document_name, xd->title2);
-	md.orientation = tracker_coalesce_strip (4, xd->orientation, td.orientation, ed->orientation, id->image_orientation);
-	md.copyright = tracker_coalesce_strip (4, xd->rights, td.copyright, ed->copyright, id->copyright_notice);
-	md.white_balance = tracker_coalesce_strip (2, xd->white_balance, ed->white_balance);
-	md.fnumber = tracker_coalesce_strip (2, xd->fnumber, ed->fnumber);
-	md.flash = tracker_coalesce_strip (2, xd->flash, ed->flash);
-	md.focal_length = tracker_coalesce_strip (2, xd->focal_length, ed->focal_length);
-	md.artist = tracker_coalesce_strip (4, xd->artist, td.artist, ed->artist, xd->contributor);
-	md.exposure_time = tracker_coalesce_strip (2, xd->exposure_time, ed->exposure_time);
-	md.iso_speed_ratings = tracker_coalesce_strip (2, xd->iso_speed_ratings, ed->iso_speed_ratings);
-	md.date = tracker_coalesce_strip (6, xd->date, xd->time_original, td.date, ed->time, id->date_created, ed->time_original);
-	md.description = tracker_coalesce_strip (3, xd->description, td.description, ed->description);
-	md.metering_mode = tracker_coalesce_strip (2, xd->metering_mode, ed->metering_mode);
-	md.city = tracker_coalesce_strip (2, xd->city, id->city);
-	md.state = tracker_coalesce_strip (2, xd->state, id->state);
-	md.address = tracker_coalesce_strip (2, xd->address, id->sublocation);
-	md.country = tracker_coalesce_strip (2, xd->country, id->country_name);
+	md.title = tracker_coalesce_strip (2, td.title, ed->document_name);
+	md.orientation = tracker_coalesce_strip (3, td.orientation, ed->orientation, id->image_orientation);
+	md.copyright = tracker_coalesce_strip (3, td.copyright, ed->copyright, id->copyright_notice);
+	md.white_balance = tracker_coalesce_strip (1, ed->white_balance);
+	md.fnumber = tracker_coalesce_strip (1, ed->fnumber);
+	md.flash = tracker_coalesce_strip (1, ed->flash);
+	md.focal_length = tracker_coalesce_strip (1, ed->focal_length);
+	md.artist = tracker_coalesce_strip (2, td.artist, ed->artist);
+	md.exposure_time = tracker_coalesce_strip (1, ed->exposure_time);
+	md.iso_speed_ratings = tracker_coalesce_strip (1, ed->iso_speed_ratings);
+	md.date = tracker_coalesce_strip (4, td.date, ed->time, id->date_created, ed->time_original);
+	md.description = tracker_coalesce_strip (2, td.description, ed->description);
+	md.metering_mode = tracker_coalesce_strip (1, ed->metering_mode);
+	md.city = tracker_coalesce_strip (1, id->city);
+	md.state = tracker_coalesce_strip (1, id->state);
+	md.address = tracker_coalesce_strip (1, id->sublocation);
+	md.country = tracker_coalesce_strip (1, id->country_name);
 
-	/* FIXME We are not handling the altitude ref here for xmp */
-	md.gps_altitude = tracker_coalesce_strip (2, xd->gps_altitude, ed->gps_altitude);
-	md.gps_latitude = tracker_coalesce_strip (2, xd->gps_latitude, ed->gps_latitude);
-	md.gps_longitude = tracker_coalesce_strip (2, xd->gps_longitude, ed->gps_longitude);
-	md.gps_direction = tracker_coalesce_strip (2, xd->gps_direction, ed->gps_direction);
-	md.creator = tracker_coalesce_strip (3, xd->creator, id->byline, id->credit);
+	md.gps_altitude = tracker_coalesce_strip (1, ed->gps_altitude);
+	md.gps_latitude = tracker_coalesce_strip (1, ed->gps_latitude);
+	md.gps_longitude = tracker_coalesce_strip (1, ed->gps_longitude);
+	md.gps_direction = tracker_coalesce_strip (1, ed->gps_direction);
+	md.creator = tracker_coalesce_strip (2, id->byline, id->credit);
 	md.x_dimension = tracker_coalesce_strip (2, td.width, ed->x_dimension);
 	md.y_dimension = tracker_coalesce_strip (2, td.length, ed->y_dimension);
-	md.make = tracker_coalesce_strip (3, xd->make, td.make, ed->make);
-	md.model = tracker_coalesce_strip (3, xd->model, td.model, ed->model);
+	md.make = tracker_coalesce_strip (2, td.make, ed->make);
+	md.model = tracker_coalesce_strip (2, td.model, ed->model);
 
 	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
 
@@ -452,64 +453,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	if (md.y_dimension) {
 		tracker_resource_set_string (metadata, "nfo:height", md.y_dimension);
-	}
-
-	if (xd->keywords) {
-		tracker_keywords_parse (keywords, xd->keywords);
-	}
-
-	if (xd->pdf_keywords) {
-		tracker_keywords_parse (keywords, xd->pdf_keywords);
-	}
-
-	if (xd->subject) {
-		tracker_keywords_parse (keywords, xd->subject);
-	}
-
-	if (xd->publisher) {
-		TrackerResource *publisher = tracker_extract_new_contact (xd->publisher);
-		tracker_resource_set_relation (metadata, "nco:publisher", publisher);
-		g_object_unref (publisher);
-	}
-
-	if (xd->type) {
-		tracker_resource_set_string (metadata, "dc:type", xd->type);
-	}
-
-	if (xd->format) {
-		tracker_resource_set_string (metadata, "dc:format", xd->format);
-	}
-
-	if (xd->identifier) {
-		tracker_resource_set_string (metadata, "dc:identifier", xd->identifier);
-	}
-
-	if (xd->source) {
-		tracker_resource_set_string (metadata, "dc:source", xd->source);
-	}
-
-	if (xd->language) {
-		tracker_resource_set_string (metadata, "dc:language", xd->language);
-	}
-
-	if (xd->relation) {
-		tracker_resource_set_string (metadata, "dc:relation", xd->relation);
-	}
-
-	if (xd->coverage) {
-		tracker_resource_set_string (metadata, "dc:coverage", xd->coverage);
-	}
-
-	if (xd->rating) {
-		tracker_resource_set_string (metadata, "nao:numericRating", xd->rating);
-	}
-
-	if (xd->license) {
-		tracker_resource_set_string (metadata, "nie:license", xd->license);
-	}
-
-	if (xd->regions) {
-		tracker_xmp_apply_regions_to_resource (metadata, xd);
 	}
 
 	if (md.address || md.state || md.country || md.city ||
@@ -690,9 +633,15 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
 	}
 
+#ifdef HAVE_EXEMPI
+	if (xd) {
+		tracker_xmp_apply_to_resource (metadata, xd);
+		tracker_xmp_free (xd);
+	}
+#endif
+
 	tiff_data_free (&td);
 	tracker_exif_free (ed);
-	tracker_xmp_free (xd);
 	tracker_iptc_free (id);
 	g_free (uri);
 	close (fd);

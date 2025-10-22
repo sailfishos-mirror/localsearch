@@ -33,11 +33,18 @@
                 ],
                 "nmm:isoSpeed" : "50",
                 "nie:contentCreated" : "2024-04-28T18:43:11",
-                "nao:hasTag" : {
-                    "@id" : "urn:tag:bright",
-                    "nao:prefLabel" : "bright",
-                    "@type" : "nao:Tag"
-                },
+                "nao:hasTag" : [
+                    {
+                        "@id": "urn:tag:amazing",
+                        "nao:prefLabel": "amazing",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id" : "urn:tag:bright",
+                        "nao:prefLabel" : "bright",
+                        "@type" : "nao:Tag"
+                    }
+                ],
                 "nfo:equipment" : {
                     "@id" : "urn:equipment:Apple:iPhone%205:",
                     "nfo:model" : "iPhone 5",
