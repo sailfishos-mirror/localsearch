@@ -18,6 +18,7 @@
  * Boston, MA  02110-1301, USA.
  */
 
+#include "config-miners.h"
 
 #include <glib.h>
 
@@ -31,6 +32,10 @@
 
 #ifdef HAVE_GUPNP_DLNA
 #include "tracker-gupnp.h"
+#endif
+
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
 #endif
 
 #define CHUNK_N_BYTES (2 << 15)
@@ -171,7 +176,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	uri = g_file_get_uri (file);
 
 	absolute_file_path = g_file_get_path (file);
+#ifdef HAVE_EXEMPI
 	av_dict_set_int (&options, "export_xmp", 1, 0);
+#endif
 
 	if (avformat_open_input (&format, absolute_file_path, NULL, &options)) {
 		av_dict_free (&options);
@@ -414,6 +421,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 	}
 
+#ifdef HAVE_EXEMPI
 	if ((tag = find_tag (format, audio_stream, video_stream, "xmp"))) {
 		TrackerXmpData *xmp;
 
@@ -421,6 +429,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_xmp_apply_to_resource (metadata, xmp);
 		tracker_xmp_free (xmp);
 	}
+#endif
 
 	if (format->bit_rate > 0) {
 		tracker_resource_set_int64 (metadata, "nfo:averageBitrate", format->bit_rate);
