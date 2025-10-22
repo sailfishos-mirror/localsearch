@@ -694,46 +694,6 @@ parse_xmp (const gchar    *buffer,
 	return TRUE;
 }
 
-#ifndef TRACKER_DISABLE_DEPRECATED
-
-// LCOV_EXCL_START
-
-/**
- * tracker_xmp_read:
- * @buffer: a chunk of data with xmp data in it.
- * @len: the size of @buffer.
- * @uri: the URI this is related to.
- * @data: a pointer to a TrackerXmpData structure to populate.
- *
- * This function takes @len bytes of @buffer and runs it through the
- * XMP library. The result is that @data is populated with the XMP
- * data found in @uri.
- *
- * Returns: %TRUE if the @data was populated successfully, otherwise
- * %FALSE is returned.
- *
- * Since: 0.8
- *
- * Deprecated: 0.9. Use tracker_xmp_new() instead.
- **/
-gboolean
-tracker_xmp_read (const gchar    *buffer,
-                  size_t          len,
-                  const gchar    *uri,
-                  TrackerXmpData *data)
-{
-	g_return_val_if_fail (buffer != NULL, FALSE);
-	g_return_val_if_fail (len > 0, FALSE);
-	g_return_val_if_fail (uri != NULL, FALSE);
-	g_return_val_if_fail (data != NULL, FALSE);
-
-	return parse_xmp (buffer, len, uri, data);
-}
-
-// LCOV_EXCL_STOP
-
-#endif /* TRACKER_DISABLE_DEPRECATED */
-
 static void
 xmp_region_free (gpointer data)
 {
