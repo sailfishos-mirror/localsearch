@@ -38,6 +38,9 @@
 #ifdef HAVE_EXEMPI
 #include "tracker-xmp.h"
 #endif
+#ifdef HAVE_GEXIV2
+#include "tracker-iptc.h"
+#endif
 
 #define CMS_PER_INCH        2.54
 
@@ -66,13 +69,8 @@ typedef struct {
 	const gchar *date;
 	const gchar *description;
 	const gchar *metering_mode;
-	const gchar *creator;
 	const gchar *x_dimension;
 	const gchar *y_dimension;
-	const gchar *city;
-	const gchar *state;
-	const gchar *address;
-	const gchar *country;
 	const gchar *gps_altitude;
 	const gchar *gps_latitude;
 	const gchar *gps_longitude;
@@ -265,7 +263,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 #ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
 #endif
+#ifdef HAVE_GEXIV2
 	TrackerIptcData *id = NULL;
+#endif
 	TrackerExifData *ed = NULL;
 	MergeData md = { 0 };
 	TiffData td = { 0 };
@@ -273,8 +273,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	gchar *filename, *uri;
 	gchar *date;
 	glong exif_offset;
-	GPtrArray *keywords;
-	guint i;
 	GFile *file;
 	int fd;
 
@@ -347,10 +345,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 #endif /* HAVE_GEXIV2 */
 
-	if (!id) {
-		id = g_new0 (TrackerIptcData, 1);
-	}
-
 	/* FIXME There are problems between XMP data embedded with different tools
 	   due to bugs in the original spec (type) */
 #ifdef HAVE_EXEMPI
@@ -414,8 +408,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_free (filename);
 
 	md.title = tracker_coalesce_strip (2, td.title, ed->document_name);
-	md.orientation = tracker_coalesce_strip (3, td.orientation, ed->orientation, id->image_orientation);
-	md.copyright = tracker_coalesce_strip (3, td.copyright, ed->copyright, id->copyright_notice);
+	md.orientation = tracker_coalesce_strip (2, td.orientation, ed->orientation);
+	md.copyright = tracker_coalesce_strip (2, td.copyright, ed->copyright);
 	md.white_balance = tracker_coalesce_strip (1, ed->white_balance);
 	md.fnumber = tracker_coalesce_strip (1, ed->fnumber);
 	md.flash = tracker_coalesce_strip (1, ed->flash);
@@ -423,25 +417,18 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	md.artist = tracker_coalesce_strip (2, td.artist, ed->artist);
 	md.exposure_time = tracker_coalesce_strip (1, ed->exposure_time);
 	md.iso_speed_ratings = tracker_coalesce_strip (1, ed->iso_speed_ratings);
-	md.date = tracker_coalesce_strip (4, td.date, ed->time, id->date_created, ed->time_original);
+	md.date = tracker_coalesce_strip (3, td.date, ed->time, ed->time_original);
 	md.description = tracker_coalesce_strip (2, td.description, ed->description);
 	md.metering_mode = tracker_coalesce_strip (1, ed->metering_mode);
-	md.city = tracker_coalesce_strip (1, id->city);
-	md.state = tracker_coalesce_strip (1, id->state);
-	md.address = tracker_coalesce_strip (1, id->sublocation);
-	md.country = tracker_coalesce_strip (1, id->country_name);
 
 	md.gps_altitude = tracker_coalesce_strip (1, ed->gps_altitude);
 	md.gps_latitude = tracker_coalesce_strip (1, ed->gps_latitude);
 	md.gps_longitude = tracker_coalesce_strip (1, ed->gps_longitude);
 	md.gps_direction = tracker_coalesce_strip (1, ed->gps_direction);
-	md.creator = tracker_coalesce_strip (2, id->byline, id->credit);
 	md.x_dimension = tracker_coalesce_strip (2, td.width, ed->x_dimension);
 	md.y_dimension = tracker_coalesce_strip (2, td.length, ed->y_dimension);
 	md.make = tracker_coalesce_strip (2, td.make, ed->make);
 	md.model = tracker_coalesce_strip (2, td.model, ed->model);
-
-	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
 
 	if (ed->user_comment) {
 		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", ed->user_comment);
@@ -455,12 +442,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_string (metadata, "nfo:height", md.y_dimension);
 	}
 
-	if (md.address || md.state || md.country || md.city ||
-	    md.gps_altitude || md.gps_latitude || md.gps_longitude) {
+	if (md.gps_altitude || md.gps_latitude || md.gps_longitude) {
 		TrackerResource *location;
 
-		location = tracker_extract_new_location (md.address, md.state,
-		                                         md.city, md.country, md.gps_altitude, md.gps_latitude,
+		location = tracker_extract_new_location (NULL, NULL, NULL, NULL,
+		                                         md.gps_altitude, md.gps_latitude,
 		                                         md.gps_longitude);
 
 		tracker_resource_set_relation (metadata, "slo:location", location);
@@ -471,31 +457,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (md.gps_direction) {
 		tracker_resource_set_string (metadata, "nfo:heading", md.gps_direction);
 	}
-
-	if (id->contact) {
-		TrackerResource *contact = tracker_extract_new_contact (id->contact);
-
-		tracker_resource_set_relation (metadata, "nco:contributor", contact);
-
-		g_object_unref (contact);
-	}
-
-	if (id->keywords) {
-		tracker_keywords_parse (keywords, id->keywords);
-	}
-
-	for (i = 0; i < keywords->len; i++) {
-		TrackerResource *tag;
-		const gchar *p;
-
-		p = g_ptr_array_index (keywords, i);
-		tag = tracker_extract_new_tag (p);
-
-		tracker_resource_set_relation (metadata, "nao:hasTag", tag);
-
-		g_object_unref (tag);
-	}
-	g_ptr_array_free (keywords, TRUE);
 
 	if (md.make || md.model) {
 		TrackerResource *equipment = tracker_extract_new_equipment (md.make, md.model);
@@ -580,37 +541,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		g_object_unref (metering);
 	}
 
-	if (md.creator) {
-		TrackerResource *creator = tracker_extract_new_contact (md.creator);
-
-		/* NOTE: We only have affiliation with
-		 * nco:PersonContact and we are using
-		 * nco:Contact here.
-		 */
-
-		/* if (id->byline_title) { */
-		/* 	tracker_sparql_builder_insert_open (preupdate, NULL); */
-
-		/* 	tracker_sparql_builder_subject (preupdate, "_:affiliation_by_line"); */
-		/* 	tracker_sparql_builder_predicate (preupdate, "a"); */
-		/* 	tracker_sparql_builder_object (preupdate, "nco:Affiliation"); */
-
-		/* 	tracker_sparql_builder_predicate (preupdate, "nco:title"); */
-		/* 	tracker_sparql_builder_object_unvalidated (preupdate, id->byline_title); */
-
-		/* 	tracker_sparql_builder_insert_close (preupdate); */
-
-		/* 	tracker_sparql_builder_predicate (metadata, "a"); */
-		/* 	tracker_sparql_builder_object (metadata, "nco:PersonContact"); */
-		/* 	tracker_sparql_builder_predicate (metadata, "nco:hasAffiliation"); */
-		/* 	tracker_sparql_builder_object (metadata, "_:affiliation_by_line"); */
-		/* } */
-
-		tracker_resource_set_relation (metadata, "nco:creator", creator);
-
-		g_object_unref (creator);
-	}
-
 	if (ed->x_resolution) {
 		gdouble value;
 
@@ -640,9 +570,15 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 #endif
 
+#ifdef HAVE_GEXIV2
+	if (id) {
+		tracker_iptc_apply_to_resource (metadata, id);
+		tracker_iptc_free (id);
+	}
+#endif
+
 	tiff_data_free (&td);
 	tracker_exif_free (ed);
-	tracker_iptc_free (id);
 	g_free (uri);
 	close (fd);
 
