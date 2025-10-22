@@ -16,16 +16,18 @@
                 },
                 "nao:numericRating": "5",
                 "nie:description": "Photograph description",
-                "nao:hasTag": {
-                    "@id": "urn:tag:bright",
-                    "nao:prefLabel": "bright",
-                    "@type": "nao:Tag"
-                },
-                "nco:creator": {
-                    "@id": "urn:contact:Author",
-                    "nco:fullname": "Author",
-                    "@type": "nco:Contact"
-                },
+                "nao:hasTag": [
+                    {
+                        "@id": "urn:tag:amazing",
+                        "nao:prefLabel": "amazing",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:bright",
+                        "nao:prefLabel": "bright",
+                        "@type": "nao:Tag"
+                    }
+                ],
                 "nmm:dlnaProfile": "PNG_TN",
                 "nfo:width": 10,
                 "nie:title": "Photograph",
