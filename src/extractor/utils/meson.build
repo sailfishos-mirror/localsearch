@@ -18,7 +18,7 @@ if exempi.found()
   tracker_extract_dependencies += exempi
 endif
 
-if gexiv2.found()
+if have_gexiv2
   libtracker_extract_sources += ['tracker-exif.c', 'tracker-iptc.c']
   tracker_extract_dependencies += gexiv2
 endif
