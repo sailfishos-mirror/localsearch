@@ -581,10 +581,9 @@ msgstr "ΕΚΦΡΑΣΗ"
 
 #: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
 #: src/cli/tracker-status.c:289
-#, fuzzy
 #| msgid "Could not get Tracker statistics"
 msgid "Could not get LocalSearch statistics"
-msgstr "Αδυναμία λήψης των στατιστικών του Tracker"
+msgstr "Αδυναμία λήψης των στατιστικών του LocalSearch"
 
 #: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
 msgid "Message"
@@ -615,24 +614,22 @@ msgstr "Υπολειπόμενος χώρος στην κατάτμηση βάσ
 
 #: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
 msgid "Indexer is paused"
-msgstr ""
+msgstr "Ο ευρετηριαστής είναι σε παύση"
 
 #: src/cli/tracker-status.c:440
 msgid "Data is still being indexed"
 msgstr "Τα δεδομένα ευρετηριοποιούνται ακόμα"
 
 #: src/cli/tracker-status.c:442
-#, fuzzy
-#| msgid "Indexes"
 msgid "Indexer is idle"
-msgstr "Ευρετήρια"
+msgstr "Ο ευρετηριαστής είναι αδρανής"
 
 #: src/cli/tracker-status.c:449
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d καταγεγραμμένη αποτυχία"
+msgstr[1] "%d καταγεγραμμένες αποτυχίες"
 
 #: src/cli/tracker-status.c:533
 msgid "No reports found"
@@ -643,10 +640,8 @@ msgid "Could not get SPARQL connection"
 msgstr "Αδύνατη η σύνδεση με το SPARQL"
 
 #: src/cli/tracker-status.c:714
-#, fuzzy
-#| msgid "Now listening for resource updates to the database"
 msgid "Now listening to database updates"
-msgstr "Τώρα ακούει τις ενημερώσεις της πηγής στη βάση δεδομένων"
+msgstr "Τώρα ακούει για ενημερώσεις βάσης δεδομένων"
 
 #: src/cli/tracker-status.c:715
 msgid "Press Ctrl+C to stop"
@@ -654,7 +649,7 @@ msgstr "Πατήστε Ctrl+C για να σταματήσετε"
 
 #: src/cli/tracker-tag.c:67
 msgid "List all tags"
-msgstr ""
+msgstr "Λίστα όλων των ετικετών"
 
 #: src/cli/tracker-tag.c:71
 msgid "Show files associated with each tag (this is only used with --list)"
@@ -727,10 +722,9 @@ msgid "Tag was removed successfully"
 msgstr "Η ετικέτα αφαιρέθηκε με επιτυχία"
 
 #: src/cli/tracker-tag.c:360
-#, fuzzy
 #| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
-msgstr "Αδυναμία σύνδεσης με το Tracker"
+msgstr "Αδυναμία σύνδεσης με το LocalSearch"
 
 #: src/cli/tracker-tag.c:425
 msgid "The --list option is required for --show-files"
@@ -820,10 +814,9 @@ msgstr "Εμφανίζει πληροφορίες έκδοσης"
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
 #: src/control/tracker-main.c:136
-#, fuzzy
 #| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
-msgstr "— εκκίνηση ευρετηρίου του tracker"
+msgstr "— εκκίνηση του διαμεσολαβητή ευρετηρίου tracker"
 
 #: src/extractor/tracker-main.c:74
 msgid "File to extract metadata for"
@@ -892,31 +885,29 @@ msgid "Data object “%s” currently does not exist"
 msgstr "Δεν υπάρχει το αντικείμενο δεδομένων «%s»"
 
 #: src/indexer/tracker-application.c:639
-#, fuzzy, c-format
+#, c-format
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
-msgstr "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος σε κανόνες)"
+msgstr "Ο γονικός κατάλογος «%s» ΔΕΝ είναι κατάλληλος για ευρετηρίαση (βασισμένο σε φίλτρα)"
 
 #: src/indexer/tracker-application.c:645
-#, fuzzy, c-format
+#, c-format
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος σε κανόνες)"
+msgstr "Ο γονικός κατάλογος «%s» ΔΕΝ είναι κατάλληλος για ευρετηρίαση (κρυφό αρχείο)"
 
 #: src/indexer/tracker-application.c:651
-#, fuzzy, c-format
+#, c-format
 #| msgid "Directory is NOT eligible to be mined (based on contents)"
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
-msgstr ""
-"Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος στα περιεχόμενα)"
+msgstr "Ο γονικός κατάλογος «%s» ΔΕΝ είναι κατάλληλος για ευρετηρίαση (βασισμένο σε φίλτρα περιεχομένου)"
 
 #: src/indexer/tracker-application.c:666
-#, fuzzy
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "Ο κατάλογος ΔΕΝ είναι διαθέσιμος για εξαγωγή (βασισμένος σε κανόνες)"
+msgstr "Ο κατάλογος ΔΕΝ είναι κατάλληλος για ευρετηρίαση (βασισμένο σε φίλτρα)"
 
 #: src/indexer/tracker-application.c:670
 msgid "File is NOT eligible to be indexed (based on filters)"
@@ -933,10 +924,9 @@ msgstr ""
 "φάκελος)"
 
 #: src/indexer/tracker-application.c:683
-#, fuzzy
 #| msgid "Directory is eligible to be mined (based on rules)"
 msgid "Directory is eligible to be indexed"
-msgstr "Ο κατάλογος είναι διαθέσιμος για εξαγωγή (βασισμένο στους κανόνες)"
+msgstr "Ο κατάλογος είναι κατάλληλος για ευρετηρίαση"
 
 #: src/indexer/tracker-application.c:684
 msgid "File is eligible to be indexed"
@@ -960,7 +950,6 @@ msgstr "Απενεργοποίηση τερματισμού μετά από 30 �
 msgid "— start the tracker writeback service"
 msgstr "— εκκίνηση της υπηρεσίας επανεγγραφής του tracker"
 
-#, fuzzy
 #~| msgid ""
 #~| "Simplify the words to their root to provide more results. E.g. 'shelves' "
 #~| "and 'shelf' to 'shel'"
@@ -971,7 +960,6 @@ msgstr "— εκκίνηση της υπηρεσίας επανεγγραφής 
 #~ "Απλοποίηση των λέξεων στην ρίζα τους για παροχή περισσότερων "
 #~ "αποτελεσμάτων. Π.χ. 'ράφια' και 'ράφι' σε 'ράφ'"
 
-#, fuzzy
 #~| msgid ""
 #~| "Translate accented characters to the equivalent unaccented. E.g. 'Idéa' "
 #~| "to 'Idea' for improved matching."
@@ -979,8 +967,8 @@ msgstr "— εκκίνηση της υπηρεσίας επανεγγραφής 
 #~ "Translate accented characters to the equivalent unaccented. E.g. “Idéa” "
 #~ "to “Idea” for improved matching."
 #~ msgstr ""
-#~ "Μετάφραση τονισμένων χαρακτήρων σε ισοδύναμους άτονους. Π.χ. 'Ιδέα' σε "
-#~ "'Ιδεα' για βελτιωμένη αντιστοίχηση."
+#~ "Μετάφραση τονισμένων χαρακτήρων σε ισοδύναμους άτονους. Π.χ. 'Idéa' σε "
+#~ "'Idea' για βελτιωμένη αντιστοίχηση."
 
 #~ msgid "If enabled, numbers will not be indexed."
 #~ msgstr "Εάν ενεργοποιηθεί, οι αριθμοί δεν θα ευρετηριοποιηθούν."
