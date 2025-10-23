@@ -215,8 +215,6 @@ msgid "Show help on subcommands"
 msgstr "Εμφάνιση βοήθειας για υποεντολές"
 
 #: src/cli/main.c:69
-#, fuzzy
-#| msgid "Metadata extractor"
 msgid "Show metadata extractor output"
 msgstr "Εμφάνιση αποτελεσμάτων εξαγωγέα μεταδεδομένων"
 
@@ -225,8 +223,6 @@ msgid "List and change indexed folders"
 msgstr "Λίστα και αλλαγή φακέλων με ευρετήριο"
 
 #: src/cli/main.c:71 src/cli/tracker-info.c:540
-#, fuzzy
-#| msgid "- Get all information about one or more files"
 msgid "Retrieve information available for files and resources"
 msgstr "Ανάκτηση πληροφοριών διαθέσιμων για αρχεία και πόρους"
 
@@ -235,26 +231,18 @@ msgid "Inhibit indexing temporarily"
 msgstr "Προσωρινή απενεργοποίηση δημιουργίας ευρετηρίου"
 
 #: src/cli/main.c:73 src/cli/tracker-reset.c:202
-#, fuzzy
-#| msgid "Reset Indexed Data"
 msgid "Erase the indexed data"
 msgstr "Διαγραφή δεδομένων με ευρετήριο"
 
 #: src/cli/main.c:74 src/cli/tracker-search.c:397
-#, fuzzy
-#| msgid "Search for contacts"
 msgid "Search for content"
 msgstr "Αναζήτηση περιεχομένου"
 
 #: src/cli/main.c:75 src/cli/tracker-status.c:748
-#, fuzzy
-#| msgid "Show statistics about the data stored"
 msgid "Provide status and statistics on the data indexed"
 msgstr "Παροχή κατάστασης και στατιστικών για τα δεδομένα με ευρετήριο"
 
 #: src/cli/main.c:76 src/cli/tracker-tag.c:414
-#, fuzzy
-#| msgid "Add, remove or list tags"
 msgid "Add, remove and list tags"
 msgstr "Προσθήκη, αφαίρεση και λίστα ετικετών"
 
@@ -263,26 +251,22 @@ msgid "Sandbox for a testing environment"
 msgstr "Sandbox για περιβάλλον δοκιμών"
 
 #: src/cli/main.c:122
-#, fuzzy
-#| msgid "Available tracker commands are:"
 msgid "Available localsearch commands are:"
 msgstr "Οι διαθέσιμες εντολές localsearch είναι:"
 
 #: src/cli/main.c:141
-#, fuzzy
 #| msgid "See 'tracker help <command>' to read about a specific subcommand."
 msgid "See “localsearch help <command>” to read about a specific subcommand."
 msgstr "Δείτε «localsearch help <command>» για πληροφορίες σχετικά με μια συγκεκριμένη υποεντολή."
 
 #: src/cli/main.c:184
-#, fuzzy, c-format
+#, c-format
 #| msgid "'%s' is not a tracker command. See 'tracker --help'"
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "Το «%s» δεν είναι εντολή localsearch. Δείτε «localsearch --help»"
 
 #: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
 #: src/extractor/tracker-main.c:81
-#, fuzzy
 #| msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Μορφή αποτελεσμάτων εξόδου: «turtle», «trig» ή «json-ld»"
