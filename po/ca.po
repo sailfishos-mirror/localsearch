@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-09-13 09:49+0000\n"
-"PO-Revision-Date: 2025-09-24 19:59+0200\n"
+"POT-Creation-Date: 2025-09-23 02:41+0000\n"
+"PO-Revision-Date: 2025-10-04 18:23+0200\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -61,6 +61,20 @@ msgstr ""
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
 msgstr "Habilita l'stemmer"
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:25
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:52
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:71
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:77
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:83
+msgid "This setting is deprecated"
+msgstr "Aquest paràmetre està en desús"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
 msgid "Enable unaccent"
@@ -137,7 +151,7 @@ msgid ""
 "and $HOME/.config/user-dirs.default"
 msgstr ""
 "Llista de directoris a indexar de forma recursiva, els valors especials "
-"inclouen: «&DESKTOP», «&DOCUMENTS», «&DOWNLOAD», «&MUSIC», «&PICTURES», «&PUBLIC_SHARE», "
+"inclouen: «&DOCUMENTS», «&DOWNLOAD», «&MUSIC», «&PICTURES», «&PUBLIC_SHARE», "
 "«&TEMPLATES», «&VIDEOS». Vegeu /etc/xdg/user-dirs.defaults i $HOME/.config/"
 "user-dirs.default"
 
@@ -546,6 +560,7 @@ msgid "Message"
 msgstr "Missatge"
 
 #: src/cli/tracker-status.c:406
+#, c-format
 msgid "Currently indexed"
 msgstr "Actualment indexat"
 
@@ -604,7 +619,7 @@ msgstr "Premeu Ctrl+C per a aturar"
 
 #: src/cli/tracker-tag.c:67
 msgid "List all tags"
-msgstr "Llista totes les etiquetes"
+msgstr "Llista totes les estiquetes"
 
 #: src/cli/tracker-tag.c:71
 msgid "Show files associated with each tag (this is only used with --list)"
@@ -833,17 +848,17 @@ msgstr "L'objecte de dades «%s» ja existeix"
 msgid "Data object “%s” currently does not exist"
 msgstr "L'objecte de dades «%s» encara no existeix"
 
-#: src/indexer/tracker-application.c:617
+#: src/indexer/tracker-application.c:616
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "El directori pare «%s» no és apte per a ser indexat (basat en filtres)"
 
-#: src/indexer/tracker-application.c:623
+#: src/indexer/tracker-application.c:622
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "El directori pare «%s» no és apte per a ser indexat (fitxer amagat)"
 
-#: src/indexer/tracker-application.c:629
+#: src/indexer/tracker-application.c:628
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -852,27 +867,27 @@ msgstr ""
 "El directori pare «%s» no és apte per a ser indexat (basat en filtres de "
 "contingut)"
 
-#: src/indexer/tracker-application.c:644
+#: src/indexer/tracker-application.c:643
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "El directori no és apte per a ser indexat (basat en filtres)"
 
-#: src/indexer/tracker-application.c:648
+#: src/indexer/tracker-application.c:647
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "El fitxer no és apte per a ser indexat (basant-se en les regles)"
 
-#: src/indexer/tracker-application.c:651
+#: src/indexer/tracker-application.c:650
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "El fitxer no és apte per a ser indexat (fitxer amagat)"
 
-#: src/indexer/tracker-application.c:653
+#: src/indexer/tracker-application.c:652
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "El fitxer no és apte per a ser indexat (no és una carpeta indexada)"
 
-#: src/indexer/tracker-application.c:661
+#: src/indexer/tracker-application.c:660
 msgid "Directory is eligible to be indexed"
 msgstr "El directori és apte per a ser indexat"
 
-#: src/indexer/tracker-application.c:662
+#: src/indexer/tracker-application.c:661
 msgid "File is eligible to be indexed"
 msgstr "El fitxer és apte per a ser indexat"
 
