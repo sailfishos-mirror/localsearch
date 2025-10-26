@@ -20,6 +20,7 @@
 #ifndef __LIBTRACKER_EXTRACT_EXIF_H__
 #define __LIBTRACKER_EXTRACT_EXIF_H__
 
+#include <gexiv2/gexiv2.h>
 #include <tinysparql.h>
 
 G_BEGIN_DECLS
@@ -69,6 +70,7 @@ typedef struct {
 	gchar *document_name;
 	gchar *time;
 	gchar *time_original;
+	gchar *date;
 	gchar *artist;
 	gchar *user_comment;
 	gchar *description;
@@ -95,19 +97,12 @@ typedef struct {
 	gchar *gps_direction;
 } TrackerExifData;
 
+TrackerExifData *tracker_exif_new_from_metadata (GExiv2Metadata *metadata);
+
 TrackerExifData * tracker_exif_new   (const guchar *buffer,
                                       size_t        len,
                                       const gchar  *uri);
 void              tracker_exif_free  (TrackerExifData *data);
-
-#ifndef TRACKER_DISABLE_DEPRECATED
-
-gboolean          tracker_exif_read  (const unsigned char *buffer,
-                                      size_t               len,
-                                      const gchar         *uri,
-                                      TrackerExifData     *data) G_GNUC_DEPRECATED;
-
-#endif /* TRACKER_DISABLE_DEPRECATED */
 
 void tracker_exif_apply_to_resource (TrackerResource *resource,
                                      TrackerExifData *exif);

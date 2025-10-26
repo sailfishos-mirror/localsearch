@@ -114,7 +114,7 @@ check-commit-log:
   variables:
     BASE_TAG: '2025-09-02.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'alpine-sdk bash-completion dbus py3-dbusmock git json-glib-dev libsoup3-dev py3-gobject3 py3-setuptools py3-tappy py3-pip mandoc asciidoc dbus-dev enca-dev exempi-dev ffmpeg-dev flac-dev gexiv2-dev giflib-dev glib-dev gobject-introspection-dev gst-plugins-good gst-plugins-base-dev gstreamer-dev icu-dev libcue-dev libexif-dev libgsf-dev libgudev-dev libiptcdata-dev libjpeg-turbo-dev libosinfo-dev libpng-dev libseccomp-dev libvorbis-dev libxml2-dev meson poppler-dev shared-mime-info taglib-dev tiff-dev tinysparql tinysparql-dev totem-pl-parser-dev tzdata upower-dev zlib-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'alpine-sdk bash-completion dbus py3-dbusmock git json-glib-dev libsoup3-dev py3-gobject3 py3-setuptools py3-tappy py3-pip mandoc asciidoc dbus-dev enca-dev exempi-dev ffmpeg-dev flac-dev gexiv2-dev giflib-dev glib-dev gobject-introspection-dev gst-plugins-good gst-plugins-base-dev gstreamer-dev icu-dev libcue-dev libgsf-dev libgudev-dev libiptcdata-dev libjpeg-turbo-dev libosinfo-dev libpng-dev libseccomp-dev libvorbis-dev libxml2-dev meson poppler-dev shared-mime-info taglib-dev tiff-dev tinysparql tinysparql-dev totem-pl-parser-dev tzdata upower-dev zlib-dev'
     FDO_DISTRIBUTION_EXEC: |
       pip3 install gcovr &&
       rm -f /usr/share/polkit-1/rules.d/50-default.rules
