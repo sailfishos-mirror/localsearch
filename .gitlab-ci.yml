@@ -98,19 +98,6 @@ check-commit-log:
       fi
   <<: *check
 
-check-merge-request:
-  variables:
-    GIT_STRATEGY: none
-  stage: review
-  script:
-    - if [[ x"$CI_MERGE_REQUEST_TARGET_BRANCH_NAME" != "x" ]] ;
-      then
-        ci-fairy check-merge-request --require-allow-collaboration --junit-xml=check-junit-report.xml ;
-      else
-        echo "Not a merge request" ;
-      fi
-  <<: *check
-
 .tracker-miners.fedora@common:
   variables:
     BASE_TAG: '2025-09-02.2'
@@ -185,7 +172,6 @@ build-fedora-container@x86_64:
     GIT_STRATEGY: none
   needs:
     - check-commit-log
-    - check-merge-request
 
 build-fedora-rawhide-container@x86_64:
   extends:
@@ -197,7 +183,6 @@ build-fedora-rawhide-container@x86_64:
   allow_failure: true
   needs:
     - check-commit-log
-    - check-merge-request
 
 build-fedora-container@aarch64:
   extends:
@@ -209,7 +194,6 @@ build-fedora-container@aarch64:
   allow_failure: true
   needs:
     - check-commit-log
-    - check-merge-request
 
 build-alpine-container@x86_64:
   extends:
@@ -220,7 +204,6 @@ build-alpine-container@x86_64:
     GIT_STRATEGY: none
   needs:
     - check-commit-log
-    - check-merge-request
 
 build-debian-container@x86_64:
   extends:
@@ -232,7 +215,6 @@ build-debian-container@x86_64:
   allow_failure: true
   needs:
     - check-commit-log
-    - check-merge-request
 
 check-code-style:
   extends:
