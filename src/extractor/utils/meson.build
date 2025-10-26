@@ -1,6 +1,5 @@
 libtracker_extract_sources = [
   'tracker-encoding.c',
-  'tracker-exif.c',
   'tracker-guarantee.c',
   'tracker-resource-helpers.c',
   'tracker-utils.c',
@@ -20,7 +19,7 @@ if exempi.found()
 endif
 
 if gexiv2.found()
-  libtracker_extract_sources += ['tracker-iptc.c']
+  libtracker_extract_sources += ['tracker-exif.c', 'tracker-iptc.c']
   tracker_extract_dependencies += gexiv2
 endif
 
