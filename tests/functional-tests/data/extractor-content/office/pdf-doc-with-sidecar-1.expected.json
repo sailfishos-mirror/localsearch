@@ -9,10 +9,10 @@
                 "dc:format" : "image/png",
                 "@type" : "nfo:PaginatedTextDocument",
                 "slo:location" : {
-                    "slo:latitude" : "0",
-                    "slo:longitude" : "-0",
+                    "slo:latitude" : 0.0,
+                    "slo:longitude" : -0.0,
                     "@type" : "slo:GeoLocation",
-                    "slo:altitude" : "65.640000000000001"
+                    "slo:altitude" : 65.64
                 },
                 "nco:creator" : {
                     "@id" : "urn:contact:first%20last",

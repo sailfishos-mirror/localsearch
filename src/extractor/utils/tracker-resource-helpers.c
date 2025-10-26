@@ -258,15 +258,24 @@ tracker_extract_new_location (const char *street_address,
 	}
 
 	if (gps_altitude) {
-		tracker_resource_set_string (location, "slo:altitude", gps_altitude);
+		gdouble val;
+
+		val = g_strtod (gps_altitude, NULL);
+		tracker_resource_set_double (location, "slo:altitude", val);
 	}
 
 	if (gps_latitude) {
-		tracker_resource_set_string (location, "slo:latitude", gps_latitude);
+		gdouble val;
+
+		val = g_strtod (gps_latitude, NULL);
+		tracker_resource_set_double (location, "slo:latitude", val);
 	}
 
 	if (gps_longitude) {
-		tracker_resource_set_string (location, "slo:longitude", gps_longitude);
+		gdouble val;
+
+		val = g_strtod (gps_longitude, NULL);
+		tracker_resource_set_double (location, "slo:longitude", val);
 	}
 
 	return location;

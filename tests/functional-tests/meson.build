@@ -70,10 +70,12 @@ endif
 
 if libjpeg.found() and exempi.found() and libexif.found()
   extractor_tests += [
+    'images/jpeg-no-metadata',
     'images/jpeg-basic',
     'images/jpeg-region-of-interest',
     'images/jpeg-gps-location',
     'images/jpeg-xmp-sidecar-1',
+    'images/jpeg-exif',
   ]
 
   if gexiv2.found()

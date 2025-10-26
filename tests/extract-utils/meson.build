@@ -8,10 +8,6 @@ if charset_library_name != 'none'
     libtracker_extract_tests += ['encoding']
 endif
 
-if libexif.found()
-    libtracker_extract_tests += ['exif']
-endif
-
 libtracker_extract_test_deps = [
     tracker_miners_common_dep, tracker_extract_dep
 ]

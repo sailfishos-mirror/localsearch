@@ -596,6 +596,12 @@ class TrackerExtractTestCase(ut.TestCase):
                     self.assert_extract_result_matches_spec(
                         expected_value, result[prop], filename, spec_filename
                     )
+                elif isinstance(expected_value, float):
+                    self.assertTrue(
+                        abs(spec[prop] - result[prop]) <= 0.000001,
+                        "On property '%s', value %f has too big delta with expected value %f" %
+                        (prop, result[prop], spec[prop])
+                    )
                 else:
                     self.assertEqual(
                         str(spec[prop]),
