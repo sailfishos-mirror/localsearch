@@ -22,7 +22,7 @@
 		"nmm:dlnaProfile": "JPEG_SM",
 		"nie:description": "Justfortest",
 		"nfo:verticalResolution": 72.0,
-		"nfo:heading": "12.300000000000001",
+		"nfo:heading": 12.3,
 		"nmm:exposureTime": 0.002,
 		"nmm:dlnaMime": "image/jpeg",
 		"nmm:whiteBalance": {
@@ -47,7 +47,7 @@
 		"nmm:meteringMode": {
                     "@id": "nmm:metering-mode-multispot"
 		},
-		"nco:contributor": {
+		"nco:creator": {
                     "@id": "urn:contact:EXIFspec",
                     "nco:fullname": "EXIFspec",
                     "@type": "nco:Contact"

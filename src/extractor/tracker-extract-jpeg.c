@@ -35,6 +35,7 @@
 #include "tracker-xmp.h"
 #endif
 #ifdef HAVE_GEXIV2
+#include "tracker-exif.h"
 #include "tracker-iptc.h"
 #include <gexiv2/gexiv2.h>
 #endif
@@ -58,29 +59,6 @@ enum {
 	JPEG_RESOLUTION_UNIT_PER_INCH = 1,
 	JPEG_RESOLUTION_UNIT_PER_CENTIMETER = 2,
 };
-
-typedef struct {
-	const gchar *make;
-	const gchar *model;
-	const gchar *title;
-	const gchar *orientation;
-	const gchar *copyright;
-	const gchar *white_balance;
-	const gchar *fnumber;
-	const gchar *flash;
-	const gchar *focal_length;
-	const gchar *artist;
-	const gchar *exposure_time;
-	const gchar *iso_speed_ratings;
-	const gchar *date;
-	const gchar *description;
-	const gchar *metering_mode;
-	const gchar *comment;
-	const gchar *gps_altitude;
-	const gchar *gps_latitude;
-	const gchar *gps_longitude;
-	const gchar *gps_direction;
-} MergeData;
 
 struct tej_error_mgr {
 	struct jpeg_error_mgr jpeg;
@@ -147,9 +125,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 #endif
 #ifdef HAVE_GEXIV2
 	TrackerIptcData *id = NULL;
-#endif
 	TrackerExifData *ed = NULL;
-	MergeData md = { 0 };
+#endif
 	GFile *file;
 	FILE *f;
 	goffset size;
@@ -278,10 +255,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		marker = marker->next;
 	}
 
-	if (!ed) {
-		ed = g_new0 (TrackerExifData, 1);
-	}
-
 #ifdef HAVE_EXEMPI
 	if (!xd) {
 		gchar *sidecar = NULL;
@@ -300,29 +273,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 #endif
 
-	md.title = tracker_coalesce_strip (1, ed->document_name);
-	md.orientation = tracker_coalesce_strip (1, ed->orientation);
-	md.copyright = tracker_coalesce_strip (1, ed->copyright);
-	md.white_balance = tracker_coalesce_strip (1, ed->white_balance);
-	md.fnumber = tracker_coalesce_strip (1, ed->fnumber);
-	md.flash = tracker_coalesce_strip (1, ed->flash);
-	md.focal_length =  tracker_coalesce_strip (1, ed->focal_length);
-	md.artist = tracker_coalesce_strip (1, ed->artist);
-	md.exposure_time = tracker_coalesce_strip (1, ed->exposure_time);
-	md.iso_speed_ratings = tracker_coalesce_strip (1, ed->iso_speed_ratings);
-	md.date = tracker_coalesce_strip (2, ed->time, ed->time_original);
-	md.description = tracker_coalesce_strip (1, ed->description);
-	md.metering_mode = tracker_coalesce_strip (1, ed->metering_mode);
-
-	/* FIXME We are not handling the altitude ref here for xmp */
-	md.gps_altitude = tracker_coalesce_strip (1, ed->gps_altitude);
-	md.gps_latitude = tracker_coalesce_strip (1, ed->gps_latitude);
-	md.gps_longitude = tracker_coalesce_strip (1, ed->gps_longitude);
-	md.gps_direction = tracker_coalesce_strip (1, ed->gps_direction);
-	md.comment = tracker_coalesce_strip (2, comment, ed->user_comment);
-	md.make = tracker_coalesce_strip (1, ed->make);
-	md.model = tracker_coalesce_strip (1, ed->model);
-
 	/* Prioritize on native dimention in all cases */
 	tracker_resource_set_int64 (metadata, "nfo:width", cinfo.image_width);
 	tracker_resource_set_int64 (metadata, "nfo:height", cinfo.image_height);
@@ -332,151 +282,34 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_resource_set_string (metadata, "nmm:dlnaMime", dlna_mimetype);
 	}
 
-	if (md.make || md.model) {
-		TrackerResource *equipment = tracker_extract_new_equipment (md.make, md.model);
-		tracker_resource_set_relation (metadata, "nfo:equipment", equipment);
-		g_object_unref (equipment);
-	}
+	if (comment)
+		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", comment);
 
 	tracker_guarantee_resource_title_from_file (metadata,
 	                                            "nie:title",
-	                                            md.title,
+	                                            NULL,
 	                                            uri,
 	                                            NULL);
 
-	if (md.orientation) {
-		TrackerResource *orientation;
-
-		orientation = tracker_resource_new (md.orientation);
-		tracker_resource_set_relation (metadata, "nfo:orientation", orientation);
-		g_object_unref (orientation);
-	}
-
-	if (md.copyright) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:copyright", md.copyright);
-	}
-
-	if (md.white_balance) {
-		TrackerResource *white_balance;
-
-		white_balance = tracker_resource_new (md.white_balance);
-		tracker_resource_set_relation (metadata, "nmm:whiteBalance", white_balance);
-		g_object_unref (white_balance);
-	}
-
-	if (md.fnumber) {
-		gdouble value;
-
-		value = g_strtod (md.fnumber, NULL);
-		tracker_resource_set_double (metadata, "nmm:fnumber", value);
-	}
-
-	if (md.flash) {
-		TrackerResource *flash;
-
-		flash = tracker_resource_new (md.flash);
-		tracker_resource_set_relation (metadata, "nmm:flash", flash);
-		g_object_unref (flash);
-	}
-
-	if (md.focal_length) {
-		gdouble value;
-
-		value = g_strtod (md.focal_length, NULL);
-		tracker_resource_set_double (metadata, "nmm:focalLength", value);
-	}
-
-	if (md.artist) {
-		TrackerResource *artist = tracker_extract_new_contact (md.artist);
-		tracker_resource_add_relation (metadata, "nco:contributor", artist);
-		g_object_unref (artist);
-	}
-
-	if (md.exposure_time) {
-		gdouble value;
-
-		value = g_strtod (md.exposure_time, NULL);
-		tracker_resource_set_double (metadata, "nmm:exposureTime", value);
-	}
-
-	if (md.iso_speed_ratings) {
-		gdouble value;
-
-		value = g_strtod (md.iso_speed_ratings, NULL);
-		tracker_resource_set_double (metadata, "nmm:isoSpeed", value);
-	}
-
 	tracker_guarantee_resource_date_from_file_mtime (metadata,
 	                                                 "nie:contentCreated",
-	                                                 md.date,
+	                                                 NULL,
 	                                                 uri);
 
-	if (md.description) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:description", md.description);
-	}
+	if (cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_INCH ||
+	    cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_CENTIMETER) {
+		gdouble v_res, h_res;
 
-	if (md.metering_mode) {
-		TrackerResource *metering;
+		v_res = cinfo.Y_density;
+		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_CENTIMETER)
+			v_res *= CMS_PER_INCH;
 
-		metering = tracker_resource_new (md.metering_mode);
-		tracker_resource_set_relation (metadata, "nmm:meteringMode", metering);
-		g_object_unref (metering);
-	}
+		h_res = cinfo.X_density;
+		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_CENTIMETER)
+			h_res *= CMS_PER_INCH;
 
-	if (md.comment) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", md.comment);
-	}
-
-	if (md.gps_altitude || md.gps_latitude || md.gps_longitude) {
-		TrackerResource *location;
-
-		location = tracker_extract_new_location (NULL, NULL, NULL, NULL,
-		                                         md.gps_altitude, md.gps_latitude,
-		                                         md.gps_longitude);
-
-		tracker_resource_set_relation (metadata, "slo:location", location);
-
-		g_object_unref (location);
-	}
-
-	if (md.gps_direction) {
-		tracker_resource_set_string (metadata, "nfo:heading", md.gps_direction);
-	}
-
-	if (cinfo.density_unit != 0 || ed->x_resolution) {
-		gdouble value;
-
-		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
-			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-				value = g_strtod (ed->x_resolution, NULL) * CMS_PER_INCH;
-			else
-				value = g_strtod (ed->x_resolution, NULL);
-		} else {
-			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
-				value = cinfo.X_density;
-			else
-				value = cinfo.X_density * CMS_PER_INCH;
-		}
-
-		tracker_resource_set_double (metadata, "nfo:horizontalResolution", value);
-	}
-
-	if (cinfo.density_unit != 0 || ed->y_resolution) {
-		gdouble value;
-
-		if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_UNKNOWN) {
-			if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-				value = g_strtod (ed->y_resolution, NULL) * CMS_PER_INCH;
-			else
-				value = g_strtod (ed->y_resolution, NULL);
-		} else {
-			if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH)
-				value = cinfo.Y_density;
-			else
-				value = cinfo.Y_density * CMS_PER_INCH;
-		}
-
-		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
+		tracker_resource_set_double (metadata, "nfo:horizontalResolution", h_res);
+		tracker_resource_set_double (metadata, "nfo:verticalResolution", v_res);
 	}
 
 #ifdef HAVE_EXEMPI
@@ -484,20 +317,23 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		tracker_xmp_apply_to_resource (metadata, xd);
 #endif
 #ifdef HAVE_GEXIV2
+	if (ed)
+		tracker_exif_apply_to_resource (metadata, ed);
+
 	if (id)
 		tracker_iptc_apply_to_resource (metadata, id);
 #endif
 
 	tracker_extract_info_set_resource (info, metadata);
 
-	fail :
+ fail :
 	jpeg_destroy_decompress (&cinfo);
 
-	g_clear_pointer (&ed, tracker_exif_free);
 #ifdef HAVE_EXEMPI
 	g_clear_pointer (&xd, tracker_xmp_free);
 #endif
 #ifdef HAVE_GEXIV2
+	g_clear_pointer (&ed, tracker_exif_free);
 	g_clear_pointer (&id, tracker_iptc_free);
 #endif
 	g_clear_pointer (&comment, g_free);
