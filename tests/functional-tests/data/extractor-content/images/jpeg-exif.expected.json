@@ -1,0 +1,61 @@
+{
+    "test": {
+        "Filename": "jpeg-exif.jpg",
+        "Comment": "JPEG with EXIF metadata"
+    },
+    "metadata": {
+        "@graph": [
+	    {
+		"nmm:fnumber": 5.6,
+		"slo:location": {
+                    "slo:latitude": "-42.5",
+                    "slo:longitude": "-10.166674613952637",
+                    "@type": "slo:GeoLocation",
+                    "slo:altitude": "237"
+		},
+		"nfo:orientation": {
+                    "@id": "nfo:orientation-left-mirror"
+		},
+		"nie:title": "test-documentname",
+		"nfo:width": 64,
+		"nfo:horizontalResolution": 72.0,
+		"nmm:dlnaProfile": "JPEG_SM",
+		"nie:description": "Justfortest",
+		"nfo:verticalResolution": 72.0,
+		"nfo:heading": "12.300000000000001",
+		"nmm:exposureTime": 0.002,
+		"nmm:dlnaMime": "image/jpeg",
+		"nmm:whiteBalance": {
+                    "@id": "nmm:white-balance-auto"
+		},
+		"@type": [
+                    "nfo:Image",
+                    "nmm:Photo"
+		],
+		"nmm:isoSpeed": 400.0,
+		"nie:contentCreated": "2011-10-13T16:16:00+0200",
+		"nie:comment": "libexif demonstration image",
+		"nfo:equipment": {
+                    "@id": "urn:equipment:Nikon:SD3000:",
+                    "nfo:model": "SD3000",
+                    "@type": "nfo:Equipment",
+                    "nfo:manufacturer": "Nikon"
+		},
+		"nmm:flash": {
+                    "@id": "nmm:flash-off"
+		},
+		"nmm:meteringMode": {
+                    "@id": "nmm:metering-mode-multispot"
+		},
+		"nco:contributor": {
+                    "@id": "urn:contact:EXIFspec",
+                    "nco:fullname": "EXIFspec",
+                    "@type": "nco:Contact"
+		},
+		"nie:copyright": "From the exif demo with exiftool metadata",
+		"nfo:height": 64,
+		"nmm:focalLength": 35.0
+	    }
+	]
+    }
+}

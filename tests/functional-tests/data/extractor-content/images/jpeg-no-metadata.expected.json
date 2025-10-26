@@ -1,0 +1,20 @@
+{
+    "test": {
+        "Filename": "jpeg-no-metadata.jpg",
+        "Comment": "JPEG with no metadata"
+    },
+    "metadata": {
+        "@graph": [
+	    {
+		"nmm:dlnaProfile": "JPEG_SM",
+		"nmm:dlnaMime": "image/jpeg",
+		"nfo:width": 64,
+		"nfo:height": 64,
+		"@type": [
+                    "nfo:Image",
+                    "nmm:Photo"
+		]
+	    }
+	]
+    }
+}
