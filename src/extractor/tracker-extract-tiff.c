@@ -39,6 +39,7 @@
 #include "tracker-xmp.h"
 #endif
 #ifdef HAVE_GEXIV2
+#include "tracker-exif.h"
 #include "tracker-iptc.h"
 #endif
 
@@ -387,6 +388,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	td.orientation = get_orientation (image);
 
 	/* Get Exif specifics */
+#ifdef HAVE_GEXIV2
 	if (TIFFGetField (image, TIFFTAG_EXIFIFD, &exif_offset)) {
 		if (TIFFReadEXIFDirectory (image, exif_offset)) {
 			ed->exposure_time = tag_to_string (image, EXIFTAG_EXPOSURETIME, TAG_TYPE_DOUBLE);
@@ -403,6 +405,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			/* ed->software = tag_to_string (image, EXIFTAG_SOFTWARE, TAG_TYPE_STRING); */
 		}
 	}
+#endif
 
 	TIFFClose (image);
 	g_free (filename);
@@ -541,6 +544,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		g_object_unref (metering);
 	}
 
+#ifdef HAVE_GEXIV2
 	if (ed->x_resolution) {
 		gdouble value;
 
@@ -562,6 +566,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
 	}
+#endif
 
 #ifdef HAVE_EXEMPI
 	if (xd) {
