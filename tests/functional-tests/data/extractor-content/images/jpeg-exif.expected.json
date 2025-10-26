@@ -8,10 +8,10 @@
 	    {
 		"nmm:fnumber": 5.6,
 		"slo:location": {
-                    "slo:latitude": "-42.5",
-                    "slo:longitude": "-10.166674613952637",
+                    "slo:latitude": -42.5,
+                    "slo:longitude": -10.166675,
                     "@type": "slo:GeoLocation",
-                    "slo:altitude": "237"
+                    "slo:altitude": 237.0
 		},
 		"nfo:orientation": {
                     "@id": "nfo:orientation-left-mirror"
