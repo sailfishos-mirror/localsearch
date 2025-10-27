@@ -32,6 +32,8 @@
 
 #define EXIF_DATE_FORMAT "%Y:%m:%d %H:%M:%S"
 
+#define CMS_PER_INCH            2.54
+
 enum {
 	EXIF_FLASH_NONE = 0x0000,
 	EXIF_FLASH_FIRED_MISSING_STROBE = 0x0005,
@@ -190,10 +192,18 @@ tracker_exif_new_from_metadata (GExiv2Metadata *metadata)
 	if (tmp_long != G_MAXLONG)
 		data->flash = convert_exif_flash_to_nmm (tmp_long);
 
-	tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTimeOriginal", NULL);
+	tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTimeOriginal", NULL);
 	if (tmp) {
 		data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT);
 		g_clear_pointer (&tmp, g_free);
+	}
+
+	if (!data->time_original) {
+		tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTimeOriginal", NULL);
+		if (tmp) {
+			data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT);
+			g_clear_pointer (&tmp, g_free);
+		}
 	}
 
 	tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTime", NULL);
@@ -306,11 +316,16 @@ tracker_exif_apply_to_resource (TrackerResource *resource,
 	if (!exif)
 		return;
 
-	if (exif->time_original)
-		tracker_resource_set_string (resource, "nie:contentCreated", exif->time_original);
+	if (exif->document_name)
+		tracker_resource_set_string (resource, "nie:title", exif->document_name);
+
+	if (exif->time_original || exif->date) {
+		const gchar *str = tracker_coalesce_strip (2, exif->date, exif->time_original);
+		tracker_resource_set_string (resource, "nie:contentCreated", str);
+	}
 
 	if (exif->orientation)
-		tracker_resource_set_string (resource, "nfo:orientation", exif->orientation);
+		tracker_resource_set_uri (resource, "nfo:orientation", exif->orientation);
 
 	if (exif->make || exif->model) {
 		TrackerResource *equipment = tracker_extract_new_equipment (exif->make, exif->model);
@@ -327,40 +342,94 @@ tracker_exif_apply_to_resource (TrackerResource *resource,
 	if (exif->description)
 		tracker_resource_set_string (resource, "nie:description", exif->description);
 
+	if (exif->user_comment)
+		tracker_resource_set_string (resource, "nie:comment", exif->user_comment);
+
 	if (exif->copyright)
 		tracker_resource_set_string (resource, "nie:copyright", exif->copyright);
 
-	if (exif->fnumber)
-		tracker_resource_set_string (resource, "nmm:fnumber", exif->fnumber);
-
-	if (exif->flash)
-		tracker_resource_set_string (resource, "nmm:flash", exif->flash);
-
-	if (exif->focal_length)
-		tracker_resource_set_string (resource, "nmm:focalLength", exif->focal_length);
-
-	if (exif->iso_speed_ratings)
-		tracker_resource_set_string (resource, "nmm:isoSpeed", exif->iso_speed_ratings);
-
-	if (exif->exposure_time)
-		tracker_resource_set_string (resource, "nmm:exposureTime", exif->exposure_time);
-
-	if (exif->metering_mode)
-		tracker_resource_set_string (resource, "nmm:meteringMode", exif->metering_mode);
-
-	if (exif->white_balance)
-		tracker_resource_set_string (resource, "nmm:whiteBalance", exif->white_balance);
-
-	if (exif->gps_latitude || exif->gps_longitude || exif->gps_altitude) {
-		TrackerResource *location = tracker_extract_new_location (
-			NULL, NULL, NULL, NULL,
-			exif->gps_altitude, exif->gps_latitude, exif->gps_longitude);
-		tracker_resource_set_relation (resource, "slo:location", location);
-		g_object_unref (location);
+	if (exif->fnumber) {
+		gdouble value;
+		value = g_strtod (exif->fnumber, NULL);
+		tracker_resource_set_double (resource, "nmm:fnumber", value);
 	}
 
-	if (exif->gps_direction)
-		tracker_resource_set_string (resource, "nfo:heading", exif->gps_direction);
+	if (exif->flash)
+		tracker_resource_set_uri (resource, "nmm:flash", exif->flash);
+
+	if (exif->focal_length) {
+		gdouble value;
+		value = g_strtod (exif->focal_length, NULL);
+		tracker_resource_set_double (resource, "nmm:focalLength", value);
+	}
+
+	if (exif->iso_speed_ratings) {
+		gdouble value;
+		value = g_strtod (exif->iso_speed_ratings, NULL);
+		tracker_resource_set_double (resource, "nmm:isoSpeed", value);
+	}
+
+	if (exif->exposure_time) {
+		gdouble value;
+		value = g_strtod (exif->exposure_time, NULL);
+		tracker_resource_set_double (resource, "nmm:exposureTime", value);
+	}
+
+	if (exif->metering_mode)
+		tracker_resource_set_uri (resource, "nmm:meteringMode", exif->metering_mode);
+
+	if (exif->white_balance)
+		tracker_resource_set_uri (resource, "nmm:whiteBalance", exif->white_balance);
+
+	if (exif->x_resolution > 0) {
+		gdouble value;
+
+		value = g_strtod (exif->x_resolution, NULL);
+
+		if (exif->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
+			value *= CMS_PER_INCH;
+
+		tracker_resource_set_double (resource, "nfo:horizontalResolution", value);
+	}
+
+	if (exif->y_resolution) {
+		gdouble value;
+
+		value = g_strtod (exif->y_resolution, NULL);
+
+		if (exif->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
+			value *= CMS_PER_INCH;
+
+		tracker_resource_set_double (resource, "nfo:verticalResolution", value);
+	}
+
+	if (exif->gps_latitude || exif->gps_longitude || exif->gps_altitude) {
+		TrackerResource *geopoint;
+
+		geopoint = tracker_resource_get_first_relation (resource, "slo:location");
+
+		if (geopoint) {
+			tracker_extract_merge_location (geopoint,
+			                                NULL, NULL,
+			                                NULL, NULL,
+			                                exif->gps_altitude,
+			                                exif->gps_latitude,
+			                                exif->gps_longitude);
+		} else {
+			geopoint = tracker_extract_new_location (NULL, NULL,
+			                                         NULL, NULL,
+			                                         exif->gps_altitude,
+			                                         exif->gps_latitude,
+			                                         exif->gps_longitude);
+			tracker_resource_set_take_relation (resource, "slo:location", geopoint);
+		}
+	}
+
+	if (exif->gps_direction) {
+		gdouble value;
+		value = g_strtod (exif->gps_direction, NULL);
+		tracker_resource_set_double (resource, "nfo:heading", value);
+	}
 }
 
 /**
@@ -403,6 +472,7 @@ tracker_exif_free (TrackerExifData *data)
 	g_free (data->gps_latitude);
 	g_free (data->gps_longitude);
 	g_free (data->gps_direction);
+	g_free (data->date);
 
 	g_free (data);
 }

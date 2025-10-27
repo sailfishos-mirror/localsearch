@@ -199,39 +199,63 @@ tracker_iptc_apply_to_resource (TrackerResource *resource,
 	if (!iptc)
 		return;
 
-	if (iptc->keywords)
-		tracker_resource_set_string (resource, "nao:keywords", iptc->keywords);
-
 	if (iptc->date_created)
 		tracker_resource_set_string (resource, "nie:contentCreated", iptc->date_created);
 
-	if (iptc->byline)
-		tracker_resource_set_string (resource, "nco:creator", iptc->byline);
+	if (iptc->byline || iptc->credit) {
+		TrackerResource *creator;
+		const gchar *str = tracker_coalesce_strip (2, iptc->byline, iptc->credit);
 
-	if (iptc->credit)
-		tracker_resource_set_string (resource, "nfo:credit", iptc->credit);
+		creator = tracker_extract_new_contact (str);
+		tracker_resource_add_take_relation (resource, "nco:creator", creator);
+	}
 
 	if (iptc->copyright_notice)
 		tracker_resource_set_string (resource, "nie:copyright", iptc->copyright_notice);
 
 	if (iptc->image_orientation)
-		tracker_resource_set_string (resource, "nfo:orientation", iptc->image_orientation);
+		tracker_resource_set_uri (resource, "nfo:orientation", iptc->image_orientation);
 
-	if (iptc->byline_title)
-		tracker_resource_set_string (resource, "nfo:bylineTitle", iptc->byline_title);
+	if (iptc->contact) {
+		TrackerResource *contrib;
 
-	if (iptc->city)
-		tracker_resource_set_string (resource, "nco:locality", iptc->city);
+		contrib = tracker_extract_new_contact (iptc->contact);
+		tracker_resource_add_take_relation (resource, "nco:contributor", contrib);
+	}
 
-	if (iptc->state)
-		tracker_resource_set_string (resource, "nco:region", iptc->state);
+	if (iptc->city || iptc->state || iptc->sublocation || iptc->country_name) {
+		TrackerResource *geopoint;
 
-	if (iptc->sublocation)
-		tracker_resource_set_string (resource, "nco:sublocation", iptc->sublocation);
+		geopoint = tracker_resource_get_first_relation (resource, "slo:location");
 
-	if (iptc->country_name)
-		tracker_resource_set_string (resource, "nco:country", iptc->country_name);
+		if (geopoint) {
+			tracker_extract_merge_location (geopoint,
+			                                iptc->sublocation, iptc->state,
+			                                iptc->city, iptc->country_name,
+			                                NULL, NULL, NULL);
+		} else {
+			geopoint = tracker_extract_new_location (iptc->sublocation, iptc->state,
+			                                         iptc->city, iptc->country_name,
+			                                         NULL, NULL, NULL);
+			tracker_resource_set_take_relation (resource, "slo:location", geopoint);
+		}
+	}
 
-	if (iptc->contact)
-		tracker_resource_set_string (resource, "nco:contact", iptc->contact);
+	if (iptc->keywords) {
+		g_autoptr (GPtrArray) keywords = NULL;
+		guint i;
+
+		keywords = g_ptr_array_new_with_free_func (g_free);
+		tracker_keywords_parse (keywords, iptc->keywords);
+
+		for (i = 0; i < keywords->len; i++) {
+			TrackerResource *tag;
+			const char *label;
+
+			label = g_ptr_array_index (keywords, i);
+			tag = tracker_extract_new_tag (label);
+
+			tracker_resource_add_take_relation (resource, "nao:hasTag", tag);
+		}
+	}
 }

@@ -46,10 +46,13 @@
 
 #include "tracker-main.h"
 
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
+#endif
+
 typedef struct {
 	gchar *title;
 	gchar *subject;
-	gchar *creation_date;
 	gchar *author;
 	gchar *date;
 	gchar *keywords;
@@ -253,7 +256,7 @@ write_pdf_data (PDFData          data,
 
 	if (!tracker_is_empty_string (data.author)) {
 		TrackerResource *author = tracker_extract_new_contact (data.author);
-		tracker_resource_set_relation (metadata, "nco:creator", author);
+		tracker_resource_add_relation (metadata, "nco:creator", author);
 		g_object_unref (author);
 	}
 
@@ -273,9 +276,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	time_t creation_date;
 	GError *inner_error = NULL;
 	TrackerResource *metadata;
+#ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
-	PDFData pd = { 0 }; /* actual data */
-	PDFData md = { 0 }; /* for merging */
+#endif
+	PDFData pd = { 0 };
 	G_GNUC_UNUSED GBytes *bytes;
 	PopplerDocument *document;
 	gchar *xml = NULL;
@@ -393,11 +397,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		g_autoptr (GDateTime) datetime = NULL;
 
 		datetime = g_date_time_new_from_unix_local (creation_date);
-		pd.creation_date = g_date_time_format_iso8601 (datetime);
+		pd.date = g_date_time_format_iso8601 (datetime);
 	}
 
 	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
 
+#ifdef HAVE_EXEMPI
 	if (xml && *xml) {
 		xd = tracker_xmp_new (xml, strlen (xml), uri);
 	} else {
@@ -417,113 +422,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 	}
 
-	if (xd) {
-		/* The casts here are well understood and known */
-		md.title = (gchar *) tracker_coalesce_strip (4, pd.title, xd->title, xd->title2, xd->pdf_title);
-		md.subject = (gchar *) tracker_coalesce_strip (2, pd.subject, xd->subject);
-		md.date = (gchar *) tracker_coalesce_strip (3, pd.creation_date, xd->date, xd->time_original);
-		md.author = (gchar *) tracker_coalesce_strip (2, pd.author, xd->creator);
+	if (xd)
+		tracker_xmp_apply_to_resource (metadata, xd);
+#endif
 
-		write_pdf_data (md, metadata, keywords);
-
-		if (xd->keywords) {
-			tracker_keywords_parse (keywords, xd->keywords);
-		}
-
-		if (xd->pdf_keywords) {
-			tracker_keywords_parse (keywords, xd->pdf_keywords);
-		}
-
-		if (xd->publisher) {
-			TrackerResource *publisher = tracker_extract_new_contact (xd->publisher);
-			tracker_resource_set_relation (metadata, "nco:publisher", publisher);
-			g_object_unref (publisher);
-		}
-
-		if (xd->type) {
-			tracker_resource_set_string (metadata, "dc:type", xd->type);
-		}
-
-		if (xd->format) {
-			tracker_resource_set_string (metadata, "dc:format", xd->format);
-		}
-
-		if (xd->identifier) {
-			tracker_resource_set_string (metadata, "dc:identifier", xd->identifier);
-		}
-
-		if (xd->source) {
-			tracker_resource_set_string (metadata, "dc:source", xd->source);
-		}
-
-		if (xd->language) {
-			tracker_resource_set_string (metadata, "dc:language", xd->language);
-		}
-
-		if (xd->relation) {
-			tracker_resource_set_string (metadata, "dc:relation", xd->relation);
-		}
-
-		if (xd->coverage) {
-			tracker_resource_set_string (metadata, "dc:coverage", xd->coverage);
-		}
-
-		if (xd->license) {
-			tracker_resource_set_string (metadata, "nie:license", xd->license);
-		}
-
-		if (xd->make || xd->model) {
-			TrackerResource *equipment = tracker_extract_new_equipment (xd->make, xd->model);
-			tracker_resource_set_relation (metadata, "nfo:equipment", equipment);
-			g_object_unref (equipment);
-		}
-
-		if (xd->rights) {
-			tracker_resource_set_string (metadata, "nie:copyright", xd->rights);
-		}
-
-		/* Question: Shouldn't xd->Artist be merged with md.author instead? */
-
-		if (xd->artist || xd->contributor) {
-			TrackerResource *artist;
-			const gchar *artist_name;
-
-			artist_name = tracker_coalesce_strip (2, xd->artist, xd->contributor);
-
-			artist = tracker_extract_new_contact (artist_name);
-
-			tracker_resource_set_relation (metadata, "nco:contributor", artist);
-
-			g_object_unref (artist);
-		}
-
-		if (xd->description) {
-			tracker_resource_set_string (metadata, "nie:description", xd->description);
-		}
-
-		if (xd->address || xd->state || xd->country || xd->city ||
-		    xd->gps_altitude || xd->gps_latitude || xd-> gps_longitude) {
-
-			TrackerResource *location = tracker_extract_new_location (xd->address,
-			        xd->state, xd->city, xd->country, xd->gps_altitude,
-			        xd->gps_latitude, xd->gps_longitude);
-
-			tracker_resource_set_relation (metadata, "slo:location", location);
-
-			g_object_unref (location);
-		}
-
-		if (xd->regions) {
-			tracker_xmp_apply_regions_to_resource (metadata, xd);
-		}
-
-		tracker_xmp_free (xd);
-	} else {
-		/* So if we are here we have NO XMP data and we just
-		 * write what we know from Poppler.
-		 */
-		write_pdf_data (pd, metadata, keywords);
-	}
+	write_pdf_data (pd, metadata, keywords);
 
 	for (i = 0; i < keywords->len; i++) {
 		TrackerResource *tag;
@@ -554,7 +457,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	g_free (pd.keywords);
 	g_free (pd.title);
 	g_free (pd.subject);
-	g_free (pd.creation_date);
 	g_free (pd.author);
 	g_free (pd.date);
 	g_free (uri);

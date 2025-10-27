@@ -67,15 +67,6 @@ TrackerIptcData *tracker_iptc_new   (const guchar    *buffer,
 				     const gchar     *uri);
 void             tracker_iptc_free  (TrackerIptcData *data);
 
-#ifndef TRACKER_DISABLE_DEPRECATED
-
-gboolean         tracker_iptc_read  (const unsigned char *buffer,
-				     size_t               len,
-				     const gchar         *uri,
-				     TrackerIptcData     *data) G_GNUC_DEPRECATED;
-
-#endif /* TRACKER_DISABLE_DEPRECATED */
-
 void tracker_iptc_apply_to_resource (TrackerResource *resource,
                                      TrackerIptcData *iptc);
 

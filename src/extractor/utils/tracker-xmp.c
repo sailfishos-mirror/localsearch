@@ -28,8 +28,6 @@
 #include "tracker-xmp.h"
 #include "tracker-utils.h"
 
-#ifdef HAVE_EXEMPI
-
 #define NS_XMP_REGIONS "http://www.metadataworkinggroup.com/schemas/regions/"
 #define NS_ST_DIM "http://ns.adobe.com/xap/1.0/sType/Dimensions#"
 #define NS_ST_AREA "http://ns.adobe.com/xmp/sType/Area#"
@@ -663,21 +661,15 @@ register_namespace (const gchar *ns_uri,
         }
 }
 
-#endif /* HAVE_EXEMPI */
-
 static gboolean
 parse_xmp (const gchar    *buffer,
            size_t          len,
            const gchar    *uri,
            TrackerXmpData *data)
 {
-#ifdef HAVE_EXEMPI
 	XmpPtr xmp;
-#endif /* HAVE_EXEMPI */
 
 	memset (data, 0, sizeof (TrackerXmpData));
-
-#ifdef HAVE_EXEMPI
 
 	xmp_init ();
 
@@ -698,50 +690,9 @@ parse_xmp (const gchar    *buffer,
 	}
 
 	xmp_terminate ();
-#endif /* HAVE_EXEMPI */
 
 	return TRUE;
 }
-
-#ifndef TRACKER_DISABLE_DEPRECATED
-
-// LCOV_EXCL_START
-
-/**
- * tracker_xmp_read:
- * @buffer: a chunk of data with xmp data in it.
- * @len: the size of @buffer.
- * @uri: the URI this is related to.
- * @data: a pointer to a TrackerXmpData structure to populate.
- *
- * This function takes @len bytes of @buffer and runs it through the
- * XMP library. The result is that @data is populated with the XMP
- * data found in @uri.
- *
- * Returns: %TRUE if the @data was populated successfully, otherwise
- * %FALSE is returned.
- *
- * Since: 0.8
- *
- * Deprecated: 0.9. Use tracker_xmp_new() instead.
- **/
-gboolean
-tracker_xmp_read (const gchar    *buffer,
-                  size_t          len,
-                  const gchar    *uri,
-                  TrackerXmpData *data)
-{
-	g_return_val_if_fail (buffer != NULL, FALSE);
-	g_return_val_if_fail (len > 0, FALSE);
-	g_return_val_if_fail (uri != NULL, FALSE);
-	g_return_val_if_fail (data != NULL, FALSE);
-
-	return parse_xmp (buffer, len, uri, data);
-}
-
-// LCOV_EXCL_STOP
-
-#endif /* TRACKER_DISABLE_DEPRECATED */
 
 static void
 xmp_region_free (gpointer data)
@@ -979,7 +930,7 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 		p = g_ptr_array_index (keywords, i);
 		label = tracker_extract_new_tag (p);
 
-		tracker_resource_set_relation (resource, "nao:hasTag", label);
+		tracker_resource_add_relation (resource, "nao:hasTag", label);
 
 		g_free (p);
 		g_object_unref (label);
@@ -1023,7 +974,7 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->license) {
-		tracker_resource_set_string (resource, "dc:license", data->license);
+		tracker_resource_set_string (resource, "nie:license", data->license);
 	}
 
 	if (data->make || data->model) {
@@ -1065,7 +1016,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->fnumber) {
-		tracker_resource_set_string (resource, "nmm:fnumber", data->fnumber);
+		gdouble value;
+
+		value = g_strtod (data->fnumber, NULL);
+		tracker_resource_set_double (resource, "nmm:fnumber", value);
 	}
 
 	if (data->flash) {
@@ -1077,7 +1031,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->focal_length) {
-		tracker_resource_set_string (resource, "nmm:focalLength", data->focal_length);
+		gdouble value;
+
+		value = g_strtod (data->focal_length, NULL);
+		tracker_resource_set_double (resource, "nmm:focalLength", value);
 	}
 
 	if (data->artist || data->contributor) {
@@ -1090,11 +1047,17 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->exposure_time) {
-		tracker_resource_set_string (resource, "nmm:exposureTime", data->exposure_time);
+		gdouble value;
+
+		value = g_strtod (data->exposure_time, NULL);
+		tracker_resource_set_double (resource, "nmm:exposureTime", value);
 	}
 
 	if (data->iso_speed_ratings) {
-		tracker_resource_set_string (resource, "nmm:isoSpeed", data->iso_speed_ratings);
+		gdouble value;
+
+		value = g_strtod (data->iso_speed_ratings, NULL);
+		tracker_resource_set_double (resource, "nmm:isoSpeed", value);
 	}
 
 	if (data->date || data->time_original) {
@@ -1128,10 +1091,23 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	    data->gps_altitude || data->gps_latitude || data->gps_longitude) {
 		TrackerResource *geopoint;
 
-		geopoint = tracker_extract_new_location (data->address, data->state, data->city,
-		        data->country, data->gps_altitude, data->gps_latitude, data->gps_longitude);
-		tracker_resource_set_relation (resource, "slo:location", geopoint);
-		g_object_unref (geopoint);
+		geopoint = tracker_resource_get_first_relation (resource, "slo:location");
+
+		if (geopoint) {
+			tracker_extract_merge_location (geopoint,
+			                                data->address, data->state,
+			                                data->city, data->country,
+			                                data->gps_altitude,
+			                                data->gps_latitude,
+			                                data->gps_longitude);
+		} else {
+			geopoint = tracker_extract_new_location (data->address, data->state,
+			                                         data->city, data->country,
+			                                         data->gps_altitude,
+			                                         data->gps_latitude,
+			                                         data->gps_longitude);
+			tracker_resource_set_take_relation (resource, "slo:location", geopoint);
+		}
 	}
 
 	if (data->gps_direction) {
@@ -1140,6 +1116,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 
 	if (data->regions) {
 		tracker_xmp_apply_regions_to_resource (resource, data);
+	}
+
+	if (data->rating) {
+		tracker_resource_set_string (resource, "nao:numericRating", data->rating);
 	}
 
 	return TRUE;

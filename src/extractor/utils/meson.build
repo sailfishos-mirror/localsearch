@@ -1,10 +1,8 @@
 libtracker_extract_sources = [
   'tracker-encoding.c',
-  'tracker-exif.c',
   'tracker-guarantee.c',
   'tracker-resource-helpers.c',
   'tracker-utils.c',
-  'tracker-xmp.c',
 ]
 
 if charset_library_name == 'enca'
@@ -16,11 +14,12 @@ endif
 tracker_extract_dependencies = [charset_library, gmodule, tracker_sparql]
 
 if exempi.found()
+  libtracker_extract_sources += ['tracker-xmp.c']
   tracker_extract_dependencies += exempi
 endif
 
-if gexiv2.found()
-  libtracker_extract_sources += 'tracker-iptc.c'
+if have_gexiv2
+  libtracker_extract_sources += ['tracker-exif.c', 'tracker-iptc.c']
   tracker_extract_dependencies += gexiv2
 endif
 

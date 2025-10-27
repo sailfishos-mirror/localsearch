@@ -1,11 +1,14 @@
 libtracker_extract_tests = [
     'guarantee',
     'utils',
-    'xmp',
 ]
 
 if charset_library_name != 'none'
     libtracker_extract_tests += ['encoding']
+endif
+
+if exempi.found()
+    libtracker_extract_tests += ['xmp']
 endif
 
 libtracker_extract_test_deps = [

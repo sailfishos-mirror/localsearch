@@ -17,12 +17,14 @@ datadir = join_paths(get_option('prefix'), get_option('datadir'))
 
 glib_required = '2.76.0'
 
+want_gexiv2 = get_option('raw').allowed() or get_option('iptc').allowed() or get_option('exif').allowed()
+
 tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
 gexiv2 = dependency('gexiv2-0.16', required: false)
 if not gexiv2.found()
-  gexiv2 = dependency('gexiv2', required: get_option('raw'))
+  gexiv2 = dependency('gexiv2', required: want_gexiv2)
 endif
 gio = dependency('gio-2.0', version: '>=' + glib_required)
 gio_unix = dependency('gio-unix-2.0', version: '>=' + glib_required)
@@ -57,6 +59,8 @@ dbusmock = python.find_installation(
 have_tracker_extract = get_option('extract')
 have_tracker_miner_fs = get_option('miner_fs')
 have_tracker_writeback = get_option('writeback')
+
+have_gexiv2 = want_gexiv2 and gexiv2.found()
 
 if get_option('man')
   a2x = find_program('a2x')
@@ -285,7 +289,7 @@ conf.set('HAVE_GSTREAMER_1_20', gstreamer.version() >= '1.20.0')
 conf.set('HAVE_POWER', battery_detection_library_name != 'none')
 conf.set('HAVE_LIBCUE', libcue.found())
 conf.set('HAVE_LIBICU_CHARSET_DETECTION', charset_library_name == 'icu')
-conf.set('HAVE_GEXIV2', gexiv2.found())
+conf.set('HAVE_GEXIV2', have_gexiv2)
 conf.set('HAVE_LIBSECCOMP', seccomp_required and libseccomp.found())
 conf.set('HAVE_MALLOC_TRIM', have_malloc_trim)
 conf.set('HAVE_GUPNP_DLNA', gupnp_dlna.found())
@@ -440,11 +444,11 @@ if have_tracker_extract
     '    Support XPS:                            ' + libgxps.found().to_string(),
     '    Support GIF:                            @0@ (xmp: @1@)'.format(libgif.found().to_string(), exempi.found().to_string()),
     '    Support JPEG:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
-        libjpeg.found().to_string(), exempi.found().to_string(), gexiv2.found().to_string(), gexiv2.found().to_string()),
+        libjpeg.found().to_string(), exempi.found().to_string(), have_gexiv2.to_string(), have_gexiv2.to_string()),
     '    Support WEBP:                           ' + webp.found().to_string(),
-    '    Support RAW:                            ' + gexiv2.found().to_string(),
+    '    Support RAW:                            ' + have_gexiv2.to_string(),
     '    Support TIFF:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
-        libtiff.found().to_string(), exempi.found().to_string(), gexiv2.found().to_string(), gexiv2.found().to_string()),
+        libtiff.found().to_string(), exempi.found().to_string(), have_gexiv2.to_string(), have_gexiv2.to_string()),
     '    Support MS & Open Office:               ' + libgsf.found().to_string(),
     '    Support XML / HTML:                     ' + libxml2.found().to_string(),
     '    Support embedded / sidecar XMP:         ' + exempi.found().to_string(),

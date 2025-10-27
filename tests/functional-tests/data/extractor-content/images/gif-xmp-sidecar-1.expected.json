@@ -7,7 +7,7 @@
         "@graph": [
 	    {
                 "dc:format": "image/gif",
-                "nmm:exposureTime": "9.1996320147194106e-05",
+                "nmm:exposureTime": 9.19963201471941e-05,
                 "nfo:heading": "171.26344086021504",
                 "nco:contributor": {
                     "@id": "urn:contact:Artist",
@@ -25,27 +25,39 @@
                     "nmm:Photo"
                 ],
                 "nfo:height": "10",
-                "nco:creator": [
-                    {
-                        "@id": "urn:contact:Author",
-                        "nco:fullname": "Author",
-                        "@type": "nco:Contact"
-                    },
-                    {
-                        "@id": "urn:contact:Author"
-                    }
-                ],
+                "nco:creator": {
+                    "@id": "urn:contact:Author",
+                    "nco:fullname": "Author",
+                    "@type": "nco:Contact"
+                },
                 "nmm:flash": {
                     "@id": "nmm:flash-on"
                 },
                 "nie:title": "Photograph",
                 "dc:type": "Type",
                 "nie:license": "License",
-                "nao:hasTag": {
-                    "@id": "urn:tag:bright2",
-                    "nao:prefLabel": "bright2",
-                    "@type": "nao:Tag"
-                },
+                "nao:hasTag": [
+                    {
+                        "@id": "urn:tag:amazing",
+                        "nao:prefLabel": "amazing",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:bright",
+                        "nao:prefLabel": "bright",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:amazing2",
+                        "nao:prefLabel": "amazing2",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:bright2",
+                        "nao:prefLabel": "bright2",
+                        "@type": "nao:Tag"
+                    }
+                ],
                 "dc:language": "en_US",
                 "nfo:hasRegionOfInterest": [
                     {
@@ -70,7 +82,7 @@
                 ],
                 "nie:description": "Photograph description",
                 "dc:coverage": "Coverage",
-                "nmm:isoSpeed": "50",
+                "nmm:isoSpeed": 50.0,
                 "dc:identifier": "Identifier",
                 "dc:source": "http://example.com/",
                 "nao:numericRating": "5",
@@ -86,11 +98,11 @@
                 },
                 "nfo:width": "10",
                 "nie:comment": "Photograph description",
-                "nmm:fnumber": "2.3999999999999999",
+                "nmm:fnumber": 2.4,
                 "nmm:whiteBalance": {
                     "@id": "nmm:white-balance-auto"
                 },
-                "nmm:focalLength": "4.1200000000000001",
+                "nmm:focalLength": 4.12,
                 "nfo:orientation": {
                     "@id": "nfo:orientation-top"
                 }

@@ -26,34 +26,17 @@
 
 #include "utils/tracker-extract.h"
 
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
+#endif
+
+#ifdef HAVE_GEXIV2
+#include "tracker-exif.h"
+#include <gexiv2/gexiv2.h>
+#endif
+
 #define RFC1123_DATE_FORMAT "%d %B %Y %H:%M:%S %z"
 #define CMS_PER_INCH        2.54
-
-typedef struct {
-	const gchar *title;
-	const gchar *copyright;
-	const gchar *creator;
-	const gchar *description;
-	const gchar *date;
-	const gchar *license;
-	const gchar *artist;
-	const gchar *make;
-	const gchar *model;
-	const gchar *orientation;
-	const gchar *white_balance;
-	const gchar *fnumber;
-	const gchar *flash;
-	const gchar *focal_length;
-	const gchar *exposure_time;
-	const gchar *iso_speed_ratings;
-	const gchar *metering_mode;
-	const gchar *comment;
-	const gchar *city;
-	const gchar *state;
-	const gchar *address;
-	const gchar *country;
-	const gchar *gps_direction;
-} MergeData;
 
 typedef struct {
 	const gchar *author;
@@ -189,17 +172,19 @@ read_metadata (TrackerResource      *metadata,
                GFile                *file,
                const gchar          *uri)
 {
-	MergeData md = { 0 };
 	PngData pd = { 0 };
+#ifdef HAVE_GEXIV2
 	TrackerExifData *ed = NULL;
+#endif
+#ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
+#endif
 	png_infop info_ptrs[2];
 	png_textp text_ptr;
 	gint info_index;
 	gint num_text;
 	gint i;
 	gint found;
-	GPtrArray *keywords;
 
 	info_ptrs[0] = info_ptr;
 	info_ptrs[1] = end_ptr;
@@ -345,10 +330,7 @@ read_metadata (TrackerResource      *metadata,
 		}
 	}
 
-	if (!ed) {
-		ed = g_new0 (TrackerExifData, 1);
-	}
-
+#ifdef HAVE_EXEMPI
 	if (!xd) {
 		gchar *sidecar = NULL;
 
@@ -365,247 +347,60 @@ read_metadata (TrackerResource      *metadata,
 			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
 		}
 	}
+#endif
 
-	if (!xd) {
-		xd = g_new0 (TrackerXmpData, 1);
+	if (pd.comment) {
+		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", pd.comment);
 	}
 
-	md.creator = tracker_coalesce_strip (3, xd->creator, pd.creator, pd.author);
-	md.title = tracker_coalesce_strip (5, xd->title, pd.title, ed->document_name, xd->title2, xd->pdf_title);
-	md.copyright = tracker_coalesce_strip (3, xd->rights, pd.copyright, ed->copyright);
-	md.license = tracker_coalesce_strip (2, xd->license, pd.disclaimer);
-	md.description = tracker_coalesce_strip (3, xd->description, pd.description, ed->description);
-	md.date = tracker_coalesce_strip (5, xd->date, xd->time_original, pd.creation_time, ed->time, ed->time_original);
-	md.comment = tracker_coalesce_strip (2, pd.comment, ed->user_comment);
-	md.artist = tracker_coalesce_strip (3, xd->artist, ed->artist, xd->contributor);
-	md.orientation = tracker_coalesce_strip (2, xd->orientation, ed->orientation);
-	md.exposure_time = tracker_coalesce_strip (2, xd->exposure_time, ed->exposure_time);
-	md.iso_speed_ratings = tracker_coalesce_strip (2, xd->iso_speed_ratings, ed->iso_speed_ratings);
-	md.fnumber = tracker_coalesce_strip (2, xd->fnumber, ed->fnumber);
-	md.flash = tracker_coalesce_strip (2, xd->flash, ed->flash);
-	md.focal_length = tracker_coalesce_strip (2, xd->focal_length, ed->focal_length);
-	md.metering_mode = tracker_coalesce_strip (2, xd->metering_mode, ed->metering_mode);
-	md.white_balance = tracker_coalesce_strip (2, xd->white_balance, ed->white_balance);
-	md.make = tracker_coalesce_strip (2, xd->make, ed->make);
-	md.model = tracker_coalesce_strip (2, xd->model, ed->model);
-
-	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
-
-	if (md.comment) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", md.comment);
+	if (pd.disclaimer) {
+		tracker_guarantee_resource_utf8_string (metadata, "nie:license", pd.disclaimer);
 	}
 
-	if (md.license) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:license", md.license);
-	}
+	if (pd.creator || pd.author) {
+		TrackerResource *creator;
+		const char *str = tracker_coalesce_strip (2, pd.creator, pd.author);
 
-	/* TODO: add ontology and store this ed->software */
-
-	if (md.creator) {
-		TrackerResource *creator = tracker_extract_new_contact (md.creator);
-
+		creator = tracker_extract_new_contact (str);
 		tracker_resource_set_relation (metadata, "nco:creator", creator);
-
 		g_object_unref (creator);
 	}
 
 	tracker_guarantee_resource_date_from_file_mtime (metadata,
 	                                                 "nie:contentCreated",
-	                                                 md.date,
+	                                                 pd.creation_time,
 	                                                 uri);
 
-	if (md.description) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:description", md.description);
+	if (pd.description) {
+		tracker_guarantee_resource_utf8_string (metadata, "nie:description", pd.description);
 	}
 
-	if (md.copyright) {
-		tracker_guarantee_resource_utf8_string (metadata, "nie:copyright", md.copyright);
+	if (pd.copyright) {
+		tracker_guarantee_resource_utf8_string (metadata, "nie:copyright", pd.copyright);
 	}
 
 	tracker_guarantee_resource_title_from_file (metadata,
 	                                            "nie:title",
-	                                            md.title,
+	                                            pd.title,
 	                                            uri,
 	                                            NULL);
-
-	if (md.make || md.model) {
-		TrackerResource *equipment = tracker_extract_new_equipment (md.make, md.model);
-
-		tracker_resource_set_relation (metadata, "nfo:equipment", equipment);
-
-		g_object_unref (equipment);
-	}
-
-	if (md.artist) {
-		TrackerResource *artist = tracker_extract_new_contact (md.artist);
-
-		tracker_resource_set_relation (metadata, "nco:contributor", artist);
-
-		g_object_unref (artist);
-	}
-
-	if (md.orientation) {
-		TrackerResource *orientation;
-
-		orientation = tracker_resource_new (md.orientation);
-		tracker_resource_set_relation (metadata, "nfo:orientation", orientation);
-		g_object_unref (orientation);
-	}
-
-	if (md.exposure_time) {
-		tracker_resource_set_string (metadata, "nmm:exposureTime", md.exposure_time);
-	}
-
-	if (md.iso_speed_ratings) {
-		tracker_resource_set_string (metadata, "nmm:isoSpeed", md.iso_speed_ratings);
-	}
-
-	if (md.white_balance) {
-		TrackerResource *white_balance;
-
-		white_balance = tracker_resource_new (md.white_balance);
-		tracker_resource_set_relation (metadata, "nmm:whiteBalance", white_balance);
-		g_object_unref (white_balance);
-	}
-
-	if (md.fnumber) {
-		tracker_resource_set_string (metadata, "nmm:fnumber", md.fnumber);
-	}
-
-	if (md.flash) {
-		TrackerResource *flash;
-
-		flash = tracker_resource_new (md.flash);
-		tracker_resource_set_relation (metadata, "nmm:flash", flash);
-		g_object_unref (flash);
-	}
-
-	if (md.focal_length) {
-		tracker_resource_set_string (metadata, "nmm:focalLength", md.focal_length);
-	}
-
-	if (md.metering_mode) {
-		TrackerResource *metering;
-
-		metering = tracker_resource_new (md.metering_mode);
-		tracker_resource_set_relation (metadata, "nmm:meteringMode", metering);
-		g_object_unref (metering);
-	}
-
-	if (xd->keywords) {
-		tracker_keywords_parse (keywords, xd->keywords);
-	}
-
-	if (xd->pdf_keywords) {
-		tracker_keywords_parse (keywords, xd->pdf_keywords);
-	}
-
-	if (xd->rating) {
-		tracker_resource_set_string (metadata, "nao:numericRating", xd->rating);
-	}
-
-	if (xd->subject) {
-		tracker_keywords_parse (keywords, xd->subject);
-	}
-
-	if (xd->publisher) {
-		TrackerResource *publisher = tracker_extract_new_contact (xd->publisher);
-
-		tracker_resource_set_relation (metadata, "nco:creator", publisher);
-
-		g_object_unref (publisher);
-	}
-
-	if (xd->type) {
-		tracker_resource_set_string (metadata, "dc:type", xd->type);
-	}
-
-	if (xd->format) {
-		tracker_resource_set_string (metadata, "dc:format", xd->format);
-	}
-
-	if (xd->identifier) {
-		tracker_resource_set_string (metadata, "dc:identifier", xd->identifier);
-	}
-
-	if (xd->source) {
-		tracker_resource_set_string (metadata, "dc:source", xd->source);
-	}
-
-	if (xd->language) {
-		tracker_resource_set_string (metadata, "dc:language", xd->language);
-	}
-
-	if (xd->relation) {
-		tracker_resource_set_string (metadata, "dc:relation", xd->relation);
-	}
-
-	if (xd->coverage) {
-		tracker_resource_set_string (metadata, "dc:coverage", xd->coverage);
-	}
-
-	if (xd->address || xd->state || xd->country || xd->city ||
-	    xd->gps_altitude || xd->gps_latitude || xd-> gps_longitude) {
-
-		TrackerResource *location = tracker_extract_new_location (xd->address,
-		        xd->state, xd->city, xd->country, xd->gps_altitude,
-		        xd->gps_latitude, xd-> gps_longitude);
-		
-		tracker_resource_set_relation (metadata, "slo:location", location);
-
-		g_object_unref (location);
-	}
-
-	if (xd->gps_direction) {
-		tracker_resource_set_string(metadata, "nfo:heading", xd->gps_direction);
-	}
-
-	if (ed->x_resolution) {
-		gdouble value;
-
-		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-			value = g_strtod (ed->x_resolution, NULL) * CMS_PER_INCH;
-		else
-			value = g_strtod (ed->x_resolution, NULL);
-
-		tracker_resource_set_double (metadata, "nfo:horizontalResolution", value);
-	}
-
-	if (ed->y_resolution) {
-		gdouble value;
-
-		if (ed->resolution_unit == EXIF_RESOLUTION_UNIT_PER_CENTIMETER)
-			value = g_strtod (ed->y_resolution, NULL) * CMS_PER_INCH;
-		else
-			value = g_strtod (ed->y_resolution, NULL);
-
-		tracker_resource_set_double (metadata, "nfo:verticalResolution", value);
-	}
-
-	if (xd->regions) {
-		tracker_xmp_apply_regions_to_resource (metadata, xd);
-	}
-
-	for (i = 0; i < keywords->len; i++) {
-		TrackerResource *tag;
-		const gchar *p;
-
-		p = g_ptr_array_index (keywords, i);
-
-		tag = tracker_extract_new_tag (p);
-
-		tracker_resource_set_relation (metadata, "nao:hasTag", tag);
-
-		g_object_unref (tag);
-	}
-	g_ptr_array_free (keywords, TRUE);
 
 	if (g_strcmp0(pd.software, "gnome-screenshot") == 0) {
 		tracker_resource_add_uri (metadata, "nie:isLogicalPartOf", "nfo:image-category-screenshot");
 	}
 
-	tracker_exif_free (ed);
-	tracker_xmp_free (xd);
+#ifdef HAVE_EXEMPI
+	if (xd) {
+		tracker_xmp_apply_to_resource (metadata, xd);
+		tracker_xmp_free (xd);
+	}
+#endif
+#ifdef HAVE_GEXIV2
+	if (ed) {
+		tracker_exif_apply_to_resource (metadata, ed);
+		tracker_exif_free (ed);
+	}
+#endif
 	g_free (pd.creation_time);
 }
 

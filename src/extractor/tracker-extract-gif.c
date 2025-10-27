@@ -33,14 +33,12 @@
 
 #include "utils/tracker-extract.h"
 
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
+#endif
+
 #define XMP_MAGIC_TRAILER_LENGTH 256
 #define EXTENSION_RECORD_COMMENT_BLOCK_CODE 0xFE
-
-typedef struct {
-	const gchar *title;
-	const gchar *date;
-	const gchar *artist;
-} MergeData;
 
 typedef struct {
 	unsigned int   byteCount;
@@ -107,12 +105,11 @@ read_metadata (GifFileType        *gifFile,
 	int frameheight;
 	int framewidth;
 	unsigned char *framedata = NULL;
-	GPtrArray *keywords;
-	guint i;
 	gint h;
 	int status;
-	MergeData md = { 0 };
+#ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
+#endif
 	gchar *sidecar = NULL;
 	int width = 0, height = 0;
 	g_autofree char *resource_uri = NULL, *comment = NULL;
@@ -238,215 +235,38 @@ read_metadata (GifFileType        *gifFile,
 		}
 	} while (RecordType != TERMINATE_RECORD_TYPE);
 
-
-	if (!xd) {
-		xd = tracker_xmp_new_from_sidecar (file, &sidecar);
-	}
-
-	if (!xd) {
-		xd = g_new0 (TrackerXmpData, 1);
-	}
-
-	md.title = tracker_coalesce_strip (3, xd->title, xd->title2, xd->pdf_title);
-	md.date = tracker_coalesce_strip (2, xd->date, xd->time_original);
-	md.artist = tracker_coalesce_strip (2, xd->artist, xd->contributor);
-
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
+
+#ifdef HAVE_EXEMPI
+	if (!xd) {
+		xd = tracker_xmp_new_from_sidecar (file, &sidecar);
+
+		if (sidecar) {
+			TrackerResource *sidecar_resource;
+
+			sidecar_resource = tracker_resource_new (sidecar);
+			tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
+			tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs", resource_uri);
+
+			tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
+		}
+	}
+#endif
+
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nmm:Photo");
 
-	if (sidecar) {
-		TrackerResource *sidecar_resource;
-
-		sidecar_resource = tracker_resource_new (sidecar);
-		tracker_resource_add_uri (sidecar_resource, "rdf:type", "nfo:FileDataObject");
-		tracker_resource_set_uri (sidecar_resource, "nie:interpretedAs", resource_uri);
-
-		tracker_resource_add_take_relation (metadata, "nie:isStoredAs", sidecar_resource);
-	}
-
-	if (xd->license) {
-		tracker_resource_set_string (metadata, "nie:license", xd->license);
-	}
-
-	if (xd->creator) {
-		TrackerResource *creator = tracker_extract_new_contact (xd->creator);
-
-		tracker_resource_set_relation (metadata, "nco:creator", creator);
-
-		g_object_unref (creator);
-	}
-
 	tracker_guarantee_resource_date_from_file_mtime (metadata,
 	                                                 "nie:contentCreated",
-	                                                 md.date,
+	                                                 NULL,
 	                                                 uri);
-
-	if (xd->description) {
-		tracker_resource_set_string (metadata, "nie:description", xd->description);
-	}
-
-	if (xd->copyright) {
-		tracker_resource_set_string (metadata, "nie:copyright", xd->copyright);
-	}
-
-	if (xd->make || xd->model) {
-		TrackerResource *equipment = tracker_extract_new_equipment (xd->make, xd->model);
-
-		tracker_resource_set_relation (metadata, "nfo:equipment", equipment);
-
-		g_object_unref (equipment);
-	}
 
 	tracker_guarantee_resource_title_from_file (metadata,
 	                                            "nie:title",
-	                                            md.title,
+	                                            NULL,
 	                                            uri,
 	                                            NULL);
-
-	if (md.artist) {
-		TrackerResource *artist = tracker_extract_new_contact (md.artist);
-
-		tracker_resource_add_relation (metadata, "nco:contributor", artist);
-
-		g_object_unref (artist);
-	}
-
-	if (xd->orientation) {
-		TrackerResource *orientation;
-
-		orientation = tracker_resource_new (xd->orientation);
-		tracker_resource_set_relation (metadata, "nfo:orientation", orientation);
-		g_object_unref (orientation);
-	}
-
-	if (xd->exposure_time) {
-		tracker_resource_set_string (metadata, "nmm:exposureTime", xd->exposure_time);
-	}
-
-	if (xd->iso_speed_ratings) {
-		tracker_resource_set_string (metadata, "nmm:isoSpeed", xd->iso_speed_ratings);
-	}
-
-	if (xd->white_balance) {
-		TrackerResource *white_balance;
-
-		white_balance = tracker_resource_new (xd->white_balance);
-		tracker_resource_set_relation (metadata, "nmm:whiteBalance", white_balance);
-		g_object_unref (white_balance);
-	}
-
-	if (xd->fnumber) {
-		tracker_resource_set_string (metadata, "nmm:fnumber", xd->fnumber);
-	}
-
-	if (xd->flash) {
-		TrackerResource *flash;
-
-		flash = tracker_resource_new (xd->flash);
-		tracker_resource_set_relation (metadata, "nmm:flash", flash);
-		g_object_unref (flash);
-	}
-
-	if (xd->focal_length) {
-		tracker_resource_set_string (metadata, "nmm:focalLength", xd->focal_length);
-	}
-
-	if (xd->metering_mode) {
-		TrackerResource *metering;
-
-		metering = tracker_resource_new (xd->metering_mode);
-		tracker_resource_set_relation (metadata, "nmm:meteringMode", metering);
-		g_object_unref (metering);
-	}
-
-	keywords = g_ptr_array_new_with_free_func ((GDestroyNotify) g_free);
-
-	if (xd->keywords) {
-		tracker_keywords_parse (keywords, xd->keywords);
-	}
-
-	if (xd->pdf_keywords) {
-		tracker_keywords_parse (keywords, xd->pdf_keywords);
-	}
-
-	if (xd->rating) {
-		tracker_resource_set_string (metadata, "nao:numericRating", xd->rating);
-	}
-
-	if (xd->subject) {
-		tracker_keywords_parse (keywords, xd->subject);
-	}
-
-        if (xd->regions) {
-                tracker_xmp_apply_regions_to_resource (metadata, xd);
-        }
-
-	for (i = 0; i < keywords->len; i++) {
-		TrackerResource *tag;
-		const gchar *p;
-
-		p = g_ptr_array_index (keywords, i);
-		tag = tracker_extract_new_tag (p);
-
-		tracker_resource_set_relation (metadata, "nao:hasTag", tag);
-
-		g_object_unref (tag);
-	}
-	g_ptr_array_free (keywords, TRUE);
-
-	if (xd->publisher) {
-		TrackerResource *publisher = tracker_extract_new_contact (xd->creator);
-
-		tracker_resource_add_relation (metadata, "nco:creator", publisher);
-
-		g_object_unref (publisher);
-	}
-
-	if (xd->type) {
-		tracker_resource_set_string (metadata, "dc:type", xd->type);
-	}
-
-	if (xd->format) {
-		tracker_resource_set_string (metadata, "dc:format", xd->format);
-	}
-
-	if (xd->identifier) {
-		tracker_resource_set_string (metadata, "dc:identifier", xd->identifier);
-	}
-
-	if (xd->source) {
-		tracker_resource_set_string (metadata, "dc:source", xd->source);
-	}
-
-	if (xd->language) {
-		tracker_resource_set_string (metadata, "dc:language", xd->language);
-	}
-
-	if (xd->relation) {
-		tracker_resource_set_string (metadata, "dc:relation", xd->relation);
-	}
-
-	if (xd->coverage) {
-		tracker_resource_set_string (metadata, "dc:coverage", xd->coverage);
-	}
-
-	if (xd->address || xd->state || xd->country || xd->city ||
-	    xd->gps_altitude || xd->gps_latitude || xd-> gps_longitude) {
-
-		TrackerResource *location = tracker_extract_new_location (xd->address,
-		        xd->state, xd->city, xd->country, xd->gps_altitude,
-		        xd->gps_latitude, xd->gps_longitude);
-
-		tracker_resource_set_relation (metadata, "slo:location", location);
-
-		g_object_unref (location);
-	}
-
-	if (xd->gps_direction) {
-		tracker_resource_set_string (metadata, "nfo:heading", xd->gps_direction);
-	}
 
 	if (width > 0)
 		tracker_resource_set_int (metadata, "nfo:width", width);
@@ -457,7 +277,12 @@ read_metadata (GifFileType        *gifFile,
 	if (comment)
 		tracker_guarantee_resource_utf8_string (metadata, "nie:comment", comment);
 
-	tracker_xmp_free (xd);
+#ifdef HAVE_EXEMPI
+	if (xd) {
+		tracker_xmp_apply_to_resource (metadata, xd);
+		tracker_xmp_free (xd);
+	}
+#endif
 
 	return metadata;
 }

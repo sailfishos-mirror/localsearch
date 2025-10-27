@@ -78,7 +78,7 @@ if libjpeg.found() and exempi.found() and gexiv2.found()
     'images/jpeg-exif',
   ]
 
-  if gexiv2.found()
+  if have_gexiv2
     extractor_tests += [
       'images/jpeg-iptc-tags',
       'images/jpeg-iptcdata',
@@ -104,7 +104,7 @@ if libpng.found()
   extractor_tests += 'images/png-photo-1'
   extractor_tests += 'images/png-screenshot-1'
 
-  if gexiv2.found()
+  if have_gexiv2
     extractor_tests += 'images/png-exif-old-1'
   endif
 
@@ -114,7 +114,7 @@ if libpng.found()
   endif
 endif
 
-if gexiv2.found()
+if have_gexiv2
   extractor_tests += 'images/raw-cr2'
 endif
 

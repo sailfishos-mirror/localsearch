@@ -29,9 +29,15 @@
 #include "tracker-extract.h"
 #include "tracker-guarantee.h"
 #include "tracker-exif.h"
-#include "tracker-iptc.h"
-#include "tracker-xmp.h"
 #include "tracker-resource-helpers.h"
+
+#ifdef HAVE_EXEMPI
+#include "tracker-xmp.h"
+#endif
+
+#ifdef HAVE_GEXIV2
+#include "tracker-exif.h"
+#endif
 
 #define BUFFER_SIZE (256 * 1024)
 
@@ -93,6 +99,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	tracker_resource_set_int64 (metadata, "nfo:width", width);
 	tracker_resource_set_int64 (metadata, "nfo:height", height);
 
+#ifdef HAVE_GEXIV2
 	if ((flags & EXIF_FLAG) && WebPDemuxGetChunk (demux, "EXIF", 1, &chunk_iter)) {
 		TrackerExifData *exif;
 
@@ -105,7 +112,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		WebPDemuxReleaseChunkIterator (&chunk_iter);
 	}
+#endif
 
+#ifdef HAVE_EXEMPI
 	if ((flags & XMP_FLAG) && WebPDemuxGetChunk (demux, "XMP ", 1, &chunk_iter)) {
 		TrackerXmpData *xmp;
 
@@ -118,6 +127,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		WebPDemuxReleaseChunkIterator (&chunk_iter);
 	}
+#endif
 
 	tracker_extract_info_set_resource (info, metadata);
 	success = TRUE;

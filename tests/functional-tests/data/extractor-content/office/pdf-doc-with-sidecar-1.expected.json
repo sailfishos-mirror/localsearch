@@ -14,11 +14,18 @@
                     "@type" : "slo:GeoLocation",
                     "slo:altitude" : 65.64
                 },
-                "nco:creator" : {
-                    "@id" : "urn:contact:first%20last",
-                    "nco:fullname" : "first last",
-                    "@type" : "nco:Contact"
-                },
+                "nco:creator": [
+                    {
+                        "@id": "urn:contact:Author",
+                        "nco:fullname": "Author",
+                        "@type": "nco:Contact"
+                    },
+                    {
+                        "@id": "urn:contact:first%20last",
+                        "nco:fullname": "first last",
+                        "@type": "nco:Contact"
+                    }
+                ],
                 "nco:publisher": {
                   "@id": "urn:contact:Publisher",
                   "nco:fullname": "Publisher",
@@ -31,7 +38,6 @@
                 "dc:relation": "Relation",
                 "dc:coverage": "Coverage",
                 "nie:license": "License",
-                "nie:subject": "subject",
                 "nie:description" : "Photograph description",
                 "nfo:pageCount" : 1,
                 "nie:title" : "Photograph",
@@ -48,6 +54,11 @@
                         "@id": "urn:tag:bright",
                         "nao:prefLabel": "bright",
                         "@type": "nao:Tag"
+                    },
+                    {
+			"@id": "urn:tag:subject",
+			"nao:prefLabel": "subject",
+			"@type": "nao:Tag"
                     },
                     {
                         "@id": "urn:tag:amazing2",

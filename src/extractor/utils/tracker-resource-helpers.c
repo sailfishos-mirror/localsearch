@@ -188,54 +188,32 @@ tracker_extract_new_external_reference (const char *source_uri,
 	return external_reference;
 }
 
-/**
- * tracker_extract_new_location:
- * @street_address: (allow none): main part of postal address, or %NULL
- * @state: (allow none): regional part of postal address, or %NULL
- * @city: (allow none): locality part of postal address, or %NULL
- * @country: (allow none): country of postal address, or %NULL
- * @gps_altitude: (allow none): altitude (following WGS 84 reference) as a string, or %NULL
- * @gps_latitude: (allow none): latitude as a string, or %NULL
- * @gps_longitude: (allow none): longitude as a string, or %NULL
- *
- * Create a new slo:GeoLocation resource, with the given postal address and/or
- * GPS coordinates.
- *
- * No validation is done here -- it's up to you to ensure the postal address
- * and GPS coordinates describe the same thing.
- *
- * Returns: a newly allocated #TrackerResource instance, of type slo:GeoLocation
- *
- * Since: 1.10
- */
-TrackerResource *
-tracker_extract_new_location (const char *street_address,
-                              const char *state,
-                              const char *city,
-                              const char *country,
-                              const char *gps_altitude,
-                              const char *gps_latitude,
-                              const char *gps_longitude)
+void
+tracker_extract_merge_location (TrackerResource *location,
+                                const char      *street_address,
+                                const char      *state,
+                                const char      *city,
+                                const char      *country,
+                                const char      *gps_altitude,
+                                const char      *gps_latitude,
+                                const char      *gps_longitude)
 {
-	TrackerResource *location;
-
-	g_return_val_if_fail (street_address != NULL || state != NULL || city != NULL ||
-	                      country != NULL || gps_altitude != NULL ||
-	                      gps_latitude != NULL || gps_longitude != NULL, NULL);
-
-	location = tracker_resource_new (NULL);
 	tracker_resource_set_uri (location, "rdf:type", "slo:GeoLocation");
 
 	if (street_address || state || country || city) {
 		TrackerResource *address;
-		gchar *addruri;
 
-		addruri = tracker_sparql_get_uuid_urn ();
-		address = tracker_resource_new (addruri);
+		address = tracker_resource_get_first_relation (location, "slo:postalAddress");
+
+		if (!address) {
+			g_autofree char *addruri = NULL;
+
+			addruri = tracker_sparql_get_uuid_urn ();
+			address = tracker_resource_new (addruri);
+			tracker_resource_set_take_relation (location, "slo:postalAddress", address);
+		}
 
 		tracker_resource_set_uri (address, "rdf:type", "nco:PostalAddress");
-
-		g_free (addruri);
 
 		if (street_address) {
 			tracker_guarantee_resource_utf8_string (address, "nco:streetAddress", street_address);
@@ -252,9 +230,6 @@ tracker_extract_new_location (const char *street_address,
 		if (country) {
 			tracker_guarantee_resource_utf8_string (address, "nco:country", country);
 		}
-
-		tracker_resource_set_relation (location, "slo:postalAddress", address);
-		g_object_unref (address);
 	}
 
 	if (gps_altitude) {
@@ -277,6 +252,23 @@ tracker_extract_new_location (const char *street_address,
 		val = g_strtod (gps_longitude, NULL);
 		tracker_resource_set_double (location, "slo:longitude", val);
 	}
+}
+
+TrackerResource *
+tracker_extract_new_location (const char *street_address,
+                              const char *state,
+                              const char *city,
+                              const char *country,
+                              const char *gps_altitude,
+                              const char *gps_latitude,
+                              const char *gps_longitude)
+{
+	TrackerResource *location;
+
+	location = tracker_resource_new (NULL);
+	tracker_extract_merge_location (location,
+	                                street_address, state, city, country,
+	                                gps_altitude, gps_latitude, gps_longitude);
 
 	return location;
 }

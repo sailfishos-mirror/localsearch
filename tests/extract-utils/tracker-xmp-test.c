@@ -23,6 +23,8 @@
 
 #include <tracker-extract.h>
 
+#include "tracker-xmp.h"
+
 #define BROKEN_XMP "This is not even XML"
 #define EXAMPLE_XMP	  \
 "   <x:xmpmeta   " \

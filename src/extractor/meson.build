@@ -27,7 +27,7 @@ if libgsf.found()
   modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [libgsf, tracker_miners_common_dep]]]
 endif
 
-if gexiv2.found()
+if have_gexiv2
   modules += [['extract-raw', 'tracker-extract-raw.c', ['10-raw.rule'], [gexiv2, tracker_miners_common_dep]]]
 endif
 

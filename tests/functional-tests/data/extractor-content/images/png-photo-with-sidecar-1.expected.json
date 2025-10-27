@@ -7,7 +7,7 @@
         "@graph": [
 	    {
                 "nao:numericRating": "5",
-                "nmm:fnumber": "2.3999999999999999",
+                "nmm:fnumber": 2.4,
                 "nfo:orientation": {
                     "@id": "nfo:orientation-top"
                 },
@@ -21,7 +21,7 @@
                     "@type": "nco:Contact"
                 },
                 "nie:description": "Photograph description",
-                "nmm:exposureTime": "9.1996320147194106e-05",
+                "nmm:exposureTime": 9.19963201471941e-05,
                 "nmm:dlnaProfile": "PNG_TN",
                 "nmm:dlnaMime": "image/png",
                 "nie:comment": "Created with GIMP",
@@ -29,11 +29,11 @@
                     "nfo:Image",
                     "nmm:Photo"
                 ],
-                "nmm:isoSpeed": "50",
+                "nmm:isoSpeed": 50.0,
                 "nmm:whiteBalance": {
                     "@id": "nmm:white-balance-auto"
                 },
-                "nmm:focalLength": "4.1200000000000001",
+                "nmm:focalLength": 4.12,
                 "nmm:meteringMode": {
                     "@id": "nmm:metering-mode-pattern"
                 },
@@ -44,11 +44,18 @@
                     "@type": "slo:GeoLocation",
                     "slo:altitude": 65.64
                 },
-                "nao:hasTag": {
-                    "@id": "urn:tag:bright",
-                    "nao:prefLabel": "bright",
-                    "@type": "nao:Tag"
-                },
+                "nao:hasTag": [
+                    {
+                        "@id": "urn:tag:amazing",
+                        "nao:prefLabel": "amazing",
+                        "@type": "nao:Tag"
+                    },
+                    {
+                        "@id": "urn:tag:bright",
+                        "nao:prefLabel": "bright",
+                        "@type": "nao:Tag"
+                    }
+                ],
                 "nfo:height": 10
 	    }
 	]
