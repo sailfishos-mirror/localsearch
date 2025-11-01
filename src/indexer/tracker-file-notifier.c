@@ -194,6 +194,7 @@ tracker_index_root_new (TrackerFileNotifier   *notifier,
 	data->flags = flags;
 	data->root_flags = root_flags;
 	data->timer = g_timer_new ();
+	data->cancellable = g_cancellable_new ();
 
 	g_queue_init (&data->deleted_dirs);
 	g_queue_init (&data->queue);
@@ -215,6 +216,8 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	              g_message ("  Found %d files, ignored %d files",
 	                         data->files_found,
 	                         data->files_ignored));
+
+	g_cancellable_cancel (data->cancellable);
 
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
 	g_queue_free_full (data->pending_finish_dirs, (GDestroyNotify) g_object_unref);
@@ -1045,8 +1048,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	GFile *directory;
 	g_autofree gchar *uri = NULL;
 
-	if (!root->cancellable)
-		root->cancellable = g_cancellable_new ();
 	g_set_object (&notifier->cancellable, root->cancellable);
 
 	directory = root->root;
