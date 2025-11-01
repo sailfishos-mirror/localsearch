@@ -793,6 +793,23 @@ tracker_index_root_remove_directory (TrackerIndexRoot *root,
 	GList *l = root->pending_dirs->head, *next;
 	GFile *file;
 
+	if (root->enumerator && root->current_dir &&
+	    (g_file_equal (root->current_dir, directory) ||
+	     g_file_has_prefix (root->current_dir, directory))) {
+		/* Cancel enumerator */
+		g_autoptr (GCancellable) old = NULL;
+
+		g_set_object (&old, root->cancellable);
+		g_set_object (&root->cancellable, g_cancellable_new ());
+		g_cancellable_cancel (old);
+
+		g_clear_object (&root->enumerator);
+		g_clear_object (&root->current_dir);
+
+		if (!check_high_water (root->notifier))
+			tracker_index_root_continue (root);
+	}
+
 	while (l) {
 		file = l->data;
 		next = l->next;
