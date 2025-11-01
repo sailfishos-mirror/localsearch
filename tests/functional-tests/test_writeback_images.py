@@ -60,31 +60,6 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         log.debug("Got the change")
         self.check_data(path, data)
 
-    def __writeback_hasTag_test(self, filename, mimetype):
-
-        SPARQL_TMPL = """
-            INSERT {
-              <test://writeback-hasTag-test/1> a nao:Tag ;
-                        nao:prefLabel "testTag" .
-
-              ?u a rdfs:Resource; nao:hasTag <test://writeback-hasTag-test/1> .
-            } WHERE {
-              ?u nie:url '%s' .
-            }
-        """
-
-        path = self.prepare_test_image(self.datadir_path(filename))
-        initial_mtime = path.stat().st_mtime
-
-        self.tracker.update(SPARQL_TMPL % (filename))
-
-        self.wait_for_file_change(path, initial_mtime)
-
-        results = fixtures.get_tracker_extract_output(
-            self.extra_env, filename, mime_type=mimetype, output_format="json-ld"
-        )
-        self.assertIn("testTag", results["nao:hasTag"])
-
     # JPEG test
 
     def test_001_jpeg_title(self):
@@ -97,14 +72,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
             "writeback-test-1.jpeg",
             {"nie:description": "test_description"})
 
-    # def test_003_jpeg_keyword (self):
-    #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-    #    self.__writeback_test (self.get_test_filename_jpeg (), "image/jpeg",
-    #                           "nie:keyword", "nao:hasTag")
-
-    # def test_004_jpeg_hasTag (self):
-    #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-    #    self.__writeback_hasTag_test (self.get_test_filename_jpeg (), "image/jpeg")
+    def test_003_jpeg_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nao:hasTag" : {"nao:prefLabel": "test_tag"}})
 
     # TIFF tests
 
@@ -118,14 +89,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
             "writeback-test-2.tif",
             {"nie:description": "test_description"})
 
-    # def test_013_tiff_keyword (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
-    #    self.__writeback_test (self.get_test_filename_tiff (), "image/tiff",
-    #                           "nie:keyword", "nao:hasTag")
-
-    # def test_014_tiff_hasTag (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
-    #    self.__writeback_hasTag_test (self.get_test_filename_tiff (), "image/tiff")
+    def test_013_tiff_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
     # PNG tests
 
@@ -139,13 +106,10 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
             "writeback-test-4.png",
             {"nie:description": "test_description"})
 
-    # def test_023_png_keyword (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-4.png"
-    #    self.__writeback_test (self.get_test_filename_png (), "image/png", "nie:keyword", "nao:hasTag:prefLabel")
-
-    # def test_024_png_hasTag (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-4.png"
-    #    self.__writeback_hasTag_test (self.get_test_filename_png (), "image/png")
+    def test_023_png_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
 
 if __name__ == "__main__":
