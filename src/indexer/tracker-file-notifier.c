@@ -109,7 +109,6 @@ struct _TrackerFileNotifier
 
 	TrackerIndexingTree *indexing_tree;
 	TrackerSparqlConnection *connection;
-	GCancellable *cancellable;
 
 	TrackerMonitor *monitor;
 
@@ -1048,8 +1047,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	GFile *directory;
 	g_autofree gchar *uri = NULL;
 
-	g_set_object (&notifier->cancellable, root->cancellable);
-
 	directory = root->root;
 
 	g_timer_reset (root->timer);
@@ -1478,8 +1475,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	if (notifier->current_index_root &&
 	    index_root_equals_file (notifier->current_index_root, directory) == 0) {
 		/* Directory being currently processed */
-		if (notifier->cancellable)
-			g_cancellable_cancel (notifier->cancellable);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1527,11 +1522,6 @@ tracker_file_notifier_finalize (GObject *object)
 
 	if (notifier->indexing_tree) {
 		g_object_unref (notifier->indexing_tree);
-	}
-
-	if (notifier->cancellable) {
-		g_cancellable_cancel (notifier->cancellable);
-		g_object_unref (notifier->cancellable);
 	}
 
 	g_clear_object (&notifier->content_query);
@@ -1730,11 +1720,8 @@ tracker_file_notifier_stop (TrackerFileNotifier *notifier)
 	g_return_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier));
 
 	if (!notifier->stopped) {
-		if (notifier->cancellable)
-			g_cancellable_cancel (notifier->cancellable);
-
 		if (notifier->current_index_root) {
-			/* Index root arbitrarily cancelled cannot be easily
+			/* Index root will be cancelled and cannot be easily
 			 * resumed, best to queue it again and start from
 			 * scratch.
 			 */
