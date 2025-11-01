@@ -25,39 +25,35 @@ from gi.repository import GLib
 
 
 class WritebackAudioTest(fixtures.TrackerWritebackTest):
-    def _writeback_test(self, path):
-        prop = "nie:title"
-
+    def _writeback_test(self, path, data):
         path = self.prepare_test_audio(self.datadir_path(path))
         initial_mtime = path.stat().st_mtime
 
-        TEST_VALUE = prop.replace(":", "") + "test"
-
-        self.writeback_data(
-            {
-                "rdf:type": GLib.Variant("s", "nfo:Audio"),
-                "nie:isStoredAs": GLib.Variant("s", path.as_uri()),
-                "nie:title": GLib.Variant("s", TEST_VALUE),
-            }
-        )
+        resource = self.create_resource("nfo:Audio", path, data)
+        self.writeback_data(resource.serialize())
 
         self.wait_for_file_change(path, initial_mtime)
+        self.check_data(path, data)
 
-        results = fixtures.get_tracker_extract_output({}, path, output_format="json-ld")
-        file_data = results["@graph"][0]
-        self.assertIn(TEST_VALUE, file_data[prop])
+    def test_mp3_title(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nie:title": "test_title"})
 
-    def test_writeback_mp3(self):
-        self._writeback_test(self.datadir_path("writeback-test-5.mp3"))
+    def test_ogg_title(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nie:title": "test_title"})
 
-    def test_writeback_ogg(self):
-        self._writeback_test(self.datadir_path("writeback-test-6.ogg"))
+    def test_flac_title(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nie:title": "test_title"})
 
-    def test_writeback_flac(self):
-        self._writeback_test(self.datadir_path("writeback-test-7.flac"))
-
-    def test_writeback_aac(self):
-        self._writeback_test(self.datadir_path("writeback-test-8.mp4"))
+    def test_aac_title(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nie:title": "test_title"})
 
 
 if __name__ == "__main__":

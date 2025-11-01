@@ -38,7 +38,7 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     that the new values are actually in the file
     """
 
-    def __writeback_test(self, filename, mimetype, prop, expectedKey=None):
+    def __writeback_test(self, filename, data):
         """
         Set a value in @prop for the @filename. Then ask tracker-extractor
         for metadata and check in the results dictionary if the property is there.
@@ -52,25 +52,13 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         path = self.prepare_test_image(self.datadir_path(filename))
         initial_mtime = path.stat().st_mtime
 
-        TEST_VALUE = prop.replace(":", "") + "test"
-        self.writeback_data(
-            {
-                "rdf:type": GLib.Variant("s", "nfo:Image"),
-                "nie:isStoredAs": GLib.Variant("s", path.as_uri()),
-                prop: GLib.Variant("s", TEST_VALUE),
-            }
-        )
+        resource = self.create_resource("nfo:Image", path, data)
+        self.writeback_data(resource.serialize())
 
         log.debug("Waiting for change on %s", path)
         self.wait_for_file_change(path, initial_mtime)
         log.debug("Got the change")
-
-        results = fixtures.get_tracker_extract_output(
-            {}, path, mime_type=mimetype, output_format="json-ld"
-        )
-        keyDict = expectedKey or prop
-        file_data = results["@graph"][0]
-        self.assertIn(TEST_VALUE, file_data[keyDict])
+        self.check_data(path, data)
 
     def __writeback_hasTag_test(self, filename, mimetype):
 
@@ -100,10 +88,14 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # JPEG test
 
     def test_001_jpeg_title(self):
-        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:title")
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nie:title": "test_title"})
 
     def test_002_jpeg_description(self):
-        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:description")
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nie:description": "test_description"})
 
     # def test_003_jpeg_keyword (self):
     #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
@@ -117,10 +109,14 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # TIFF tests
 
     def test_011_tiff_title(self):
-        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:title")
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nie:title": "test_title"})
 
     def test_012_tiff_description(self):
-        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:description")
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nie:description": "test_description"})
 
     # def test_013_tiff_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
@@ -134,10 +130,14 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     # PNG tests
 
     def test_021_png_title(self):
-        self.__writeback_test("writeback-test-4.png", "image/png", "nie:title")
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nie:title": "test_title"})
 
     def test_022_png_description(self):
-        self.__writeback_test("writeback-test-4.png", "image/png", "nie:description")
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nie:description": "test_description"})
 
     # def test_023_png_keyword (self):
     #    FILENAME = "test-writeback-monitored/writeback-test-4.png"

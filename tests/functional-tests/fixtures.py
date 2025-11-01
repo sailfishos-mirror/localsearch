@@ -670,8 +670,10 @@ class TrackerWritebackTest(TrackerMinerTest):
         datadir = os.path.join(os.path.dirname(__file__), "data/writeback-content")
         return pathlib.Path(os.path.join(datadir, filename))
 
-    def writeback_data(self, variant):
-        self.writeback_proxy.Writeback("(a{sv})", variant)
+    def writeback_data(self, metadata):
+        self.writeback_proxy.call_sync(
+            "Writeback", GLib.Variant.new_tuple(metadata),
+            Gio.DBusCallFlags.NONE, -1, None)
 
     def prepare_test_audio(self, filename):
         path = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(filename)))
@@ -716,6 +718,68 @@ class TrackerWritebackTest(TrackerMinerTest):
         raise Exception(
             "Timeout waiting for %s to be updated (mtime has not changed)" % filename
         )
+
+    def __create_resource(self, data):
+        resource = Tsparql.Resource.new()
+        for prop in data:
+            if isinstance(data[prop], list):
+                if isinstance(data[prop][0], dict):
+                    for elem in data[prop]:
+                        child_resource = self.__create_resource(elem)
+                        resource.add_relation(prop, child_resource)
+                else:
+                    for elem in data[prop]:
+                        # FIXME: multivalued literals only supported as strings
+                        resource.add_string(prop, elem)
+            elif isinstance(data[prop], dict):
+                child_resource = self.__create_resource(data[prop])
+                resource.set_relation(prop, child_resource)
+            elif isinstance(data[prop], float):
+                resource.set_double(prop, data[prop])
+            elif isinstance(data[prop], int):
+                resource.set_int(prop, data[prop])
+            else:
+                resource.set_string(prop, data[prop])
+
+        return resource
+
+    def create_resource(self, rdf_type: str, path: pathlib.Path, data: dict[str, any]):
+        """
+        Creates a Tsparql.Resource from the data dict. Data may contain
+        strings, integers, and floats, as well as (arrays of) other resources
+        expressed as further dicts.
+        """
+        resource = self.__create_resource(data)
+        resource.add_uri("rdf:type", rdf_type)
+        resource.add_uri("nie:isStoredAs", path.as_uri())
+        return resource
+
+    def __compare_data(self, result, data):
+        for prop in data:
+            if isinstance(data[prop], list):
+                for i, elem in enumerate(data[prop]):
+                    self.__compare_data(result[prop][i], elem);
+            elif isinstance(data[prop], dict):
+                self.__compare_data(result[prop], data[prop])
+            elif isinstance(result[prop], dict):
+                # Special case to compare resources as URIs vs. relations
+                self.assertEqual(data[prop], result[prop]['@id'],
+                                 "Property '%s' has incorrect data" % prop)
+            else:
+                self.assertEqual(data[prop], result[prop],
+                                 "Property '%s' has incorrect data" % prop)
+
+    def check_data(self, path: pathlib.Path, data: dict[str, any]):
+        """
+        Compares the extractor JSON-LD parsed output with the given data.
+        Data may contain strings, integers and doubles. Types must match
+        with the JSON-LD output.
+        """
+        results = get_tracker_extract_output(
+            {}, path, output_format="json-ld"
+        )
+        file_data = results["@graph"][0]
+        self.__compare_data(file_data, data)
 
 
 class CliError(Exception):
