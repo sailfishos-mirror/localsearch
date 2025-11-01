@@ -245,7 +245,7 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 			xmp_set_property (xmp, NS_EXIF, "UserComment", comment, 0);
 		}
 
-		if (g_strcmp0 (prop, "nie:keyword") == 0) {
+		if (g_strcmp0 (prop, "nao:hasTag") == 0) {
 			GList *keywords, *k;
 			GString *keyword_str = g_string_new (NULL);
 
@@ -256,8 +256,11 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 				value = k->data;
 
-				if (G_VALUE_HOLDS_STRING (value)) {
-					const gchar *str = g_value_get_string (value);
+				if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
+					TrackerResource *tag = g_value_get_object (value);
+					const gchar *str =
+						tracker_resource_get_first_string (tag,
+						                                   "nao:prefLabel");
 
 					if (keyword_str->len > 0)
 						g_string_append_c (keyword_str, ',');
