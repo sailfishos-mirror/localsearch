@@ -29,30 +29,25 @@
 #define KEY_MESSAGE "Message"
 #define KEY_SPARQL "Sparql"
 
-static gchar *report_dir = NULL;
+static GFile *report_dir = NULL;
 
 void
 tracker_error_report_init (GFile *cache_dir)
 {
-	GFile *report_file;
-
-	report_file = g_file_get_child (cache_dir, "errors");
-	report_dir = g_file_get_path (report_file);
-	if (g_mkdir_with_parents (report_dir, 0700) < 0)
-		g_warning ("Failed to create location for error reports: %m");
-	g_object_unref (report_file);
+	report_dir = g_file_get_child (cache_dir, "errors");
 }
 
 static gchar *
 get_report_file (const gchar *uri)
 {
-	gchar *md5, *report_file;
+	g_autoptr (GFile) report_file = NULL;
+	gchar *md5;
 
 	md5 = g_compute_checksum_for_string (G_CHECKSUM_MD5, uri, -1);
-	report_file = g_build_filename (report_dir, md5, NULL);
+	report_file = g_file_get_child (report_dir, md5);
 	g_free (md5);
 
-	return report_file;
+	return g_file_get_path (report_file);
 }
 
 void
@@ -67,6 +62,11 @@ tracker_error_report (GFile       *file,
 
 	if (!report_dir)
 		return;
+
+	if (g_mkdir_with_parents (g_file_peek_path (report_dir), 0700) < 0) {
+		g_warning ("Failed to create location for error reports: %m");
+		return;
+	}
 
 	uri = g_file_get_uri (file);
 	report_path = get_report_file (uri);
