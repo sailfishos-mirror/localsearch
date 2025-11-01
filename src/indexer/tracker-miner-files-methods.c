@@ -386,6 +386,7 @@ tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
 
 	uri = g_file_get_uri (file);
 	resource = tracker_resource_new (uri);
+	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 	tracker_resource_set_string (resource, "tracker:extractorHash",
 	                             tracker_extract_module_manager_get_hash (DIRECTORY_MIME));
 
