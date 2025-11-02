@@ -77,6 +77,37 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
             "writeback-test-1.jpeg",
             {"nao:hasTag" : {"nao:prefLabel": "test_tag"}})
 
+    def test_004_jpeg_contributor (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
+
+    def test_005_jpeg_copyright (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nie:copyright": "test_copyright"})
+
+    def test_006_jpeg_content_created (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_007_jpeg_heading (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nfo:heading": 42.0})
+
+    def test_008_jpeg_location (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"slo:location": { "slo:longitude": 123.0,
+                               "slo:latitude": 12.0,
+                               "slo:altitude": -1.0,
+                               "slo:postalAddress": {"nco:locality": "test_locality",
+                                                     "nco:region": "test_region",
+                                                     "nco:streetAddress": "test_address",
+                                                     "nco:country": "test_country"}}})
+
     # TIFF tests
 
     def test_011_tiff_title(self):
@@ -93,6 +124,21 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         self.__writeback_test (
             "writeback-test-2.tif",
             {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
+
+    def test_014_tiff_contributor (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
+
+    def test_015_tiff_copyright (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nie:copyright": "test_copyright"})
+
+    def test_016_tiff_content_created (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
 
     # PNG tests
 
@@ -111,6 +157,36 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
             "writeback-test-4.png",
             {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
+    def test_024_png_contributor (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
+
+    def test_025_png_copyright (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nie:copyright": "test_copyright"})
+
+    def test_026_png_content_created (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_027_png_heading (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nfo:heading": 42.2})
+
+    def test_028_png_location (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"slo:location": { "slo:longitude": 123.0,
+                               "slo:latitude": 12.0,
+                               "slo:altitude": -1.0,
+                               "slo:postalAddress": {"nco:locality": "test_locality",
+                                                     "nco:region": "test_region",
+                                                     "nco:streetAddress": "test_address",
+                                                     "nco:country": "test_country"}}})
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()
