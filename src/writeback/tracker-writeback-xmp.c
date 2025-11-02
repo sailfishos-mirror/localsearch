@@ -233,8 +233,8 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 			const gchar *copyright;
 
 			copyright = tracker_resource_get_first_string (resource, prop);
-			xmp_delete_property (xmp, NS_EXIF, "Copyright");
-			xmp_set_property (xmp, NS_EXIF, "Copyright", copyright, 0);
+			xmp_delete_property (xmp, NS_DC, "rights");
+			xmp_set_property (xmp, NS_DC, "rights", copyright, 0);
 		}
 
 		if (g_strcmp0 (prop, "nie:comment") == 0) {
