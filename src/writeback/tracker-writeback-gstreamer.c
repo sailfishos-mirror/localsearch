@@ -783,7 +783,7 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 			g_value_unset (&val);
 		}
 
-		if (g_strcmp0 (prop, "nmm:genre") == 0) {
+		if (g_strcmp0 (prop, "nfo:genre") == 0) {
 			const gchar *genre;
 
 			genre = tracker_resource_get_first_string (resource, prop);
