@@ -1111,7 +1111,9 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	}
 
 	if (data->gps_direction) {
-		tracker_resource_set_string (resource, "nfo:heading", data->gps_direction);
+		double value;
+		value = g_ascii_strtod (data->gps_direction, NULL);
+		tracker_resource_set_double (resource, "nfo:heading", value);
 	}
 
 	if (data->regions) {

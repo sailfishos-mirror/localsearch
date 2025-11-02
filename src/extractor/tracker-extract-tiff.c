@@ -458,7 +458,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 	if (md.gps_direction) {
-		tracker_resource_set_string (metadata, "nfo:heading", md.gps_direction);
+		double value;
+		value = g_ascii_strtod (md.gps_direction, NULL);
+		tracker_resource_set_double (metadata, "nfo:heading", value);
 	}
 
 	if (md.make || md.model) {
