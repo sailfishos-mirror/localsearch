@@ -242,6 +242,10 @@ if have_tracker_writeback and gstreamer.found()
   functional_tests += 'test_writeback_audio'
 endif
 
+if have_tracker_writeback and totem_plparser.found()
+  functional_tests += 'test_writeback_playlist'
+endif
+
 extractor_tests += [
   'video/mkv-basic',
   'video/mov-basic',
