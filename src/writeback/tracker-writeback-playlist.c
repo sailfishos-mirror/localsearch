@@ -86,13 +86,6 @@ writeback_playlist_content_types (TrackerWritebackFile *wbf)
 		"audio/x-scpls",
 		"application/xspf+xml",
 		"audio/x-iriver-pla",
-#if 0
-		"audio/x-pn-realaudio",
-		"application/ram",
-		"application/vnd.ms-wpl",
-		"application/smil",
-		"audio/x-ms-asx",
-#endif
 		NULL
 	};
 
@@ -100,10 +93,11 @@ writeback_playlist_content_types (TrackerWritebackFile *wbf)
 }
 
 static gboolean
-get_playlist_type (GFile             *file,
-                   TotemPlParserType *type)
+get_playlist_type (GFile              *file,
+                   TotemPlParserType  *type,
+                   GError            **error)
 {
-	GFileInfo *file_info;
+	g_autoptr (GFileInfo) file_info = NULL;
 	const gchar *mime_type;
 	gint i;
 	PlaylistMap playlist_map[] = {
@@ -117,25 +111,25 @@ get_playlist_type (GFile             *file,
 	file_info = g_file_query_info (file,
 	                               G_FILE_ATTRIBUTE_STANDARD_CONTENT_TYPE,
 	                               G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
-	                               NULL, NULL);
+	                               NULL, error);
 
 	if (!file_info) {
 		return FALSE;
 	}
 
 	mime_type = g_file_info_get_content_type (file_info);
-	g_object_unref (file_info);
-
-	if (!mime_type) {
-		return FALSE;
-	}
 
 	for (i = 0; i < G_N_ELEMENTS (playlist_map); i++) {
-		if (strcmp (mime_type, playlist_map[i].mime_type) == 0) {
+		if (g_strcmp0 (mime_type, playlist_map[i].mime_type) == 0) {
 			*type = playlist_map[i].playlist_type;
 			return TRUE;
 		}
 	}
+
+	g_set_error (error,
+	             G_IO_ERROR,
+	             G_IO_ERROR_FAILED,
+	             "Unhandled playlist type");
 
 	return FALSE;
 }
@@ -152,60 +146,55 @@ writeback_playlist_write_file_metadata (TrackerWritebackFile  *writeback_file,
 	TotemPlPlaylist *playlist;
 	TotemPlPlaylistIter iter;
 	TotemPlParserType type;
-	GPtrArray *entries;
-	guint amount = 0;
-	gchar *path;
+	g_autoptr (GPtrArray) entries = NULL;
+	gboolean retval = FALSE;
+	int i;
 
-	if (!get_playlist_type (file, &type)) {
-		g_set_error (G_IO_ERROR,
-		             G_IO_ERROR_FAILED,
-		             "Unhandled playlist type");
+	if (!get_playlist_type (file, &type, error))
 		return FALSE;
-	}
 
 	entries = g_ptr_array_new ();
+	properties = tracker_resource_get_properties (resource);
 
 	for (l = properties; l; l = l->next) {
 		const gchar *prop = l->data;
 
 		if (g_strcmp0 (prop, "nfo:hasMediaFileListEntry") == 0) {
-			GList *resources;
+			GList *resources, *r;
 
 			resources = tracker_resource_get_values (resource, prop);
 
-			for (l = resources; l; l = l->next) {
+			for (r = resources; r; r = r->next) {
 				TrackerResource *entry;
-				const gchar *url;
+				const gchar *url, **ptr;
 				GValue *value;
-				gpointer ptr;
 				gint pos;
 
-				value = l->data;
+				value = r->data;
 				entry = g_value_get_object (value);
-				pos = tracker_resource_get_first_integer (entry,
-				                                          "nfo:listPosition");
+				pos = tracker_resource_get_first_int (entry,
+				                                      "nfo:listPosition");
 				url = tracker_resource_get_first_string (entry,
 				                                         "nfo:entryUrl");
 
 				if (entries->len < pos)
-					g_array_set_size (entries, pos);
+					g_ptr_array_set_size (entries, pos);
 
-				ptr = &g_ptr_array_index (entries, pos) = url;
+				ptr = (const char **) &g_ptr_array_index (entries, pos - 1);
 				*ptr = url;
 			}
 		}
 	}
 
-	parser = totem_pl_parser_new ();
 	playlist = totem_pl_playlist_new ();
 
-	for (i = 0; entries->len; i++) {
+	for (i = 0; i < entries->len; i++) {
 		const gchar *uri;
 
 		uri = g_ptr_array_index (entries, i);
 
 		if (uri) {
-			totem_pl_playlist_append  (playlist, &iter);
+			totem_pl_playlist_append (playlist, &iter);
 			totem_pl_playlist_set (playlist, &iter,
 			                       TOTEM_PL_PARSER_FIELD_URI,
 			                       uri, NULL);
@@ -213,22 +202,15 @@ writeback_playlist_write_file_metadata (TrackerWritebackFile  *writeback_file,
 	}
 
 	if (entries->len > 0) {
-		totem_pl_parser_save (parser, playlist, file, NULL, type, &error);
-	} else {
-		/* TODO: Empty the file in @path */
+		parser = totem_pl_parser_new ();
+		retval = totem_pl_parser_save (parser, playlist, file, NULL, type, error);
+		g_object_unref (parser);
 	}
 
-	if (error) {
-		g_critical ("Could not save playlist: %s\n", error->message);
-		g_error_free (error);
-	}
-
-	g_ptr_array_unref (entries);
 	g_list_free (properties);
 	g_object_unref (playlist);
-	g_object_unref (parser);
 
-	return TRUE;
+	return retval;
 }
 
 TrackerWriteback *
@@ -244,7 +226,6 @@ writeback_module_get_rdf_types (void)
 {
 	static const gchar *rdftypes[] = {
 		TRACKER_PREFIX_NFO "MediaList",
-		TRACKER_PREFIX_NFO "MediaFileListEntry",
 		NULL
 	};
 
