@@ -111,6 +111,7 @@ writeback_gstreamer_content_types (TrackerWritebackFile *writeback_file)
 		"audio/ogg",
 		"audio/x-ogg",
 		"audio/x-vorbis+ogg",
+		"video/mp4",
 		NULL
 	};
 

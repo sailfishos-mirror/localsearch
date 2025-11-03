@@ -89,7 +89,6 @@ writeback_xmp_content_types (TrackerWritebackFile *wbf)
 		"sketch/png",  /* .sketch.png files on Maemo*/
 		"image/jpeg",  /* .jpg & .jpeg files */
 		"image/tiff",  /* .tiff & .tif files */
-		"video/mp4",   /* .mp4 files */
 		"video/3gpp",  /* .3gpp files */
                 "image/gif",   /* .gif files */
 		NULL
