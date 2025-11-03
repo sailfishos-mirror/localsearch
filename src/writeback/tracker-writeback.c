@@ -70,6 +70,10 @@ typedef struct {
 	WritebackData *current;
 } TrackerControllerPrivate;
 
+struct _TrackerController {
+	GObject parent_instance;
+};
+
 #define WRITEBACK_SERVICE "org.freedesktop.LocalSearch3.Writeback"
 
 #define TRACKER_WRITEBACK_SERVICE   "org.freedesktop.Tracker3.Writeback"
@@ -126,12 +130,13 @@ tracker_controller_finalize (GObject *object)
 
 	if (priv->shutdown_source) {
 		g_source_destroy (priv->shutdown_source);
+		g_source_unref (priv->shutdown_source);
 		priv->shutdown_source = NULL;
 	}
 
 	tracker_controller_dbus_stop (controller);
 
-	g_hash_table_unref (priv->modules);
+	g_clear_pointer (&priv->modules, g_hash_table_unref);
 
 	g_main_loop_unref (priv->main_loop);
 	g_main_context_unref (priv->context);
@@ -141,21 +146,6 @@ tracker_controller_finalize (GObject *object)
 	g_mutex_clear (&priv->mutex);
 
 	G_OBJECT_CLASS (tracker_controller_parent_class)->finalize (object);
-}
-
-static void
-tracker_controller_get_property (GObject    *object,
-                                 guint       param_id,
-                                 GValue     *value,
-                                 GParamSpec *pspec)
-{
-	TrackerControllerPrivate *priv = tracker_controller_get_instance_private (TRACKER_CONTROLLER (object));
-
-	switch (param_id) {
-	case PROP_SHUTDOWN_TIMEOUT:
-		g_value_set_uint (value, priv->shutdown_timeout);
-		break;
-	}
 }
 
 static void
@@ -179,16 +169,13 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = tracker_controller_finalize;
-	object_class->get_property = tracker_controller_get_property;
 	object_class->set_property = tracker_controller_set_property;
 
 	g_object_class_install_property (object_class,
 	                                 PROP_SHUTDOWN_TIMEOUT,
-	                                 g_param_spec_uint ("shutdown-timeout",
-	                                                    "Shutdown timeout",
-	                                                    "Shutdown timeout, 0 to disable",
+	                                 g_param_spec_uint ("shutdown-timeout", NULL, NULL,
 	                                                    0, 1000, 0,
-	                                                    G_PARAM_READWRITE |
+	                                                    G_PARAM_WRITABLE |
 	                                                    G_PARAM_CONSTRUCT_ONLY |
 	                                                    G_PARAM_STATIC_STRINGS));
 }
@@ -202,14 +189,13 @@ writeback_data_new (TrackerController       *controller,
 {
 	WritebackData *data;
 
-	data = g_slice_new (WritebackData);
+	data = g_new0 (WritebackData, 1);
 	data->cancellable = g_cancellable_new ();
 	data->controller = g_object_ref (controller);
 	data->resource = g_object_ref (resource);
 	data->invocation = invocation;
 	data->writeback_handlers = writeback_handlers;
 	data->request = request;
-	data->error = NULL;
 
 	return data;
 }
@@ -220,16 +206,13 @@ writeback_data_free (WritebackData *data)
 	/* We rely on data->invocation being freed through
 	 * the g_dbus_method_invocation_return_* methods
 	 */
-	g_object_unref (data->cancellable);
-	g_object_unref (data->resource);
+	g_clear_object (&data->controller);
+	g_clear_object (&data->cancellable);
+	g_clear_object (&data->resource);
 
-	g_list_foreach (data->writeback_handlers, (GFunc) g_object_unref, NULL);
-	g_list_free (data->writeback_handlers);
-
-	if (data->error) {
-		g_error_free (data->error);
-	}
-	g_slice_free (WritebackData, data);
+	g_clear_list (&data->writeback_handlers, g_object_unref);
+	g_clear_error (&data->error);
+	g_free (data);
 }
 
 static gboolean

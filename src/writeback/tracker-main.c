@@ -74,10 +74,10 @@ int
 main (int   argc,
       char *argv[])
 {
-	TrackerController *controller;
-	GOptionContext *context;
-	GMainLoop *loop;
-	GError *error = NULL;
+	g_autoptr (TrackerController) controller = NULL;
+	g_autoptr (GOptionContext) context = NULL;
+	g_autoptr (GMainLoop) loop = NULL;
+	g_autoptr (GError) error = NULL;
 	guint shutdown_timeout;
 
 	/* Set up locale */
@@ -94,7 +94,6 @@ main (int   argc,
 
 	g_option_context_add_main_entries (context, entries, NULL);
 	g_option_context_parse (context, &argc, &argv, &error);
-	g_option_context_free (context);
 
 	if (version) {
 		g_print ("\n" ABOUT "\n" LICENSE "\n");
@@ -111,7 +110,6 @@ main (int   argc,
 
 	if (error) {
 		g_critical ("Error creating controller: %s", error->message);
-		g_error_free (error);
 		return EXIT_FAILURE;
 	}
 
@@ -120,10 +118,6 @@ main (int   argc,
 	loop = g_main_loop_new (NULL, FALSE);
 	g_unix_signal_add (SIGTERM, on_sigterm, loop);
 	g_main_loop_run (loop);
-
-	g_object_unref (controller);
-
-	g_main_loop_unref (loop);
 
 	return EXIT_SUCCESS;
 }

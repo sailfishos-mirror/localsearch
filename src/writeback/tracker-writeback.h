@@ -22,33 +22,16 @@
 
 #include <gio/gio.h>
 
-/* Not needed, but for now this keeps #include API backward compatible */
-#include "tracker-writeback-module.h"
-
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_CONTROLLER         (tracker_controller_get_type ())
-#define TRACKER_CONTROLLER(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_CONTROLLER, TrackerController))
-#define TRACKER_CONTROLLER_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c), TRACKER_TYPE_CONTROLLER, TrackerControllerClass))
-#define TRACKER_IS_CONTROLLER(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_CONTROLLER))
-#define TRACKER_IS_CONTROLLER_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c), TRACKER_TYPE_CONTROLLER))
-#define TRACKER_CONTROLLER_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o), TRACKER_TYPE_CONTROLLER, TrackerControllerClass))
+#define TRACKER_TYPE_CONTROLLER (tracker_controller_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerController,
+                      tracker_controller,
+                      TRACKER, CONTROLLER,
+                      GObject)
 
-typedef struct TrackerController TrackerController;
-typedef struct TrackerControllerClass TrackerControllerClass;
-
-struct TrackerController {
-	GObject parent_instance;
-};
-
-struct TrackerControllerClass {
-	GObjectClass parent_class;
-};
-
-GType               tracker_controller_get_type (void) G_GNUC_CONST;
-
-TrackerController * tracker_controller_new      (guint    shutdown_timeout,
-                                                 GError **error);
+TrackerController * tracker_controller_new (guint    shutdown_timeout,
+                                            GError **error);
 
 G_END_DECLS
 
