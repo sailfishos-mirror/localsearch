@@ -155,8 +155,7 @@ endif
 
 executable('localsearch-extractor-@0@'.format(tracker_api_major),
   tracker_extract_sources,
-  # Manually add the root dir to work around https://github.com/mesonbuild/meson/issues/1387
-  c_args: tracker_c_args + ['-I' + meson.build_root()],
+  c_args: tracker_c_args,
   export_dynamic: true,
   dependencies: tracker_extract_dependencies,
   install: true,

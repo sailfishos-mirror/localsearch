@@ -1,6 +1,6 @@
 project('localsearch', 'c',
         version: '3.10.1',
-        meson_version: '>=0.51')
+        meson_version: '>=0.59')
 
 gnome = import('gnome')
 i18n = import('i18n')
@@ -377,8 +377,8 @@ subdir('src')
 subdir('docs')
 
 test_c_args = tracker_c_args + [
-  '-DTOP_BUILDDIR="@0@/"'.format(meson.build_root()),
-  '-DTOP_SRCDIR="@0@/"'.format(meson.source_root()),
+  '-DTOP_BUILDDIR="@0@/"'.format(meson.project_build_root()),
+  '-DTOP_SRCDIR="@0@/"'.format(meson.project_source_root()),
 ]
 
 if get_option('tests_tap_protocol')
@@ -412,12 +412,12 @@ subdir('examples')
 
 subdir('po')
 
-meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
+gnome.post_install(glib_compile_schemas: true)
 
 summary = [
   '\nBuild Configuration:',
   '    Prefix:                                 ' + get_option('prefix'),
-  '    Source code location:                   ' + meson.source_root(),
+  '    Source code location:                   ' + meson.project_source_root(),
   '    Compiler:                               ' + cc.get_id(),
   '    Debug:                                  ' + get_option('debug').to_string(),
   '    Optimization:                           ' + get_option('optimization'),
