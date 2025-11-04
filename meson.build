@@ -412,7 +412,7 @@ subdir('examples')
 
 subdir('po')
 
-meson.add_install_script('meson_integration_commands.sh', glib_compile_schemas.path(), gsettings_schema_dir)
+gnome.post_install(glib_compile_schemas: true)
 
 summary = [
   '\nBuild Configuration:',
