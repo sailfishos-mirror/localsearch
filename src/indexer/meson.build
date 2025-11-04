@@ -71,7 +71,7 @@ executable('localsearch-@0@'.format(tracker_api_major),
     c_args: [
         tracker_c_args,
         '-DBUILDROOT="@0@"'.format(meson.global_build_root()),
-        '-DBUILD_EXTRACTDIR="@0@"'.format(meson.build_root() / 'src' / 'extractor'),
+        '-DBUILD_EXTRACTDIR="@0@"'.format(meson.project_build_root() / 'src' / 'extractor'),
         '-DLIBEXECDIR="@0@"'.format(get_option('prefix') / get_option('libexecdir')),
     ],
     install: true,
