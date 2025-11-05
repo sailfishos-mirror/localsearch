@@ -38,7 +38,7 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
     that the new values are actually in the file
     """
 
-    def __writeback_test(self, filename, mimetype, prop, expectedKey=None):
+    def __writeback_test(self, filename, data):
         """
         Set a value in @prop for the @filename. Then ask tracker-extractor
         for metadata and check in the results dictionary if the property is there.
@@ -52,101 +52,141 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         path = self.prepare_test_image(self.datadir_path(filename))
         initial_mtime = path.stat().st_mtime
 
-        TEST_VALUE = prop.replace(":", "") + "test"
-        self.writeback_data(
-            {
-                "rdf:type": GLib.Variant("s", "nfo:Image"),
-                "nie:isStoredAs": GLib.Variant("s", path.as_uri()),
-                prop: GLib.Variant("s", TEST_VALUE),
-            }
-        )
+        resource = self.create_resource("nfo:Image", path, data)
+        self.writeback_data(resource.serialize())
 
         log.debug("Waiting for change on %s", path)
         self.wait_for_file_change(path, initial_mtime)
         log.debug("Got the change")
-
-        results = fixtures.get_tracker_extract_output(
-            {}, path, mime_type=mimetype, output_format="json-ld"
-        )
-        keyDict = expectedKey or prop
-        file_data = results["@graph"][0]
-        self.assertIn(TEST_VALUE, file_data[keyDict])
-
-    def __writeback_hasTag_test(self, filename, mimetype):
-
-        SPARQL_TMPL = """
-            INSERT {
-              <test://writeback-hasTag-test/1> a nao:Tag ;
-                        nao:prefLabel "testTag" .
-
-              ?u a rdfs:Resource; nao:hasTag <test://writeback-hasTag-test/1> .
-            } WHERE {
-              ?u nie:url '%s' .
-            }
-        """
-
-        path = self.prepare_test_image(self.datadir_path(filename))
-        initial_mtime = path.stat().st_mtime
-
-        self.tracker.update(SPARQL_TMPL % (filename))
-
-        self.wait_for_file_change(path, initial_mtime)
-
-        results = fixtures.get_tracker_extract_output(
-            self.extra_env, filename, mime_type=mimetype, output_format="json-ld"
-        )
-        self.assertIn("testTag", results["nao:hasTag"])
+        self.check_data(path, data)
 
     # JPEG test
 
     def test_001_jpeg_title(self):
-        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:title")
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nie:title": "test_title"})
 
     def test_002_jpeg_description(self):
-        self.__writeback_test("writeback-test-1.jpeg", "image/jpeg", "nie:description")
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nie:description": "test_description"})
 
-    # def test_003_jpeg_keyword (self):
-    #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-    #    self.__writeback_test (self.get_test_filename_jpeg (), "image/jpeg",
-    #                           "nie:keyword", "nao:hasTag")
+    def test_003_jpeg_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nao:hasTag" : {"nao:prefLabel": "test_tag"}})
 
-    # def test_004_jpeg_hasTag (self):
-    #    #FILENAME = "test-writeback-monitored/writeback-test-1.jpeg"
-    #    self.__writeback_hasTag_test (self.get_test_filename_jpeg (), "image/jpeg")
+    def test_004_jpeg_contributor (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
+
+    def test_005_jpeg_copyright (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nie:copyright": "test_copyright"})
+
+    def test_006_jpeg_content_created (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_007_jpeg_heading (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"nfo:heading": 42.0})
+
+    def test_008_jpeg_location (self):
+        self.__writeback_test (
+            "writeback-test-1.jpeg",
+            {"slo:location": { "slo:longitude": 123.0,
+                               "slo:latitude": 12.0,
+                               "slo:altitude": -1.0,
+                               "slo:postalAddress": {"nco:locality": "test_locality",
+                                                     "nco:region": "test_region",
+                                                     "nco:streetAddress": "test_address",
+                                                     "nco:country": "test_country"}}})
 
     # TIFF tests
 
     def test_011_tiff_title(self):
-        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:title")
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nie:title": "test_title"})
 
     def test_012_tiff_description(self):
-        self.__writeback_test("writeback-test-2.tif", "image/tiff", "nie:description")
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nie:description": "test_description"})
 
-    # def test_013_tiff_keyword (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
-    #    self.__writeback_test (self.get_test_filename_tiff (), "image/tiff",
-    #                           "nie:keyword", "nao:hasTag")
+    def test_013_tiff_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
-    # def test_014_tiff_hasTag (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-2.tif"
-    #    self.__writeback_hasTag_test (self.get_test_filename_tiff (), "image/tiff")
+    def test_014_tiff_contributor (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
+
+    def test_015_tiff_copyright (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nie:copyright": "test_copyright"})
+
+    def test_016_tiff_content_created (self):
+        self.__writeback_test (
+            "writeback-test-2.tif",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
 
     # PNG tests
 
     def test_021_png_title(self):
-        self.__writeback_test("writeback-test-4.png", "image/png", "nie:title")
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nie:title": "test_title"})
 
     def test_022_png_description(self):
-        self.__writeback_test("writeback-test-4.png", "image/png", "nie:description")
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nie:description": "test_description"})
 
-    # def test_023_png_keyword (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-4.png"
-    #    self.__writeback_test (self.get_test_filename_png (), "image/png", "nie:keyword", "nao:hasTag:prefLabel")
+    def test_023_png_hasTag (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
-    # def test_024_png_hasTag (self):
-    #    FILENAME = "test-writeback-monitored/writeback-test-4.png"
-    #    self.__writeback_hasTag_test (self.get_test_filename_png (), "image/png")
+    def test_024_png_contributor (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nco:contributor": {"nco:fullname": "test_contributor"}})
 
+    def test_025_png_copyright (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nie:copyright": "test_copyright"})
+
+    def test_026_png_content_created (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_027_png_heading (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"nfo:heading": 42.2})
+
+    def test_028_png_location (self):
+        self.__writeback_test (
+            "writeback-test-4.png",
+            {"slo:location": { "slo:longitude": 123.0,
+                               "slo:latitude": 12.0,
+                               "slo:altitude": -1.0,
+                               "slo:postalAddress": {"nco:locality": "test_locality",
+                                                     "nco:region": "test_region",
+                                                     "nco:streetAddress": "test_address",
+                                                     "nco:country": "test_country"}}})
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

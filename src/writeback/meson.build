@@ -16,6 +16,10 @@ if exempi.found()
   modules += [['writeback-xmp', 'tracker-writeback-xmp.c', [tracker_sparql, tracker_miners_common_dep, exempi]]]
 endif
 
+if totem_plparser.found()
+  modules += [['writeback-playlist', 'tracker-writeback-playlist.c', [tracker_sparql, tracker_miners_common_dep, totem_plparser]]]
+endif
+
 foreach module : modules
   name = module[0]
   sources = module[1]

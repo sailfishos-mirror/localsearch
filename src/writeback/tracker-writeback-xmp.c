@@ -89,7 +89,6 @@ writeback_xmp_content_types (TrackerWritebackFile *wbf)
 		"sketch/png",  /* .sketch.png files on Maemo*/
 		"image/jpeg",  /* .jpg & .jpeg files */
 		"image/tiff",  /* .tiff & .tif files */
-		"video/mp4",   /* .mp4 files */
 		"video/3gpp",  /* .3gpp files */
                 "image/gif",   /* .gif files */
 		NULL
@@ -233,8 +232,8 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 			const gchar *copyright;
 
 			copyright = tracker_resource_get_first_string (resource, prop);
-			xmp_delete_property (xmp, NS_EXIF, "Copyright");
-			xmp_set_property (xmp, NS_EXIF, "Copyright", copyright, 0);
+			xmp_delete_property (xmp, NS_DC, "rights");
+			xmp_set_property (xmp, NS_DC, "rights", copyright, 0);
 		}
 
 		if (g_strcmp0 (prop, "nie:comment") == 0) {
@@ -245,7 +244,7 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 			xmp_set_property (xmp, NS_EXIF, "UserComment", comment, 0);
 		}
 
-		if (g_strcmp0 (prop, "nie:keyword") == 0) {
+		if (g_strcmp0 (prop, "nao:hasTag") == 0) {
 			GList *keywords, *k;
 			GString *keyword_str = g_string_new (NULL);
 
@@ -256,8 +255,11 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 				value = k->data;
 
-				if (G_VALUE_HOLDS_STRING (value)) {
-					const gchar *str = g_value_get_string (value);
+				if (G_VALUE_HOLDS (value, TRACKER_TYPE_RESOURCE)) {
+					TrackerResource *tag = g_value_get_object (value);
+					const gchar *str =
+						tracker_resource_get_first_string (tag,
+						                                   "nao:prefLabel");
 
 					if (keyword_str->len > 0)
 						g_string_append_c (keyword_str, ',');
@@ -452,52 +454,56 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 		}
 
 		if (g_strcmp0 (prop, "slo:location") == 0) {
-			TrackerResource *location;
+			TrackerResource *location, *postal_address;
 			gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
 			const gchar *str;
 			gdouble value;
 
 			location = tracker_resource_get_first_relation (resource, prop);
+			postal_address = tracker_resource_get_first_relation (location, "slo:postalAddress");
 
 			/* TODO: A lot of these location fields are pretty vague and ambigious.
 			 * We should go through them one by one and ensure that all of them are
 			 * used sanely */
-			str = tracker_resource_get_first_string (location, "nco:locality");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "City");
-			xmp_delete_property (xmp, NS_PHOTOSHOP, "City");
-			if (str != NULL) {
-				xmp_set_property (xmp, NS_IPTC4XMP, "City", str, 0);
-				xmp_set_property (xmp, NS_PHOTOSHOP, "City", str, 0);
-			}
 
-			str = tracker_resource_get_first_string (location, "nco:region");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "State");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "Province");
-			xmp_delete_property (xmp, NS_PHOTOSHOP, "State");
-			if (str != NULL) {
-				xmp_set_property (xmp, NS_IPTC4XMP, "State", str, 0);
-				xmp_set_property (xmp, NS_IPTC4XMP, "Province", str, 0);
-				xmp_set_property (xmp, NS_PHOTOSHOP, "State", str, 0);
-			}
+			if (postal_address) {
+				str = tracker_resource_get_first_string (postal_address, "nco:locality");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "City");
+				xmp_delete_property (xmp, NS_PHOTOSHOP, "City");
+				if (str != NULL) {
+					xmp_set_property (xmp, NS_IPTC4XMP, "City", str, 0);
+					xmp_set_property (xmp, NS_PHOTOSHOP, "City", str, 0);
+				}
 
-			str = tracker_resource_get_first_string (location, "nco:streetAddress");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "SubLocation");
-			xmp_delete_property (xmp, NS_PHOTOSHOP, "Location");
-			if (str != NULL) {
-				xmp_set_property (xmp, NS_IPTC4XMP, "SubLocation", str, 0);
-				xmp_set_property (xmp, NS_PHOTOSHOP, "Location", str, 0);
-			}
+				str = tracker_resource_get_first_string (postal_address, "nco:region");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "State");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "Province");
+				xmp_delete_property (xmp, NS_PHOTOSHOP, "State");
+				if (str != NULL) {
+					xmp_set_property (xmp, NS_IPTC4XMP, "State", str, 0);
+					xmp_set_property (xmp, NS_IPTC4XMP, "Province", str, 0);
+					xmp_set_property (xmp, NS_PHOTOSHOP, "State", str, 0);
+				}
 
-			str = tracker_resource_get_first_string (location, "nco:country");
-			xmp_delete_property (xmp, NS_PHOTOSHOP, "Country");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "Country");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "PrimaryLocationName");
-			xmp_delete_property (xmp, NS_IPTC4XMP, "CountryName");
-			if (str != NULL) {
-				xmp_set_property (xmp, NS_PHOTOSHOP, "Country", str, 0);
-				xmp_set_property (xmp, NS_IPTC4XMP, "Country", str, 0);
-				xmp_set_property (xmp, NS_IPTC4XMP, "PrimaryLocationName", str, 0);
-				xmp_set_property (xmp, NS_IPTC4XMP, "CountryName", str, 0);
+				str = tracker_resource_get_first_string (postal_address, "nco:streetAddress");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "SubLocation");
+				xmp_delete_property (xmp, NS_PHOTOSHOP, "Location");
+				if (str != NULL) {
+					xmp_set_property (xmp, NS_IPTC4XMP, "SubLocation", str, 0);
+					xmp_set_property (xmp, NS_PHOTOSHOP, "Location", str, 0);
+				}
+
+				str = tracker_resource_get_first_string (postal_address, "nco:country");
+				xmp_delete_property (xmp, NS_PHOTOSHOP, "Country");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "Country");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "PrimaryLocationName");
+				xmp_delete_property (xmp, NS_IPTC4XMP, "CountryName");
+				if (str != NULL) {
+					xmp_set_property (xmp, NS_PHOTOSHOP, "Country", str, 0);
+					xmp_set_property (xmp, NS_IPTC4XMP, "Country", str, 0);
+					xmp_set_property (xmp, NS_IPTC4XMP, "PrimaryLocationName", str, 0);
+					xmp_set_property (xmp, NS_IPTC4XMP, "CountryName", str, 0);
+				}
 			}
 
 			value = tracker_resource_get_first_double (location, "slo:altitude");
