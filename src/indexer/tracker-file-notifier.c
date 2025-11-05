@@ -109,7 +109,6 @@ struct _TrackerFileNotifier
 
 	TrackerIndexingTree *indexing_tree;
 	TrackerSparqlConnection *connection;
-	GCancellable *cancellable;
 
 	TrackerMonitor *monitor;
 
@@ -194,6 +193,7 @@ tracker_index_root_new (TrackerFileNotifier   *notifier,
 	data->flags = flags;
 	data->root_flags = root_flags;
 	data->timer = g_timer_new ();
+	data->cancellable = g_cancellable_new ();
 
 	g_queue_init (&data->deleted_dirs);
 	g_queue_init (&data->queue);
@@ -215,6 +215,8 @@ tracker_index_root_free (TrackerIndexRoot *data)
 	              g_message ("  Found %d files, ignored %d files",
 	                         data->files_found,
 	                         data->files_ignored));
+
+	g_cancellable_cancel (data->cancellable);
 
 	g_queue_free_full (data->pending_dirs, (GDestroyNotify) g_object_unref);
 	g_queue_free_full (data->pending_finish_dirs, (GDestroyNotify) g_object_unref);
@@ -791,6 +793,23 @@ tracker_index_root_remove_directory (TrackerIndexRoot *root,
 	GList *l = root->pending_dirs->head, *next;
 	GFile *file;
 
+	if (root->enumerator && root->current_dir &&
+	    (g_file_equal (root->current_dir, directory) ||
+	     g_file_has_prefix (root->current_dir, directory))) {
+		/* Cancel enumerator */
+		g_autoptr (GCancellable) old = NULL;
+
+		g_set_object (&old, root->cancellable);
+		g_set_object (&root->cancellable, g_cancellable_new ());
+		g_cancellable_cancel (old);
+
+		g_clear_object (&root->enumerator);
+		g_clear_object (&root->current_dir);
+
+		if (!check_high_water (root->notifier))
+			tracker_index_root_continue (root);
+	}
+
 	while (l) {
 		file = l->data;
 		next = l->next;
@@ -1044,10 +1063,6 @@ tracker_index_root_query_contents (TrackerIndexRoot *root)
 	TrackerFileNotifier *notifier = root->notifier;
 	GFile *directory;
 	g_autofree gchar *uri = NULL;
-
-	if (!root->cancellable)
-		root->cancellable = g_cancellable_new ();
-	g_set_object (&notifier->cancellable, root->cancellable);
 
 	directory = root->root;
 
@@ -1477,8 +1492,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	if (notifier->current_index_root &&
 	    index_root_equals_file (notifier->current_index_root, directory) == 0) {
 		/* Directory being currently processed */
-		if (notifier->cancellable)
-			g_cancellable_cancel (notifier->cancellable);
 		notifier_check_next_root (notifier);
 	}
 
@@ -1526,11 +1539,6 @@ tracker_file_notifier_finalize (GObject *object)
 
 	if (notifier->indexing_tree) {
 		g_object_unref (notifier->indexing_tree);
-	}
-
-	if (notifier->cancellable) {
-		g_cancellable_cancel (notifier->cancellable);
-		g_object_unref (notifier->cancellable);
 	}
 
 	g_clear_object (&notifier->content_query);
@@ -1729,11 +1737,8 @@ tracker_file_notifier_stop (TrackerFileNotifier *notifier)
 	g_return_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier));
 
 	if (!notifier->stopped) {
-		if (notifier->cancellable)
-			g_cancellable_cancel (notifier->cancellable);
-
 		if (notifier->current_index_root) {
-			/* Index root arbitrarily cancelled cannot be easily
+			/* Index root will be cancelled and cannot be easily
 			 * resumed, best to queue it again and start from
 			 * scratch.
 			 */

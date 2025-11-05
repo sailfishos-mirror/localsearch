@@ -33,8 +33,6 @@
 #define BUFFER_POOL_LIMIT 800
 #define DEFAULT_URN_LRU_SIZE 100
 
-#define BIG_QUEUE_THRESHOLD 1000
-
 /* Put tasks processing at a lower priority so other events
  * (timeouts, monitor events, etc...) are guaranteed to be
  * dispatched promptly.
@@ -1194,8 +1192,7 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 
 	if (event) {
 		if (event->is_dir &&
-		    event->type == TRACKER_MINER_FS_EVENT_DELETED &&
-		    g_hash_table_size (priv->items_by_file) < BIG_QUEUE_THRESHOLD) {
+		    event->type == TRACKER_MINER_FS_EVENT_DELETED) {
 			/* Attempt to optimize by removing any children
 			 * of this directory from being processed.
 			 */
