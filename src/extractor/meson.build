@@ -139,7 +139,6 @@ tracker_extract_sources = [
   'tracker-extract.c',
   'tracker-extract-controller.c',
   'tracker-extract-persistence.c',
-  'tracker-read.c',
   'tracker-main.c',
   extract_resources,
 ]
