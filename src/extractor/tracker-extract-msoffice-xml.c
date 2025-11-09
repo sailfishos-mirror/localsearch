@@ -70,19 +70,6 @@ typedef struct {
 
 	/* Metadata-parsing specific things */
 	TrackerResource *metadata;
-	guint has_title      : 1;
-	guint has_subject    : 1;
-	guint has_publisher  : 1;
-	guint has_comment    : 1;
-	guint has_generator  : 1;
-	guint has_page_count : 1;
-	guint has_char_count : 1;
-	guint has_word_count : 1;
-	guint has_line_count : 1;
-	guint has_content_created       : 1;
-	guint has_content_last_modified : 1;
-	gboolean title_already_set;
-	gboolean generator_already_set;
 
 	/* Content-parsing specific things */
 	GString *content;
@@ -423,142 +410,72 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 		break;
 
 	case MS_OFFICE_XML_TAG_TITLE:
-		if (info->has_title) {
-			g_warning ("Avoiding additional title (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_title = TRUE;
-			tracker_resource_set_string (info->metadata, "nie:title", text);
-		}
+		tracker_resource_set_string (info->metadata, "nie:title", text);
 		break;
 
 	case MS_OFFICE_XML_TAG_SUBJECT:
-		if (info->has_subject) {
-			g_warning ("Avoiding additional subject (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_subject = TRUE;
-			tracker_resource_set_string (info->metadata, "nie:subject", text);
-		}
+		tracker_resource_set_string (info->metadata, "nie:subject", text);
 		break;
 
-	case MS_OFFICE_XML_TAG_AUTHOR:
-		if (info->has_publisher) {
-			g_warning ("Avoiding additional publisher (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			TrackerResource *publisher = tracker_extract_new_contact (text);
+	case MS_OFFICE_XML_TAG_AUTHOR: {
+		TrackerResource *publisher = tracker_extract_new_contact (text);
 
-			info->has_publisher = TRUE;
-			tracker_resource_set_relation (info->metadata, "nco:publisher", publisher);
-
-			g_object_unref (publisher);
-		}
+		tracker_resource_set_relation (info->metadata, "nco:publisher", publisher);
+		g_object_unref (publisher);
 		break;
+	}
 
 	case MS_OFFICE_XML_TAG_COMMENTS:
-		if (info->has_comment) {
-			g_warning ("Avoiding additional comment (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_comment = TRUE;
-			tracker_resource_set_string (info->metadata, "nie:comment", text);
-		}
+		tracker_resource_set_string (info->metadata, "nie:comment", text);
 		break;
 
-	case MS_OFFICE_XML_TAG_CREATED:
-		if (info->has_content_created) {
-			g_warning ("Avoiding additional creation time (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			gchar *date;
+	case MS_OFFICE_XML_TAG_CREATED: {
+		gchar *date;
 
-			date = tracker_date_guess (text);
-			if (date) {
-				info->has_content_created = TRUE;
-				tracker_resource_set_string (info->metadata, "nie:contentCreated", date);
-				g_free (date);
-			} else {
-				g_warning ("Could not parse creation time (%s) from MsOffice XML document '%s'",
-				           text, info->uri);
-			}
+		date = tracker_date_guess (text);
+		if (date) {
+			tracker_resource_set_string (info->metadata, "nie:contentCreated", date);
+			g_free (date);
+		} else {
+			g_warning ("Could not parse creation time (%s) from MsOffice XML document '%s'",
+				   text, info->uri);
 		}
 		break;
+	}
 
 	case MS_OFFICE_XML_TAG_GENERATOR:
-		if (info->has_generator) {
-			g_warning ("Avoiding additional generator (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_generator = TRUE;
-			tracker_resource_set_string (info->metadata, "nie:generator", text);
-		}
-		break;
-
 	case MS_OFFICE_XML_TAG_APPLICATION:
-		/* FIXME: Same code as MS_OFFICE_XML_TAG_GENERATOR should be
-		 * used, but nie:generator has max cardinality of 1
-		 * and this would cause errors.
-		 */
+		tracker_resource_set_string (info->metadata, "nie:generator", text);
 		break;
 
-	case MS_OFFICE_XML_TAG_MODIFIED:
-		if (info->has_content_last_modified) {
-			g_warning ("Avoiding additional last modification time (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			gchar *date;
+	case MS_OFFICE_XML_TAG_MODIFIED: {
+		gchar *date;
 
-			date = tracker_date_guess (text);
-			if (date) {
-				info->has_content_last_modified = TRUE;
-				tracker_resource_set_string (info->metadata, "nie:contentLastModified", date);
-				g_free (date);
-			} else {
-				g_warning ("Could not parse last modification time (%s) from MsOffice XML document '%s'",
-				           text, info->uri);
-			}
+		date = tracker_date_guess (text);
+		if (date) {
+			tracker_resource_set_string (info->metadata, "nie:contentLastModified", date);
+			g_free (date);
+		} else {
+			g_warning ("Could not parse last modification time (%s) from MsOffice XML document '%s'",
+				   text, info->uri);
 		}
 		break;
+	}
 
 	case MS_OFFICE_XML_TAG_NUM_OF_PAGES:
-		if (info->has_page_count) {
-			g_warning ("Avoiding additional page count (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_page_count = TRUE;
-			tracker_resource_set_string (info->metadata, "nfo:pageCount", text);
-		}
+		tracker_resource_set_string (info->metadata, "nfo:pageCount", text);
 		break;
 
 	case MS_OFFICE_XML_TAG_NUM_OF_CHARACTERS:
-		if (info->has_char_count) {
-			g_warning ("Avoiding additional character count (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_char_count = TRUE;
-			tracker_resource_set_string (info->metadata, "nfo:characterCount", text);
-		}
+		tracker_resource_set_string (info->metadata, "nfo:characterCount", text);
 		break;
 
 	case MS_OFFICE_XML_TAG_NUM_OF_WORDS:
-		if (info->has_word_count) {
-			g_warning ("Avoiding additional word count (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_word_count = TRUE;
-			tracker_resource_set_string (info->metadata, "nfo:wordCount", text);
-		}
+		tracker_resource_set_string (info->metadata, "nfo:wordCount", text);
 		break;
 
 	case MS_OFFICE_XML_TAG_NUM_OF_LINES:
-		if (info->has_line_count) {
-			g_warning ("Avoiding additional line count (%s) in MsOffice XML document '%s'",
-			           text, info->uri);
-		} else if (text[0] != '\0') {
-			info->has_line_count = TRUE;
-			tracker_resource_set_string (info->metadata, "nfo:lineCount", text);
-		}
+		tracker_resource_set_string (info->metadata, "nfo:lineCount", text);
 		break;
 
 	case MS_OFFICE_XML_TAG_NUM_OF_PARAGRAPHS:
@@ -833,8 +750,6 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	info.preserve_attribute_present = FALSE;
 	info.uri = uri;
 	info.content = NULL;
-	info.title_already_set = FALSE;
-	info.generator_already_set = FALSE;
 	info.bytes_pending = tracker_extract_info_get_max_text (extract_info);
 
 	/* Create content-type parser context */
