@@ -334,6 +334,7 @@ conf.set('libexecdir', join_paths(get_option('prefix'), get_option('libexecdir')
 conf.set('prefix', get_option('prefix'))
 conf.set('TRACKER_API_VERSION', tracker_api_version)
 conf.set('VERSION', meson.project_version())
+conf.set('LIBXML2_SUPPORTS_HTML_CTXT', libxml2.version().version_compare('>=2.11.0'))
 
 configure_file(input: 'config-miners.h.meson.in',
                output: 'config-miners.h',

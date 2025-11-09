@@ -223,6 +223,9 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
+#ifdef LIBXML2_SUPPORTS_HTML_CTXT
+	htmlParserCtxt *ctxt;
+#endif
 	TrackerResource *metadata;
 	GFile *file;
 	htmlDocPtr doc;
@@ -279,7 +282,14 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	pd.n_bytes_remaining = tracker_extract_info_get_max_text (info);
 
 	filename = g_file_get_path (file);
+
+#ifdef LIBXML2_SUPPORTS_HTML_CTXT
+	ctxt = htmlNewSAXParserCtxt (&handler, &pd);
+	doc = htmlCtxtReadFile (ctxt, filename, NULL, HTML_PARSE_NOWARNING);
+	htmlFreeParserCtxt (ctxt);
+#else
 	doc = htmlSAXParseFile (filename, NULL, &handler, &pd);
+#endif
 	g_free (filename);
 
 	if (doc) {
