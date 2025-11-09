@@ -40,8 +40,6 @@ typedef struct {
 	TrackerResource *metadata;
 	tag_type current;
 	guint in_body : 1;
-	guint has_license : 1;
-	guint has_description : 1;
 	GString *title;
 	GString *plain_text;
 	guint n_bytes_remaining;
@@ -112,10 +110,8 @@ parser_start_element (void           *data,
 
 			href = lookup_attribute (attrs, "href");
 
-			if (href && !pd->has_license) {
+			if (href)
 				tracker_resource_set_string (pd->metadata, "nie:license", href);
-				pd->has_license = TRUE;
-			}
 		}
 	} else if (g_ascii_strcasecmp (name, "title") == 0) {
 		pd->current = READ_TITLE;
@@ -139,10 +135,8 @@ parser_start_element (void           *data,
 
 			desc = lookup_attribute (attrs,"content");
 
-			if (desc && !pd->has_description) {
+			if (desc)
 				tracker_resource_set_string (pd->metadata, "nie:description", desc);
-				pd->has_description = TRUE;
-			}
 		}
 
 		if (has_attribute (attrs, "name", "keywords")) {
