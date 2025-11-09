@@ -58,14 +58,6 @@ typedef struct {
 	TrackerResource *metadata;
 	GQueue *tag_stack;            /* (element-type: ODTTagType) */
 	const gchar *uri;
-	guint has_title           : 1;
-	guint has_subject         : 1;
-	guint has_publisher       : 1;
-	guint has_comment         : 1;
-	guint has_generator       : 1;
-	guint has_word_count      : 1;
-	guint has_page_count      : 1;
-	guint has_content_created : 1;
 } ODTMetadataParseInfo;
 
 typedef struct {
@@ -280,21 +272,9 @@ xml_start_element_handler_metadata (GMarkupParseContext  *context,
 
 		for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
 			if (g_ascii_strcasecmp (*a, "meta:word-count") == 0) {
-				if (data->has_word_count) {
-					g_warning ("Avoiding additional word count (%s) in OASIS document '%s'",
-					           *v, data->uri);
-				} else {
-					data->has_word_count = TRUE;
-					tracker_resource_set_string (metadata, "nfo:wordCount", *v);
-				}
+				tracker_resource_set_string (metadata, "nfo:wordCount", *v);
 			} else if (g_ascii_strcasecmp (*a, "meta:page-count") == 0) {
-				if (data->has_page_count) {
-					g_warning ("Avoiding additional page count (%s) in OASIS document '%s'",
-					           *v, data->uri);
-				} else {
-					data->has_page_count = TRUE;
-					tracker_resource_set_string (metadata, "nfo:pageCount", *v);
-				}
+				tracker_resource_set_string (metadata, "nfo:pageCount", *v);
 			}
 		}
 
@@ -343,38 +323,20 @@ xml_text_handler_metadata (GMarkupParseContext  *context,
 	current = GPOINTER_TO_INT (g_queue_peek_head (data->tag_stack));
 	switch (current) {
 	case ODT_TAG_TYPE_TITLE:
-		if (data->has_title) {
-			g_warning ("Avoiding additional title (%s) in OASIS document '%s'",
-			           text, data->uri);
-		} else {
-			data->has_title = TRUE;
-			tracker_resource_set_string (metadata, "nie:title", text);
-		}
+		tracker_resource_set_string (metadata, "nie:title", text);
 		break;
 
 	case ODT_TAG_TYPE_SUBJECT:
-		if (data->has_subject) {
-			g_warning ("Avoiding additional subject (%s) in OASIS document '%s'",
-			           text, data->uri);
-		} else {
-			data->has_subject = TRUE;
-			tracker_resource_set_string (metadata, "nie:subject", text);
-		}
+		tracker_resource_set_string (metadata, "nie:subject", text);
 		break;
 
-	case ODT_TAG_TYPE_AUTHOR:
-		if (data->has_publisher) {
-			g_warning ("Avoiding additional publisher (%s) in OASIS document '%s'",
-			           text, data->uri);
-		} else {
-			TrackerResource *publisher = tracker_extract_new_contact (text);
+	case ODT_TAG_TYPE_AUTHOR: {
+		TrackerResource *publisher = tracker_extract_new_contact (text);
 
-			data->has_publisher = TRUE;
-			tracker_resource_set_relation (metadata, "nco:publisher", publisher);
-
-			g_object_unref (publisher);
-		}
+		tracker_resource_set_relation (metadata, "nco:publisher", publisher);
+		g_object_unref (publisher);
 		break;
+	}
 
 	case ODT_TAG_TYPE_KEYWORDS: {
 		gchar *keywords;
@@ -394,40 +356,23 @@ xml_text_handler_metadata (GMarkupParseContext  *context,
 	}
 
 	case ODT_TAG_TYPE_COMMENTS:
-		if (data->has_comment) {
-			g_warning ("Avoiding additional comment (%s) in OASIS document '%s'",
-			           text, data->uri);
-		} else {
-			data->has_comment = TRUE;
-			tracker_resource_set_string (metadata, "nie:comment", text);
-		}
+		tracker_resource_set_string (metadata, "nie:comment", text);
 		break;
 
-	case ODT_TAG_TYPE_CREATED:
-		if (data->has_content_created) {
-			g_warning ("Avoiding additional creation time (%s) in OASIS document '%s'",
-			           text, data->uri);
+	case ODT_TAG_TYPE_CREATED: {
+		date = tracker_date_guess (text);
+		if (date) {
+			tracker_resource_set_string (metadata, "nie:contentCreated", date);
+			g_free (date);
 		} else {
-			date = tracker_date_guess (text);
-			if (date) {
-				data->has_content_created = TRUE;
-				tracker_resource_set_string (metadata, "nie:contentCreated", date);
-				g_free (date);
-			} else {
-				g_warning ("Could not parse creation time (%s) in OASIS document '%s'",
-				           text, data->uri);
-			}
+			g_warning ("Could not parse creation time (%s) in OASIS document '%s'",
+				   text, data->uri);
 		}
 		break;
+	}
 
 	case ODT_TAG_TYPE_GENERATOR:
-		if (data->has_generator) {
-			g_warning ("Avoiding additional creation time (%s) in OASIS document '%s'",
-			           text, data->uri);
-		} else {
-			data->has_generator = TRUE;
-			tracker_resource_set_string (metadata, "nie:generator", text);
-		}
+		tracker_resource_set_string (metadata, "nie:generator", text);
 		break;
 
 	default:
