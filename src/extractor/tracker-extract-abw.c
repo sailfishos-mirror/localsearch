@@ -54,11 +54,7 @@ struct AbwParserData {
 	gchar *uri;
 
 	guint cur_tag;
-	guint in_text       : 1;
-	guint has_title     : 1;
-	guint has_subject   : 1;
-	guint has_comment   : 1;
-	guint has_generator : 1;
+	guint in_text : 1;
 };
 
 static void
@@ -105,22 +101,10 @@ abw_parser_text (GMarkupParseContext *context,
 
 	switch (data->cur_tag) {
 	case ABW_PARSER_TAG_TITLE:
-		if (data->has_title) {
-			g_warning ("Avoiding additional title (%s) in Abiword document '%s'",
-			           str, data->uri);
-		} else {
-			data->has_title = TRUE;
-			tracker_resource_set_string (data->resource, "nie:title", str);
-		}
+		tracker_resource_set_string (data->resource, "nie:title", str);
 		break;
 	case ABW_PARSER_TAG_SUBJECT:
-		if (data->has_subject) {
-			g_warning ("Avoiding additional subject (%s) in Abiword document '%s'",
-			           str, data->uri);
-		} else {
-			data->has_subject = TRUE;
-			tracker_resource_set_string (data->resource, "nie:subject", str);
-		}
+		tracker_resource_set_string (data->resource, "nie:subject", str);
 		break;
 	case ABW_PARSER_TAG_CREATOR: {
 		TrackerResource *creator;
@@ -131,22 +115,10 @@ abw_parser_text (GMarkupParseContext *context,
 		break;
 	}
 	case ABW_PARSER_TAG_DESCRIPTION:
-		if (data->has_comment) {
-			g_warning ("Avoiding additional comment (%s) in Abiword document '%s'",
-			           str, data->uri);
-		} else {
-			data->has_comment = TRUE;
-			tracker_resource_set_string (data->resource, "nie:comment", str);
-		}
+		tracker_resource_set_string (data->resource, "nie:comment", str);
 		break;
 	case ABW_PARSER_TAG_GENERATOR:
-		if (data->has_generator) {
-			g_warning ("Avoiding additional generator (%s) in Abiword document '%s'",
-			           str, data->uri);
-		} else {
-			data->has_generator = TRUE;
-			tracker_resource_set_string (data->resource, "nie:generator", str);
-		}
+		tracker_resource_set_string (data->resource, "nie:generator", str);
 		break;
 	case ABW_PARSER_TAG_KEYWORDS:
 	{
