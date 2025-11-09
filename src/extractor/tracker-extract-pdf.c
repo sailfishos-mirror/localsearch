@@ -274,114 +274,45 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	time_t creation_date;
-	GError *inner_error = NULL;
-	TrackerResource *metadata;
+	g_autoptr (GError) inner_error = NULL;
+	g_autoptr (TrackerResource) metadata = NULL;
 #ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
 #endif
 	PDFData pd = { 0 };
-	G_GNUC_UNUSED GBytes *bytes;
 	PopplerDocument *document;
-	gchar *xml = NULL;
-	gchar *content, *uri;
+	g_autofree char *uri = NULL;
+	g_autofree char *xml = NULL;
+	g_autofree char *content = NULL;
+	g_autofree char *resource_uri = NULL;
+	g_autoptr (GPtrArray) keywords = NULL;
 	guint n_bytes;
-	GPtrArray *keywords;
 	guint i;
 	GFile *file;
-	gchar *filename, *resource_uri;
-	int fd;
-	gchar *contents = NULL;
-	gsize len;
-	struct stat st;
 
 	file = tracker_extract_info_get_file (info);
-	filename = g_file_get_path (file);
-
-	fd = tracker_file_open_fd (filename);
-
-	if (fd == -1) {
-		g_warning ("Could not open pdf file '%s': %s\n",
-		           filename,
-		           g_strerror (errno));
-		g_free (filename);
-		return FALSE;
-	}
-
-	if (fstat (fd, &st) == -1) {
-		g_warning ("Could not fstat pdf file '%s': %s\n",
-		           filename,
-		           g_strerror (errno));
-		close (fd);
-		g_free (filename);
-		return FALSE;
-	}
-
-	if (st.st_size == 0) {
-		contents = NULL;
-		len = 0;
-	} else {
-		contents = (gchar *) mmap (NULL, st.st_size, PROT_READ, MAP_PRIVATE, fd, 0);
-		if (contents == NULL || contents == MAP_FAILED) {
-			g_warning ("Could not mmap pdf file '%s': %s\n",
-			           filename,
-			           g_strerror (errno));
-			close (fd);
-			g_free (filename);
-			return FALSE;
-		}
-		len = st.st_size;
-	}
-
-	g_free (filename);
 	uri = g_file_get_uri (file);
-
-#if POPPLER_CHECK_VERSION (0, 82, 0)
-	bytes = g_bytes_new (contents, len);
-	document = poppler_document_new_from_bytes (bytes, NULL, &inner_error);
-	g_bytes_unref (bytes);
-#else
-	document = poppler_document_new_from_data (contents, len, NULL, &inner_error);
-#endif
+	document = poppler_document_new_from_gfile (file, NULL, NULL, &inner_error);
 
 	if (inner_error) {
 		if (inner_error->code == POPPLER_ERROR_ENCRYPTED) {
 			resource_uri = tracker_extract_info_get_content_id (info, NULL);
 			metadata = tracker_resource_new (resource_uri);
-			g_free (resource_uri);
 
 			tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");
 			tracker_resource_set_boolean (metadata, "nfo:isContentEncrypted", TRUE);
 
 			tracker_extract_info_set_resource (info, metadata);
-			g_object_unref (metadata);
-
-			g_error_free (inner_error);
-			g_free (uri);
-			close (fd);
-
 			return TRUE;
 		} else {
 			g_propagate_prefixed_error (error, inner_error, "Couldn't open PopplerDocument:");
-			g_free (uri);
-			close (fd);
-
 			return FALSE;
 		}
-	}
-
-	if (!document) {
-		g_warning ("Could not create PopplerDocument from uri:'%s', "
-		           "NULL returned without an error",
-		           uri);
-		g_free (uri);
-		close (fd);
-		return FALSE;
 	}
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:PaginatedTextDocument");
-	g_free (resource_uri);
 
 	g_object_get (document,
 	              "title", &pd.title,
@@ -439,38 +370,26 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 		g_object_unref (tag);
 	}
-	g_ptr_array_free (keywords, TRUE);
 
 	tracker_resource_set_int64 (metadata, "nfo:pageCount", poppler_document_get_n_pages(document));
 
 	n_bytes = tracker_extract_info_get_max_text (info);
 	content = extract_content_text (document, n_bytes);
 
-	if (content) {
+	if (content)
 		tracker_resource_set_string (metadata, "nie:plainTextContent", content);
-		g_free (content);
-	}
 
 	read_outline (document, metadata);
 
-	g_free (xml);
 	g_free (pd.keywords);
 	g_free (pd.title);
 	g_free (pd.subject);
 	g_free (pd.author);
 	g_free (pd.date);
-	g_free (uri);
 
 	g_object_unref (document);
 
-	if (contents) {
-		munmap (contents, len);
-	}
-
-	close (fd);
-
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
 
 	return TRUE;
 }

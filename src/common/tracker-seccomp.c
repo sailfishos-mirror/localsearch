@@ -260,6 +260,7 @@ tracker_seccomp_init (void)
 	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
 	CUSTOM_RULE (dup3, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
 	ALLOW_RULE (read);
+	ALLOW_RULE (pread64);
 	ALLOW_RULE (lseek);
 	ALLOW_RULE (_llseek);
 	ALLOW_RULE (fadvise64);
