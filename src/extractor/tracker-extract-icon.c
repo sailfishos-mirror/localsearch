@@ -27,32 +27,28 @@
 #define ICON_IMAGE_METADATA_SIZE_8 16
 #define MAX_IMAGES 16
 
+enum {
+	POS_WIDTH = 0,
+	POS_HEIGHT,
+};
+
 static gboolean
-find_max_width_and_height (const gchar *uri,
-                           guint       *width,
-                           guint       *height)
+find_max_width_and_height (GFile   *file,
+                           guint   *width,
+                           guint   *height,
+                           GError **error)
 {
-	GError *error = NULL;
-	GFile *file;
-	GFileInputStream *stream;
+	g_autoptr (GFileInputStream) stream = NULL;
 	guint n_images;
 	guint i;
-	guint16 header [ICON_HEADER_SIZE_16];
+	guint16 header[ICON_HEADER_SIZE_16];
 
 	*width = 0;
 	*height = 0;
 
-	file = g_file_new_for_uri (uri);
-	stream = g_file_read (file, NULL, &error);
-	if (error) {
-		g_debug ("Could not read file '%s': %s",
-		         uri,
-		         error->message);
-		g_error_free (error);
-		g_object_unref (file);
-
+	stream = g_file_read (file, NULL, error);
+	if (!stream)
 		return FALSE;
-	}
 
 	/* Header consists of:
 	 *  - 2bytes, reserved, must be 0
@@ -66,21 +62,16 @@ find_max_width_and_height (const gchar *uri,
 	                              ICON_HEADER_SIZE_16 * 2,
 	                              NULL,
 	                              NULL,
-	                              &error)) {
-		g_debug ("Error reading icon header from stream: '%s'",
-		         error->message);
-		g_error_free (error);
-		g_object_unref (stream);
-		g_object_unref (file);
+	                              error))
 		return FALSE;
-	}
 
 	n_images = GUINT16_FROM_LE (header[2]);
 	g_debug ("Found '%u' images in the icon file...", n_images);
 
 	/* Loop images looking for the biggest one... */
 	for (i = 0; i < MIN (MAX_IMAGES, n_images); i++) {
-		guint8 image_metadata [ICON_IMAGE_METADATA_SIZE_8];
+		guint8 image_metadata[ICON_IMAGE_METADATA_SIZE_8];
+		guint cur_width, cur_height;
 
 		/* Image metadata chunk consists of:
 		 *  - 1 byte, width in pixels, 0 means 256
@@ -92,13 +83,8 @@ find_max_width_and_height (const gchar *uri,
 		                              ICON_IMAGE_METADATA_SIZE_8,
 		                              NULL,
 		                              NULL,
-		                              &error)) {
-			g_debug ("Error reading icon image metadata '%u' from stream: '%s'",
-			         i,
-			         error->message);
-			g_error_free (error);
-			break;
-		}
+		                              error))
+			return FALSE;
 
 		g_debug ("  Image '%u'; width:%u height:%u",
 		         i,
@@ -106,23 +92,17 @@ find_max_width_and_height (const gchar *uri,
 		         image_metadata[1]);
 
 		/* Width... */
-		if (image_metadata[0] == 0) {
-			*width = 256;
-		} else if (image_metadata[0] > *width) {
-			*width = image_metadata[0];
-		}
+		cur_width = image_metadata[POS_WIDTH] != 0 ?
+		            image_metadata[POS_WIDTH] : 256;
+		*width = MAX (*width, cur_width);
 
 		/* Height... */
-		if (image_metadata[1] == 0) {
-			*height = 256;
-		} else if (image_metadata[1] > *height) {
-			*height = image_metadata[1];
-		}
+		cur_height = image_metadata[POS_HEIGHT] != 0 ?
+		             image_metadata[POS_HEIGHT] : 256;
+		*height = MAX (*height, cur_height);
 	}
 
 	g_input_stream_close (G_INPUT_STREAM (stream), NULL, NULL);
-	g_object_unref (stream);
-	g_object_unref (file);
 	return TRUE;
 }
 
@@ -130,38 +110,30 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *metadata;
+	g_autoptr (TrackerResource) metadata = NULL;
+	g_autofree char *resource_uri = NULL;
 	guint max_width;
 	guint max_height;
 	GFile *file;
-	gchar *uri, *resource_uri;
 
 	file = tracker_extract_info_get_file (info);
-	uri = g_file_get_uri (file);
-
-	resource_uri = tracker_extract_info_get_content_id (info, NULL);
-	metadata = tracker_resource_new (resource_uri);
-	g_free (resource_uri);
 
 	/* The Windows Icon file format may contain the same icon with different
 	 * sizes inside, so there's no clear way of setting single width and
 	 * height values. Thus, we set maximum sizes found. */
+	if (!find_max_width_and_height (file, &max_width, &max_height, error))
+		return FALSE;
+
+	resource_uri = tracker_extract_info_get_content_id (info, NULL);
+	metadata = tracker_resource_new (resource_uri);
+
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Image");
 	tracker_resource_add_uri (metadata, "rdf:type", "nfo:Icon");
 
-	if (find_max_width_and_height (uri, &max_width, &max_height)) {
-		if (max_width > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:width", (gint64)max_width);
-		}
-		if (max_height > 0) {
-			tracker_resource_set_int64 (metadata, "nfo:height", (gint64)max_height);
-		}
-	}
-
-	g_free (uri);
+	tracker_resource_set_int64 (metadata, "nfo:width", max_width);
+	tracker_resource_set_int64 (metadata, "nfo:height", max_height);
 
 	tracker_extract_info_set_resource (info, metadata);
-	g_object_unref (metadata);
 
 	return TRUE;
 }
