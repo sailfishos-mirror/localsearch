@@ -24,7 +24,7 @@
                     "nco:fullname" : "Publisher",
                     "@type" : "nco:Contact"
                 },
-                "nie:identifier" : "identifier",
+                "nie:identifier" : "isbn01234",
                 "nie:title" : "title",
                 "nie:contentCreated" : "1900-01-01T01:01:01Z",
                 "nie:plainTextContent" : "Section 1 "

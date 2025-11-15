@@ -24,7 +24,6 @@
 
 #include "tracker-main.h"
 #include "tracker-gsf.h"
-#include "tracker-read.h"
 
 #include <unistd.h>
 
@@ -53,15 +52,8 @@ typedef struct {
 
 	OPFTagType element;
 	GList *pages;
-	guint in_metadata         : 1;
-	guint in_manifest         : 1;
-	guint has_publisher       : 1;
-	guint has_title           : 1;
-	guint has_content_created : 1;
-	guint has_language        : 1;
-	guint has_subject         : 1;
-	guint has_description     : 1;
-	guint has_identifier      : 1;
+	guint in_metadata : 1;
+	guint in_manifest : 1;
 	gchar *savedstring;
 } OPFData;
 
@@ -268,21 +260,14 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 
 	switch (data->element) {
 	case OPF_TAG_TYPE_PUBLISHER:
-		if (data->has_publisher) {
-			g_warning ("Avoiding additional publisher (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			TrackerResource *publisher;
+		TrackerResource *publisher;
 
-			publisher = tracker_resource_new (NULL);
-			tracker_resource_set_uri (publisher, "rdf:type", "nco:Contact");
-			tracker_resource_set_string (publisher, "nco:fullname", text);
+		publisher = tracker_resource_new (NULL);
+		tracker_resource_set_uri (publisher, "rdf:type", "nco:Contact");
+		tracker_resource_set_string (publisher, "nco:fullname", text);
 
-			tracker_resource_set_relation (data->resource, "nco:publisher", publisher);
-			g_object_unref (publisher);
-
-			data->has_publisher = TRUE;
-		}
+		tracker_resource_set_relation (data->resource, "nco:publisher", publisher);
+		g_object_unref (publisher);
 		break;
 	case OPF_TAG_TYPE_AUTHOR:
 	case OPF_TAG_TYPE_EDITOR:
@@ -382,7 +367,7 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 
 		if (data->element == OPF_TAG_TYPE_AUTHOR) {
 			role_str = "nco:creator";
-		} else if (data->element == OPF_TAG_TYPE_EDITOR && !data->has_publisher) {
+		} else if (data->element == OPF_TAG_TYPE_EDITOR) {
 			/* Should this be nco:contributor ?
 			 * 'Editor' is a bit vague here.
 			 */
@@ -432,68 +417,32 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 		break;
 	}
 	case OPF_TAG_TYPE_TITLE:
-		if (data->has_title) {
-			g_warning ("Avoiding additional title (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			data->has_title = TRUE;
-			tracker_resource_set_string (data->resource, "nie:title", text);
-		}
+		tracker_resource_set_string (data->resource, "nie:title", text);
 		break;
 	case OPF_TAG_TYPE_CREATED: {
-		if (data->has_content_created) {
-			g_warning ("Avoiding additional creation time (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			gchar *date = tracker_date_guess (text);
+		gchar *date = tracker_date_guess (text);
 
-			if (date) {
-				data->has_content_created = TRUE;
-				tracker_resource_set_string (data->resource, "nie:contentCreated", date);
-				g_free (date);
-			} else {
-				g_warning ("Could not parse creation time (%s) in EPUB '%s'",
-				           text, data->uri);
-			}
+		if (date) {
+			tracker_resource_set_string (data->resource, "nie:contentCreated", date);
+			g_free (date);
+		} else {
+			g_warning ("Could not parse creation time (%s) in EPUB '%s'",
+				   text, data->uri);
 		}
 		break;
 	}
 	case OPF_TAG_TYPE_LANGUAGE:
-		if (data->has_language) {
-			g_warning ("Avoiding additional language (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			data->has_language = TRUE;
-			tracker_resource_set_string (data->resource, "nie:language", text);
-		}
+		tracker_resource_set_string (data->resource, "nie:language", text);
 		break;
 	case OPF_TAG_TYPE_SUBJECT:
-		if (data->has_subject) {
-			g_warning ("Avoiding additional subject (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			data->has_subject = TRUE;
-			tracker_resource_set_string (data->resource, "nie:subject", text);
-		}
+		tracker_resource_set_string (data->resource, "nie:subject", text);
 		break;
 	case OPF_TAG_TYPE_DESCRIPTION:
-		if (data->has_description) {
-			g_warning ("Avoiding additional description (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			data->has_description = TRUE;
-			tracker_resource_set_string (data->resource, "nie:description", text);
-		}
+		tracker_resource_set_string (data->resource, "nie:description", text);
 		break;
 	case OPF_TAG_TYPE_UUID:
 	case OPF_TAG_TYPE_ISBN:
-		if (data->has_identifier) {
-			g_warning ("Avoiding additional identifier (%s) in EPUB '%s'",
-			           text, data->uri);
-		} else {
-			data->has_identifier = TRUE;
-			tracker_resource_set_string (data->resource, "nie:identifier", text);
-		}
+		tracker_resource_set_string (data->resource, "nie:identifier", text);
 		break;
 	/* case OPF_TAG_TYPE_RATING: */
 	case OPF_TAG_TYPE_UNKNOWN:
