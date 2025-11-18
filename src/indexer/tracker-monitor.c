@@ -39,9 +39,7 @@ enum {
 enum {
 	PROP_0,
 	PROP_ENABLED,
-	PROP_LIMIT,
 	PROP_COUNT,
-	PROP_IGNORED,
 	N_PROPS
 };
 
@@ -58,9 +56,7 @@ tracker_monitor_set_property (GObject      *object,
 {
 	switch (prop_id) {
 	case PROP_ENABLED:
-	case PROP_LIMIT:
 	case PROP_COUNT:
-	case PROP_IGNORED:
 		g_warning ("Property should be overridden by superclass");
 		break;
 	default:
@@ -76,9 +72,7 @@ tracker_monitor_get_property (GObject      *object,
 {
 	switch (prop_id) {
 	case PROP_ENABLED:
-	case PROP_LIMIT:
 	case PROP_COUNT:
-	case PROP_IGNORED:
 		g_warning ("Property should be overridden by superclass");
 		break;
 	default:
@@ -161,28 +155,10 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 		                      TRUE,
 		                      G_PARAM_READWRITE |
 		                      G_PARAM_STATIC_STRINGS);
-	pspecs[PROP_LIMIT] =
-		g_param_spec_uint ("limit",
-		                   "Limit",
-		                   "Limit",
-		                   0,
-		                   G_MAXUINT,
-		                   0,
-		                   G_PARAM_READABLE |
-		                   G_PARAM_STATIC_STRINGS);
 	pspecs[PROP_COUNT] =
 		g_param_spec_uint ("count",
 		                   "Count",
 		                   "Count",
-		                   0,
-		                   G_MAXUINT,
-		                   0,
-		                   G_PARAM_READABLE |
-		                   G_PARAM_STATIC_STRINGS);
-	pspecs[PROP_IGNORED] =
-		g_param_spec_uint ("ignored",
-		                   "Ignored",
-		                   "Ignored",
 		                   0,
 		                   G_MAXUINT,
 		                   0,
@@ -294,30 +270,6 @@ tracker_monitor_get_count (TrackerMonitor *monitor)
 	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), 0);
 
 	return TRACKER_MONITOR_GET_CLASS (monitor)->get_count (monitor);
-}
-
-guint
-tracker_monitor_get_ignored (TrackerMonitor *monitor)
-{
-	guint ignored;
-
-	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), 0);
-
-	g_object_get (monitor, "ignored", &ignored, NULL);
-
-	return ignored;
-}
-
-guint
-tracker_monitor_get_limit (TrackerMonitor *monitor)
-{
-	guint limit;
-
-	g_return_val_if_fail (TRACKER_IS_MONITOR (monitor), 0);
-
-	g_object_get (monitor, "limit", &limit, NULL);
-
-	return limit;
 }
 
 void
