@@ -183,9 +183,6 @@ static void           file_notifier_finished              (TrackerFileNotifier *
 
 static void           queue_handler_maybe_set_up          (TrackerIndexer *indexer);
 
-static void           task_pool_limit_reached_notify_cb       (GObject        *object,
-                                                               GParamSpec     *pspec,
-                                                               gpointer        user_data);
 
 G_DEFINE_TYPE (TrackerIndexer, tracker_indexer, TRACKER_TYPE_MINER)
 
@@ -741,9 +738,6 @@ fs_constructed (GObject *object)
 	indexer->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
 	                                                    BUFFER_POOL_LIMIT,
 	                                                    indexer->root);
-	g_signal_connect (indexer->sparql_buffer, "notify::limit-reached",
-	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
-	                  object);
 
 	/* Create the file notifier */
 	indexer->file_notifier = tracker_file_notifier_new (indexer->indexing_tree,
@@ -846,15 +840,6 @@ fs_get_property (GObject    *object,
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
 	}
-}
-
-static void
-task_pool_limit_reached_notify_cb (GObject    *object,
-				   GParamSpec *pspec,
-				   gpointer    user_data)
-{
-	if (!tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object)))
-		queue_handler_maybe_set_up (user_data);
 }
 
 static void
