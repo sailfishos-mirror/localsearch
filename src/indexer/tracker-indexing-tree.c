@@ -1005,52 +1005,6 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
 }
 
 /**
- * tracker_indexing_tree_get_master_root:
- * @tree: a #TrackerIndexingTree
- *
- * Returns the #GFile that represents the master root location for all
- * indexing locations. For example, if
- * <filename>file:///etc</filename> is an indexed path and so was
- * <filename>file:///home/user</filename>, the master root is
- * <filename>file:///</filename>. Only one scheme per @tree can be
- * used, so you can not mix <filename>http</filename> and
- * <filename>file</filename> roots in @tree.
- *
- * The return value should <emphasis>NEVER</emphasis> be %NULL. In
- * cases where no root is given, we fallback to
- * <filename>file:///</filename>.
- *
- * Roots explained:
- *
- * - master root = top most level root node,
- *   e.g. file:///
- *
- * - config root = a root node from GSettings,
- *   e.g. file:///home/martyn/Documents
- *
- * - root = ANY root, normally config root, but it can also apply to
- *   roots added for devices, which technically are not a config root or a
- *   master root.
- *
- * Returns: (transfer none): the effective root for all locations, or
- * %NULL on error. The root is owned by @tree and should not be freed.
- * It can be referenced using g_object_ref().
- *
- * Since: 1.2
- **/
-GFile *
-tracker_indexing_tree_get_master_root (TrackerIndexingTree *tree)
-{
-	TrackerIndexingTreePrivate *priv;
-
-	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), NULL);
-
-	priv = tree->priv;
-
-	return priv->root;
-}
-
-/**
  * tracker_indexing_tree_file_is_root:
  * @tree: a #TrackerIndexingTree
  * @file: a #GFile to compare

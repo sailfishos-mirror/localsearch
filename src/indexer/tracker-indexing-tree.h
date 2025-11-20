@@ -112,7 +112,6 @@ GFile *   tracker_indexing_tree_get_root             (TrackerIndexingTree    *tr
                                                       GFile                  *file,
                                                       const char            **id,
                                                       TrackerDirectoryFlags  *directory_flags);
-GFile *   tracker_indexing_tree_get_master_root      (TrackerIndexingTree   *tree);
 
 gboolean  tracker_indexing_tree_file_is_root         (TrackerIndexingTree   *tree,
                                                       GFile                 *file);
