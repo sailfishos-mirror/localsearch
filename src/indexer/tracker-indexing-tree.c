@@ -35,7 +35,6 @@
  * by the #TrackerMinerFS.
  **/
 
-typedef struct _TrackerIndexingTreePrivate TrackerIndexingTreePrivate;
 typedef struct _ConfiguredFolder ConfiguredFolder;
 typedef struct _PatternData PatternData;
 
@@ -54,8 +53,10 @@ struct _PatternData
 	TrackerFilterType type;
 };
 
-struct _TrackerIndexingTreePrivate
+struct _TrackerIndexingTree
 {
+	GObject parent_instance;
+
 	GArray *configured_folders;
 	GList *filter_patterns;
 	GList *allowed_text_patterns;
@@ -63,7 +64,7 @@ struct _TrackerIndexingTreePrivate
 	guint filter_hidden : 1;
 };
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerIndexingTree, tracker_indexing_tree, G_TYPE_OBJECT)
+G_DEFINE_TYPE (TrackerIndexingTree, tracker_indexing_tree, G_TYPE_OBJECT)
 
 enum {
 	PROP_0,
@@ -95,13 +96,12 @@ find_configured_folder (TrackerIndexingTree *tree,
 			GEqualFunc           func,
 			unsigned int        *pos)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	unsigned int i;
 
-	for (i = 0; i < priv->configured_folders->len; i++) {
+	for (i = 0; i < tree->configured_folders->len; i++) {
 		ConfiguredFolder *folder;
 
-		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
+		folder = &g_array_index (tree->configured_folders, ConfiguredFolder, i);
 
 		if (func (file, folder->file)) {
 			if (pos)
@@ -161,13 +161,11 @@ tracker_indexing_tree_get_property (GObject    *object,
                                     GValue     *value,
                                     GParamSpec *pspec)
 {
-	TrackerIndexingTreePrivate *priv;
-
-	priv = TRACKER_INDEXING_TREE (object)->priv;
+	TrackerIndexingTree *tree = TRACKER_INDEXING_TREE (object);
 
 	switch (prop_id) {
 	case PROP_FILTER_HIDDEN:
-		g_value_set_boolean (value, priv->filter_hidden);
+		g_value_set_boolean (value, tree->filter_hidden);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -199,15 +197,13 @@ tracker_indexing_tree_set_property (GObject      *object,
 static void
 tracker_indexing_tree_finalize (GObject *object)
 {
-	TrackerIndexingTreePrivate *priv;
 	TrackerIndexingTree *tree;
 
 	tree = TRACKER_INDEXING_TREE (object);
-	priv = tree->priv;
 
-	g_clear_list (&priv->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
-	g_clear_list (&priv->filter_patterns, (GDestroyNotify) pattern_data_free);
-	g_clear_pointer (&priv->configured_folders, g_array_unref);
+	g_clear_list (&tree->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
+	g_clear_list (&tree->filter_patterns, (GDestroyNotify) pattern_data_free);
+	g_clear_pointer (&tree->configured_folders, g_array_unref);
 
 	G_OBJECT_CLASS (tracker_indexing_tree_parent_class)->finalize (object);
 }
@@ -245,10 +241,7 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 		g_signal_new ("directory-added",
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerIndexingTreeClass,
-		                               directory_added),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE, 1, G_TYPE_FILE);
 
 	/**
@@ -268,10 +261,7 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 		g_signal_new ("directory-removed",
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerIndexingTreeClass,
-		                               directory_removed),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE, 1, G_TYPE_FILE);
 
 	/**
@@ -290,10 +280,7 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 		g_signal_new ("directory-updated",
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerIndexingTreeClass,
-		                               directory_updated),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE, 1, G_TYPE_FILE);
 
 	/**
@@ -314,24 +301,17 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 		g_signal_new ("child-updated",
 		              G_OBJECT_CLASS_TYPE (object_class),
 		              G_SIGNAL_RUN_LAST,
-		              G_STRUCT_OFFSET (TrackerIndexingTreeClass,
-		                               child_updated),
-		              NULL, NULL,
-		              NULL,
+		              0, NULL, NULL, NULL,
 		              G_TYPE_NONE, 2, G_TYPE_FILE, G_TYPE_FILE);
 }
 
 static void
 tracker_indexing_tree_init (TrackerIndexingTree *tree)
 {
-	TrackerIndexingTreePrivate *priv =
-		tracker_indexing_tree_get_instance_private (tree);
-
-       tree->priv = priv;
-       priv->configured_folders =
-	       g_array_new (FALSE, FALSE, sizeof (ConfiguredFolder));
-       g_array_set_clear_func (priv->configured_folders,
-			       configured_folder_clear);
+	tree->configured_folders =
+		g_array_new (FALSE, FALSE, sizeof (ConfiguredFolder));
+	g_array_set_clear_func (tree->configured_folders,
+				configured_folder_clear);
 }
 
 /**
@@ -363,7 +343,6 @@ tracker_indexing_tree_add (TrackerIndexingTree   *tree,
                            GFile                 *directory,
                            TrackerDirectoryFlags  flags)
 {
-	TrackerIndexingTreePrivate *priv;
 	g_autofree char *uri = NULL;
 	ConfiguredFolder new_folder;
 	unsigned int i, pos = 0;
@@ -373,7 +352,6 @@ tracker_indexing_tree_add (TrackerIndexingTree   *tree,
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 	g_return_if_fail (G_IS_FILE (directory));
 
-	priv = tree->priv;
 	uri = g_file_get_uri (directory);
 	uri_len = strlen (uri);
 
@@ -382,10 +360,10 @@ tracker_indexing_tree_add (TrackerIndexingTree   *tree,
 	 * come up first, so ordered g_file_has_prefix checks will be
 	 * guaranteed to get the deepmost configured folder that applies.
 	 */
-	for (i = 0; i < priv->configured_folders->len; i++) {
+	for (i = 0; i < tree->configured_folders->len; i++) {
 		ConfiguredFolder *folder;
 
-		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
+		folder = &g_array_index (tree->configured_folders, ConfiguredFolder, i);
 
 		if (folder->uri_len > uri_len) {
 			continue;
@@ -417,9 +395,9 @@ tracker_indexing_tree_add (TrackerIndexingTree   *tree,
 	};
 
 	if (insert)
-		g_array_insert_val (priv->configured_folders, pos, new_folder);
+		g_array_insert_val (tree->configured_folders, pos, new_folder);
 	else
-		g_array_append_val (priv->configured_folders, new_folder);
+		g_array_append_val (tree->configured_folders, new_folder);
 
 	g_signal_emit (tree, signals[DIRECTORY_ADDED], 0, directory);
 }
@@ -437,21 +415,18 @@ void
 tracker_indexing_tree_remove (TrackerIndexingTree *tree,
                               GFile               *directory)
 {
-	TrackerIndexingTreePrivate *priv;
 	ConfiguredFolder *folder;
 	unsigned int pos;
 
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 	g_return_if_fail (G_IS_FILE (directory));
 
-	priv = tree->priv;
-
 	folder = find_configured_folder (tree, directory, (GEqualFunc) g_file_equal, &pos);
 	if (!folder)
 		return;
 
 	g_signal_emit (tree, signals[DIRECTORY_REMOVED], 0, folder->file);
-	g_array_remove_index (priv->configured_folders, pos);
+	g_array_remove_index (tree->configured_folders, pos);
 }
 
 /**
@@ -528,13 +503,10 @@ tracker_indexing_tree_add_filter (TrackerIndexingTree *tree,
                                   TrackerFilterType    filter,
                                   const gchar         *glob_string)
 {
-	TrackerIndexingTreePrivate *priv;
 	PatternData *data;
 
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 	g_return_if_fail (glob_string != NULL);
-
-	priv = tree->priv;
 
 	if (g_path_is_absolute (glob_string)) {
 		g_warning ("Absolute paths are no longer allowed in 'ignored-files', 'ignored-directories', or 'ignored-directories-with-content'");
@@ -547,7 +519,7 @@ tracker_indexing_tree_add_filter (TrackerIndexingTree *tree,
 	}
 
 	data = pattern_data_new (glob_string, filter);
-	priv->filter_patterns = g_list_prepend (priv->filter_patterns, data);
+	tree->filter_patterns = g_list_prepend (tree->filter_patterns, data);
 }
 
 /**
@@ -561,14 +533,11 @@ void
 tracker_indexing_tree_clear_filters (TrackerIndexingTree *tree,
                                      TrackerFilterType    type)
 {
-	TrackerIndexingTreePrivate *priv;
 	GList *l;
 
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 
-	priv = tree->priv;
-
-	for (l = priv->filter_patterns; l; l = l->next) {
+	for (l = tree->filter_patterns; l; l = l->next) {
 		PatternData *data = l->data;
 
 		if (data->type == type) {
@@ -576,7 +545,7 @@ tracker_indexing_tree_clear_filters (TrackerIndexingTree *tree,
 			 * to the beginning of the list to make sure
 			 * we don't miss anything.
 			 */
-			l = priv->filter_patterns = g_list_delete_link (priv->filter_patterns, l);
+			l = tree->filter_patterns = g_list_delete_link (tree->filter_patterns, l);
 			pattern_data_free (data);
 		}
 	}
@@ -597,7 +566,6 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
                                            TrackerFilterType    type,
                                            GFile               *file)
 {
-	TrackerIndexingTreePrivate *priv;
 	GList *filters;
 	gchar *basename, *str, *reverse;
 	gboolean match = FALSE;
@@ -606,8 +574,7 @@ tracker_indexing_tree_file_matches_filter (TrackerIndexingTree *tree,
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
-	priv = tree->priv;
-	filters = priv->filter_patterns;
+	filters = tree->filter_patterns;
 	basename = g_file_get_basename (file);
 
 	str = g_utf8_make_valid (basename, -1);
@@ -740,15 +707,13 @@ gboolean
 tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
                                            GFile               *parent)
 {
-	TrackerIndexingTreePrivate *priv;
 	gboolean has_match = FALSE;
 	GList *filters;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (parent), FALSE);
 
-	priv = tree->priv;
-	filters = priv->filter_patterns;
+	filters = tree->filter_patterns;
 
 	while (filters) {
 		PatternData *data = filters->data;
@@ -784,12 +749,9 @@ tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
 gboolean
 tracker_indexing_tree_get_filter_hidden (TrackerIndexingTree *tree)
 {
-	TrackerIndexingTreePrivate *priv;
-
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 
-	priv = tree->priv;
-	return priv->filter_hidden;
+	return tree->filter_hidden;
 }
 
 /**
@@ -812,12 +774,9 @@ void
 tracker_indexing_tree_set_filter_hidden (TrackerIndexingTree *tree,
                                          gboolean             filter_hidden)
 {
-	TrackerIndexingTreePrivate *priv;
-
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 
-	priv = tree->priv;
-	priv->filter_hidden = filter_hidden;
+	tree->filter_hidden = filter_hidden;
 
 	g_object_notify (G_OBJECT (tree), "filter-hidden");
 }
@@ -828,7 +787,6 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
                                 const char            **id,
                                 TrackerDirectoryFlags  *directory_flags)
 {
-	TrackerIndexingTreePrivate *priv;
 	ConfiguredFolder *folder;
 
 	if (directory_flags) {
@@ -837,8 +795,6 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
-
-	priv = tree->priv;
 
 	folder = find_configured_folder (tree, file, (GEqualFunc) parent_or_equals, NULL);
 
@@ -894,18 +850,15 @@ tracker_indexing_tree_file_is_root (TrackerIndexingTree *tree,
 GList *
 tracker_indexing_tree_list_roots (TrackerIndexingTree *tree)
 {
-	TrackerIndexingTreePrivate *priv;
 	unsigned int i;
 	GList *roots = NULL;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), NULL);
 
-	priv = tree->priv;
-
-	for (i = 0; i < priv->configured_folders->len; i++) {
+	for (i = 0; i < tree->configured_folders->len; i++) {
 		ConfiguredFolder *folder;
 
-		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
+		folder = &g_array_index (tree->configured_folders, ConfiguredFolder, i);
 		roots = g_list_prepend (roots, folder->file);
 	}
 
@@ -915,35 +868,30 @@ tracker_indexing_tree_list_roots (TrackerIndexingTree *tree)
 void
 tracker_indexing_tree_clear_allowed_text_patterns (TrackerIndexingTree *tree)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
-
-	g_list_free_full (priv->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
-	priv->allowed_text_patterns = NULL;
+	g_clear_list (&tree->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
 }
 
 void
 tracker_indexing_tree_add_allowed_text_pattern (TrackerIndexingTree *tree,
                                                 const char          *pattern_str)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	PatternData *pattern;
 
 	pattern = pattern_data_new (pattern_str, 0);
-	priv->allowed_text_patterns =
-		g_list_prepend (priv->allowed_text_patterns, pattern);
+	tree->allowed_text_patterns =
+		g_list_prepend (tree->allowed_text_patterns, pattern);
 }
 
 gboolean
 tracker_indexing_tree_file_has_allowed_text_extension (TrackerIndexingTree *tree,
                                                        GFile               *file)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	g_autofree gchar *basename = NULL;
 	GList *l;
 
 	basename = g_file_get_basename (file);
 
-	for (l = priv->allowed_text_patterns; l; l = l->next) {
+	for (l = tree->allowed_text_patterns; l; l = l->next) {
 		PatternData *pattern = l->data;
 
 #if GLIB_CHECK_VERSION (2, 70, 0)
@@ -978,7 +926,6 @@ tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
                                    GFile                *config,
                                    GError              **error)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	GVariantBuilder builder, text_allowlist, single_dirs, recursive_dirs;
 	GVariantBuilder ignored_files, ignored_dirs, ignored_dirs_with_content;
 	g_autoptr (GVariant) variant = NULL;
@@ -993,12 +940,12 @@ tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
 	g_variant_builder_init (&single_dirs, G_VARIANT_TYPE ("as"));
 	g_variant_builder_init (&recursive_dirs, G_VARIANT_TYPE ("as"));
 
-	for (l = priv->allowed_text_patterns; l; l = l->next) {
+	for (l = tree->allowed_text_patterns; l; l = l->next) {
 		PatternData *pattern = l->data;
 		g_variant_builder_add (&text_allowlist, "s", pattern->string);
 	}
 
-	for (l = priv->filter_patterns; l; l = l->next) {
+	for (l = tree->filter_patterns; l; l = l->next) {
 		PatternData *pattern = l->data;
 
 		if (pattern->type == TRACKER_FILTER_FILE)
@@ -1054,7 +1001,6 @@ compare_filter (TrackerIndexingTree *tree,
                 TrackerFilterType    type,
                 int                 *n_items_found_inout)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	g_auto (GStrv) strv = NULL;
 	int n_filters = 0, i;
 
@@ -1065,7 +1011,7 @@ compare_filter (TrackerIndexingTree *tree,
 			match.type = type;
 			match.string = strv[i];
 
-			if (!g_list_find_custom (priv->filter_patterns, &match,
+			if (!g_list_find_custom (tree->filter_patterns, &match,
 			                         (GCompareFunc) pattern_data_compare))
 				return FALSE;
 
@@ -1118,7 +1064,6 @@ tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
                                     GFile               *config,
                                     gboolean             check_locations)
 {
-	TrackerIndexingTreePrivate *priv = tree->priv;
 	g_autoptr (GVariant) variant = NULL;
 	g_autofree char *str = NULL;
 	g_auto (GStrv) strv = NULL;
@@ -1140,16 +1085,16 @@ tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
 
 			match.string = strv[i];
 
-			if (!g_list_find_custom (priv->allowed_text_patterns, &match,
+			if (!g_list_find_custom (tree->allowed_text_patterns, &match,
 			                         (GCompareFunc) pattern_data_compare))
 				goto update;
 		}
 
-		if (g_strv_length (strv) != g_list_length (priv->allowed_text_patterns))
+		if (g_strv_length (strv) != g_list_length (tree->allowed_text_patterns))
 			goto update;
 
 		g_clear_pointer (&strv, g_strfreev);
-	} else if (priv->allowed_text_patterns) {
+	} else if (tree->allowed_text_patterns) {
 		goto update;
 	}
 
@@ -1165,7 +1110,7 @@ tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
 	                     TRACKER_FILTER_PARENT_DIRECTORY, &n_filters))
 		goto update;
 
-	if (n_filters != g_list_length (priv->filter_patterns))
+	if (n_filters != g_list_length (tree->filter_patterns))
 		goto update;
 
 	if (check_locations) {
