@@ -39,7 +39,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_ENABLED,
-	PROP_COUNT,
 	N_PROPS
 };
 
@@ -155,15 +154,6 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 		                      TRUE,
 		                      G_PARAM_READWRITE |
 		                      G_PARAM_STATIC_STRINGS);
-	pspecs[PROP_COUNT] =
-		g_param_spec_uint ("count",
-		                   "Count",
-		                   "Count",
-		                   0,
-		                   G_MAXUINT,
-		                   0,
-		                   G_PARAM_READABLE |
-		                   G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, pspecs);
 }

@@ -111,7 +111,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_ENABLED,
-	PROP_COUNT,
 };
 
 static GInitableIface *initable_parent_iface = NULL;
@@ -557,9 +556,6 @@ tracker_monitor_fanotify_get_property (GObject      *object,
 	case PROP_ENABLED:
 		g_value_set_boolean (value, monitor->enabled);
 		break;
-	case PROP_COUNT:
-		g_value_set_uint (value, tracker_monitor_get_count (TRACKER_MONITOR (object)));
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 	}
@@ -931,7 +927,6 @@ tracker_monitor_fanotify_class_init (TrackerMonitorFanotifyClass *klass)
 	monitor_class->get_count = tracker_monitor_fanotify_get_count;
 
 	g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
-	g_object_class_override_property (object_class, PROP_COUNT, "count");
 }
 
 static void
