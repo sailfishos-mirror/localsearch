@@ -685,6 +685,7 @@ static void
 log_config (TrackerConfig *config)
 {
 #ifdef G_ENABLE_DEBUG
+// LCOV_EXCL_START
 	if (TRACKER_DEBUG_CHECK (CONFIG)) {
 		GSList *dirs, *l;
 
@@ -711,6 +712,7 @@ log_config (TrackerConfig *config)
 		                                   "enable-monitors") ?
 		           "on" : "off");
 	}
+// LCOV_EXCL_STOP
 #endif
 }
 
