@@ -695,6 +695,7 @@ wait_settle_cb (gpointer user_data)
 	return G_SOURCE_REMOVE;
 }
 
+#if IS_DEDICATED_SERVICE
 static void
 on_domain_vanished (GDBusConnection *connection,
                     const gchar     *name,
@@ -705,6 +706,7 @@ on_domain_vanished (GDBusConnection *connection,
 	g_message ("Domain %s vanished: quitting now.", name);
 	g_application_quit (G_APPLICATION (app));
 }
+#endif /* IS_DEDICATED_SERVICE */
 
 static void
 track_instance_state (TrackerApplication *app,
@@ -1151,8 +1153,8 @@ tracker_application_dbus_register (GApplication     *application,
 	if (!initialize_main_instance (app, &app->main_instance, dbus_conn, error))
 		return FALSE;
 
-	if (!app->no_daemon &&
-	    g_strcmp0 (DOMAIN_PREFIX, "org.freedesktop") != 0) {
+#if IS_DEDICATED_SERVICE
+	if (!app->no_daemon) {
 		g_debug ("tracker-miner-fs-3 running for domain " DOMAIN_PREFIX ". "
 		         "The service will exit when " DOMAIN_PREFIX " disappears from the bus.");
 		app->domain_watch_id =
@@ -1161,6 +1163,7 @@ tracker_application_dbus_register (GApplication     *application,
 			                                NULL, on_domain_vanished,
 			                                app, NULL);
 	}
+#endif /* IS_DEDICATED_SERVICE */
 
 	app->files_interface = tracker_files_interface_new (dbus_conn);
 

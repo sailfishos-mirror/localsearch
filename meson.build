@@ -302,6 +302,7 @@ conf.set('HAVE_GUPNP_DLNA', gupnp_dlna.found())
 conf.set('HAVE_FANOTIFY', have_fanotify)
 conf.set('HAVE_BTRFS_IOCTL', have_btrfs_ioctl)
 conf.set_quoted('DOMAIN_PREFIX', get_option('domain_prefix'))
+conf.set10('IS_DEDICATED_SERVICE', get_option('domain_prefix') != 'org.freedesktop')
 
 if get_option('domain_prefix') != 'org.freedesktop'
   if get_option('miner_fs_cache_location') == ''
