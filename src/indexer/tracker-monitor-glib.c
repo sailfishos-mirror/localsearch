@@ -234,12 +234,6 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
 
 		priv->monitor_limit = get_kqueue_limit ();
-	} else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
-		/* Using Windows */
-		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
-
-		/* Guessing limit... */
-		priv->monitor_limit = 8192;
 	} else {
 		/* Unknown */
 		g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
