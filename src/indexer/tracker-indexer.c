@@ -114,6 +114,7 @@ typedef enum {
 	TRACKER_INDEXER_EVENT_DELETED,
 	TRACKER_INDEXER_EVENT_MOVED,
 	TRACKER_INDEXER_EVENT_FINISH_DIRECTORY,
+	TRACKER_INDEXER_N_EVENTS,
 } TrackerIndexerEventType;
 
 enum {
@@ -189,25 +190,6 @@ static void           queue_handler_maybe_set_up          (TrackerIndexer *index
 G_DEFINE_TYPE (TrackerIndexer, tracker_indexer, TRACKER_TYPE_MINER)
 
 #define EVENT_QUEUE_LOG_PREFIX "[Event Queue] "
-
-G_GNUC_UNUSED static void
-debug_print_event (QueueEvent *event)
-{
-	const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED", "FINISH_DIRECTORY" };
-	g_autofree char *uri1 = NULL, *uri2 = NULL;
-
-	uri1 = g_file_get_uri (event->file);
-	if (event->dest_file)
-		uri2 = g_file_get_uri (event->dest_file);
-
-	g_message ("%s New %s event: %s%s%s%s",
-	            EVENT_QUEUE_LOG_PREFIX,
-	            event_type_name[event->type],
-	            event->attributes_update ? "(attributes only) " : "",
-	            uri1,
-	            uri2 ? "->" : "",
-	            uri2 ? uri2 : "");
-}
 
 static void
 tracker_indexer_class_init (TrackerIndexerClass *klass)
@@ -1364,7 +1346,28 @@ indexer_queue_event (TrackerIndexer *indexer,
 			                 &foreach_data);
 		}
 
-		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
+#ifdef G_ENABLE_DEBUG
+// LCOV_EXCL_START
+		if (TRACKER_DEBUG_CHECK (MINER_FS_EVENTS)) {
+			const gchar *event_type_name[] = { "CREATED", "UPDATED", "DELETED", "MOVED", "FINISH_DIRECTORY" };
+			g_autofree char *uri1 = NULL, *uri2 = NULL;
+
+			G_STATIC_ASSERT (G_N_ELEMENTS (event_type_name) == TRACKER_INDEXER_N_EVENTS);
+
+			uri1 = g_file_get_uri (event->file);
+			if (event->dest_file)
+				uri2 = g_file_get_uri (event->dest_file);
+
+			g_message ("%s New %s event: %s%s%s%s",
+				   EVENT_QUEUE_LOG_PREFIX,
+				   event_type_name[event->type],
+				   event->attributes_update ? "(attributes only) " : "",
+				   uri1,
+				   uri2 ? "->" : "",
+				   uri2 ? uri2 : "");
+		}
+// LCOV_EXCL_STOP
+#endif
 
 		event->queue_node = g_list_alloc ();
 		event->queue_node->data = event;
