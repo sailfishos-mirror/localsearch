@@ -53,14 +53,8 @@ tracker_monitor_set_property (GObject      *object,
                               const GValue *value,
                               GParamSpec   *pspec)
 {
-	switch (prop_id) {
-	case PROP_ENABLED:
-	case PROP_COUNT:
-		g_warning ("Property should be overridden by superclass");
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-	}
+	/* All properties are overridden */
+	g_assert_not_reached ();
 }
 
 static void
@@ -69,14 +63,8 @@ tracker_monitor_get_property (GObject      *object,
                               GValue       *value,
                               GParamSpec   *pspec)
 {
-	switch (prop_id) {
-	case PROP_ENABLED:
-	case PROP_COUNT:
-		g_warning ("Property should be overridden by superclass");
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-	}
+	/* All properties are overridden */
+	g_assert_not_reached ();
 }
 
 static void
