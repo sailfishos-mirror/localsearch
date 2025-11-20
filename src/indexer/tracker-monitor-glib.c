@@ -123,8 +123,7 @@ static void           tracker_monitor_glib_get_property (GObject        *object,
                                                          guint           prop_id,
                                                          GValue         *value,
                                                          GParamSpec     *pspec);
-static guint          get_kqueue_limit             (void);
-static guint          get_inotify_limit            (void);
+
 static GFileMonitor * directory_monitor_new        (TrackerMonitorGlib *monitor,
                                                     GFile              *file);
 static void           directory_monitor_cancel     (GFileMonitor     *dir_monitor);
@@ -154,6 +153,47 @@ G_DEFINE_TYPE_WITH_CODE (TrackerMonitorGlib, tracker_monitor_glib, TRACKER_TYPE_
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_monitor_glib_initable_iface_init)
                          G_ADD_PRIVATE (TrackerMonitorGlib))
+
+#ifdef TRACKER_MONITOR_KQUEUE
+static guint
+get_kqueue_limit (void)
+{
+	guint limit = 400;
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
+		rl.rlim_cur = rl.rlim_max;
+		limit = (rl.rlim_cur * 90) / 100;
+	}
+
+	return limit;
+}
+#endif /* TRACKER_MONITOR_KQUEUE */
+
+#ifdef __linux__
+static guint
+get_inotify_limit (void)
+{
+	g_autoptr (GError) error = NULL;
+	const gchar *filename;
+	g_autofree char *contents = NULL;
+	guint limit = 8192;
+
+	filename = "/proc/sys/fs/inotify/max_user_watches";
+
+	if (!g_file_get_contents (filename,
+	                          &contents,
+	                          NULL,
+	                          &error)) {
+		g_warning ("Couldn't get INotify monitor limit from:'%s', %s",
+		           filename, error->message);
+	} else {
+		limit = atoi (contents);
+	}
+
+	return limit;
+}
+#endif /* __linux__ */
 
 static gpointer
 monitor_thread_func (gpointer user_data)
@@ -206,6 +246,7 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 	name = g_type_name (monitor_backend);
 
 	/* Set limits based on backend... */
+#ifdef __linux__
 	if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
 	    strcmp (name, "GInotifyFileMonitor") == 0) {
 		/* Using inotify */
@@ -228,13 +269,18 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 		 * negative maximum.
 		 */
 		priv->monitor_limit = MAX (priv->monitor_limit, 0);
-	} else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
+	}
+#endif /* __linux__ */
+#ifdef TRACKER_MONITOR_KQUEUE
+	else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
 	           strcmp (name, "GKqueueFileMonitor") == 0) {
 		/* Using kqueue(2) */
 		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
 
 		priv->monitor_limit = get_kqueue_limit ();
-	} else {
+	}
+#endif /* TRACKER_MONITOR_KQUEUE */
+	else {
 		/* Unknown */
 		g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
 		           name);
@@ -421,51 +467,6 @@ tracker_monitor_glib_get_property (GObject      *object,
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 	}
-}
-
-static guint
-get_kqueue_limit (void)
-{
-	guint limit = 400;
-#ifdef TRACKER_MONITOR_KQUEUE
-	struct rlimit rl;
-
-	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
-		rl.rlim_cur = rl.rlim_max;
-		limit = (rl.rlim_cur * 90) / 100;
-	}
-#endif /* TRACKER_MONITOR_KQUEUE */
-
-	return limit;
-}
-
-static guint
-get_inotify_limit (void)
-{
-	GError      *error = NULL;
-	const gchar *filename;
-	gchar       *contents = NULL;
-	guint        limit;
-
-	filename = "/proc/sys/fs/inotify/max_user_watches";
-
-	if (!g_file_get_contents (filename,
-	                          &contents,
-	                          NULL,
-	                          &error)) {
-		g_warning ("Couldn't get INotify monitor limit from:'%s', %s",
-		           filename,
-		           error ? error->message : "no error given");
-		g_clear_error (&error);
-
-		/* Setting limit to an arbitary limit */
-		limit = 8192;
-	} else {
-		limit = atoi (contents);
-		g_free (contents);
-	}
-
-	return limit;
 }
 
 static gboolean
