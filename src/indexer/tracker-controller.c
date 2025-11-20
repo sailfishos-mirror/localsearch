@@ -279,9 +279,6 @@ update_filters (TrackerController   *controller,
 {
 	GStrv strv;
 
-	/* Always ignore hidden */
-	tracker_indexing_tree_set_filter_hidden (indexing_tree, TRUE);
-
 	/* Ignored files */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-files");
 	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_FILE, strv);

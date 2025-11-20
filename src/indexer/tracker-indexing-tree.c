@@ -60,16 +60,9 @@ struct _TrackerIndexingTree
 	GArray *configured_folders;
 	GList *filter_patterns;
 	GList *allowed_text_patterns;
-
-	guint filter_hidden : 1;
 };
 
 G_DEFINE_TYPE (TrackerIndexingTree, tracker_indexing_tree, G_TYPE_OBJECT)
-
-enum {
-	PROP_0,
-	PROP_FILTER_HIDDEN
-};
 
 enum {
 	DIRECTORY_ADDED,
@@ -156,45 +149,6 @@ pattern_data_compare (const PatternData *data1,
 }
 
 static void
-tracker_indexing_tree_get_property (GObject    *object,
-                                    guint       prop_id,
-                                    GValue     *value,
-                                    GParamSpec *pspec)
-{
-	TrackerIndexingTree *tree = TRACKER_INDEXING_TREE (object);
-
-	switch (prop_id) {
-	case PROP_FILTER_HIDDEN:
-		g_value_set_boolean (value, tree->filter_hidden);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
-tracker_indexing_tree_set_property (GObject      *object,
-                                    guint         prop_id,
-                                    const GValue *value,
-                                    GParamSpec   *pspec)
-{
-	TrackerIndexingTree *tree;
-
-	tree = TRACKER_INDEXING_TREE (object);
-
-	switch (prop_id) {
-	case PROP_FILTER_HIDDEN:
-		tracker_indexing_tree_set_filter_hidden (tree,
-		                                         g_value_get_boolean (value));
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
 tracker_indexing_tree_finalize (GObject *object)
 {
 	TrackerIndexingTree *tree;
@@ -214,16 +168,7 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = tracker_indexing_tree_finalize;
-	object_class->set_property = tracker_indexing_tree_set_property;
-	object_class->get_property = tracker_indexing_tree_get_property;
 
-	g_object_class_install_property (object_class,
-	                                 PROP_FILTER_HIDDEN,
-	                                 g_param_spec_boolean ("filter-hidden",
-	                                                       "Filter hidden",
-	                                                       "Whether hidden resources are filtered",
-	                                                       FALSE,
-	                                                       G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
 	/**
 	 * TrackerIndexingTree::directory-added:
 	 * @indexing_tree: a #TrackerIndexingTree
@@ -685,8 +630,7 @@ tracker_indexing_tree_file_is_indexable (TrackerIndexingTree *tree,
 			return FALSE;
 		}
 
-		if (tracker_indexing_tree_get_filter_hidden (tree) &&
-		    info && g_file_info_get_is_hidden (info)) {
+		if (info && g_file_info_get_is_hidden (info)) {
 			return FALSE;
 		}
 
@@ -733,52 +677,6 @@ tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree *tree,
 	}
 
 	return !has_match;
-}
-
-/**
- * tracker_indexing_tree_get_filter_hidden:
- * @tree: a #TrackerIndexingTree
- *
- * Describes if the @tree should index hidden content. To change this
- * setting, see tracker_indexing_tree_set_filter_hidden().
- *
- * Returns: %FALSE if hidden files are indexed, otherwise %TRUE.
- *
- * Since: 0.18
- **/
-gboolean
-tracker_indexing_tree_get_filter_hidden (TrackerIndexingTree *tree)
-{
-	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
-
-	return tree->filter_hidden;
-}
-
-/**
- * tracker_indexing_tree_set_filter_hidden:
- * @tree: a #TrackerIndexingTree
- * @filter_hidden: a boolean
- *
- * When indexing content, sometimes it is preferable to ignore hidden
- * content, for example, files prefixed with &quot;.&quot;. This is
- * common for files in a home directory which are usually config
- * files.
- *
- * Sets the indexing policy for @tree with hidden files and content.
- * To ignore hidden files, @filter_hidden should be %TRUE, otherwise
- * %FALSE.
- *
- * Since: 0.18
- **/
-void
-tracker_indexing_tree_set_filter_hidden (TrackerIndexingTree *tree,
-                                         gboolean             filter_hidden)
-{
-	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
-
-	tree->filter_hidden = filter_hidden;
-
-	g_object_notify (G_OBJECT (tree), "filter-hidden");
 }
 
 GFile *

@@ -1297,8 +1297,7 @@ check_eligible (const char *eligible)
 				         dir_path);
 				g_print ("\n");
 				parents_indexable = FALSE;
-			} else if (tracker_file_is_hidden (l->data) &&
-			           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+			} else if (tracker_file_is_hidden (l->data)) {
 				g_print (_("Parent directory “%s” is NOT eligible to be indexed (hidden file)"),
 				         dir_path);
 				g_print ("\n");
@@ -1325,8 +1324,7 @@ check_eligible (const char *eligible)
 		} else if (!is_dir &&
 		           tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_FILE, file)) {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (based on filters)"));
-		} else if (tracker_file_is_hidden (file) &&
-		           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+		} else if (tracker_file_is_hidden (file)) {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (hidden file)"));
 		} else {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (not an indexed folder)"));
