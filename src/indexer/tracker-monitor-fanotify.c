@@ -48,7 +48,19 @@ typedef enum {
 	EVENT_ATTRIBUTES_UPDATE,
 	EVENT_DELETE,
 	EVENT_MOVE,
+	N_EVENTS,
 } EventType;
+
+static const char *event_names[] = {
+	"NONE",
+	"CREATE",
+	"UPDATE",
+	"ATTRIBUTES_UPDATE",
+	"DELETE",
+	"MOVE",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (event_names) == N_EVENTS);
 
 typedef struct {
 	EventType type;
@@ -114,25 +126,6 @@ G_DEFINE_TYPE_WITH_CODE (TrackerMonitorFanotify, tracker_monitor_fanotify,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_monitor_fanotify_initable_iface_init))
 
-static inline const char *
-event_type_to_string (EventType evtype)
-{
-	switch (evtype) {
-	case EVENT_CREATE:
-		return "CREATE";
-	case EVENT_UPDATE:
-		return "UPDATE";
-	case EVENT_ATTRIBUTES_UPDATE:
-		return "ATTRIBUTES_UPDATE";
-	case EVENT_DELETE:
-		return "DELETE";
-	case EVENT_MOVE:
-		return "MOVE";
-	default:
-		g_assert_not_reached ();
-	}
-}
-
 static void
 emit_event (TrackerMonitorFanotify *monitor,
             EventType               evtype,
@@ -140,11 +133,13 @@ emit_event (TrackerMonitorFanotify *monitor,
             GFile                  *other_file,
             gboolean                is_directory)
 {
+	g_assert (evtype < N_EVENTS);
+
 	if (evtype == EVENT_MOVE) {
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for files '%s'->'%s'",
 		                         evtype,
-		                         event_type_to_string (evtype),
+		                         event_names[evtype],
 		                         g_file_peek_path (file),
 		                         g_file_peek_path (other_file)));
 		tracker_monitor_emit_moved (TRACKER_MONITOR (monitor),
@@ -153,7 +148,7 @@ emit_event (TrackerMonitorFanotify *monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for %s:'%s'",
 		                         evtype,
-		                         event_type_to_string (evtype),
+		                         event_names[evtype],
 		                         is_directory ? "directory" : "file",
 		                         g_file_peek_path (file)));
 		switch (evtype) {

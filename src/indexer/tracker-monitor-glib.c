@@ -111,6 +111,21 @@ enum {
 	PROP_IGNORED,
 };
 
+/* Matches GFileMonitorEvent */
+static const char *event_names[] = {
+	"G_FILE_MONITOR_EVENT_CHANGED",
+	"G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT",
+	"G_FILE_MONITOR_EVENT_DELETED",
+	"G_FILE_MONITOR_EVENT_CREATED",
+	"G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED",
+	"G_FILE_MONITOR_EVENT_PRE_UNMOUNT",
+	"G_FILE_MONITOR_EVENT_UNMOUNTED",
+	"G_FILE_MONITOR_EVENT_MOVED",
+	"G_FILE_MONITOR_EVENT_RENAMED",
+	"G_FILE_MONITOR_EVENT_MOVED_IN",
+	"G_FILE_MONITOR_EVENT_MOVED_OUT",
+};
+
 static void           tracker_monitor_glib_finalize     (GObject        *object);
 static void           tracker_monitor_glib_set_property (GObject        *object,
                                                          guint           prop_id,
@@ -699,38 +714,6 @@ tracker_monitor_glib_move (TrackerMonitor *monitor,
 	return items_moved > 0;
 }
 
-static const gchar *
-monitor_event_to_string (GFileMonitorEvent event_type)
-{
-	switch (event_type) {
-	case G_FILE_MONITOR_EVENT_CHANGED:
-		return "G_FILE_MONITOR_EVENT_CHANGED";
-	case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
-		return "G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT";
-	case G_FILE_MONITOR_EVENT_DELETED:
-		return "G_FILE_MONITOR_EVENT_DELETED";
-	case G_FILE_MONITOR_EVENT_CREATED:
-		return "G_FILE_MONITOR_EVENT_CREATED";
-	case G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED:
-		return "G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED";
-	case G_FILE_MONITOR_EVENT_PRE_UNMOUNT:
-		return "G_FILE_MONITOR_EVENT_PRE_UNMOUNT";
-	case G_FILE_MONITOR_EVENT_UNMOUNTED:
-		return "G_FILE_MONITOR_EVENT_UNMOUNTED";
-	case G_FILE_MONITOR_EVENT_MOVED:
-		return "G_FILE_MONITOR_EVENT_MOVED";
-	case G_FILE_MONITOR_EVENT_RENAMED:
-		return "G_FILE_MONITOR_EVENT_RENAMED";
-	case G_FILE_MONITOR_EVENT_MOVED_IN:
-		return "G_FILE_MONITOR_EVENT_MOVED_IN";
-	case G_FILE_MONITOR_EVENT_MOVED_OUT:
-		return "G_FILE_MONITOR_EVENT_MOVED_OUT";
-		break;
-	}
-
-	return "unknown";
-}
-
 /* Executed in main thread */
 static gboolean
 emit_signal_for_event (MonitorEvent *event)
@@ -895,7 +878,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for %s:'%s'",
 		                         event_type,
-		                         monitor_event_to_string (event_type),
+		                         event_type < G_N_ELEMENTS (event_names) ? event_names[event_type] : "unknown",
 		                         is_directory ? "directory" : "file",
 		                         file_uri));
 
@@ -934,7 +917,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for files '%s'->'%s'",
 		                         event_type,
-		                         monitor_event_to_string (event_type),
+		                         event_type < G_N_ELEMENTS (event_names) ? event_names[event_type] : "unknown",
 		                         file_uri,
 		                         other_file_uri));
 
