@@ -48,16 +48,6 @@ static GParamSpec *pspecs[N_PROPS] = { 0, };
 G_DEFINE_ABSTRACT_TYPE (TrackerMonitor, tracker_monitor, G_TYPE_OBJECT)
 
 static void
-tracker_monitor_set_property (GObject      *object,
-                              guint         prop_id,
-                              const GValue *value,
-                              GParamSpec   *pspec)
-{
-	/* All properties are overridden */
-	g_assert_not_reached ();
-}
-
-static void
 tracker_monitor_get_property (GObject      *object,
                               guint         prop_id,
                               GValue       *value,
@@ -74,7 +64,6 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 
 	object_class = G_OBJECT_CLASS (klass);
 
-	object_class->set_property = tracker_monitor_set_property;
 	object_class->get_property = tracker_monitor_get_property;
 
 	signals[ITEM_CREATED] =
@@ -140,7 +129,7 @@ tracker_monitor_class_init (TrackerMonitorClass *klass)
 		                      "Enabled",
 		                      "Enabled",
 		                      TRUE,
-		                      G_PARAM_READWRITE |
+		                      G_PARAM_READABLE |
 		                      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, pspecs);
