@@ -699,7 +699,7 @@ fs_finalize (GObject *object)
 
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
-	g_clear_pointer (&indexer->urn_lru, tracker_lru_unref);
+	g_clear_pointer (&indexer->urn_lru, tracker_lru_free);
 	g_clear_handle_id (&indexer->item_queues_handler_id, g_source_remove);
 	g_clear_handle_id (&indexer->grace_period_timeout_id, g_source_remove);
 	g_clear_handle_id (&indexer->resume_after_disk_full_id, g_source_remove);
