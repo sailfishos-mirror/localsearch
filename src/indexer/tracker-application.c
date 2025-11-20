@@ -1360,10 +1360,8 @@ tracker_application_handle_local_options (GApplication *application,
 	if (g_variant_dict_lookup (options, "eligible", "^&ay", &eligible_file))
 		return check_eligible (eligible_file);
 
-	if (g_variant_dict_contains (options, "no-daemon"))
-		app->no_daemon = TRUE;
-	if (g_variant_dict_contains (options, "dry-run"))
-		app->dry_run = TRUE;
+	app->no_daemon = g_variant_dict_contains (options, "no-daemon");
+	app->dry_run = g_variant_dict_contains (options, "dry-run");
 
 	return G_APPLICATION_CLASS (tracker_application_parent_class)->handle_local_options (application, options);
 }
