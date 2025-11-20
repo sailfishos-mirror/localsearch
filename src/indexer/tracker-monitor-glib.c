@@ -46,11 +46,6 @@ struct TrackerMonitorGlibPrivate {
 	gboolean       monitor_limit_warned;
 	guint          monitors_ignored;
 
-	/* For FAM, the _CHANGES_DONE event is not signalled, so we
-	 * have to just use the _CHANGED event instead.
-	 */
-	gboolean       use_changed_event;
-
 	struct {
 		GMainContext *owner_context;
 		GMainContext *monitor_context;
@@ -190,7 +185,7 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 	priv = tracker_monitor_glib_get_instance_private (TRACKER_MONITOR_GLIB (initable));
 
 	/* For the first monitor we get the type and find out if we
-	 * are using inotify, FAM, polling, etc.
+	 * are using inotify, etc.
 	 */
 	file = g_file_new_for_path (g_get_home_dir ());
 	monitor = g_file_monitor_directory (file,
@@ -239,15 +234,6 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
 
 		priv->monitor_limit = get_kqueue_limit ();
-	} else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
-		/* Using Fam */
-		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
-
-		/* Setting limit to an arbitary limit
-		 * based on testing
-		 */
-		priv->monitor_limit = 400;
-		priv->use_changed_event = TRUE;
 	} else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
 		/* Using Windows */
 		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
@@ -914,12 +900,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 	switch (event_type) {
 	case G_FILE_MONITOR_EVENT_CREATED:
 	case G_FILE_MONITOR_EVENT_CHANGED:
-		if (!priv->use_changed_event) {
-			cache_event (monitor, file, event_type, is_directory);
-		} else {
-			queue_signal_for_event (monitor, event_type,
-			                        is_directory, file, NULL);
-		}
+		cache_event (monitor, file, event_type, is_directory);
 		break;
 	case G_FILE_MONITOR_EVENT_DELETED:
 		if (prev_event &&
