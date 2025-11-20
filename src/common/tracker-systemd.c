@@ -22,7 +22,7 @@
 #include <unistd.h>
 #include <glib/gstdio.h>
 
-/* LCOV_EXCLUDE_START */
+// LCOV_EXCL_START
 int
 tracker_systemd_notify (const char *message) {
 	union sockaddr_union {
@@ -76,4 +76,4 @@ tracker_systemd_notify (const char *message) {
 
 	return 1; /* Notified! */
 }
-/* LCOV_EXCLUDE_STOP */
+// LCOV_EXCL_STOP
