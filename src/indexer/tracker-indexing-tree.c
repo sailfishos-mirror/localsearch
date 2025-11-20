@@ -36,17 +36,15 @@
  **/
 
 typedef struct _TrackerIndexingTreePrivate TrackerIndexingTreePrivate;
-typedef struct _NodeData NodeData;
+typedef struct _ConfiguredFolder ConfiguredFolder;
 typedef struct _PatternData PatternData;
-typedef struct _FindNodeData FindNodeData;
 
-struct _NodeData
+struct _ConfiguredFolder
 {
 	GFile *file;
 	char *id;
-	guint flags;
-	guint shallow : 1;
-	guint removing : 1;
+	TrackerDirectoryFlags flags;
+	int uri_len;
 };
 
 struct _PatternData
@@ -56,20 +54,12 @@ struct _PatternData
 	TrackerFilterType type;
 };
 
-struct _FindNodeData
-{
-	GEqualFunc func;
-	GNode *node;
-	GFile *file;
-};
-
 struct _TrackerIndexingTreePrivate
 {
-	GNode *config_tree;
+	GArray *configured_folders;
 	GList *filter_patterns;
 	GList *allowed_text_patterns;
 
-	GFile *root;
 	guint filter_hidden : 1;
 };
 
@@ -90,33 +80,38 @@ enum {
 
 static guint signals[LAST_SIGNAL] = { 0 };
 
-static NodeData *
-node_data_new (GFile *file,
-               guint  flags)
-{
-	NodeData *data;
-
-	data = g_slice_new0 (NodeData);
-	data->file = g_object_ref (file);
-	data->flags = flags;
-
-	return data;
-}
-
 static void
-node_data_free (NodeData *data)
+configured_folder_clear (gpointer data)
 {
-	g_object_unref (data->file);
-	g_free (data->id);
-	g_slice_free (NodeData, data);
+	ConfiguredFolder *folder = data;
+
+	g_clear_object (&folder->file);
+	g_clear_pointer (&folder->id, g_free);
 }
 
-static gboolean
-node_free (GNode    *node,
-           gpointer  user_data)
+static ConfiguredFolder *
+find_configured_folder (TrackerIndexingTree *tree,
+			GFile               *file,
+			GEqualFunc           func,
+			unsigned int        *pos)
 {
-	node_data_free (node->data);
-	return FALSE;
+	TrackerIndexingTreePrivate *priv = tree->priv;
+	unsigned int i;
+
+	for (i = 0; i < priv->configured_folders->len; i++) {
+		ConfiguredFolder *folder;
+
+		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
+
+		if (func (file, folder->file)) {
+			if (pos)
+				*pos = i;
+
+			return folder;
+		}
+	}
+
+	return NULL;
 }
 
 static PatternData *
@@ -202,26 +197,6 @@ tracker_indexing_tree_set_property (GObject      *object,
 }
 
 static void
-tracker_indexing_tree_constructed (GObject *object)
-{
-	TrackerIndexingTree *tree;
-	TrackerIndexingTreePrivate *priv;
-	NodeData *data;
-
-	G_OBJECT_CLASS (tracker_indexing_tree_parent_class)->constructed (object);
-
-	tree = TRACKER_INDEXING_TREE (object);
-	priv = tree->priv;
-
-	/* Add a shallow root node */
-	priv->root = g_file_new_for_uri ("file:///");
-	data = node_data_new (priv->root, 0);
-	data->shallow = TRUE;
-
-	priv->config_tree = g_node_new (data);
-}
-
-static void
 tracker_indexing_tree_finalize (GObject *object)
 {
 	TrackerIndexingTreePrivate *priv;
@@ -230,24 +205,9 @@ tracker_indexing_tree_finalize (GObject *object)
 	tree = TRACKER_INDEXING_TREE (object);
 	priv = tree->priv;
 
-	g_list_free_full (priv->allowed_text_patterns,
-	                  (GDestroyNotify) pattern_data_free);
-	priv->allowed_text_patterns = NULL;
-
-	g_list_foreach (priv->filter_patterns, (GFunc) pattern_data_free, NULL);
-	g_list_free (priv->filter_patterns);
-
-	g_node_traverse (priv->config_tree,
-	                 G_POST_ORDER,
-	                 G_TRAVERSE_ALL,
-	                 -1,
-	                 (GNodeTraverseFunc) node_free,
-	                 NULL);
-	g_node_destroy (priv->config_tree);
-
-	if (priv->root) {
-		g_object_unref (priv->root);
-	}
+	g_clear_list (&priv->allowed_text_patterns, (GDestroyNotify) pattern_data_free);
+	g_clear_list (&priv->filter_patterns, (GDestroyNotify) pattern_data_free);
+	g_clear_pointer (&priv->configured_folders, g_array_unref);
 
 	G_OBJECT_CLASS (tracker_indexing_tree_parent_class)->finalize (object);
 }
@@ -258,7 +218,6 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->finalize = tracker_indexing_tree_finalize;
-	object_class->constructed = tracker_indexing_tree_constructed;
 	object_class->set_property = tracker_indexing_tree_set_property;
 	object_class->get_property = tracker_indexing_tree_get_property;
 
@@ -365,7 +324,14 @@ tracker_indexing_tree_class_init (TrackerIndexingTreeClass *klass)
 static void
 tracker_indexing_tree_init (TrackerIndexingTree *tree)
 {
-       tree->priv = tracker_indexing_tree_get_instance_private (tree);
+	TrackerIndexingTreePrivate *priv =
+		tracker_indexing_tree_get_instance_private (tree);
+
+       tree->priv = priv;
+       priv->configured_folders =
+	       g_array_new (FALSE, FALSE, sizeof (ConfiguredFolder));
+       g_array_set_clear_func (priv->configured_folders,
+			       configured_folder_clear);
 }
 
 /**
@@ -383,59 +349,6 @@ tracker_indexing_tree_new (void)
 	return g_object_new (TRACKER_TYPE_INDEXING_TREE, NULL);
 }
 
-static gboolean
-find_node_foreach (GNode    *node,
-                   gpointer  user_data)
-{
-	FindNodeData *data = user_data;
-	NodeData *node_data = node->data;
-
-	if ((data->func) (data->file, node_data->file)) {
-		data->node = node;
-		return TRUE;
-	}
-
-	return FALSE;
-}
-
-static GNode *
-find_directory_node (GNode      *node,
-                     GFile      *file,
-                     GEqualFunc  func)
-{
-	FindNodeData data;
-
-	data.file = file;
-	data.node = NULL;
-	data.func = func;
-
-	g_node_traverse (node,
-	                 G_POST_ORDER,
-	                 G_TRAVERSE_ALL,
-	                 -1,
-	                 find_node_foreach,
-	                 &data);
-
-	return data.node;
-}
-
-static void
-check_reparent_node (GNode    *node,
-                     gpointer  user_data)
-{
-	GNode *new_node = user_data;
-	NodeData *new_node_data, *node_data;
-
-	new_node_data = new_node->data;
-	node_data = node->data;
-
-	if (g_file_has_prefix (node_data->file,
-	                       new_node_data->file)) {
-		g_node_unlink (node);
-		g_node_append (new_node, node);
-	}
-}
-
 /**
  * tracker_indexing_tree_add:
  * @tree: a #TrackerIndexingTree
@@ -451,51 +364,62 @@ tracker_indexing_tree_add (TrackerIndexingTree   *tree,
                            TrackerDirectoryFlags  flags)
 {
 	TrackerIndexingTreePrivate *priv;
-	GNode *parent, *node;
-	NodeData *data;
+	g_autofree char *uri = NULL;
+	ConfiguredFolder new_folder;
+	unsigned int i, pos = 0;
+	int uri_len;
+	gboolean insert = FALSE;
 
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 	g_return_if_fail (G_IS_FILE (directory));
 
 	priv = tree->priv;
-	node = find_directory_node (priv->config_tree, directory,
-	                            (GEqualFunc) g_file_equal);
+	uri = g_file_get_uri (directory);
+	uri_len = strlen (uri);
 
-	if (node) {
-		/* Node already existed */
-		data = node->data;
-		data->shallow = FALSE;
+	/* Elements are ordered by uri length, the principle is that
+	 * in case of nesting of configured folders, deeper folders will
+	 * come up first, so ordered g_file_has_prefix checks will be
+	 * guaranteed to get the deepmost configured folder that applies.
+	 */
+	for (i = 0; i < priv->configured_folders->len; i++) {
+		ConfiguredFolder *folder;
 
-		/* Overwrite flags if they are different */
-		if (data->flags != flags) {
-			gchar *uri;
+		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
 
-			uri = g_file_get_uri (directory);
-			g_debug ("Overwriting flags for directory '%s'", uri);
-			g_free (uri);
+		if (folder->uri_len > uri_len) {
+			continue;
+		} else if (folder->uri_len == uri_len) {
+			if (g_file_equal (folder->file, directory)) {
+				/* Overwrite flags if they are different */
+				if (folder->flags != flags) {
+					folder->flags = flags;
+					g_signal_emit (tree, signals[DIRECTORY_UPDATED], 0,
+						       folder->file);
+				}
 
-			data->flags = flags;
-			g_signal_emit (tree, signals[DIRECTORY_UPDATED], 0,
-			               data->file);
+				/* Folder already existed */
+				return;
+			}
+
+			continue;
+		} else {
+			/* Found the first shorter configured folder, thus the insertion spot */
+			pos = i;
+			insert = TRUE;
+			break;
 		}
-		return;
 	}
 
-	/* Find out the parent */
-	parent = find_directory_node (priv->config_tree, directory,
-	                              (GEqualFunc) g_file_has_prefix);
+	new_folder = (ConfiguredFolder) {
+		g_object_ref (directory),
+		NULL, flags, uri_len,
+	};
 
-	/* Create node, move children of parent that
-	 * could be children of this new node now.
-	 */
-	data = node_data_new (directory, flags);
-	node = g_node_new (data);
-
-	g_node_children_foreach (parent, G_TRAVERSE_ALL,
-	                         check_reparent_node, node);
-
-	/* Add the new node underneath the parent */
-	g_node_append (parent, node);
+	if (insert)
+		g_array_insert_val (priv->configured_folders, pos, new_folder);
+	else
+		g_array_append_val (priv->configured_folders, new_folder);
 
 	g_signal_emit (tree, signals[DIRECTORY_ADDED], 0, directory);
 }
@@ -514,46 +438,20 @@ tracker_indexing_tree_remove (TrackerIndexingTree *tree,
                               GFile               *directory)
 {
 	TrackerIndexingTreePrivate *priv;
-	GNode *node, *parent;
-	NodeData *data;
+	ConfiguredFolder *folder;
+	unsigned int pos;
 
 	g_return_if_fail (TRACKER_IS_INDEXING_TREE (tree));
 	g_return_if_fail (G_IS_FILE (directory));
 
 	priv = tree->priv;
-	node = find_directory_node (priv->config_tree, directory,
-	                            (GEqualFunc) g_file_equal);
-	if (!node) {
+
+	folder = find_configured_folder (tree, directory, (GEqualFunc) g_file_equal, &pos);
+	if (!folder)
 		return;
-	}
 
-	data = node->data;
-
-	if (data->removing) {
-		return;
-	}
-
-	data->removing = TRUE;
-
-	if (!node->parent) {
-		/* Node is the config tree
-		 * root, mark as shallow again
-		 */
-		data->shallow = TRUE;
-		return;
-	}
-
-	g_signal_emit (tree, signals[DIRECTORY_REMOVED], 0, data->file);
-
-	parent = node->parent;
-	g_node_unlink (node);
-
-	/* Move children to parent */
-	g_node_children_foreach (node, G_TRAVERSE_ALL,
-	                         check_reparent_node, parent);
-
-	node_data_free (node->data);
-	g_node_destroy (node);
+	g_signal_emit (tree, signals[DIRECTORY_REMOVED], 0, folder->file);
+	g_array_remove_index (priv->configured_folders, pos);
 }
 
 /**
@@ -931,8 +829,7 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
                                 TrackerDirectoryFlags  *directory_flags)
 {
 	TrackerIndexingTreePrivate *priv;
-	NodeData *data;
-	GNode *parent;
+	ConfiguredFolder *folder;
 
 	if (directory_flags) {
 		*directory_flags = TRACKER_DIRECTORY_FLAG_NONE;
@@ -942,32 +839,23 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
 	priv = tree->priv;
-	parent = find_directory_node (priv->config_tree, file,
-	                              (GEqualFunc) parent_or_equals);
-	if (!parent) {
+
+	folder = find_configured_folder (tree, file, (GEqualFunc) parent_or_equals, NULL);
+
+	if (!folder)
 		return NULL;
+
+	if (!folder->id) {
+		folder->id = tracker_indexing_tree_get_root_id (tree,
+								folder->file);
 	}
 
-	data = parent->data;
+	if (id)
+		*id = folder->id;
+	if (directory_flags)
+		*directory_flags = folder->flags;
 
-	if (!data->shallow &&
-	    (file == data->file ||
-	     g_file_equal (file, data->file) ||
-	     g_file_has_prefix (file, data->file))) {
-		if (!data->id) {
-			data->id = tracker_indexing_tree_get_root_id (tree,
-			                                              data->file);
-		}
-
-		if (id)
-			*id = data->id;
-		if (directory_flags)
-			*directory_flags = data->flags;
-
-		return data->file;
-	}
-
-	return NULL;
+	return folder->file;
 }
 
 /**
@@ -986,28 +874,10 @@ gboolean
 tracker_indexing_tree_file_is_root (TrackerIndexingTree *tree,
                                     GFile               *file)
 {
-	TrackerIndexingTreePrivate *priv;
-	GNode *node;
-
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), FALSE);
 	g_return_val_if_fail (G_IS_FILE (file), FALSE);
 
-	priv = tree->priv;
-	node = find_directory_node (priv->config_tree, file,
-	                            (GEqualFunc) g_file_equal);
-	return node != NULL;
-}
-
-static gboolean
-prepend_config_root (GNode    *node,
-                     gpointer  user_data)
-{
-	GList **list = user_data;
-	NodeData *data = node->data;
-
-	if (!data->shallow && !data->removing)
-		*list = g_list_prepend (*list, data->file);
-	return FALSE;
+	return find_configured_folder (tree, file, (GEqualFunc) g_file_equal, NULL) != NULL;
 }
 
 /**
@@ -1025,18 +895,21 @@ GList *
 tracker_indexing_tree_list_roots (TrackerIndexingTree *tree)
 {
 	TrackerIndexingTreePrivate *priv;
-	GList *nodes = NULL;
+	unsigned int i;
+	GList *roots = NULL;
 
 	g_return_val_if_fail (TRACKER_IS_INDEXING_TREE (tree), NULL);
 
 	priv = tree->priv;
-	g_node_traverse (priv->config_tree,
-	                 G_POST_ORDER,
-	                 G_TRAVERSE_ALL,
-	                 -1,
-	                 prepend_config_root,
-	                 &nodes);
-	return nodes;
+
+	for (i = 0; i < priv->configured_folders->len; i++) {
+		ConfiguredFolder *folder;
+
+		folder = &g_array_index (priv->configured_folders, ConfiguredFolder, i);
+		roots = g_list_prepend (roots, folder->file);
+	}
+
+	return roots;
 }
 
 void
