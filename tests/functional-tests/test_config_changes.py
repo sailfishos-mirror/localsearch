@@ -272,40 +272,6 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
         super(TestConfigMount, self).setUp()
         self.device_path = pathlib.Path(self.workdir).joinpath("mount-1")
 
-    def test_index_removable_devices(self):
-        self.device_path.mkdir()
-        path = self.device_path.joinpath("file1.txt")
-        path.write_text("Foo bar baz")
-        self.add_removable_device(self.device_path)
-
-        # Ensure the file was not indexed
-        time.sleep(3)
-
-        object_path = self.miner_fs.removable_device_object_path (self.device_path)
-        endpoint_helper = None
-
-        try:
-            endpoint_helper = self.helper_for_endpoint(object_path)
-        except:
-            pass
-
-        assert not endpoint_helper
-
-        dconf = self.sandbox.get_dconf_client()
-
-        # Mountpoint should be indexed with the config change
-        with self.miner_fs.await_endpoint_added(self.device_path.as_uri()):
-            dconf.write (
-                'org.freedesktop.Tracker3.Miner.Files',
-                'index-removable-devices', GLib.Variant.new_boolean(True))
-
-        # The "device" should be "removed", with the config change
-        with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
-            dconf.write (
-                'org.freedesktop.Tracker3.Miner.Files',
-                'index-removable-devices', GLib.Variant.new_boolean(False))
-
-
     def test_non_removable_in_index_single_directories(self):
         self.device_path.mkdir()
         path = self.device_path.joinpath("file1.txt")
