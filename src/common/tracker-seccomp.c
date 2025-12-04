@@ -36,6 +36,10 @@
 #include <sys/socket.h>
 #include <fcntl.h>
 
+#if defined(__linux__) && defined(__x86_64__)
+#include <asm/prctl.h>
+#endif
+
 #include <linux/netlink.h>
 
 #ifdef HAVE_BTRFS_IOCTL
@@ -316,6 +320,13 @@ tracker_seccomp_init (void)
 	                       O_WRONLY | O_RDWR | O_APPEND | O_CREAT | O_TRUNC | O_EXCL, 0));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_WRONLY, O_WRONLY));
 	CUSTOM_RULE (openat, SCMP_ACT_ERRNO (EACCES), SCMP_CMP(2, SCMP_CMP_MASKED_EQ, O_RDWR, O_RDWR));
+
+#if defined(__linux__) && defined(__x86_64__)
+	/* Allow arch_prctl only on ARCH_SHSTK_DISABLE, to allow usage of
+	 * Intel CET (SHSTK) in permissive mode.
+	 */
+	CUSTOM_RULE (arch_prctl, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, ARCH_SHSTK_DISABLE));
+#endif
 
 	/* Syscalls may differ between libcs */
 #if !defined(__GLIBC__)
