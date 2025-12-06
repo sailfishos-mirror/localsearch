@@ -33,7 +33,7 @@
                     "nmm:Photo"
 		],
 		"nmm:isoSpeed": 400.0,
-		"nie:contentCreated": "2011-10-13T16:16:00+0200",
+		"nie:contentCreated": "2011-10-13T16:16:00+02:00",
 		"nie:comment": "libexif demonstration image",
 		"nfo:equipment": {
                     "@id": "urn:equipment:Nikon:SD3000:",
