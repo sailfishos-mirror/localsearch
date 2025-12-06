@@ -103,6 +103,18 @@ if webp.found()
   modules += [['extract-webp', 'tracker-extract-webp.c', ['10-webp.rule'], [webp, tracker_miners_common_dep]]]
 endif
 
+if libmediainfo.found()
+  rules = ['15-libmediainfo-guess.rule', '90-libmediainfo-audio-generic.rule', '90-libmediainfo-video-generic.rule']
+  extract_mediainfo_files = [
+    'tracker-extract-mediainfo.cpp',
+    'tracker-cue-sheet.c',
+  ]
+  if gupnp_dlna.found()
+    extract_mediainfo_files += ['tracker-gupnp-mediainfo.cpp']
+  endif
+  modules += [['extract-mediainfo', extract_mediainfo_files, rules, [libmediainfo, libcue, gupnp_dlna, tracker_miners_common_dep]]]
+endif
+
 enabled_rule_files = []
 
 foreach module : modules

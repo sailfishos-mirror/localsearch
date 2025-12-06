@@ -57,7 +57,7 @@ if get_option('abiword')
   extractor_tests += 'office/abw-3'
 endif
 
-if avformat.found()
+if avformat.found() or libmediainfo.found()
   extractor_tests += 'audio/flac'
   extractor_tests += 'audio/vorbis'
 endif
@@ -240,7 +240,7 @@ if have_tracker_writeback and totem_plparser.found()
   functional_tests += 'test_writeback_playlist'
 endif
 
-if avformat.found()
+if avformat.found() or libmediainfo.found()
   extractor_tests += [
     'video/mkv-basic',
     'video/mov-basic',

@@ -1,0 +1,6 @@
+[ExtractorRule]
+ModulePath=libextract-mediainfo.so
+MimeTypes=video/*;
+FallbackRdfTypes=nmm:Video;
+Graph=tracker:Video
+Hash=@hash@

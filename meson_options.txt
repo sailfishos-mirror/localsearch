@@ -74,6 +74,8 @@ option('xps', type: 'feature', value: 'auto',
        description: 'Support extracting metadata from XPS documents')
 option('libav', type: 'feature', value: 'auto',
        description: 'Support extracting metadata using FFmpeg/libav')
+option('libmediainfo', type: 'feature', value: 'auto',
+       description: 'Support extracting metadata using libmediainfo')
 option('webp', type: 'feature', value: 'auto',
        description: 'Support webp images')
 option('zip', type: 'feature', value: 'auto',
