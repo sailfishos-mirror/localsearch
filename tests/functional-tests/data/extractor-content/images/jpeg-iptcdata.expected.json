@@ -43,7 +43,7 @@
                     "nco:fullname": "Dilbert",
                     "@type": "nco:Contact"
 		},
-		"nie:contentCreated": "2011-10-22T00:00:00+0200"
+		"nie:contentCreated": "2011-10-22T00:00:00+02:00"
 	    }
 	]
     }

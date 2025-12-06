@@ -314,7 +314,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
     def test_aac_content_created(self):
         self._writeback_test(
             "writeback-test-8.mp4",
-            {"nie:contentCreated": "1234-12-23T00:00:00.000000Z"})
+            {"nie:contentCreated": "1234-12-23T00:00:00Z"})
 
     @unittest.skip('gstreamer does not write the tag')
     def test_aac_isrc(self):
