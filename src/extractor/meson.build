@@ -113,7 +113,8 @@ foreach module : modules
     dependencies: [tracker_extract_dep, tracker_miners_common_dep] + dependencies,
     include_directories: [configinc, commoninc],
     install: true,
-    install_dir: tracker_extract_modules_dir)
+    install_dir: tracker_extract_modules_dir,
+    install_rpath: tracker_internal_libs_dir)
 
   hash = run_command('calculate-hash.sh', [sources] + files_extract, check: true)
 
