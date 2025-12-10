@@ -1,3 +1,15 @@
+NEW in 3.10.2 - 2025-12-10
+==========================
+  * Fix possible errors if a directory is deleted while crawled
+  * Improve handling of indexed folder configuration changes while
+    the indexer is not running
+  * Fix inconsistencies in "localsearch index" CLI utility that
+    could lead to duplicates in the indexed folder settings
+  * Fix pager not being closed after some CLI utilities exited with
+    errors
+
+Translations: ca, de, el, fur, sr, sr@latin, oc
+
 NEW in 3.10.1 - 2025-10-13
 ==========================
   * Improvements to the handling of corrupted databases
