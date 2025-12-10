@@ -396,12 +396,12 @@ get_no_args (void)
 	GList *keyfiles;
 	gboolean use_pager, paused;
 
-	use_pager = tracker_term_pipe_to_pager ();
-
 	/* How many files / folders do we have? */
 	if (get_file_and_folder_count (&files, &folders) != 0) {
 		return EXIT_FAILURE;
 	}
+
+	use_pager = tracker_term_pipe_to_pager ();
 
 	g_print (_("Currently indexed"));
 	g_print (": ");

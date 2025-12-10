@@ -90,20 +90,6 @@ alias_to_path (const gchar *alias)
 }
 
 static const gchar *
-path_to_alias (const gchar *path)
-{
-	guint i;
-
-	for (i = 0; i < G_N_ELEMENTS (special_dirs); i++) {
-		if (g_strcmp0 (path,
-		               g_get_user_special_dir (special_dirs[i].user_dir)) == 0)
-			return special_dirs[i].symbol;
-	}
-
-	return NULL;
-}
-
-static const gchar *
 envvar_to_path (const gchar *envvar)
 {
 	const gchar *path;
@@ -113,6 +99,34 @@ envvar_to_path (const gchar *envvar)
 		return path;
 
 	return NULL;
+}
+
+static gboolean
+elem_equals (const char *elem,
+             const char *list_elem)
+{
+	if (g_strcmp0 (elem, list_elem) == 0)
+		return TRUE;
+	if (g_strcmp0 (elem, alias_to_path (list_elem)) == 0)
+		return TRUE;
+	if (g_strcmp0 (elem, envvar_to_path (list_elem)) == 0)
+		return TRUE;
+
+	return FALSE;
+}
+
+static gboolean
+strv_contains (GStrv        strv,
+               const gchar *elem)
+{
+	int i;
+
+	for (i = 0; strv[i]; i++) {
+		if (elem_equals (elem, strv[i]))
+			return TRUE;
+	}
+
+	return FALSE;
 }
 
 static GStrv
@@ -128,7 +142,7 @@ strv_add (GStrv        strv,
 
 	for (i = 0; strv[i]; i++) {
 		copy = g_strdup (strv[i]);
-		found |= g_strcmp0 (elem, strv[i]) == 0;
+		found |= elem_equals (elem, strv[i]);
 		g_array_append_val (array, copy);
 	}
 
@@ -151,7 +165,7 @@ strv_remove (GStrv        strv,
 	array = g_array_new (TRUE, TRUE, sizeof (char *));
 
 	for (i = 0; strv[i]; i++) {
-		if (g_strcmp0 (strv[i], elem) == 0)
+		if (elem_equals (elem, strv[i]))
 			continue;
 
 		copy = g_strdup (strv[i]);
@@ -173,7 +187,6 @@ index_add (void)
 	for (i = 0; filenames[i]; i++) {
 		g_autoptr (GFile) file = NULL;
 		g_autofree char *path = NULL;
-		const gchar *alias;
 		g_auto (GStrv) dirs = NULL, rec_dirs = NULL;
 
 		dirs = g_settings_get_strv (settings, "index-single-directories");
@@ -181,12 +194,9 @@ index_add (void)
 
 		file = g_file_new_for_commandline_arg (filenames[i]);
 		path = g_file_get_path (file);
-		alias = path_to_alias (path);
 
-		if (g_strv_contains ((const gchar * const *) dirs, path) ||
-		    (alias && g_strv_contains ((const gchar * const *) dirs, alias)) ||
-		    g_strv_contains ((const gchar * const *) rec_dirs, path) ||
-		    (alias && g_strv_contains ((const gchar * const *) rec_dirs, alias))) {
+		if (strv_contains (dirs, path) ||
+		    strv_contains (rec_dirs, path)) {
 			handled = TRUE;
 			continue;
 		}
@@ -222,15 +232,13 @@ index_remove_setting (GSettings   *settings,
                       const gchar *path)
 {
 	g_auto (GStrv) dirs = NULL, new_dirs = NULL;
-	const gchar *alias;
 
 	dirs = g_settings_get_strv (settings, setting_path);
-	alias = path_to_alias (path);
 
-	if (g_strv_contains ((const gchar * const *) dirs, path))
+	if (strv_contains (dirs, path))
 		new_dirs = strv_remove (dirs, path);
-	if (alias && g_strv_contains ((const gchar * const *) dirs, alias))
-		new_dirs = strv_remove (dirs, path_to_alias (path));
+	else
+		new_dirs = g_steal_pointer (&dirs);
 
 	g_settings_set_strv (settings, setting_path,
 	                     (const gchar * const *) new_dirs);
