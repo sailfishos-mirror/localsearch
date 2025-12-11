@@ -274,7 +274,8 @@ build-alpine-latest@x86_64:
   needs:
     - build-alpine-container@x86_64
   variables:
-    BUILD_ARGS: '-Dxps=disabled -Dsystemd_user_services=false'
+    # Playlist extraction is broken in Alpine, and temporarily disabled
+    BUILD_ARGS: '-Dxps=disabled -Dplaylist=disabled -Dsystemd_user_services=false'
   <<: *build
 
 build-debian-stable@x86_64:
