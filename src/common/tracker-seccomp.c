@@ -302,9 +302,10 @@ tracker_seccomp_init (void)
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
 
 #ifdef HAVE_BTRFS_IOCTL
-	/* Special requirements for btrfs, allowed for BTRFS_IOC_INO_LOOKUP */
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_INO_LOOKUP));
+	/* Special requirements for btrfs, allowed for BTRFS_IOC_GET_SUBVOL_INFO */
+	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_GET_SUBVOL_INFO));
 #endif
+	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, FS_IOC_GETFSUUID));
 
 	/* Special requirements for open/openat, allow O_RDONLY calls,
          * but fail if write permissions are requested.

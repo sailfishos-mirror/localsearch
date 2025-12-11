@@ -995,8 +995,7 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
 	     g_file_has_prefix (file, data->file))) {
 		if (!data->id) {
 			data->id = tracker_indexing_tree_get_root_id (tree,
-			                                              data->file,
-			                                              priv->udev_client);
+			                                              data->file);
 		}
 
 		if (id)

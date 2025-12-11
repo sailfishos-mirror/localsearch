@@ -135,7 +135,7 @@ have_fanotify = cc.has_header('sys/fanotify.h', required: get_option('fanotify')
 # Check for btrfs ioctls
 ##########################################
 
-if cc.has_header_symbol('linux/btrfs.h', 'BTRFS_IOC_INO_LOOKUP')
+if cc.has_header_symbol('linux/btrfs.h', 'BTRFS_IOC_GET_SUBVOL_INFO')
   have_btrfs_ioctl = true
 else
   have_btrfs_ioctl = false
