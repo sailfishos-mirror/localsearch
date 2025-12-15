@@ -305,7 +305,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			tracker_extract_info_set_resource (info, metadata);
 			return TRUE;
 		} else {
-			g_propagate_prefixed_error (error, inner_error, "Couldn't open PopplerDocument:");
+			g_propagate_error (error, g_steal_pointer (&inner_error));
 			return FALSE;
 		}
 	}
