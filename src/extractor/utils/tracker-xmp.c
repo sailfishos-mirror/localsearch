@@ -990,7 +990,8 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 		                                                   data->title2,
 		                                                   data->pdf_title);
 
-		tracker_resource_set_string (resource, "nie:title", final_title);
+		if (final_title)
+			tracker_resource_set_string (resource, "nie:title", final_title);
 	}
 
 	if (data->orientation) {
@@ -1004,7 +1005,8 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 	if (data->rights || data->copyright) {
 		const gchar *final_rights = tracker_coalesce_strip (2, data->copyright, data->rights);
 
-		tracker_resource_set_string (resource, "nie:copyright", final_rights);
+		if (final_rights)
+			tracker_resource_set_string (resource, "nie:copyright", final_rights);
 	}
 
 	if (data->white_balance) {
@@ -1041,9 +1043,11 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 		TrackerResource *contributor;
 		const gchar *final_artist = tracker_coalesce_strip (2, data->artist, data->contributor);
 
-		contributor = tracker_extract_new_contact (final_artist);
-		tracker_resource_set_relation (resource, "nco:contributor", contributor);
-		g_object_unref (contributor);
+		if (final_artist) {
+			contributor = tracker_extract_new_contact (final_artist);
+			tracker_resource_set_relation (resource, "nco:contributor", contributor);
+			g_object_unref (contributor);
+		}
 	}
 
 	if (data->exposure_time) {
@@ -1064,7 +1068,8 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 		const gchar *final_date = tracker_coalesce_strip (2, data->date,
 		                                                  data->time_original);
 
-		tracker_resource_set_string (resource, "nie:contentCreated", final_date);
+		if (final_date)
+			tracker_resource_set_string (resource, "nie:contentCreated", final_date);
 	}
 
 	if (data->description) {

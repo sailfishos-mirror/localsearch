@@ -236,7 +236,7 @@ tracker_exif_new_from_metadata (GExiv2Metadata *metadata)
 			stripped = strchr (tmp, ' ');
 			if (stripped)
 				stripped++;
-			if (*stripped)
+			if (*stripped && g_utf8_validate (stripped, -1, NULL))
 				data->user_comment = g_strdup (stripped);
 		} else {
 			data->user_comment = g_strdup (tmp);
