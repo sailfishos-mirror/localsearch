@@ -23,44 +23,56 @@
 
 #include "tracker-indexing-tree-methods.h"
 
-#include <gio/gunixmounts.h>
+#include <glib/gstdio.h>
 
-#if !GLIB_CHECK_VERSION (2, 83, 0)
-#define g_unix_mount_entry_for g_unix_mount_for
-#define g_unix_mount_entry_at g_unix_mount_at
-#define g_unix_mount_entry_get_device_path g_unix_mount_get_device_path
+#include <fcntl.h>
+#include <sys/ioctl.h>
+
+#ifdef __linux__
+#include <linux/btrfs.h>
 #endif
+
+#define UUID_FORMAT_STR "%02x%02x%02x%02x-%02x%02x-%02x%02x-%02x%02x-%02x%02x%02x%02x%02x%02x"
+
+#define UUID_FORMAT_ARGS(bytes)	                    \
+	bytes[0],  bytes[1],  bytes[2],  bytes[3],  \
+	bytes[4],  bytes[5],  bytes[6],  bytes[7],  \
+	bytes[8],  bytes[9],  bytes[10], bytes[11], \
+	bytes[12], bytes[13], bytes[14], bytes[15]
 
 char *
 tracker_indexing_tree_get_root_id (TrackerIndexingTree *tree,
-                                   GFile               *root,
-                                   GUdevClient         *udev_client)
+                                   GFile               *root)
 {
 	g_autofree char *path = NULL, *expanded = NULL;
-	const char *devpath = NULL, *id = NULL;
-	GUnixMountEntry *mount = NULL;
-	GUdevDevice *udev_device = NULL;
+	char *id = NULL;
+	g_autofd int fd;
 
 	path = g_file_get_path (root);
 	expanded = realpath (path, NULL);
 
-	mount = g_unix_mount_entry_at (expanded ? expanded : path, NULL);
+	fd = open (expanded ? expanded : path, O_RDONLY | O_DIRECTORY);
 
-	if (!mount)
-		mount = g_unix_mount_entry_for (expanded ? expanded : path, NULL);
+#ifdef HAVE_BTRFS_IOCTL
+	{
+		struct btrfs_ioctl_get_subvol_info_args subvol_info;
 
-	if (mount)
-		devpath = g_unix_mount_entry_get_device_path (mount);
-
-	if (devpath) {
-		udev_device = g_udev_client_query_by_device_file (udev_client, devpath);
-
-		if (udev_device) {
-			id = g_udev_device_get_property (udev_device, "ID_FS_UUID_SUB");
-			if (!id)
-				id = g_udev_device_get_property (udev_device, "ID_FS_UUID");
+		if (fd >= 0 && ioctl (fd, BTRFS_IOC_GET_SUBVOL_INFO, &subvol_info) >= 0) {
+			id = g_strdup_printf (UUID_FORMAT_STR,
+			                      UUID_FORMAT_ARGS (subvol_info.uuid));
 		}
 	}
+#endif
+#ifdef __linux__
+	if (!id) {
+		struct fsuuid2 uuid;
 
-	return g_strdup (id);
+		if (ioctl (fd, FS_IOC_GETFSUUID, &uuid) >= 0 && uuid.len == 16) {
+			id = g_strdup_printf (UUID_FORMAT_STR,
+			                      UUID_FORMAT_ARGS (uuid.uuid));
+		}
+	}
+#endif
+
+	return id;
 }

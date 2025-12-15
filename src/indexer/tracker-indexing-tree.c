@@ -67,7 +67,6 @@ struct _TrackerIndexingTreePrivate
 {
 	GNode *config_tree;
 	GList *filter_patterns;
-	GUdevClient *udev_client;
 	GList *allowed_text_patterns;
 
 	GFile *root;
@@ -220,8 +219,6 @@ tracker_indexing_tree_constructed (GObject *object)
 	data->shallow = TRUE;
 
 	priv->config_tree = g_node_new (data);
-
-	priv->udev_client = g_udev_client_new (NULL);
 }
 
 static void
@@ -247,8 +244,6 @@ tracker_indexing_tree_finalize (GObject *object)
 	                 (GNodeTraverseFunc) node_free,
 	                 NULL);
 	g_node_destroy (priv->config_tree);
-
-	g_clear_object (&priv->udev_client);
 
 	if (priv->root) {
 		g_object_unref (priv->root);
@@ -995,8 +990,7 @@ tracker_indexing_tree_get_root (TrackerIndexingTree    *tree,
 	     g_file_has_prefix (file, data->file))) {
 		if (!data->id) {
 			data->id = tracker_indexing_tree_get_root_id (tree,
-			                                              data->file,
-			                                              priv->udev_client);
+			                                              data->file);
 		}
 
 		if (id)

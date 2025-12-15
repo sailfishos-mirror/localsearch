@@ -23,8 +23,5 @@
 
 #include <gio/gio.h>
 
-#include <gudev/gudev.h>
-
 char * tracker_indexing_tree_get_root_id (TrackerIndexingTree *tree,
-                                          GFile               *root,
-                                          GUdevClient         *udev_client);
+                                          GFile               *root);
