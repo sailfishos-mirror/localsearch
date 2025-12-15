@@ -29,7 +29,6 @@ endif
 gio = dependency('gio-2.0', version: '>=' + glib_required)
 gio_unix = dependency('gio-unix-2.0', version: '>=' + glib_required)
 glib = dependency('glib-2.0', version: '>=' + glib_required)
-gudev = dependency('gudev-1.0')
 gmodule = dependency('gmodule-2.0', version: '>=' + glib_required)
 gobject = dependency('gobject-2.0', version: '>=' + glib_required)
 gobject_introspection = dependency('gobject-introspection-1.0')

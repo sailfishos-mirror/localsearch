@@ -21,7 +21,6 @@
 #define __TRACKER_MINER_FS_FILES_H__
 
 #include <gio/gio.h>
-#include <gudev/gudev.h>
 
 #include "tracker-config.h"
 
