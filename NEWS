@@ -1,3 +1,23 @@
+NEW in 3.11.alpha - 2026-01-05
+==============================
+  * Default configuration change, the user home directory will now be indexed
+    recursively as a whole, instead of XDG folders
+  * Major change in handling of removable devices. When enabled, removable
+    devices will get a `.localsearch3` folder with a self-contained database
+    for the removable device indexed data, instead of being included in the
+    main database in the user home folder. The setting default remains off.
+  * Improved handling of indexed folder changes found on restart
+  * Improved handling of indexing cancellation in deleted folders
+  * Improved handling of BTRFS filesystems
+  * Dropped libexif dependency, EXIF data is now extracted through gexiv2
+  * Dropped libpiptcdata dependency, IPTC data is now extracted through
+    gexiv2
+  * Consistency improvements to extracted metadata
+  * Fixes to SHSTK handling in the sandboxed process
+  * Further extended test coverage
+
+Translations: ca, el, fur, id, oc, sr, sr@latin
+
 NEW in 3.10.1 - 2025-10-13
 ==========================
   * Improvements to the handling of corrupted databases
