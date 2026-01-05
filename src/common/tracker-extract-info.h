@@ -32,6 +32,7 @@ typedef struct _TrackerExtractInfo TrackerExtractInfo;
 GType                 tracker_extract_info_get_type               (void) G_GNUC_CONST;
 
 TrackerExtractInfo *  tracker_extract_info_new                    (GFile              *file,
+                                                                   const gchar        *file_id,
                                                                    const gchar        *content_id,
                                                                    const gchar        *mimetype,
                                                                    const gchar        *graph,
@@ -49,6 +50,8 @@ gint                  tracker_extract_info_get_max_text           (TrackerExtrac
 TrackerResource *     tracker_extract_info_get_resource           (TrackerExtractInfo *info);
 void                  tracker_extract_info_set_resource           (TrackerExtractInfo *info,
                                                                    TrackerResource    *resource);
+
+const char * tracker_extract_info_get_file_id (TrackerExtractInfo *info);
 
 G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerExtractInfo, tracker_extract_info_unref)
 

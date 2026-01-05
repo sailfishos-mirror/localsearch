@@ -37,6 +37,8 @@ gchar *  tracker_seconds_estimate_to_string (gdouble       seconds_elapsed,
 gchar *  tracker_seconds_to_string          (gdouble       seconds,
                                              gboolean      short_string);
 
+char * tracker_encode_for_object_path (const char *str);
+
 G_END_DECLS
 
 #endif /* __LIBTRACKER_COMMON_UTILS_H__ */

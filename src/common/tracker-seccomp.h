@@ -24,7 +24,7 @@
 
 G_BEGIN_DECLS
 
-gboolean tracker_seccomp_init (void);
+gboolean tracker_seccomp_init (gboolean readonly);
 
 G_END_DECLS
 

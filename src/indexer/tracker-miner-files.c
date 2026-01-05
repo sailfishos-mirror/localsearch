@@ -31,13 +31,9 @@
 #include "tracker-extract-watchdog.h"
 #include "tracker-utils.h"
 
-#define SECONDS_PER_DAY 86400
-
 #define DEFAULT_GRAPH "tracker:FileSystem"
 
 #define RETRY_AFTER_DISK_FULL (60 * 15)
-
-#define REMOVABLE_DEVICES_CHECK_DAYS 3
 
 #define TRACKER_MINER_FILES_GET_PRIVATE(o) (tracker_miner_files_get_instance_private (TRACKER_MINER_FILES (o)))
 
@@ -62,8 +58,6 @@ struct _TrackerMinerFilesPrivate {
 #ifdef HAVE_POWER
 	TrackerPower *power;
 #endif /* HAVE_POWER) */
-
-	guint stale_volumes_check_id;
 };
 
 #define TEXT_ALLOWLIST "text-allowlist"
@@ -77,7 +71,6 @@ static void        battery_status_cb                    (GObject              *o
                                                          gpointer              user_data);
 #endif /* HAVE_POWER */
 static void        init_index_roots                     (TrackerMinerFiles    *miner);
-static void        init_stale_volume_removal            (TrackerMinerFiles    *miner);
 
 static void        miner_files_process_file             (TrackerMinerFS       *fs,
                                                          GFile                *file,
@@ -104,9 +97,6 @@ static void        miner_files_finish_directory         (TrackerMinerFS       *f
                                                          GFile                *directory,
                                                          TrackerSparqlBuffer  *buffer);
 static void        miner_files_finished                 (TrackerMinerFS       *fs);
-
-static void        miner_files_in_removable_media_remove_by_date  (TrackerMinerFiles  *miner,
-                                                                   GDateTime          *datetime);
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerMinerFiles, tracker_miner_files, TRACKER_TYPE_MINER_FS)
 
@@ -189,10 +179,15 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
                      TrackerMinerFiles      *mf)
 {
 	if (!tracker_miner_is_paused (TRACKER_MINER (mf))) {
+		gboolean is_active;
+
+		is_active = g_strcmp0 (status, "Idle") != 0;
+
 		g_object_set (mf,
 		              "status", status,
 		              "progress", progress,
 		              "remaining-time", remaining,
+		              "active", is_active,
 		              NULL);
 	}
 }
@@ -270,11 +265,6 @@ miner_files_finalize (GObject *object)
 	}
 #endif /* HAVE_POWER */
 
-	if (priv->stale_volumes_check_id) {
-		g_source_remove (priv->stale_volumes_check_id);
-		priv->stale_volumes_check_id = 0;
-	}
-
 	G_OBJECT_CLASS (tracker_miner_files_parent_class)->finalize (object);
 }
 
@@ -287,10 +277,8 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	g_autofree gchar *uri = NULL;
-	g_autoptr (GDateTime) now = NULL;
 
 	uri = g_file_get_uri (mount_point);
-	now = g_date_time_new_now_utc ();
 
 	g_debug ("Mount point state (%s) being set in DB for mount_point '%s'",
 	         mounted ? "MOUNTED" : "UNMOUNTED",
@@ -302,7 +290,6 @@ set_up_mount_point (TrackerMinerFiles *miner,
 	tracker_batch_add_statement (batch, stmt,
 	                             "mountPoint", G_TYPE_STRING, uri,
 	                             "mounted", G_TYPE_BOOLEAN, mounted,
-	                             "currentDate", G_TYPE_DATE_TIME, now,
 	                             NULL);
 }
 
@@ -406,42 +393,10 @@ init_index_roots (TrackerMinerFiles *miner_files)
 			set_up_mount_point (miner_files, file, TRUE, batch);
 	}
 
-	if (tracker_batch_execute (batch, NULL, &error)) {
-		init_stale_volume_removal (miner_files);
-	} else {
+	if (!tracker_batch_execute (batch, NULL, &error)) {
 		g_critical ("Could not initialize currently active mount points: %s",
 		            error->message);
 	}
-}
-
-static gboolean
-cleanup_stale_removable_volumes_cb (gpointer user_data)
-{
-	TrackerMinerFiles *miner = TRACKER_MINER_FILES (user_data);
-	g_autoptr (GDateTime) now = NULL, n_days_ago = NULL;
-
-	g_debug ("Running stale volumes check...");
-
-	now = g_date_time_new_now_utc ();
-	n_days_ago = g_date_time_add_days (now, -REMOVABLE_DEVICES_CHECK_DAYS);
-	miner_files_in_removable_media_remove_by_date (miner, n_days_ago);
-
-	return TRUE;
-}
-
-static void
-init_stale_volume_removal (TrackerMinerFiles *miner)
-{
-	/* Run right away the first check */
-	cleanup_stale_removable_volumes_cb (miner);
-
-	g_debug ("Initializing stale volume check timeout...");
-
-	/* Then, setup new timeout event every day */
-	miner->private->stale_volumes_check_id =
-		g_timeout_add_seconds (SECONDS_PER_DAY + 1,
-		                       cleanup_stale_removable_volumes_cb,
-		                       miner);
 }
 
 #ifdef HAVE_POWER
@@ -671,7 +626,8 @@ miner_files_constructed (GObject *object)
 
 	mf->private->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (mf)),
-		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)));
+		                              tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf)),
+		                              tracker_miner_fs_get_root (TRACKER_MINER_FS (mf)));
 	g_signal_connect (mf->private->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), mf);
 	g_signal_connect (mf->private->extract_watchdog, "status",
@@ -681,7 +637,8 @@ miner_files_constructed (GObject *object)
 TrackerMiner *
 tracker_miner_files_new (TrackerSparqlConnection  *connection,
                          TrackerIndexingTree      *indexing_tree,
-                         TrackerMonitor           *monitor)
+                         TrackerMonitor           *monitor,
+                         GFile                    *root)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -689,46 +646,6 @@ tracker_miner_files_new (TrackerSparqlConnection  *connection,
 	                     "connection", connection,
 	                     "indexing-tree", indexing_tree,
 	                     "monitor", monitor,
+	                     "root", root,
 	                     NULL);
-}
-
-static void
-remove_files_in_removable_media_cb (GObject      *object,
-                                    GAsyncResult *result,
-                                    gpointer      user_data)
-{
-	g_autofree GError *error = NULL;
-
-	tracker_sparql_statement_update_finish (TRACKER_SPARQL_STATEMENT (object),
-	                                        result, &error);
-
-	if (error)
-		g_critical ("Could not remove files in volumes: %s", error->message);
-}
-
-static void
-miner_files_in_removable_media_remove_by_date (TrackerMinerFiles *miner,
-                                               GDateTime         *datetime)
-{
-	TrackerSparqlConnection *conn;
-	g_autoptr (TrackerSparqlStatement) stmt = NULL;
-
-#ifdef G_ENABLE_DEBUG
-	if (TRACKER_DEBUG_CHECK (CONFIG)) {
-		g_autofree gchar *date;
-
-		date = g_date_time_format_iso8601 (datetime);
-		g_message ("  Removing all resources in store from removable "
-			   "devices not mounted after '%s'",
-			   date);
-	}
-#endif
-
-	conn = tracker_miner_get_connection (TRACKER_MINER (miner));
-	stmt = tracker_load_statement (conn, "delete-mountpoints-by-date.rq", NULL);
-
-	tracker_sparql_statement_bind_datetime (stmt, "unmountDate", datetime);
-	tracker_sparql_statement_update_async (stmt, NULL,
-	                                       remove_files_in_removable_media_cb,
-	                                       NULL);
 }

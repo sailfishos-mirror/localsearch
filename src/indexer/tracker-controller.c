@@ -23,6 +23,8 @@
 
 #include "tracker-config.h"
 
+#include "tracker-storage.h"
+
 #include <tracker-common.h>
 
 struct _TrackerController
@@ -35,6 +37,8 @@ struct _TrackerController
 	TrackerConfig *config;
 	GSettings *extractor_settings;
 	TrackerFilesInterface *files_interface;
+
+	GList *registered_indexing_trees;
 
 	GDBusProxy *control_proxy;
 	GCancellable *control_proxy_cancellable;
@@ -51,13 +55,20 @@ struct _TrackerController
 enum {
 	PROP_0,
 	PROP_INDEXING_TREE,
-	PROP_STORAGE,
 	PROP_FILES_INTERFACE,
 	PROP_MONITOR,
 	N_PROPS,
 };
 
 static GParamSpec *props[N_PROPS] = { 0, };
+
+enum {
+	REMOVABLE_POINT_ADDED,
+	REMOVABLE_POINT_REMOVED,
+	N_SIGNALS,
+};
+
+static guint signals[N_SIGNALS] = { 0, };
 
 G_DEFINE_TYPE (TrackerController, tracker_controller, G_TYPE_OBJECT)
 
@@ -72,9 +83,6 @@ tracker_controller_set_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_INDEXING_TREE:
 		controller->indexing_tree = g_value_dup_object (value);
-		break;
-	case PROP_STORAGE:
-		controller->storage = g_value_dup_object (value);
 		break;
 	case PROP_FILES_INTERFACE:
 		controller->files_interface = g_value_dup_object (value);
@@ -100,9 +108,6 @@ tracker_controller_get_property (GObject    *object,
 	case PROP_INDEXING_TREE:
 		g_value_set_object (value, controller->indexing_tree);
 		break;
-	case PROP_STORAGE:
-		g_value_set_object (value, controller->storage);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -115,7 +120,6 @@ add_indexed_directory (TrackerController     *controller,
                        TrackerDirectoryFlags  flags)
 {
 	g_autofree gchar *path = NULL;
-	TrackerStorageType type;
 
 	path = g_file_get_path (file);
 
@@ -133,9 +137,7 @@ add_indexed_directory (TrackerController     *controller,
 		}
 	}
 
-	type = tracker_storage_get_type_for_file (controller->storage, file);
-
-	if ((type & TRACKER_STORAGE_REMOVABLE) != 0)
+	if (tracker_storage_is_removable_mount_point (controller->storage, file))
 		flags |= TRACKER_DIRECTORY_FLAG_IS_VOLUME;
 
 	g_debug ("  Adding:'%s'", path);
@@ -147,35 +149,15 @@ static void
 add_removable_directory (TrackerController *controller,
                          GFile             *mount_file)
 {
-	TrackerDirectoryFlags flags;
-	g_autofree gchar *uri = NULL;
-
-	flags = TRACKER_DIRECTORY_FLAG_RECURSE |
-		TRACKER_DIRECTORY_FLAG_PRESERVE |
-		TRACKER_DIRECTORY_FLAG_PRIORITY |
-		TRACKER_DIRECTORY_FLAG_IS_VOLUME;
-
-	uri = g_file_get_uri (mount_file);
-	g_debug ("  Adding removable: '%s'", uri);
-	tracker_indexing_tree_add (controller->indexing_tree,
-				   mount_file,
-				   flags);
+	g_signal_emit (controller, signals[REMOVABLE_POINT_ADDED], 0, mount_file);
 }
 
 static void
 mount_point_added_cb (TrackerController *controller,
-                      const gchar       *uuid,
-                      const gchar       *mount_point,
-                      const gchar       *mount_name,
+                      GFile             *mount_point_file,
                       gboolean           removable,
-                      gboolean           optical,
                       TrackerStorage    *storage)
 {
-	g_autoptr (GFile) mount_point_file = NULL;
-
-	g_debug ("Mount point added for path '%s'", mount_point);
-	mount_point_file = g_file_new_for_path (mount_point);
-
 	if (removable && !controller->index_removable_devices) {
 		g_debug ("  Not crawling, removable devices disabled in config");
 	} else if (!removable) {
@@ -207,7 +189,7 @@ mount_point_added_cb (TrackerController *controller,
 				/* If the mount path is contained inside the config path,
 				 *  then add the mount path to re-check */
 				g_debug ("  Re-check of path '%s' needed (inside configured path '%s')",
-				         mount_point,
+				         g_file_peek_path (mount_point_file),
 				         (gchar *) l->data);
 				add_indexed_directory (controller,
 				                       config_file,
@@ -242,16 +224,28 @@ mount_point_added_cb (TrackerController *controller,
 
 static void
 mount_point_removed_cb (TrackerController *controller,
-                        const gchar       *uuid,
-                        const gchar       *mount_point,
+                        GFile             *mount_point_file,
+                        gboolean           removable,
                         TrackerStorage    *storage)
 {
-	g_autoptr (GFile) mount_point_file = NULL;
+	if (removable) {
+		g_signal_emit (controller, signals[REMOVABLE_POINT_REMOVED], 0, mount_point_file);
+	} else {
+		GList *roots, *l;
 
-	g_debug ("Mount point removed for path '%s'", mount_point);
+		roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
 
-	mount_point_file = g_file_new_for_path (mount_point);
-	tracker_indexing_tree_remove (controller->indexing_tree, mount_point_file);
+		for (l = roots; l; l = l->next) {
+			if (!g_file_equal (l->data, mount_point_file) &&
+			    !g_file_has_prefix (l->data, mount_point_file))
+				continue;
+
+			tracker_indexing_tree_remove (controller->indexing_tree,
+			                              l->data);
+		}
+
+		g_list_free (roots);
+	}
 }
 
 static void
@@ -280,31 +274,32 @@ text_allowlist_update (TrackerIndexingTree *indexing_tree,
 }
 
 static void
-update_filters (TrackerController *controller)
+update_filters (TrackerController   *controller,
+		TrackerIndexingTree *indexing_tree)
 {
 	GStrv strv;
 
 	/* Always ignore hidden */
-	tracker_indexing_tree_set_filter_hidden (controller->indexing_tree, TRUE);
+	tracker_indexing_tree_set_filter_hidden (indexing_tree, TRUE);
 
 	/* Ignored files */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-files");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_FILE, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_FILE, strv);
 	g_strfreev (strv);
 
 	/* Ignored directories */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_DIRECTORY, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_DIRECTORY, strv);
 	g_strfreev (strv);
 
 	/* Directories with content */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-directories-with-content");
-	indexing_tree_update_filter (controller->indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
+	indexing_tree_update_filter (indexing_tree, TRACKER_FILTER_PARENT_DIRECTORY, strv);
 	g_strfreev (strv);
 
 	/* Allowed text patterns */
 	strv = g_settings_get_strv (controller->extractor_settings, "text-allowlist");
-	text_allowlist_update (controller->indexing_tree, strv);
+	text_allowlist_update (indexing_tree, strv);
 	g_strfreev (strv);
 }
 
@@ -418,20 +413,17 @@ index_single_directories_cb (TrackerConfig     *config,
 }
 
 static void
-filter_changed_cb (GSettings         *config,
-                   GParamSpec        *pspec,
-                   TrackerController *controller)
+filter_changed_cb (TrackerController *controller)
 {
-	update_filters (controller);
-	tracker_indexing_tree_update_all (controller->indexing_tree);
-}
+	GList *l;
 
-static void
-text_allowlist_changed_cb (TrackerConfig *config,
-                           GParamSpec        *pspec,
-                           TrackerController *controller)
-{
+	update_filters (controller, controller->indexing_tree);
 	tracker_indexing_tree_update_all (controller->indexing_tree);
+
+	for (l = controller->registered_indexing_trees; l; l = l->next) {
+		update_filters (controller, l->data);
+		tracker_indexing_tree_update_all (l->data);
+	}
 }
 
 static gboolean
@@ -450,9 +442,8 @@ index_volumes_changed_idle (gpointer user_data)
 	if (controller->index_removable_devices != new_index_removable_devices) {
 		GSList *m;
 
-		m = tracker_storage_get_device_roots (controller->storage,
-		                                      TRACKER_STORAGE_REMOVABLE,
-		                                      TRUE);
+		m = tracker_storage_get_removable_mount_points (controller->storage);
+
 		/* Set new config value */
 		controller->index_removable_devices = new_index_removable_devices;
 
@@ -474,27 +465,20 @@ index_volumes_changed_idle (gpointer user_data)
 		GSList *sl;
 
 		for (sl = mounts_removed; sl; sl = g_slist_next (sl)) {
-			g_autoptr (GFile) mount_point_file = NULL;
-
-			mount_point_file = g_file_new_for_path (sl->data);
-			tracker_indexing_tree_remove (controller->indexing_tree,
-						      mount_point_file);
+			g_signal_emit (controller, signals[REMOVABLE_POINT_REMOVED], 0, sl->data);
 		}
 
-		g_slist_free_full (mounts_removed, g_free);
+		g_slist_free_full (mounts_removed, g_object_unref);
 	}
 
 	if (mounts_added) {
 		GSList *sl;
 
 		for (sl = mounts_added; sl; sl = g_slist_next (sl)) {
-			g_autoptr (GFile) mount_point_file = NULL;
-
-			mount_point_file = g_file_new_for_path (sl->data);
-			add_removable_directory (controller, mount_point_file);
+			add_removable_directory (controller, sl->data);
 		}
 
-		g_slist_free_full (mounts_removed, g_free);
+		g_slist_free_full (mounts_removed, g_object_unref);
 	}
 
 	controller->volumes_changed_id = 0;
@@ -526,17 +510,16 @@ enable_monitors_changed_cb (GSettings         *config,
 	if (enable != tracker_monitor_get_enabled (controller->monitor)) {
 		tracker_monitor_set_enabled (controller->monitor, enable);
 		if (enable)
-			filter_changed_cb (config, pspec, controller);
+			filter_changed_cb (controller);
 	}
 }
 
 static void
 initialize_from_config (TrackerController *controller)
 {
-	GSList *mounts = NULL, *l;
 	GSList *dirs;
 
-	update_filters (controller);
+	update_filters (controller, controller->indexing_tree);
 
 	if (controller->monitor) {
 		tracker_monitor_set_enabled (controller->monitor,
@@ -551,13 +534,6 @@ initialize_from_config (TrackerController *controller)
 	controller->index_removable_devices =
 		g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
 
-	if (controller->index_removable_devices) {
-		/* Get list of roots for removable devices */
-		mounts = tracker_storage_get_device_roots (controller->storage,
-		                                           TRACKER_STORAGE_REMOVABLE,
-		                                           TRUE);
-	}
-
 	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from config (IndexSingleDirectory)"));
 
 	dirs = tracker_config_get_index_single_directories (controller->config);
@@ -566,13 +542,15 @@ initialize_from_config (TrackerController *controller)
 	for (; dirs; dirs = dirs->next) {
 		g_autoptr (GFile) file = NULL;
 
-		if (g_slist_find_custom (mounts, dirs->data, (GCompareFunc) g_strcmp0)) {
+		file = g_file_new_for_path (dirs->data);
+
+		if (controller->index_removable_devices &&
+		    tracker_storage_is_removable_mount_point (controller->storage, file)) {
 			g_debug ("  Duplicate found:'%s' - same as removable device path",
-			         (gchar*) dirs->data);
+			         g_file_peek_path (file));
 			continue;
 		}
 
-		file = g_file_new_for_path (dirs->data);
 		add_indexed_directory (controller, file,
 		                       TRACKER_DIRECTORY_FLAG_NONE);
 	}
@@ -585,28 +563,18 @@ initialize_from_config (TrackerController *controller)
 	for (; dirs; dirs = dirs->next) {
 		g_autoptr (GFile) file = NULL;
 
-		if (g_slist_find_custom (mounts, dirs->data, (GCompareFunc) g_strcmp0)) {
+		file = g_file_new_for_path (dirs->data);
+
+		if (controller->index_removable_devices &&
+		    tracker_storage_is_removable_mount_point (controller->storage, file)) {
 			g_debug ("  Duplicate found:'%s' - same as removable device path",
 			         (gchar*) dirs->data);
 			continue;
 		}
 
-		file = g_file_new_for_path (dirs->data);
 		add_indexed_directory (controller, file,
 		                       TRACKER_DIRECTORY_FLAG_RECURSE);
 	}
-
-	/* Add mounts */
-	TRACKER_NOTE (CONFIG, g_message ("Setting up directories to iterate from devices/discs"));
-
-	for (l = mounts; l; l = l->next) {
-		g_autoptr (GFile) mount_point = NULL;
-
-		mount_point = g_file_new_for_path (l->data);
-		add_removable_directory (controller, mount_point);
-	}
-
-	g_slist_free_full (mounts, g_free);
 }
 
 static void
@@ -757,6 +725,7 @@ tracker_controller_constructed (GObject *object)
 
 	G_OBJECT_CLASS (tracker_controller_parent_class)->constructed (object);
 
+	controller->storage = tracker_storage_new ();
 	g_signal_connect_object (controller->storage,
 	                         "mount-point-added",
 	                         G_CALLBACK (mount_point_added_cb),
@@ -775,15 +744,6 @@ tracker_controller_constructed (GObject *object)
 	g_signal_connect (controller->config, "changed::index-single-directories",
 	                  G_CALLBACK (index_single_directories_cb),
 	                  object);
-	g_signal_connect (controller->config, "changed::ignored-directories",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
-	g_signal_connect (controller->config, "changed::ignored-directories-with-content",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
-	g_signal_connect (controller->config, "changed::ignored-files",
-	                  G_CALLBACK (filter_changed_cb),
-	                  object);
 	g_signal_connect (controller->config, "changed::enable-monitors",
 	                  G_CALLBACK (enable_monitors_changed_cb),
 	                  object);
@@ -791,10 +751,20 @@ tracker_controller_constructed (GObject *object)
 	                  G_CALLBACK (index_volumes_changed_cb),
 	                  object);
 
+	g_signal_connect_swapped (controller->config, "changed::ignored-directories",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+	g_signal_connect_swapped (controller->config, "changed::ignored-directories-with-content",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+	g_signal_connect_swapped (controller->config, "changed::ignored-files",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
+
 	controller->extractor_settings = g_settings_new ("org.freedesktop.Tracker3.Extract");
-	g_signal_connect (controller->extractor_settings, "changed::text-allowlist",
-	                  G_CALLBACK (text_allowlist_changed_cb),
-	                  object);
+	g_signal_connect_swapped (controller->extractor_settings, "changed::text-allowlist",
+				  G_CALLBACK (filter_changed_cb),
+				  object);
 
 	g_dbus_proxy_new_for_bus (TRACKER_IPC_BUS,
 	                          G_DBUS_PROXY_FLAGS_DO_NOT_AUTO_START,
@@ -821,6 +791,8 @@ tracker_controller_finalize (GObject *object)
 	g_clear_object (&controller->control_proxy);
 	g_clear_pointer (&controller->control_proxy_folders, g_ptr_array_unref);
 
+	g_list_free (controller->registered_indexing_trees);
+
 	g_clear_handle_id (&controller->volumes_changed_id, g_source_remove);
 
 	g_clear_object (&controller->indexing_tree);
@@ -845,19 +817,26 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 	object_class->constructed = tracker_controller_constructed;
 	object_class->finalize = tracker_controller_finalize;
 
+	signals[REMOVABLE_POINT_ADDED] =
+		g_signal_new ("removable-point-added",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE,
+		              1, G_TYPE_FILE);
+	signals[REMOVABLE_POINT_REMOVED] =
+		g_signal_new ("removable-point-removed",
+		              G_TYPE_FROM_CLASS (klass),
+		              G_SIGNAL_RUN_LAST,
+		              0, NULL, NULL, NULL,
+		              G_TYPE_NONE,
+		              1, G_TYPE_FILE);
+
 	props[PROP_INDEXING_TREE] =
 		g_param_spec_object ("indexing-tree",
 		                     "Indexing tree",
 		                     "Indexing tree",
 		                     TRACKER_TYPE_INDEXING_TREE,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_CONSTRUCT_ONLY |
-		                     G_PARAM_STATIC_STRINGS);
-	props[PROP_STORAGE] =
-		g_param_spec_object ("storage",
-		                     "Storage",
-		                     "Storage",
-		                     TRACKER_TYPE_STORAGE,
 		                     G_PARAM_READWRITE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
@@ -889,13 +868,42 @@ tracker_controller_init (TrackerController *controller)
 TrackerController *
 tracker_controller_new (TrackerIndexingTree   *tree,
                         TrackerMonitor        *monitor,
-                        TrackerStorage        *storage,
                         TrackerFilesInterface *files_interface)
 {
 	return g_object_new (TRACKER_TYPE_CONTROLLER,
 			     "indexing-tree", tree,
 	                     "monitor", monitor,
-	                     "storage", storage,
 	                     "files-interface", files_interface,
 			     NULL);
+}
+
+void
+tracker_controller_initialize_removable_devices (TrackerController *controller)
+{
+	GSList *mounts, *l;
+
+	if (!g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices"))
+		return;
+
+	mounts = tracker_storage_get_removable_mount_points (controller->storage);
+
+	for (l = mounts; l; l = l->next)
+		add_removable_directory (controller, l->data);
+}
+
+void
+tracker_controller_register_indexing_tree (TrackerController   *controller,
+					   TrackerIndexingTree *indexing_tree)
+{
+	controller->registered_indexing_trees =
+		g_list_prepend (controller->registered_indexing_trees, indexing_tree);
+	update_filters (controller, indexing_tree);
+}
+
+void
+tracker_controller_unregister_indexing_tree (TrackerController   *controller,
+					     TrackerIndexingTree *indexing_tree)
+{
+	controller->registered_indexing_trees =
+		g_list_remove (controller->registered_indexing_trees, indexing_tree);
 }

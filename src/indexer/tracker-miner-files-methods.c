@@ -110,7 +110,7 @@ miner_files_create_folder_information_element (TrackerMinerFiles *miner,
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
 
-	uri = g_file_get_uri (file);
+	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
 	tracker_resource_set_uri (resource, "nie:isStoredAs", uri);
 
 	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
@@ -198,7 +198,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 	mime_type = get_content_type (file);
 
-	uri = g_file_get_uri (file);
+	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
 
 	modified = g_file_info_get_modification_date_time (file_info);
 	if (!modified)
@@ -328,7 +328,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 
 	mime_type = get_content_type (file);
 
-	uri = g_file_get_uri (file);
+	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
@@ -384,7 +384,7 @@ tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
 	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
 	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
 
-	uri = g_file_get_uri (file);
+	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 	tracker_resource_set_string (resource, "tracker:extractorHash",

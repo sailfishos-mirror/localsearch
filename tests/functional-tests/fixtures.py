@@ -406,22 +406,16 @@ class TrackerMinerRemovableMediaTest(TrackerMinerTest):
             cancellable,
         )
 
-    def await_device_removed(self, device_uri):
-        result = self.tracker.query(
-            """
-            SELECT tracker:id(?u) {
-                <%s> a nfo:FileDataObject ;
-                    nie:interpretedAs/nie:rootElementOf ?u .
-            }"""
-            % device_uri
+    def helper_for_endpoint(self, object_path):
+        conn = Tsparql.SparqlConnection.bus_new(
+            MinerFsHelper.MINERFS_BUSNAME, object_path,
+            self.sandbox.get_session_bus_connection()
         )
-        resource_id = int(result[0][0])
-        return self.tracker.await_property_update(
-            FILESYSTEM_GRAPH,
-            resource_id,
-            "tracker:available true",
-            "tracker:available false",
-        )
+        return trackertestutils.helpers.StoreHelper(conn)
+
+    def get_relative_uri(self, path):
+        f = Gio.File.new_for_uri('file:///' + str(path))
+        return f.get_uri().replace("///", "")
 
 
 def get_tracker_extract_output(

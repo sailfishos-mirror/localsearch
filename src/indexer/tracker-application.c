@@ -22,6 +22,7 @@
 #include "tracker-application.h"
 
 #include "tracker-controller.h"
+#include "tracker-dbus-interface.h"
 #include "tracker-miner-files.h"
 
 #ifdef HAVE_MALLOC_TRIM
@@ -29,10 +30,13 @@
 #endif
 
 #include <glib/gi18n.h>
+#include <glib/gstdio.h>
+#include <sys/socket.h>
 
 #define DBUS_NAME_SUFFIX "LocalSearch3"
 #define LEGACY_DBUS_NAME_SUFFIX "Tracker3.Miner.Files"
 #define DBUS_PATH "/org/freedesktop/Tracker3/Miner/Files"
+#define REMOTE_FD_NUMBER 3
 
 #define ABOUT	  \
 	"LocalSearch " PACKAGE_VERSION "\n"
@@ -68,7 +72,6 @@ static GOptionEntry entries[] = {
 };
 
 typedef struct {
-	TrackerSparqlConnection *sparql_conn;
 	GDBusConnection *dbus_conn;
 	GMainLoop *main_loop;
 	GMutex mutex;
@@ -78,14 +81,35 @@ typedef struct {
 	GError *error;
 } EndpointThreadData;
 
-static EndpointThreadData *endpoint_thread_data = NULL;
-
 typedef struct _IndexerInstance IndexerInstance;
 struct _IndexerInstance
 {
 	TrackerMiner *indexer;
 	TrackerSparqlConnection *sparql_conn;
 	TrackerIndexingTree *indexing_tree;
+	EndpointThreadData endpoint_thread;
+	TrackerController *controller;
+	TrackerApplication *app;
+	GFile *root;
+	GFile *config_file;
+	char *object_path;
+
+	struct {
+		GDBusConnection *dbus_conn;
+		GSubprocessLauncher *launcher;
+		GSubprocess *subprocess;
+	} sandbox;
+};
+
+typedef struct _PauseRequest PauseRequest;
+
+struct _PauseRequest {
+	TrackerApplication *app;
+	int cookie_id;
+	char *application;
+	char *reason;
+	char *watch_name;
+	guint watch_name_id;
 };
 
 struct _TrackerApplication
@@ -93,17 +117,20 @@ struct _TrackerApplication
 	GApplication parent_instance;
 
 	TrackerMiner *miner_files;
-	TrackerMinerProxy *proxy;
+	TrackerDBusMiner *indexer_iface;
 	GDBusProxy *systemd_proxy;
 	TrackerMonitor *monitor;
-	TrackerStorage *storage;
 	TrackerController *controller;
 #if GLIB_CHECK_VERSION (2, 64, 0)
 	GMemoryMonitor *memory_monitor;
 #endif
 	TrackerFilesInterface *files_interface;
 
+	GList *removable_instances;
 	IndexerInstance main_instance;
+	IndexerInstance *active_instance;
+
+	GList *pause_requests;
 
 	guint wait_settle_id;
 	guint cleanup_id;
@@ -112,6 +139,7 @@ struct _TrackerApplication
 	guint no_daemon : 1;
 	guint dry_run : 1;
 	guint got_error : 1;
+	guint paused_by_clients : 1;
 };
 
 G_DEFINE_TYPE (TrackerApplication, tracker_application, G_TYPE_APPLICATION)
@@ -119,16 +147,17 @@ G_DEFINE_TYPE (TrackerApplication, tracker_application, G_TYPE_APPLICATION)
 gpointer
 endpoint_thread_func (gpointer user_data)
 {
-	EndpointThreadData *data = user_data;
+	IndexerInstance *instance = user_data;
+	EndpointThreadData *data = &instance->endpoint_thread;
 	TrackerEndpointDBus *endpoint;
 	GMainContext *main_context;
 
 	main_context = g_main_context_new ();
 	g_main_context_push_thread_default (main_context);
 
-	endpoint = tracker_endpoint_dbus_new (data->sparql_conn,
+	endpoint = tracker_endpoint_dbus_new (instance->sparql_conn,
 	                                      data->dbus_conn,
-	                                      NULL,
+	                                      instance->object_path,
 	                                      NULL,
 	                                      &data->error);
 
@@ -143,7 +172,6 @@ endpoint_thread_func (gpointer user_data)
 		g_main_loop_run (data->main_loop);
 
 	g_main_context_pop_thread_default (main_context);
-	g_main_loop_unref (data->main_loop);
 	g_main_context_unref (main_context);
 	g_clear_object (&endpoint);
 
@@ -151,22 +179,30 @@ endpoint_thread_func (gpointer user_data)
 }
 
 gboolean
-start_endpoint_thread (TrackerSparqlConnection  *conn,
-                       GDBusConnection          *dbus_conn,
-                       GError                  **error)
+start_endpoint_thread (IndexerInstance  *instance,
+                       GDBusConnection  *dbus_conn,
+                       GError          **error)
 {
-	g_assert (endpoint_thread_data == NULL);
+	EndpointThreadData *endpoint_thread_data;
 
-	endpoint_thread_data = g_new0 (EndpointThreadData, 1);
+	endpoint_thread_data = &instance->endpoint_thread;
 	g_mutex_init (&endpoint_thread_data->mutex);
 	g_cond_init (&endpoint_thread_data->cond);
-	endpoint_thread_data->sparql_conn = conn;
 	endpoint_thread_data->dbus_conn = dbus_conn;
+
+	if (instance->root) {
+		g_autofree char *path = NULL, *encoded_str = NULL;
+
+		path = g_file_get_path (instance->root);
+		encoded_str = tracker_encode_for_object_path (path);
+		instance->object_path =
+			g_strdup_printf ("/org/freedesktop/LocalSearch3/%s", encoded_str);
+	}
 
 	endpoint_thread_data->thread =
 		g_thread_try_new ("SPARQL endpoint",
 		                  endpoint_thread_func,
-		                  endpoint_thread_data,
+		                  instance,
 		                  error);
 
 	if (!endpoint_thread_data->thread)
@@ -184,7 +220,6 @@ start_endpoint_thread (TrackerSparqlConnection  *conn,
 	if (endpoint_thread_data->error) {
 		g_propagate_error (error, endpoint_thread_data->error);
 		g_thread_join (endpoint_thread_data->thread);
-		g_clear_pointer (&endpoint_thread_data, g_free);
 		return FALSE;
 	}
 
@@ -192,16 +227,15 @@ start_endpoint_thread (TrackerSparqlConnection  *conn,
 }
 
 void
-finish_endpoint_thread (void)
+finish_endpoint_thread (EndpointThreadData *endpoint_thread_data)
 {
-	if (!endpoint_thread_data)
-		return;
+	if (endpoint_thread_data->main_loop) {
+		g_main_loop_quit (endpoint_thread_data->main_loop);
+		g_main_loop_unref (endpoint_thread_data->main_loop);
+	}
 
-	g_main_loop_quit (endpoint_thread_data->main_loop);
-
-	g_thread_join (endpoint_thread_data->thread);
-
-	g_clear_pointer (&endpoint_thread_data, g_free);
+	if (endpoint_thread_data->thread)
+		g_thread_join (endpoint_thread_data->thread);
 }
 
 static GFile *
@@ -223,33 +257,129 @@ get_cache_dir (void)
 	return cache;
 }
 
-static TrackerSparqlConnection *
+static gboolean
+open_connection (TrackerApplication  *app,
+                 IndexerInstance     *instance,
+                 GFile               *store,
+                 gboolean             sandboxed,
+                 GError             **error)
+{
+	int fd_pair[2] = { -1, -1 };
+
+	if (sandboxed) {
+		g_autoptr (GSocket) socket = NULL;
+		g_autoptr (GIOStream) stream = NULL;
+		g_autoptr (GFile) location = NULL;
+		g_autofree char *guid = NULL, *current_dir = NULL;
+		const char *helper_path;
+
+		g_assert (instance->root);
+
+		if (socketpair (AF_LOCAL, SOCK_STREAM, 0, fd_pair)) {
+			g_set_error (error,
+			             G_IO_ERROR,
+			             G_IO_ERROR_FAILED,
+			             "socketpair failed: %m");
+			goto error;
+		}
+
+		instance->sandbox.launcher =
+			g_subprocess_launcher_new (G_SUBPROCESS_FLAGS_NONE);
+		g_subprocess_launcher_take_fd (instance->sandbox.launcher,
+		                               g_steal_fd (&fd_pair[1]),
+		                               REMOTE_FD_NUMBER);
+
+		socket = g_socket_new_from_fd (fd_pair[0], error);
+		if (!socket)
+			goto error;
+
+		fd_pair[0] = -1;
+		stream = G_IO_STREAM (g_socket_connection_factory_create_connection (socket));
+
+		guid = g_dbus_generate_guid ();
+
+		current_dir = g_get_current_dir ();
+
+		if (g_strcmp0 (current_dir, BUILDROOT) == 0)
+			helper_path = BUILDDIR "/localsearch-endpoint-3";
+		else
+			helper_path = LIBEXECDIR "/localsearch-endpoint-3";
+
+		location = g_file_get_child (instance->root, ".localsearch3");
+
+		instance->sandbox.subprocess =
+			g_subprocess_launcher_spawn (instance->sandbox.launcher, error,
+			                             helper_path,
+			                             "--location", g_file_peek_path (location),
+			                             "--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),
+			                             NULL);
+		if (!instance->sandbox.subprocess)
+			goto error;
+
+		instance->sandbox.dbus_conn =
+			g_dbus_connection_new_sync (stream,
+			                            guid,
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_SERVER |
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_ALLOW_ANONYMOUS |
+			                            G_DBUS_CONNECTION_FLAGS_AUTHENTICATION_REQUIRE_SAME_USER,
+			                            NULL, NULL,
+			                            error);
+		if (!instance->sandbox.dbus_conn)
+			goto error;
+
+		instance->sparql_conn =
+			tracker_sparql_connection_bus_new (NULL,
+			                                   NULL,
+			                                   instance->sandbox.dbus_conn,
+			                                   error);
+	} else {
+		TrackerSparqlConnectionFlags flags =
+			TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
+			TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
+		g_autoptr (GFile) ontology = NULL;
+
+		ontology = tracker_sparql_get_ontology_nepomuk ();
+		instance->sparql_conn =
+			tracker_sparql_connection_new (flags,
+			                               store,
+			                               ontology,
+			                               NULL,
+			                               error);
+	}
+
+	g_clear_fd (&fd_pair[0], NULL);
+	g_clear_fd (&fd_pair[1], NULL);
+
+	if (instance->sparql_conn)
+		return TRUE;
+ error:
+	g_clear_object (&instance->sandbox.dbus_conn);
+	g_clear_object (&instance->sandbox.launcher);
+	g_clear_object (&instance->sandbox.subprocess);
+
+	return FALSE;
+}
+
+static gboolean
 setup_connection (TrackerApplication  *app,
+                  IndexerInstance     *instance,
                   GFile               *store,
+                  gboolean             sandboxed,
                   GError             **error)
 {
-	TrackerSparqlConnection *sparql_conn = NULL;
 	g_autoptr (GFile) ontology = NULL, corrupt = NULL;
 	g_autoptr (GError) internal_error = NULL;
-	gboolean is_corrupted;
-	TrackerSparqlConnectionFlags flags =
-		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_STEMMER |
-		TRACKER_SPARQL_CONNECTION_FLAGS_FTS_ENABLE_UNACCENT;
+	gboolean is_corrupted, retval = FALSE;
 
 	ontology = tracker_sparql_get_ontology_nepomuk ();
 
 	corrupt = g_file_get_child (store, CORRUPT_FILE_NAME);
 	is_corrupted = g_file_query_exists (corrupt, NULL);
 
-	if (!store || !is_corrupted) {
-		sparql_conn = tracker_sparql_connection_new (flags,
-							     store,
-							     ontology,
-							     NULL,
-							     &internal_error);
-	}
+	if (!store || !is_corrupted)
+		retval = open_connection (app, instance, store, sandboxed, error);
 
-	if (store) {
+	if (!retval && store) {
 		if (is_corrupted ||
 		    g_error_matches (internal_error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT)) {
 			g_autoptr (GFile) backup_location = NULL;
@@ -267,11 +397,7 @@ setup_connection (TrackerApplication  *app,
 
 				path = g_file_get_path (backup_location);
 				g_message ("Database is corrupt, it is now backed up at %s. Reindexing from scratch", path);
-				sparql_conn = tracker_sparql_connection_new (flags,
-									     store,
-									     ontology,
-									     NULL,
-									     &internal_error);
+				retval = open_connection (app, instance, store, sandboxed, error);
 			}
 		}
 	}
@@ -279,7 +405,7 @@ setup_connection (TrackerApplication  *app,
 	if (internal_error)
 		g_propagate_error (error, g_steal_pointer (&internal_error));
 
-	return sparql_conn;
+	return retval;
 }
 
 static void
@@ -329,32 +455,209 @@ on_low_memory (GMemoryMonitor            *monitor,
 #endif
 
 static void
-indexer_started_cb (TrackerApplication *app)
+pause_removable_instances (TrackerApplication *app,
+                           IndexerInstance    *not_this_one)
 {
-	stop_cleanup_timeout (app);
-}
+	GList *l;
 
-static void
-indexer_finished_cb (TrackerApplication *app)
-{
-	if (app->no_daemon) {
-		/* We're not sticking around for file updates, so stop
-		 * the mainloop and exit.
-		 */
-		g_application_release (G_APPLICATION (app));
+	for (l = app->removable_instances; l; l = l->next) {
+		IndexerInstance *instance = l->data;
+
+		if (l->data == not_this_one)
+			continue;
+
+		tracker_miner_pause (instance->indexer);
 	}
 }
 
 static void
-indexer_status_cb (TrackerApplication *app)
+resume_removable_instances (TrackerApplication *app,
+                            IndexerInstance    *not_this_one)
 {
-	g_autofree gchar *status = NULL;
+	GList *l;
 
-	g_object_get (G_OBJECT (app->main_instance.indexer), "status", &status, NULL);
-	if (g_strcmp0 (status, "Idle") == 0)
-		start_cleanup_timeout (app);
-	else
+	for (l = app->removable_instances; l; l = l->next) {
+		IndexerInstance *instance = l->data;
+
+		if (l->data == not_this_one)
+			continue;
+
+		tracker_miner_resume (instance->indexer);
+	}
+}
+
+static void
+sync_client_pause_state (TrackerApplication *app)
+{
+	gboolean paused_by_clients;
+
+	paused_by_clients = app->pause_requests != NULL;
+
+	if (paused_by_clients == app->paused_by_clients)
+		return;
+
+	app->paused_by_clients = paused_by_clients;
+
+	if (app->paused_by_clients) {
+		tracker_miner_pause (app->main_instance.indexer);
+		pause_removable_instances (app, NULL);
+		tracker_dbus_miner_emit_paused (app->indexer_iface);
+	} else {
+		tracker_miner_resume (app->main_instance.indexer);
+		resume_removable_instances (app, NULL);
+		tracker_dbus_miner_emit_resumed (app->indexer_iface);
+	}
+}
+
+static PauseRequest *
+find_pause_request (TrackerApplication *app,
+                    int                 cookie_id)
+{
+	GList *l;
+
+	for (l = app->pause_requests; l; l = l->next) {
+		PauseRequest *request = l->data;
+
+		if (request->cookie_id == cookie_id)
+			return request;
+	}
+
+	return NULL;
+}
+
+static void
+pause_request_free (PauseRequest *request)
+{
+	g_clear_handle_id (&request->watch_name_id, g_bus_unwatch_name);
+	g_free (request->watch_name);
+	g_free (request->reason);
+	g_free (request->application);
+	g_free (request);
+}
+
+static void
+pause_process_disappeared_cb (GDBusConnection *connection,
+                              const gchar     *name,
+                              gpointer         user_data)
+{
+	PauseRequest *request = user_data;
+	TrackerApplication *app = request->app;
+
+	app->pause_requests = g_list_remove (app->pause_requests, request);
+	pause_request_free (request);
+	sync_client_pause_state (app);
+}
+
+static PauseRequest *
+pause_request_new (TrackerApplication *app,
+                   const char         *application,
+                   const char         *reason,
+                   const char         *watch_name)
+{
+	PauseRequest *request;
+	int cookie_id;
+
+	request = g_new0 (PauseRequest, 1);
+
+	/* Make sure to pick an unused cookie ID */
+	do {
+		cookie_id = g_random_int ();
+	} while (find_pause_request (app, cookie_id) != NULL);
+
+	request->app = app;
+	request->cookie_id = cookie_id;
+	request->application = g_strdup (application);
+	request->reason = g_strdup (reason);
+	request->watch_name = g_strdup (watch_name);
+
+	request->watch_name_id =
+		g_bus_watch_name_on_connection (g_application_get_dbus_connection (G_APPLICATION (app)),
+		                                request->watch_name,
+		                                G_BUS_NAME_WATCHER_FLAGS_NONE,
+		                                NULL,
+		                                pause_process_disappeared_cb,
+		                                request,
+		                                NULL);
+
+	return request;
+}
+
+static void
+indexer_progress_cb (TrackerMiner    *miner,
+                     GParamSpec      *pspec,
+                     IndexerInstance *instance)
+{
+	TrackerApplication *app = instance->app;
+
+	if (instance == app->active_instance) {
+		g_autofree char *status = NULL;
+		int remaining_time;
+		double progress;
+
+		g_object_get (G_OBJECT (instance->indexer),
+		              "status", &status,
+		              "progress", &progress,
+		              "remaining-time", &remaining_time,
+		              NULL);
+
+		tracker_dbus_miner_emit_progress (app->indexer_iface,
+		                                  status, progress,
+		                                  remaining_time);
+	}
+}
+
+static void
+indexer_active_cb (TrackerMiner    *miner,
+                   GParamSpec      *pspec,
+                   IndexerInstance *instance)
+{
+	TrackerApplication *app = instance->app;
+	gboolean active;
+
+	g_object_get (G_OBJECT (miner), "active", &active, NULL);
+
+	if (active) {
 		stop_cleanup_timeout (app);
+
+		if (instance == &app->main_instance) {
+			if (app->active_instance != instance) {
+				/* Any active removable instance already paused every
+				 * other removable instances, we should not pause
+				 * these twice.
+				 */
+				if (app->active_instance)
+					tracker_miner_pause (app->active_instance->indexer);
+				else
+					pause_removable_instances (app, NULL);
+			}
+
+			/* Let the main instance take over always */
+			app->active_instance = instance;
+		} else {
+			/* Removable instances pause each other, never the main isntance */
+			if (!app->active_instance) {
+				pause_removable_instances (app, instance);
+				app->active_instance = instance;
+			}
+		}
+	} else {
+		start_cleanup_timeout (app);
+
+		/* Signal last progress */
+		indexer_progress_cb (miner, NULL, instance);
+
+		if (instance == app->active_instance) {
+			resume_removable_instances (app, app->active_instance);
+			app->active_instance = NULL;
+		}
+
+		if (app->no_daemon) {
+			/* We're not sticking around for file updates, so stop
+			 * the mainloop and exit.
+			 */
+			g_application_release (G_APPLICATION (app));
+		}
+	}
 }
 
 static void
@@ -414,22 +717,47 @@ on_domain_vanished (GDBusConnection *connection,
 }
 
 static void
+track_instance_state (TrackerApplication *app,
+                      IndexerInstance    *instance)
+{
+	g_signal_connect (instance->indexer, "notify::active",
+	                  G_CALLBACK (indexer_active_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::status",
+	                  G_CALLBACK (indexer_progress_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::progress",
+	                  G_CALLBACK (indexer_progress_cb),
+	                  instance);
+	g_signal_connect (instance->indexer, "notify::remaining-time",
+	                  G_CALLBACK (indexer_progress_cb),
+	                  instance);
+}
+
+static void
+untrack_instance_state (TrackerApplication *app,
+                        IndexerInstance    *instance)
+{
+	if (instance->indexer) {
+		g_signal_handlers_disconnect_by_func (instance->indexer,
+		                                      indexer_active_cb,
+		                                      instance);
+	}
+}
+
+static void
 shutdown_main_instance (TrackerApplication *app,
                         IndexerInstance    *instance)
 {
-	finish_endpoint_thread ();
+	finish_endpoint_thread (&instance->endpoint_thread);
 
-	if (!app->dry_run &&
-	    app->main_instance.indexing_tree) {
-		g_autoptr (GFile) store, config;
-
-		store = get_cache_dir ();
-		config = g_file_get_child (store, CONFIG_FILE);
-
-		tracker_indexing_tree_save_config (app->main_instance.indexing_tree,
-		                                   config, NULL);
+	if (instance->config_file && instance->indexing_tree) {
+		tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                   instance->config_file, NULL);
+		g_clear_object (&instance->config_file);
 	}
 
+	untrack_instance_state (app, instance);
 	g_clear_object (&instance->indexer);
 	g_clear_object (&instance->indexing_tree);
 	g_clear_object (&instance->sparql_conn);
@@ -448,29 +776,28 @@ initialize_main_instance (TrackerApplication  *app,
 		tracker_error_report_init (store);
 	}
 
-	instance->sparql_conn = setup_connection (app, store, error);
-	if (!instance->sparql_conn)
+	instance->app = app;
+	instance->controller = app->controller;
+
+	if (!setup_connection (app, instance, store, FALSE, error))
 		return FALSE;
 
 	if (instance->sparql_conn) {
 		instance->indexing_tree = tracker_indexing_tree_new ();
 		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
 		                                             instance->indexing_tree,
-		                                             app->monitor);
+		                                             app->monitor,
+		                                             NULL);
 	}
 
-	if (!start_endpoint_thread (instance->sparql_conn, dbus_conn, error))
+	if (!start_endpoint_thread (instance, dbus_conn, error))
 		return FALSE;
 
-	g_signal_connect_swapped (instance->indexer, "started",
-	                          G_CALLBACK (indexer_started_cb),
-	                          app);
-	g_signal_connect_swapped (instance->indexer, "finished",
-	                          G_CALLBACK (indexer_finished_cb),
-	                          app);
-	g_signal_connect_swapped (instance->indexer, "notify::status",
-	                          G_CALLBACK (indexer_status_cb),
-	                          app);
+	track_instance_state (app, instance);
+
+	if (store)
+		instance->config_file = g_file_get_child (store, CONFIG_FILE);
+
 	g_signal_connect_swapped (instance->indexer, "corrupt",
 	                          G_CALLBACK (indexer_corrupt_cb),
 	                          app);
@@ -479,18 +806,326 @@ initialize_main_instance (TrackerApplication  *app,
 }
 
 static void
+indexer_instance_free (IndexerInstance *instance)
+{
+	g_assert (instance->root != NULL);
+	finish_endpoint_thread (&instance->endpoint_thread);
+	untrack_instance_state (instance->app, instance);
+
+	if (instance->indexer)
+		tracker_miner_stop (instance->indexer);
+
+	g_clear_object (&instance->indexer);
+	tracker_controller_unregister_indexing_tree (instance->controller,
+						     instance->indexing_tree);
+
+	if (instance->config_file && instance->indexing_tree) {
+		tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                   instance->config_file, NULL);
+		g_clear_object (&instance->config_file);
+	}
+
+	g_clear_object (&instance->indexing_tree);
+	g_clear_object (&instance->sparql_conn);
+	g_clear_object (&instance->root);
+	g_clear_pointer (&instance->object_path, g_free);
+
+	if (instance->sandbox.subprocess) {
+		g_subprocess_send_signal (instance->sandbox.subprocess, SIGTERM);
+		g_subprocess_wait (instance->sandbox.subprocess, NULL, NULL);
+	}
+
+	g_clear_object (&instance->sandbox.subprocess);
+	g_clear_object (&instance->sandbox.launcher);
+	g_clear_object (&instance->sandbox.dbus_conn);
+
+	g_free (instance);
+}
+
+static IndexerInstance *
+indexer_instance_new_for_mountpoint (TrackerApplication  *app,
+                                     GFile               *mount_point,
+                                     GDBusConnection     *dbus_conn,
+                                     GError             **error)
+{
+	g_autoptr (GFile) store = NULL;
+	IndexerInstance *instance;
+
+	instance = g_new0 (IndexerInstance, 1);
+	instance->app = app;
+	instance->root = g_object_ref (mount_point);
+	instance->controller = app->controller;
+
+	if (!app->dry_run) {
+		store = g_file_get_child (mount_point, ".localsearch3");
+
+		if (g_mkdir_with_parents (g_file_peek_path (store), 0755) < 0) {
+			g_set_error (error,
+			             G_IO_ERROR,
+			             g_io_error_from_errno (errno),
+			             "Could not create database folder");
+			goto error;
+		}
+	}
+
+	if (!setup_connection (app, instance, store, TRUE, error))
+		goto error;
+
+	if (instance->sparql_conn) {
+		instance->indexing_tree = tracker_indexing_tree_new ();
+		tracker_controller_register_indexing_tree (app->controller,
+							   instance->indexing_tree);
+
+		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
+		                                             instance->indexing_tree,
+		                                             app->monitor,
+		                                             instance->root);
+	}
+
+	if (!start_endpoint_thread (instance, dbus_conn, error))
+		goto error;
+
+	tracker_indexing_tree_add (instance->indexing_tree,
+	                           instance->root,
+	                           TRACKER_DIRECTORY_FLAG_RECURSE |
+	                           TRACKER_DIRECTORY_FLAG_IS_VOLUME);
+
+	track_instance_state (app, instance);
+
+	if (store) {
+		instance->config_file = g_file_get_child (store, CONFIG_FILE);
+		tracker_indexing_tree_check_config (instance->indexing_tree,
+		                                    instance->config_file,
+		                                    FALSE);
+	}
+
+	/* Sync paused state */
+	if (app->active_instance)
+		tracker_miner_pause (instance->indexer);
+	if (app->paused_by_clients)
+		tracker_miner_pause (instance->indexer);
+
+	tracker_miner_start (instance->indexer);
+
+	return instance;
+ error:
+	indexer_instance_free (instance);
+	return NULL;
+}
+
+static void
+removable_point_added_cb (TrackerApplication *app,
+                          GFile              *location)
+{
+	IndexerInstance *instance;
+	GDBusConnection *dbus_conn;
+	g_autoptr (GError) error = NULL;
+	g_autofree char *uri = NULL;
+
+	dbus_conn = g_application_get_dbus_connection (G_APPLICATION (app));
+	instance = indexer_instance_new_for_mountpoint (app, location,
+	                                                dbus_conn,
+	                                                &error);
+
+	if (!instance) {
+		g_warning ("Could not index removable point: %s", error->message);
+		return;
+	}
+
+	uri = g_file_get_uri (location);
+	app->removable_instances = g_list_prepend (app->removable_instances,
+	                                           instance);
+	tracker_dbus_miner_emit_endpoint_added (app->indexer_iface, uri,
+	                                        instance->object_path);
+}
+
+static void
+removable_point_removed_cb (TrackerApplication *app,
+                            GFile              *location)
+{
+	GList *l;
+
+	for (l = app->removable_instances; l; l = l->next) {
+		IndexerInstance *instance = l->data;
+		g_autoptr (GFile) root = NULL;
+		g_autofree char *object_path = NULL, *uri = NULL;
+
+		if (!g_file_equal (location, instance->root))
+			continue;
+
+		object_path = g_strdup (instance->object_path);
+		root = g_object_ref (instance->root);
+
+		app->removable_instances = g_list_remove (app->removable_instances,
+		                                          instance);
+		indexer_instance_free (instance);
+
+		uri = g_file_get_uri (root);
+		tracker_dbus_miner_emit_endpoint_removed (app->indexer_iface,
+		                                          uri, object_path);
+		break;
+	}
+}
+
+static gboolean
+dbus_iface_handle_start (TrackerDBusMiner      *dbus_iface,
+                         GDBusMethodInvocation *invocation,
+                         TrackerApplication    *app)
+{
+	g_dbus_method_invocation_return_value (invocation, NULL);
+	tracker_dbus_miner_emit_started (app->indexer_iface);
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_status (TrackerDBusMiner      *dbus_iface,
+                              GDBusMethodInvocation *invocation,
+                              TrackerApplication    *app)
+{
+	char *status = NULL;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "status", &status,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(s)",
+	                                                      status ?
+	                                                      status : "Idle"));
+	g_free (status);
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_progress (TrackerDBusMiner      *dbus_iface,
+                                GDBusMethodInvocation *invocation,
+                                TrackerApplication    *app)
+{
+	double progress = 1;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "progress", &progress,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(d)", progress));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_remaining_time (TrackerDBusMiner      *dbus_iface,
+                                      GDBusMethodInvocation *invocation,
+                                      TrackerApplication    *app)
+{
+	int remaining_time = -1;
+
+	if (app->active_instance) {
+		g_object_get (app->active_instance->indexer,
+		              "remaining-time", &remaining_time,
+		              NULL);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(i)", remaining_time));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_get_pause_details (TrackerDBusMiner      *dbus_iface,
+                                     GDBusMethodInvocation *invocation,
+                                     TrackerApplication    *app)
+{
+	GVariantBuilder apps, reasons;
+	GList *l;
+
+	g_variant_builder_init (&apps, G_VARIANT_TYPE ("as"));
+	g_variant_builder_init (&reasons, G_VARIANT_TYPE ("as"));
+
+	for (l = app->pause_requests; l; l = l->next) {
+		PauseRequest *request = l->data;
+
+		g_variant_builder_add (&apps, "s", request->application);
+		g_variant_builder_add (&reasons, "s", request->reason);
+	}
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(asas)",
+	                                                      &apps, &reasons));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_pause (TrackerDBusMiner      *dbus_iface,
+                         GDBusMethodInvocation *invocation,
+                         const char            *app_name,
+                         const char            *reason,
+                         TrackerApplication    *app)
+{
+	PauseRequest *request;
+
+	request = pause_request_new (app, app_name, reason,
+	                             g_dbus_method_invocation_get_sender (invocation));
+	app->pause_requests = g_list_prepend (app->pause_requests, request);
+
+	sync_client_pause_state (app);
+
+	g_dbus_method_invocation_return_value (invocation,
+	                                       g_variant_new ("(i)", request->cookie_id));
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static gboolean
+dbus_iface_handle_resume (TrackerDBusMiner      *dbus_iface,
+                          GDBusMethodInvocation *invocation,
+                          int                    cookie_id,
+                          TrackerApplication    *app)
+{
+	PauseRequest *request;
+
+	request = find_pause_request (app, cookie_id);
+
+	if (request) {
+		app->pause_requests =
+			g_list_remove (app->pause_requests, request);
+		pause_request_free (request);
+
+		sync_client_pause_state (app);
+
+		g_dbus_method_invocation_return_value (invocation, NULL);
+	} else {
+		g_dbus_method_invocation_return_error (invocation,
+		                                       tracker_miner_error_quark (),
+		                                       TRACKER_MINER_ERROR_INVALID_COOKIE,
+		                                       "Not a valid pause cookie");
+	}
+
+	return G_DBUS_METHOD_INVOCATION_HANDLED;
+}
+
+static void
 tracker_application_finalize (GObject *object)
 {
 	TrackerApplication *app = TRACKER_APPLICATION (object);
 
+	g_clear_list (&app->removable_instances, (GDestroyNotify) indexer_instance_free);
 	shutdown_main_instance (app, &app->main_instance);
+
+	g_clear_list (&app->pause_requests, (GDestroyNotify) pause_request_free);
 
 	g_clear_handle_id (&app->domain_watch_id, g_bus_unwatch_name);
 
 	g_clear_object (&app->files_interface);
 	g_clear_object (&app->controller);
-	g_clear_object (&app->proxy);
-	g_clear_object (&app->storage);
+	g_clear_object (&app->indexer_iface);
 	g_clear_object (&app->systemd_proxy);
 	g_clear_object (&app->monitor);
 
@@ -523,22 +1158,39 @@ tracker_application_dbus_register (GApplication     *application,
 	app->files_interface = tracker_files_interface_new (dbus_conn);
 
 	app->controller = tracker_controller_new (app->main_instance.indexing_tree,
-	                                          app->monitor, app->storage,
+	                                          app->monitor,
 	                                          app->files_interface);
+	g_signal_connect_swapped (app->controller, "removable-point-added",
+	                          G_CALLBACK (removable_point_added_cb), app);
+	g_signal_connect_swapped (app->controller, "removable-point-removed",
+	                          G_CALLBACK (removable_point_removed_cb), app);
 
-	app->proxy = tracker_miner_proxy_new (app->main_instance.indexer,
-	                                      dbus_conn, DBUS_PATH, NULL, error);
-	if (!app->proxy)
+	app->indexer_iface = tracker_dbus_miner_skeleton_new ();
+	g_signal_connect (app->indexer_iface, "handle-start",
+	                  G_CALLBACK (dbus_iface_handle_start), app);
+	g_signal_connect (app->indexer_iface, "handle-get-status",
+	                  G_CALLBACK (dbus_iface_handle_get_status), app);
+	g_signal_connect (app->indexer_iface, "handle-get-progress",
+	                  G_CALLBACK (dbus_iface_handle_get_progress), app);
+	g_signal_connect (app->indexer_iface, "handle-get-remaining-time",
+	                  G_CALLBACK (dbus_iface_handle_get_remaining_time), app);
+	g_signal_connect (app->indexer_iface, "handle-get-pause-details",
+	                  G_CALLBACK (dbus_iface_handle_get_pause_details), app);
+	g_signal_connect (app->indexer_iface, "handle-pause",
+	                  G_CALLBACK (dbus_iface_handle_pause), app);
+	g_signal_connect (app->indexer_iface, "handle-pause-for-process",
+	                  G_CALLBACK (dbus_iface_handle_pause), app);
+	g_signal_connect (app->indexer_iface, "handle-resume",
+	                  G_CALLBACK (dbus_iface_handle_resume), app);
+
+	if (!g_dbus_interface_skeleton_export (G_DBUS_INTERFACE_SKELETON (app->indexer_iface),
+	                                       dbus_conn, DBUS_PATH, error))
 		return FALSE;
 
-	if (!app->dry_run) {
-		g_autoptr (GFile) store, config;
-
-		store = get_cache_dir ();
-		config = g_file_get_child (store, CONFIG_FILE);
-
+	if (app->main_instance.config_file) {
 		tracker_indexing_tree_check_config (app->main_instance.indexing_tree,
-		                                    config);
+		                                    app->main_instance.config_file,
+		                                    TRUE);
 	}
 
 	/* Request legacy DBus name */
@@ -571,7 +1223,6 @@ static gint
 check_eligible (const char *eligible)
 {
 	g_autoptr (TrackerIndexingTree) indexing_tree = NULL;
-	g_autoptr (TrackerStorage) storage = NULL;
 	g_autoptr (TrackerController) controller = NULL;
 	g_autoptr (GFile) file = NULL;
 	g_autoptr (GFileInfo) info = NULL;
@@ -583,9 +1234,8 @@ check_eligible (const char *eligible)
 	gboolean is_dir;
 
 	indexing_tree = tracker_indexing_tree_new ();
-	storage = tracker_storage_new ();
 
-	controller = tracker_controller_new (indexing_tree, NULL, storage, NULL);
+	controller = tracker_controller_new (indexing_tree, NULL, NULL);
 
 	/* Start check */
 	file = g_file_new_for_commandline_arg (eligible);
@@ -716,6 +1366,10 @@ tracker_application_startup (GApplication *application)
 	TrackerApplication *app = TRACKER_APPLICATION (application);
 	gboolean wait_settle = FALSE;
 
+	g_application_hold (application);
+
+	tracker_controller_initialize_removable_devices (app->controller);
+
 	if (app->systemd_proxy) {
 		const char *finished_states[] = { "running", "degraded", NULL };
 		g_autoptr (GVariant) v = NULL;
@@ -747,8 +1401,6 @@ tracker_application_startup (GApplication *application)
 		start_indexer (app);
 	}
 
-	g_application_hold (application);
-
 	G_APPLICATION_CLASS (tracker_application_parent_class)->startup (application);
 }
 
@@ -772,8 +1424,6 @@ tracker_application_init (TrackerApplication *application)
 	g_autoptr (GError) error = NULL;
 
 	g_application_add_main_option_entries (G_APPLICATION (application), entries);
-
-	application->storage = tracker_storage_new ();
 
 	application->monitor = tracker_monitor_new (&error);
 

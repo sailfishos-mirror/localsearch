@@ -100,7 +100,7 @@ check-commit-log:
 
 .tracker-miners.fedora@common:
   variables:
-    BASE_TAG: '2025-11-07.0'
+    BASE_TAG: '2025-11-15.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
     FDO_DISTRIBUTION_PACKAGES: 'clang clang-analyzer python3-dbusmock git libasan libubsan python3-gobject python3-pip umockdev-devel xmlto uncrustify patch diffutils gstreamer1-plugins-good gstreamer1-plugins-bad-free redhat-rpm-config man-db libzip-devel'
     FDO_DISTRIBUTION_EXEC: |
@@ -112,9 +112,9 @@ check-commit-log:
 
 .tracker-miners.alpine@common:
   variables:
-    BASE_TAG: '2025-11-07.0'
+    BASE_TAG: '2025-11-15.0'
     FDO_UPSTREAM_REPO: GNOME/localsearch
-    FDO_DISTRIBUTION_PACKAGES: 'alpine-sdk bash-completion dbus py3-dbusmock git json-glib-dev libsoup3-dev py3-gobject3 py3-setuptools py3-tappy py3-pip mandoc asciidoc dbus-dev enca-dev exempi-dev ffmpeg-dev flac-dev gexiv2-dev giflib-dev glib-dev gobject-introspection-dev gst-plugins-good gst-plugins-bad gst-plugins-base-dev gstreamer-dev icu-dev libcue-dev libgsf-dev libgudev-dev libiptcdata-dev libjpeg-turbo-dev libosinfo-dev libpng-dev libseccomp-dev libvorbis-dev libxml2-dev libzip-dev meson poppler-dev shared-mime-info taglib-dev tiff-dev tinysparql tinysparql-dev totem-pl-parser-dev tzdata upower-dev zlib-dev'
+    FDO_DISTRIBUTION_PACKAGES: 'alpine-sdk bash-completion dbus py3-dbusmock git json-glib-dev libsoup3-dev py3-gobject3 py3-setuptools py3-tappy py3-pip mandoc asciidoc dbus-dev enca-dev exempi-dev ffmpeg-dev flac-dev gexiv2-dev giflib-dev glib-dev gobject-introspection-dev gst-plugins-good gst-plugins-bad gst-plugins-base-dev gstreamer-dev icu-dev libcue-dev libgsf-dev libgudev-dev libiptcdata-dev libjpeg-turbo-dev libosinfo-dev libpng-dev libseccomp-dev libvorbis-dev libxml2-dev libzip-dev meson poppler-dev shared-mime-info taglib-dev tiff-dev libstemmer-dev tinysparql tinysparql-dev totem-pl-parser-dev tzdata upower-dev zlib-dev'
     FDO_DISTRIBUTION_EXEC: |
       pip3 install gcovr &&
       rm -f /usr/share/polkit-1/rules.d/50-default.rules
@@ -234,7 +234,7 @@ check-code-style:
   script:
     - mkdir build
     - cd build
-    - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:avahi=disabled ${BUILD_ARGS}
+    - meson setup .. --prefix=/usr -Db_lto=true -Dtests_tap_protocol=true -Dtinysparql-3.0:docs=false --auto-features=enabled -Dtinysparql-3.0:vapi=disabled -Dtinysparql-3.0:avahi=disabled ${BUILD_ARGS}
     - ninja
   artifacts:
     expire_in: 1 day

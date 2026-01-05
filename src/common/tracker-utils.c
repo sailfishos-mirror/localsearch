@@ -156,3 +156,24 @@ tracker_seconds_to_string (gdouble  seconds_elapsed,
 
 	return str;
 }
+
+char *
+tracker_encode_for_object_path (const char *str)
+{
+	GString *string;
+	int i, len;
+
+	string = g_string_new ("");
+	len = strlen (str);
+
+	for (i = 0; i < len; i++) {
+		if ((str[i] >= 'a' && str[i] <= 'z') ||
+		    (str[i] >= 'A' && str[i] <= 'Z') ||
+		    (str[i] >= '0' && str[i] <= '9'))
+			g_string_append_c (string, str[i]);
+		else
+			g_string_append_printf (string, "_%x", str[i]);
+	}
+
+	return g_string_free_and_steal (string);
+}

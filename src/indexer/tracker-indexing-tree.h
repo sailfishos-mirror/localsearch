@@ -134,7 +134,8 @@ gboolean tracker_indexing_tree_save_config (TrackerIndexingTree  *tree,
                                             GError              **error);
 
 gboolean tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
-                                             GFile               *config);
+                                             GFile               *config,
+                                             gboolean             check_locations);
 
 G_END_DECLS
 

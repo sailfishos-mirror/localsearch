@@ -62,6 +62,7 @@ static GMainLoop *main_loop;
 static TrackerSparqlConnection *conn;
 
 static gchar *filename;
+static char *root;
 static gchar *mime_type;
 static gchar *output_format_name;
 static gboolean version;
@@ -84,6 +85,10 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_INT, &socket_fd,
 	  N_("Socket file descriptor for peer-to-peer communication"),
 	  N_("FD") },
+	{ "root", 0, 0,
+	  G_OPTION_ARG_FILENAME, &root,
+	  N_("Filesystem root of the extracted data"),
+	  N_("FILE") },
 	{ "version", 'V', 0,
 	  G_OPTION_ARG_NONE, &version,
 	  N_("Displays version information"),
@@ -210,7 +215,7 @@ run_standalone (void)
 
 	extract = tracker_extract_new ();
 
-	info = tracker_extract_file_sync (extract, uri, "_:content", mime, &error);
+	info = tracker_extract_file_sync (extract, file, uri, "_:content", mime, &error);
 	if (!info)
 		goto error;
 
@@ -317,6 +322,7 @@ do_main (int argc, char *argv[])
 	g_autoptr (GDBusConnection) connection = NULL;
 	g_autoptr (TrackerExtractPersistence) persistence = NULL;
 	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
+	g_autoptr (GFile) root_file = NULL;
 
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
@@ -401,9 +407,13 @@ do_main (int argc, char *argv[])
 		return EXIT_FAILURE;
 	}
 
+	if (root)
+		root_file = g_file_new_for_commandline_arg (root);
+
 	persistence = tracker_extract_persistence_new ();
 
-	decorator = tracker_decorator_new (sparql_connection, extract, persistence);
+	decorator = tracker_decorator_new (sparql_connection,
+	                                   extract, persistence, root_file);
 
 	tracker_locale_sanity_check ();
 
@@ -453,7 +463,7 @@ main (int argc, char *argv[])
 	/* This makes sure we don't steal all the system's resources */
 	initialize_priority_and_scheduling ();
 
-	if (!tracker_seccomp_init ())
+	if (!tracker_seccomp_init (TRUE))
 		g_assert_not_reached ();
 
 	return do_main (argc, argv);

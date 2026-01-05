@@ -1322,7 +1322,8 @@ compare_directories (TrackerIndexingTree   *tree,
 
 gboolean
 tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
-                                    GFile               *config)
+                                    GFile               *config,
+                                    gboolean             check_locations)
 {
 	TrackerIndexingTreePrivate *priv = tree->priv;
 	g_autoptr (GVariant) variant = NULL;
@@ -1374,24 +1375,26 @@ tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
 	if (n_filters != g_list_length (priv->filter_patterns))
 		goto update;
 
-	if (!compare_directories (tree, variant, "index-single-directories",
-	                          TRACKER_DIRECTORY_FLAG_RECURSE,
-	                          TRACKER_DIRECTORY_FLAG_NONE,
-	                          &n_roots))
-		goto update;
+	if (check_locations) {
+		if (!compare_directories (tree, variant, "index-single-directories",
+		                          TRACKER_DIRECTORY_FLAG_RECURSE,
+		                          TRACKER_DIRECTORY_FLAG_NONE,
+		                          &n_roots))
+			goto update;
 
-	if (!compare_directories (tree, variant, "index-recursive-directories",
-	                          TRACKER_DIRECTORY_FLAG_RECURSE,
-	                          TRACKER_DIRECTORY_FLAG_RECURSE,
-	                          &n_roots))
-		goto update;
+		if (!compare_directories (tree, variant, "index-recursive-directories",
+		                          TRACKER_DIRECTORY_FLAG_RECURSE,
+		                          TRACKER_DIRECTORY_FLAG_RECURSE,
+		                          &n_roots))
+			goto update;
 
-	roots = tracker_indexing_tree_list_roots (tree);
-	cur_n_roots = g_list_length (roots);
-	g_list_free (roots);
+		roots = tracker_indexing_tree_list_roots (tree);
+		cur_n_roots = g_list_length (roots);
+		g_list_free (roots);
 
-	if (n_roots != cur_n_roots)
-		goto update;
+		if (n_roots != cur_n_roots)
+			goto update;
+	}
 
 	/* Everything matches, nothing to do */
 	return TRUE;

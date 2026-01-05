@@ -58,6 +58,7 @@ static gboolean show_stat;
 static gboolean follow;
 static gboolean watch;
 static gchar **terms;
+static char *mount;
 
 static gboolean indexer_paused;
 static int indeterminate_pos = 0;
@@ -73,6 +74,10 @@ static GOptionEntry entries[] = {
 	},
 	{ "watch", 'w', G_OPTION_FLAG_NONE, G_OPTION_ARG_NONE, &watch,
 	  N_("Watch changes to the database in real time (e.g. resources or files being added)"),
+	  NULL
+	},
+	{ "mount", 'm', 0, G_OPTION_ARG_FILENAME, &mount,
+	  N_("Removable device mount point to query"),
 	  NULL
 	},
 	{ G_OPTION_REMAINING, 0, 0,
@@ -109,6 +114,30 @@ print_link (const gchar *url)
 	g_print ("\x1B]8;;%s\a" LINK_STR "\x1B]8;;\a", url);
 }
 
+static TrackerSparqlConnection *
+create_connection (GError **error)
+{
+	TrackerSparqlConnection *connection;
+	g_autofree char *dbus_path = NULL;
+
+	if (mount) {
+		g_autofree char *path = NULL, *encoded_uri = NULL;
+		g_autoptr (GFile) mount_root = NULL;
+
+		mount_root = g_file_new_for_commandline_arg (mount);
+		path = g_file_get_path (mount_root);
+		encoded_uri = tracker_encode_for_object_path (path);
+
+		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
+		                         encoded_uri, NULL);
+	}
+
+	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
+	                                                dbus_path, NULL, error);
+
+	return connection;
+}
+
 static int
 status_stat (void)
 {
@@ -122,8 +151,7 @@ status_stat (void)
 	int longest_class = 0;
 	guint i;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                NULL, NULL, &error);
+	connection = create_connection (&error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
@@ -233,8 +261,7 @@ get_file_and_folder_count (int *files,
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (GError) error = NULL;
 
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                NULL, NULL, &error);
+	connection = create_connection (&error);
 
 	if (files) {
 		*files = 0;
@@ -644,8 +671,7 @@ status_watch (void)
 	g_autoptr (TrackerNotifier) notifier = NULL;
 	g_autoptr (GError) error = NULL;
 
-	sparql_connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                       NULL, NULL, &error);
+	sparql_connection = create_connection (&error);
 
 	if (!sparql_connection) {
 		g_critical ("%s, %s",

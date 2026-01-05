@@ -19,7 +19,7 @@ glib_required = '2.76.0'
 
 want_gexiv2 = get_option('raw').allowed() or get_option('iptc').allowed() or get_option('exif').allowed()
 
-tracker_sparql = dependency('tinysparql-3.0', version: '>=3.8')
+tracker_sparql = dependency('tinysparql-3.0', version: '>=3.10.1')
 dbus = dependency('dbus-1', version: '>= 1.3.1')
 exempi = dependency('exempi-2.0', version: '>= 2.1.0', required: get_option('xmp'))
 gexiv2 = dependency('gexiv2-0.16', required: false)

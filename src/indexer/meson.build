@@ -13,6 +13,13 @@ miner_fs_resources = gnome.compile_resources(
     c_name: 'tracker_miner_fs',
 )
 
+indexer_dbus_sources = gnome.gdbus_codegen(
+    'tracker-dbus-interface',
+    'org.freedesktop.Tracker3.Miner.Files.xml',
+    interface_prefix: 'org.freedesktop.Tracker3',
+    namespace: 'TrackerDBus',
+)
+
 private_sources = [
     'tracker-file-notifier.c',
     'tracker-files-interface.c',
@@ -36,6 +43,7 @@ libtracker_miner_private = static_library(
     'tracker-miner-private',
     miner_fs_resources[0], miner_fs_resources[1],
     miner_fs_enums[0], miner_fs_enums[1],
+    indexer_dbus_sources,
     private_sources,
     dependencies: [tracker_miners_common_dep, tracker_sparql, gmodule],
     c_args: tracker_c_args,
@@ -62,6 +70,20 @@ tracker_miner_fs_deps = [
     tracker_miner_dep,
 ]
 
+executable('localsearch-endpoint-@0@'.format(tracker_api_major),
+    'tracker-endpoint-helper.c',
+    dependencies: [
+        tracker_miners_common_dep,
+        tracker_sparql
+    ],
+    c_args: [
+        tracker_c_args,
+    ],
+    install: true,
+    install_dir: get_option('libexecdir'),
+    install_rpath: tracker_internal_libs_dir,
+)
+
 executable('localsearch-@0@'.format(tracker_api_major),
     sources,
     miner_fs_resources[0], miner_fs_resources[1],
@@ -70,6 +92,7 @@ executable('localsearch-@0@'.format(tracker_api_major),
     c_args: [
         tracker_c_args,
         '-DBUILDROOT="@0@"'.format(meson.global_build_root()),
+        '-DBUILDDIR="@0@"'.format(meson.current_build_dir()),
         '-DBUILD_EXTRACTDIR="@0@"'.format(meson.project_build_root() / 'src' / 'extractor'),
         '-DLIBEXECDIR="@0@"'.format(get_option('prefix') / get_option('libexecdir')),
     ],

@@ -1,0 +1,49 @@
+<node>
+  <interface name='org.freedesktop.Tracker3.Miner'>
+    <method name='Start'>
+    </method>
+    <method name='GetStatus'>
+      <arg type='s' name='status' direction='out' />
+    </method>
+    <method name='GetProgress'>
+      <arg type='d' name='progress' direction='out' />
+    </method>
+    <method name='GetRemainingTime'>
+      <arg type='i' name='remaining_time' direction='out' />
+    </method>
+    <method name='GetPauseDetails'>
+      <arg type='as' name='pause_applications' direction='out' />
+      <arg type='as' name='pause_reasons' direction='out' />
+    </method>
+    <method name='Pause'>
+      <arg type='s' name='application' direction='in' />
+      <arg type='s' name='reason' direction='in' />
+      <arg type='i' name='cookie' direction='out' />
+    </method>
+    <method name='PauseForProcess'>
+      <arg type='s' name='application' direction='in' />
+      <arg type='s' name='reason' direction='in' />
+      <arg type='i' name='cookie' direction='out' />
+    </method>
+    <method name='Resume'>
+      <arg type='i' name='cookie' direction='in' />
+    </method>
+    <signal name='Started' />
+    <signal name='Stopped' />
+    <signal name='Paused' />
+    <signal name='Resumed' />
+    <signal name='Progress'>
+      <arg type='s' name='status' />
+      <arg type='d' name='progress' />
+      <arg type='i' name='remaining_time' />
+    </signal>
+    <signal name='EndpointAdded'>
+      <arg type='s' name='mount_uri' />
+      <arg type='o' name='object_path' />
+    </signal>
+    <signal name='EndpointRemoved'>
+      <arg type='s' name='mount_uri' />
+      <arg type='o' name='object_path' />
+    </signal>
+  </interface>
+</node>

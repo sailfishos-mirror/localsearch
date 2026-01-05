@@ -54,7 +54,8 @@ struct _TrackerSparqlBufferClass
 GType                tracker_sparql_buffer_get_type (void) G_GNUC_CONST;
 
 TrackerSparqlBuffer *tracker_sparql_buffer_new   (TrackerSparqlConnection *connection,
-                                                  guint                    limit);
+                                                  guint                    limit,
+                                                  GFile                   *root);
 
 gboolean             tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
                                                   const gchar         *reason,

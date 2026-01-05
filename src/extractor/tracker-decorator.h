@@ -36,7 +36,8 @@ G_DECLARE_FINAL_TYPE (TrackerDecorator,
 
 TrackerDecorator * tracker_decorator_new (TrackerSparqlConnection   *connection,
                                           TrackerExtract            *extract,
-                                          TrackerExtractPersistence *persistence);
+                                          TrackerExtractPersistence *persistence,
+                                          GFile                     *root);
 
 void tracker_decorator_set_priority_graphs (TrackerDecorator    *decorator,
                                             const gchar * const *graphs);

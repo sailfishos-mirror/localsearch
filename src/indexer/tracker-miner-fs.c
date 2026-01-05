@@ -88,6 +88,9 @@ struct _TrackerMinerFSPrivate {
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
 
+	/* Root for relative URIs */
+	GFile *root;
+
 	/* Sparql insertion tasks */
 	TrackerSparqlBuffer *sparql_buffer;
 
@@ -101,6 +104,7 @@ struct _TrackerMinerFSPrivate {
 	GTimer *timer;
 	GTimer *extraction_timer;
 
+	guint active : 1;
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
 
@@ -139,6 +143,8 @@ enum {
 	PROP_THROTTLE,
 	PROP_INDEXING_TREE,
 	PROP_MONITOR,
+	PROP_ROOT,
+	PROP_ACTIVE,
 	N_PROPS,
 };
 
@@ -251,6 +257,18 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ROOT] =
+		g_param_spec_object ("root", NULL, NULL,
+		                     G_TYPE_FILE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ACTIVE] =
+		g_param_spec_boolean ("active", NULL, NULL,
+		                      FALSE,
+		                      G_PARAM_READWRITE |
+		                      G_PARAM_EXPLICIT_NOTIFY |
+		                      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 
@@ -473,7 +491,8 @@ fs_constructed (GObject *object)
 	                  object);
 
 	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 BUFFER_POOL_LIMIT);
+	                                                 BUFFER_POOL_LIMIT,
+	                                                 priv->root);
 	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
 	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
 	                  object);
@@ -481,7 +500,8 @@ fs_constructed (GObject *object)
 	/* Create the file notifier */
 	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
 	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 priv->monitor);
+	                                                 priv->monitor,
+	                                                 priv->root);
 
 	g_signal_connect (priv->file_notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created),
@@ -530,6 +550,12 @@ fs_set_property (GObject      *object,
 	case PROP_MONITOR:
 		priv->monitor = g_value_dup_object (value);
 		break;
+	case PROP_ROOT:
+		priv->root = g_value_dup_object (value);
+		break;
+	case PROP_ACTIVE:
+		priv->active = g_value_get_boolean (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -552,6 +578,9 @@ fs_get_property (GObject    *object,
 		break;
 	case PROP_INDEXING_TREE:
 		g_value_set_object (value, priv->indexing_tree);
+		break;
+	case PROP_ACTIVE:
+		g_value_set_boolean (value, priv->active);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -624,6 +653,20 @@ miner_resumed (TrackerMiner *miner)
 }
 
 static void
+set_active (TrackerMinerFS *fs,
+            gboolean        active)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	if (priv->active == !!active)
+		return;
+
+	priv->active = !!active;
+	g_object_notify (G_OBJECT (fs), "active");
+}
+
+static void
 process_stop (TrackerMinerFS *fs)
 {
 	TrackerMinerFSPrivate *priv =
@@ -637,6 +680,7 @@ process_stop (TrackerMinerFS *fs)
 
 	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
 
+	set_active (fs, FALSE);
 	g_signal_emit (fs, signals[FINISHED], 0);
 }
 
@@ -1103,6 +1147,7 @@ queue_handler_set_up (TrackerMinerFS *fs)
 	}
 
 	priv->item_queues_handler_id = source_id;
+	set_active (fs, TRUE);
 }
 
 static void
@@ -1478,4 +1523,24 @@ tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 
 	return priv->indexing_tree;
+}
+
+GFile *
+tracker_miner_fs_get_root (TrackerMinerFS *fs)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	return priv->root;
+}
+
+char *
+tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
+                                        GFile          *file)
+{
+	TrackerMinerFSPrivate *priv =
+		tracker_miner_fs_get_instance_private (fs);
+
+	return tracker_file_notifier_get_file_resource_uri (priv->file_notifier,
+	                                                    file);
 }

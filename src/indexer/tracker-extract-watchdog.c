@@ -28,6 +28,8 @@
 
 #define REMOTE_FD_NUMBER 3
 
+#define EXECUTABLE_NAME "localsearch-extractor-3"
+
 enum {
 	STATUS,
 	LOST,
@@ -40,6 +42,7 @@ enum {
 	PROP_0,
 	PROP_SPARQL_CONN,
 	PROP_INDEXING_TREE,
+	PROP_ROOT,
 	N_PROPS,
 };
 
@@ -55,6 +58,7 @@ struct _TrackerExtractWatchdog {
 	TrackerEndpoint *endpoint;
 	TrackerFilesInterface *files_interface;
 	TrackerIndexingTree *indexing_tree;
+	GFile *root;
 	guint progress_signal_id;
 	guint error_signal_id;
 	int persistence_fd;
@@ -193,6 +197,7 @@ tracker_extract_watchdog_finalize (GObject *object)
 
 	g_clear_object (&watchdog->sparql_conn);
 	g_clear_object (&watchdog->indexing_tree);
+	g_clear_object (&watchdog->root);
 
 	G_OBJECT_CLASS (tracker_extract_watchdog_parent_class)->finalize (object);
 }
@@ -211,6 +216,9 @@ tracker_extract_watchdog_set_property (GObject      *object,
 		break;
 	case PROP_INDEXING_TREE:
 		watchdog->indexing_tree = g_value_dup_object (value);
+		break;
+	case PROP_ROOT:
+		watchdog->root = g_value_dup_object (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -254,6 +262,12 @@ tracker_extract_watchdog_class_init (TrackerExtractWatchdogClass *klass)
 		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
+	props[PROP_ROOT] =
+		g_param_spec_object ("root", NULL, NULL,
+		                     G_TYPE_FILE,
+		                     G_PARAM_WRITABLE |
+		                     G_PARAM_CONSTRUCT_ONLY |
+		                     G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
 }
@@ -267,11 +281,13 @@ tracker_extract_watchdog_init (TrackerExtractWatchdog *watchdog)
 
 TrackerExtractWatchdog *
 tracker_extract_watchdog_new (TrackerSparqlConnection *sparql_conn,
-                              TrackerIndexingTree     *indexing_tree)
+                              TrackerIndexingTree     *indexing_tree,
+                              GFile                   *root)
 {
 	return g_object_new (TRACKER_TYPE_EXTRACT_WATCHDOG,
 	                     "sparql-conn", sparql_conn,
 	                     "indexing-tree", indexing_tree,
+	                     "root", root,
 	                     NULL);
 }
 
@@ -392,7 +408,7 @@ extractor_child_setup (gpointer user_data)
 #ifdef HAVE_LANDLOCK
 	const gchar * const *indexed_folders = user_data;
 
-	if (!tracker_landlock_init (indexed_folders)) {
+	if (!tracker_landlock_init (EXECUTABLE_NAME, indexed_folders, NULL)) {
 		g_critical ("Refusing to extract file data since Landlock could not be enabled. "
 		            "Update your kernel to fix this warning.");
 		_exit (0);
@@ -473,6 +489,8 @@ tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 {
 	g_autoptr (GError) error = NULL;
 	g_autofree gchar *current_dir = NULL;
+	g_autoptr (GStrvBuilder) strv_builder = NULL;
+	g_auto (GStrv) arguments = NULL;
 	const gchar *extract_path;
 
 	if (watchdog->extract_process) {
@@ -501,16 +519,29 @@ tracker_extract_watchdog_ensure_started (TrackerExtractWatchdog *watchdog)
 	current_dir = g_get_current_dir ();
 
 	if (g_strcmp0 (current_dir, BUILDROOT) == 0)
-		extract_path = BUILD_EXTRACTDIR "/localsearch-extractor-3";
+		extract_path = BUILD_EXTRACTDIR "/" EXECUTABLE_NAME;
 	else
-		extract_path = LIBEXECDIR "/localsearch-extractor-3";
+		extract_path = LIBEXECDIR "/" EXECUTABLE_NAME;
+
+	strv_builder = g_strv_builder_new ();
+	g_strv_builder_add (strv_builder, extract_path);
+	g_strv_builder_add_many (strv_builder,
+				 "--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),
+				 NULL);
+
+	if (watchdog->root) {
+		g_autofree char *root_uri = g_file_get_uri (watchdog->root);
+		g_strv_builder_add_many (strv_builder,
+		                         "--root", root_uri,
+		                         NULL);
+	}
+
+	arguments = g_strv_builder_end (strv_builder);
 
 	watchdog->extract_process =
-		g_subprocess_launcher_spawn (watchdog->launcher,
-		                             &error,
-		                             extract_path,
-		                             "--socket-fd", G_STRINGIFY (REMOTE_FD_NUMBER),
-		                             NULL);
+		g_subprocess_launcher_spawnv (watchdog->launcher,
+		                              (const char * const *) arguments,
+		                              &error);
 
 	if (watchdog->extract_process) {
 		g_subprocess_wait_check_async (watchdog->extract_process,

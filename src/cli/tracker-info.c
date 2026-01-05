@@ -57,6 +57,7 @@ static gchar **filenames;
 static gboolean full_namespaces;
 static gboolean plain_text_content;
 static char *output_format = NULL;
+static char *mount = NULL;
 static gboolean eligible;
 
 static gboolean output_is_tty;
@@ -75,6 +76,9 @@ static GOptionEntry entries[] = {
 	  N_("FORMAT") },
 	{ "eligible", 'e', 0, G_OPTION_ARG_NONE, &eligible,
 	  N_("Checks if FILE is eligible for being indexed"),
+	  NULL },
+	{ "mount", 'm', 0, G_OPTION_ARG_FILENAME, &mount,
+	  N_("Removable device mount point to query"),
 	  NULL },
 	{ G_OPTION_REMAINING, 0, 0, G_OPTION_ARG_FILENAME_ARRAY, &filenames,
 	  N_("FILE"),
@@ -326,14 +330,27 @@ info_run (void)
 {
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (GError) error = NULL;
+	g_autoptr (GFile) mount_root = NULL;
+	g_autofree char *dbus_path = NULL;
 	GList *urns = NULL;
 	gchar **p;
 	int retval = EXIT_FAILURE;
 
 	tracker_term_pipe_to_pager ();
 
+	if (mount) {
+		g_autofree char *path = NULL, *encoded_uri = NULL;
+
+		mount_root = g_file_new_for_commandline_arg (mount);
+		path = g_file_get_path (mount_root);
+		encoded_uri = tracker_encode_for_object_path (path);
+
+		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
+		                         encoded_uri, NULL);
+	}
+
 	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                NULL, NULL, &error);
+	                                                dbus_path, NULL, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
@@ -357,7 +374,11 @@ info_run (void)
 			g_autoptr (GFile) file = NULL;
 
 			file = g_file_new_for_commandline_arg (*p);
-			uri = g_file_get_uri (file);
+
+			if (mount_root)
+				uri = tracker_file_get_relative_uri (file, mount_root);
+			else
+				uri = g_file_get_uri (file);
 		}
 
 		stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
