@@ -7,10 +7,11 @@ edit_uri: blob/main/docs/reference
 use_directory_urls: false
 
 nav:
-  - Overview: 'index.md'
-  - SPARQL Endpoint: 'endpoint.md'
+  - Overview: 'overview.md'
+  - Indexed data: 'indexed-data.md'
+  - Querying LocalSearch: 'endpoint.md'
   - Miscellaneous D-Bus API: 'dbus-api.md'
-  - Command Line: 'commandline.md'
+  - Commandline reference: 'commandline.md'
   - Handling of corrupted databases: 'corruption.md'
 
 theme:

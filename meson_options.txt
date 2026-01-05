@@ -21,10 +21,10 @@ option('domain_prefix', type: 'string', value: 'org.freedesktop',
 option('miner_fs_cache_location', type: 'string', value: '',
        description: 'Location of the miner cache')
 option('default_index_recursive_dirs', type: 'array',
-       value: [ '&DESKTOP', '&DOCUMENTS', '&MUSIC', '&PICTURES', '&VIDEOS' ],
+       value: [ '$HOME' ],
        description: 'List of directories to index recursively')
 option('default_index_single_dirs', type: 'array',
-       value: [ '$HOME', '&DOWNLOAD' ],
+       value: [ ],
        description: 'List of directories to index without inspecting subfolders')
 
 option('fanotify', type: 'feature', value: 'auto',
