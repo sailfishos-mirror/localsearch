@@ -1,14 +1,14 @@
 # Norwegian bokmål translation of tracker.
 # Copyright (C) 2010 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the tracker package.
-# Kjartan Maraas <kmaraas@gnome.org>, 2007-2017.
+# Kjartan Maraas <kmaraas@gnome.org>, 2007-2025.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker 1.13.x\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=tracker&keywords=I18N+L10N&component=Miners\n"
-"POT-Creation-Date: 2017-08-10 22:45+0000\n"
-"PO-Revision-Date: 2017-11-20 19:28+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
+"POT-Creation-Date: 2025-12-10 21:07+0000\n"
+"PO-Revision-Date: 2026-01-08 17:29+0100\n"
 "Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: nb\n"
@@ -17,479 +17,27 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: ../src/libtracker-common/tracker-utils.c:90
-msgid "unknown time"
-msgstr "ukjent tid"
-
-#: ../src/libtracker-common/tracker-utils.c:104
-#: ../src/libtracker-common/tracker-utils.c:155
-msgid "less than one second"
-msgstr "mindre enn ett sekund"
-
-#. Translators: this is %d days
-#: ../src/libtracker-common/tracker-utils.c:119
-#, c-format
-msgid " %dd"
-msgstr "%dd"
-
-#. Translators: this is %2.2d hours
-#: ../src/libtracker-common/tracker-utils.c:123
-#, c-format
-msgid " %2.2dh"
-msgstr "%2.2dt"
-
-#. Translators: this is %2.2d minutes
-#: ../src/libtracker-common/tracker-utils.c:127
-#, c-format
-msgid " %2.2dm"
-msgstr "%2.2dm"
-
-#. Translators: this is %2.2d seconds
-#: ../src/libtracker-common/tracker-utils.c:131
-#, c-format
-msgid " %2.2ds"
-msgstr "%2.2ds"
-
-#: ../src/libtracker-common/tracker-utils.c:135
-#, c-format
-msgid " %d day"
-msgid_plural " %d days"
-msgstr[0] "%d dag"
-msgstr[1] "%d dager"
-
-#: ../src/libtracker-common/tracker-utils.c:139
-#, c-format
-msgid " %2.2d hour"
-msgid_plural " %2.2d hours"
-msgstr[0] "%2.2d time"
-msgstr[1] "%2.2d timer"
-
-#: ../src/libtracker-common/tracker-utils.c:143
-#, c-format
-msgid " %2.2d minute"
-msgid_plural " %2.2d minutes"
-msgstr[0] "%2.2d minutt"
-msgstr[1] "%2.2d minutter"
-
-#: ../src/libtracker-common/tracker-utils.c:147
-#, c-format
-msgid " %2.2d second"
-msgid_plural " %2.2d seconds"
-msgstr[0] "%2.2d sekund"
-msgstr[1] "%2.2d sekunder"
-
-#: ../src/miners/apps/org.freedesktop.Tracker1.Miner.Applications.service.in.in.h:1
-msgid "Applications"
-msgstr "Programmer"
-
-#: ../src/miners/apps/org.freedesktop.Tracker1.Miner.Applications.service.in.in.h:2
-msgid "Applications data miner"
-msgstr "Datagraver for programmer"
-
-#: ../src/miners/apps/tracker-main.c:60 ../src/miners/fs/tracker-main.c:77
-#: ../src/miners/rss/tracker-main.c:43
-#: ../src/tracker-writeback/tracker-main.c:55
-msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
-msgstr ""
-
-#: ../src/miners/apps/tracker-main.c:65
-msgid "Runs until all applications are indexed and then exits"
-msgstr "Kjører til alle programmer er indeksert og avslutter"
-
-#: ../src/miners/apps/tracker-main.c:69 ../src/miners/fs/tracker-main.c:95
-#: ../src/miners/rss/tracker-main.c:57
-#: ../src/tracker-extract/tracker-main.c:101
-msgid "Runs for a specific domain ontology"
-msgstr ""
-
-#: ../src/miners/apps/tracker-main.c:73 ../src/miners/fs/tracker-main.c:99
-#: ../src/tracker-extract/tracker-main.c:105
-#: ../src/tracker-writeback/tracker-main.c:51
-msgid "Displays version information"
-msgstr "Vis versjonsinformasjon"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: ../src/miners/apps/tracker-main.c:205
-msgid "— start the application data miner"
-msgstr "– start datagraver for programmer"
-
-#: ../src/miners/apps/tracker-miner-apps.desktop.in.in.h:1
-msgid "Tracker Application Miner"
-msgstr "Tracker datagraver for programmer"
-
-#: ../src/miners/apps/tracker-miner-apps.desktop.in.in.h:2
-msgid "Indexes information about applications installed"
-msgstr "Indekserer informasjon om installerte programmer"
-
-#: ../src/miners/fs/org.freedesktop.Tracker1.Miner.Files.service.in.in.h:1
-msgid "File System"
-msgstr "Filsystem"
-
-#: ../src/miners/fs/org.freedesktop.Tracker1.Miner.Files.service.in.in.h:2
-msgid "File system data miner"
-msgstr "Filsystem datagraver"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:1
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:1
-#: ../src/tracker-writeback/org.freedesktop.Tracker.Writeback.gschema.xml.in.h:1
-msgid "Log verbosity"
-msgstr "Detaljgrad for logg"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:2
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:2
-#: ../src/tracker-writeback/org.freedesktop.Tracker.Writeback.gschema.xml.in.h:2
-msgid "Log verbosity."
-msgstr "Detaljgrad for logg."
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:3
-msgid "Initial sleep"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:4
-msgid "Initial sleep time, in seconds."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:5
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:3
-msgid "Scheduler priority when idle"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:6
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:4
-msgid ""
-"The scheduler is the kernel component that decides which runnable "
-"application will be executed by the CPU next. Each application has an "
-"associated scheduling policy and priority."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:7
-msgid "Throttle"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:8
-msgid "Indexing speed, the higher the slower."
-msgstr "Indekseringshastighet, høyere er tregere."
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:9
-msgid "Low disk space limit"
-msgstr "Grense for lite diskplass"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:10
-msgid ""
-"Disk space threshold in percent at which to pause indexing, or -1 to disable."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:11
-msgid "Crawling interval"
-msgstr "Graveintervall"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:12
-msgid ""
-"Interval in days to check whether the filesystem is up to date in the "
-"database. 0 forces crawling anytime, -1 forces it only after unclean "
-"shutdowns, and -2 disables it entirely."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:13
-msgid "Removable devices’ data permanence threshold"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:14
-msgid ""
-"Threshold in days after which files from removables devices will be removed "
-"from database if not mounted. 0 means never, maximum is 365."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:15
-msgid "Enable monitors"
-msgstr "Slå på overvåkin"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:16
-msgid "Set to false to completely disable any file monitoring"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:17
-msgid "Enable writeback"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:18
-msgid "Set to false to completely disable any file writeback"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:19
-msgid "Index removable devices"
-msgstr "Indekser flyttbare enheter"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:20
-msgid ""
-"Set to true to enable indexing mounted directories for removable devices."
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:21
-msgid "Index optical discs"
-msgstr "Indekser optiske plater"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:22
-msgid ""
-"Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-"removable devices are not indexed, optical discs won’t be either)"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:23
-msgid "Index when running on battery"
-msgstr "Indekser når datamaskinen kjører på batteri"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:24
-msgid "Set to true to index while running on battery"
-msgstr "Sett til «true» for å indeksere på batteristrøm"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:25
-msgid "Perform initial indexing when running on battery"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:26
-msgid "Set to true to index while running on battery for the first time only"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:27
-msgid "Directories to index recursively"
-msgstr "Kataloger som skal indekseres rekursivt"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:28
-msgid ""
-"List of directories to index recursively, Special values include: &amp;"
-"DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;PICTURES, &amp;"
-"PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/xdg/user-dirs.defaults "
-"and $HOME/.config/user-dirs.default"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:29
-msgid "Directories to index non-recursively"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:30
-msgid ""
-"List of directories to index without inspecting subfolders, Special values "
-"include: &amp;DESKTOP, &amp;DOCUMENTS, &amp;DOWNLOAD, &amp;MUSIC, &amp;"
-"PICTURES, &amp;PUBLIC_SHARE, &amp;TEMPLATES, &amp;VIDEOS. See /etc/xdg/user-"
-"dirs.defaults and $HOME/.config/user-dirs.default"
-msgstr ""
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:31
-msgid "Ignored files"
-msgstr "Ignorerte filer"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:32
-msgid "List of file patterns to avoid"
-msgstr "Liste med filmønstre som skal unngås"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:33
-msgid "Ignored directories"
-msgstr "Ignorerte mapper"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:34
-msgid "List of directories to avoid"
-msgstr "Liste med mapper som skal unngås"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:35
-msgid "Ignored directories with content"
-msgstr "Ignorerte mapper med innhold"
-
-#: ../src/miners/fs/org.freedesktop.Tracker.Miner.Files.gschema.xml.in.h:36
-msgid "Avoid any directory containing a file blacklisted here"
-msgstr ""
-
-#: ../src/miners/fs/tracker-main.c:82
-msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-msgstr ""
-
-#: ../src/miners/fs/tracker-main.c:87
-msgid "Runs until all configured locations are indexed and then exits"
-msgstr ""
-
-#: ../src/miners/fs/tracker-main.c:91
-msgid "Checks if FILE is eligible for being mined based on configuration"
-msgstr ""
-
-#: ../src/miners/fs/tracker-main.c:92 ../src/tracker-extract/tracker-main.c:87
-msgid "FILE"
-msgstr "FIL"
-
-#: ../src/miners/fs/tracker-main.c:460
-#, c-format
-msgid "Data object “%s” currently exists"
-msgstr "Dataobjekt «%s» eksisterer allerede"
-
-#: ../src/miners/fs/tracker-main.c:461
-#, c-format
-msgid "Data object “%s” currently does not exist"
-msgstr "Dataobjekt «%s» eksisterer ikke"
-
-#: ../src/miners/fs/tracker-main.c:476
-msgid "Directory is eligible to be mined (based on rules)"
-msgstr "Katalogen er kvalifisert for utgraving (basert på regler)"
-
-#: ../src/miners/fs/tracker-main.c:477
-msgid "Directory is NOT eligible to be mined (based on rules)"
-msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
-
-#: ../src/miners/fs/tracker-main.c:497
-msgid "Directory is eligible to be mined (based on contents)"
-msgstr "Katalogen er kvalifisert for utgraving (basert på innhold)"
-
-#: ../src/miners/fs/tracker-main.c:498
-msgid "Directory is NOT eligible to be mined (based on contents)"
-msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på innhold)"
-
-#: ../src/miners/fs/tracker-main.c:545
-msgid "Directory is eligible to be monitored (based on config)"
-msgstr "Katalogen er kvalifisert for overvåking (basert på konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:546
-msgid "Directory is NOT eligible to be monitored (based on config)"
-msgstr "Katalogen er IKKE kvalifisert for overvåking (basert på konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:550
-msgid "File is eligible to be monitored (based on config)"
-msgstr "Filen er kvalifisert for overvåking (basert på konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:551
-msgid "File is NOT eligible to be monitored (based on config)"
-msgstr "Filen er IKKE kvalifisert for overvåking (basert på konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:555
-msgid "File or Directory is eligible to be monitored (based on config)"
-msgstr ""
-"Fil eller katalog er kvalifisert for overvåking (basert på konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:556
-msgid "File or Directory is NOT eligible to be monitored (based on config)"
-msgstr ""
-"Fil eller katalog er IKKE kvalifisert for overvåking (basert på "
-"konfigurasjon)"
-
-#: ../src/miners/fs/tracker-main.c:571
-msgid "File is eligible to be mined (based on rules)"
-msgstr "Filen er kvalifisert for utgraving (basert på regler)"
-
-#: ../src/miners/fs/tracker-main.c:572
-msgid "File is NOT eligible to be mined (based on rules)"
-msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
-
-#: ../src/miners/fs/tracker-main.c:581
-msgid "Would be indexed"
-msgstr "Vil bli indeksert"
-
-#: ../src/miners/fs/tracker-main.c:582 ../src/miners/fs/tracker-main.c:584
-msgid "Yes"
-msgstr "Ja"
-
-#: ../src/miners/fs/tracker-main.c:582 ../src/miners/fs/tracker-main.c:584
-msgid "No"
-msgstr "Nei"
-
-#: ../src/miners/fs/tracker-main.c:583
-msgid "Would be monitored"
-msgstr "Ville blitt overvåket"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: ../src/miners/fs/tracker-main.c:715
-msgid "— start the tracker indexer"
-msgstr "– start tracker indeksering"
-
-#: ../src/miners/fs/tracker-miner-fs.desktop.in.in.h:1
-msgid "Tracker File System Miner"
-msgstr "Tracker filsystemgraver"
-
-#: ../src/miners/fs/tracker-miner-fs.desktop.in.in.h:2
-msgid "Crawls and processes files on the file system"
-msgstr "Graver etter og prosesserer filer i filsystemet"
-
-#: ../src/miners/rss/org.freedesktop.Tracker1.Miner.RSS.service.in.in.h:1
-msgid "RSS/ATOM Feeds"
-msgstr "RSS/ATOM-strømmer"
-
-#: ../src/miners/rss/org.freedesktop.Tracker1.Miner.RSS.service.in.in.h:2
-msgid "Fetch RSS/ATOM Feeds"
-msgstr "Hent RSS/ATOM-strømmer"
-
-#. Translators: this is a "feed" as in RSS
-#: ../src/miners/rss/tracker-main.c:49
-msgid "Add feed"
-msgstr "Legg til strøm"
-
-#: ../src/miners/rss/tracker-main.c:50
-msgid "URL"
-msgstr "URL"
-
-#: ../src/miners/rss/tracker-main.c:53
-msgid "Title to use (must be used with --add-feed)"
-msgstr "Tittel som skal brukes (må brukes sammen med --add-feed)"
-
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: ../src/miners/rss/tracker-main.c:94
-msgid "— start the feeds indexer"
-msgstr "– start indeksering av strømmer"
-
-#: ../src/miners/rss/tracker-main.c:128
-msgid "Could not establish a connection to Tracker"
-msgstr "Kunne ikke etablere en tilkobling til Tracker"
-
-#: ../src/miners/rss/tracker-main.c:129
-msgid "No error given"
-msgstr "Ingen feil oppgitt"
-
-#: ../src/miners/rss/tracker-main.c:156
-msgid "Could not add feed"
-msgstr "Kunne ikke legge til strøm"
-
-#: ../src/miners/rss/tracker-miner-rss.desktop.in.in.h:1
-msgid "Tracker RSS/ATOM Feeds Miner"
-msgstr "Tracker graver for RSS/ATOM-strømmer"
-
-#: ../src/miners/rss/tracker-miner-rss.desktop.in.in.h:2
-msgid "Fetch RSS/ATOM feeds"
-msgstr "Hent RSS/ATOM-strømmer"
-
-#: ../src/tracker-extract/org.freedesktop.Tracker1.Miner.Extract.service.in.in.h:1
-msgid "Extractor"
-msgstr "Uthenter"
-
-#: ../src/tracker-extract/org.freedesktop.Tracker1.Miner.Extract.service.in.in.h:2
-msgid "Metadata extractor"
-msgstr "Metadatauthenter"
-
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:5
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
 msgstr "Maks antal bytes som skal hentes ut"
 
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:6
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:24
 msgid "Maximum number of UTF-8 bytes to extract."
 msgstr "Maksimalt antall UTF-8 bytes som skal hentes ut."
 
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:7
-msgid "Max media art width"
-msgstr "Maksimal bredde på bildekunst"
-
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:8
-msgid ""
-"Maximum width in pixels for any media art extracted. Anything bigger is "
-"resized. Set to -1 to disable saving media art from files. Setting to 0 sets "
-"no limit on the media art width."
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:30
+msgid "Text file allowlist"
 msgstr ""
 
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:9
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:31
+msgid "Filename patterns for plain text documents that should be indexed"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:37
 msgid "Wait for FS miner to be done before extracting"
 msgstr ""
 
-#: ../src/tracker-extract/org.freedesktop.Tracker.Extract.gschema.xml.in.h:10
+#: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
 "crawling before extracting meta-data. This option is useful on constrained "
@@ -497,81 +45,859 @@ msgid ""
 "wait to get meta-data later."
 msgstr ""
 
-#: ../src/tracker-extract/tracker-extract.c:685
-msgid "Metadata extraction failed"
-msgstr "Uthenting av metadata feilet"
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:24
+#, fuzzy
+#| msgid "Enable monitors"
+msgid "Enable stemmer"
+msgstr "Slå på overvåkin"
 
-#: ../src/tracker-extract/tracker-extract.c:751
-msgid "No metadata or extractor modules found to handle this file"
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:25
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:31
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:37
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:24
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:31
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:38
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:45
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:52
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:71
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:77
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:83
+msgid "This setting is deprecated"
 msgstr ""
-"Ingen metadata eller uthentingsmoduler funnet for håndtering av denne filen"
 
-#: ../src/tracker-extract/tracker-main.c:81
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:30
+msgid "Enable unaccent"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.FTS.gschema.xml:36
+msgid "Ignore numbers"
+msgstr "Ignorer tall"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:23
+msgid "Initial sleep"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:30
+msgid "Throttle"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:37
+msgid "Low disk space limit"
+msgstr "Grense for lite diskplass"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:44
+msgid "Crawling interval"
+msgstr "Graveintervall"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:51
+msgid "Removable devices’ data permanence threshold"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:58
+msgid "Enable monitors"
+msgstr "Slå på overvåkin"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:59
+msgid "Set to false to completely disable any file monitoring"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:64
+msgid "Index removable devices"
+msgstr "Indekser flyttbare enheter"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:65
 msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default = "
-"0)"
+"Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
-"Logging, 0 = kun feil, 1 = minimal, 2 = detaljert og 3 = feilsøking (forvalg "
-"= 0)"
 
-#: ../src/tracker-extract/tracker-main.c:86
-msgid "File to extract metadata for"
-msgstr "Fil som det skal hentes metadata for"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:70
+msgid "Index optical discs"
+msgstr "Indekser optiske plater"
 
-#: ../src/tracker-extract/tracker-main.c:90
-msgid "MIME type for file (if not provided, this will be guessed)"
-msgstr "MIME-type for filen (hvis ikke oppgitt vil den bli gjettet)"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:76
+msgid "Index when running on battery"
+msgstr "Indekser når datamaskinen kjører på batteri"
 
-#: ../src/tracker-extract/tracker-main.c:91
-msgid "MIME"
-msgstr "MIME"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:82
+msgid "Perform initial indexing when running on battery"
+msgstr ""
 
-#: ../src/tracker-extract/tracker-main.c:94
-msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-msgstr "Tving en modul for bruk ved uthenting (f.eks. «foo» for «foo.so»)"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:88
+msgid "Directories to index recursively"
+msgstr "Kataloger som skal indekseres rekursivt"
 
-#: ../src/tracker-extract/tracker-main.c:95
-msgid "MODULE"
-msgstr "MODUL"
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:91
+msgid ""
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
 
-#: ../src/tracker-extract/tracker-main.c:97
-msgid "Output results format: “sparql”, or “turtle”"
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
+msgid "Directories to index non-recursively"
+msgstr ""
+
+#. Translators: Do NOT translate the directories names in capital. Those
+#. are keys used by Tracker.
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:105
+msgid ""
+"List of directories to index without inspecting subfolders, Special values "
+"include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
+msgstr ""
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
+msgid "Ignored files"
+msgstr "Ignorerte filer"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:117
+msgid "List of file patterns to avoid"
+msgstr "Liste med filmønstre som skal unngås"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:122
+msgid "Ignored directories"
+msgstr "Ignorerte mapper"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:123
+msgid "List of directories to avoid"
+msgstr "Liste med mapper som skal unngås"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:128
+msgid "Ignored directories with content"
+msgstr "Ignorerte mapper med innhold"
+
+#: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:129
+msgid "Avoid any directory containing a file blocklisted here"
+msgstr ""
+
+#: src/cli/main.c:68
+msgid "Show help on subcommands"
+msgstr ""
+
+#: src/cli/main.c:69
+#, fuzzy
+#| msgid "Metadata extractor"
+msgid "Show metadata extractor output"
+msgstr "Metadatauthenter"
+
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
+msgid "List and change indexed folders"
+msgstr ""
+
+#: src/cli/main.c:71 src/cli/tracker-info.c:543
+msgid "Retrieve information available for files and resources"
+msgstr ""
+
+#: src/cli/main.c:72 src/cli/tracker-inhibit.c:98
+msgid "Inhibit indexing temporarily"
+msgstr ""
+
+#: src/cli/main.c:73 src/cli/tracker-reset.c:202
+msgid "Erase the indexed data"
+msgstr ""
+
+#: src/cli/main.c:74 src/cli/tracker-search.c:397
+msgid "Search for content"
+msgstr ""
+
+#: src/cli/main.c:75 src/cli/tracker-status.c:748
+msgid "Provide status and statistics on the data indexed"
+msgstr ""
+
+#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+msgid "Add, remove and list tags"
+msgstr ""
+
+#: src/cli/main.c:77
+msgid "Sandbox for a testing environment"
+msgstr ""
+
+#: src/cli/main.c:122
+msgid "Available localsearch commands are:"
+msgstr ""
+
+#: src/cli/main.c:141
+msgid "See “localsearch help <command>” to read about a specific subcommand."
+msgstr ""
+
+#: src/cli/main.c:184
+#, c-format
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr ""
+
+#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
+#: src/extractor/tracker-main.c:81
+#, fuzzy
+#| msgid "Output results format: “sparql”, or “turtle”"
+msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Format for utdataresultat: «sparql» eller «turtle»"
 
-#: ../src/tracker-extract/tracker-main.c:98
+#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: ../src/tracker-extract/tracker-main.c:271
+#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
+#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
+#: src/indexer/tracker-application.c:58
+msgid "FILE"
+msgstr "FIL"
+
+#: src/cli/tracker-extract.c:90
+msgid "Could not run tracker-extract: "
+msgstr ""
+
+#: src/cli/tracker-extract.c:123
+msgid "Extract metadata from a file"
+msgstr "Hent ut metadata fra en fil"
+
+#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:550 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
+#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+msgid "Unrecognized options"
+msgstr ""
+
+#: src/cli/tracker-index.c:51
+msgid "Adds FILE as an indexed location"
+msgstr ""
+
+#: src/cli/tracker-index.c:54
+msgid "Removes FILE from indexed locations"
+msgstr ""
+
+#: src/cli/tracker-index.c:57
+#, fuzzy
+#| msgid "Directories to index recursively"
+msgid "Makes indexing recursive"
+msgstr "Kataloger som skal indekseres rekursivt"
+
+#: src/cli/tracker-index.c:205
+#, c-format
+msgid "“%s” is not a directory"
+msgstr "«%s» er ikke en katalog"
+
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:281
+msgid "Either --add or --remove must be provided"
+msgstr ""
+
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:285
+msgid "--add and --remove are mutually exclusive"
+msgstr ""
+
+#. TRANSLATORS: These are commandline options
+#: src/cli/tracker-index.c:295
+msgid "--recursive requires --add"
+msgstr ""
+
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:347
+msgid "Path"
+msgstr "Sti"
+
+#: src/cli/tracker-index.c:354
+msgid "Recursive"
+msgstr ""
+
+#: src/cli/tracker-index.c:396
+msgid "Please specify one or more locations to index."
+msgstr ""
+
+#: src/cli/tracker-info.c:66
+msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
+msgstr ""
+
+#: src/cli/tracker-info.c:70
+msgid "Show plain text content if available for resources"
+msgstr ""
+
+#: src/cli/tracker-info.c:77
+msgid "Checks if FILE is eligible for being indexed"
+msgstr ""
+
+#: src/cli/tracker-info.c:349
+msgid "Error message"
+msgstr "Feilmelding"
+
+#: src/cli/tracker-info.c:375 src/cli/tracker-search.c:341
+#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#, fuzzy
+#| msgid "Could not establish a connection to Tracker"
+msgid "Could not connect to LocalSearch"
+msgstr "Kunne ikke etablere en tilkobling til Tracker"
+
+#: src/cli/tracker-info.c:420
+#, fuzzy
+#| msgid "File to extract metadata for"
+msgid "Unable to retrieve data for URI"
+msgstr "Fil som det skal hentes metadata for"
+
+#: src/cli/tracker-info.c:430
+msgid "No metadata available for that URI"
+msgstr ""
+
+#: src/cli/tracker-info.c:435 src/cli/tracker-info.c:509
+msgid "Could not get eligible status: "
+msgstr ""
+
+#: src/cli/tracker-info.c:461 src/extractor/tracker-main.c:184
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Ikke støttet serialiseringsformat «%s»\n"
 
+#: src/cli/tracker-inhibit.c:39
+msgid "List inhibitions"
+msgstr ""
+
+#: src/cli/tracker-inhibit.c:45
+msgid "command"
+msgstr "kommando"
+
+#: src/cli/tracker-inhibit.c:46
+msgid "COMMAND"
+msgstr "KOMMANDO"
+
+#: src/cli/tracker-inhibit.c:65
+msgid "Application"
+msgstr "Program"
+
+#: src/cli/tracker-inhibit.c:66
+msgid "Reason"
+msgstr "Årsak"
+
+#: src/cli/tracker-inhibit.c:136
+msgid "Indexing inhibited through command line"
+msgstr ""
+
+#: src/cli/tracker-inhibit.c:160
+msgid "Failed to inhibit indexer"
+msgstr ""
+
+#: src/cli/tracker-process.c:89
+#, fuzzy
+#| msgid "Could not add feed"
+msgid "Could not terminate indexer"
+msgstr "Kunne ikke legge til strøm"
+
+#: src/cli/tracker-process.c:92
+msgid "Indexer process terminated"
+msgstr ""
+
+#: src/cli/tracker-reset.c:48
+msgid "Remove filesystem indexer database"
+msgstr ""
+
+#: src/cli/tracker-reset.c:51
+msgid ""
+"Erase indexed information about a file, works recursively for directories"
+msgstr ""
+
+#. Now, delete the element recursively
+#: src/cli/tracker-reset.c:95
+msgid "Deleting…"
+msgstr ""
+
+#: src/cli/tracker-reset.c:111
+msgid ""
+"The indexed data for this file has been deleted and will be reindexed again."
+msgstr ""
+
+#: src/cli/tracker-reset.c:223
+msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
+msgstr ""
+
+#. TRANSLATORS: this is our test for a [y|N] question in the command line.
+#. * A partial or full match will be considered an affirmative answer,
+#. * it is intentionally lowercase, so please keep it like this.
+#.
+#: src/cli/tracker-reset.c:231
+msgid "yes"
+msgstr "ja"
+
+#: src/cli/tracker-search.c:99
+msgid "Results"
+msgstr "Resultater"
+
+#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
+#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
+#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+msgid "Files"
+msgstr "Filer"
+
+#: src/cli/tracker-search.c:102
+msgid "Folders"
+msgstr "Mapper"
+
+#: src/cli/tracker-search.c:104
+msgid "Albums"
+msgstr "Album"
+
+#: src/cli/tracker-search.c:105
+msgid "Artists"
+msgstr "Artister"
+
+#: src/cli/tracker-search.c:116
+msgid "Search for files"
+msgstr "Søk etter filer"
+
+#: src/cli/tracker-search.c:120
+msgid "Search for folders"
+msgstr "Søk etter mapper"
+
+#: src/cli/tracker-search.c:124
+msgid "Search for audio files"
+msgstr "Søk etter lydfiler"
+
+#: src/cli/tracker-search.c:128
+msgid "Search for music albums"
+msgstr "Søk etter musikkalbum"
+
+#: src/cli/tracker-search.c:132
+msgid "Search for music artists"
+msgstr "Søk etter musikkartister"
+
+#: src/cli/tracker-search.c:136
+msgid "Search for image files"
+msgstr "Søk etter bildefiler"
+
+#: src/cli/tracker-search.c:140
+msgid "Search for video files"
+msgstr "Søk etter videofiler"
+
+#: src/cli/tracker-search.c:144
+msgid "Search for document files"
+msgstr "Søk etter dokumenter"
+
+#: src/cli/tracker-search.c:148
+msgid "Search for software files"
+msgstr "Søk etter programvarefiler"
+
+#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+msgid "Limit the number of results shown"
+msgstr ""
+
+#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+msgid "Offset the results"
+msgstr ""
+
+#: src/cli/tracker-search.c:165
+msgid "Show URNs for results"
+msgstr ""
+
+#: src/cli/tracker-search.c:169
+msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
+msgstr ""
+
+#: src/cli/tracker-search.c:173
+msgid "Show help options"
+msgstr ""
+
+#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+msgid "search terms"
+msgstr ""
+
+#: src/cli/tracker-search.c:181
+msgid "TERMS"
+msgstr ""
+
+#: src/cli/tracker-status.c:67
+msgid "Follow status changes as they happen"
+msgstr ""
+
+#: src/cli/tracker-status.c:71
+msgid "Show statistics for current index / data set"
+msgstr ""
+
+#: src/cli/tracker-status.c:75
+msgid ""
+"Watch changes to the database in real time (e.g. resources or files being "
+"added)"
+msgstr ""
+
+#: src/cli/tracker-status.c:81
+msgid "EXPRESSION"
+msgstr ""
+
+#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
+#: src/cli/tracker-status.c:289
+msgid "Could not get LocalSearch statistics"
+msgstr ""
+
+#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
+msgid "Message"
+msgstr "Melding"
+
+#: src/cli/tracker-status.c:406
+#, fuzzy, c-format
+#| msgid "Would be indexed"
+msgid "Currently indexed"
+msgstr "Vil bli indeksert"
+
+#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#, c-format
+msgid "%d file"
+msgid_plural "%d files"
+msgstr[0] "%d fil"
+msgstr[1] "%d filer"
+
+#: src/cli/tracker-status.c:415
+#, c-format
+msgid "%d folder"
+msgid_plural "%d folders"
+msgstr[0] "%d mappe"
+msgstr[1] "%d mapper"
+
+#: src/cli/tracker-status.c:429
+msgid "Remaining space on database partition"
+msgstr ""
+
+#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+msgid "Indexer is paused"
+msgstr ""
+
+#: src/cli/tracker-status.c:440
+msgid "Data is still being indexed"
+msgstr ""
+
+#: src/cli/tracker-status.c:442
+msgid "Indexer is idle"
+msgstr ""
+
+#: src/cli/tracker-status.c:449
+#, c-format
+msgid "%d recorded failure"
+msgid_plural "%d recorded failures"
+msgstr[0] ""
+msgstr[1] ""
+
+#: src/cli/tracker-status.c:533
+msgid "No reports found"
+msgstr ""
+
+#: src/cli/tracker-status.c:705
+#, fuzzy
+#| msgid "Could not establish a connection to Tracker"
+msgid "Could not get SPARQL connection"
+msgstr "Kunne ikke etablere en tilkobling til Tracker"
+
+#: src/cli/tracker-status.c:714
+msgid "Now listening to database updates"
+msgstr ""
+
+#: src/cli/tracker-status.c:715
+msgid "Press Ctrl+C to stop"
+msgstr ""
+
+#: src/cli/tracker-tag.c:67
+msgid "List all tags"
+msgstr ""
+
+#: src/cli/tracker-tag.c:71
+msgid "Show files associated with each tag (this is only used with --list)"
+msgstr ""
+
+#: src/cli/tracker-tag.c:75
+msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
+msgstr ""
+
+#: src/cli/tracker-tag.c:76 src/cli/tracker-tag.c:80
+msgid "TAG"
+msgstr ""
+
+#: src/cli/tracker-tag.c:79
+msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
+msgstr ""
+
+#: src/cli/tracker-tag.c:83
+msgid "Description for a tag (this is only used with --add)"
+msgstr ""
+
+#: src/cli/tracker-tag.c:84
+msgid "STRING"
+msgstr "STRENG"
+
+#: src/cli/tracker-tag.c:96
+msgid "FILE…"
+msgstr "FIL …"
+
+#: src/cli/tracker-tag.c:119
+msgid "Could not get files related to tag"
+msgstr ""
+
+#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#, fuzzy
+#| msgid "Could not add feed"
+msgid "Could not get all tags"
+msgstr "Kunne ikke legge til strøm"
+
+#: src/cli/tracker-tag.c:156
+msgid "Tags (shown by name)"
+msgstr ""
+
+#: src/cli/tracker-tag.c:217
+#, fuzzy
+#| msgid "Could not add feed"
+msgid "Could not add tag"
+msgstr "Kunne ikke legge til strøm"
+
+#: src/cli/tracker-tag.c:222
+msgid "Tag was added successfully"
+msgstr ""
+
+#: src/cli/tracker-tag.c:248
+#, fuzzy
+#| msgid "Could not add feed"
+msgid "Could not add tag to files"
+msgstr "Kunne ikke legge til strøm"
+
+#: src/cli/tracker-tag.c:253
+msgid "Tagged"
+msgstr ""
+
+#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#, fuzzy
+#| msgid "Could not add feed"
+msgid "Could not remove tag"
+msgstr "Kunne ikke legge til strøm"
+
+#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+msgid "Tag was removed successfully"
+msgstr ""
+
+#: src/cli/tracker-tag.c:360
+#, fuzzy
+#| msgid "Could not establish a connection to Tracker"
+msgid "Could not establish a connection to LocalSearch"
+msgstr "Kunne ikke etablere en tilkobling til Tracker"
+
+#: src/cli/tracker-tag.c:424
+msgid "The --list option is required for --show-files"
+msgstr ""
+
+#: src/cli/tracker-tag.c:426
+msgid "Add and delete actions can not be used together"
+msgstr ""
+
+#: src/cli/tracker-tag.c:428
+msgid "The --description option can only be used with --add"
+msgstr ""
+
+#: src/common/tracker-miner-proxy.c:349
+msgid "Cookie not recognized to resume paused miner"
+msgstr ""
+
+#: src/common/tracker-miner-proxy.c:406
+msgid "Pause application and reason match an already existing pause request"
+msgstr ""
+
+#: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
+msgid "less than one second"
+msgstr "mindre enn ett sekund"
+
+#. Translators: this is %d days
+#: src/common/tracker-utils.c:116
+#, c-format
+msgid " %dd"
+msgstr "%dd"
+
+#. Translators: this is %2.2d hours
+#: src/common/tracker-utils.c:120
+#, c-format
+msgid " %2.2dh"
+msgstr "%2.2dt"
+
+#. Translators: this is %2.2d minutes
+#: src/common/tracker-utils.c:124
+#, c-format
+msgid " %2.2dm"
+msgstr "%2.2dm"
+
+#. Translators: this is %2.2d seconds
+#: src/common/tracker-utils.c:128
+#, c-format
+msgid " %2.2ds"
+msgstr "%2.2ds"
+
+#: src/common/tracker-utils.c:132
+#, c-format
+msgid " %d day"
+msgid_plural " %d days"
+msgstr[0] "%d dag"
+msgstr[1] "%d dager"
+
+#: src/common/tracker-utils.c:136
+#, c-format
+msgid " %2.2d hour"
+msgid_plural " %2.2d hours"
+msgstr[0] "%2.2d time"
+msgstr[1] "%2.2d timer"
+
+#: src/common/tracker-utils.c:140
+#, c-format
+msgid " %2.2d minute"
+msgid_plural " %2.2d minutes"
+msgstr[0] "%2.2d minutt"
+msgstr[1] "%2.2d minutter"
+
+#: src/common/tracker-utils.c:144
+#, c-format
+msgid " %2.2d second"
+msgid_plural " %2.2d seconds"
+msgstr[0] "%2.2d sekund"
+msgstr[1] "%2.2d sekunder"
+
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
+#: src/indexer/tracker-application.c:65 src/writeback/tracker-main.c:50
+msgid "Displays version information"
+msgstr "Vis versjonsinformasjon"
+
+#. Translators: this messagge will apper immediately after the
+#. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
+#: src/control/tracker-main.c:136
+#, fuzzy
+#| msgid "— start the tracker indexer"
+msgid "— start the tracker index proxy"
+msgstr "– start tracker indeksering"
+
+#: src/extractor/tracker-main.c:74
+msgid "File to extract metadata for"
+msgstr "Fil som det skal hentes metadata for"
+
+#: src/extractor/tracker-main.c:78
+msgid "MIME type for file (if not provided, this will be guessed)"
+msgstr "MIME-type for filen (hvis ikke oppgitt vil den bli gjettet)"
+
+#: src/extractor/tracker-main.c:79
+msgid "MIME"
+msgstr "MIME"
+
+#: src/extractor/tracker-main.c:85
+msgid "Socket file descriptor for peer-to-peer communication"
+msgstr ""
+
+#: src/extractor/tracker-main.c:86
+msgid "FD"
+msgstr ""
+
+#: src/extractor/tracker-main.c:257
+msgid "No metadata or extractor modules found to handle this file"
+msgstr ""
+"Ingen metadata eller uthentingsmoduler funnet for håndtering av denne filen"
+
+#: src/extractor/tracker-main.c:265
+msgid "Metadata extraction failed"
+msgstr "Uthenting av metadata feilet"
+
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: ../src/tracker-extract/tracker-main.c:331
+#: src/extractor/tracker-main.c:327
 msgid "— Extract file meta data"
 msgstr "– Hent ut metadata for fil"
 
-#: ../src/tracker-extract/tracker-main.c:340
+#: src/extractor/tracker-main.c:341
 msgid "Filename and mime type must be provided together"
 msgstr "Filnavn og MIME-type må oppgis sammen"
 
-#: ../src/tracker-extract/tracker-extract.desktop.in.in.h:1
-msgid "Tracker Metadata Extractor"
-msgstr "Tracker metadataekstrakt"
+#: src/indexer/tracker-application.c:53
+msgid "Runs until all configured locations are indexed and then exits"
+msgstr ""
 
-#: ../src/tracker-extract/tracker-extract.desktop.in.in.h:2
-msgid "Extracts metadata from local files"
-msgstr "Henter ut metadata fra lokale filer"
+#: src/indexer/tracker-application.c:57
+msgid "Checks if FILE is eligible for being mined based on configuration"
+msgstr ""
 
-#: ../src/tracker-writeback/tracker-main.c:62
+#: src/indexer/tracker-application.c:61
+#, fuzzy
+#| msgid "Crawls and processes files on the file system"
+msgid "Avoids changes in the filesystem"
+msgstr "Graver etter og prosesserer filer i filsystemet"
+
+#: src/indexer/tracker-application.c:612
+#, c-format
+msgid "Data object “%s” currently exists"
+msgstr "Dataobjekt «%s» eksisterer allerede"
+
+#: src/indexer/tracker-application.c:613
+#, c-format
+msgid "Data object “%s” currently does not exist"
+msgstr "Dataobjekt «%s» eksisterer ikke"
+
+#: src/indexer/tracker-application.c:639
+#, fuzzy, c-format
+#| msgid "Directory is NOT eligible to be mined (based on rules)"
+msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
+msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:645
+#, fuzzy, c-format
+#| msgid "Directory is NOT eligible to be mined (based on rules)"
+msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
+msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:651
+#, fuzzy, c-format
+#| msgid "Directory is NOT eligible to be mined (based on contents)"
+msgid ""
+"Parent directory “%s” is NOT eligible to be indexed (based on content "
+"filters)"
+msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på innhold)"
+
+#: src/indexer/tracker-application.c:666
+#, fuzzy
+#| msgid "Directory is NOT eligible to be mined (based on rules)"
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:670
+#, fuzzy
+#| msgid "File is NOT eligible to be mined (based on rules)"
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:673
+#, fuzzy
+#| msgid "File is NOT eligible to be mined (based on rules)"
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:675
+#, fuzzy
+#| msgid "File is NOT eligible to be mined (based on rules)"
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:683
+#, fuzzy
+#| msgid "Directory is eligible to be mined (based on rules)"
+msgid "Directory is eligible to be indexed"
+msgstr "Katalogen er kvalifisert for utgraving (basert på regler)"
+
+#: src/indexer/tracker-application.c:684
+#, fuzzy
+#| msgid "File is eligible to be mined (based on rules)"
+msgid "File is eligible to be indexed"
+msgstr "Filen er kvalifisert for utgraving (basert på regler)"
+
+#: src/writeback/tracker-main.c:54
+msgid ""
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
+msgstr ""
+
+#: src/writeback/tracker-main.c:61
 msgid "Disable shutting down after 30 seconds of inactivity"
 msgstr "Deaktiver nedstenging etter 30 sekunder med inaktivitet"
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: ../src/tracker-writeback/tracker-main.c:98
+#: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "– start trackers tilbakeskrivingstjeneste"
