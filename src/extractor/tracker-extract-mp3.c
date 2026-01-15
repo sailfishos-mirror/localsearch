@@ -2583,6 +2583,7 @@ parse_id3v20 (const gchar          *data,
 			break;
 		} else if (csize == 0) {
 			g_debug ("[v20] Content size was 0, moving to next frame");
+			continue;
 		}
 
 		/* Early versions do not have unsynch per frame */
