@@ -1485,8 +1485,12 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 	text_desc     = &data[pos + 4]; /* <text string according to encoding> $00 (00) */
 	text_desc_len = id3v2_strlen (text_encode, text_desc, csize - 4);
 
-	offset        = 4 + text_desc_len + id3v2_nul_size (text_encode);
-	text          = &data[pos + offset]; /* <full text string according to encoding> */
+	offset = 4 + text_desc_len + id3v2_nul_size (text_encode);
+
+	if (pos + offset >= csize)
+		return;
+
+	text = &data[pos + offset]; /* <full text string according to encoding> */
 
 	if (version == 2.3f) {
 		description = id3v2_text_to_utf8 (data[pos], &data[pos + 1], csize - 1, info);
