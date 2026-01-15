@@ -1420,12 +1420,12 @@ static void
 extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
 {
 	gchar text_encode;
-	guint offset = 0;
+	size_t offset = 0;
 	GSList *performers;
 	gint n_performers = 0;
 
 	text_encode = data[pos];
-	pos += 1;
+	offset += 1;
 	performers = NULL;
 
 	while (pos + offset < csize) {
@@ -1435,9 +1435,9 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		gint text_performer_len;
 		gchar *performer = NULL;
 
-		text_instrument = &data[pos];
-		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - 1);
-		offset = text_instrument_len + id3v2_nul_size (text_encode);
+		text_instrument = &data[pos + offset];
+		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - offset);
+		offset += text_instrument_len + id3v2_nul_size (text_encode);
 
 		if (pos + offset >= csize)
 			break;
@@ -1454,7 +1454,7 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		n_performers += 1;
 
 		text_performer_len = id3v2_strlen (text_encode, text_performer, csize - offset);
-		pos += text_instrument_len + text_performer_len + 2*id3v2_nul_size (text_encode);
+		offset += text_performer_len + id3v2_nul_size (text_encode);
 	}
 
 	if (performers) {
