@@ -1438,6 +1438,10 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		text_instrument = &data[pos];
 		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - 1);
 		offset = text_instrument_len + id3v2_nul_size (text_encode);
+
+		if (pos + offset >= csize)
+			break;
+
 		text_performer = &data[pos + offset];
 
 		if (version == 2.4f) {
