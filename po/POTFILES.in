@@ -15,12 +15,12 @@ src/cli/tracker-search.c
 src/cli/tracker-status.c
 src/cli/tracker-tag.c
 src/common/tracker-dbus.c
-src/common/tracker-miner-proxy.c
 src/common/tracker-utils.c
 src/control/tracker-main.c
 src/extractor/tracker-extract.c
 src/extractor/tracker-main.c
 src/indexer/tracker-application.c
+src/indexer/tracker-endpoint-helper.c
 src/indexer/tracker-main.c
 src/indexer/tracker-miner-files.c
 src/writeback/tracker-main.c
