@@ -1420,12 +1420,12 @@ static void
 extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id3tag *info, gfloat version)
 {
 	gchar text_encode;
-	guint offset = 0;
+	size_t offset = 0;
 	GSList *performers;
 	gint n_performers = 0;
 
 	text_encode = data[pos];
-	pos += 1;
+	offset += 1;
 	performers = NULL;
 
 	while (pos + offset < csize) {
@@ -1435,9 +1435,13 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		gint text_performer_len;
 		gchar *performer = NULL;
 
-		text_instrument = &data[pos];
-		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - 1);
-		offset = text_instrument_len + id3v2_nul_size (text_encode);
+		text_instrument = &data[pos + offset];
+		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - offset);
+		offset += text_instrument_len + id3v2_nul_size (text_encode);
+
+		if (pos + offset >= csize)
+			break;
+
 		text_performer = &data[pos + offset];
 
 		if (version == 2.4f) {
@@ -1450,7 +1454,7 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		n_performers += 1;
 
 		text_performer_len = id3v2_strlen (text_encode, text_performer, csize - offset);
-		pos += text_instrument_len + text_performer_len + 2*id3v2_nul_size (text_encode);
+		offset += text_performer_len + id3v2_nul_size (text_encode);
 	}
 
 	if (performers) {
@@ -1481,8 +1485,12 @@ extract_txxx_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize, id
 	text_desc     = &data[pos + 4]; /* <text string according to encoding> $00 (00) */
 	text_desc_len = id3v2_strlen (text_encode, text_desc, csize - 4);
 
-	offset        = 4 + text_desc_len + id3v2_nul_size (text_encode);
-	text          = &data[pos + offset]; /* <full text string according to encoding> */
+	offset = 4 + text_desc_len + id3v2_nul_size (text_encode);
+
+	if (pos + offset >= csize)
+		return;
+
+	text = &data[pos + offset]; /* <full text string according to encoding> */
 
 	if (version == 2.3f) {
 		description = id3v2_text_to_utf8 (data[pos], &data[pos + 1], csize - 1, info);
@@ -1558,6 +1566,78 @@ extract_ufid_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csize)
 }
 
 static void
+extract_apic_tag (id3v2tag    *tag,
+                  const gchar *data,
+                  guint        pos,
+                  size_t       csize,
+                  id3tag      *info,
+                  MP3Data     *filedata,
+                  gfloat       version)
+{
+	char text_type;
+	const char *mime;
+	char pic_type;
+	const char *desc;
+	guint offset;
+	int mime_len;
+
+	text_type =  data[pos + 0];
+	mime = &data[pos + 1];
+	mime_len = strnlen (mime, csize - 1);
+	pic_type =  data[pos + 1 + mime_len + 1];
+	desc = &data[pos + 1 + mime_len + 1 + 1];
+
+	if (pic_type == 3 || (pic_type == 0 && filedata->media_art_size == 0)) {
+		offset = pos + 1 + mime_len + 2;
+		offset += id3v2_strlen (text_type, desc, csize - offset) + id3v2_nul_size (text_type);
+
+		filedata->media_art_data = &data[offset];
+		filedata->media_art_size = csize - offset;
+		filedata->media_art_mime = mime;
+	}
+}
+
+static void
+extract_comm_tag (id3v2tag    *tag,
+                  const gchar *data,
+                  guint        pos,
+                  size_t       csize,
+                  id3tag      *info,
+                  gfloat       version)
+{
+	gchar *word = NULL;
+	gchar text_encode;
+	const gchar *text_desc;
+	const gchar *text;
+	guint offset;
+	gint text_desc_len;
+
+	text_encode =  data[pos + 0]; /* $xx */
+	text_desc = &data[pos + 4]; /* <text string according to encoding> $00 (00) */
+	text_desc_len = id3v2_strlen (text_encode, text_desc, csize - 4);
+
+	offset = 4 + text_desc_len + id3v2_nul_size (text_encode);
+
+	if (offset >= csize)
+		return;
+
+	text = &data[pos + offset]; /* <full text string according to encoding> */
+
+	if (version == 2.3f)
+		word = id3v2_text_to_utf8 (text_encode, text, csize - offset, info);
+	else
+		word = id3v24_text_to_utf8 (text_encode, text, csize - offset, info);
+
+	if (!tracker_is_empty_string (word)) {
+		g_strstrip (word);
+		g_free (tag->comment);
+		tag->comment = word;
+	} else {
+		g_free (word);
+	}
+}
+
+static void
 get_id3v24_tags (id3v24frame           frame,
                  const gchar          *data,
                  size_t                csize,
@@ -1570,61 +1650,14 @@ get_id3v24_tags (id3v24frame           frame,
 	guint pos = 0;
 
 	switch (frame) {
-	case ID3V24_APIC: {
+	case ID3V24_APIC:
 		/* embedded image */
-		gchar text_type;
-		const gchar *mime;
-		gchar pic_type;
-		const gchar *desc;
-		guint offset;
-		gint mime_len;
-
-		text_type =  data[pos + 0];
-		mime      = &data[pos + 1];
-		mime_len  = strnlen (mime, csize - 1);
-		pic_type  =  data[pos + 1 + mime_len + 1];
-		desc      = &data[pos + 1 + mime_len + 1 + 1];
-
-		if (pic_type == 3 || (pic_type == 0 && filedata->media_art_size == 0)) {
-			offset = pos + 1 + mime_len + 2;
-			offset += id3v2_strlen (text_type, desc, csize - offset) + id3v2_nul_size (text_type);
-
-			filedata->media_art_data = &data[offset];
-			filedata->media_art_size = csize - offset;
-			filedata->media_art_mime = mime;
-		}
+		extract_apic_tag (tag, data, pos, csize, info, filedata, 2.4f);
 		break;
-	}
 
-	case ID3V24_COMM: {
-		gchar *word;
-		gchar text_encode;
-		const gchar *text_desc;
-		const gchar *text;
-		guint offset;
-		gint text_desc_len;
-
-		text_encode   =  data[pos + 0]; /* $xx */
-		text_desc     = &data[pos + 4]; /* <text string according to encoding> $00 (00) */
-		text_desc_len = id3v2_strlen (text_encode, text_desc, csize - 4);
-
-		offset        = 4 + text_desc_len + id3v2_nul_size (text_encode);
-		text          = &data[pos + offset]; /* <full text string according to encoding> */
-
-		if (offset >= csize)
-			break;
-
-		word = id3v24_text_to_utf8 (text_encode, text, csize - offset, info);
-
-		if (!tracker_is_empty_string (word)) {
-			g_strstrip (word);
-			g_free (tag->comment);
-			tag->comment = word;
-		} else {
-			g_free (word);
-		}
+	case ID3V24_COMM:
+		extract_comm_tag (tag, data, pos, csize, info, 2.4f);
 		break;
-	}
 
 	case ID3V24_TMCL: {
 		extract_performers_tags (tag, data, pos, csize, info, 2.4f);
@@ -1778,59 +1811,14 @@ get_id3v23_tags (id3v24frame           frame,
 	guint pos = 0;
 
 	switch (frame) {
-	case ID3V24_APIC: {
+	case ID3V24_APIC:
 		/* embedded image */
-		gchar text_type;
-		const gchar *mime;
-		gchar pic_type;
-		const gchar *desc;
-		guint offset;
-		gint  mime_len;
-
-		text_type =  data[pos + 0];
-		mime      = &data[pos + 1];
-		mime_len  = strnlen (mime, csize - 1);
-		pic_type  =  data[pos + 1 + mime_len + 1];
-		desc      = &data[pos + 1 + mime_len + 1 + 1];
-
-		if (pic_type == 3 || (pic_type == 0 && filedata->media_art_size == 0)) {
-			offset = pos + 1 + mime_len + 2;
-			offset += id3v2_strlen (text_type, desc, csize - offset) + id3v2_nul_size (text_type);
-
-			filedata->media_art_data = &data[offset];
-			filedata->media_art_size = csize - offset;
-			filedata->media_art_mime = mime;
-		}
+		extract_apic_tag (tag, data, pos, csize, info, filedata, 2.3f);
 		break;
-	}
 
-	case ID3V24_COMM: {
-		gchar *word;
-		gchar text_encode;
-		const gchar *text_desc;
-		const gchar *text;
-		guint offset;
-		gint text_desc_len;
-
-		text_encode   =  data[pos + 0]; /* $xx */
-		text_desc     = &data[pos + 4]; /* <text string according to encoding> $00 (00) */
-		text_desc_len = id3v2_strlen (text_encode, text_desc, csize - 4);
-
-		offset        = 4 + text_desc_len + id3v2_nul_size (text_encode);
-		text          = &data[pos + offset]; /* <full text string according to encoding> */
-
-		word = id3v2_text_to_utf8 (text_encode, text, csize - offset, info);
-
-		if (!tracker_is_empty_string (word)) {
-			g_strstrip (word);
-			g_free (tag->comment);
-			tag->comment = word;
-		} else {
-			g_free (word);
-		}
-
+	case ID3V24_COMM:
+		extract_comm_tag (tag, data, pos, csize, info, 2.4f);
 		break;
-	}
 
 	case ID3V24_IPLS: {
 		extract_performers_tags (tag, data, pos, csize, info, 2.3f);
@@ -2579,6 +2567,7 @@ parse_id3v20 (const gchar          *data,
 			break;
 		} else if (csize == 0) {
 			g_debug ("[v20] Content size was 0, moving to next frame");
+			continue;
 		}
 
 		/* Early versions do not have unsynch per frame */
