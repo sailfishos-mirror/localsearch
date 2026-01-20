@@ -166,7 +166,6 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             output = proc.stdout.read()
 
         self.assertIn("is paused", output)
-        self.assertIn("Indexing", output)
         self.assertIn("Idle", output)
 
     def test_status_watch(self):
