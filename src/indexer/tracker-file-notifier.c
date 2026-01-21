@@ -959,13 +959,12 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	           ((!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) &&
 	             !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) ||
 	            index_root_equals_file (root, file) == 0) &&
-	           check_directory_contents (notifier, file)) {
-		if ((root->root_flags & TRACKER_ROOT_FLAG_FULL_CHECK) != 0 ||
+	           check_directory_contents (notifier, file) &&
+		   (!!(root->root_flags & TRACKER_ROOT_FLAG_FULL_CHECK) ||
 		    file_data->state == FILE_STATE_CREATE ||
-		    file_data->state == FILE_STATE_UPDATE) {
-			/* Updated directory, needs crawling */
-			g_queue_push_head (root->pending_dirs, g_object_ref (file));
-		}
+		    file_data->state == FILE_STATE_UPDATE)) {
+		/* Updated directory, needs crawling */
+		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
 	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
