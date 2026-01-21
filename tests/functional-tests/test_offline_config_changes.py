@@ -480,11 +480,11 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
         resource_id = self.tracker.get_resource_id_by_uri(self.device_path.as_uri())
 
         self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+        self.device_path.rmdir()
 
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
-            self.device_path.rmdir()
             # The new miner instance will be already unaware of the "mount"
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
@@ -541,11 +541,11 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
         resource_id = self.tracker.get_content_resource_id(self.device_path.as_uri())
 
         self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+        self.device_path.rmdir()
 
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
-            self.device_path.rmdir()
             # The new miner instance will be already unaware of the "mount"
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
