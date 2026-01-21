@@ -282,8 +282,7 @@ handle_monitor_events (TrackerMonitorFanotify *monitor,
 
 	if (mask & (FAN_DELETE | FAN_DELETE_SELF)) {
 		cache_event (monitor, EVENT_DELETE, file, is_directory);
-		if (mask & FAN_DELETE)
-			flush_event (monitor, file);
+		flush_event (monitor, file);
 	}
 
 	if (mask & FAN_CLOSE_WRITE) {

@@ -832,6 +832,7 @@ test_file_notifier_monitor_updates_recursive (TestCommonContext *fixture,
 	};
 	FilesystemOperation expected_results3[] = {
 		{ OPERATION_DELETE, "recursive/folder", NULL },
+		{ OPERATION_DELETE, "recursive/folder", NULL, FLAGS_OPTIONAL },
 		{ OPERATION_DELETE, "recursive/bbb", NULL }
 	};
 
