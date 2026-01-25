@@ -1,14 +1,14 @@
 # Georgian translation for tracker-miners.
 # Copyright (C) 2023 LocalSearch's authors
 # This file is distributed under the same license as the LocalSearch package.
-# Ekaterine Papava <papava.e@gtu.ge>, 2023-2025.
+# Ekaterine Papava <papava.e@gtu.ge>, 2023-2026.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: tracker-miners\n"
+"Project-Id-Version: LocalSearch\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-26 17:35+0000\n"
-"PO-Revision-Date: 2025-09-04 11:08+0200\n"
+"POT-Creation-Date: 2026-01-16 18:54+0000\n"
+"PO-Revision-Date: 2026-01-25 10:38+0100\n"
 "Last-Translator: Ekaterine Papava <papava.e@gtu.ge>\n"
 "Language-Team: Georgian <(nothing)>\n"
 "Language: ka\n"
@@ -16,7 +16,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -196,11 +196,11 @@ msgstr "ქვებრძანებების დახმარები�
 msgid "Show metadata extractor output"
 msgstr "მეტამონაცემების ამომღების გამოტანილი ინფორმაციის ჩვენება"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "დაინდექსებული საქაღალდეების ჩამოთვლა და შეცვლა"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "ფაილებისთვის და რესურსებისთვის ხელმისაწვდომი ინფორმაციის მიღება"
 
@@ -212,11 +212,11 @@ msgstr "დაინდექსების დროებით გამო�
 msgid "Erase the indexed data"
 msgstr "დაინდექსების მონაცემების წაშლა"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "შემცველობის ძებნა"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "დაინდექსებული მონაცემების სტატუსისა და სტატისტიკის გამოტანა"
 
@@ -243,36 +243,40 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "\"%s\" localsearch-ის ბრძანება არაა. იხილეთ \"localsearch --help\""
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "შეტყობინება"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "გამოტანის შედეგი ფორმატებია: ““turtle”, “trig” ან “json-ld”"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "ფორმატი"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "ფაილი"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "შეცდომა tracker-extract-ის გაშვებისას: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "მეტამონაცემების მიღება ფაილიდან"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "უცნობი პარამეტრები"
 
@@ -288,74 +292,75 @@ msgstr "მითითებული ფაილის წაშლა და
 msgid "Makes indexing recursive"
 msgstr "რეკურსიული დაინდექსება"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "%s საქაღალდეს არ წარმოადგენს"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "მითითებული უნდა იყოს --add ან --remove"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add და --remove ურთიერთგამომრიცხავია"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "--recursive-ს --add ესაჭიროება"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "ბილიკი"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "რეკურსიული"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "დასაინდექსებლად მიუთითეთ ერთი ან მეტი მდებარეობა."
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "სრული სახელის სივრცეების ჩვენება (მაგ: არ გამოიყენო nie:title ნაჩვენები "
 "იქნება სრული URL)"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr "რესურსებისთვის, თუ ხელმისაწვდომია, უბრალო ტექსტის შემცველობის ჩვენება"
 
-#: src/cli/tracker-info.c:77
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "ამოწმებს, არის თუ არა მითითებული ფაილი დაინდექსებული"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "შეცდომის შეტყობინება"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "მოხსნადი მოწყობილობის მიმაგრების წერტილი შესამოწმებლად"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "LocalSearch-თან დაკავშირება შეუძლებელია"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "URI-სთვის მონაცემების მიღება შეუძლებელია"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "იმ URI-სთვის მეტამონაცემები ხელმისაწვდომი არაა"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "უფლებამოსილების მდგომარეობის მიღება შეუძლებელია: "
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "მხარდაუჭერელი სერიალიზაციის ფორმატი \"%s\"\n"
@@ -430,103 +435,103 @@ msgstr "LocalSearch-ის დაინდექსების მონაც�
 msgid "yes"
 msgstr "დიახ"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "შედეგები"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "ფაილები"
 
-#: src/cli/tracker-search.c:102
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "საქაღალდეები"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "ალბომები"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "შემსრულებლები"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "ფაილების ძებნა"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "საქაღალდეებში ძებნა"
 
-#: src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "აუდიოფაილების ძებნა"
 
-#: src/cli/tracker-search.c:128
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "მუსიკის ალბომების ძებნა"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "მუსიკის შემსრულებლების ძებნა"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "გამოსახულებს ფაილების ძებნა"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "ვიდეოფაილების ძებნა"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "დოკუმენტის ფალების ძებნა"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "პროგრამის ფაილების ძებნა"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "ნაჩვენები შედეგების რაოდენობის შეზღუდვა"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "შედეგების წანაცვლება"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "URN-ების ჩვენება შედეგებისთვის"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "ნაჩვენები იქნება ყველა არარსებული დამთხვევაც (მაგალითად, მიუმაგრებელი "
 "ტომების ჩასმა)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "დახმარების პარამეტრების ჩვენება"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "ძებნის პირობები"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "პირობები"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "მიადევნეთ თვალი მდგომარეობის ცვლილებებს, როცა ისინი ხდება"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "მიმდინარე ინდექსის / მონაცემების ნაკრების სტატისტიკის ჩვენება"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -534,73 +539,70 @@ msgstr ""
 "ბაზაში ცვლილებების რეალურ დროში აღმოჩენა (მაგ: რესურსების ან ფაილების "
 "დამატება)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "გამოსახულება"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "LocalSearch-ის სტატისტიკის მიღება შეუძლებელია"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "შეტყობინება"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "ამჟამად დაინდექსებულია"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d ფაილი"
 msgstr[1] "%d ფაილი"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d საქაღალდე"
 msgstr[1] "%d საქაღალდე"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "ბაზის დანაყოფზე დარჩენილი ადგილი"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "ინდექსერი შეჩერებულია"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "მონაცემების დაინდექსება ჯერ კიდევ მიმდინარეობს"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "ინდექსერი უქმეა"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d ჩაწერილი ჩავარდნა"
 msgstr[1] "%d ჩაწერილი ჩავარდნა"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "ანგარიშები ვერ ვიპოვე"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "ვერ მივიღე SPARQL მიერთება"
 
-#: src/cli/tracker-status.c:714
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "ახლა ვუსმენ ბაზის განახლებებს"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "გასაჩერებლად დააწექით Ctrl+C"
 
@@ -680,26 +682,17 @@ msgstr "ჭდის წაშლა წარმატებულია"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "LocalSearch-თან დაკავშირება შეუძლებელია"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "--show-files-თვის --list აუცილებელია"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr "დამატების და წაშლის ოპერაციებს ერთად ვერ გამოიყენებთ"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr "პარამეტრს --descrption, მხოლოდ, --add-თან ერთად გამოიყენებთ"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "ამ ქუქის შეჩერებული ინდექსატორის გაგრძელება არ შეუძლია"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr ""
-"აპლიკაციის შეჩერება და მიზეზი ემთხვევა უკვე არსებულ შეჩერების მოთხოვნას"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -757,110 +750,98 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d წამი"
 msgstr[1] " %2.2d წამი"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "ვერსიის ჩვენება"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— ტრეკერის ინდექსერის პროქსის გაშვება"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "ფაილი, რომლის მეტამონაცემების მიღებაც გსურთ"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "ფაილის MIME ტიპი (თუ მითითებული არაა, ვცდი, მივხვდე)"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "სოკეტის ფაილის დესკრიპტორი გამჭოლი კომუნიკაციისთვის"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FD"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+msgid "Filesystem root of the extracted data"
+msgstr "ამოღებული მონაცემების ფაილური სისტემის საწყისი საქაღალდე"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "ამ ფაილიდან მეტამონაცემების ან ინფორმაციის გამოღებისთვის მოდული ვერ ვიპოვე"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "მეტამონაცემების გამოღება ჩავარდა"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— ფაილის მეტამონაცემების გამოღება"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "ფაილის სახელი და MIME ტიპი ერთად უნდა შეიყვანოთ"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "გაშვებულია, სანამ არ მოხდება ყველა მორგებული მდებარეობის დაინდექსება, შემდეგ "
 "კი დაასრულებს მუშაობას"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "ამოწმებს, არის თუ არა მითითებული ფაილი დაინდექსებული, კონფიგურაციაზე "
 "დაყრდნობით"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "ფაილური სისტემის ცვლილებების თავიდან არიდება"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "მონაცემს ობიექტი \"%s\" უკვე არსებობს"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "მონაცემის ობიექტი \"%s\" ამჟამად არ არსებობს"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "საქაღალდის დაინდექსება არ მოხდება (ფილტრების გამო)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "ფაილი დაინდექსება არ მოხდება (ფილტრების გამო)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "ფაილი დაინდექსება არ მოხდება (ფაილი დამალულია)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "ფაილი დაინდექსება არ მოხდება (ინდექსირებად საქაღალდეში არაა)"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (ფილტრების გამო)"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (დამალული ფაილი)"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -868,20 +849,37 @@ msgid ""
 msgstr ""
 "მშობელი საქაღალდის \"%s\" დაინდექსება არ მოხდება (შემცველობის ფილტრების გამო)"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:1316
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "საქაღალდის დაინდექსება არ მოხდება (ფილტრების გამო)"
+
+#: src/indexer/tracker-application.c:1320
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "ფაილი დაინდექსება არ მოხდება (ფილტრების გამო)"
+
+#: src/indexer/tracker-application.c:1323
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "ფაილი დაინდექსება არ მოხდება (ფაილი დამალულია)"
+
+#: src/indexer/tracker-application.c:1325
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "ფაილი დაინდექსება არ მოხდება (ინდექსირებად საქაღალდეში არაა)"
+
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "საქაღალდის დაინდექსება შესაძლებელია"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "ფაილის დაინდექსება შეუძლებელია"
 
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "— ტრეკერის ინდექსერის გაშვება"
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "ბაზის მდებარეობა"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "საქაღალდე"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
@@ -900,6 +898,19 @@ msgstr "30 წამი არააქტიურობის შემდე�
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— ტრეკერის უკუჩაწერის სერვისის გაჩვება"
+
+#~ msgid "Error message"
+#~ msgstr "შეცდომის შეტყობინება"
+
+#~ msgid "Cookie not recognized to resume paused miner"
+#~ msgstr "ამ ქუქის შეჩერებული ინდექსატორის გაგრძელება არ შეუძლია"
+
+#~ msgid "Pause application and reason match an already existing pause request"
+#~ msgstr ""
+#~ "აპლიკაციის შეჩერება და მიზეზი ემთხვევა უკვე არსებულ შეჩერების მოთხოვნას"
+
+#~ msgid "— start the tracker indexer"
+#~ msgstr "— ტრეკერის ინდექსერის გაშვება"
 
 #~ msgid ""
 #~ "Simplify the words to their root to provide more results. E.g. “shelves” "
