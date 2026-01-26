@@ -4,13 +4,13 @@
 #
 # Mykola Tkach <Stuartlittle1970@gmail.com>, 2014.
 # Daniel Korostil <ted.korostiled@gmail.com>, 2014.
-# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023, 2024, 2025.
+# Yuri Chornoivan <yurchor@ukr.net>, 2020, 2021, 2022, 2023, 2024, 2025, 2026.
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-16 12:26+0000\n"
-"PO-Revision-Date: 2025-09-05 19:46+0300\n"
+"POT-Creation-Date: 2026-01-16 18:54+0000\n"
+"PO-Revision-Date: 2026-01-26 02:35+0200\n"
 "Last-Translator: Yuri Chornoivan <yurchor@ukr.net>\n"
 "Language-Team: Ukrainian <trans-uk@lists.fedoraproject.org>\n"
 "Language: uk\n"
@@ -195,16 +195,14 @@ msgid "Show help on subcommands"
 msgstr "Показати довідку щодо підкоманд"
 
 #: src/cli/main.c:69
-#| msgid "Metadata extraction failed"
 msgid "Show metadata extractor output"
 msgstr "Показувати виведені засобом видобування метаданих повідомлення"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "Вивести список і змінити теки індексування"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
-#| msgid "Retrieve all information available for a certain file"
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "Отримати доступні відомості для файлів та ресурсів"
 
@@ -216,11 +214,11 @@ msgstr "Тимчасово заборонити індексування"
 msgid "Erase the indexed data"
 msgstr "Витерти індексовані дані"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "Шукати дані"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "Показати дані щодо стану та статистики індексованих даних"
 
@@ -247,37 +245,40 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "«%s» не є командою localsearch. Див. «localsearch --help»"
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
-#| msgid "Output results format: “sparql”, “turtle” or “json-ld”"
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "Повідомлення"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Формат виведення результатів: «turtle», «trig» або «json-ld»"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "ФОРМАТ"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Не вдалося запустити tracker-extract: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "Видобути метадані з файла"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "Невідомий параметр"
 
@@ -293,77 +294,76 @@ msgstr "Вилучає ФАЙЛ з індексованих місць"
 msgid "Makes indexing recursive"
 msgstr "Робить індексування рекурсивним"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "«%s» не є каталогом"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "Слід вказати або --add, або --remove"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add і --remove не можна використовувати одночасно"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "--recursive потребує --add"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "Шлях"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "Рекурсивно"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "Будь ласка, вкажіть одне або декілька місць для індексування."
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Показати повні простори назв (тобто не використовуйте nie:title, "
 "використовуйте повні адреси)"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr ""
 "Показати для ресурсів вміст у вигляді звичайного тексту, якщо доступно"
 
-#: src/cli/tracker-info.c:77
-#| msgid "Checks if FILE is eligible for being mined based on configuration"
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "Перевіряє, чи можна індексувати ФАЙЛ"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "Повідомлення про помилку"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "Точка монтування портативного пристрою, яку слід опитати"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
-#| msgid "Could not establish a connection to Tracker"
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "Не вдалося встановити з’єднання з LocalSearch"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "Не вдалося отримати дані для адреси"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "Для цієї адреси немає доступних метаданих"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "Не вдалося отримати прийнятний стан: "
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Непідтримуваний формат перетворення на послідовну форму «%s»\n"
@@ -393,12 +393,10 @@ msgid "Indexing inhibited through command line"
 msgstr "Індексування заборонено за допомогою командного рядка"
 
 #: src/cli/tracker-inhibit.c:160
-#| msgid "File is eligible to be indexed"
 msgid "Failed to inhibit indexer"
 msgstr "Не вдалося заборонити індексування"
 
 #: src/cli/tracker-process.c:89
-#| msgid "Could not (re)index file"
 msgid "Could not terminate indexer"
 msgstr "Не вдалося перервати роботу засобу індексування"
 
@@ -436,113 +434,106 @@ msgstr "Зараз індексовані дані LocalSearch буде вилу
 #. * it is intentionally lowercase, so please keep it like this.
 #.
 #: src/cli/tracker-reset.c:231
-#| msgid "Yes"
 msgid "yes"
 msgstr "так"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "Результати"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "Файли"
 
-#: src/cli/tracker-search.c:102
-#| msgid "%d folder"
-#| msgid_plural "%d folders"
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "Теки"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "Альбоми"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "Виконавці"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "Знайти файли"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "Знайти теки"
 
-#: src/cli/tracker-search.c:124
-#| msgid "Search for video files"
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "Пошук файлів звукових даних"
 
-#: src/cli/tracker-search.c:128
-#| msgid "Search for music files"
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "Пошук музичних альбомів"
 
-#: src/cli/tracker-search.c:132
-#| msgid "Search for music files"
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "Пошук музичних виконавців"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "Знайти зображення"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "Пошук відеофайлів"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "Пошук документів"
 
-#: src/cli/tracker-search.c:148
-#| msgid "Search for image files"
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "Пошук файлів програмного забезпечення"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "Обмежити кількість показуваних результатів"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "Зсув результатів"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "Показувати URN для результатів"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Повернути також усі збіги, який вже не існує (тобто включити незмонтовані "
 "томи)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "Показати параметри довідки"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "пошук термів"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "ТЕРМІНИ"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "Слідувати за змінами стану"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "Показати статистику щодо поточного покажчика та набору даних"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -550,25 +541,21 @@ msgstr ""
 "Переглядати зміни до бази даних у режимі реального часу (наприклад, при "
 "додаванні ресурсів або файлів)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "ВИРАЗ"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
-#| msgid "Could not get Tracker statistics"
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "Не вдалося отримати статистику LocalSearch"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "Повідомлення"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "Виконується індексування"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
@@ -577,7 +564,7 @@ msgstr[1] "%d файли"
 msgstr[2] "%d файлів"
 msgstr[3] "один файл"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
@@ -586,23 +573,23 @@ msgstr[1] "%d теки"
 msgstr[2] "%d тек"
 msgstr[3] "одна тека"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "Лишилося місця на розділі із базою даних"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "Засіб індексування призупинено"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "Дані все ще індексуються"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "Засіб індексування бездіяльний"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
@@ -611,20 +598,19 @@ msgstr[1] "Записано %d помилки"
 msgstr[2] "Записано %d помилок"
 msgstr[3] "Записано %d помилку"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "Звітів не знайдено"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "Не вдалося отримати з'єднання SPARQL"
 
-#: src/cli/tracker-status.c:714
-#| msgid "Now listening for resource updates to the database"
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "Очікуємо на оновлення бази даних"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "Натисніть Ctrl+C, щоб припинити"
 
@@ -701,31 +687,20 @@ msgid "Tag was removed successfully"
 msgstr "Тег успішно вилучений"
 
 #: src/cli/tracker-tag.c:360
-#| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Не вдалося встановити з’єднання з LocalSearch"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "Для параметра --show-files потрібно вказати параметр --list"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr "Дії з додавання та вилучення не можна використовувати разом"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr "Ключ --description можна використовувати лише з ключем --add"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Цей Cookie не може відновити призупинений індексатор"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr ""
-"Запит на призупинку додатку і причина відповідають наявному запиту на "
-"призупинку"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -791,111 +766,100 @@ msgstr[1] " %2.2d секунди "
 msgstr[2] " %2.2d секунд"
 msgstr[3] " %2.2d секунда"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Показує інформацію про версію"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— запустити проксі індексатора tracker"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "Файл для витягнення метаданих"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Тип MIME для файлу (у випадку відсутності, він буде визначений)"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "Дескриптор файла сокета для обміну даними між одноранговими вузлами"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "ДФ"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+#| msgid "File to extract metadata for"
+msgid "Filesystem root of the extracted data"
+msgstr "Коренева тека файлової системи видобутих даних"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Для цього файлу не вдалося знайти відповідний модуль метаданих або модуль "
 "витягування"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "Витягти метадані не вдалося"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— Видобути з файла метадані"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "Ім’я файлу і тип MIME повинні бути вказані одночасно"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Виконується, поки індексуються усі налаштовані місця, а потім закінчується"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Перевіряє, чи може індексуватися ФАЙЛ на основі налаштувань"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "Уникає внесення змін до файлової системи"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Об’єкт даних «%s» на дану мить існує"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Об’єкт даних «%s» на дану мить не існує"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "Каталог НЕ може бути проіндексований (засновано на фільтрах)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "Файл НЕ може бути проіндексований (засновано на фільтрах)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "Файл НЕ може бути проіндексований (прихований файл)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "Файл НЕ може бути проіндексований (не є індексованою текою)"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Батьківський каталог «%s» НЕ може бути проіндексований (засновано на "
 "фільтрах)"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Батьківський каталог «%s» НЕ може бути проіндексований (прихований файл)"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -904,20 +868,37 @@ msgstr ""
 "Батьківський каталог «%s» НЕ може бути проіндексований (засновано на "
 "фільтрах вмісту)"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:1316
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "Каталог НЕ може бути проіндексований (засновано на фільтрах)"
+
+#: src/indexer/tracker-application.c:1320
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "Файл НЕ може бути проіндексований (засновано на фільтрах)"
+
+#: src/indexer/tracker-application.c:1323
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "Файл НЕ може бути проіндексований (прихований файл)"
+
+#: src/indexer/tracker-application.c:1325
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "Файл НЕ може бути проіндексований (не є індексованою текою)"
+
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "Каталог може бути проіндексований"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "Файл може бути проіндексований"
 
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "— запустити індексатор tracker"
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "Розташування бази даних"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "КАТАЛОГ"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
@@ -936,6 +917,20 @@ msgstr "Не вимикати після 30 секунд простоюванн�
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— запустити службу зворотного запису tracker"
+
+#~ msgid "Error message"
+#~ msgstr "Повідомлення про помилку"
+
+#~ msgid "Cookie not recognized to resume paused miner"
+#~ msgstr "Цей Cookie не може відновити призупинений індексатор"
+
+#~ msgid "Pause application and reason match an already existing pause request"
+#~ msgstr ""
+#~ "Запит на призупинку додатку і причина відповідають наявному запиту на "
+#~ "призупинку"
+
+#~ msgid "— start the tracker indexer"
+#~ msgstr "— запустити індексатор tracker"
 
 #~ msgid ""
 #~ "Simplify the words to their root to provide more results. E.g. “shelves” "
