@@ -185,6 +185,8 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             with self.await_document_inserted(target):
                 shutil.copy(file, target)
 
+            time.sleep(2)
+
             proc.terminate()
             output = proc.stdout.read()
 
