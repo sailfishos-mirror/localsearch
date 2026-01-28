@@ -146,13 +146,21 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL) as proc:
 
+            os.set_blocking(proc.stdout.fileno(), False)
+
             # Set up a temporary inhibition, this state should be reported in the output
             with subprocess.Popen(
                     ["localsearch", "inhibit", "cat"],
                     stdin=subprocess.PIPE,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL) as inhibit_proc:
-                time.sleep(3)
+
+                n_attempts = 0
+                while b'is paused' not in proc.stdout.buffer.peek():
+                    time.sleep(1)
+                    n_attempts += 1
+                    assert n_attempts < 90
+
                 # Close stdin to end the cat process
                 inhibit_proc.stdin.close()
 
