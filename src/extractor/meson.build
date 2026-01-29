@@ -149,7 +149,10 @@ tracker_extract_dependencies = [
 ]
 
 if libgsf.found()
-  tracker_extract_sources += 'tracker-gsf.c'
+  tracker_extract_sources += [
+    'tracker-gsf.c',
+    'tracker-zip-input-stream.c',
+  ]
   tracker_extract_dependencies += libgsf
 endif
 
