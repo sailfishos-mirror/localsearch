@@ -118,8 +118,14 @@ class MinerResourceRemovalTest(fixtures.TrackerMinerTest):
         self.assertResourceExists("test:content")
         self.assertResourceMissing(file_2_uri)
 
+        file_1_id = self.tracker.get_resource_id_by_uri(file_1_uri)
+
         # Second create a second file that will be picked up by the extractor
-        file_2 = self.create_text_file(file_2_name)
+        # we expect this indexing pass to delete the first file.
+        with self.tracker.await_delete(
+            fixtures.AUDIO_GRAPH, file_1_id, timeout=cfg.AWAIT_TIMEOUT
+        ):
+            file_2 = self.create_text_file(file_2_name)
 
         # Third check that the first resource does not exist
         self.assertResourceMissing(file_1_uri)
