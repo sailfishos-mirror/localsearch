@@ -18,14 +18,18 @@
  * Boston, MA  02110-1301, USA.
  */
 
+#include <string.h>
+#include <unistd.h>
+
+#include <glib.h>
+#include <gio/gio.h>
+
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
 
 #include "tracker-main.h"
-#include "tracker-gsf.h"
-
-#include <unistd.h>
+#include "tracker-zip-input-stream.h"
 
 typedef enum {
 	OPF_TAG_TYPE_UNKNOWN,
@@ -480,6 +484,63 @@ content_xml_text_handler (GMarkupParseContext   *context,
 	content_data->limit -= written_bytes;
 }
 
+#define ZIP_XML_BUFFER_SIZE 8192
+
+static gboolean
+parse_xml_from_zip (const gchar          *zip_uri,
+                    const gchar          *member_name,
+                    GMarkupParseContext  *context,
+                    GError              **error)
+{
+	GInputStream *stream;
+	GBytes *bytes;
+	const guint8 *data;
+	gsize len;
+	gboolean ok;
+
+	stream = NULL;
+	bytes = NULL;
+	ok = TRUE;
+
+	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	if (!stream)
+		return FALSE;
+
+	while ((bytes = g_input_stream_read_bytes (stream,
+	                                           ZIP_XML_BUFFER_SIZE,
+	                                           NULL,
+	                                           error)) != NULL) {
+		len = g_bytes_get_size (bytes);
+
+		if (len == 0) {
+			g_bytes_unref (bytes);
+			bytes = NULL;
+			break; /* EOF */
+		}
+
+		data = g_bytes_get_data (bytes, NULL);
+
+		ok = g_markup_parse_context_parse (context,
+		                                   (const gchar *) data,
+		                                   len,
+		                                   error);
+		g_bytes_unref (bytes);
+		bytes = NULL;
+
+		if (!ok)
+			break;
+	}
+
+	/* If we broke out because of a read error, make sure we report failure */
+	if (error && *error)
+		ok = FALSE;
+
+	g_input_stream_close (stream, NULL, NULL);
+	g_object_unref (stream);
+
+	return ok;
+}
+
 static gchar *
 extract_opf_path (const gchar *uri)
 {
@@ -497,7 +558,7 @@ extract_opf_path (const gchar *uri)
 	/* Load the internal container file from the Zip archive,
 	 * and parse it to extract the .opf file to get metadata from
 	 */
-	tracker_gsf_parse_xml_in_zip (uri, "META-INF/container.xml", context, &error);
+	parse_xml_from_zip (uri, "META-INF/container.xml", context, &error);
 	g_markup_parse_context_free (context);
 
 	if (error) {
@@ -538,7 +599,7 @@ extract_opf_contents (TrackerExtractInfo *info,
 
 		/* Page file is relative to OPF file location */
 		path = g_build_filename (content_prefix, l->data, NULL);
-		tracker_gsf_parse_xml_in_zip (uri, path, context, &error);
+		parse_xml_from_zip (uri, path, context, &error);
 
 		if (error) {
 			g_warning ("Error extracting EPUB contents (%s): %s",
@@ -593,7 +654,7 @@ extract_opf (TrackerExtractInfo *info,
 	/* Load the internal container file from the Zip archive,
 	 * and parse it to extract the .opf file to get metadata from
 	 */
-	tracker_gsf_parse_xml_in_zip (uri, opf_path, context, &error);
+	parse_xml_from_zip (uri, opf_path, context, &error);
 	g_markup_parse_context_free (context);
 
 	if (error) {
