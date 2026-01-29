@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-12-10 21:07+0000\n"
-"PO-Revision-Date: 2026-01-11 12:27+0500\n"
+"POT-Creation-Date: 2026-01-16 18:54+0000\n"
+"PO-Revision-Date: 2026-01-29 22:28+0500\n"
 "Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>\n"
 "Language-Team: Kazakh <kk_KZ@googlegroups.com>\n"
 "Language: kk\n"
@@ -40,15 +40,15 @@ msgstr "Шығарып алу алдында FS miner жұмысының аяқ�
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
-"When true, tracker-extract will wait for tracker-miner-fs to be done crawling "
-"before extracting meta-data. This option is useful on constrained environment "
-"where it is important to list files as fast as possible and can wait to get "
-"meta-data later."
+"When true, tracker-extract will wait for tracker-miner-fs to be done "
+"crawling before extracting meta-data. This option is useful on constrained "
+"environment where it is important to list files as fast as possible and can "
+"wait to get meta-data later."
 msgstr ""
 "Егер мәні ақиқат болса, tracker-extract метадеректерді шығарып алу алдында "
-"tracker-miner-fs жұмысының аяқталуын күтеді. Бұл опция файлдарды мүмкіндігінше "
-"тез тізімдеу маңызды болатын және метадеректерді кейінірек алуға болатын "
-"шектеулі орталарда пайдалы."
+"tracker-miner-fs жұмысының аяқталуын күтеді. Бұл опция файлдарды "
+"мүмкіндігінше тез тізімдеу маңызды болатын және метадеректерді кейінірек "
+"алуға болатын шектеулі орталарда пайдалы."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
@@ -109,7 +109,8 @@ msgid "Index removable devices"
 msgstr "Ауыстырмалы құрылғыларды индекстеу"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:65
-msgid "Set to true to enable indexing mounted directories for removable devices."
+msgid ""
+"Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
 "Ауыстырмалы құрылғылар үшін тіркелген бумаларды индекстеуді іске қосу үшін "
 "true мәніне орнатыңыз."
@@ -134,15 +135,15 @@ msgstr "Рекурсивті түрде индекстелетін бумала�
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:91
 msgid ""
-"List of directories to index recursively, Special values include: ‘&DESKTOP’, "
-"‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
-"‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
-"user-dirs.default"
+"List of directories to index recursively, Special values include: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
-"Рекурсивті түрде индекстелетін бумалар тізімі. Арнайы мәндерге мыналар жатады: "
-"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
-"‘&TEMPLATES’, ‘&VIDEOS’. /etc/xdg/user-dirs.defaults және $HOME/.config/user-"
-"dirs.default файлдарын қараңыз."
+"Рекурсивті түрде индекстелетін бумалар тізімі. Арнайы мәндерге мыналар "
+"жатады: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. /etc/xdg/user-dirs.defaults және "
+"$HOME/.config/user-dirs.default файлдарын қараңыз."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid "Directories to index non-recursively"
@@ -154,13 +155,13 @@ msgstr "Рекурсивті емес түрде индекстелетін бу
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and "
-"$HOME/.config/user-dirs.default"
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
+"and $HOME/.config/user-dirs.default"
 msgstr ""
-"Ішкі бумаларды тексермей индекстелетін бумалар тізімі. Арнайы мәндерге мыналар "
-"жатады: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. /etc/xdg/user-dirs.defaults және "
-"$HOME/.config/user-dirs.default файлдарын қараңыз"
+"Ішкі бумаларды тексермей индекстелетін бумалар тізімі. Арнайы мәндерге "
+"мыналар жатады: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, "
+"‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. /etc/xdg/user-"
+"dirs.defaults және $HOME/.config/user-dirs.default файлдарын қараңыз"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid "Ignored files"
@@ -198,7 +199,7 @@ msgstr "Метадеректерді шығарушының шығысын кө�
 msgid "List and change indexed folders"
 msgstr "Индекстелген бумаларды тізімдеу және өзгерту"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:543
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "Файлдар мен ресурстар үшін қолжетімді ақпаратты алу"
 
@@ -210,11 +211,11 @@ msgstr "Индекстеуді уақытша тежеу"
 msgid "Erase the indexed data"
 msgstr "Индекстелген деректерді өшіру"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "Мазмұнды іздеу"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "Нұсқағышталған деректер бойынша күй мен статистиканы ұсыну"
 
@@ -233,42 +234,48 @@ msgstr "Қолжетімді localsearch командалары:"
 #: src/cli/main.c:141
 msgid "See “localsearch help <command>” to read about a specific subcommand."
 msgstr ""
-"Белгілі бір ішкі команда туралы оқу үшін “localsearch help <command>” қараңыз."
+"Белгілі бір ішкі команда туралы оқу үшін “localsearch help <command>” "
+"қараңыз."
 
 #: src/cli/main.c:184
 #, c-format
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "“%s” - localsearch командасы емес. “localsearch --help” қараңыз"
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "Хабарлама"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Шығыс нәтижелерінің пішімі: “turtle”, “trig” немесе “json-ld”"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "ПІШІМ"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81 src/cli/tracker-reset.c:52
-#: src/extractor/tracker-main.c:75 src/indexer/tracker-application.c:58
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "ФАЙЛ"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "tracker-extract орындау мүмкін болмады: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "Файлдан метадеректерді шығарып алу"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:387
-#: src/cli/tracker-info.c:550 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "Танылмаған параметрлер"
 
@@ -304,7 +311,7 @@ msgstr "--add және --remove өзара үйлеспейді"
 msgid "--recursive requires --add"
 msgstr "--recursive опциясы --add талап етеді"
 
-#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "Орналасу"
 
@@ -316,42 +323,43 @@ msgstr "Рекурсивті"
 msgid "Please specify one or more locations to index."
 msgstr "Индекстек үшін бір немесе бірнеше орынды көрсетіңіз."
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Толық атаулар кеңістігін көрсету (яғни, nie:title қолданбай, толық URL "
 "адрестерін қолдану)"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr "Ресурстар үшін қолжетімді болса, жай мәтіндік мазмұнды көрсету"
 
-#: src/cli/tracker-info.c:77
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "ФАЙЛДЫҢ индекстеуге алуға жарамдылығын тексеру"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "Қате хабарламасы"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "Ауыстырмалы құрылғы сұрауға сілтеп тұруы керек"
 
-#: src/cli/tracker-info.c:375 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "LocalSearch қызметіне қосылу мүмкін болмады"
 
-#: src/cli/tracker-info.c:420
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "URI үшін деректерді алу мүмкін емес"
 
-#: src/cli/tracker-info.c:430
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "Бұл URI үшін метадеректер қолжетімді емес"
 
-#: src/cli/tracker-info.c:435 src/cli/tracker-info.c:509
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "Жарамды күйін алу мүмкін болмады: "
 
-#: src/cli/tracker-info.c:461 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "“%s” қолдау көрсетілмейтін сериялау пішімі\n"
@@ -397,10 +405,11 @@ msgid "Remove filesystem indexer database"
 msgstr "Файлдық жүйенің индекс дерекқорын өшіру"
 
 #: src/cli/tracker-reset.c:51
-msgid "Erase indexed information about a file, works recursively for directories"
+msgid ""
+"Erase indexed information about a file, works recursively for directories"
 msgstr ""
-"Файл туралы индекстелген ақпаратты өшіру, бумалар үшін рекурсивті түрде жұмыс "
-"істейді"
+"Файл туралы индекстелген ақпаратты өшіру, бумалар үшін рекурсивті түрде "
+"жұмыс істейді"
 
 #. Now, delete the element recursively
 #: src/cli/tracker-reset.c:95
@@ -414,110 +423,112 @@ msgstr "Бұл файлдың индекстелген деректері өші
 
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
-msgstr "LocalSearch индекстелген деректері өшіріледі, жалғастыру керек пе? [y/N]"
+msgstr ""
+"LocalSearch индекстелген деректері өшіріледі, жалғастыру керек пе? [y/N]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
 #. * it is intentionally lowercase, so please keep it like this.
+#.
 #: src/cli/tracker-reset.c:231
 msgid "yes"
 msgstr "иә"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "Нәтижелер"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "Файлдар"
 
-#: src/cli/tracker-search.c:102
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "Бумалар"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "Альбомдар"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "Әртістер"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "Файлдарды іздеу"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "Бумаларды іздеу"
 
-#: src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "Аудио файлдарды іздеу"
 
-#: src/cli/tracker-search.c:128
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "Музыкалық альбомдарды іздеу"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "Музыка орындаушыларын іздеу"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "Сурет файлдарын іздеу"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "Видео файлдарын іздеу"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "Құжат файлдарын іздеу"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "Бағдарламалық қамтама файлдарын іздеу"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "Көрсетілген нәтижелер санын шектеу"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "Нәтижелерді жылжыту"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "Нәтижелер үшін URN-дерді көрсету"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "Барлық жоқ сәйкестіктерді де қайтару (яғни, тіркелмеген томдарды қоса)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "Көмек опцияларын көрсету"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "іздеу ұғымдары"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "ТЕРМИНДЕР"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "Күй өзгерістерін олар орын алған сайын бақылау"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "Ағымдағы индекс / деректер жиыны үшін статистиканы көрсету"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -525,71 +536,67 @@ msgstr ""
 "Дерекқордағы өзгерістерді нақты уақыт режимінде бақылау (мысалы, ресурстар "
 "немесе файлдар қосылуы)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "ӨРНЕК"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "LocalSearch статистикасын алу мүмкін болмады"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "Хабарлама"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
 #, c-format
 msgid "Currently indexed"
 msgstr "Қазіргі уақытта индекстелген"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d файл"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d бума"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "Дерекқор бөліміндегі бос орын"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "Индекстеуші кідіртілді"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "Деректер әлі де индекстелуде"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "Индекстеуші бос тұр"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d жазылған сәтсіздік"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "Есептер табылмады"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "SPARQL қосылымын алу мүмкін болмады"
 
-#: src/cli/tracker-status.c:714
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "Қазір дерекқор жаңартуларын тыңдауда"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "Тоқтау үшін Ctrl+C басыңыз"
 
@@ -680,16 +687,6 @@ msgstr "Қосу және өшіру әрекеттерін бірге пайд�
 msgid "The --description option can only be used with --add"
 msgstr "--description опциясын тек --add опциясымен қолдануға болады"
 
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Кідіртілген майнерді жалғастыру үшін Cookie танылмады"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr ""
-"Бағдарламалық қамтаманы кідірту және себебі бұрыннан бар кідірту сұранысына "
-"сәйкес келеді"
-
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
 msgstr "бір секундтан кем"
@@ -742,125 +739,140 @@ msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d секунд"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-application.c:65 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Нұсқа ақпаратын көрсетеді"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#: src/control/tracker-main.c:136
+#.
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— трекердің индекс проксиін іске қосу"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "Метадеректерді алу керек файл"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "Файлдың MIME түрі (көрсетілмесе, ол болжанады)"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "Тең дәрежелі байланысқа арналған сокет файл дескрипторы"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FD"
 
-#: src/extractor/tracker-main.c:257
-msgid "No metadata or extractor modules found to handle this file"
-msgstr "Бұл файлды өңдеу үшін ешқандай метадерек немесе алу модульдері табылмады"
+#: src/extractor/tracker-main.c:90
+msgid "Filesystem root of the extracted data"
+msgstr "Тарқатылған деректердің файлдық жүйедегі түбірлік бумасы"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:262
+msgid "No metadata or extractor modules found to handle this file"
+msgstr ""
+"Бұл файлды өңдеу үшін ешқандай метадерек немесе алу модульдері табылмады"
+
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "Метадеректерді алу сәтсіз аяқталды"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— Файл мета деректерін шығарып алу"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "Файл атауы мен MIME түрі бірге берілуі тиіс"
 
-#: src/indexer/tracker-application.c:53
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
-"Барлық бапталған орындар индекстелгенше жұмыс істейді және содан кейін жұмысын "
-"аяқтайды"
+"Барлық бапталған орындар индекстелгенше жұмыс істейді және содан кейін "
+"жұмысын аяқтайды"
 
-#: src/indexer/tracker-application.c:57
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Конфигурация негізінде ФАЙЛ-дың өңдеуге жарамдылығын тексереді"
 
-#: src/indexer/tracker-application.c:61
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "Файлдық жүйедегі өзгерістерді болдырмайды"
 
-#: src/indexer/tracker-application.c:612
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "“%s” деректер объектісі қазір бар"
 
-#: src/indexer/tracker-application.c:613
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "“%s” деректер объектісі қазір жоқ"
 
-#: src/indexer/tracker-application.c:639
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "“%s” аталық бумасы индекстелуге жарамсыз (сүзгілер негізінде)"
 
-#: src/indexer/tracker-application.c:645
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "“%s” аталық бумасы индекстелуге жарамсыз (жасырын файл)"
 
-#: src/indexer/tracker-application.c:651
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
-"Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
+"Parent directory “%s” is NOT eligible to be indexed (based on content "
+"filters)"
 msgstr "“%s” аталық бумасы индекстелуге жарамсыз (мазмұн сүзгілері негізінде)"
 
-#: src/indexer/tracker-application.c:666
+#: src/indexer/tracker-application.c:1316
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Бума индекстелуге жарамсыз (сүзгілер негізінде)"
 
-#: src/indexer/tracker-application.c:670
+#: src/indexer/tracker-application.c:1320
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Файл индекстелуге жарамсыз (сүзгілер негізінде)"
 
-#: src/indexer/tracker-application.c:673
+#: src/indexer/tracker-application.c:1323
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Файл индекстелуге жарамсыз (жасырын файл)"
 
-#: src/indexer/tracker-application.c:675
+#: src/indexer/tracker-application.c:1325
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Файл индекстелуге жарамсыз (индекстелетін бума емес)"
 
-#: src/indexer/tracker-application.c:683
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "Бума индекстелуге жарамды"
 
-#: src/indexer/tracker-application.c:684
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "Файл индекстелуге жарамды"
+
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "Дерекқордың орналасуы"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "БУМА"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
 "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
 msgstr ""
-"Журналдау, 0 = тек қателер, 1 = минималды, 2 = егжей-тегжейлі және 3 = жөндеу "
-"(әдепкі бойынша=0)"
+"Журналдау, 0 = тек қателер, 1 = минималды, 2 = егжей-тегжейлі және 3 = "
+"жөндеу (әдепкі бойынша=0)"
 
 #: src/writeback/tracker-main.c:61
 msgid "Disable shutting down after 30 seconds of inactivity"
@@ -868,9 +880,21 @@ msgstr "30 секунд әрекетсіздіктен кейін жұмысты
 
 #. Translators: this message will appear immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
+#.
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— трекердің кері жазу қызметін іске қосу"
+
+#~ msgid "Error message"
+#~ msgstr "Қате хабарламасы"
+
+#~ msgid "Cookie not recognized to resume paused miner"
+#~ msgstr "Кідіртілген майнерді жалғастыру үшін Cookie танылмады"
+
+#~ msgid "Pause application and reason match an already existing pause request"
+#~ msgstr ""
+#~ "Бағдарламалық қамтаманы кідірту және себебі бұрыннан бар кідірту "
+#~ "сұранысына сәйкес келеді"
 
 #~ msgid "If enabled, numbers will not be indexed."
 #~ msgstr "Рұқсат етілсе, сандар индекстелмейді."
