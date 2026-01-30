@@ -922,6 +922,12 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	                                tracker_sparql_cursor_get_string (cursor, 4, NULL),
 	                                store_mtime);
 
+	if (notifier->monitor &&
+	    file_type == G_FILE_TYPE_DIRECTORY) {
+		/* Directory, needs monitoring */
+		tracker_monitor_add (notifier->monitor, file);
+	}
+
 	/* Query fs info in place */
 	info = g_file_query_info (file, INDEXER_FILE_ATTRIBUTES,
 	                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
@@ -953,24 +959,25 @@ handle_file_from_cursor (TrackerIndexRoot    *root,
 	           ((!!(root->flags & TRACKER_DIRECTORY_FLAG_RECURSE) &&
 	             !g_file_info_get_attribute_boolean (info, G_FILE_ATTRIBUTE_UNIX_IS_MOUNTPOINT)) ||
 	            index_root_equals_file (root, file) == 0) &&
-	           check_directory_contents (notifier, file)) {
-		if (notifier->monitor) {
-			/* Directory, needs monitoring */
-			tracker_monitor_add (notifier->monitor, file);
-		}
-
-		if ((root->root_flags & TRACKER_ROOT_FLAG_FULL_CHECK) != 0 ||
+	           check_directory_contents (notifier, file) &&
+		   (!!(root->root_flags & TRACKER_ROOT_FLAG_FULL_CHECK) ||
 		    file_data->state == FILE_STATE_CREATE ||
-		    file_data->state == FILE_STATE_UPDATE) {
-			/* Updated directory, needs crawling */
-			g_queue_push_head (root->pending_dirs, g_object_ref (file));
-		}
+		    file_data->state == FILE_STATE_UPDATE)) {
+		/* Updated directory, needs crawling */
+		g_queue_push_head (root->pending_dirs, g_object_ref (file));
 	}
 
 	if (file_data->state == FILE_STATE_EXTRACTOR_UPDATE)
 		root->files_reindexed++;
 	else if (file_data->state != FILE_STATE_NONE)
 		root->files_updated++;
+
+	if (notifier->monitor &&
+	    file_type == G_FILE_TYPE_DIRECTORY &&
+	    !file_data->is_dir_in_disk &&
+	    index_root_equals_file (root, file) != 0) {
+		tracker_monitor_remove (notifier->monitor, file);
+	}
 
 	tracker_file_notifier_notify (notifier, file_data, info);
 	g_queue_delete_link (&root->queue, file_data->node);

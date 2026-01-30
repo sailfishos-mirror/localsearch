@@ -700,7 +700,7 @@ log_config (TrackerConfig *config)
 		for (l = dirs; l; l = l->next)
 			g_message ("    %s\n", (char*) l->data);
 
-		dirs = tracker_config_get_index_recursive_directories (config);
+		dirs = tracker_config_get_index_single_directories (config);
 		if (dirs)
 			g_message ("  Non-recursive folders:");
 		for (l = dirs; l; l = l->next)
