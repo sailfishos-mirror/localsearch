@@ -94,7 +94,7 @@ main (int   argc,
 		return EXIT_FAILURE;
 #endif
 
-#ifndef HAVE_LIBSECCOMP
+#ifdef HAVE_LIBSECCOMP
 	if (!tracker_seccomp_init (FALSE))
 		return EXIT_FAILURE;
 #endif
