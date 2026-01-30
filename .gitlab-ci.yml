@@ -300,6 +300,8 @@ build-debian-stable@x86_64:
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
+      mkdir tmp
+      export TMPDIR=`pwd`/tmp
       meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 4 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
 
   after_script:
@@ -417,6 +419,8 @@ test-dist:
       # whole environment for every failed test, and that gives a whole
       # screenful of junk each time unless we strip these.
       unset $(env|grep -o '^CI_[^=]*')
+      mkdir tmp
+      export TMPDIR=`pwd`/tmp
       meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 4 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
 
   artifacts:
