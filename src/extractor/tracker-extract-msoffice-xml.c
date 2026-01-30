@@ -22,13 +22,14 @@
 #include <string.h>
 
 #include <glib.h>
+#include <gio/gio.h>
 
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
 
 #include "tracker-main.h"
-#include "tracker-gsf.h"
+#include "tracker-zip-input-stream.h"
 
 typedef enum {
 	MS_OFFICE_XML_TAG_INVALID,
@@ -495,6 +496,59 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 
 /* ------------------------- CONTENT-TYPES file parsing -----------------------------------*/
 
+#define ZIP_XML_BUFFER_SIZE 8192
+
+static gboolean
+parse_xml_from_zip (const gchar          *zip_uri,
+                    const gchar          *member_name,
+                    GMarkupParseContext  *context,
+                    GError              **error)
+{
+	GInputStream *stream;
+	GBytes *bytes;
+	const guint8 *data;
+	gsize len;
+	gboolean ok;
+
+	stream = NULL;
+	bytes = NULL;
+	ok = TRUE;
+
+	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	if (!stream)
+		return FALSE;
+
+	while ((bytes = g_input_stream_read_bytes (stream,
+	                                           ZIP_XML_BUFFER_SIZE,
+	                                           NULL,
+	                                           error)) != NULL) {
+		len = g_bytes_get_size (bytes);
+
+		if (len == 0) {
+			g_bytes_unref (bytes);
+			bytes = NULL;
+			break; /* EOF */
+		}
+
+		data = g_bytes_get_data (bytes, NULL);
+
+		ok = g_markup_parse_context_parse (context,
+		                                   (const gchar *) data,
+		                                   len,
+		                                   error);
+		g_bytes_unref (bytes);
+		bytes = NULL;
+
+		if (!ok)
+			break;
+	}
+
+	g_input_stream_close (stream, NULL, NULL);
+	g_object_unref (stream);
+
+	return ok;
+}
+
 static gboolean
 xml_read (MsOfficeXMLParserInfo *parser_info,
           const gchar           *xml_filename,
@@ -502,8 +556,10 @@ xml_read (MsOfficeXMLParserInfo *parser_info,
 {
 	GMarkupParseContext *context;
 
+	context = NULL;
+
 	switch (type) {
-	case MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA: {
+	case MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA:
 		/* Reset these flags before going on */
 		parser_info->tag_type = MS_OFFICE_XML_TAG_INVALID;
 
@@ -512,8 +568,8 @@ xml_read (MsOfficeXMLParserInfo *parser_info,
 		                                      parser_info,
 		                                      NULL);
 		break;
-	}
-	case MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA: {
+
+	case MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA:
 		/* Reset these flags before going on */
 		parser_info->tag_type = MS_OFFICE_XML_TAG_INVALID;
 		parser_info->style_element_present = FALSE;
@@ -524,29 +580,24 @@ xml_read (MsOfficeXMLParserInfo *parser_info,
 		                                      parser_info,
 		                                      NULL);
 		break;
-	}
+
 	default:
-		context = NULL;
 		break;
 	}
 
 	if (context) {
-		GError *error = NULL;
+		GError *error;
 
-		/* Load the internal XML file from the Zip archive, and parse it
-		 * using the given context */
-		tracker_gsf_parse_xml_in_zip (parser_info->uri,
-		                              xml_filename,
-		                              context,
-		                              &error);
-		g_markup_parse_context_free (context);
+		error = NULL;
 
-		if (error) {
+		if (!parse_xml_from_zip (parser_info->uri, xml_filename, context, &error) && error) {
 			g_debug ("Parsing internal '%s' gave error: '%s'",
 			         xml_filename,
 			         error->message);
 			g_error_free (error);
 		}
+
+		g_markup_parse_context_free (context);
 	}
 
 	return TRUE;
@@ -758,14 +809,16 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	                                      &info,
 	                                      NULL);
 
-	/* Load the internal XML file from the Zip archive, and parse it
-	 * using the given context */
-	tracker_gsf_parse_xml_in_zip (uri,
-	                              "[Content_Types].xml",
-	                              context,
-	                              &inner_error);
-	if (inner_error) {
-		g_propagate_prefixed_error (error, inner_error, "Could not open:");
+	if (!parse_xml_from_zip (uri, "[Content_Types].xml", context, &inner_error)) {
+		if (inner_error)
+			g_propagate_prefixed_error (error, inner_error, "Could not open:");
+		else
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Could not open: unknown error");
+
+		g_markup_parse_context_free (context);
+		g_free (uri);
+		g_object_unref (metadata);
+
 		return FALSE;
 	}
 
