@@ -20,14 +20,18 @@
 
 #include "config-miners.h"
 
+#include <string.h>
+#include <unistd.h>
+
+#include <glib.h>
+#include <gio/gio.h>
+
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
 
 #include "tracker-main.h"
-#include "tracker-gsf.h"
-
-#include <unistd.h>
+#include "tracker-zip-input-stream.h"
 
 typedef enum {
 	ODT_TAG_TYPE_UNKNOWN,
@@ -104,6 +108,63 @@ static void extract_oasis_content              (const gchar           *uri,
                                                 ODTFileType            file_type,
                                                 TrackerResource       *metadata);
 
+#define ZIP_XML_BUFFER_SIZE 8192
+
+static gboolean
+parse_xml_from_zip (const gchar          *zip_uri,
+                    const gchar          *member_name,
+                    GMarkupParseContext  *context,
+                    GError              **error)
+{
+	GInputStream *stream;
+	GBytes *bytes;
+	const guint8 *data;
+	gsize len;
+	gboolean ok;
+
+	stream = NULL;
+	bytes = NULL;
+	ok = TRUE;
+
+	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	if (!stream)
+		return FALSE;
+
+	while ((bytes = g_input_stream_read_bytes (stream,
+	                                           ZIP_XML_BUFFER_SIZE,
+	                                           NULL,
+	                                           error)) != NULL) {
+		len = g_bytes_get_size (bytes);
+
+		if (len == 0) {
+			g_bytes_unref (bytes);
+			bytes = NULL;
+			break; /* EOF */
+		}
+
+		data = g_bytes_get_data (bytes, NULL);
+
+		ok = g_markup_parse_context_parse (context,
+		                                   (const gchar *) data,
+		                                   len,
+		                                   error);
+		g_bytes_unref (bytes);
+		bytes = NULL;
+
+		if (!ok)
+			break;
+	}
+
+	/* If we broke out because of a read error, make sure we report failure */
+	if (error && *error)
+		ok = FALSE;
+
+	g_input_stream_close (stream, NULL, NULL);
+	g_object_unref (stream);
+
+	return ok;
+}
+
 static void
 extract_oasis_content (const gchar     *uri,
                        gulong           total_bytes,
@@ -138,7 +199,7 @@ extract_oasis_content (const gchar     *uri,
 
 	/* Load the internal XML file from the Zip archive, and parse it
 	 * using the given context */
-	tracker_gsf_parse_xml_in_zip (uri, "content.xml", context, &error);
+	parse_xml_from_zip (uri, "content.xml", context, &error);
 
 	if (!error || g_error_matches (error, maximum_size_error_quark, 0)) {
 		content = g_string_free (info.content, FALSE);
@@ -205,7 +266,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 
 	/* Load the internal XML file from the Zip archive, and parse it
 	 * using the given context */
-	tracker_gsf_parse_xml_in_zip (uri, "meta.xml", context, NULL);
+	parse_xml_from_zip (uri, "meta.xml", context, NULL);
 	g_markup_parse_context_free (context);
 
 	if (g_ascii_strcasecmp (mime_used, "application/vnd.oasis.opendocument.text") == 0) {

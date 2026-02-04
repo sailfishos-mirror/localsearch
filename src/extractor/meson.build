@@ -21,10 +21,14 @@ if get_option('abiword')
 endif
 
 if libgsf.found()
-  modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [libgsf, tracker_miners_common_dep]]]
   modules += [['extract-msoffice', 'tracker-extract-msoffice.c', ['10-msoffice.rule'], [libgsf, tracker_miners_common_dep]]]
-  modules += [['extract-msoffice-xml', 'tracker-extract-msoffice-xml.c', ['11-msoffice-xml.rule'], [libgsf, tracker_miners_common_dep]]]
-  modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [libgsf, tracker_miners_common_dep]]]
+endif
+
+if libzip.found()
+  modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [libzip, tracker_miners_common_dep]]]
+  modules += [['extract-msoffice-xml', 'tracker-extract-msoffice-xml.c', ['11-msoffice-xml.rule'], [libzip, tracker_miners_common_dep]]]
+  modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [libzip, tracker_miners_common_dep]]]
+
 endif
 
 if have_gexiv2
@@ -148,9 +152,9 @@ tracker_extract_dependencies = [
   tracker_miners_common_dep, tracker_extract_dep
 ]
 
-if libgsf.found()
-  tracker_extract_sources += 'tracker-gsf.c'
-  tracker_extract_dependencies += libgsf
+if libzip.found()
+  tracker_extract_sources += 'tracker-zip-input-stream.c'
+  tracker_extract_dependencies += libzip
 endif
 
 executable('localsearch-extractor-@0@'.format(tracker_api_major),

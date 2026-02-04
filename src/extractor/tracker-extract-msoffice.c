@@ -33,7 +33,6 @@
 
 #include "utils/tracker-extract.h"
 #include "tracker-main.h"
-#include "tracker-gsf.h"
 
 /* Powerpoint files comprise of structures. Each structure contains a
  * header. Within that header is a record type that specifies what
@@ -740,7 +739,7 @@ open_file (const gchar *filename, FILE *file)
 	GError *error = NULL;
 
 	input = gsf_input_stdio_new_FILE (filename, file, TRUE);
-	
+
 	if (!input) {
 		return NULL;
 	}
