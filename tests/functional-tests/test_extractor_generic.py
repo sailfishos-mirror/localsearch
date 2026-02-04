@@ -40,6 +40,7 @@ import unittest as ut
 import configuration as cfg
 import fixtures
 
+log = logging.getLogger(__name__)
 
 class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
     """
@@ -111,7 +112,9 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
                 trig = fixtures.get_tracker_extract_output(
                     extra_env, self.file_to_extract, output_format="trig"
                 )
+                log.debug('validating trig')
                 self.validate_trig(trig)
+                log.debug('trig validated')
             else:
                 # No output data is expected for this file
                 jsonld = None
@@ -140,10 +143,13 @@ class GenericExtractionTestCase(fixtures.TrackerExtractTestCase):
 
     def __assert_extraction_ok(self, result):
         try:
+            log.debug ("Assert JSON-LD extraction begin")
             self.assert_extract_result_matches_spec(
                 self.spec["metadata"], result, self.file_to_extract, self.descfile
             )
+            log.debug ("Assert JSON-LD extraction end")
         except AssertionError:
+            log.debug ("Assert JSON-LD extraction error")
             print("\ntracker-extract returned: %s" % json.dumps(result, indent=4))
             raise
 

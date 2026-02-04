@@ -365,7 +365,6 @@ class MinerRemovableLiveConfigChangeTest(MinerRemovableConfigTest):
                 'org.freedesktop.Tracker3.Miner.Files',
                 'index-removable-devices', GLib.Variant.new_boolean(True))
 
-        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
         endpoint_helper = self.helper_for_endpoint(object_path)
         endpoint_helper.ensure_resource(
             fixtures.FILESYSTEM_GRAPH, "nie:isStoredAs <file:>")

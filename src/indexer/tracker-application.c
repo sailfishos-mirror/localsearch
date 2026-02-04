@@ -922,6 +922,8 @@ removable_point_added_cb (TrackerApplication *app,
 	g_autoptr (GError) error = NULL;
 	g_autofree char *uri = NULL;
 
+	g_message ("Removable point added for '%s'", g_file_peek_path (location));
+
 	dbus_conn = g_application_get_dbus_connection (G_APPLICATION (app));
 	instance = indexer_instance_new_for_mountpoint (app, location,
 	                                                dbus_conn,
@@ -945,6 +947,8 @@ removable_point_removed_cb (TrackerApplication *app,
 {
 	GList *l;
 
+	g_print ("Mount point removed: %s\n", g_file_peek_path (location));
+
 	for (l = app->removable_instances; l; l = l->next) {
 		IndexerInstance *instance = l->data;
 		g_autoptr (GFile) root = NULL;
@@ -953,6 +957,7 @@ removable_point_removed_cb (TrackerApplication *app,
 		if (!g_file_equal (location, instance->root))
 			continue;
 
+		g_print ("Matched with: %s\n", instance->object_path);
 		object_path = g_strdup (instance->object_path);
 		root = g_object_ref (instance->root);
 
@@ -961,8 +966,10 @@ removable_point_removed_cb (TrackerApplication *app,
 		indexer_instance_free (instance);
 
 		uri = g_file_get_uri (root);
+		g_print ("Emitting endpoint removed... %s %s\n", uri, object_path);
 		tracker_dbus_miner_emit_endpoint_removed (app->indexer_iface,
 		                                          uri, object_path);
+		g_print ("Emitted\n");
 		break;
 	}
 }

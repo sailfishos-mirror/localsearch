@@ -155,6 +155,7 @@ unmount_check_data_free (gpointer user_data)
 {
 	UnmountCheckData *unmount_data = user_data;
 
+	g_print ("Pre-unmount data free: %p\n", unmount_data);
 	g_source_remove (unmount_data->source_id);
 	g_object_unref (unmount_data->mount);
 	g_free (unmount_data);
@@ -167,6 +168,7 @@ pre_unmount_timeout_cb (gpointer user_data)
 	TrackerStorage *storage = unmount_data->storage;
 
 	g_warning ("Unmount operation failed, adding back mount point...");
+	g_print ("Pre-unmount timeout data: %p\n", unmount_data);
 
 	mount_add (unmount_data->storage, unmount_data->mount);
 
@@ -192,10 +194,13 @@ mount_removed_cb (GVolumeMonitor *monitor,
 {
 	GList *l;
 
+	g_print ("Mount removed %s\n", g_mount_get_name (mount));
+
 	for (l = storage->pending_pre_unmounts; l; l = l->next) {
 		UnmountCheckData *unmount_data = l->data;
 
 		if (unmount_data->mount == mount) {
+			g_print ("Matched with mount %p %s\n", unmount_data, g_mount_get_name (unmount_data->mount));
 			/* Pre-unmount went through */
 			storage->pending_pre_unmounts =
 				g_list_remove (storage->pending_pre_unmounts, unmount_data);
@@ -223,6 +228,8 @@ mount_pre_unmount_cb (GVolumeMonitor *monitor,
 		                            PRE_UNMOUNT_FAILED_TIMEOUT,
 		                            pre_unmount_timeout_cb,
 		                            unmount_data, NULL);
+
+	g_print ("Pre-unmount data: %p\n", unmount_data);
 
 	storage->pending_pre_unmounts =
 		g_list_prepend (storage->pending_pre_unmounts, unmount_data);

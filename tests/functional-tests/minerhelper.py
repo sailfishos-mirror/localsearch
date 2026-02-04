@@ -63,8 +63,9 @@ class await_endpoint():
             log.info("Timeout fired after %s seconds", self.timeout)
             self.loop.quit()
             raise Exception(
-                f"Timeout ({self.timeout}s) awaiting new endpoint for {self.uri}")
+                f"Timeout ({self.timeout}s) awaiting {self.dbus_signal} for {self.uri}")
 
+        log.debug(f"waiting {self.dbus_signal} for {self.uri} now")
         self.signal_id = self.proxy.connect('g-signal', dbus_signal_cb)
         self.timeout_id = GLib.timeout_add_seconds(self.timeout, timeout_cb)
 

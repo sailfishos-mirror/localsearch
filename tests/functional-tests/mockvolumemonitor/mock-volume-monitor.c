@@ -85,6 +85,8 @@ add_mock_mount (MockVolumeMonitor *self,
 	g_signal_emit_by_name (self, "drive-connected", drive);
 	g_signal_emit_by_name (self, "volume-added", volume);
 	g_signal_emit_by_name (self, "mount-added", mount);
+
+	g_message ("Added mock mount '%s' %p", mount_name, mount);
 }
 
 static gint
@@ -117,6 +119,7 @@ remove_mock_mount (MockVolumeMonitor *self,
 		return;
 	}
 
+	g_message ("Mock mount '%s' being pre-unmounted", g_mount_get_name (G_MOUNT (node->data)));
 	volume = g_mount_get_volume (G_MOUNT (node->data));
 	drive = g_volume_get_drive (volume);
 
@@ -124,6 +127,7 @@ remove_mock_mount (MockVolumeMonitor *self,
 	g_signal_emit_by_name (self, "mount-pre-unmount", node->data);
 
 	if ((flags & UNMOUNT_FLAG_EMULATE_BUSY) != 0) {
+		g_message ("Emulating busy volume... %x", flags);
 		return;
 	}
 
@@ -132,6 +136,7 @@ remove_mock_mount (MockVolumeMonitor *self,
 	mock_volume_removed (MOCK_VOLUME (volume));
 	mock_drive_disconnected (MOCK_DRIVE (drive));
 
+	g_message ("Mock mount '%s' being unmounted", g_mount_get_name (G_MOUNT (mount)));
 	g_signal_emit_by_name (self, "mount-removed", mount);
 	g_signal_emit_by_name (self, "volume-removed", volume);
 	g_signal_emit_by_name (self, "drive-disconnected", drive);
@@ -139,6 +144,8 @@ remove_mock_mount (MockVolumeMonitor *self,
 	self->drives = g_list_remove (self->drives, drive);
 	self->volumes = g_list_remove (self->volumes, volume);
 	self->mounts = g_list_remove (self->mounts, mount);
+
+	g_message ("Mock mount '%s' now removed", g_mount_get_name (G_MOUNT (mount)));
 }
 
 

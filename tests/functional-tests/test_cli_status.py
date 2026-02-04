@@ -32,15 +32,18 @@ import fixtures
 import shutil
 import time
 
+import logging
+log = logging.getLogger(__name__)
+
 class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_status(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
         # Copy a file and wait for it to be indexed, in order to ensure idle state
         file = datadir.joinpath("text/mango.txt")
-        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        target = pathlib.Path(os.path.join(self.indexed_dir, "mango-1.txt"))
         with self.await_document_inserted(target):
-            shutil.copy(file, self.indexed_dir)
+            shutil.copy(file, target)
 
         output = self.run_cli(["localsearch", "status"])
         self.assertIn("1 file", output)
@@ -69,9 +72,9 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # Copy a file and wait for it to be indexed, in order to ensure idle state
         file = datadir.joinpath("text/mango.txt")
-        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        target = pathlib.Path(os.path.join(self.indexed_dir, "mango-2.txt"))
         with self.await_document_inserted(target):
-            shutil.copy(file, self.indexed_dir)
+            shutil.copy(file, target)
 
         output = self.run_cli(["localsearch", "status", "mango"])
         self.assertIn("No reports found", output)
@@ -112,7 +115,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # Copy a file and wait for it to be indexed, in order to ensure state
         file = datadir.joinpath("text/mango.txt")
-        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        target = pathlib.Path(os.path.join(self.indexed_dir, "mango-3.txt"))
         with self.await_document_inserted(target):
             shutil.copy(file, target)
 
@@ -127,7 +130,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # Copy a file and wait for it to be indexed, in order to ensure state
         file = datadir.joinpath("text/mango.txt")
-        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        target = pathlib.Path(os.path.join(self.indexed_dir, "mango-4.txt"))
         with self.await_document_inserted(target):
             shutil.copy(file, target)
 
@@ -162,11 +165,15 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
                     assert n_attempts < 90
 
                 # Close stdin to end the cat process
+                log.debug('closing cat subprocess')
                 inhibit_proc.stdin.close()
+                log.debug('closed cat subprocess')
+
+            log.debug('continue...')
 
             # Copy a file and wait for it to be indexed
             file = datadir.joinpath("text/mango.txt")
-            target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+            target = pathlib.Path(os.path.join(self.indexed_dir, "mango-5.txt"))
             with self.await_document_inserted(target):
                 shutil.copy(file, target)
 
@@ -189,7 +196,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
             # Copy a file and wait for it to be indexed
             file = datadir.joinpath("text/mango.txt")
-            target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+            target = pathlib.Path(os.path.join(self.indexed_dir, "mango-6.txt"))
             with self.await_document_inserted(target):
                 shutil.copy(file, target)
 
@@ -199,7 +206,7 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             output = proc.stdout.read()
 
         # Check we've witnessed the file creation
-        self.assertIn("mango.txt", output)
+        self.assertIn("mango-6.txt", output)
         self.assertIn("tracker:Documents", output)
 
     def test_status_wrongargs(self):

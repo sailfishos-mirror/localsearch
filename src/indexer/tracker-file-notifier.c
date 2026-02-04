@@ -359,6 +359,7 @@ tracker_file_notifier_notify (TrackerFileNotifier *notifier,
 static gboolean
 notifier_check_next_root (TrackerFileNotifier *notifier)
 {
+	g_message ("File notifier next root...");
 	if (notifier->stopped)
 		return FALSE;
 
@@ -1779,6 +1780,7 @@ tracker_file_notifier_is_active (TrackerFileNotifier *notifier)
 {
 	g_return_val_if_fail (TRACKER_IS_FILE_NOTIFIER (notifier), FALSE);
 
+	g_message ("File Notifier is active %p %p\n", notifier->pending_index_roots, notifier->current_index_root);
 	return notifier->pending_index_roots || notifier->current_index_root;
 }
 

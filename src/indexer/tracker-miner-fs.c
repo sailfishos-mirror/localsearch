@@ -984,11 +984,15 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	}
 
 	if (file == NULL) {
+		g_message ("No more files left to process...");
+
 		if (!tracker_file_notifier_is_active (priv->file_notifier)) {
 			if (!priv->flushing &&
 			    tracker_task_pool_get_size (TRACKER_TASK_POOL (priv->sparql_buffer)) == 0) {
+				g_message ("Indexer stopping...");
 				process_stop (fs);
 			} else {
+				g_message ("Flushing pending updates...");
 				/* Flush any possible pending update here */
 				if (tracker_sparql_buffer_flush (priv->sparql_buffer,
 								 "Queue handlers NONE",
