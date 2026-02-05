@@ -454,7 +454,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	g_assert_cmpint (tracker_monitor_get_count (fixture->monitor), ==, 1);
 
 	/* Setup also not-monitored directory */
-	fixture->not_monitored_directory = g_strdup (g_get_tmp_dir ());
+	fixture->not_monitored_directory = g_dir_make_tmp ("tracker-monitor-test-XXXXXX", NULL);
 
 	/* Create new main loop */
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
@@ -489,6 +489,7 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 	g_object_unref (fixture->monitored_directory_file);
 	g_free (fixture->monitored_directory);
 
+	g_assert_no_errno (g_rmdir (fixture->not_monitored_directory));
 	g_assert_true (fixture->not_monitored_directory != NULL);
 	g_free (fixture->not_monitored_directory);
 }
