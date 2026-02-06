@@ -45,7 +45,7 @@ libpng = dependency('libpng', version: '>= 0.89', required: get_option('png'))
 libseccomp = dependency('libseccomp', version: '>= 2.0', required: false)
 libtiff = dependency('libtiff-4', required: get_option('tiff'))
 libxml2 = dependency('libxml-2.0', version: '>= 2.6', required: get_option('xml'))
-libzip = dependency('libzip', required: true)
+libzip = dependency('libzip', required: get_option('zip'))
 poppler = dependency('poppler-glib', version: '>= 0.16.0', required: get_option('pdf'))
 totem_plparser = dependency('totem-plparser', required: get_option('playlist'))
 webp = dependency('libwebpdemux', required: get_option('webp'))
@@ -451,6 +451,7 @@ if have_tracker_extract
     '    Support TIFF:                           @0@ (xmp: @1@, exif: @2@, iptc: @3@)'.format(
         libtiff.found().to_string(), exempi.found().to_string(), have_gexiv2.to_string(), have_gexiv2.to_string()),
     '    Support MS & Open Office:               ' + libgsf.found().to_string(),
+    '    Support zipped EPUB, OOXML & ODF        ' + libzip.found().to_string(),
     '    Support XML / HTML:                     ' + libxml2.found().to_string(),
     '    Support embedded / sidecar XMP:         ' + exempi.found().to_string(),
     '    Support A/V formats:                    ' + avformat.found().to_string(),

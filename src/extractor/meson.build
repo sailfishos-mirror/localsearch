@@ -28,7 +28,6 @@ if libzip.found()
   modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [libzip, tracker_miners_common_dep]]]
   modules += [['extract-msoffice-xml', 'tracker-extract-msoffice-xml.c', ['11-msoffice-xml.rule'], [libzip, tracker_miners_common_dep]]]
   modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [libzip, tracker_miners_common_dep]]]
-
 endif
 
 if have_gexiv2
