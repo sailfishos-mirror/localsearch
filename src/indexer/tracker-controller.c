@@ -427,14 +427,11 @@ filter_changed_cb (TrackerController *controller)
 }
 
 static gboolean
-index_volumes_changed_idle (gpointer user_data)
+handle_removable_volume_changes (TrackerController *controller)
 {
-	TrackerController *controller = user_data;
 	GSList *mounts_removed = NULL;
 	GSList *mounts_added = NULL;
 	gboolean new_index_removable_devices;
-
-	TRACKER_NOTE (CONFIG, g_message ("Volume related configuration changed, updating..."));
 
 	new_index_removable_devices = g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices");
 
@@ -480,7 +477,14 @@ index_volumes_changed_idle (gpointer user_data)
 
 		g_slist_free_full (mounts_removed, g_object_unref);
 	}
+}
 
+static gboolean
+index_volumes_changed_idle (gpointer user_data)
+{
+	TrackerController *controller = user_data;
+
+	handle_removable_volume_changes (controller);
 	controller->volumes_changed_id = 0;
 
 	return G_SOURCE_REMOVE;
@@ -491,6 +495,8 @@ index_volumes_changed_cb (TrackerConfig     *config,
                           GParamSpec        *pspec,
                           TrackerController *controller)
 {
+	TRACKER_NOTE (CONFIG, g_message ("Volume related configuration changed, updating..."));
+
 	if (controller->volumes_changed_id == 0) {
 		/* Set idle so multiple changes in the config lead to one check */
 		controller->volumes_changed_id =
@@ -880,15 +886,7 @@ tracker_controller_new (TrackerIndexingTree   *tree,
 void
 tracker_controller_initialize_removable_devices (TrackerController *controller)
 {
-	GSList *mounts, *l;
-
-	if (!g_settings_get_boolean (G_SETTINGS (controller->config), "index-removable-devices"))
-		return;
-
-	mounts = tracker_storage_get_removable_mount_points (controller->storage);
-
-	for (l = mounts; l; l = l->next)
-		add_removable_directory (controller, l->data);
+	handle_removable_volume_changes (controller);
 }
 
 void
