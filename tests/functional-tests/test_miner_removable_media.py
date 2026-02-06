@@ -168,6 +168,7 @@ class MinerRemovableConfigTest(MinerRemovableMediaTest):
         if self.offline_test:
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
+            self.sandbox.session_bus.await_bus_name(self.MOCK_VOLUME_MONITOR_DBUS_NAME)
             self.add_removable_device(self.device_path)
 
     def test_ignored_files(self):
@@ -336,16 +337,19 @@ class MinerRemovableLiveConfigChangeTest(MinerRemovableConfigTest):
         self.offline_test = False
 
     def test_index_removable_devices(self):
+        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+
         dconf = self.sandbox.get_dconf_client()
         dconf.write (
             'org.freedesktop.Tracker3.Miner.Files',
             'index-removable-devices', GLib.Variant.new_boolean(False))
 
-        path = self.device_path.joinpath("file1.txt")
-        path.write_text("Foo bar baz")
+        self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
+        self.miner_fs.start()
+        self.sandbox.session_bus.await_bus_name(self.MOCK_VOLUME_MONITOR_DBUS_NAME)
         self.add_removable_device(self.device_path)
 
-        # Ensure the file was not indexed
+        # Ensure the endpoint is not added
         time.sleep(2)
 
         object_path = self.miner_fs.removable_device_object_path (self.device_path)
@@ -363,6 +367,11 @@ class MinerRemovableLiveConfigChangeTest(MinerRemovableConfigTest):
             dconf.write (
                 'org.freedesktop.Tracker3.Miner.Files',
                 'index-removable-devices', GLib.Variant.new_boolean(True))
+
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+        endpoint_helper = self.helper_for_endpoint(object_path)
+        endpoint_helper.ensure_resource(
+            fixtures.FILESYSTEM_GRAPH, "nie:isStoredAs <file:>")
 
         # The "device" should be "removed", with the config change
         with self.miner_fs.await_endpoint_removed(self.device_path.as_uri()):
