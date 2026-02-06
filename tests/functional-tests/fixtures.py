@@ -110,7 +110,6 @@ class TrackerMinerTest(DBusTestCase):
                     [self.non_recursive_dir]
                 ),
                 "index-removable-devices": GLib.Variant.new_boolean(False),
-                "index-applications": GLib.Variant.new_boolean(False),
             }
         }
         return settings

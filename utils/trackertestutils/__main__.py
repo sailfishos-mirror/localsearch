@@ -171,9 +171,6 @@ def config_set(sandbox, content_locations_recursive=None,
     dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
                       'index-single-directories',
                       locations_gsetting(content_locations_single or []))
-    dconfclient.write('org.freedesktop.Tracker3.Miner.Files',
-                      'index-applications',
-                      GLib.Variant('b', applications))
 
 
 def link_to_mime_data():
