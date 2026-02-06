@@ -51,33 +51,35 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         resource_id = self.tracker.get_content_resource_id(uri1)
 
         dconf = self.sandbox.get_dconf_client()
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-files', GLib.Variant.new_strv(['*.txt']))
 
-        # Newly created filtered file should not appear either
         filename2 = "test-monitored/file2.txt"
         path2 = self.path(filename2)
         uri2 = self.uri(filename2)
-        with open(path2, "w") as f:
-            f.write("Foo bar baz")
 
         with self.tracker.await_delete(
             fixtures.DOCUMENTS_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-files', GLib.Variant.new_strv(['*.txt']))
+
+            with open(path2, "w") as f:
+                f.write("Foo bar baz")
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
+        # Newly created filtered file should not appear either
         self.assertResourceMissing(uri2)
 
         # Ensure that both files are back by removing the filter
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-files', GLib.Variant.new_strv([]))
-
         with self.await_document_inserted(path1):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-files', GLib.Variant.new_strv([]))
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -99,14 +101,14 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         dconf = self.sandbox.get_dconf_client()
 
         # Set ignored-directories filter, directory and file should disappear
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-directories', GLib.Variant.new_strv(['dir']))
-
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-directories', GLib.Variant.new_strv(['dir']))
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -114,12 +116,12 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         self.assertResourceMissing(uri)
 
         # Ensure the file/dir are back after removing the filter
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-directories', GLib.Variant.new_strv([]))
-
         with self.await_document_inserted(f):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-directories', GLib.Variant.new_strv([]))
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -144,14 +146,14 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         dconf = self.sandbox.get_dconf_client()
 
         # Set ignored-directories-with-content filter, dir and file should disappear
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-directories-with-content', GLib.Variant.new_strv(['hide-me']))
-
         with self.tracker.await_delete(
             fixtures.DOCUMENTS_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-directories-with-content', GLib.Variant.new_strv(['hide-me']))
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -159,12 +161,12 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
         self.assertResourceMissing(uri)
 
         # Ensure the file/dir are back after removing the filter
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'ignored-directories-with-content', GLib.Variant.new_strv([]))
-
         with self.await_document_inserted(f):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'ignored-directories-with-content', GLib.Variant.new_strv([]))
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -259,17 +261,19 @@ class TestOfflineConfigChanges(fixtures.TrackerMinerTest):
 
     def test_enable_monitors(self):
         dconf = self.sandbox.get_dconf_client()
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'enable-monitors', GLib.Variant.new_boolean(False))
 
-        # Start the indexer
         start_check = "test-monitored/start_check.txt"
-        with open(self.path(start_check), "w") as f:
-            f.write("Foo bar baz")
 
+        # Restart the indexer
         with self.await_document_inserted(self.path(start_check)):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'enable-monitors', GLib.Variant.new_boolean(False))
+
+            with open(self.path(start_check), "w") as f:
+                f.write("Foo bar baz")
+
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -465,12 +469,12 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
     def test_preconfigured_non_removable_in_index_single_directories(self):
         dconf = self.sandbox.get_dconf_client()
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-single-directories', GLib.Variant.new_strv([str(self.device_path)]))
-
         with self.await_insert_dir(self.device_path):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-single-directories', GLib.Variant.new_strv([str(self.device_path)]))
+
             self.device_path.mkdir()
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
@@ -479,13 +483,13 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
         self.assertResourceExists(self.device_path.as_uri())
         resource_id = self.tracker.get_resource_id_by_uri(self.device_path.as_uri())
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        self.device_path.rmdir()
-
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+
             # The new miner instance will be already unaware of the "mount"
+            self.device_path.rmdir()
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
 
@@ -525,13 +529,13 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
     def test_preconfigured_non_removable_in_index_recursive_directories(self):
         dconf = self.sandbox.get_dconf_client()
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-recursive-directories',
-            GLib.Variant.new_strv([self.indexed_dir, str(self.device_path)]))
-
         with self.await_insert_dir(self.device_path):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-recursive-directories',
+                GLib.Variant.new_strv([self.indexed_dir, str(self.device_path)]))
+
             self.device_path.mkdir()
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
@@ -540,12 +544,12 @@ class TestOfflineConfigMount(fixtures.TrackerMinerRemovableMediaTest):
         self.assertResourceExists(self.device_path.as_uri())
         resource_id = self.tracker.get_content_resource_id(self.device_path.as_uri())
 
-        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
-        self.device_path.rmdir()
-
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
+            self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+            self.device_path.rmdir()
+
             # The new miner instance will be already unaware of the "mount"
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
             self.miner_fs.start()
