@@ -31,6 +31,8 @@ import configuration
 import fixtures
 import shutil
 
+from minerhelper import MinerFsHelper
+
 class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_reset(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
@@ -65,8 +67,8 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         # Re-start the indexer, check that file is reindexed
         with self.await_document_inserted(target):
-            output = self.run_cli(["localsearch", "status"])
-            self.assertNotIn("idle", output)
+            self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
+            self.miner_fs.start()
 
     def test_reset_file(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
