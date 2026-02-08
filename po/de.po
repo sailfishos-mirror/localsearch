@@ -24,8 +24,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-10-21 16:05+0000\n"
-"PO-Revision-Date: 2025-10-25 20:58+0200\n"
+"POT-Creation-Date: 2025-12-09 19:27+0000\n"
+"PO-Revision-Date: 2026-02-07 20:50+0100\n"
 "Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
 "Language: de\n"
@@ -33,7 +33,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -213,16 +213,14 @@ msgid "Show help on subcommands"
 msgstr "Hilfe zu Unterbefehlen anzeigen"
 
 #: src/cli/main.c:69
-#, fuzzy
-#| msgid "Metadata extractor"
 msgid "Show metadata extractor output"
-msgstr "Metadaten-Entdecker"
+msgstr "Die Ausgabe des Metadaten-Sammlers anzeigen"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "Indizierte Ordner auflisten und ändern"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
+#: src/cli/main.c:71 src/cli/tracker-info.c:543
 msgid "Retrieve information available for files and resources"
 msgstr "Verfügbaren Informationen zu Dateien und Ressourcen abrufen"
 
@@ -291,8 +289,8 @@ msgstr "tracker-extract konnte nicht ausgeführt werden: "
 msgid "Extract metadata from a file"
 msgstr "Metadaten aus einer Datei auslesen"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:550 src/cli/tracker-inhibit.c:113
 #: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
 #: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
@@ -310,35 +308,35 @@ msgstr "Entfernt FILE aus indizierten Orten"
 msgid "Makes indexing recursive"
 msgstr "Führt die Indizierung rekursiv durch"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "»%s« ist kein Ordner"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "Entweder --add oder --remove muss angegeben sein"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add und --remove schließen sich gegenseitig aus"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "--recursive benötigt --add"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:347
 msgid "Path"
 msgstr "Pfad"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "Rekursiv"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "Bitte geben Sie einen oder mehrere Orte zum Indizieren an."
 
@@ -360,27 +358,27 @@ msgstr "Prüft, ob DATEI für eine Indizierung infrage kommt"
 msgid "Error message"
 msgstr "Fehlermeldung"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
+#: src/cli/tracker-info.c:375 src/cli/tracker-search.c:341
 #: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
 msgid "Could not connect to LocalSearch"
 msgstr "Es konnte keine Verbindung zu LocalSearch aufgebaut werden"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:420
 msgid "Unable to retrieve data for URI"
 msgstr "Daten für URI konnten nicht abgerufen werden"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:430
 msgid "No metadata available for that URI"
 msgstr "Keine Metadaten für diese URI verfügbar"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:435 src/cli/tracker-info.c:509
 msgid "Could not get eligible status: "
 msgstr "Status der Zugriffsrechte konnte nicht ermittelt werden: "
 
 # Ist das hier gemeint?
 # https://de.wikipedia.org/wiki/Serialisierung
 # Denke ja. -mb
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:461 src/extractor/tracker-main.c:184
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Nicht unterstütztes Serialisierungs-Format »%s«\n"
@@ -524,7 +522,7 @@ msgstr "Ergebnisse versetzen"
 
 #: src/cli/tracker-search.c:165
 msgid "Show URNs for results"
-msgstr ""
+msgstr "Die Identifikatoren für Ergebnisse anzeigen"
 
 #: src/cli/tracker-search.c:169
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
@@ -633,7 +631,7 @@ msgstr "Drücken Sie Strg+C zum Anhalten"
 
 #: src/cli/tracker-tag.c:67
 msgid "List all tags"
-msgstr ""
+msgstr "Alle Schlagwörter auflisten"
 
 #: src/cli/tracker-tag.c:71
 msgid "Show files associated with each tag (this is only used with --list)"
@@ -711,16 +709,16 @@ msgstr "Schlagwort wurde erfolgreich entfernt"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Es konnte keine Verbindung zu LocalSearch aufgebaut werden"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "Die Option »--list« wird für »--show-files« benötigt"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr ""
 "Aktionen zum Hinzufügen und Löschen können nicht zugleich verwendet werden"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr ""
 "Die Option »--description« kann nur zusammen mit »--add« verwendet werden"
