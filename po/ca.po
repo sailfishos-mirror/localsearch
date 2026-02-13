@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2026-01-16 18:54+0000\n"
-"PO-Revision-Date: 2026-01-27 17:14+0100\n"
+"PO-Revision-Date: 2026-02-13 17:14+0100\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -620,7 +620,7 @@ msgstr "Premeu Ctrl+C per a aturar"
 
 #: src/cli/tracker-tag.c:67
 msgid "List all tags"
-msgstr "Llista totes les estiquetes"
+msgstr "Llista totes les etiquetes"
 
 #: src/cli/tracker-tag.c:71
 msgid "Show files associated with each tag (this is only used with --list)"
