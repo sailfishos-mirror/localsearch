@@ -12,14 +12,14 @@
 # YunQiang Su <wzssyqa@gmail.com>, 2010, 2015.
 # Mingcong Bai <jeffbai@aosc.xyz>, 2017, 2018.
 # Dingzhong Chen <wsxy162@gmail.com>, 2016, 2019.
-# lumingzh <lumingzh@qq.com>, 2022-2025.
+# lumingzh <lumingzh@qq.com>, 2022-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-16 12:26+0000\n"
-"PO-Revision-Date: 2025-09-05 10:51+0800\n"
+"POT-Creation-Date: 2026-01-30 17:08+0000\n"
+"PO-Revision-Date: 2026-02-14 16:19+0800\n"
 "Last-Translator: lumingzh <lumingzh@qq.com>\n"
 "Language-Team: Chinese (China) <i18n-zh@googlegroups.com>\n"
 "Language: zh_CN\n"
@@ -27,7 +27,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 49.0\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -200,11 +200,11 @@ msgstr "在子命令上显示帮助"
 msgid "Show metadata extractor output"
 msgstr "显示元数据提取输出"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "列出和更改索引的文件夹"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "获取文件和资源的可用信息"
 
@@ -216,11 +216,11 @@ msgstr "临时抑制索引"
 msgid "Erase the indexed data"
 msgstr "擦除已索引数据"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "搜索内容"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "提供状态和索引数据的统计"
 
@@ -245,36 +245,40 @@ msgstr "请查阅“localsearch help <命令>”以阅读特定子命令的信�
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "“%s”不是 localsearch 命令。请查阅“localsearch --help”"
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "信息"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "输出结果格式：“turtle”、“trig”或“json-ld”"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "格式"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "文件"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "无法运行 tracker-extract："
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "从文件提取元数据"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "无法识别的选项"
 
@@ -290,72 +294,73 @@ msgstr "将文件从被索引的位置中移除"
 msgid "Makes indexing recursive"
 msgstr "递归进行索引"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "“%s”不是目录"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "需要提供 --add 或 --remove 其中任意一个"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add 和 --remove 是互斥的"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "--recursive 需要 --add"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "路径"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "递归"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "请指定一个或多个要索引的位置。"
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr "显示完整命名空间（即，不要使用 nie:title，而是使用完整 URLs）"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr "对合适的资源以纯文本显示其内容"
 
-#: src/cli/tracker-info.c:77
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "检查文件是否适宜被索引"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "出错消息"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "要查询的可移动设备挂载点"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "无法连接到 LocalSearch"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "无法为 URI 检索数据"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "没有那个 URI 可用的元数据"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "不能获得适宜的状态："
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "不支持的序列化格式“%s”\n"
@@ -427,170 +432,167 @@ msgstr "LocalSearch 索引的数据将被删除，确定吗？[y/N]"
 msgid "yes"
 msgstr "yes"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "结果"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "文件"
 
-#: src/cli/tracker-search.c:102
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "文件夹"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "专辑"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "艺人"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "搜索文件"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "搜索文件夹"
 
-#: src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "搜索音频文件"
 
-#: src/cli/tracker-search.c:128
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "搜索音乐专辑"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "搜索音乐艺人"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "搜索图像文件"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "搜索视频文件"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "搜索文档文件"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "搜索软件文件"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "限制结果显示的数目"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "偏移结果"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "显示结果的 URN"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "同时返回所有不存在的匹配(即包括未挂载的卷标)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "显示帮助选项"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "搜索关键词"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "关键词"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "更改发生时跟随状态"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "显示关于目前索引 / 数据集的统计"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr "实时监视数据库的变更(如添加了文件或资源)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "表达式"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "无法获得 LocalSearch 统计信息"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "信息"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "目前已索引"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d 个文件"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d 个文件夹"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "数据库分区的剩余空间"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "索引器已暂停"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "数据仍正被索引"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "索引器空闲"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d 个已记录的错误"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "没有找到报告"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "无法获取 SPARQL 连接"
 
-#: src/cli/tracker-status.c:714
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "正在监听数据库更新"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "按 Ctrl+C 停止"
 
@@ -666,25 +668,17 @@ msgstr "标签删除成功"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "无法建立到 LocalSearch 的连接"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "--show-files 需要 --list 选项配合使用"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr "添加和删除动作不能同时使用"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr "--description 选项只能与 --add 同时使用"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Cookie 未被识别用以恢复暂停的挖掘器"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "暂停应用并合理匹配一个已经存在的暂停请求"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -738,125 +732,130 @@ msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d 秒"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "显示版本信息"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— 启动 tracker 索引代理服务器"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "要提取提取元数据的文件"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "文件的 MIME 类型（如果不提供，将进行猜测）"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "用于 P2P 通讯的套接字文件描述符"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FD"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+msgid "Filesystem root of the extracted data"
+msgstr "已提取数据的文件系统根"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "没有找到处理此文件的原数据或提取器模块"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "元数据提取失败"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— 提取文件元数据"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "必须同时提供文件名和 mime 类型"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "运行到所有配置的位置都已索引，然后退出"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "检查文件是否适宜基于配置的挖掘"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "避免文件系统中的更改"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "数据对象“%s”目前存在"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "数据对象“%s”目前不存在"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "目录不适宜进行挖掘（基于过滤器）"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "文件不适宜进行挖掘（基于过滤器）"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "文件不适宜进行挖掘（隐藏文件）"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "文件不适宜进行挖掘（不是被索引的文件夹）"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "上级目录“%s”不适宜进行挖掘（基于过滤器）"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "上级目录“%s”不适宜进行挖掘（隐藏文件）"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 msgstr "上级目录“%s”不适宜进行挖掘（基于内容过滤器）"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:1316
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "目录不适宜进行挖掘（基于过滤器）"
+
+#: src/indexer/tracker-application.c:1320
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "文件不适宜进行挖掘（基于过滤器）"
+
+#: src/indexer/tracker-application.c:1323
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "文件不适宜进行挖掘（隐藏文件）"
+
+#: src/indexer/tracker-application.c:1325
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "文件不适宜进行挖掘（不是被索引的文件夹）"
+
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "目录适宜进行挖掘"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "文件适宜进行挖掘"
 
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "— 启动 tracker 索引器"
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "数据库位置"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "目录"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
@@ -873,6 +872,18 @@ msgstr "闲置 30 秒之后禁用关闭"
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— 启动 tracker 回写服务"
+
+#~ msgid "Error message"
+#~ msgstr "出错消息"
+
+#~ msgid "Cookie not recognized to resume paused miner"
+#~ msgstr "Cookie 未被识别用以恢复暂停的挖掘器"
+
+#~ msgid "Pause application and reason match an already existing pause request"
+#~ msgstr "暂停应用并合理匹配一个已经存在的暂停请求"
+
+#~ msgid "— start the tracker indexer"
+#~ msgstr "— 启动 tracker 索引器"
 
 #~ msgid ""
 #~ "Simplify the words to their root to provide more results. E.g. “shelves” "
@@ -1420,8 +1431,8 @@ msgstr "— 启动 tracker 回写服务"
 #~ "If this option is enabled, the filesystem miner will look for .desktop "
 #~ "files in the standard XDG system and user data directories."
 #~ msgstr ""
-#~ "如果启用此选项，文件系统挖掘器将在标准 XDG 系统和用户数据目录中查找 ."
-#~ "desktop 文件。"
+#~ "如果启用此选项，文件系统挖掘器将在标准 XDG 系统和用户数据目录中查"
+#~ "找 .desktop 文件。"
 
 #~ msgid "Operation not supported"
 #~ msgstr "不支持该操作"
@@ -2014,9 +2025,6 @@ msgstr "— 启动 tracker 回写服务"
 #~ msgid "Days before deleting removable devices:"
 #~ msgstr "删除可移动设备前的天数："
 
-#~ msgid "Garbage Collection"
-#~ msgstr "垃圾回收"
-
 #~ msgid "Indexing"
 #~ msgstr "正在索引"
 
@@ -2243,8 +2251,8 @@ msgstr "— 启动 tracker 回写服务"
 #~ "Tell miners to reindex files which match the mime type supplied (for new "
 #~ "extractors), use -m MIME1 -m MIME2"
 #~ msgstr ""
-#~ "让挖掘器重新索引匹配提供的 mime 类型的文件(用于新提取器)，使用 -m MIME1 -"
-#~ "m MIME2"
+#~ "让挖掘器重新索引匹配提供的 mime 类型的文件(用于新提取器)，使用 -m MIME1 "
+#~ "-m MIME2"
 
 #~ msgid "Tell miners to (re)index a given file"
 #~ msgstr "让挖掘器(重新)索引给定的文件"
@@ -2393,8 +2401,8 @@ msgstr "— 启动 tracker 回写服务"
 #~ msgstr "检索类前缀"
 
 #~ msgid ""
-#~ "Retrieve properties for a class, prefixes can be used too (e.g. rdfs:"
-#~ "Resource)"
+#~ "Retrieve properties for a class, prefixes can be used too (e.g. "
+#~ "rdfs:Resource)"
 #~ msgstr "为一个类检索属性，可以使用前缀 (例如 rdfs:Resource)"
 
 #~ msgid "CLASS"
@@ -2461,8 +2469,8 @@ msgstr "— 启动 tracker 回写服务"
 #~ msgstr "前缀"
 
 #~ msgid ""
-#~ "Could not find property for class prefix, e.g. :Resource in 'rdfs:"
-#~ "Resource'"
+#~ "Could not find property for class prefix, e.g. :Resource in "
+#~ "'rdfs:Resource'"
 #~ msgstr "无法找到类前缀的属性，例如“rdfs:Resource”中的 :Resource"
 
 #~ msgid "Could not list properties"
