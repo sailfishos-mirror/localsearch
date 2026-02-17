@@ -2,21 +2,22 @@
 # Copyright (C) 2023 tracker-miners's COPYRIGHT HOLDER
 # This file is distributed under the same license as the tracker-miners package.
 # Danial Behzadi <dani.behzi@ubuntu.com>, 2023-2024.
+# Goudarz Jafari <me@goudarzjafari.com>, 2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-26 17:35+0000\n"
-"PO-Revision-Date: 2025-09-05 16:20+0330\n"
-"Last-Translator: Danial Behzadi <dani.behzi@ubuntu.com>\n"
+"POT-Creation-Date: 2026-01-16 18:54+0000\n"
+"PO-Revision-Date: 2026-01-30 08:32+0330\n"
+"Last-Translator: Goudarz Jafari <me@goudarzjafari.com>\n"
 "Language-Team: Persian <fa@li.org>\n"
 "Language: fa\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.7\n"
+"X-Generator: Poedit 3.8\n"
 "X-DamnedLies-Scope: partial\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -193,11 +194,11 @@ msgstr "نمایش راهنمای زیردستورها"
 msgid "Show metadata extractor output"
 msgstr "نمایش خروجی استخراجگر فراداده"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "سیاهه کردن و تغییر شاخه‌های نمایه شده"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "بازگردانی اطّلاعات موجود برای پرونده‌ها و منابع"
 
@@ -209,11 +210,11 @@ msgstr "جلوگیری موقّتی از نمایه کردن"
 msgid "Erase the indexed data"
 msgstr "پاک کردن داده‌های نمایه شده"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "جست‌وجوی محتوا"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "فراهم کردن وضعیت و آمار روی داده‌های اندیس شده"
 
@@ -238,35 +239,40 @@ msgstr "برای خواندن دربارهٔ زیرفرمانی خاص «localse
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "دستور «%s» برای localsearch نیست. «localsearch3 --help»‌ را ببینید"
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "پیام"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "قالب نتیجه‌های خروجی: «turtle»، ‏«trig»‌ یا «json-ld»"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "FORMAT"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
-#: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61 src/cli/tracker-info.c:80
-#: src/cli/tracker-info.c:81 src/cli/tracker-reset.c:52
-#: src/extractor/tracker-main.c:75 src/indexer/tracker-main.c:80
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
+#: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61 src/cli/tracker-info.c:84
+#: src/cli/tracker-info.c:85 src/cli/tracker-reset.c:52
+#: src/extractor/tracker-main.c:76 src/extractor/tracker-main.c:91
+#: src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "FILE"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "نتوانست tracker-extract را اجرا کند: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "استخراج فراداده از پرونده"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "گزینه‌های شناخته نشده"
 
@@ -282,72 +288,72 @@ msgstr "از مکان‌های اندیس شده FILE را برمی‌دارد"
 msgid "Makes indexing recursive"
 msgstr "اندیس کردن را بازگشتی می‌کند"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "«%s» شاخه نیست"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "باید ‪--add‬ یا ‪--remove‬ فراهم شود"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "گزینه‌های ‪--add‬ و ‪--remove‬ با هم به کار نمی‌روند"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "گزینهٔ ‪--recursive‬ نیازمند ‪--add‬ است"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "مسیر"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "بازگشتی"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "لطفاً مکانی برای اندیس کردن مشخّص کنید."
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr "نمایش فضانام‌های کامل (استفاده نکردن از nie:title و استفاده از نشانی‌های کامل)"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr "نمایش محتوای متن خام برای منابع در صورت امکان"
 
-#: src/cli/tracker-info.c:77
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "بررسی وجود شرایط نمایه شدن FILE"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "پیام خطتا"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189 src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "نقطه اتصال دستگاه قابل‌حمل برای پرس‌وجو"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "نتوانست به LocalSearch وصل شود"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "ناتوان در بازپس‌گیری داده برای نشانی"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "هیچ فراداده‌ای برای آن نشانی موجود نیست"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "نتوانست وضعیت مطلوب را بگیرد: "
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "قابل دنباله‌سازی پشتیبانی نشده «%s»\n"
@@ -418,174 +424,171 @@ msgstr "داده‌های نمایه شدهٔ LocalSearch دارند حذف م�
 msgid "yes"
 msgstr "بله"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "نتیجه‌ها"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "پرونده‌ها"
 
-#: src/cli/tracker-search.c:102
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "شاخه‌‌ها"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "آلبوم‌ها"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "هنرمندان"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "جست‌وجوی پرونده‌ها"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "جست‌وجوی شاخه‌ها"
 
-#: src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "جست‌وجوی پرونده‌های صوتی"
 
-#: src/cli/tracker-search.c:128
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "جست‌وجوی آلبوم‌های آهنگ"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "جست‌وجوی هنرمندان آهنگ‌ها"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "جست‌وجوی پرونده‌های تصویری"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "جست‌وجوی پرونده‌های ویدیویی"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "جست‌وجوی پرونده‌های مستند"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "جست‌وجوی پرونده‌های نرم‌افزارها"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "محدودیت شمار نتیجه‌های نمایشی"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "عرض از مبدأ نتایج"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "نمایش URN برای نتیجه‌ها"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr "برگرداندن همهٔ مطابقت‌های ناموجود (مثلاً شامل حجم‌های سوار نشده)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "نمایش گزینه‌های راهنما"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "جست‌وجوی عبارت‌ها"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "TERMS"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "پیروی از دگرگونی‌های وضعیت به محض رخ داد"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "نمایش آمار برای مجموعه داده یا اندیس کنونی"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being added)"
 msgstr ""
 "نگریستن به دگرگونی‌های پایگاه داده در زمان واقعی (نمونه افزوده شدن منبع‌ها یا "
 "پرونده‌ها)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "EXPRESSION"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "نتوانست آمار LocalSearch را بگیرد"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "پیام"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "اندیس شده"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%Id پرونده"
 msgstr[1] "%Id پرونده"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%Id شاخه"
 msgstr[1] "%Id شاخه"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "فضای مانده روی افراز پایگاه داده"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "نمایه‌گر مکث شده"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "داده هنوز در حال اندیس شدن است"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "نمایه‌گر بی‌کار است"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%Id شکست ثبت شده"
 msgstr[1] "%Id شکست ثبت شده"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "هیچ گزارشی پیدا نشد"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "نتوانست اتّصال SPARQL را بگیرد"
 
-#: src/cli/tracker-status.c:714
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "شنود کردن به‌روز رسانی‌های پایگاه داده"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "زدن مهار+C برای توقّف"
 
@@ -661,25 +664,17 @@ msgstr "برجسب با موفّقیت برداشته شد"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "نتوانست اتّصالی با LocalSearch برقرار کند"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "گزینهٔ ‪--list‬ برای ‪--show-files‬ لازم است"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr "کنش‌های افزودن و حذف نمی‌توانند با هم استفاده شوند"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr "گزینهٔ ‪--description‬ تنها می‌تواند با ‪--add‬ استفاده شود"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "کلوچک برای از سر گیری معدن‌کاوی مکث شده شناخته نشد"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "مکث برنامه و دلیل با درخواست مگث موجودی مطابق است"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -737,124 +732,129 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %I2.2d ثانیه"
 msgstr[1] " %I2.2d ثانیه"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "نمایش اطّلاعات نگارش"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— آغاز پیشکار نمایهٔ ردیاب"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "پرونده برای استخراج فراداده"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "گونهٔ MIME برای پرونده (اگر فراهم نشود حدس زده می‌شود)"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "توصیفگر پروندهٔ سوکت برای ارتباطات نظیر به نظیر"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FD"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+msgid "Filesystem root of the extracted data"
+msgstr "ریشهٔ سامانه‌پروندهٔ داده‌های استخراج‌شده"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "پیمانهٔ استخراجگر یا فراداده‌ای برای مدیریت این پرونده پیدا نشد"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "استخراج فراداده شکست خورد"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— استخراج فرادادهٔ پرونده"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "نام پرونده و گونهٔ mime باید با هم فراهم شوند"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr "اجرا تا نمایه شدن همهٔ مکان‌های پیکربندی شده و سپس خروج"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "بررسی واجد شرایط معدن‌کاوی شدن FILE بر پایهٔ پیکربندی"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "جلوگیری از دگرگونی در سامانه‌پرونده"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "شی داده‌ای «%s» هم‌اکنون وجود دارد"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "شی داده‌ای «%s» هم‌اکنون وجود ندارد"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "شاخه واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "پرونده واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "پرونده واجد اندیس شدن نیست (پروندهٔ نهفته)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "پرونده واجد اندیس شدن نیست (شاخهٔ اندیس نشده)"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (پروندهٔ نهفته)"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
 msgstr "شاخهٔ والد «%s» واجد اندیس شدن نیست (بر اساس پالایه‌های محتوایی)"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:1316
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "شاخه واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
+
+#: src/indexer/tracker-application.c:1320
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "پرونده واجد اندیس شدن نیست (بر اساس پالایه‌ها)"
+
+#: src/indexer/tracker-application.c:1323
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "پرونده واجد اندیس شدن نیست (پروندهٔ نهفته)"
+
+#: src/indexer/tracker-application.c:1325
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "پرونده واجد اندیس شدن نیست (شاخهٔ اندیس نشده)"
+
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "شاخه واجد شرایط معدن‌کاوی است"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "پرونده واجد شرایط معدن‌کاوی است"
 
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "— آغاز نمایه‌گذار ردیاب"
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "مکان پایگاه داده"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "شاخه"
 
 #: src/writeback/tracker-main.c:54
 msgid "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
@@ -871,6 +871,18 @@ msgstr "از کار انداختن خاموشی پس از ۳۰ ثانیه غیر
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— آغاز خدمت بازنویسی ردیاب"
+
+#~ msgid "Error message"
+#~ msgstr "پیام خطتا"
+
+#~ msgid "Cookie not recognized to resume paused miner"
+#~ msgstr "کلوچک برای از سر گیری معدن‌کاوی مکث شده شناخته نشد"
+
+#~ msgid "Pause application and reason match an already existing pause request"
+#~ msgstr "مکث برنامه و دلیل با درخواست مگث موجودی مطابق است"
+
+#~ msgid "— start the tracker indexer"
+#~ msgstr "— آغاز نمایه‌گذار ردیاب"
 
 #~ msgid ""
 #~ "Simplify the words to their root to provide more results. E.g. “shelves” and "
