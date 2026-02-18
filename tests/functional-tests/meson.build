@@ -59,12 +59,14 @@ endif
 
 # Gstreamer 1.17/1.18 introduced support for some additional
 # MusicBrainz tags
-if gstreamer.found() and gstreamer.version() >= '1.17.0'
-  extractor_tests += 'audio/flac-musicbrainz'
-  extractor_tests += 'audio/vorbis-musicbrainz'
-else
-  extractor_tests += 'audio/flac'
-  extractor_tests += 'audio/vorbis'
+if avformat.found()
+  if gstreamer.found() and gstreamer.version() >= '1.17.0'
+    extractor_tests += 'audio/flac-musicbrainz'
+    extractor_tests += 'audio/vorbis-musicbrainz'
+  else
+    extractor_tests += 'audio/flac'
+    extractor_tests += 'audio/vorbis'
+  endif
 endif
 
 if libjpeg.found() and exempi.found() and gexiv2.found()
@@ -245,12 +247,14 @@ if have_tracker_writeback and totem_plparser.found()
   functional_tests += 'test_writeback_playlist'
 endif
 
-extractor_tests += [
-  'video/mkv-basic',
-  'video/mov-basic',
-  'video/mp4-basic',
-  'video/mp4-video-without-audio',
-]
+if avformat.found()
+  extractor_tests += [
+    'video/mkv-basic',
+    'video/mov-basic',
+    'video/mp4-basic',
+    'video/mp4-video-without-audio',
+  ]
+endif
 
 test_env = environment()
 
