@@ -1,3 +1,14 @@
+NEW in 3.11.beta - 2026-02-18
+=============================
+  * Fixes for possible buffer overflows and NULL pointer dereferences
+    in MP3 extractor
+  * Fix seccomp jail in database helper process for removable devices
+  * Replace libgsf with libzip for ZIP content handling
+  * Improve reliability of the test suite in slow scenarios (e.g. CI)
+
+Translations: bg, ca, cs, el, eu, fa, fr, gl, he, ka, kk, lt, pt_BR, ro, ru,
+  sl, sv, tr, ug, uk, zh_CN
+
 NEW in 3.11.alpha - 2026-01-05
 ==============================
   * Default configuration change, the user home directory will now be indexed
