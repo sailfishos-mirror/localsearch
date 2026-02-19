@@ -10,7 +10,7 @@
 		"nie:subject": "Some subject",
 		"nie:contentLastModified": "2023-01-13T16:39:22Z",
 		"nie:title": "Some title",
-		"nie:plainTextContent": "                                               Title1                  Hello                                                       Title2                  There        ",
+		"nie:plainTextContent": "Title1 Hello Title2 There ",
 		"@type": "nfo:PaginatedTextDocument",
 		"nie:contentCreated": "2023-01-13T16:36:44Z"
 	    }
