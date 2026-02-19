@@ -20,9 +20,13 @@
 #include "config-miners.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #include <glib.h>
 #include <gio/gio.h>
+
+#include <libxml/parser.h>
+#include <libxml/SAX2.h>
 
 #include <tracker-common.h>
 
@@ -77,339 +81,438 @@ typedef struct {
 	gulong bytes_pending;
 	gboolean style_element_present;
 	gboolean preserve_attribute_present;
+	gboolean in_xlsx_shared_strings;
 	GList *parts;
+	GString *text_buf;
 } MsOfficeXMLParserInfo;
 
-static void msoffice_xml_content_parse_start       (GMarkupParseContext  *context,
-                                                    const gchar          *element_name,
-                                                    const gchar         **attribute_names,
-                                                    const gchar         **attribute_values,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-static void msoffice_xml_content_parse_stop        (GMarkupParseContext  *context,
-                                                    const gchar          *element_name,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-static void msoffice_xml_content_parse             (GMarkupParseContext  *context,
-                                                    const gchar          *text,
-                                                    gsize                 text_len,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-
-static void msoffice_xml_metadata_parse_start      (GMarkupParseContext  *context,
-                                                    const gchar           *element_name,
-                                                    const gchar          **attribute_names,
-                                                    const gchar          **attribute_values,
-                                                    gpointer               user_data,
-                                                    GError               **error);
-static void msoffice_xml_metadata_parse_stop       (GMarkupParseContext  *context,
-                                                    const gchar          *element_name,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-static void msoffice_xml_metadata_parse            (GMarkupParseContext  *context,
-                                                    const gchar          *text,
-                                                    gsize                 text_len,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-
-static void msoffice_xml_content_types_parse_start (GMarkupParseContext  *context,
-                                                    const gchar          *element_name,
-                                                    const gchar         **attribute_names,
-                                                    const gchar         **attribute_values,
-                                                    gpointer              user_data,
-                                                    GError              **error);
-
-static const GMarkupParser metadata_parser = {
-	msoffice_xml_metadata_parse_start,
-	msoffice_xml_metadata_parse_stop,
-	msoffice_xml_metadata_parse,
-	NULL,
-	NULL
-};
-
-static const GMarkupParser content_parser = {
-	msoffice_xml_content_parse_start,
-	msoffice_xml_content_parse_stop,
-	msoffice_xml_content_parse,
-	NULL,
-	NULL
-};
-
-static const GMarkupParser content_types_parser = {
-	msoffice_xml_content_types_parse_start,
-	NULL,
-	NULL,
-	NULL,
-	NULL
-};
-
+static void msoffice_xml_content_start_element_ns 	(void           *ctx,
+                                                         const xmlChar  *localname,
+                                                         const xmlChar  *prefix,
+                                                         const xmlChar  *URI,
+                                                         int             nb_namespaces,
+                                                         const xmlChar **namespaces,
+                                                         int             nb_attributes,
+                                                         int             nb_defaulted,
+                                                         const xmlChar **attributes);
+static void msoffice_xml_content_end_element_ns   	(void *ctx,
+                                                         const xmlChar *localname,
+                                                         const xmlChar *prefix,
+                                                         const xmlChar *URI);
+static void msoffice_xml_content_parse			(gpointer      context,
+                                                         const gchar  *text,
+                                                         gsize         text_len,
+                                                         gpointer      user_data,
+                                                         GError      **error);
+static void msoffice_xml_characters			(void          *ctx,
+                                                         const xmlChar *ch,
+                                                         int            len);
+static void msoffice_xml_metadata_start_element_ns 	(void           *ctx,
+                                                         const xmlChar  *localname,
+                                                         const xmlChar  *prefix,
+                                                         const xmlChar  *URI,
+                                                         int             nb_namespaces,
+                                                         const xmlChar **namespaces,
+                                                         int             nb_attributes,
+                                                         int             nb_defaulted,
+                                                         const xmlChar **attributes);
+static void msoffice_xml_metadata_end_element_ns	(void          *ctx,
+                                                         const xmlChar *localname,
+                                                         const xmlChar *prefix,
+                                                         const xmlChar *URI);
+static void msoffice_xml_metadata_parse			(gpointer      context,
+                                                         const gchar  *text,
+                                                         gsize	       text_len,
+                                                         gpointer      user_data,
+                                                         GError	     **error);
+static void msoffice_xml_content_types_start_element_ns (void           *ctx,
+                                                         const xmlChar  *localname,
+                                                         const xmlChar  *prefix,
+                                                         const xmlChar  *URI,
+                                                         int             nb_namespaces,
+                                                         const xmlChar **namespaces,
+                                                         int             nb_attributes,
+                                                         int             nb_defaulted,
+                                                         const xmlChar **attributes);
 static GQuark maximum_size_error_quark = 0;
 
 /* ------------------------- CONTENT files parsing -----------------------------------*/
 
 static void
-msoffice_xml_content_parse_start (GMarkupParseContext  *context,
-                                  const gchar          *element_name,
-                                  const gchar         **attribute_names,
-                                  const gchar         **attribute_values,
-                                  gpointer              user_data,
-                                  GError              **error)
+msoffice_xml_content_start_element_ns (void           *ctx,
+                                       const xmlChar  *localname,
+                                       const xmlChar  *prefix,
+                                       const xmlChar  *URI G_GNUC_UNUSED,
+                                       int             nb_namespaces G_GNUC_UNUSED,
+                                       const xmlChar **namespaces G_GNUC_UNUSED,
+                                       int             nb_attributes,
+                                       int             nb_defaulted G_GNUC_UNUSED,
+                                       const xmlChar **attributes)
 {
-	MsOfficeXMLParserInfo *info = user_data;
-	const gchar **a;
-	const gchar **v;
+	MsOfficeXMLParserInfo *info = ctx;
+	g_autofree gchar *qname = NULL;
+
+	if (prefix && *prefix)
+		qname = g_strdup_printf ("%s:%s", (const gchar *) prefix, (const gchar *) localname);
+	else
+		qname = g_strdup ((const gchar *) localname);
 
 	switch (info->file_type) {
 	case FILE_TYPE_DOCX:
-		if (g_ascii_strcasecmp (element_name, "w:pStyle") == 0) {
-			for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-				if (g_ascii_strcasecmp (*a, "w:val") != 0) {
-					continue;
-				}
+		if (g_ascii_strcasecmp (qname, "w:pStyle") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *a_local  = attributes[i*5 + 0];
+				const xmlChar *a_prefix = attributes[i*5 + 1];
+				const xmlChar *v_start  = attributes[i*5 + 3];
+				const xmlChar *v_end    = attributes[i*5 + 4];
+				int v_len = (int)(v_end - v_start);
+				g_autofree gchar *attr = NULL, *val = NULL;
 
-				if (g_ascii_strncasecmp (*v, "Heading", 7) == 0) {
-					info->style_element_present = TRUE;
-				} else if (g_ascii_strncasecmp (*v, "TOC", 3) == 0) {
-					info->style_element_present = TRUE;
-				} else if (g_ascii_strncasecmp (*v, "Section", 7) == 0) {
-					info->style_element_present = TRUE;
-				} else if (g_ascii_strncasecmp (*v, "Title", 5) == 0) {
-					info->style_element_present = TRUE;
-				} else if (g_ascii_strncasecmp (*v, "Subtitle", 8) == 0) {
+				if (a_prefix && *a_prefix)
+					attr = g_strdup_printf ("%s:%s", (const gchar *) a_prefix, (const gchar *) a_local);
+				else
+					attr = g_strdup ((const gchar *) a_local);
+
+				if (g_ascii_strcasecmp (attr, "w:val") != 0)
+					continue;
+
+				val = g_strndup ((const gchar *) v_start, v_len);
+				if (g_ascii_strncasecmp (val, "Heading", 7) == 0 ||
+				    g_ascii_strncasecmp (val, "TOC", 3) == 0 ||
+				    g_ascii_strncasecmp (val, "Section", 7) == 0 ||
+				    g_ascii_strncasecmp (val, "Title", 5) == 0 ||
+				    g_ascii_strncasecmp (val, "Subtitle", 8) == 0) {
 					info->style_element_present = TRUE;
 				}
 			}
-		} else if (g_ascii_strcasecmp (element_name, "w:rStyle") == 0) {
-			for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-				if (g_ascii_strcasecmp (*a, "w:val") != 0) {
-					continue;
-				}
+		} else if (g_ascii_strcasecmp (qname, "w:rStyle") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *a_local  = attributes[i*5 + 0];
+				const xmlChar *a_prefix = attributes[i*5 + 1];
+				const xmlChar *v_start  = attributes[i*5 + 3];
+				const xmlChar *v_end    = attributes[i*5 + 4];
+				int v_len = (int)(v_end - v_start);
+				g_autofree gchar *attr = NULL, *val = NULL;
 
-				if (g_ascii_strncasecmp (*v, "SubtleEmphasis", 14) == 0) {
-					info->style_element_present = TRUE;
-				} else if (g_ascii_strncasecmp (*v, "SubtleReference", 15) == 0) {
+				if (a_prefix && *a_prefix)
+					attr = g_strdup_printf ("%s:%s", (const gchar *) a_prefix, (const gchar *) a_local);
+				else
+					attr = g_strdup ((const gchar *) a_local);
+
+				if (g_ascii_strcasecmp (attr, "w:val") != 0)
+					continue;
+
+				val = g_strndup ((const gchar *) v_start, v_len);
+				if (g_ascii_strncasecmp (val, "SubtleEmphasis", 14) == 0 ||
+				    g_ascii_strncasecmp (val, "SubtleReference", 15) == 0) {
 					info->style_element_present = TRUE;
 				}
 			}
-		} else if (g_ascii_strcasecmp (element_name, "w:sz") == 0) {
-			for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-				if (g_ascii_strcasecmp (*a, "w:val") != 0) {
-					continue;
-				}
+		} else if (g_ascii_strcasecmp (qname, "w:sz") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *a_local  = attributes[i*5 + 0];
+				const xmlChar *a_prefix = attributes[i*5 + 1];
+				const xmlChar *v_start  = attributes[i*5 + 3];
+				const xmlChar *v_end    = attributes[i*5 + 4];
+				int v_len = (int)(v_end - v_start);
+				g_autofree gchar *attr = NULL, *val = NULL;
 
-				if (atoi (*v) >= 38) {
+				if (a_prefix && *a_prefix)
+					attr = g_strdup_printf ("%s:%s", (const gchar *) a_prefix, (const gchar *) a_local);
+				else
+					attr = g_strdup ((const gchar *) a_local);
+
+				if (g_ascii_strcasecmp (attr, "w:val") != 0)
+					continue;
+
+				val = g_strndup ((const gchar *) v_start, v_len);
+				if (atoi (val) >= 38)
 					info->style_element_present = TRUE;
-				}
 			}
-		} else if (g_ascii_strcasecmp (element_name, "w:smartTag") == 0) {
+		} else if (g_ascii_strcasecmp (qname, "w:smartTag") == 0 ||
+		           g_ascii_strcasecmp (qname, "w:sdtContent") == 0 ||
+		           g_ascii_strcasecmp (qname, "w:hyperlink") == 0) {
 			info->style_element_present = TRUE;
-		} else if (g_ascii_strcasecmp (element_name, "w:sdtContent") == 0) {
-			info->style_element_present = TRUE;
-		} else if (g_ascii_strcasecmp (element_name, "w:hyperlink") == 0) {
-			info->style_element_present = TRUE;
-		} else if (g_ascii_strcasecmp (element_name, "w:t") == 0) {
-			for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-				if (g_ascii_strcasecmp (*a, "xml:space") != 0) {
-					continue;
-				}
+		} else if (g_ascii_strcasecmp (qname, "w:t") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *a_local  = attributes[i*5 + 0];
+				const xmlChar *a_prefix = attributes[i*5 + 1];
+				const xmlChar *v_start  = attributes[i*5 + 3];
+				const xmlChar *v_end    = attributes[i*5 + 4];
+				int v_len = (int)(v_end - v_start);
+				g_autofree gchar *attr = NULL, *val = NULL;
 
-				if (g_ascii_strncasecmp (*v, "preserve", 8) == 0) {
+				if (a_prefix && *a_prefix)
+					attr = g_strdup_printf ("%s:%s", (const gchar *) a_prefix, (const gchar *) a_local);
+				else
+					attr = g_strdup ((const gchar *) a_local);
+
+				if (g_ascii_strcasecmp (attr, "xml:space") != 0)
+					continue;
+
+				val = g_strndup ((const gchar *) v_start, v_len);
+				if (g_ascii_strncasecmp (val, "preserve", 8) == 0)
 					info->preserve_attribute_present = TRUE;
-				}
 			}
 
 			info->tag_type = MS_OFFICE_XML_TAG_WORD_TEXT;
+			g_string_set_size (info->text_buf, 0);
 		}
 		break;
 
 	case FILE_TYPE_XLSX:
-		if (g_ascii_strcasecmp (element_name, "sheet") == 0) {
-			for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-				if (g_ascii_strcasecmp (*a, "name") == 0) {
-					info->tag_type = MS_OFFICE_XML_TAG_XLS_SHARED_TEXT;
-				}
-			}
-
-		} else if (g_ascii_strcasecmp (element_name, "t") == 0) {
+		if (info->in_xlsx_shared_strings &&
+			g_ascii_strcasecmp (qname, "t") == 0) {
 			info->tag_type = MS_OFFICE_XML_TAG_XLS_SHARED_TEXT;
+			g_string_set_size (info->text_buf, 0);
 		}
 		break;
 
 	case FILE_TYPE_PPTX:
 	case FILE_TYPE_PPSX:
-		info->tag_type = MS_OFFICE_XML_TAG_SLIDE_TEXT;
+		if (g_ascii_strcasecmp (qname, "a:t") == 0 || g_ascii_strcasecmp (qname, "t") == 0) {
+			info->tag_type = MS_OFFICE_XML_TAG_SLIDE_TEXT;
+			g_string_set_size (info->text_buf, 0);
+		}
 		break;
 
 	case FILE_TYPE_INVALID:
-		g_debug ("Microsoft document type:%d invalid", info->file_type);
 		break;
 	}
 }
 
 static void
-msoffice_xml_content_parse_stop (GMarkupParseContext  *context,
-                                 const gchar          *element_name,
-                                 gpointer              user_data,
-                                 GError              **error)
+msoffice_xml_content_end_element_ns (void          *ctx,
+                                     const xmlChar *localname,
+                                     const xmlChar *prefix,
+                                     const xmlChar *URI G_GNUC_UNUSED)
 {
-	MsOfficeXMLParserInfo *info = user_data;
+	MsOfficeXMLParserInfo *info = ctx;
+	g_autofree gchar *qname = NULL;
+	/* Flush ONLY when closing the element that started the text capture */
+	gboolean should_flush = FALSE;
 
-	if (g_ascii_strcasecmp (element_name, "w:p") == 0) {
+	if (prefix && *prefix)
+		qname = g_strdup_printf ("%s:%s", (const gchar *) prefix, (const gchar *) localname);
+	else
+		qname = g_strdup ((const gchar *) localname);
+
+	if (info->tag_type == MS_OFFICE_XML_TAG_WORD_TEXT) {
+		should_flush = (g_ascii_strcasecmp (qname, "w:t") == 0);
+	} else if (info->tag_type == MS_OFFICE_XML_TAG_SLIDE_TEXT) {
+		should_flush = (g_ascii_strcasecmp (qname, "a:t") == 0 ||
+						g_ascii_strcasecmp (qname, "t") == 0);
+	} else if (info->tag_type == MS_OFFICE_XML_TAG_XLS_SHARED_TEXT) {
+		should_flush = (g_ascii_strcasecmp (qname, "t") == 0);
+	}
+
+	if (should_flush && info->text_buf->len > 0) {
+		msoffice_xml_content_parse (NULL,
+		                            info->text_buf->str,
+		                            info->text_buf->len,
+		                            info,
+		                            NULL);
+	}
+
+	/* Reset capture state after element closes */
+	if (should_flush) {
+		info->tag_type = MS_OFFICE_XML_TAG_INVALID;
+		g_string_set_size (info->text_buf, 0);
+	} else if (info->tag_type != MS_OFFICE_XML_TAG_INVALID) {
+		/* If we were capturing text, but this wasn't its closing tag, don't reset */
+		/* keep tag_type and text_buf */
+	} else {
+		/* Not capturing: ensure buffer is empty */
+		g_string_set_size (info->text_buf, 0);
+	}
+
+	if (g_ascii_strcasecmp (qname, "w:p") == 0) {
 		info->style_element_present = FALSE;
 		info->preserve_attribute_present = FALSE;
 	}
-
-	/* Reset tag */
-	info->tag_type = MS_OFFICE_XML_TAG_INVALID;
 }
 
 static void
-msoffice_xml_content_parse (GMarkupParseContext  *context,
-                            const gchar          *text,
-                            gsize                 text_len,
-                            gpointer              user_data,
-                            GError              **error)
+msoffice_xml_content_parse (gpointer      context G_GNUC_UNUSED,
+                            const gchar  *text,
+                            gsize         text_len,
+                            gpointer      user_data,
+                            GError      **error G_GNUC_UNUSED)
 {
 	MsOfficeXMLParserInfo *info = user_data;
 	gsize written_bytes = 0;
 
-	/* If reached max bytes to extract, just return */
-	if (info->bytes_pending == 0) {
-		g_set_error_literal (error,
-		                     maximum_size_error_quark,
-		                     0,
-		                     "Maximum text limit reached");
+	/* Nothing to extract */
+	if (text_len == 0 || text == NULL || *text == '\0')
 		return;
-	}
 
-	/* Create content string if not already done before */
+	/* Ignore if reaching the limit */
+	if (info->bytes_pending == 0)
+		return;
+
+	/* Create content doesn't exist */
 	if (G_UNLIKELY (info->content == NULL)) {
-		info->content =	g_string_new ("");
+		info->content = g_string_new ("");
 	}
 
 	switch (info->tag_type) {
 	case MS_OFFICE_XML_TAG_WORD_TEXT:
-		tracker_text_validate_utf8 (text,
-		                            MIN (text_len, info->bytes_pending),
-		                            &info->content,
-		                            &written_bytes);
-		g_string_append_c (info->content, ' ');
-		info->bytes_pending -= written_bytes;
-		break;
-
 	case MS_OFFICE_XML_TAG_SLIDE_TEXT:
 		tracker_text_validate_utf8 (text,
 		                            MIN (text_len, info->bytes_pending),
 		                            &info->content,
 		                            &written_bytes);
-		g_string_append_c (info->content, ' ');
-		info->bytes_pending -= written_bytes;
-		break;
-
-	case MS_OFFICE_XML_TAG_XLS_SHARED_TEXT:
-		if (atoi (text) == 0)  {
-			tracker_text_validate_utf8 (text,
-			                            MIN (text_len, info->bytes_pending),
-			                            &info->content,
-			                            &written_bytes);
-			g_string_append_c (info->content, ' ');
+		if (written_bytes > 0) {
+			/* Append a separator only if last char is not whitespace */
+			if (info->content->len > 0) {
+				gchar last = info->content->str[info->content->len - 1];
+				if (last != ' ' && last != '\n' && last != '\t' && last != '\r')
+					g_string_append_c (info->content, ' ');
+			}
 			info->bytes_pending -= written_bytes;
 		}
 		break;
 
-	/* Ignore tags that may not happen inside the text subdocument */
-	case MS_OFFICE_XML_TAG_TITLE:
-	case MS_OFFICE_XML_TAG_SUBJECT:
-	case MS_OFFICE_XML_TAG_AUTHOR:
-	case MS_OFFICE_XML_TAG_COMMENTS:
-	case MS_OFFICE_XML_TAG_CREATED:
-	case MS_OFFICE_XML_TAG_GENERATOR:
-	case MS_OFFICE_XML_TAG_APPLICATION:
-	case MS_OFFICE_XML_TAG_MODIFIED:
-	case MS_OFFICE_XML_TAG_NUM_OF_PAGES:
-	case MS_OFFICE_XML_TAG_NUM_OF_CHARACTERS:
-	case MS_OFFICE_XML_TAG_NUM_OF_WORDS:
-	case MS_OFFICE_XML_TAG_NUM_OF_LINES:
-	case MS_OFFICE_XML_TAG_NUM_OF_PARAGRAPHS:
-	case MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA:
-	case MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA:
-	case MS_OFFICE_XML_TAG_INVALID:
+	case MS_OFFICE_XML_TAG_XLS_SHARED_TEXT: {
+		gboolean all_digits = TRUE;
+		for (gsize k = 0; k < text_len; k++) {
+			if (text[k] < '0' || text[k] > '9') {
+				all_digits = FALSE;
+				break;
+			}
+		}
+		if (all_digits)
+			break;
+
+		tracker_text_validate_utf8 (text,
+		                            MIN (text_len, info->bytes_pending),
+		                            &info->content,
+		                            &written_bytes);
+		if (written_bytes > 0) {
+			if (info->content->len > 0) {
+				gchar last = info->content->str[info->content->len - 1];
+				if (last != ' ' && last != '\n' && last != '\t' && last != '\r')
+					g_string_append_c (info->content, ' ');
+			}
+			info->bytes_pending -= written_bytes;
+		}
 		break;
+	}
+
+	default:
+		break;
+	}
+}
+
+static void
+msoffice_xml_characters (void          *ctx,
+                         const xmlChar *ch,
+                         int            len)
+{
+	MsOfficeXMLParserInfo *info = ctx;
+
+	if (len <= 0)
+		return;
+
+	if (info->tag_type != MS_OFFICE_XML_TAG_INVALID) {
+		if (info->text_buf->len < 16384) {
+			g_string_append_len (info->text_buf, (const gchar *) ch, len);
+		} else {
+			info->tag_type = MS_OFFICE_XML_TAG_INVALID;
+			g_string_set_size (info->text_buf, 0);
+		}
 	}
 }
 
 /* ------------------------- METADATA files parsing -----------------------------------*/
 
 static void
-msoffice_xml_metadata_parse_start (GMarkupParseContext  *context,
-                                   const gchar           *element_name,
-                                   const gchar          **attribute_names,
-                                   const gchar          **attribute_values,
-                                   gpointer               user_data,
-                                   GError               **error)
+msoffice_xml_metadata_start_element_ns (void           *ctx,
+                                        const xmlChar  *localname,
+                                        const xmlChar  *prefix,
+                                        const xmlChar  *URI G_GNUC_UNUSED,
+                                        int             nb_namespaces G_GNUC_UNUSED,
+                                        const xmlChar **namespaces G_GNUC_UNUSED,
+                                        int             nb_attributes G_GNUC_UNUSED,
+                                        int             nb_defaulted G_GNUC_UNUSED,
+                                        const xmlChar **attributes G_GNUC_UNUSED)
 {
-	MsOfficeXMLParserInfo *info = user_data;
+	MsOfficeXMLParserInfo *info = ctx;
+	g_autofree gchar *qname = NULL;
 
-	/* Setup the proper tag type */
-	if (g_ascii_strcasecmp (element_name, "dc:title") == 0) {
+	if (prefix && *prefix)
+		qname = g_strdup_printf ("%s:%s", (const gchar *) prefix, (const gchar *) localname);
+	else
+		qname = g_strdup ((const gchar *) localname);
+
+	if (g_ascii_strcasecmp (qname, "dc:title") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_TITLE;
-	} else if (g_ascii_strcasecmp (element_name, "dc:subject") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "dc:subject") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_SUBJECT;
-	} else if (g_ascii_strcasecmp (element_name, "dc:creator") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "dc:creator") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_AUTHOR;
-	} else if (g_ascii_strcasecmp (element_name, "dc:description") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "dc:description") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_COMMENTS;
-	} else if (g_ascii_strcasecmp (element_name, "dcterms:created") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "dcterms:created") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_CREATED;
-	} else if (g_ascii_strcasecmp (element_name, "meta:generator") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "meta:generator") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_GENERATOR;
-	} else if (g_ascii_strcasecmp (element_name, "dcterms:modified") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "dcterms:modified") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_MODIFIED;
-	} else if (g_ascii_strcasecmp (element_name, "Pages") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Pages") == 0 ||
+	           g_ascii_strcasecmp (qname, "Slides") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_PAGES;
-	} else if (g_ascii_strcasecmp (element_name, "Slides") == 0) {
-		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_PAGES;
-	} else if (g_ascii_strcasecmp (element_name, "Paragraphs") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Paragraphs") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_PARAGRAPHS;
-	} else if (g_ascii_strcasecmp (element_name, "Characters") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Characters") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_CHARACTERS;
-	} else if (g_ascii_strcasecmp (element_name, "Words") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Words") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_WORDS;
-	} else if (g_ascii_strcasecmp (element_name, "Lines") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Lines") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_NUM_OF_LINES;
-	} else if (g_ascii_strcasecmp (element_name, "Application") == 0) {
+	} else if (g_ascii_strcasecmp (qname, "Application") == 0) {
 		info->tag_type = MS_OFFICE_XML_TAG_APPLICATION;
 	} else {
 		info->tag_type = MS_OFFICE_XML_TAG_INVALID;
 	}
+
+	if (info->tag_type != MS_OFFICE_XML_TAG_INVALID)
+		g_string_set_size (info->text_buf, 0);
 }
 
 static void
-msoffice_xml_metadata_parse_stop (GMarkupParseContext  *context,
-                                  const gchar          *element_name,
-                                  gpointer              user_data,
-                                  GError              **error)
+msoffice_xml_metadata_end_element_ns (void          *ctx,
+                                      const xmlChar *localname G_GNUC_UNUSED,
+                                      const xmlChar *prefix G_GNUC_UNUSED,
+                                      const xmlChar *URI G_GNUC_UNUSED)
 {
-	/* Reset tag */
-	((MsOfficeXMLParserInfo *)user_data)->tag_type = MS_OFFICE_XML_TAG_INVALID;
+	MsOfficeXMLParserInfo *info = ctx;
+
+	if (info->tag_type != MS_OFFICE_XML_TAG_INVALID && info->text_buf->len > 0) {
+		msoffice_xml_metadata_parse (NULL,
+		                             info->text_buf->str,
+		                             info->text_buf->len,
+		                             info,
+		                             NULL);
+	}
+
+	info->tag_type = MS_OFFICE_XML_TAG_INVALID;
+	g_string_set_size (info->text_buf, 0);
 }
 
 static void
-msoffice_xml_metadata_parse (GMarkupParseContext  *context,
-                             const gchar          *text,
-                             gsize                 text_len,
-                             gpointer              user_data,
-                             GError              **error)
+msoffice_xml_metadata_parse (gpointer     context G_GNUC_UNUSED,
+                             const gchar *text,
+                             gsize        text_len G_GNUC_UNUSED,
+                             gpointer     user_data,
+                             GError     **error G_GNUC_UNUSED)
 {
 	MsOfficeXMLParserInfo *info = user_data;
 
-	switch (info->tag_type) {
-	/* Ignore tags that may not happen inside the core subdocument */
-	case MS_OFFICE_XML_TAG_WORD_TEXT:
-	case MS_OFFICE_XML_TAG_SLIDE_TEXT:
-	case MS_OFFICE_XML_TAG_XLS_SHARED_TEXT:
-		break;
+	if (!text || *text == '\0')
+		return;
 
+	switch (info->tag_type) {
 	case MS_OFFICE_XML_TAG_TITLE:
 		tracker_resource_set_string (info->metadata, "nie:title", text);
 		break;
@@ -420,7 +523,6 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 
 	case MS_OFFICE_XML_TAG_AUTHOR: {
 		TrackerResource *publisher = tracker_extract_new_contact (text);
-
 		tracker_resource_set_relation (info->metadata, "nco:publisher", publisher);
 		g_object_unref (publisher);
 		break;
@@ -431,15 +533,25 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 		break;
 
 	case MS_OFFICE_XML_TAG_CREATED: {
-		gchar *date;
-
-		date = tracker_date_guess (text);
+		gchar *date = tracker_date_guess (text);
 		if (date) {
 			tracker_resource_set_string (info->metadata, "nie:contentCreated", date);
 			g_free (date);
 		} else {
 			g_warning ("Could not parse creation time (%s) from MsOffice XML document '%s'",
-				   text, info->uri);
+			           text, info->uri);
+		}
+		break;
+	}
+
+	case MS_OFFICE_XML_TAG_MODIFIED: {
+		gchar *date = tracker_date_guess (text);
+		if (date) {
+			tracker_resource_set_string (info->metadata, "nie:contentLastModified", date);
+			g_free (date);
+		} else {
+			g_warning ("Could not parse last modification time (%s) from MsOffice XML document '%s'",
+			           text, info->uri);
 		}
 		break;
 	}
@@ -448,20 +560,6 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 	case MS_OFFICE_XML_TAG_APPLICATION:
 		tracker_resource_set_string (info->metadata, "nie:generator", text);
 		break;
-
-	case MS_OFFICE_XML_TAG_MODIFIED: {
-		gchar *date;
-
-		date = tracker_date_guess (text);
-		if (date) {
-			tracker_resource_set_string (info->metadata, "nie:contentLastModified", date);
-			g_free (date);
-		} else {
-			g_warning ("Could not parse last modification time (%s) from MsOffice XML document '%s'",
-				   text, info->uri);
-		}
-		break;
-	}
 
 	case MS_OFFICE_XML_TAG_NUM_OF_PAGES:
 		tracker_resource_set_string (info->metadata, "nfo:pageCount", text);
@@ -480,16 +578,10 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 		break;
 
 	case MS_OFFICE_XML_TAG_NUM_OF_PARAGRAPHS:
-		/* TODO: There is no ontology for this. */
+		/* TODO: no ontology */
 		break;
 
-	case MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA:
-	case MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA:
-		/* Nothing as we are using it in defining type of data */
-		break;
-
-	case MS_OFFICE_XML_TAG_INVALID:
-		/* Here we cant use log otheriwse it will print for other non useful files */
+	default:
 		break;
 	}
 }
@@ -498,53 +590,86 @@ msoffice_xml_metadata_parse (GMarkupParseContext  *context,
 
 #define ZIP_XML_BUFFER_SIZE 8192
 
-static gboolean
-parse_xml_from_zip (const gchar          *zip_uri,
-                    const gchar          *member_name,
-                    GMarkupParseContext  *context,
-                    GError              **error)
+G_MODULE_EXPORT gboolean
+tracker_extract_module_init (GError **error)
 {
-	GInputStream *stream;
-	GBytes *bytes;
+       xmlInitParser ();
+       return TRUE;
+}
+
+static gboolean
+parse_xml_from_zip_sax (const gchar         *zip_uri,
+                        const gchar         *member_name,
+                        const xmlSAXHandler *sax,
+                        gpointer             user_data,
+                        GError             **error)
+{
+	g_autoptr (GInputStream) stream = NULL;
+	g_autoptr (GBytes) bytes = NULL;
+	g_autoptr (GError) inner_error = NULL;
+	xmlParserCtxtPtr ctxt;
 	const guint8 *data;
 	gsize len;
-	gboolean ok;
-
-	stream = NULL;
-	bytes = NULL;
-	ok = TRUE;
+	gboolean ok = TRUE;
 
 	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
+	ctxt = xmlCreatePushParserCtxt ((xmlSAXHandler *) sax,
+	                                user_data,
+	                                NULL, 0,
+	                                member_name);
+	g_assert (ctxt != NULL);
+
+	ctxt->options |= XML_PARSE_NONET;
+
 	while ((bytes = g_input_stream_read_bytes (stream,
 	                                           ZIP_XML_BUFFER_SIZE,
 	                                           NULL,
-	                                           error)) != NULL) {
+	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
 		if (len == 0) {
-			g_bytes_unref (bytes);
-			bytes = NULL;
 			break; /* EOF */
 		}
 
 		data = g_bytes_get_data (bytes, NULL);
 
-		ok = g_markup_parse_context_parse (context,
-		                                   (const gchar *) data,
-		                                   len,
-		                                   error);
-		g_bytes_unref (bytes);
-		bytes = NULL;
-
-		if (!ok)
+		if (xmlParseChunk (ctxt, (const char *) data, (int) len, 0) != 0) {
+			ok = FALSE;
 			break;
+		}
+
+		g_clear_pointer (&bytes, g_bytes_unref);
 	}
 
+	if (inner_error)
+		ok = FALSE;
+
+	if (ok) {
+		if (xmlParseChunk (ctxt, NULL, 0, 1) != 0)
+			ok = FALSE;
+	}
+
+	if (!ok) {
+		if (inner_error) {
+			g_propagate_error (error, inner_error);
+		} else if (ctxt->lastError.message) {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s (line %d): %s",
+			             member_name,
+			             ctxt->lastError.line,
+			             ctxt->lastError.message);
+		} else {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s", member_name);
+		}
+	}
+
+	xmlFreeParserCtxt (ctxt);
+
 	g_input_stream_close (stream, NULL, NULL);
-	g_object_unref (stream);
 
 	return ok;
 }
@@ -554,50 +679,44 @@ xml_read (MsOfficeXMLParserInfo *parser_info,
           const gchar           *xml_filename,
           MsOfficeXMLTagType     type)
 {
-	GMarkupParseContext *context;
+	g_autoptr (GError) error = NULL;
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+	};
 
-	context = NULL;
+	/* State reset */
+	parser_info->tag_type = MS_OFFICE_XML_TAG_INVALID;
+	g_string_set_size (parser_info->text_buf, 0);
+
+	if (parser_info->file_type == FILE_TYPE_XLSX) {
+		parser_info->in_xlsx_shared_strings =
+			(g_strrstr (xml_filename, "sharedStrings") != NULL);
+	}
 
 	switch (type) {
 	case MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA:
-		/* Reset these flags before going on */
-		parser_info->tag_type = MS_OFFICE_XML_TAG_INVALID;
-
-		context = g_markup_parse_context_new (&metadata_parser,
-		                                      0,
-		                                      parser_info,
-		                                      NULL);
+		sax.startElementNs = msoffice_xml_metadata_start_element_ns;
+		sax.endElementNs   = msoffice_xml_metadata_end_element_ns;
+		sax.characters     = msoffice_xml_characters;
 		break;
 
 	case MS_OFFICE_XML_TAG_DOCUMENT_TEXT_DATA:
-		/* Reset these flags before going on */
-		parser_info->tag_type = MS_OFFICE_XML_TAG_INVALID;
 		parser_info->style_element_present = FALSE;
 		parser_info->preserve_attribute_present = FALSE;
 
-		context = g_markup_parse_context_new (&content_parser,
-		                                      0,
-		                                      parser_info,
-		                                      NULL);
+		sax.startElementNs = msoffice_xml_content_start_element_ns;
+		sax.endElementNs   = msoffice_xml_content_end_element_ns;
+		sax.characters     = msoffice_xml_characters;
 		break;
 
 	default:
-		break;
+		return TRUE;
 	}
 
-	if (context) {
-		GError *error;
-
-		error = NULL;
-
-		if (!parse_xml_from_zip (parser_info->uri, xml_filename, context, &error) && error) {
-			g_debug ("Parsing internal '%s' gave error: '%s'",
-			         xml_filename,
-			         error->message);
-			g_error_free (error);
-		}
-
-		g_markup_parse_context_free (context);
+	if (!parse_xml_from_zip_sax (parser_info->uri, xml_filename, &sax, parser_info, &error) && error) {
+		g_debug ("Parsing internal '%s' gave error: '%s'",
+		         xml_filename,
+		         error->message);
 	}
 
 	return TRUE;
@@ -621,52 +740,49 @@ compare_slide_name (gconstpointer a,
 }
 
 static void
-msoffice_xml_content_types_parse_start (GMarkupParseContext  *context,
-                                        const gchar          *element_name,
-                                        const gchar         **attribute_names,
-                                        const gchar         **attribute_values,
-                                        gpointer              user_data,
-                                        GError              **error)
+msoffice_xml_content_types_start_element_ns (void           *ctx,
+                                             const xmlChar  *localname,
+                                             const xmlChar  *prefix G_GNUC_UNUSED,
+                                             const xmlChar  *URI G_GNUC_UNUSED,
+                                             int             nb_namespaces G_GNUC_UNUSED,
+                                             const xmlChar **namespaces G_GNUC_UNUSED,
+                                             int             nb_attributes,
+                                             int             nb_defaulted G_GNUC_UNUSED,
+                                             const xmlChar **attributes)
 {
-	MsOfficeXMLParserInfo *info = user_data;
-	const gchar *part_name = NULL;
-	const gchar *content_type = NULL;
-	gint i;
+	MsOfficeXMLParserInfo *info = ctx;
+	g_autofree gchar *part_name = NULL;
+	g_autofree gchar *content_type = NULL;
 
-	if (g_ascii_strcasecmp (element_name, "Override") != 0) {
+	if (g_ascii_strcasecmp ((const gchar *) localname, "Override") != 0)
 		return;
-	}
 
-	/* Look for part name and content type */
-	for (i = 0; attribute_names[i]; i++) {
-		if (g_ascii_strcasecmp (attribute_names[i], "PartName") == 0) {
-			part_name = attribute_values[i];
-		} else if (g_ascii_strcasecmp (attribute_names[i], "ContentType") == 0) {
-			content_type = attribute_values[i];
+	for (int i = 0; i < nb_attributes; i++) {
+		const xmlChar *a_local = attributes[i*5 + 0];
+		const xmlChar *v_start = attributes[i*5 + 3];
+		const xmlChar *v_end   = attributes[i*5 + 4];
+		int v_len = (int) (v_end - v_start);
+
+		if (g_ascii_strcasecmp ((const gchar *) a_local, "PartName") == 0) {
+			part_name = g_strndup ((const gchar *) v_start, v_len);
+		} else if (g_ascii_strcasecmp ((const gchar *) a_local, "ContentType") == 0) {
+			content_type = g_strndup ((const gchar *) v_start, v_len);
 		}
 	}
 
-	/* Both part_name and content_type MUST be NON-NULL */
-	if (!part_name || !content_type) {
-		g_debug ("Invalid file (part_name:%s, content_type:%s)",
-		         part_name ? part_name : "none",
-		         content_type ? content_type : "none");
+	if (!part_name || !content_type)
 		return;
-	}
 
 	/* Metadata part? */
-	if ((g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-package.core-properties+xml") == 0) ||
-	    (g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-officedocument.extended-properties+xml") == 0)) {
+	if (g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-package.core-properties+xml") == 0 ||
+	    g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-officedocument.extended-properties+xml") == 0) {
 		xml_read (info, part_name + 1, MS_OFFICE_XML_TAG_DOCUMENT_CORE_DATA);
 		return;
 	}
 
-	/* If the file type is unknown, skip trying to extract content */
-	if (info->file_type == FILE_TYPE_INVALID) {
-		g_debug ("Invalid file type, not extracting content from '%s'",
-		         part_name + 1);
+	/* If the file type is unknown, skip content */
+	if (info->file_type == FILE_TYPE_INVALID)
 		return;
-	}
 
 	/* Content part? */
 	if ((info->file_type == FILE_TYPE_DOCX &&
@@ -677,8 +793,10 @@ msoffice_xml_content_types_parse_start (GMarkupParseContext  *context,
 	    (info->file_type == FILE_TYPE_XLSX &&
 	     (g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml") == 0 ||
 	      g_ascii_strcasecmp (content_type, "application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml") == 0))) {
+
 		if (info->file_type == FILE_TYPE_PPTX) {
-			info->parts = g_list_insert_sorted (info->parts, g_strdup (part_name + 1),
+			info->parts = g_list_insert_sorted (info->parts,
+			                                    g_strdup (part_name + 1),
 			                                    compare_slide_name);
 		} else {
 			info->parts = g_list_append (info->parts, g_strdup (part_name + 1));
@@ -771,10 +889,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	MsOfficeXMLParserInfo info = { 0 };
 	MsOfficeXMLFileType file_type;
 	TrackerResource *metadata;
-	GMarkupParseContext *context = NULL;
 	GError *inner_error = NULL;
 	GFile *file;
 	gchar *uri, *resource_uri;
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.startElementNs = msoffice_xml_content_types_start_element_ns,
+	};
 
 	if (G_UNLIKELY (maximum_size_error_quark == 0)) {
 		maximum_size_error_quark = g_quark_from_static_string ("maximum_size_error");
@@ -797,27 +918,24 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	info.metadata = metadata;
 	info.file_type = file_type;
 	info.tag_type = MS_OFFICE_XML_TAG_INVALID;
+	info.in_xlsx_shared_strings = FALSE;
 	info.style_element_present = FALSE;
 	info.preserve_attribute_present = FALSE;
 	info.uri = uri;
 	info.content = NULL;
 	info.bytes_pending = tracker_extract_info_get_max_text (extract_info);
+	info.text_buf = g_string_new ("");
 
-	/* Create content-type parser context */
-	context = g_markup_parse_context_new (&content_types_parser,
-	                                      0,
-	                                      &info,
-	                                      NULL);
-
-	if (!parse_xml_from_zip (uri, "[Content_Types].xml", context, &inner_error)) {
+	if (!parse_xml_from_zip_sax (uri, "[Content_Types].xml", &sax, &info, &inner_error)) {
 		if (inner_error)
 			g_propagate_prefixed_error (error, inner_error, "Could not open:");
 		else
 			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "Could not open: unknown error");
 
-		g_markup_parse_context_free (context);
 		g_free (uri);
 		g_object_unref (metadata);
+		if (info.text_buf)
+			g_string_free (info.text_buf, TRUE);
 
 		return FALSE;
 	}
@@ -842,11 +960,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 		g_list_free (info.parts);
 	}
 
-	g_markup_parse_context_free (context);
 	g_free (uri);
 
 	tracker_extract_info_set_resource (extract_info, metadata);
 	g_object_unref (metadata);
+
+	if (info.text_buf)
+		g_string_free (info.text_buf, TRUE);
 
 	return TRUE;
 }
