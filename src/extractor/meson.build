@@ -35,7 +35,7 @@ if libzip.found()
   tracker_extract_zip_dep = declare_dependency(
     link_with: libtracker_extract_zip)
 
-  modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [tracker_extract_zip_dep]]]
+  modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [libxml2, tracker_extract_zip_dep]]]
   modules += [['extract-msoffice-xml', 'tracker-extract-msoffice-xml.c', ['11-msoffice-xml.rule'], [tracker_extract_zip_dep]]]
   modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [tracker_extract_zip_dep]]]
 endif
