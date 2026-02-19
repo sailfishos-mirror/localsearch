@@ -19,7 +19,7 @@
 		    "keyword2"
 		],
 		"nie:title" : "Some Title",
-		"nie:plainTextContent" : "\nHello there!\n\n",
+		"nie:plainTextContent" : "\nHello there!\n",
 		"nie:comment" : "Some description"
 	    }
 	]

@@ -17,7 +17,7 @@ modules = [
 ]
 
 if get_option('abiword')
-  modules += [['extract-abw', 'tracker-extract-abw.c', ['10-abw.rule'], [tracker_miners_common_dep]]]
+  modules += [['extract-abw', 'tracker-extract-abw.c', ['10-abw.rule'], [libxml2, tracker_miners_common_dep]]]
 endif
 
 if libgsf.found()
