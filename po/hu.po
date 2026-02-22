@@ -1,16 +1,16 @@
 # Hungarian translation for tracker.
-# Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016, 2019, 2021, 2022, 2024, 2025 Free Software Foundation, Inc.
+# Copyright (C) 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016, 2019, 2021, 2022, 2024, 2025, 2026 Free Software Foundation, Inc.
 # This file is distributed under the same license as the tracker package.
 #
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2007, 2008, 2009, 2010, 2011, 2013, 2014, 2016.
-# Balázs Úr <ur.balazs at fsf dot hu>, 2014, 2015, 2016, 2019, 2021, 2022, 2024, 2025.
+# Balázs Úr <ur.balazs at fsf dot hu>, 2014, 2015, 2016, 2019, 2021, 2022, 2024, 2025, 2026.
 # Balázs Meskó <mesko.balazs at fsf dot hu>, 2021.
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-08-26 17:35+0000\n"
-"PO-Revision-Date: 2025-09-08 09:29+0200\n"
+"POT-Creation-Date: 2026-01-30 17:08+0000\n"
+"PO-Revision-Date: 2026-02-22 19:22+0100\n"
 "Last-Translator: Balázs Úr <ur.balazs at fsf dot hu>\n"
 "Language-Team: Hungarian <openscope at fsf dot hu>\n"
 "Language: hu\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 24.12.3\n"
+"X-Generator: Lokalize 25.08.1\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -195,16 +195,14 @@ msgid "Show help on subcommands"
 msgstr "Alparancsok súgójának megjelenítése"
 
 #: src/cli/main.c:69
-#| msgid "Metadata extraction failed"
 msgid "Show metadata extractor output"
 msgstr "Metaadat-kinyerő kimenetének megjelenítése"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr "Indexelt mappák felsorolása és megváltoztatása"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
-#| msgid "Retrieve all information available for a certain file"
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 msgid "Retrieve information available for files and resources"
 msgstr "Fájlokhoz és erőforrásokhoz elérhető információk lekérdezése"
 
@@ -216,11 +214,11 @@ msgstr "Az indexelés átmeneti gátlása"
 msgid "Erase the indexed data"
 msgstr "Az indexelt adatok törlése"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
+#: src/cli/main.c:74 src/cli/tracker-search.c:418
 msgid "Search for content"
 msgstr "Tartalom keresése"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:721
 msgid "Provide status and statistics on the data indexed"
 msgstr "Állapot és statisztikák készítése az indexelt adatokról"
 
@@ -247,37 +245,40 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "A(z) „%s” nem localsearch parancs. Lásd: „localsearch --help”"
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
-#| msgid "Output results format: “sparql”, “turtle” or “json-ld”"
+#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "Üzenet"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Kimeneti eredmények formátuma: „turtle”, „trig” vagy „json-ld”"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "FORMÁTUM"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-main.c:80
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "FÁJL"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Nem sikerült futtatni a tracker-extract parancsot: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "Metaadatok kinyerése egy fájlból"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
+#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
 msgid "Unrecognized options"
 msgstr "Azonosítatlan kapcsolók"
 
@@ -293,77 +294,76 @@ msgstr "Eltávolítja a FÁJLT az indexelt helyek közül"
 msgid "Makes indexing recursive"
 msgstr "Rekurzívvá teszi az indexelést"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "A(z) „%s” nem könyvtár"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "Meg kell adni az --add vagy a --remove kapcsolók egyikét"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "Az --add és a --remove kölcsönösen kizárják egymást"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "A --recursive kapcsolóhoz szükséges az --add kapcsoló"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "Útvonal"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "Rekurzív"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr "Adjon meg egy vagy több indexelendő helyet."
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 "Teljes névterek megjelenítése (azaz a nie:title tulajdonság helyett teljes "
 "URL-ek használata)"
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr ""
 "Egyszerű szöveges tartalom megjelenítése, ha elérhető az erőforrásokhoz"
 
-#: src/cli/tracker-info.c:77
-#| msgid "Checks if FILE is eligible for being mined based on configuration"
+#: src/cli/tracker-info.c:78
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "Ellenőrzi, hogy a FÁJL alkalmas-e indexelésre"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "Hibaüzenet"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr "Cserélhető eszköz csatolási pontja a lekérdezéshez"
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
-#| msgid "Could not establish a connection to Tracker"
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "Nem sikerült kapcsolódni a LocalSearch szolgáltatáshoz"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "Nem lehet lekérni az adatokat az URI-hoz"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "Nem érhetők el metaadatok ahhoz az URI-hoz"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "Nem sikerült lekérni az alkalmassági állapotot: "
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Nem támogatott sorosítási formátum: „%s”\n"
@@ -393,12 +393,10 @@ msgid "Indexing inhibited through command line"
 msgstr "Az indexelés gátolva van a parancssoron keresztül"
 
 #: src/cli/tracker-inhibit.c:160
-#| msgid "File is eligible to be indexed"
 msgid "Failed to inhibit indexer"
 msgstr "Nem sikerült gátolni az indexelőt"
 
 #: src/cli/tracker-process.c:89
-#| msgid "Could not resume miner: %s"
 msgid "Could not terminate indexer"
 msgstr "Nem sikerült leállítani az indexelőt"
 
@@ -441,109 +439,103 @@ msgstr ""
 msgid "yes"
 msgstr "igen"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "Eredmények"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "Fájlok"
 
-#: src/cli/tracker-search.c:102
-#| msgid "%d folder"
-#| msgid_plural "%d folders"
+#: src/cli/tracker-search.c:118
 msgid "Folders"
 msgstr "Mappák"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "Albumok"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "Előadók"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "Fájlok keresése"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "Mappák keresése"
 
-#: src/cli/tracker-search.c:124
-#| msgid "Search for video files"
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
 msgstr "Hangfájlok keresése"
 
-#: src/cli/tracker-search.c:128
-#| msgid "Search for music files"
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
 msgstr "Zenei albumok keresése"
 
-#: src/cli/tracker-search.c:132
-#| msgid "Search for music files"
+#: src/cli/tracker-search.c:148
 msgid "Search for music artists"
 msgstr "Zenei előadók keresése"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "Képfájlok keresése"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "Videofájlok keresése"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "Dokumentumfájlok keresése"
 
-#: src/cli/tracker-search.c:148
-#| msgid "Search for image files"
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
 msgstr "Szoftverfájlok keresése"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "A megjelenített találatok számának korlátozása"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "Találatok eltolása"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr "URN-ek megjelenítése a találatoknál"
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Az összes nem létező találat visszaadása (azaz vegye bele a nem csatolt "
 "köteteket)"
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr "Súgólehetőségek megjelenítése"
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "keresési kifejezések"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "KIFEJEZÉSEK"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "Állapotváltozások követése, amint megtörténnek"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "Statisztikák megjelenítése a jelenlegi indexhez vagy adatkészlethez"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
@@ -551,75 +543,70 @@ msgstr ""
 "Az adatbázis változásainak figyelése valós időben (például erőforrások vagy "
 "fájlok hozzáadása)"
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "KIFEJEZÉS"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
-#| msgid "Could not get Tracker statistics"
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
 msgstr "Nem sikerült lekérni a LocalSearch statisztikáit"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "Üzenet"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "Jelenleg indexelt"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d fájl"
 msgstr[1] "%d fájl"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d mappa"
 msgstr[1] "%d mappa"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "Szabad terület az adatbázis-partíción"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr "Az indexelő szüneteltetve"
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "Az adatok indexelése folyamatban"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr "Az indexelő tétlen"
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d rögzített hiba"
 msgstr[1] "%d rögzített hiba"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "Nem találhatók jelentések"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:678
 msgid "Could not get SPARQL connection"
 msgstr "Nem sikerült lekérni a SPARQL kapcsolatot"
 
-#: src/cli/tracker-status.c:714
-#| msgid "Now listening for resource updates to the database"
+#: src/cli/tracker-status.c:687
 msgid "Now listening to database updates"
 msgstr "Most figyelés az adatbázis-frissítésekre"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:688
 msgid "Press Ctrl+C to stop"
 msgstr "Nyomjon Ctrl+C-t a leállításhoz"
 
@@ -698,31 +685,20 @@ msgid "Tag was removed successfully"
 msgstr "A címke sikeresen eltávolítva"
 
 #: src/cli/tracker-tag.c:360
-#| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Nem sikerült létrehozni kapcsolatot a LocalSearch szolgáltatáshoz"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:424
 msgid "The --list option is required for --show-files"
 msgstr "A --list kapcsoló szükséges a --show-files kapcsolóhoz"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:426
 msgid "Add and delete actions can not be used together"
 msgstr "A hozzáadás és törlés műveletek együtt nem használhatók"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:428
 msgid "The --description option can only be used with --add"
 msgstr "A --description kapcsoló csak az --add kapcsolóval használható"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "A süti nem ismerhető fel a szüneteltetett bányász folytatásához"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr ""
-"Az alkalmazás szüneteltetési kérés és indok megegyezik egy már létező szünetel"
-"tetési kéréssel"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -780,111 +756,100 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d másodperc"
 msgstr[1] " %2.2d másodperc"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-main.c:87 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Verzióinformációk megjelenítése"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "– a követő indexelő proxy elindítása"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "Metaadatok kinyerése e fájlból"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr "A fájl MIME-típusa (ha nincs megadva, ki lesz találva)"
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME-típus"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "Foglalatfájl-leíró az egyenrangú kommunikációhoz"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FL"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+#| msgid "File to extract metadata for"
+msgid "Filesystem root of the extracted data"
+msgstr "A kinyert adatok fájlrendszergyökere"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Nem találhatók metaadat- vagy kinyerő modulok ezen fájl kezeléséhez"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "Nem sikerült a metaadatok kinyerése"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "– Fájlok metaadatainak kinyerése"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "A fájlnevet és MIME-típust együtt kell megadni"
 
-#: src/indexer/tracker-main.c:75
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Addig fut, amíg minden beállított hely nem kerül indexelésre, majd kilép"
 
-#: src/indexer/tracker-main.c:79
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Ellenőrzi, hogy a FÁJL alkalmas-e adatbányászásra a beállítások alapján"
 
-#: src/indexer/tracker-main.c:83
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "Elkerüli a fájlrendszeren való változtatásokat"
 
-#: src/indexer/tracker-main.c:335
+#: src/indexer/tracker-application.c:1262
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "A(z) „%s” adatobjektum már létezik"
 
-#: src/indexer/tracker-main.c:336
+#: src/indexer/tracker-application.c:1263
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "A(z) „%s” adatobjektum nem létezik"
 
-#: src/indexer/tracker-main.c:346
-msgid "Directory is NOT eligible to be indexed (based on filters)"
-msgstr "A könyvtár NEM alkalmas arra, hogy indexelve legyen (a szűrők alapján)"
-
-#: src/indexer/tracker-main.c:350
-msgid "File is NOT eligible to be indexed (based on filters)"
-msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (a szűrők alapján)"
-
-#: src/indexer/tracker-main.c:353
-msgid "File is NOT eligible to be indexed (hidden file)"
-msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (rejtett fájl)"
-
-#: src/indexer/tracker-main.c:355
-msgid "File is NOT eligible to be indexed (not an indexed folder)"
-msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (nem indexelt mappa)"
-
-#: src/indexer/tracker-main.c:379
+#: src/indexer/tracker-application.c:1289
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "A(z) „%s” szülőkönyvtár NEM alkalmas arra, hogy indexelve legyen (a szűrők "
 "alapján)"
 
-#: src/indexer/tracker-main.c:385
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "A(z) „%s” szülőkönyvtár NEM alkalmas arra, hogy indexelve legyen (rejtett "
 "fájl)"
 
-#: src/indexer/tracker-main.c:391
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -893,20 +858,37 @@ msgstr ""
 "A(z) „%s” szülőkönyvtár NEM alkalmas arra, hogy indexelve legyen (a "
 "tartalomszűrők alapján)"
 
-#: src/indexer/tracker-main.c:408
+#: src/indexer/tracker-application.c:1316
+msgid "Directory is NOT eligible to be indexed (based on filters)"
+msgstr "A könyvtár NEM alkalmas arra, hogy indexelve legyen (a szűrők alapján)"
+
+#: src/indexer/tracker-application.c:1320
+msgid "File is NOT eligible to be indexed (based on filters)"
+msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (a szűrők alapján)"
+
+#: src/indexer/tracker-application.c:1323
+msgid "File is NOT eligible to be indexed (hidden file)"
+msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (rejtett fájl)"
+
+#: src/indexer/tracker-application.c:1325
+msgid "File is NOT eligible to be indexed (not an indexed folder)"
+msgstr "A fájl NEM alkalmas arra, hogy indexelve legyen (nem indexelt mappa)"
+
+#: src/indexer/tracker-application.c:1333
 msgid "Directory is eligible to be indexed"
 msgstr "A könyvtár alkalmas arra, hogy indexelve legyen"
 
-#: src/indexer/tracker-main.c:409
+#: src/indexer/tracker-application.c:1334
 msgid "File is eligible to be indexed"
 msgstr "A fájl alkalmas arra, hogy indexelve legyen"
 
-#. Translators: this messagge will apper immediately after the
-#. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#.
-#: src/indexer/tracker-main.c:623
-msgid "— start the tracker indexer"
-msgstr "– a követő indexelő elindítása"
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr "Adatbázis helye"
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr "KÖNYVTÁR"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
