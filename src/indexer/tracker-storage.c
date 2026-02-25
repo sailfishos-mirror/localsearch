@@ -151,7 +151,7 @@ mount_remove (TrackerStorage *storage,
 }
 
 static void
-unount_check_data_free (gpointer user_data)
+unmount_check_data_free (gpointer user_data)
 {
 	UnmountCheckData *unmount_data = user_data;
 
@@ -172,7 +172,7 @@ pre_unmount_timeout_cb (gpointer user_data)
 
 	storage->pending_pre_unmounts =
 		g_list_remove (storage->pending_pre_unmounts, unmount_data);
-	unount_check_data_free (unmount_data);
+	unmount_check_data_free (unmount_data);
 
 	return G_SOURCE_REMOVE;
 }
@@ -199,7 +199,7 @@ mount_removed_cb (GVolumeMonitor *monitor,
 			/* Pre-unmount went through */
 			storage->pending_pre_unmounts =
 				g_list_remove (storage->pending_pre_unmounts, unmount_data);
-			unount_check_data_free (unmount_data);
+			unmount_check_data_free (unmount_data);
 			return;
 		}
 	}
@@ -240,7 +240,7 @@ tracker_storage_finalize (GObject *object)
 	g_clear_object (&storage->volume_monitor);
 
 	g_clear_list (&storage->removable_mount_points, g_object_unref);
-	g_clear_list (&storage->pending_pre_unmounts, unount_check_data_free);
+	g_clear_list (&storage->pending_pre_unmounts, unmount_check_data_free);
 
 	G_OBJECT_CLASS (tracker_storage_parent_class)->finalize (object);
 }

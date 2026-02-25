@@ -23,7 +23,7 @@ Test `localsearch info` subcommand
 
 import gi
 gi.require_version("Tsparql", "3.0")
-from gi.repository import Gio
+from gi.repository import Gio, GLib
 from gi.repository import Tsparql
 
 from typing import *
@@ -226,11 +226,10 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_info_rdf(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
-        # Copy a file and wait for it to be indexed, in order to ensure idle state
-        file = datadir.joinpath("text/mango.txt")
-        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        # Move a file and wait for it to be indexed, in order to ensure idle state
+        target = pathlib.Path(os.path.join(self.indexed_dir, "mango.txt"))
         with self.await_document_inserted(target):
-            shutil.copy(file, self.indexed_dir)
+            GLib.file_set_contents(target.as_posix(), b"monkey")
 
         output = self.run_cli(["localsearch", "info", target, "--output-format", "trig"])
         self.assertIn("@prefix", output)

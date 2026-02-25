@@ -164,6 +164,8 @@ class DBusDaemon:
         if self.process:
             log.debug("  Stopping DBus daemon")
             self.process.terminate()
+            self.process.stdout.close()
+            self.process.stderr.close()
             self.process.wait()
             self.process = None
         if len(self._threads) > 0:

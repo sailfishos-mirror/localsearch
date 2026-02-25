@@ -454,7 +454,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	g_assert_cmpint (tracker_monitor_get_count (fixture->monitor), ==, 1);
 
 	/* Setup also not-monitored directory */
-	fixture->not_monitored_directory = g_strdup (g_get_tmp_dir ());
+	fixture->not_monitored_directory = g_dir_make_tmp ("tracker-monitor-test-XXXXXX", NULL);
 
 	/* Create new main loop */
 	fixture->main_loop = g_main_loop_new (NULL, FALSE);
@@ -489,6 +489,7 @@ test_monitor_common_teardown (TrackerMonitorTestFixture *fixture,
 	g_object_unref (fixture->monitored_directory_file);
 	g_free (fixture->monitored_directory);
 
+	g_assert_no_errno (g_rmdir (fixture->not_monitored_directory));
 	g_assert_true (fixture->not_monitored_directory != NULL);
 	g_free (fixture->not_monitored_directory);
 }
@@ -731,7 +732,7 @@ test_monitor_file_event_moved_to_monitored (TrackerMonitorTestFixture *fixture,
 	dest_file = g_file_new_for_path (dest_path);
 	g_assert_true (dest_file != NULL);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_file),
@@ -779,7 +780,7 @@ test_monitor_file_event_moved_to_not_monitored (TrackerMonitorTestFixture *fixtu
 	dest_file = g_file_new_for_path (dest_path);
 	g_assert_true (dest_file != NULL);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_file),
@@ -825,9 +826,8 @@ test_monitor_file_event_moved_from_not_monitored (TrackerMonitorTestFixture *fix
 	source_path = g_file_get_path (source_file);
 	dest_path = g_build_filename (fixture->monitored_directory, "in.txt", NULL);
 	dest_file = g_file_new_for_path (dest_path);
-	g_assert_true (dest_file != NULL);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_file),
@@ -960,7 +960,7 @@ test_monitor_directory_event_moved_to_monitored (TrackerMonitorTestFixture *fixt
 	dest_dir = g_file_get_parent (file_in_dest_dir);
 	dest_path = g_file_get_path (dest_dir);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_dir),
@@ -1044,7 +1044,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_create (TrackerMonito
 	dest_dir = g_file_get_parent (file_in_dest_dir);
 	dest_path = g_file_get_path (dest_dir);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_dir),
@@ -1132,7 +1132,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonito
 	dest_dir = g_file_get_parent (file_in_dest_dir);
 	dest_path = g_file_get_path (dest_dir);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_dir),
@@ -1200,7 +1200,7 @@ test_monitor_directory_event_moved_to_not_monitored (TrackerMonitorTestFixture *
 	dest_path = g_build_path (G_DIR_SEPARATOR_S, fixture->not_monitored_directory, "directory", NULL);
 	dest_dir = g_file_new_for_path (dest_path);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_dir),
@@ -1251,7 +1251,7 @@ test_monitor_directory_event_moved_from_not_monitored (TrackerMonitorTestFixture
 	dest_path = g_build_path (G_DIR_SEPARATOR_S, fixture->monitored_directory, "foo", NULL);
 	dest_dir = g_file_new_for_path (dest_path);
 
-	g_assert_cmpint (g_rename (source_path, dest_path), ==, 0);
+	g_assert_no_errno (g_rename (source_path, dest_path));
 
 	g_hash_table_insert (fixture->events,
 	                     g_object_ref (source_dir),

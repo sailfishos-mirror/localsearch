@@ -116,23 +116,11 @@ class TrackerSandbox:
         log.info("Looking for active Tracker processes on the session bus")
         for busname in self.session_bus.list_names_sync():
             if busname.startswith(TRACKER_DBUS_PREFIX):
+                log.info("Terminating '%s'", busname)
                 pid = self.session_bus.get_connection_unix_process_id_sync(busname)
                 if pid is not None:
-                    tracker_processes.append(pid)
-
-        log.info("Terminating %i Tracker processes", len(tracker_processes))
-        for pid in tracker_processes:
-            os.kill(pid, signal.SIGTERM)
-
-        log.info("Waiting for %i Tracker processes", len(tracker_processes))
-        for pid in tracker_processes:
-            psutil.wait_pid(pid)
-
-        # We need to wait until Tracker processes have stopped before we
-        # terminate the D-Bus daemon, otherwise lots of criticals like this
-        # appear in the log output:
-        #
-        #  (tracker-miner-fs:14955): GLib-GIO-CRITICAL **: 11:38:40.386: Error  while sending AddMatch() message: The connection is closed
+                    os.kill(pid, signal.SIGTERM)
+                    self.session_bus.await_bus_name(busname, acquired=False)
 
         log.info("Stopping D-Bus session bus for sandbox.")
         self.session_bus.stop()

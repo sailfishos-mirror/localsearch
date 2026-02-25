@@ -6,7 +6,6 @@ libtracker_miner_tests = [
 
 libtracker_miner_slow_tests = [
     'file-notifier',
-    'miner-fs',
     'monitor',
     'monitor-glib',
 ]

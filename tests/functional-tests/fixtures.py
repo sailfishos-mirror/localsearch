@@ -110,7 +110,6 @@ class TrackerMinerTest(DBusTestCase):
                     [self.non_recursive_dir]
                 ),
                 "index-removable-devices": GLib.Variant.new_boolean(False),
-                "index-applications": GLib.Variant.new_boolean(False),
             }
         }
         return settings
@@ -781,18 +780,11 @@ class CliError(Exception):
 
 
 class TrackerCommandLineTestCase(TrackerMinerTest):
-    def setUp(self):
-        super(TrackerCommandLineTestCase, self).setUp()
-
+    def environment(self):
         extra_env = cfg.test_environment(self.workdir)
         extra_env["LANG"] = "en_GB.utf8"
-
-        self.env = os.environ.copy()
-        self.env.update(extra_env)
-
-        path = self.env.get("PATH", []).split(":")
-        self.env["PATH"] = ":".join([cfg.cli_dir()] + path)
-        self.env["TRACKER_CLI_DIR"] = cfg.cli_dir()
+        extra_env["PATH"] = ":".join([cfg.cli_dir()] + os.environ['PATH'].split(":"))
+        return extra_env
 
     @contextlib.contextmanager
     def tmpdir(self):
@@ -810,7 +802,7 @@ class TrackerCommandLineTestCase(TrackerMinerTest):
         command = [str(c) for c in command]
         log.info("Running: %s", " ".join(command))
         result = subprocess.run(
-            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=self.env
+            command, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
         )
 
         if len(result.stdout) > 0:

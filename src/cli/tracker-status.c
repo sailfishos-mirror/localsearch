@@ -631,6 +631,7 @@ status_follow (void)
 {
 	g_autoptr (TrackerIndexerMiner) indexer_proxy = NULL;
 	g_autoptr (GMainLoop) main_loop = NULL;
+	gboolean paused;
 
 	indexer_proxy =
 		tracker_indexer_miner_proxy_new_for_bus_sync (G_BUS_TYPE_SESSION,
@@ -641,7 +642,12 @@ status_follow (void)
 	if (!indexer_proxy)
 		return EXIT_FAILURE;
 
-	print_indexer_status (indexer_proxy);
+	are_miners_finished (&paused);
+
+	if (paused)
+		indexer_paused_cb (indexer_proxy);
+	else
+		print_indexer_status (indexer_proxy);
 
 	g_signal_connect (indexer_proxy, "progress",
 	                  G_CALLBACK (indexer_progress_cb), NULL);

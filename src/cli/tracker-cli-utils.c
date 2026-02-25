@@ -75,6 +75,9 @@ tracker_cli_get_error_keyfiles (void)
 	                                        G_FILE_QUERY_INFO_NONE,
 	                                        NULL,
 	                                        NULL);
+	if (!enumerator)
+		return NULL;
+
 	while (TRUE) {
 		GFileInfo *info;
 

@@ -323,6 +323,7 @@ tracker_seccomp_init (gboolean readonly)
 		ERROR_RULE (mkdirat, EPERM);
 		ERROR_RULE (rename, EPERM);
 		ERROR_RULE (unlink, EPERM);
+		ERROR_RULE (unlinkat, EPERM);
 	} else {
 		ALLOW_RULE (open);
 		ALLOW_RULE (openat);
@@ -337,6 +338,7 @@ tracker_seccomp_init (gboolean readonly)
 		ALLOW_RULE (mkdirat);
 		ALLOW_RULE (rename);
 		ALLOW_RULE (unlink);
+		ALLOW_RULE (unlinkat);
 	}
 
 #if defined(__linux__) && defined(__x86_64__)
