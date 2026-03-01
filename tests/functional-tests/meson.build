@@ -57,16 +57,9 @@ if get_option('abiword')
   extractor_tests += 'office/abw-3'
 endif
 
-# Gstreamer 1.17/1.18 introduced support for some additional
-# MusicBrainz tags
 if avformat.found()
-  if gstreamer.found() and gstreamer.version() >= '1.17.0'
-    extractor_tests += 'audio/flac-musicbrainz'
-    extractor_tests += 'audio/vorbis-musicbrainz'
-  else
-    extractor_tests += 'audio/flac'
-    extractor_tests += 'audio/vorbis'
-  endif
+  extractor_tests += 'audio/flac'
+  extractor_tests += 'audio/vorbis'
 endif
 
 if libjpeg.found() and exempi.found() and gexiv2.found()
