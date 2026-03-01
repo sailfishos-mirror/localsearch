@@ -18,14 +18,14 @@
 		    "@id": "urn:artist:AbBaby",
 		    "@type": "nmm:Artist",
 		    "nmm:artistName": "AbBaby",
-		    "tracker:hasExternalReference": [
-			{
-			    "@id": "https://musicbrainz.org/artist/234561",
-			    "@type": "tracker:ExternalReference",
-			    "tracker:referenceSource": "https://musicbrainz.org/doc/Artist",
-			    "tracker:referenceIdentifier": "234561"
-			}
-		    ]
+		    "tracker:hasExternalReference": {
+			"@id": "https://musicbrainz.org/artist/234561",
+			"@type": "tracker:ExternalReference",
+			"tracker:referenceSource": {
+			    "@id": "https://musicbrainz.org/doc/Artist"
+			},
+			"tracker:referenceIdentifier": "234561"
+		    }
 		},
 		"nmm:performer": {
 		    "@id": "urn:artist:a%20vorbis%20performer",
@@ -38,30 +38,52 @@
 		    "nmm:artistName": "Ab"
 		},
 		"nmm:musicAlbum": {
-		    "@id": "urn:album:SinCos:2008-01-01",
 		    "@type": "nmm:MusicAlbum",
+		    "@id": "urn:album:SinCos:2008-01-01",
 		    "nie:title": "SinCos",
 		    "tracker:hasExternalReference": [
 			{
 			    "@id": "https://musicbrainz.org/release/345612",
 			    "@type": "tracker:ExternalReference",
-			    "tracker:referenceSource": "https://musicbrainz.org/doc/Release",
+			    "tracker:referenceSource": {
+				"@id": "https://musicbrainz.org/doc/Release"
+			    },
 			    "tracker:referenceIdentifier": "345612"
+			},
+			{
+			    "@id": "https://musicbrainz.org/release-group/561234",
+			    "@type": "tracker:ExternalReference",
+			    "tracker:referenceSource": {
+				"@id": "https://musicbrainz.org/doc/Release_Group"
+			    },
+			    "tracker:referenceIdentifier": "561234"
 			}
 		    ]
 		},
 		"nmm:musicAlbumDisc": {
 		    "@id": "urn:album-disc:SinCos:2008-01-01:Disc1",
-		    "@type": "nmm:MusicAlbumDisc",
-		    "nmm:albumDiscAlbum": "urn:album:SinCos:2008-01-01",
-		    "nmm:setNumber": 1
+		    "nmm:setNumber": 1,
+		    "nmm:albumDiscAlbum": {
+			"@id": "urn:album:SinCos:2008-01-01"
+		    },
+		    "@type": "nmm:MusicAlbumDisc"
 		},
 		"tracker:hasExternalReference": [
 		    {
 			"@id": "https://musicbrainz.org/recording/456123",
 			"@type": "tracker:ExternalReference",
-			"tracker:referenceSource": "https://musicbrainz.org/doc/Recording",
+			"tracker:referenceSource": {
+			    "@id": "https://musicbrainz.org/doc/Recording"
+			},
 			"tracker:referenceIdentifier": "456123"
+		    },
+		    {
+			"@id": "https://musicbrainz.org/track/123456",
+			"@type": "tracker:ExternalReference",
+			"tracker:referenceSource": {
+			    "@id": "https://musicbrainz.org/doc/Track"
+			},
+			"tracker:referenceIdentifier": "123456"
 		    }
 		]
 	    }
