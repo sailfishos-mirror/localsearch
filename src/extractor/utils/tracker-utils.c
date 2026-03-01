@@ -451,7 +451,7 @@ tracker_date_format_to_iso8601 (const gchar *date_string,
 	date_time = g_date_time_new (tz,
 	                             date_tm.tm_year + 1900,
 	                             date_tm.tm_mon + 1,
-	                             date_tm.tm_mday,
+	                             MAX (date_tm.tm_mday, 1),
 	                             date_tm.tm_hour,
 	                             date_tm.tm_min,
 	                             date_tm.tm_sec);
