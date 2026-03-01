@@ -168,6 +168,9 @@ TrackerXmpData *tracker_xmp_new           (const gchar          *buffer,
                                            const gchar          *uri);
 TrackerXmpData *tracker_xmp_new_from_sidecar (GFile             *orig_file,
                                               gchar            **sidecar_uri);
+
+TrackerXmpData * tracker_xmp_new_for_file (GFile *file);
+
 void            tracker_xmp_free          (TrackerXmpData       *data);
 
 

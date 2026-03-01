@@ -661,37 +661,16 @@ register_namespace (const gchar *ns_uri,
         }
 }
 
-static gboolean
-parse_xmp (const gchar    *buffer,
-           size_t          len,
+static void
+parse_xmp (XmpPtr          xmp,
            const gchar    *uri,
            TrackerXmpData *data)
 {
-	XmpPtr xmp;
+	XmpIteratorPtr iter;
 
-	memset (data, 0, sizeof (TrackerXmpData));
-
-	xmp_init ();
-
-        register_namespace (NS_XMP_REGIONS, "mwg-rs");
-        register_namespace (NS_ST_DIM, "stDim");
-        register_namespace (NS_ST_AREA, "stArea");
-
-	xmp = xmp_new_empty ();
-	xmp_parse (xmp, buffer, len);
-
-	if (xmp != NULL) {
-		XmpIteratorPtr iter;
-
-		iter = xmp_iterator_new (xmp, NULL, NULL, XMP_ITER_PROPERTIES);
-		iterate (xmp, iter, uri, data, FALSE);
-		xmp_iterator_free (iter);
-		xmp_free (xmp);
-	}
-
-	xmp_terminate ();
-
-	return TRUE;
+	iter = xmp_iterator_new (xmp, NULL, NULL, XMP_ITER_PROPERTIES);
+	iterate (xmp, iter, uri, data, FALSE);
+	xmp_iterator_free (iter);
 }
 
 static void
@@ -711,6 +690,15 @@ xmp_region_free (gpointer data)
         g_free (region);
 }
 
+static void
+init_xmp (void)
+{
+	xmp_init ();
+
+	register_namespace (NS_XMP_REGIONS, "mwg-rs");
+	register_namespace (NS_ST_DIM, "stDim");
+	register_namespace (NS_ST_AREA, "stArea");
+}
 
 /**
  * tracker_xmp_new:
@@ -731,18 +719,51 @@ tracker_xmp_new (const gchar *buffer,
                  gsize        len,
                  const gchar *uri)
 {
-	TrackerXmpData *data;
+	TrackerXmpData *data = NULL;
+	XmpPtr xmp;
 
 	g_return_val_if_fail (buffer != NULL, NULL);
 	g_return_val_if_fail (len > 0, NULL);
 	g_return_val_if_fail (uri != NULL, NULL);
 
-	data = g_new0 (TrackerXmpData, 1);
+	init_xmp ();
 
-	if (!parse_xmp (buffer, len, uri, data)) {
-		tracker_xmp_free (data);
-		return NULL;
+	xmp = xmp_new_empty ();
+	xmp_parse (xmp, buffer, len);
+	data = g_new0 (TrackerXmpData, 1);
+	parse_xmp (xmp, uri, data);
+
+	xmp_free (xmp);
+	xmp_terminate ();
+
+	return data;
+}
+
+TrackerXmpData *
+tracker_xmp_new_for_file (GFile *file)
+{
+	TrackerXmpData *data = NULL;
+	XmpFilePtr xmp_files;
+	XmpPtr xmp;
+
+	init_xmp ();
+
+	xmp_files = xmp_files_open_new (g_file_peek_path (file),
+	                                XMP_OPEN_READ);
+	xmp = xmp_files_get_new_xmp (xmp_files);
+	xmp_files_close (xmp_files, XMP_CLOSE_NOOPTION);
+	xmp_files_free (xmp_files);
+
+	if (xmp) {
+		g_autofree char *uri = NULL;
+
+		data = g_new0 (TrackerXmpData, 1);
+		uri = g_file_get_uri (file);
+		parse_xmp (xmp, uri, data);
+		xmp_free (xmp);
 	}
+
+	xmp_terminate ();
 
 	return data;
 }
