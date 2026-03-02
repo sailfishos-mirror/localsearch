@@ -194,21 +194,21 @@ tracker_exif_new_from_metadata (GExiv2Metadata *metadata)
 
 	tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Image.DateTimeOriginal", NULL);
 	if (tmp) {
-		data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT);
+		data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT, NULL);
 		g_clear_pointer (&tmp, g_free);
 	}
 
 	if (!data->time_original) {
 		tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTimeOriginal", NULL);
 		if (tmp) {
-			data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT);
+			data->time_original = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT, NULL);
 			g_clear_pointer (&tmp, g_free);
 		}
 	}
 
 	tmp = gexiv2_metadata_get_tag_string (metadata, "Exif.Photo.DateTime", NULL);
 	if (tmp) {
-		data->date = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT);
+		data->date = tracker_date_format_to_iso8601 (tmp, EXIF_DATE_FORMAT, NULL);
 		g_clear_pointer (&tmp, g_free);
 	}
 

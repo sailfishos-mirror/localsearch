@@ -448,7 +448,8 @@ tracker_date_format_iso8601 (GDateTime *datetime)
  **/
 gchar *
 tracker_date_format_to_iso8601 (const gchar *date_string,
-                                const gchar *format)
+                                const gchar *format,
+                                GTimeZone   *timezone)
 {
 	g_autoptr (GTimeZone) tz = NULL;
 	g_autoptr (GDateTime) date_time = NULL;
@@ -461,7 +462,9 @@ tracker_date_format_to_iso8601 (const gchar *date_string,
 		return NULL;
 	}
 
-	if (!strstr (format, "%z") && !strstr (format, "%Z"))
+	if (timezone)
+		tz = g_time_zone_ref (timezone);
+	else if (!strstr (format, "%z") && !strstr (format, "%Z"))
 		tz = g_time_zone_new_local ();
 	else
 		tz = g_time_zone_new_offset (date_tm.tm_gmtoff);

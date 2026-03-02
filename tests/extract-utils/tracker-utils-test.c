@@ -210,13 +210,13 @@ test_date_to_iso8601 ()
         /* Not much to test here because it uses strptime/strftime */
         gchar *result;
 
-        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12:12", "%Y:%m:%d %H:%M:%S");
+        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12:12", "%Y:%m:%d %H:%M:%S", NULL);
         g_assert_true (g_str_has_prefix (result, "2010-03-13T12:12:12"));
         g_assert_cmpint (strlen (result), <=, 25);
         g_free (result);
 
         /* Pattern and string don't match */
-        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12", "%Y:%m:%d %H:%M:%S");
+        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12", "%Y:%m:%d %H:%M:%S", NULL);
         g_assert_true (result == NULL);
 }
 

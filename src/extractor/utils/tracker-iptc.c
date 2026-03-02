@@ -100,7 +100,7 @@ tracker_iptc_new_from_metadata (GExiv2Metadata *metadata)
 
 	char *date_created = gexiv2_metadata_get_tag_string (metadata, "Iptc.Application2.DateCreated", NULL);
 	if (date_created) {
-		data->date_created = tracker_date_format_to_iso8601 (date_created, IPTC_DATE_FORMAT);
+		data->date_created = tracker_date_format_to_iso8601 (date_created, IPTC_DATE_FORMAT, NULL);
 		g_free (date_created);
 	}
 
