@@ -43,11 +43,7 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
                 "@type": ["nfo:Audio", "nmm:MusicPiece", "nfo:Audio"],
                 "nmm:trackNumber": 1,
                 "nfo:audioOffset": 0.0,
-                "nmm:performer": {
-                    "@id": "urn:artist:My%20Bloody%20Valentine",
-                    "nmm:artistName": "My Bloody Valentine",
-                    "@type": "nmm:Artist",
-                },
+                "nmm:performer": {"@id": "urn:artist:My%20Bloody%20Valentine"},
                 "nfo:channels": 1,
                 "nie:isStoredAs": {"@id": audio_uri},
                 "nfo:sampleRate": 44100,
