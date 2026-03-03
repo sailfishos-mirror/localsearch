@@ -1,3 +1,9 @@
+NEW in 3.11.rc - 2026-03-03
+===========================
+  * Reliability improvements to the test suite
+
+Translations: es, hu, ko, ne, oc, pt
+
 NEW in 3.11.beta - 2026-02-18
 =============================
   * Fixes for possible buffer overflows and NULL pointer dereferences
