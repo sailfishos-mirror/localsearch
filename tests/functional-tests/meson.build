@@ -148,24 +148,29 @@ endif
 
 if libgsf.found()
   extractor_tests += [
-    'office/epub-doc-1',
-    'office/epub-doc-2',
-    'office/oasis-doc',
-    'office/odg-drawing-1',
-    'office/odp-presentation-1',
-    'office/ods-spreadsheet-1',
     'office/office-doc',
-    'office/office-xml-doc-1',
     'office/powerpoint',
     'office/pdf-doc',
     'office/pdf-encrypted',
     'office/ps-doc',
     'office/ps-doc-2',
     'office/ps-doc-atend',
-    'office/pptx-presentation-1',
     'office/xls-spreadsheet-1',
-    'office/xlsx-spreadsheet-1',
   ]
+
+  if libzip.found()
+    extractor_tests += [
+      'office/epub-doc-1',
+      'office/epub-doc-2',
+      'office/oasis-doc',
+      'office/odg-drawing-1',
+      'office/odp-presentation-1',
+      'office/ods-spreadsheet-1',
+      'office/office-xml-doc-1',
+      'office/pptx-presentation-1',
+      'office/xlsx-spreadsheet-1',
+    ]
+  endif
 
   if exempi.found()
     extractor_tests += [
