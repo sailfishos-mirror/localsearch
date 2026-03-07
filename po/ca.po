@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
 "POT-Creation-Date: 2026-01-16 18:54+0000\n"
-"PO-Revision-Date: 2026-02-13 17:14+0100\n"
+"PO-Revision-Date: 2026-03-07 17:14+0100\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -412,7 +412,7 @@ msgstr "S'ha finalitzat el procés de l'indexador"
 
 #: src/cli/tracker-reset.c:48
 msgid "Remove filesystem indexer database"
-msgstr "Eliminar la base de dades d'indexadors del sistema"
+msgstr "Elimina la base de dades de l'indexador del sistema de fitxers"
 
 #: src/cli/tracker-reset.c:51
 msgid ""
@@ -640,7 +640,7 @@ msgstr "ETIQUETA"
 #: src/cli/tracker-tag.c:79
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
 msgstr ""
-"Suprimeix una etiqueta (si s'omet «FITXER's» se suprimirà l'«ETIQUETA» de "
+"Suprimeix una etiqueta (si s'omet «FITXERS» se suprimirà l'«ETIQUETA» de "
 "tots els fitxers)"
 
 #: src/cli/tracker-tag.c:83
