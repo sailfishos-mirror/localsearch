@@ -10,7 +10,10 @@
 		"@type": "nmm:Video",
 		"!@type": "nmm:Audio",
 		"nfo:height": "480",
-		"nfo:width": "864"
+		"nfo:width": "864",
+		"nmm:episodeNumber": 12,
+		"nmm:series": { "nie:title": "Now This Is a Show" },
+		"nmm:isPartOfSeason": { "nmm:seasonNumber": 42 }
 	    }
 	]
     }
