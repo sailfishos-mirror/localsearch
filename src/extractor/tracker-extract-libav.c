@@ -216,6 +216,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	}
 
 	if (video_stream && !(video_stream->disposition & AV_DISPOSITION_ATTACHED_PIC)) {
+		g_autoptr (TrackerResource) tv_series = NULL, tv_season = NULL;
 		guint64 hash;
 
 		tracker_resource_add_uri(metadata, "rdf:type", "nmm:Video");
@@ -255,8 +256,23 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			tracker_resource_set_int64 (metadata, "nmm:episodeNumber", atoi (tag->value));
 		}
 
+		if ((tag = find_tag (format, video_stream, NULL, "show"))) {
+			tv_series = tracker_extract_new_tv_series (tag->value);
+			tracker_resource_add_uri (tv_series, "nmm:hasEpisode", resource_uri);
+			tracker_resource_set_relation (metadata, "nmm:series", tv_series);
+		}
+
 		if ((tag = find_tag (format, video_stream, NULL, "season_number"))) {
-			tracker_resource_set_int64 (metadata, "nmm:season", atoi (tag->value));
+			int n_season;
+
+			n_season = atoi (tag->value);
+
+			if (tv_series && n_season > 0) {
+				tag = find_tag (format, video_stream, NULL, "show");
+				tv_season = tracker_extract_new_tv_season (tag->value, n_season, tv_series);
+				tracker_resource_add_uri (tv_season, "nmm:hasSeasonEpisode", resource_uri);
+				tracker_resource_set_relation (metadata, "nmm:isPartOfSeason", tv_season);
+			}
 		}
 
 		if ((tag = find_tag (format, video_stream, NULL, "creation_time"))) {
