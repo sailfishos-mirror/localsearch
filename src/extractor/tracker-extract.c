@@ -372,6 +372,9 @@ get_metadata (GTask *task)
 	}
 #endif
 
+	/* Drop no longer necessary task data, along with the deadline watch */
+	g_task_set_task_data (task, NULL, NULL);
+
 	return FALSE;
 }
 
