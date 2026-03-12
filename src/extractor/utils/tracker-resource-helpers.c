@@ -385,3 +385,41 @@ tracker_extract_new_tag (const char *label)
 	g_free (uri);
 	return tag;
 }
+
+TrackerResource *
+tracker_extract_new_tv_series (const char *name)
+{
+	TrackerResource *tv_series;
+	g_autofree char *uri = NULL;
+
+	uri = tracker_sparql_escape_uri_printf ("urn:tvseries:%s", name);
+	tv_series = tracker_resource_new (uri);
+	tracker_resource_set_uri (tv_series, "rdf:type", "nmm:TVSeries");
+	tracker_resource_set_string (tv_series, "nie:title", name);
+
+	return tv_series;
+}
+
+TrackerResource *
+tracker_extract_new_tv_season (const char      *name,
+                               int              number,
+                               TrackerResource *tv_series)
+{
+	TrackerResource *tv_season;
+	g_autofree char *uri = NULL;
+
+	uri = tracker_sparql_escape_uri_printf ("urn:tvseason:%s-S%2d",
+	                                        name, number);
+	tv_season = tracker_resource_new (uri);
+
+	tracker_resource_set_uri (tv_season, "rdf:type", "nmm:TVSeason");
+	tracker_resource_set_int (tv_season, "nmm:seasonNumber", number);
+
+	if (tv_series) {
+		tracker_resource_set_uri (tv_season, "nmm:seasonOf",
+		                          tracker_resource_get_identifier (tv_series));
+		tracker_resource_add_uri (tv_series, "nmm:hasSeason", uri);
+	}
+
+	return tv_season;
+}
