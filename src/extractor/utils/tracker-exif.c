@@ -153,7 +153,7 @@ tracker_exif_new_from_metadata (GExiv2Metadata *metadata)
 	TrackerExifData *data;
 	g_autofree char *tmp = NULL;
 	gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
-	double fnumber, lat, lon, alt, focal_length, tmp_gps;
+	double fnumber, lat, lon, alt, focal_length, tmp_gps G_GNUC_UNUSED;
 	int nom, den;
 	glong tmp_long;
 
