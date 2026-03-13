@@ -202,7 +202,9 @@ static gchar *
 div_str_dup (const gchar *value)
 {
 	gchar *ret;
-	gchar *ptr = strchr (value, '/');
+	const gchar *ptr;
+
+	ptr = strchr (value, '/');
 
 	if (ptr) {
 		gchar *cpy = g_strdup (value);
