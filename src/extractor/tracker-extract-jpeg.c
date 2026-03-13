@@ -296,8 +296,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	                                                 NULL,
 	                                                 uri);
 
-	if (cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_INCH ||
-	    cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_CENTIMETER) {
+	if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH ||
+	    cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_CENTIMETER) {
 		gdouble v_res, h_res;
 
 		v_res = cinfo.Y_density;
