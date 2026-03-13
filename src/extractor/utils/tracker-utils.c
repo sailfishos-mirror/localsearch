@@ -392,7 +392,9 @@ tracker_text_validate_utf8 (const gchar  *text,
 
 		/* Validate string, getting the pointer to first non-valid character
 		 *  (if any) or to the end of the string. */
-		g_utf8_validate (text, len_to_validate, &end);
+		if (g_utf8_validate (text, len_to_validate, &end))
+			g_assert (end - text == len_to_validate);
+
 		if (end > text) {
 			/* If str output required... */
 			if (str) {
