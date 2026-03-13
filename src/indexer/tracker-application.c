@@ -377,7 +377,7 @@ setup_connection (TrackerApplication  *app,
 	is_corrupted = g_file_query_exists (corrupt, NULL);
 
 	if (!store || !is_corrupted)
-		retval = open_connection (app, instance, store, sandboxed, error);
+		retval = open_connection (app, instance, store, sandboxed, &internal_error);
 
 	if (!retval && store) {
 		if (is_corrupted ||
