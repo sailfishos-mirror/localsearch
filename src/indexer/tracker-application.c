@@ -752,8 +752,11 @@ shutdown_main_instance (TrackerApplication *app,
 	finish_endpoint_thread (&instance->endpoint_thread);
 
 	if (instance->config_file && instance->indexing_tree) {
-		tracker_indexing_tree_save_config (instance->indexing_tree,
-		                                   instance->config_file, NULL);
+		g_autoptr (GError) error = NULL;
+
+		if (!tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                        instance->config_file, &error))
+			g_warning ("Could not save configuration: %s", error->message);
 		g_clear_object (&instance->config_file);
 	}
 
@@ -820,8 +823,11 @@ indexer_instance_free (IndexerInstance *instance)
 						     instance->indexing_tree);
 
 	if (instance->config_file && instance->indexing_tree) {
-		tracker_indexing_tree_save_config (instance->indexing_tree,
-		                                   instance->config_file, NULL);
+		g_autoptr (GError) error = NULL;
+
+		if (!tracker_indexing_tree_save_config (instance->indexing_tree,
+		                                        instance->config_file, &error))
+			g_warning ("Could not save configuration: %s", error->message);
 		g_clear_object (&instance->config_file);
 	}
 
