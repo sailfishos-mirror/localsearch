@@ -82,7 +82,6 @@ TrackerIptcData *
 tracker_iptc_new_from_metadata (GExiv2Metadata *metadata)
 {
 	TrackerIptcData *data;
-	GError *error = NULL;
 
 	g_return_val_if_fail (metadata != NULL, NULL);
 
@@ -110,8 +109,6 @@ tracker_iptc_new_from_metadata (GExiv2Metadata *metadata)
 		data->image_orientation = g_strdup (fix_iptc_orientation (img_orientation));
 		g_free (img_orientation);
 	}
-
-	if (error) { g_error_free (error); error = NULL; }
 
 	if (!(data->keywords || data->byline || data->copyright_notice || data->city)) {
 		tracker_iptc_free (data);

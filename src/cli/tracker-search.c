@@ -269,7 +269,6 @@ get_cursor_results (TrackerSparqlCursor *cursor,
                     gboolean             details)
 {
 	gboolean is_tty;
-	gint count = 0;
 
 	is_tty = tracker_term_is_tty ();
 
@@ -289,8 +288,6 @@ get_cursor_results (TrackerSparqlCursor *cursor,
 		} else {
 			g_print ("%s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
 		}
-
-		count++;
 	}
 
 	g_print ("\n");

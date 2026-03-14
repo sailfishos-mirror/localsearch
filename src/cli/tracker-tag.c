@@ -118,7 +118,6 @@ get_all_tags_show_tag_id (TrackerSparqlConnection *connection,
 		g_printerr ("%s, %s\n",
 		            _("Could not get files related to tag"),
 		            error->message);
-		g_error_free (error);
 		return;
 	}
 
@@ -334,8 +333,6 @@ get_tags_by_file (TrackerSparqlConnection *connection,
 		g_printerr ("%s, %s\n",
 		            _("Could not get all tags"),
 		            error->message);
-		g_error_free (error);
-
 		return FALSE;
 	}
 

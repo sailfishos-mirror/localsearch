@@ -2,13 +2,15 @@
 
 #include <fcntl.h>
 
+#include <glib/gstdio.h>
+
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	TrackerResource *resource;
 	g_autofree gchar *path = NULL;
-	int fd;
+	g_autofd int fd;
 
 	path = g_file_get_path (tracker_extract_info_get_file (info));
 	/* Attempt to truncate the file */

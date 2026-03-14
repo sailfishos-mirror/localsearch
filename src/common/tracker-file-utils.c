@@ -365,9 +365,9 @@ tracker_path_list_filter_duplicates (GSList      *roots,
 	l1 = new_list;
 
 	while (l1) {
-		const gchar *path;
-		gchar       *p;
-		gboolean     reset = FALSE;
+		char *path;
+		const char *p;
+		gboolean reset = FALSE;
 
 		path = l1->data;
 
@@ -443,7 +443,8 @@ tracker_path_list_filter_duplicates (GSList      *roots,
 
 			/* Make sure the path doesn't have the '/' suffix. */
 			if (p && !p[1]) {
-				*p = '\0';
+				size_t pos = p - path;
+				path[pos] = '\0';
 			}
 
 			l1 = l1->next;
@@ -732,8 +733,7 @@ gboolean
 tracker_filename_casecmp_without_extension (const gchar *a,
                                             const gchar *b)
 {
-	gchar *pa;
-	gchar *pb;
+	const char *pa, *pb;
 	gint len_a;
 	gint len_b;
 

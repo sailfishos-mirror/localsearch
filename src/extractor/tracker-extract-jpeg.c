@@ -203,7 +203,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			len = marker->data_length;
 
 #ifdef HAVE_GEXIV2
-			if (len > 0 && strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
+			if (!ed && len >= EXIF_NAMESPACE_LENGTH &&
+			    strncmp (EXIF_NAMESPACE, str, EXIF_NAMESPACE_LENGTH) == 0) {
 				GExiv2Metadata *metadata = gexiv2_metadata_new ();
 
 				if (gexiv2_metadata_from_app1_segment (metadata, (const guint8 *) str, len, NULL))
@@ -214,7 +215,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 #endif /* HAVE_GEXIV2 */
 
 #ifdef HAVE_EXEMPI
-			if (!xd && strncmp (XMP_NAMESPACE, str, XMP_NAMESPACE_LENGTH) == 0) {
+			if (!xd && len >= XMP_NAMESPACE_LENGTH &&
+			    strncmp (XMP_NAMESPACE, str, XMP_NAMESPACE_LENGTH) == 0) {
 				xd = tracker_xmp_new (str + XMP_NAMESPACE_LENGTH,
 				                      len - XMP_NAMESPACE_LENGTH,
 				                      uri);
@@ -227,7 +229,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			str = (gchar*) marker->data;
 			len = marker->data_length;
 #ifdef HAVE_GEXIV2
-			if (len > 0 && strncmp(PS3_NAMESPACE, str, PS3_NAMESPACE_LENGTH) == 0) {
+			if (!id && len > PS3_NAMESPACE_LENGTH &&
+			    strncmp(PS3_NAMESPACE, str, PS3_NAMESPACE_LENGTH) == 0) {
 				const gchar *filepath = g_file_peek_path(file);
 				GError *error = NULL;
 				GExiv2Metadata *metadata = gexiv2_metadata_new();
@@ -296,8 +299,8 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	                                                 NULL,
 	                                                 uri);
 
-	if (cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_INCH ||
-	    cinfo.density_unit != JPEG_RESOLUTION_UNIT_PER_CENTIMETER) {
+	if (cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_INCH ||
+	    cinfo.density_unit == JPEG_RESOLUTION_UNIT_PER_CENTIMETER) {
 		gdouble v_res, h_res;
 
 		v_res = cinfo.Y_density;

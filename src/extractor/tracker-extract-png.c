@@ -80,8 +80,8 @@ raw_profile_new (const gchar *input,
 	size_t len;
 	size_t i;
 	size_t o;
-	char *p;
-	char *q;
+	const char *p;
+	const char *q;
 
 	ptr = input;
 
