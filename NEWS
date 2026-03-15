@@ -1,3 +1,21 @@
+NEW in 3.11.0 - 2026-03-15
+==========================
+  * Memory leak fixes
+  * Stability fixes
+  * Fixes to tv series/season extraction from video files
+
+Translations: ca, da, en_GB, pl
+
+Notable changes since 3.10.0:
+  * Default configuration change, the user home directory will now be indexed
+    recursively as a whole, instead of XDG folders
+  * Major change in handling of removable devices. When enabled, removable
+    devices will get a `.localsearch3` folder with a self-contained database
+    for the removable device indexed data, instead of being included in the
+    main database in the user home folder. The setting default remains off.
+  * The set of dependencies was modernized and sanitized. GExiv2 is now used
+    for more metadata, libzip is now used for bundled files.
+
 NEW in 3.11.rc - 2026-03-03
 ===========================
   * Reliability improvements to the test suite
