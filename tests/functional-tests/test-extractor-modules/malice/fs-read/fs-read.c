@@ -2,13 +2,15 @@
 
 #include <fcntl.h>
 
+#include <glib/gstdio.h>
+
 G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	TrackerResource *resource;
 	g_autofree gchar *home_parent = NULL;
-	int fd;
+	g_autofd int fd;
 
 	/* Attempt to read files from disallowed locations */
 	fd = open ("/proc/cmdline", O_RDONLY);
