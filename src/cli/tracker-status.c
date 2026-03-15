@@ -312,10 +312,7 @@ get_file_and_folder_count (int *files,
 		if (stmt)
 			cursor = tracker_sparql_statement_execute (stmt, NULL, &error);
 
-		if (cursor)
-			tracker_sparql_cursor_next (cursor, NULL, &error);
-
-		if (error) {
+		if (error || !tracker_sparql_cursor_next (cursor, NULL, &error)) {
 			g_printerr ("%s, %s\n",
 			            _("Could not get LocalSearch statistics"),
 			            error->message);
