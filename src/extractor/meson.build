@@ -25,10 +25,19 @@ if libgsf.found()
 endif
 
 if libzip.found()
-  zip_files = files('tracker-zip-input-stream.c')
-  modules += [['extract-epub', ['tracker-extract-epub.c', zip_files], ['10-epub.rule'], [libzip]]]
-  modules += [['extract-msoffice-xml', ['tracker-extract-msoffice-xml.c', zip_files], ['11-msoffice-xml.rule'], [libzip]]]
-  modules += [['extract-oasis', ['tracker-extract-oasis.c', zip_files], ['10-oasis.rule'], [libzip]]]
+  libtracker_extract_zip = shared_library('tracker-extract-zip',
+    'tracker-zip-input-stream.c',
+    c_args: tracker_c_args,
+    dependencies: [tracker_extract_dep, libzip],
+    install: true,
+    install_dir: tracker_internal_libs_dir)
+
+  tracker_extract_zip_dep = declare_dependency(
+    link_with: libtracker_extract_zip)
+
+  modules += [['extract-epub', 'tracker-extract-epub.c', ['10-epub.rule'], [tracker_extract_zip_dep]]]
+  modules += [['extract-msoffice-xml', 'tracker-extract-msoffice-xml.c', ['11-msoffice-xml.rule'], [tracker_extract_zip_dep]]]
+  modules += [['extract-oasis', 'tracker-extract-oasis.c', ['10-oasis.rule'], [tracker_extract_zip_dep]]]
 endif
 
 if have_gexiv2
