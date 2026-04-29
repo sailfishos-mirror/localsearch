@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: tracker HEAD\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
 "POT-Creation-Date: 2026-03-15 00:39+0000\n"
-"PO-Revision-Date: 2026-04-23 15:06+0200\n"
+"PO-Revision-Date: 2026-04-29 21:12+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak <gnome-sk-list@gnome.org>\n"
 "Language: sk\n"
@@ -44,6 +44,7 @@ msgid "Wait for FS miner to be done before extracting"
 msgstr "Pred extrahovaním čakať na dokončenie dolovača súborového systému"
 
 # desc
+# well-spelled: tracker-extract, tracker-miner-fs, tracker, extract, fs
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
 "When true, tracker-extract will wait for tracker-miner-fs to be done "
@@ -51,7 +52,7 @@ msgid ""
 "environment where it is important to list files as fast as possible and can "
 "wait to get meta-data later."
 msgstr ""
-"Keď je hodnota true, funkcia tracker-extract bude pred extrahovaním "
+"Keď je hodnota pravdivá, funkcia tracker-extract bude pred extrakciou "
 "metaúdajov čakať, kým funkcia tracker-miner-fs nedokončí prechádzanie. Táto "
 "voľba je užitočná pre obmedzené prostredie, kde je dôležité vytvoriť zoznam "
 "súborov čo najrýchlejšie a je možné počkať na neskoršie získanie metaúdajov."
@@ -109,7 +110,7 @@ msgstr "Povoliť monitory"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:59
 msgid "Set to false to completely disable any file monitoring"
 msgstr ""
-"Nastavte na false, ak chcete úplne zakázať akékoľvek monitorovanie súborov"
+"Nastavte na nepravda, ak chcete úplne zakázať akékoľvek monitorovanie súborov"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:64
 msgid "Index removable devices"
@@ -119,7 +120,7 @@ msgstr "Indexovať vymeniteľné zariadenia"
 msgid ""
 "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
-"Nastavte na true, ak chcete povoliť indexovanie pripojených adresárov na "
+"Nastavte na pravda, ak chcete povoliť indexovanie pripojených adresárov na "
 "vymeniteľných zariadeniach."
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:70
@@ -140,6 +141,7 @@ msgstr "Adresáre pre rekurzívne indexovanie"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
+# well-spelled: xdg, dirs, default, documents, defaults, dirs
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:91
 msgid ""
 "List of directories to index recursively, Special values include: "
@@ -158,6 +160,7 @@ msgstr "Adresáre pre nerekurzívne indexovanie"
 
 #. Translators: Do NOT translate the directories names in capital. Those
 #. are keys used by Tracker.
+# well-spelled: xdg, dirs, defaults, default
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:105
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
@@ -235,31 +238,37 @@ msgid "Add, remove and list tags"
 msgstr "Pridá, odstráni a vypíše zoznam značiek"
 
 #: src/cli/main.c:77
+# well-spelled: Sandbox
 msgid "Sandbox for a testing environment"
 msgstr "Sandbox pre testovacie prostredie"
 
 #: src/cli/main.c:122
+# well-spelled: localsearch
 msgid "Available localsearch commands are:"
 msgstr "Dostupné príkazy programu localsearch:"
 
 #: src/cli/main.c:141
+# well-spelled: localsearch, help
 msgid "See “localsearch help <command>” to read about a specific subcommand."
 msgstr ""
-"Informácie k danému príkazu môžete získať pomocou „localsearch help <príkaz>”"
+"Informácie k danému príkazu môžete získať pomocou „localsearch help <príkaz>“"
 
+# well-spelled: localsearch, help
 #: src/cli/main.c:184
 #, c-format
-msgid "”%s” is not a localsearch command. See “localsearch --help”"
-msgstr "„%s” nie je príkaz programu localsearch. Viď „localsearch --help”."
+#| msgid "”%s” is not a localsearch command. See “localsearch --help”"
+msgid "“%s” is not a localsearch command. See “localsearch --help”"
+msgstr "„%s“ nie je príkazom programu localsearch. Viď „localsearch --help“"
 
 #: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Správa"
 
+# well-spelled: turtle, trig, json, ld
 #: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
 #: src/extractor/tracker-main.c:82
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
-msgstr "Formát výstupných výsledkov: „turtle”, „trig” alebo „json-ld”"
+msgstr "Formát výstupných výsledkov: „turtle“, „trig“ alebo „json-ld“"
 
 #: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
 #: src/extractor/tracker-main.c:83
@@ -275,6 +284,7 @@ msgstr "FORMÁT"
 msgid "FILE"
 msgstr "SÚBOR"
 
+# well-spelled: tracker, extract
 #: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Nepodarilo sa spustiť funkciu tracker-extract: "
@@ -334,6 +344,7 @@ msgstr "Rekurzívne"
 msgid "Please specify one or more locations to index."
 msgstr "Prosím, určte jednu alebo viacero umiestnení na indexovanie."
 
+# well-spelled: title
 # cmd desc
 #: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
@@ -355,6 +366,7 @@ msgstr "Skontroluje, či je SÚBOR určený na indexovanie"
 msgid "Removable device mount point to query"
 msgstr "Bod pripojenia vymeniteľného zariadenia na dopytovanie"
 
+# well-spelled: LocalSearch
 #: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
@@ -435,9 +447,11 @@ msgid ""
 msgstr ""
 "Indexované údaje pre tento súbor boli odstránené a budú znovu indexované."
 
+# well-spelled: LocalSearch
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
-msgstr "Indexované údaje programu LocalSearch budú odstránené, pokračovať? [a/N]"
+msgstr ""
+"Indexované údaje programu LocalSearch budú odstránené, pokračovať? [a/N]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
@@ -572,6 +586,7 @@ msgstr ""
 msgid "EXPRESSION"
 msgstr "VÝRAZ"
 
+# well-spelled: LocalSearch
 #: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
 #: src/cli/tracker-status.c:317
 msgid "Could not get LocalSearch statistics"
@@ -634,6 +649,7 @@ msgstr "Nepodarilo sa nadviazať pripojenie k SPARQL"
 msgid "Now listening to database updates"
 msgstr "Teraz sa sledujú aktualizácie databázy"
 
+# well-spelled: LocalSearch, Ctrl
 #: src/cli/tracker-status.c:694
 msgid "Press Ctrl+C to stop"
 msgstr "Stlačením Ctrl+C zastavíte činnosť"
@@ -716,6 +732,7 @@ msgstr "Nepodarilo sa odstrániť značku"
 msgid "Tag was removed successfully"
 msgstr "Značka bola úspešne odstránená"
 
+# well-spelled: LocalSearch
 #: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Nepodarilo sa nadviazať pripojenie k LocalSearch"
@@ -724,6 +741,7 @@ msgstr "Nepodarilo sa nadviazať pripojenie k LocalSearch"
 msgid "The --list option is required for --show-files"
 msgstr "Pre --show-files sa vyžaduje voľba --list"
 
+# well-spelled: add, delete
 #: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr "Akcie add (pridať) a delete (odstrániť) nemôžu byť použité súčasne"
@@ -822,7 +840,7 @@ msgstr "MIME"
 
 #: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
-msgstr "Deskriptor súboru soketu pre komunikáciu peer-to-peer"
+msgstr "Deskriptor súboru socketu pre komunikáciu peer-to-peer"
 
 #: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
