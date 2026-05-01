@@ -2,14 +2,14 @@
 # Copyright (C) 2024 tracker-miners's COPYRIGHT HOLDER
 # This file is distributed under the same license as the tracker-miners package.
 # Rachida SACI <rgebbid@gmail.com>, 2024.
-# ButterflyOfFire <butterflyoffire@protonmail.com>, 2025.
+# ButterflyOfFire <butterflyoffire@protonmail.com>, 2025-2026.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker-miners master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2025-09-13 09:49+0000\n"
-"PO-Revision-Date: 2025-09-14 09:56+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-03-15 00:39+0000\n"
+"PO-Revision-Date: 2026-05-01 09:56+0100\n"
 "Last-Translator: ButterflyOfFire <butterflyoffire@protonmail.com>\n"
 "Language-Team: Kabyle\n"
 "Language: kab\n"
@@ -17,12 +17,13 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n>1;\n"
-"X-Generator: Gtranslator 48.0\n"
+"X-Generator: Gtranslator 50.0\n"
 "X-DL-Lang: kab\n"
 "X-DL-Module: LocalSearch\n"
 "X-DL-Branch: main\n"
 "X-DL-Domain: po\n"
 "X-DL-State: Translating\n"
+"X-DL-VCS-Web: https://gitlab.gnome.org/GNOME/localsearch\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -190,11 +191,11 @@ msgstr ""
 msgid "Show metadata extractor output"
 msgstr "Tussfa n yiɣefisefka tecceḍ"
 
-#: src/cli/main.c:70 src/cli/tracker-index.c:374
+#: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr ""
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:540
+#: src/cli/main.c:71 src/cli/tracker-info.c:533
 #, fuzzy
 #| msgid "Retrieve all information available for a certain file"
 msgid "Retrieve information available for files and resources"
@@ -208,17 +209,15 @@ msgstr ""
 msgid "Erase the indexed data"
 msgstr ""
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:397
-#, fuzzy
-#| msgid "Search for folders"
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
-msgstr "Nadi ɣef yikaramen"
+msgstr "Anadi ɣef yigburen"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:748
+#: src/cli/main.c:75 src/cli/tracker-status.c:727
 msgid "Provide status and statistics on the data indexed"
 msgstr ""
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "Rnu, kkes, smizwer tibzimin"
 
@@ -239,38 +238,42 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr ""
 
-#: src/cli/tracker-extract.c:42 src/cli/tracker-info.c:74
-#: src/extractor/tracker-main.c:81
+#: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
+msgid "Message"
+msgstr "Izen"
+
+#: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
+#: src/extractor/tracker-main.c:82
 #, fuzzy
 #| msgid "Output results format: “sparql”, “turtle” or “json-ld”"
 msgid "Output results format: “turtle”, “trig” or “json-ld”"
 msgstr "Amasal n yigmaḍ n unekcum: “sparql”, “turtle” neɣ “json-ld”"
 
-#: src/cli/tracker-extract.c:43 src/cli/tracker-info.c:75
-#: src/extractor/tracker-main.c:82
+#: src/cli/tracker-extract.c:45 src/cli/tracker-info.c:76
+#: src/extractor/tracker-main.c:83
 msgid "FORMAT"
 msgstr "AMASAL"
 
-#: src/cli/tracker-extract.c:45 src/cli/tracker-extract.c:46
+#: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:80 src/cli/tracker-info.c:81
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:75
-#: src/indexer/tracker-application.c:55
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
+#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
 msgid "FILE"
 msgstr "AFAYLU"
 
-#: src/cli/tracker-extract.c:90
+#: src/cli/tracker-extract.c:94
 msgid "Could not run tracker-extract: "
 msgstr "Yegguma ad isselkem tussfa n uneḍfar: "
 
-#: src/cli/tracker-extract.c:123
+#: src/cli/tracker-extract.c:131
 msgid "Extract metadata from a file"
 msgstr "Ssef iɣefsefka seg ufaylu"
 
-#: src/cli/tracker-extract.c:130 src/cli/tracker-index.c:379
-#: src/cli/tracker-info.c:547 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:410
-#: src/cli/tracker-status.c:753 src/cli/tracker-tag.c:419
+#: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
+#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:732 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Tixtiṛiyin ur yettwaqbalen ara"
 
@@ -286,76 +289,77 @@ msgstr "Itekkes AFAYLU am wadigen yettwasmitren"
 msgid "Makes indexing recursive"
 msgstr "Yettarra asmiter d asnalas"
 
-#: src/cli/tracker-index.c:195
+#: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
 msgstr "\"%s\" mačči d akaram"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:273
+#: src/cli/tracker-index.c:281
 msgid "Either --add or --remove must be provided"
 msgstr "Ilaq amuddu --add neɣ --remove"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:277
+#: src/cli/tracker-index.c:285
 msgid "--add and --remove are mutually exclusive"
 msgstr "--add akked --remove d ttemsuffaɣen"
 
 #. TRANSLATORS: These are commandline options
-#: src/cli/tracker-index.c:287
+#: src/cli/tracker-index.c:295
 msgid "--recursive requires --add"
 msgstr "--recursive yesra --add"
 
-#: src/cli/tracker-index.c:345 src/cli/tracker-status.c:347
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
 msgid "Path"
 msgstr "Abrid"
 
-#: src/cli/tracker-index.c:346
+#: src/cli/tracker-index.c:354
 msgid "Recursive"
 msgstr "Analas"
 
-#: src/cli/tracker-index.c:388
+#: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
 msgstr ""
 
-#: src/cli/tracker-info.c:66
+#: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
 
-#: src/cli/tracker-info.c:70
+#: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
 msgstr ""
 
-#: src/cli/tracker-info.c:77
+#: src/cli/tracker-info.c:78
 #, fuzzy
 #| msgid "Checks if FILE is eligible for being mined based on configuration"
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "Yessenqad ma yella AFAYLU yewjed i wakken ad yettwassef almend n uswel"
 
-#: src/cli/tracker-info.c:349
-msgid "Error message"
-msgstr "Tuccḍa deg yizen"
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-status.c:80
+msgid "Removable device mount point to query"
+msgstr ""
 
-#: src/cli/tracker-info.c:374 src/cli/tracker-search.c:341
-#: src/cli/tracker-status.c:129 src/cli/tracker-status.c:248
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
+#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 #, fuzzy
 #| msgid "Could not establish a connection to Tracker"
 msgid "Could not connect to LocalSearch"
 msgstr "Yegguma ad isserked tuqqna ɣer Tracker"
 
-#: src/cli/tracker-info.c:419
+#: src/cli/tracker-info.c:405
 msgid "Unable to retrieve data for URI"
 msgstr "D awezɣi ad d-yerr isefka i URI"
 
-#: src/cli/tracker-info.c:429
+#: src/cli/tracker-info.c:412
 msgid "No metadata available for that URI"
 msgstr "Ulac taffa n yisefka i yellan i URI-a"
 
-#: src/cli/tracker-info.c:434 src/cli/tracker-info.c:506
+#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
 msgid "Could not get eligible status: "
 msgstr "Yegguma ad d-yawi addad n usireg: "
 
-#: src/cli/tracker-info.c:460 src/extractor/tracker-main.c:184
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Amasal n usmizrer \"%s\" ur yettwasefrak ara\n"
@@ -429,190 +433,178 @@ msgstr ""
 #.
 #: src/cli/tracker-reset.c:231
 msgid "yes"
-msgstr ""
+msgstr "ih"
 
-#: src/cli/tracker-search.c:99
+#: src/cli/tracker-search.c:115
 msgid "Results"
 msgstr "Igmaḍ"
 
-#: src/cli/tracker-search.c:100 src/cli/tracker-search.c:101
-#: src/cli/tracker-search.c:103 src/cli/tracker-search.c:106
-#: src/cli/tracker-search.c:107 src/cli/tracker-search.c:108
+#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
+#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
+#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
 msgid "Files"
 msgstr "Ifuyla"
 
-#: src/cli/tracker-search.c:102
-#, fuzzy
-#| msgid "%d folder"
-#| msgid_plural "%d folders"
+#: src/cli/tracker-search.c:118
 msgid "Folders"
-msgstr "%d ukaram"
+msgstr "Ikaramen"
 
-#: src/cli/tracker-search.c:104
+#: src/cli/tracker-search.c:120
 msgid "Albums"
 msgstr "Albumen"
 
-#: src/cli/tracker-search.c:105
+#: src/cli/tracker-search.c:121
 msgid "Artists"
 msgstr "Inaẓuren"
 
-#: src/cli/tracker-search.c:116
+#: src/cli/tracker-search.c:132
 msgid "Search for files"
 msgstr "Nadi ifuyla"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:136
 msgid "Search for folders"
 msgstr "Nadi ɣef yikaramen"
 
-#: src/cli/tracker-search.c:124
-#, fuzzy
-#| msgid "Search for video files"
+#: src/cli/tracker-search.c:140
 msgid "Search for audio files"
-msgstr "Nadi ɣef yifuyla n tvidyut"
+msgstr "Nadi ɣef yifuyla n umeslaw"
 
-#: src/cli/tracker-search.c:128
-#, fuzzy
-#| msgid "Search for music files"
+#: src/cli/tracker-search.c:144
 msgid "Search for music albums"
-msgstr "Nadi ɣef yifuyla n uẓawan"
+msgstr "Nadi ɣef yilbumen n uẓawan"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:148
 #, fuzzy
 #| msgid "Search for music files"
 msgid "Search for music artists"
 msgstr "Nadi ɣef yifuyla n uẓawan"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:152
 msgid "Search for image files"
 msgstr "Nadi ɣef yifuyla n tugna"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:156
 msgid "Search for video files"
 msgstr "Nadi ɣef yifuyla n tvidyut"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:160
 msgid "Search for document files"
 msgstr "Nadi ɣef yifuyla n yisemli"
 
-#: src/cli/tracker-search.c:148
-#, fuzzy
-#| msgid "Search for image files"
+#: src/cli/tracker-search.c:164
 msgid "Search for software files"
-msgstr "Nadi ɣef yifuyla n tugna"
+msgstr "Nadi ɣef yifuyla n iseɣẓanen"
 
-#: src/cli/tracker-search.c:157 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "Talast n umḍan n yigmaḍ ara yettwaskanen"
 
-#: src/cli/tracker-search.c:161 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "Ankaz n yigmaḍ"
 
-#: src/cli/tracker-search.c:165
+#: src/cli/tracker-search.c:181
 msgid "Show URNs for results"
 msgstr ""
 
-#: src/cli/tracker-search.c:169
+#: src/cli/tracker-search.c:185
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 
-#: src/cli/tracker-search.c:173
+#: src/cli/tracker-search.c:193
 msgid "Show help options"
 msgstr ""
 
-#: src/cli/tracker-search.c:180 src/cli/tracker-status.c:80
+#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "nadi awalen"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:201
 msgid "TERMS"
 msgstr "AWALEN"
 
-#: src/cli/tracker-status.c:67
+#: src/cli/tracker-status.c:68
 msgid "Follow status changes as they happen"
 msgstr "Ḍfer isenfal n waddaden akken ḍerrun"
 
-#: src/cli/tracker-status.c:71
+#: src/cli/tracker-status.c:72
 msgid "Show statistics for current index / data set"
 msgstr "Sken tidaddanin i umatar / tagrumma n taffa n yisefka imiranen"
 
-#: src/cli/tracker-status.c:75
+#: src/cli/tracker-status.c:76
 msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
 
-#: src/cli/tracker-status.c:81
+#: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
 msgstr "TANFALIT"
 
-#: src/cli/tracker-status.c:143 src/cli/tracker-status.c:267
-#: src/cli/tracker-status.c:289
+#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
+#: src/cli/tracker-status.c:317
 #, fuzzy
 #| msgid "Could not get Tracker statistics"
 msgid "Could not get LocalSearch statistics"
 msgstr "Yegguma ad d-yawi tidaddanin n Tracker"
 
-#: src/cli/tracker-status.c:348 src/cli/tracker-status.c:511
-msgid "Message"
-msgstr "Izen"
-
-#: src/cli/tracker-status.c:406
+#: src/cli/tracker-status.c:434
+#, c-format
 msgid "Currently indexed"
 msgstr "Yettwasmiter melmi kan"
 
-#: src/cli/tracker-status.c:409 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d ufaylu"
 msgstr[1] "%d yifuyla"
 
-#: src/cli/tracker-status.c:415
+#: src/cli/tracker-status.c:443
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d ukaram"
 msgstr[1] "%d yikaramen"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:457
 msgid "Remaining space on database partition"
 msgstr "Tallunt i d-yeqqimen ɣef uḥric n taffa n yisefka"
 
-#: src/cli/tracker-status.c:439 src/cli/tracker-status.c:645
+#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
 msgid "Indexer is paused"
 msgstr ""
 
-#: src/cli/tracker-status.c:440
+#: src/cli/tracker-status.c:468
 msgid "Data is still being indexed"
 msgstr "Isefka mazal-iten deg usmiter"
 
-#: src/cli/tracker-status.c:442
+#: src/cli/tracker-status.c:470
 msgid "Indexer is idle"
 msgstr ""
 
-#: src/cli/tracker-status.c:449
+#: src/cli/tracker-status.c:477
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d uɣelluy i yettwaskelsen"
 msgstr[1] "%d yiɣelluyen i yettwaskelsen"
 
-#: src/cli/tracker-status.c:533
+#: src/cli/tracker-status.c:507
 msgid "No reports found"
 msgstr "Ulac ineqqisen i yettwafen"
 
-#: src/cli/tracker-status.c:705
+#: src/cli/tracker-status.c:684
 msgid "Could not get SPARQL connection"
 msgstr "Yegguma ad d-yawi tuqqna SPARQL"
 
-#: src/cli/tracker-status.c:714
+#: src/cli/tracker-status.c:693
 #, fuzzy
 #| msgid "Now listening for resource updates to the database"
 msgid "Now listening to database updates"
 msgstr "Ad nsell tura ileqman n yiɣbula n taffa n yisefka"
 
-#: src/cli/tracker-status.c:715
+#: src/cli/tracker-status.c:694
 msgid "Press Ctrl+C to stop"
 msgstr "Sit ɣef Ctrl+C i useḥbes"
 
@@ -654,63 +646,55 @@ msgstr "AFAYLU…"
 msgid "Could not get files related to tag"
 msgstr "Yegguma ad d-yawi ifuyla yeqqnen ɣer tebzimt"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
-msgstr "YEgguma ad d-yawi akk tibzimin"
+msgstr "Yegguma ad d-yawi akk tibzimin"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "Tibzimin 'ttwaskanet s yisem)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "Yegguma ad yernu tabzimt"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "Tettwarna tebzimt akken iwata"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "Ur yezmir ara ad yernu tabzimt ɣer yifuyla"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "Yettwabzem"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "Ur yezmir ara ad yekkes tabzimt"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "Tabzimt tettwakkes akken iwata"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 #, fuzzy
 #| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Yegguma ad isserked tuqqna ɣer Tracker"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "Taxtiṛt --tabdart tettwasra i --sken-afaylu"
 
-#: src/cli/tracker-tag.c:427
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr "Tigawin n tmerna d tukksa ur zmirent ara ad ttwasqedcent akken"
 
-#: src/cli/tracker-tag.c:429
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr "Taxtiṛt --aglam tezmer kan ad tettwaseqdac akked --rnu"
-
-#: src/common/tracker-miner-proxy.c:349
-msgid "Cookie not recognized to resume paused miner"
-msgstr "Anagi n tuqqna d arussin i wallus n umassaf i iḥebsen"
-
-#: src/common/tracker-miner-proxy.c:406
-msgid "Pause application and reason match an already existing pause request"
-msgstr "Asnas n useḥbes akked ssebba yemṣada d ussuter n useḥbes yellan yakan"
 
 #: src/common/tracker-utils.c:101 src/common/tracker-utils.c:152
 msgid "less than one second"
@@ -720,25 +704,25 @@ msgstr "ddaw n yiwet n tasint"
 #: src/common/tracker-utils.c:116
 #, c-format
 msgid " %dd"
-msgstr " %dd"
+msgstr " %dus"
 
 #. Translators: this is %2.2d hours
 #: src/common/tracker-utils.c:120
 #, c-format
 msgid " %2.2dh"
-msgstr " %2.2dh"
+msgstr " %2.2dsr"
 
 #. Translators: this is %2.2d minutes
 #: src/common/tracker-utils.c:124
 #, c-format
 msgid " %2.2dm"
-msgstr " %2.2dm"
+msgstr " %2.2dsd"
 
 #. Translators: this is %2.2d seconds
 #: src/common/tracker-utils.c:128
 #, c-format
 msgid " %2.2ds"
-msgstr " %2.2ds"
+msgstr " %2.2dssb"
 
 #: src/common/tracker-utils.c:132
 #, c-format
@@ -758,102 +742,108 @@ msgstr[1] " %2.2d n yisragen"
 #, c-format
 msgid " %2.2d minute"
 msgid_plural " %2.2d minutes"
-msgstr[0] " %2.2d tesdat"
-msgstr[1] " %2.2d tesdatin"
+msgstr[0] " %2.2d n tesdat"
+msgstr[1] " %2.2d n tesdatin"
 
 #: src/common/tracker-utils.c:144
 #, c-format
 msgid " %2.2d second"
 msgid_plural " %2.2d seconds"
-msgstr[0] " %2.2d tasint"
-msgstr[1] " %2.2d tsinin"
+msgstr[0] " %2.2d n tasint"
+msgstr[1] " %2.2d n tasinin"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:89
-#: src/indexer/tracker-application.c:62 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Yeskanay talɣut n lqem"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136
+#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— senker apṛuksi n umatar n uḍfar"
 
-#: src/extractor/tracker-main.c:74
+#: src/extractor/tracker-main.c:75
 msgid "File to extract metadata for"
 msgstr "Afaylu i tussfa n yiɣefisefka i"
 
-#: src/extractor/tracker-main.c:78
+#: src/extractor/tracker-main.c:79
 msgid "MIME type for file (if not provided, this will be guessed)"
 msgstr ""
 
-#: src/extractor/tracker-main.c:79
+#: src/extractor/tracker-main.c:80
 msgid "MIME"
 msgstr "MIME"
 
-#: src/extractor/tracker-main.c:85
+#: src/extractor/tracker-main.c:86 src/indexer/tracker-endpoint-helper.c:40
 msgid "Socket file descriptor for peer-to-peer communication"
 msgstr "Anaglam n ufaylu socket i teywalt seg yixef ɣer yixef"
 
-#: src/extractor/tracker-main.c:86
+#: src/extractor/tracker-main.c:87 src/indexer/tracker-endpoint-helper.c:41
 msgid "FD"
 msgstr "FD"
 
-#: src/extractor/tracker-main.c:257
+#: src/extractor/tracker-main.c:90
+#, fuzzy
+#| msgid "File to extract metadata for"
+msgid "Filesystem root of the extracted data"
+msgstr "Afaylu i tussfa n yiɣefisefka i"
+
+#: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Ulac iɣefisefka neɣ izegrar n umassaf i usefrek i wawway n ufaylu-a"
 
-#: src/extractor/tracker-main.c:265
+#: src/extractor/tracker-main.c:270
 msgid "Metadata extraction failed"
 msgstr "Tussfa n yiɣefisefka tecceḍ"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:327
+#: src/extractor/tracker-main.c:333
 msgid "— Extract file meta data"
 msgstr "— Ssef iɣefisefka n ufaylu"
 
-#: src/extractor/tracker-main.c:341
+#: src/extractor/tracker-main.c:347
 msgid "Filename and mime type must be provided together"
 msgstr "Isem n ufaylu d wanaw n MIME ilaq ad d-ttwamuddent akken"
 
-#: src/indexer/tracker-application.c:50
+#: src/indexer/tracker-application.c:57
 msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 "Yettwaselkam alamma meṛṛa idgan yettusewlen ad ttwasmitren, syen ad iffeɣ"
 
-#: src/indexer/tracker-application.c:54
+#: src/indexer/tracker-application.c:61
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Yessenqad ma yella AFAYLU yewjed i wakken ad yettwassef almend n uswel"
 
-#: src/indexer/tracker-application.c:58
+#: src/indexer/tracker-application.c:65
 msgid "Avoids changes in the filesystem"
 msgstr "Wexxer i yisenfal deg unagraw n yifuyla"
 
-#: src/indexer/tracker-application.c:589
+#: src/indexer/tracker-application.c:1268
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Taɣawsa n yisefka \"%s\" tella yakan"
 
-#: src/indexer/tracker-application.c:590
+#: src/indexer/tracker-application.c:1269
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Taɣawsa n yisefka \"%s\" ulac-itt"
 
-#: src/indexer/tracker-application.c:617
+#: src/indexer/tracker-application.c:1295
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Akaram amaraw \"%s\" UR issaweḍ ARA ad yettusmiter (almend n yimsizedgen)"
 
-#: src/indexer/tracker-application.c:623
+#: src/indexer/tracker-application.c:1301
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Akaram amaraw \"%s\" UR issaweḍ ARA ad yettusmiter (almend n yimsizedgen)"
 
-#: src/indexer/tracker-application.c:629
+#: src/indexer/tracker-application.c:1307
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -862,29 +852,37 @@ msgstr ""
 "Akaram amaraw \"%s\" UR issaweḍ ARA ad yettusmiter (almend n yimsizedgen n "
 "ugbur)"
 
-#: src/indexer/tracker-application.c:644
+#: src/indexer/tracker-application.c:1322
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Akaram UR issaweḍ ARA ad yettusmiter (almend n yimsizedgen)"
 
-#: src/indexer/tracker-application.c:648
+#: src/indexer/tracker-application.c:1326
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Afaylu UR issaweḍ ARA ad yettusmiter (almend n yimsizedgen)"
 
-#: src/indexer/tracker-application.c:651
+#: src/indexer/tracker-application.c:1329
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Afaylu UR issaweḍ ARA ad yettusmiter (d afyu yeffren)"
 
-#: src/indexer/tracker-application.c:653
+#: src/indexer/tracker-application.c:1331
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Afaylu UR issaweḍ ARA ad yettusmiter (mačči d akaram i yettwasmitren)"
 
-#: src/indexer/tracker-application.c:661
+#: src/indexer/tracker-application.c:1339
 msgid "Directory is eligible to be indexed"
 msgstr "Akaram ur issaweḍ ara ad yettusmiter"
 
-#: src/indexer/tracker-application.c:662
+#: src/indexer/tracker-application.c:1340
 msgid "File is eligible to be indexed"
 msgstr "Afaylu ur issaweḍ ara ad yettusmiter"
+
+#: src/indexer/tracker-endpoint-helper.c:36
+msgid "Database location"
+msgstr ""
+
+#: src/indexer/tracker-endpoint-helper.c:37
+msgid "DIR"
+msgstr ""
 
 #: src/writeback/tracker-main.c:54
 msgid ""
