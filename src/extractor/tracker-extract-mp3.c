@@ -96,6 +96,7 @@ typedef struct {
 	gint track_count;
 	gint set_number;
 	gint set_count;
+	gchar *set_subtitle;
 	gchar *acoustid_fingerprint;
 	gchar *mb_recording_id;
 	gchar *mb_track_id;
@@ -148,6 +149,7 @@ typedef enum {
 	ID3V24_TPUB,
 	ID3V24_TRCK,
 	ID3V24_TPOS,
+	ID3V24_TSST,
 	ID3V24_TXXX,
 	ID3V24_TYER,
 	ID3V24_UFID,
@@ -194,6 +196,7 @@ typedef struct {
 	gint track_count;
 	gint set_number;
 	gint set_count;
+	const gchar *set_subtitle;
 	const gchar *acoustid_fingerprint;
 	const gchar *mb_recording_id;
 	const gchar *mb_track_id;
@@ -252,6 +255,7 @@ static const struct {
 	{ "TPOS", ID3V24_TPOS },
 	{ "TPUB", ID3V24_TPUB },
 	{ "TRCK", ID3V24_TRCK },
+	{ "TSST", ID3V24_TSST },
 	{ "TXXX", ID3V24_TXXX },
 	{ "TYER", ID3V24_TYER },
 	{ "UFID", ID3V24_UFID },
@@ -584,6 +588,7 @@ id3v2tag_free (id3v2tag *tags)
 	g_free (tags->title1);
 	g_free (tags->title2);
 	g_free (tags->title3);
+	g_free (tags->set_subtitle);
 	g_free (tags->acoustid_fingerprint);
 	g_free (tags->mb_recording_id);
 	g_free (tags->mb_track_id);
@@ -1784,6 +1789,9 @@ get_id3v24_tags (id3v24frame           frame,
 
 			break;
 		}
+		case ID3V24_TSST:
+			tag->set_subtitle = word;
+			break;
 		case ID3V24_TYER:
 			if (atoi (word) > 0) {
 				tag->recording_time = tracker_date_guess (word);
@@ -2807,6 +2815,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		md.set_count = md.id3v22.set_count;
 	}
 
+	if (md.id3v24.set_subtitle) {
+		md.set_subtitle = tracker_coalesce_strip (1, md.id3v24.set_subtitle);
+	}
+
 	if (md.artist_name) {
 		md.artist = tracker_extract_new_artist (md.artist_name);
 	}
@@ -2845,6 +2857,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		                                                   album_artist,
 		                                                   md.set_number > 0 ? md.set_number : 1,
 		                                                   md.recording_time);
+		if (md.set_subtitle) {
+			tracker_resource_set_string (album_disc, "nie:title", md.set_subtitle);
+		}
 
 		md.album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
 
