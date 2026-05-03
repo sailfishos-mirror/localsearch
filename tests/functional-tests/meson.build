@@ -65,6 +65,11 @@ if avformat.found() or libmediainfo.found()
   extractor_tests += 'audio/vorbis'
 endif
 
+if have_mediainfo_with_consistent_disc_info
+  extractor_tests += 'audio/flac-disc-subtitle'
+  extractor_tests += 'audio/vorbis-disc-subtitle'
+endif
+
 if libjpeg.found() and exempi.found() and gexiv2.found()
   extractor_tests += [
     'images/jpeg-no-metadata',
