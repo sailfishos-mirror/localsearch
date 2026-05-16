@@ -545,15 +545,16 @@ map_to_album (TrackerResource *resource,
               MediaInfo       *ctx,
               gpointer         user_data)
 {
-	g_autofree char *disc_nr_str = NULL, *album_artist_str = NULL;
+	g_autofree char *disc_nr_str = NULL, *disc_title_str = NULL, *album_artist_str = NULL;
 	g_autoptr (TrackerResource) album_disc = NULL, artist = NULL;
 	const char *content_created;
 	TrackerResource *album;
 	gint64 disc_number;
 
-	disc_nr_str = ctx_get_property (ctx, Stream_General, L"Part");
+	disc_nr_str = ctx_get_property (ctx, Stream_General, L"Part/Position");
 	if (!disc_nr_str || sscanf (disc_nr_str, "%" G_GINT64_MODIFIER "u", &disc_number) != 1)
 		disc_number = 1;
+	disc_title_str = ctx_get_property (ctx, Stream_General, L"Part");
 
 	album_artist_str = ctx_get_property (ctx, Stream_General, L"Album/Performer");
 	if (!album_artist_str)
@@ -567,6 +568,8 @@ map_to_album (TrackerResource *resource,
 	                                                   artist,
 	                                                   disc_number,
 	                                                   content_created);
+	if (disc_title_str)
+		tracker_resource_set_string (album_disc, "nie:title", disc_title_str);
 
 	album = tracker_resource_get_first_relation (album_disc, "nmm:albumDiscAlbum");
 

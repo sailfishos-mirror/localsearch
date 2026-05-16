@@ -3,6 +3,8 @@ python = find_program('python3')
 subdir('mockvolumemonitor')
 subdir('test-extractor-modules')
 
+have_mediainfo_with_consistent_disc_info = libmediainfo.found() and libmediainfo.version() >= '26.05'
+
 # Configure functional tests to run completely from source tree.
 testconf = configuration_data()
 
@@ -20,9 +22,10 @@ if have_tracker_extract
   testconf.set('TEST_EXTRACTORS_DIR', uninstalled_tracker_extract_dir)
   testconf.set('TRACKER_EXTRACT_PATH', uninstalled_tracker_extract_path)
 endif
- 
+
 if have_tracker_writeback
   testconf.set('TEST_WRITEBACK_MODULES_DIR', tracker_uninstalled_writeback_modules_dir)
+  testconf.set('TEST_HAVE_MEDIAINFO_WITH_CONSISTENT_DISC_INFO', have_mediainfo_with_consistent_disc_info.to_string())
 endif
 
 subdir('config')

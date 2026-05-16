@@ -67,6 +67,10 @@ def tap_protocol_enabled():
     return config["TEST_TAP_ENABLED"]
 
 
+def have_mediainfo_with_consistent_disc_info() -> bool:
+    return config["TEST_HAVE_MEDIAINFO_WITH_CONSISTENT_DISC_INFO"]
+
+
 # This path is used for test data for tests which expect filesystem monitoring
 # to work. For this reason we must avoid it being on a tmpfs filesystem. Note
 # that this MUST NOT be a hidden directory, as Tracker is hardcoded to ignore
