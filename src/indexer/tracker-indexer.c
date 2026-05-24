@@ -1152,7 +1152,7 @@ item_move (TrackerIndexer *indexer,
 	}
 
 	if (tracker_indexing_tree_file_is_root (indexer->indexing_tree, dest_file)) {
-		data_source = tracker_indexer_get_identifier (indexer, dest_file);
+		data_source = tracker_indexer_get_content_uri (indexer, dest_file);
 	} else {
 		GFile *root;
 
@@ -1160,7 +1160,7 @@ item_move (TrackerIndexer *indexer,
 		                                       dest_file, NULL, NULL);
 
 		if (root)
-			data_source = tracker_indexer_get_identifier (indexer, root);
+			data_source = tracker_indexer_get_content_uri (indexer, root);
 	}
 
 	if (!data_source)
@@ -1697,8 +1697,8 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 }
 
 const gchar *
-tracker_indexer_get_identifier (TrackerIndexer *indexer,
-                                GFile          *file)
+tracker_indexer_get_content_uri (TrackerIndexer *indexer,
+                                 GFile          *file)
 {
 	g_autoptr (GFileInfo) info = NULL;
 	gchar *str;

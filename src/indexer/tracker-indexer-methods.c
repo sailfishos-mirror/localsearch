@@ -41,14 +41,14 @@ indexer_add_to_datasource (TrackerIndexer  *indexer,
 	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-		datasource_uri = tracker_indexer_get_identifier (indexer, file);
+		datasource_uri = tracker_indexer_get_content_uri (indexer, file);
 	} else {
 		GFile *root;
 
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 
 		if (root)
-			datasource_uri = tracker_indexer_get_identifier (indexer, root);
+			datasource_uri = tracker_indexer_get_content_uri (indexer, root);
 	}
 
 	if (datasource_uri)
@@ -101,7 +101,7 @@ create_folder_information_element (TrackerIndexer *indexer,
 	g_autofree char *uri = NULL;
 
 	/* Preserve URN for nfo:Folders */
-	urn = tracker_indexer_get_identifier (indexer, file);
+	urn = tracker_indexer_get_content_uri (indexer, file);
 	resource = tracker_resource_new (urn);
 
 	tracker_resource_set_string (resource, "nie:mimeType", DIRECTORY_MIME);
@@ -131,7 +131,7 @@ create_text_file_information_element (TrackerIndexer *indexer,
 	const gchar *urn;
 	int i;
 
-	urn = tracker_indexer_get_identifier (indexer, file);
+	urn = tracker_indexer_get_content_uri (indexer, file);
 	resource = tracker_resource_new (urn);
 
 	rdf_types = tracker_extract_module_manager_get_rdf_types (mime_type);
@@ -152,7 +152,7 @@ create_empty_information_element (TrackerIndexer *indexer,
 	TrackerResource *resource;
 	const gchar *urn;
 
-	urn = tracker_indexer_get_identifier (indexer, file);
+	urn = tracker_indexer_get_content_uri (indexer, file);
 	resource = tracker_resource_new (urn);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
@@ -205,7 +205,7 @@ tracker_indexer_process_file (TrackerIndexer      *indexer,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_indexer_get_identifier (indexer, parent);
+	parent_urn = tracker_indexer_get_content_uri (indexer, parent);
 
 	if (parent_urn) {
 		tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_urn);
@@ -283,7 +283,7 @@ tracker_indexer_process_file (TrackerIndexer      *indexer,
 		g_autoptr (TrackerResource) folder = NULL;
 		const char *urn = NULL;
 
-		urn = tracker_indexer_get_identifier (indexer, file);
+		urn = tracker_indexer_get_content_uri (indexer, file);
 
 		folder = tracker_resource_new (urn);
 		tracker_resource_set_uri (folder, "rdf:type", "nfo:Folder");

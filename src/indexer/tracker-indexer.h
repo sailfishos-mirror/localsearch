@@ -45,8 +45,8 @@ TrackerIndexer * tracker_indexer_new (TrackerSparqlConnection *connection,
 TrackerIndexingTree * tracker_indexer_get_indexing_tree (TrackerIndexer *indexer);
 
 /* URNs */
-const gchar * tracker_indexer_get_identifier (TrackerIndexer *indexer,
-                                              GFile          *file);
+const gchar * tracker_indexer_get_content_uri (TrackerIndexer *indexer,
+                                               GFile          *file);
 
 char * tracker_indexer_get_file_resource_uri (TrackerIndexer *indexer,
                                               GFile          *file);
