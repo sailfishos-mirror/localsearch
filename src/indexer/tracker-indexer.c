@@ -1000,18 +1000,16 @@ sparql_buffer_flush_cb (GObject      *object,
 
 static void
 item_add_or_update (TrackerIndexer *indexer,
-                    GFile          *file,
-                    GFileInfo      *file_info,
-                    gboolean        attributes_update,
+                    QueueEvent     *event,
                     gboolean        create)
 {
 	g_autoptr (GFileInfo) info = NULL;
 	g_autofree char *uri = NULL;
 
-	if (file_info) {
-		g_set_object (&info, file_info);
+	if (event->info) {
+		g_set_object (&info, event->info);
 	} else {
-		info = g_file_query_info (file,
+		info = g_file_query_info (event->file,
 		                          INDEXER_FILE_ATTRIBUTES,
 		                          G_FILE_QUERY_INFO_NOFOLLOW_SYMLINKS,
 		                          NULL, NULL);
@@ -1020,96 +1018,93 @@ item_add_or_update (TrackerIndexer *indexer,
 	}
 
 	if (!create) {
-		tracker_lru_remove (indexer->urn_lru, file);
+		tracker_lru_remove (indexer->urn_lru, event->file);
 	}
 
-	uri = g_file_get_uri (file);
+	uri = g_file_get_uri (event->file);
 
-	if (!attributes_update) {
+	if (!event->attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
-		tracker_indexer_process_file (indexer, file, info,
+		tracker_indexer_process_file (indexer, event->file, info,
 		                              indexer->sparql_buffer, create);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
-		tracker_indexer_process_file_attributes (indexer, file, info,
+		tracker_indexer_process_file_attributes (indexer, event->file, info,
 		                                         indexer->sparql_buffer);
 	}
 }
 
 static void
 item_remove (TrackerIndexer *indexer,
-             GFile          *file,
-             gboolean        is_dir)
+             QueueEvent     *event)
 {
 	g_autofree char *uri = NULL;
 
-	uri = g_file_get_uri (file);
+	uri = g_file_get_uri (event->file);
 
 	TRACKER_NOTE (MINER_FS_EVENTS,
 	              g_message ("Removing item: '%s' (Deleted from filesystem or no longer monitored)", uri));
 
-	if (is_dir) {
+	if (event->is_dir) {
 		tracker_sparql_buffer_log_delete_content (indexer->sparql_buffer,
-		                                          file);
+		                                          event->file);
 		tracker_lru_remove_foreach (indexer->urn_lru,
 		                            (GEqualFunc) g_file_has_prefix,
-		                            file);
+		                            event->file);
 	}
 
-	tracker_sparql_buffer_log_delete (indexer->sparql_buffer, file);
-	tracker_lru_remove (indexer->urn_lru, file);
+	tracker_sparql_buffer_log_delete (indexer->sparql_buffer, event->file);
+	tracker_lru_remove (indexer->urn_lru, event->file);
 }
 
 static void
 item_move (TrackerIndexer *indexer,
-           GFile          *dest_file,
-           GFile          *source_file,
-           gboolean        is_dir)
+           QueueEvent     *event)
 {
 	g_autofree char *uri = NULL, *source_uri = NULL;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean source_recursive, dest_recursive;
 	const gchar *data_source = NULL;
 
-	uri = g_file_get_uri (dest_file);
-	source_uri = g_file_get_uri (source_file);
+	uri = g_file_get_uri (event->dest_file);
+	source_uri = g_file_get_uri (event->file);
 
 	TRACKER_NOTE (MINER_FS_EVENTS,
 	              g_message ("Moving item from '%s' to '%s'",
 	                         source_uri, uri));
 
-	tracker_indexing_tree_get_root (indexer->indexing_tree, source_file, NULL, &source_flags);
+	tracker_indexing_tree_get_root (indexer->indexing_tree, event->file, NULL, &source_flags);
 	source_recursive = (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
-	tracker_indexing_tree_get_root (indexer->indexing_tree, dest_file, NULL, &flags);
+	tracker_indexing_tree_get_root (indexer->indexing_tree, event->dest_file, NULL, &flags);
 	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
-	if (is_dir) {
+	if (event->is_dir) {
 		tracker_lru_remove_foreach (indexer->urn_lru,
 		                            (GEqualFunc) g_file_has_prefix,
-		                            source_file);
+		                            event->file);
 	}
 
-	tracker_lru_remove (indexer->urn_lru, source_file);
-	tracker_lru_remove (indexer->urn_lru, dest_file);
+	tracker_lru_remove (indexer->urn_lru, event->file);
+	tracker_lru_remove (indexer->urn_lru, event->dest_file);
 
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
 	 */
-	if (is_dir && source_recursive && !dest_recursive) {
+	if (event->is_dir && source_recursive && !dest_recursive) {
 		TRACKER_NOTE (MINER_FS_EVENTS,
 		              g_message ("Removing children for item: '%s' (No longer monitored)", source_uri));
 
 		tracker_sparql_buffer_log_delete_content (indexer->sparql_buffer,
-		                                          source_file);
+		                                          event->file);
 	}
 
-	if (tracker_indexing_tree_file_is_root (indexer->indexing_tree, dest_file)) {
-		data_source = tracker_indexer_get_content_uri (indexer, dest_file);
+	if (tracker_indexing_tree_file_is_root (indexer->indexing_tree, event->dest_file)) {
+		data_source = tracker_indexer_get_content_uri (indexer, event->dest_file);
 	} else {
 		GFile *root;
 
 		root = tracker_indexing_tree_get_root (indexer->indexing_tree,
-		                                       dest_file, NULL, NULL);
+		                                       event->dest_file, NULL, NULL);
 
 		if (root)
 			data_source = tracker_indexer_get_content_uri (indexer, root);
@@ -1119,20 +1114,21 @@ item_move (TrackerIndexer *indexer,
 		return;
 
 	tracker_sparql_buffer_log_move (indexer->sparql_buffer,
-	                                source_file, dest_file,
+	                                event->file, event->dest_file,
 	                                data_source);
 
-	if (is_dir && source_recursive && dest_recursive) {
+	if (event->is_dir && source_recursive && dest_recursive) {
 		tracker_sparql_buffer_log_move_content (indexer->sparql_buffer,
-		                                        source_file, dest_file);
+		                                        event->file,
+		                                        event->dest_file);
 	}
 }
 
 static void
 item_finish_directory (TrackerIndexer *indexer,
-                       GFile          *file)
+                       QueueEvent     *event)
 {
-	tracker_indexer_finish_directory (indexer, file, indexer->sparql_buffer);
+	tracker_indexer_finish_directory (indexer, event->file, indexer->sparql_buffer);
 }
 
 static gboolean
@@ -1163,55 +1159,15 @@ remove_items_by_file_foreach (gpointer key,
 	        g_file_has_prefix (file, prefix));
 }
 
-static void
-item_queue_get_next_file (TrackerIndexer           *indexer,
-                          GFile                   **file,
-                          GFile                   **source_file,
-                          GFileInfo               **info,
-                          TrackerIndexerEventType  *type,
-                          gboolean                 *attributes_update,
-                          gboolean                 *is_dir)
-{
-	QueueEvent *event;
-
-	*file = NULL;
-	*source_file = NULL;
-
-	event = tracker_priority_queue_pop (indexer->items, NULL);
-
-	if (event) {
-		if (event->type == TRACKER_INDEXER_EVENT_MOVED) {
-			g_set_object (file, event->dest_file);
-			g_set_object (source_file, event->file);
-		} else {
-			g_set_object (file, event->file);
-		}
-
-		*type = event->type;
-		*attributes_update = event->attributes_update;
-		*is_dir = event->is_dir;
-		g_set_object (info, event->info);
-
-		maybe_remove_file_event_node (indexer, event);
-		queue_event_free (event);
-	}
-}
-
 static gboolean
 miner_handle_next_item (TrackerIndexer *indexer)
 {
-	GFile *file = NULL;
-	GFile *source_file = NULL;
 	gboolean keep_processing = TRUE;
-	gboolean attributes_update = FALSE;
-	gboolean is_dir = FALSE;
-	TrackerIndexerEventType type;
-	GFileInfo *info = NULL;
+	QueueEvent *event;
 
-	item_queue_get_next_file (indexer, &file, &source_file, &info, &type,
-	                          &attributes_update, &is_dir);
+	event = tracker_priority_queue_pop (indexer->items, NULL);
 
-	if (file == NULL) {
+	if (!event) {
 		if (!tracker_file_notifier_is_active (indexer->file_notifier)) {
 			if (!indexer->flushing &&
 			    tracker_task_pool_get_size (TRACKER_TASK_POOL (indexer->sparql_buffer)) == 0) {
@@ -1230,22 +1186,24 @@ miner_handle_next_item (TrackerIndexer *indexer)
 		return FALSE;
 	}
 
+	maybe_remove_file_event_node (indexer, event);
+
 	/* Handle queues */
-	switch (type) {
+	switch (event->type) {
 	case TRACKER_INDEXER_EVENT_MOVED:
-		item_move (indexer, file, source_file, is_dir);
+		item_move (indexer, event);
 		break;
 	case TRACKER_INDEXER_EVENT_DELETED:
-		item_remove (indexer, file, is_dir);
+		item_remove (indexer, event);
 		break;
 	case TRACKER_INDEXER_EVENT_CREATED:
-		item_add_or_update (indexer, file, info, FALSE, TRUE);
+		item_add_or_update (indexer, event, TRUE);
 		break;
 	case TRACKER_INDEXER_EVENT_UPDATED:
-		item_add_or_update (indexer, file, info, attributes_update, FALSE);
+		item_add_or_update (indexer, event, FALSE);
 		break;
 	case TRACKER_INDEXER_EVENT_FINISH_DIRECTORY:
-		item_finish_directory (indexer, file);
+		item_finish_directory (indexer, event);
 		break;
 	default:
 		g_assert_not_reached ();
@@ -1267,9 +1225,7 @@ miner_handle_next_item (TrackerIndexer *indexer)
 
 	check_notifier_high_water (indexer);
 
-	g_clear_object (&file);
-	g_clear_object (&source_file);
-	g_clear_object (&info);
+	queue_event_free (event);
 
 	return keep_processing;
 }
