@@ -945,7 +945,8 @@ miner_resumed (TrackerMiner *miner)
 	/* Only set up queue handler if we have items waiting to be
 	 * processed.
 	 */
-	if (tracker_miner_fs_has_items_to_process (fs))
+	if (tracker_file_notifier_is_active (fs->file_notifier) ||
+	    !tracker_priority_queue_is_empty (fs->items))
 		queue_handler_maybe_set_up (fs);
 }
 
@@ -1776,33 +1777,6 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 	tracker_lru_add (fs->urn_lru, g_object_ref (file), str);
 
 	return str;
-}
-
-/**
- * tracker_miner_fs_has_items_to_process:
- * @fs: a #TrackerMinerFS
- *
- * The @fs keeps many priority queus for content it is processing.
- * This function returns %TRUE if the sum of all (or any) priority
- * queues is more than 0. This includes items deleted, created,
- * updated, moved or being written back.
- *
- * Returns: %TRUE if there are items to process in the internal
- * queues, otherwise %FALSE.
- *
- * Since: 0.10
- **/
-gboolean
-tracker_miner_fs_has_items_to_process (TrackerMinerFS *fs)
-{
-	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), FALSE);
-
-	if (tracker_file_notifier_is_active (fs->file_notifier) ||
-	    !tracker_priority_queue_is_empty (fs->items)) {
-		return TRUE;
-	}
-
-	return FALSE;
 }
 
 /**

@@ -46,9 +46,6 @@ const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
 char * tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
                                                GFile          *file);
 
-/* Progress */
-gboolean              tracker_miner_fs_has_items_to_process  (TrackerMinerFS  *fs);
-
 G_END_DECLS
 
 #endif /* __LIBTRACKER_MINER_MINER_FS_H__ */
