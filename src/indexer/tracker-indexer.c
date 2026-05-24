@@ -58,15 +58,6 @@ typedef struct {
 	GList *queue_node;
 } QueueEvent;
 
-typedef struct {
-	GFile *file;
-	gchar *urn;
-	gint priority;
-	GCancellable *cancellable;
-	TrackerMiner *miner;
-	TrackerTask *task;
-} UpdateProcessingTaskContext;
-
 struct _TrackerIndexer {
 	TrackerMiner parent_instance;
 
