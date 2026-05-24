@@ -98,18 +98,11 @@ struct _TrackerIndexer {
 	gdouble throttle;
 
 	/* Status */
-	GTimer *timer;
-	GTimer *extraction_timer;
-
 	guint low_battery_pause : 1;
 
 	guint active : 1;
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
-
-	guint timer_stopped : 1;    /* TRUE if main timer is stopped */
-	guint extraction_timer_stopped : 1; /* TRUE if the extraction
-	                                     * timer is stopped */
 
 	guint status_idle_id;
 	guint grace_period_timeout_id;
@@ -300,15 +293,6 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 static void
 tracker_indexer_init (TrackerIndexer *indexer)
 {
-	indexer->timer = g_timer_new ();
-	indexer->extraction_timer = g_timer_new ();
-
-	g_timer_stop (indexer->timer);
-	g_timer_stop (indexer->extraction_timer);
-
-	indexer->timer_stopped = TRUE;
-	indexer->extraction_timer_stopped = TRUE;
-
 	indexer->items = tracker_priority_queue_new ();
 	indexer->items_by_file = g_hash_table_new_full (g_file_hash,
 	                                                (GEqualFunc) g_file_equal,
@@ -720,9 +704,6 @@ fs_finalize (GObject *object)
 {
 	TrackerIndexer *indexer = TRACKER_INDEXER (object);
 
-	g_timer_destroy (indexer->timer);
-	g_timer_destroy (indexer->extraction_timer);
-
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
 	g_clear_pointer (&indexer->urn_lru, tracker_lru_unref);
@@ -891,11 +872,6 @@ miner_started (TrackerMiner *miner)
 {
 	TrackerIndexer *indexer = TRACKER_INDEXER (miner);
 
-	if (indexer->timer_stopped) {
-		g_timer_start (indexer->timer);
-		indexer->timer_stopped = FALSE;
-	}
-
 	tracker_file_notifier_start (indexer->file_notifier);
 	init_index_roots (indexer);
 }
@@ -930,12 +906,6 @@ miner_resumed (TrackerMiner *miner)
 static void
 process_stop (TrackerIndexer *indexer)
 {
-	g_timer_stop (indexer->timer);
-	g_timer_stop (indexer->extraction_timer);
-
-	indexer->timer_stopped = TRUE;
-	indexer->extraction_timer_stopped = TRUE;
-
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
 	set_active (indexer, FALSE);
@@ -1240,19 +1210,6 @@ miner_handle_next_item (TrackerIndexer *indexer)
 
 	item_queue_get_next_file (indexer, &file, &source_file, &info, &type,
 	                          &attributes_update, &is_dir);
-
-	if (indexer->timer_stopped) {
-		g_timer_start (indexer->timer);
-		indexer->timer_stopped = FALSE;
-	}
-
-	if (file == NULL && !indexer->extraction_timer_stopped) {
-		g_timer_stop (indexer->extraction_timer);
-		indexer->extraction_timer_stopped = TRUE;
-	} else if (file != NULL && indexer->extraction_timer_stopped) {
-		g_timer_continue (indexer->extraction_timer);
-		indexer->extraction_timer_stopped = FALSE;
-	}
 
 	if (file == NULL) {
 		if (!tracker_file_notifier_is_active (indexer->file_notifier)) {
