@@ -24,7 +24,7 @@
 #include "tracker-error-report.h"
 #include "tracker-extract-watchdog.h"
 #include "tracker-indexer.h"
-#include "tracker-miner-files-methods.h"
+#include "tracker-indexer-methods.h"
 #include "tracker-monitor.h"
 #include "tracker-utils.h"
 #include "tracker-priority-queue.h"
@@ -1075,12 +1075,12 @@ item_add_or_update (TrackerIndexer *indexer,
 
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
-		tracker_miner_files_process_file (indexer, file, info,
-		                                  indexer->sparql_buffer, create);
+		tracker_indexer_process_file (indexer, file, info,
+		                              indexer->sparql_buffer, create);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
-		tracker_miner_files_process_file_attributes (indexer, file, info,
-		                                             indexer->sparql_buffer);
+		tracker_indexer_process_file_attributes (indexer, file, info,
+		                                         indexer->sparql_buffer);
 	}
 }
 
@@ -1180,7 +1180,7 @@ static void
 item_finish_directory (TrackerIndexer *indexer,
                        GFile          *file)
 {
-	tracker_miner_files_finish_directory (indexer, file, indexer->sparql_buffer);
+	tracker_indexer_finish_directory (indexer, file, indexer->sparql_buffer);
 }
 
 static gboolean
@@ -1723,7 +1723,7 @@ tracker_indexer_get_identifier (TrackerIndexer *indexer,
 	if (!tracker_indexing_tree_file_is_indexable (indexer->indexing_tree, file, info))
 		return NULL;
 
-	str = tracker_miner_files_get_content_identifier (indexer, file, info);
+	str = tracker_indexer_get_content_identifier (indexer, file, info);
 	tracker_lru_add (indexer->urn_lru, g_object_ref (file), str);
 
 	return str;

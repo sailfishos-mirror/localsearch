@@ -1,5 +1,5 @@
 files_extract = files(
-    'tracker-miner-files-methods.c',
+    'tracker-indexer-methods.c',
     'tracker-indexing-tree-methods.c',
 )
 

@@ -22,7 +22,7 @@
 
 #include <gio/gunixmounts.h>
 
-#include "tracker-miner-files-methods.h"
+#include "tracker-indexer-methods.h"
 
 #include <tracker-common.h>
 
@@ -177,11 +177,11 @@ get_content_type (GFile *file)
 }
 
 void
-tracker_miner_files_process_file (TrackerIndexer      *indexer,
-                                  GFile               *file,
-                                  GFileInfo           *file_info,
-                                  TrackerSparqlBuffer *buffer,
-                                  gboolean             create)
+tracker_indexer_process_file (TrackerIndexer      *indexer,
+                              GFile               *file,
+                              GFileInfo           *file_info,
+                              TrackerSparqlBuffer *buffer,
+                              gboolean             create)
 {
 	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
 	const gchar *graph = NULL;
@@ -304,10 +304,10 @@ tracker_miner_files_process_file (TrackerIndexer      *indexer,
 }
 
 void
-tracker_miner_files_process_file_attributes (TrackerIndexer      *indexer,
-                                             GFile               *file,
-                                             GFileInfo           *info,
-                                             TrackerSparqlBuffer *buffer)
+tracker_indexer_process_file_attributes (TrackerIndexer      *indexer,
+                                         GFile               *file,
+                                         GFileInfo           *info,
+                                         TrackerSparqlBuffer *buffer)
 {
 	g_autoptr (TrackerResource) resource = NULL, graph_file = NULL;
 	g_autofree gchar *uri = NULL;
@@ -362,9 +362,9 @@ tracker_miner_files_process_file_attributes (TrackerIndexer      *indexer,
 }
 
 void
-tracker_miner_files_finish_directory (TrackerIndexer      *indexer,
-                                      GFile               *file,
-                                      TrackerSparqlBuffer *buffer)
+tracker_indexer_finish_directory (TrackerIndexer      *indexer,
+                                  GFile               *file,
+                                  TrackerSparqlBuffer *buffer)
 {
 	TrackerIndexingTree *indexing_tree;
 	g_autoptr (TrackerResource) resource = NULL, folder_resource = NULL;
@@ -388,9 +388,9 @@ tracker_miner_files_finish_directory (TrackerIndexer      *indexer,
 }
 
 gchar *
-tracker_miner_files_get_content_identifier (TrackerIndexer *indexer,
-                                            GFile          *file,
-                                            GFileInfo      *info)
+tracker_indexer_get_content_identifier (TrackerIndexer *indexer,
+                                        GFile          *file,
+                                        GFileInfo      *info)
 {
 	TrackerIndexingTree *indexing_tree;
 	g_autofree gchar *inode = NULL, *str = NULL, *id = NULL;
