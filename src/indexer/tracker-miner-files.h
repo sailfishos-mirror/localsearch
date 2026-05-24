@@ -31,8 +31,9 @@
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_MINER_FILES tracker_miner_files_get_type()
-G_DECLARE_FINAL_TYPE (TrackerMinerFiles, tracker_miner_files, TRACKER, MINER_FILES, TrackerMinerFS)
+typedef TrackerMinerFS TrackerMinerFiles;
+
+#define TRACKER_MINER_FILES TRACKER_MINER_FS
 
 TrackerMiner * tracker_miner_files_new (TrackerSparqlConnection *connection,
                                         TrackerIndexingTree     *indexing_tree,

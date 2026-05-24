@@ -32,40 +32,7 @@
 G_BEGIN_DECLS
 
 #define TRACKER_TYPE_MINER_FS tracker_miner_fs_get_type()
-G_DECLARE_DERIVABLE_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER, MINER_FS, TrackerMiner)
-
-struct _TrackerMinerFSClass {
-	TrackerMinerClass parent;
-
-	void     (* process_file)             (TrackerMinerFS       *fs,
-	                                       GFile                *file,
-	                                       GFileInfo            *info,
-	                                       TrackerSparqlBuffer  *buffer,
-	                                       gboolean              created);
-	void     (* finished)                 (TrackerMinerFS       *fs);
-	void     (* process_file_attributes)  (TrackerMinerFS       *fs,
-	                                       GFile                *file,
-	                                       GFileInfo            *info,
-	                                       TrackerSparqlBuffer  *buffer);
-	void     (* remove_file)              (TrackerMinerFS       *fs,
-	                                       GFile                *file,
-	                                       TrackerSparqlBuffer  *buffer,
-	                                       gboolean              is_dir);
-	void     (* remove_children)          (TrackerMinerFS       *fs,
-	                                       GFile                *file,
-	                                       TrackerSparqlBuffer  *buffer);
-	void     (* move_file)                (TrackerMinerFS       *fs,
-	                                       GFile                *dest,
-	                                       GFile                *source,
-	                                       TrackerSparqlBuffer  *buffer,
-	                                       gboolean              recursive);
-	void (* finish_directory)             (TrackerMinerFS       *fs,
-	                                       GFile                *folder,
-	                                       TrackerSparqlBuffer  *buffer);
-	gchar * (* get_content_identifier)    (TrackerMinerFS       *fs,
-					       GFile                *file,
-	                                       GFileInfo            *info);
-};
+G_DECLARE_FINAL_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER, MINER_FS, TrackerMiner)
 
 /* Properties */
 TrackerIndexingTree * tracker_miner_fs_get_indexing_tree     (TrackerMinerFS  *fs);

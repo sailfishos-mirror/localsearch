@@ -62,7 +62,6 @@ sources = [
     'tracker-controller.c',
     'tracker-extract-watchdog.c',
     'tracker-main.c',
-    'tracker-miner-files.c',
     'tracker-storage.c',
 ]
 
