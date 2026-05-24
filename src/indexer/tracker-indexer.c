@@ -924,8 +924,8 @@ sparql_buffer_flush_cb (GObject      *object,
                         gpointer      user_data)
 {
 	TrackerIndexer *indexer = user_data;
-	GPtrArray *tasks;
-	GError *error = NULL;
+	g_autoptr (GPtrArray) tasks = NULL;
+	g_autoptr (GError) error = NULL;
 	TrackerTask *task;
 	GFile *task_file;
 	guint i;
@@ -983,9 +983,6 @@ sparql_buffer_flush_cb (GObject      *object,
 	}
 
 	queue_handler_maybe_set_up (indexer);
-
-	g_ptr_array_unref (tasks);
-	g_clear_error (&error);
 }
 
 static void
