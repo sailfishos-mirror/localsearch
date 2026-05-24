@@ -1745,25 +1745,6 @@ tracker_miner_fs_set_throttle (TrackerMinerFS *fs,
 	}
 }
 
-/**
- * tracker_miner_fs_get_throttle:
- * @fs: a #TrackerMinerFS
- *
- * Gets the current throttle value, see
- * tracker_miner_fs_set_throttle() for more details.
- *
- * Returns: a double representing a value between 0.0 and 1.0.
- *
- * Since: 0.8
- **/
-gdouble
-tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
-{
-	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), 0);
-
-	return fs->throttle;
-}
-
 const gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 				 GFile          *file)
@@ -1842,24 +1823,12 @@ tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 	return fs->indexing_tree;
 }
 
-GFile *
-tracker_miner_fs_get_root (TrackerMinerFS *fs)
-{
-	return fs->root;
-}
-
 char *
 tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
                                         GFile          *file)
 {
 	return tracker_file_notifier_get_file_resource_uri (fs->file_notifier,
 	                                                    file);
-}
-
-TrackerErrorReport *
-tracker_miner_fs_get_error_reports (TrackerMinerFS *fs)
-{
-	return fs->error_reports;
 }
 
 TrackerMiner *
