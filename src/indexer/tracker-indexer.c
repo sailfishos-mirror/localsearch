@@ -163,7 +163,6 @@ static void           fs_get_property                     (GObject              
                                                            GParamSpec           *pspec);
 
 static void           miner_started                       (TrackerMiner         *miner);
-static void           miner_stopped                       (TrackerMiner         *miner);
 static void           miner_paused                        (TrackerMiner         *miner);
 static void           miner_resumed                       (TrackerMiner         *miner);
 
@@ -240,7 +239,6 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 	object_class->get_property = fs_get_property;
 
 	miner_class->started = miner_started;
-	miner_class->stopped = miner_stopped;
 	miner_class->paused  = miner_paused;
 	miner_class->resumed = miner_resumed;
 
@@ -900,11 +898,6 @@ miner_started (TrackerMiner *miner)
 
 	tracker_file_notifier_start (indexer->file_notifier);
 	init_index_roots (indexer);
-}
-
-static void
-miner_stopped (TrackerMiner *miner)
-{
 }
 
 static void
