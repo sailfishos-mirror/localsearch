@@ -247,7 +247,7 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 	props[PROP_INDEXING_TREE] =
 		g_param_spec_object ("indexing-tree", NULL, NULL,
 		                     TRACKER_TYPE_INDEXING_TREE,
-		                     G_PARAM_READWRITE |
+		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_MONITOR] =
@@ -271,7 +271,7 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 	props[PROP_ACTIVE] =
 		g_param_spec_boolean ("active", NULL, NULL,
 		                      FALSE,
-		                      G_PARAM_READWRITE |
+		                      G_PARAM_READABLE |
 		                      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
@@ -573,6 +573,16 @@ extractor_lost_timeout_cb (gpointer user_data)
 	return G_SOURCE_REMOVE;
 }
 
+static void
+set_active (TrackerIndexer *indexer,
+            gboolean        active)
+{
+	if (indexer->active == !!active)
+		return;
+
+	indexer->active = !!active;
+	g_object_notify (G_OBJECT (indexer), "active");
+}
 
 static void
 on_extractor_lost (TrackerExtractWatchdog *watchdog,
@@ -595,15 +605,11 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
                      TrackerIndexer         *indexer)
 {
 	if (!tracker_miner_is_paused (TRACKER_MINER (indexer))) {
-		gboolean is_active;
-
-		is_active = g_strcmp0 (status, "Idle") != 0;
-
+		set_active (indexer, g_strcmp0 (status, "Idle") != 0);
 		g_object_set (indexer,
 		              "status", status,
 		              "progress", progress,
 		              "remaining-time", remaining,
-		              "active", is_active,
 		              NULL);
 	}
 }
@@ -849,9 +855,6 @@ fs_set_property (GObject      *object,
 	case PROP_ERROR_REPORTS:
 		indexer->error_reports = g_value_dup_object (value);
 		break;
-	case PROP_ACTIVE:
-		indexer->active = g_value_get_boolean (value);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -867,9 +870,6 @@ fs_get_property (GObject    *object,
 	TrackerIndexer *indexer = TRACKER_INDEXER (object);
 
 	switch (prop_id) {
-	case PROP_INDEXING_TREE:
-		g_value_set_object (value, indexer->indexing_tree);
-		break;
 	case PROP_ACTIVE:
 		g_value_set_boolean (value, indexer->active);
 		break;
@@ -932,17 +932,6 @@ miner_resumed (TrackerMiner *miner)
 	if (tracker_file_notifier_is_active (indexer->file_notifier) ||
 	    !tracker_priority_queue_is_empty (indexer->items))
 		queue_handler_maybe_set_up (indexer);
-}
-
-static void
-set_active (TrackerIndexer *indexer,
-            gboolean        active)
-{
-	if (indexer->active == !!active)
-		return;
-
-	indexer->active = !!active;
-	g_object_notify (G_OBJECT (indexer), "active");
 }
 
 static void
