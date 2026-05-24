@@ -36,7 +36,6 @@
 
 #include "tracker-application.h"
 #include "tracker-controller.h"
-#include "tracker-miner-files.h"
 #include "tracker-files-interface.h"
 
 #include <tinysparql.h>

@@ -23,7 +23,7 @@
 
 #include "tracker-controller.h"
 #include "tracker-dbus-interface.h"
-#include "tracker-miner-files.h"
+#include "tracker-indexer.h"
 
 #ifdef HAVE_MALLOC_TRIM
 #include <malloc.h>
@@ -116,7 +116,6 @@ struct _TrackerApplication
 {
 	GApplication parent_instance;
 
-	TrackerMiner *miner_files;
 	TrackerDBusMiner *indexer_iface;
 	GDBusProxy *systemd_proxy;
 	TrackerMonitor *monitor;
@@ -782,11 +781,11 @@ initialize_main_instance (TrackerApplication  *app,
 
 	if (instance->sparql_conn) {
 		instance->indexing_tree = tracker_indexing_tree_new ();
-		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
-		                                             instance->indexing_tree,
-		                                             app->monitor,
-		                                             error_reports,
-		                                             NULL);
+		instance->indexer = TRACKER_MINER (tracker_indexer_new (instance->sparql_conn,
+		                                                        instance->indexing_tree,
+		                                                        app->monitor,
+		                                                        error_reports,
+		                                                        NULL));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -883,11 +882,11 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 		tracker_controller_register_indexing_tree (app->controller,
 							   instance->indexing_tree);
 
-		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
-		                                             instance->indexing_tree,
-		                                             app->monitor,
-		                                             error_reports,
-		                                             instance->root);
+		instance->indexer = TRACKER_MINER (tracker_indexer_new (instance->sparql_conn,
+		                                                        instance->indexing_tree,
+		                                                        app->monitor,
+		                                                        error_reports,
+		                                                        instance->root));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))

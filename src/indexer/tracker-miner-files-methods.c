@@ -31,25 +31,24 @@
 #define DIRECTORY_MIME "inode/directory"
 
 static void
-miner_files_add_to_datasource (TrackerMinerFiles *mf,
-                               GFile             *file,
-                               TrackerResource   *resource)
+indexer_add_to_datasource (TrackerIndexer  *indexer,
+                           GFile           *file,
+                           TrackerResource *resource)
 {
 	TrackerIndexingTree *indexing_tree;
-	TrackerMinerFS *fs = TRACKER_MINER_FS (mf);
 	const char *datasource_uri = NULL;
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-		datasource_uri = tracker_miner_fs_get_identifier (fs, file);
+		datasource_uri = tracker_indexer_get_identifier (indexer, file);
 	} else {
 		GFile *root;
 
 		root = tracker_indexing_tree_get_root (indexing_tree, file, NULL, NULL);
 
 		if (root)
-			datasource_uri = tracker_miner_fs_get_identifier (fs, root);
+			datasource_uri = tracker_indexer_get_identifier (indexer, root);
 	}
 
 	if (datasource_uri)
@@ -57,15 +56,15 @@ miner_files_add_to_datasource (TrackerMinerFiles *mf,
 }
 
 static void
-miner_files_add_mount_info (TrackerMinerFiles *miner,
-                            TrackerResource   *resource,
-                            GFile             *file)
+indexer_add_mount_info (TrackerIndexer  *indexer,
+                        TrackerResource *resource,
+                        GFile           *file)
 {
 	TrackerIndexingTree *indexing_tree;
 	TrackerDirectoryFlags flags;
 	gboolean is_removable;
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 	tracker_indexing_tree_get_root (indexing_tree, file, NULL, &flags);
 	is_removable = !!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME);
 
@@ -76,12 +75,12 @@ miner_files_add_mount_info (TrackerMinerFiles *miner,
 }
 
 static void
-maybe_add_root_info (TrackerMinerFS  *fs,
+maybe_add_root_info (TrackerIndexer  *indexer,
                      GFile           *file,
                      TrackerResource *resource)
 {
 	TrackerIndexingTree *indexing_tree =
-		tracker_miner_fs_get_indexing_tree (fs);
+		tracker_indexer_get_indexing_tree (indexer);
 
 	if (!tracker_indexing_tree_file_is_root (indexing_tree, file))
 		return;
@@ -93,48 +92,46 @@ maybe_add_root_info (TrackerMinerFS  *fs,
 }
 
 static TrackerResource *
-miner_files_create_folder_information_element (TrackerMinerFiles *miner,
-                                               GFile             *file)
+create_folder_information_element (TrackerIndexer *indexer,
+                                   GFile          *file)
 {
-	TrackerMinerFS *fs = TRACKER_MINER_FS (miner);
 	TrackerResource *resource;
 	TrackerIndexingTree *indexing_tree;
 	const gchar *urn;
 	g_autofree char *uri = NULL;
 
 	/* Preserve URN for nfo:Folders */
-	urn = tracker_miner_fs_get_identifier (fs, file);
+	urn = tracker_indexer_get_identifier (indexer, file);
 	resource = tracker_resource_new (urn);
 
 	tracker_resource_set_string (resource, "nie:mimeType", DIRECTORY_MIME);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:Folder");
 
-	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
+	uri = tracker_indexer_get_file_resource_uri (indexer, file);
 	tracker_resource_set_uri (resource, "nie:isStoredAs", uri);
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (miner));
+	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 
 	if (tracker_indexing_tree_file_is_root (indexing_tree, file)) {
-		maybe_add_root_info (fs, file, resource);
-		miner_files_add_mount_info (miner, resource, file);
+		maybe_add_root_info (indexer, file, resource);
+		indexer_add_mount_info (indexer, resource, file);
 	}
 
 	return resource;
 }
 
 static TrackerResource *
-miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
-                                                  GFile             *file,
-                                                  const gchar       *mime_type)
+create_text_file_information_element (TrackerIndexer *indexer,
+                                      GFile          *file,
+                                      const gchar    *mime_type)
 {
 	TrackerResource *resource;
 	GStrv rdf_types;
 	const gchar *urn;
 	int i;
 
-	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
-	                                       file);
+	urn = tracker_indexer_get_identifier (indexer, file);
 	resource = tracker_resource_new (urn);
 
 	rdf_types = tracker_extract_module_manager_get_rdf_types (mime_type);
@@ -148,15 +145,14 @@ miner_files_create_text_file_information_element (TrackerMinerFiles *miner,
 }
 
 static TrackerResource *
-miner_files_create_empty_information_element (TrackerMinerFiles *miner,
-                                              GFile             *file,
-                                              const gchar       *mime_type)
+create_empty_information_element (TrackerIndexer *indexer,
+                                  GFile          *file,
+                                  const gchar    *mime_type)
 {
 	TrackerResource *resource;
 	const gchar *urn;
 
-	urn = tracker_miner_fs_get_identifier (TRACKER_MINER_FS (miner),
-	                                       file);
+	urn = tracker_indexer_get_identifier (indexer, file);
 	resource = tracker_resource_new (urn);
 	tracker_resource_add_uri (resource, "rdf:type", "nie:InformationElement");
 	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
@@ -181,7 +177,7 @@ get_content_type (GFile *file)
 }
 
 void
-tracker_miner_files_process_file (TrackerMinerFS      *fs,
+tracker_miner_files_process_file (TrackerIndexer      *indexer,
                                   GFile               *file,
                                   GFileInfo           *file_info,
                                   TrackerSparqlBuffer *buffer,
@@ -198,7 +194,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 	mime_type = get_content_type (file);
 
-	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
+	uri = tracker_indexer_get_file_resource_uri (indexer, file);
 
 	modified = g_file_info_get_modification_date_time (file_info);
 	if (!modified)
@@ -209,7 +205,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
 	parent = g_file_get_parent (file);
-	parent_urn = tracker_miner_fs_get_identifier (fs, parent);
+	parent_urn = tracker_indexer_get_identifier (indexer, parent);
 
 	if (parent_urn) {
 		tracker_resource_set_uri (resource, "nfo:belongsToContainer", parent_urn);
@@ -240,7 +236,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 	/* The URL of the DataObject (because IE = DO, this is correct) */
 	tracker_resource_set_string (resource, "nie:url", uri);
 
-	miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, resource);
+	indexer_add_to_datasource (indexer, file, resource);
 
 	if (mime_type)
 		graph = tracker_extract_module_manager_get_graph (mime_type);
@@ -263,28 +259,22 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 
 		tracker_resource_set_int64 (graph_file, "nfo:fileSize",
 		                            g_file_info_get_size (file_info));
-		miner_files_add_to_datasource (TRACKER_MINER_FILES (fs), file, graph_file);
+		indexer_add_to_datasource (indexer, file, graph_file);
 
-		indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+		indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 
 		if (tracker_extract_module_manager_check_fallback_rdf_type (mime_type,
 		                                                            "nfo:PlainTextDocument") &&
 		    !tracker_indexing_tree_file_has_allowed_text_extension (indexing_tree, file)) {
 			/* We let disallowed text files have a shallow document nie:InformationElement */
-			information_element =
-				miner_files_create_text_file_information_element (TRACKER_MINER_FILES (fs),
-				                                                  file, mime_type);
-
+			information_element = create_text_file_information_element (indexer, file, mime_type);
 			tracker_resource_set_string (resource, "tracker:extractorHash",
 			                             tracker_extract_module_manager_get_hash (mime_type));
 		} else {
 			/* Insert only the base nie:InformationElement class, for the extractor to get
 			 * the suitable content identifier.
 			 */
-			information_element =
-				miner_files_create_empty_information_element (TRACKER_MINER_FILES (fs),
-				                                              file,
-				                                              mime_type);
+			information_element = create_empty_information_element (indexer, file, mime_type);
 		}
 
 		tracker_resource_set_take_relation (graph_file, "nie:interpretedAs", information_element);
@@ -293,11 +283,11 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 		g_autoptr (TrackerResource) folder = NULL;
 		const char *urn = NULL;
 
-		urn = tracker_miner_fs_get_identifier (fs, file);
+		urn = tracker_indexer_get_identifier (indexer, file);
 
 		folder = tracker_resource_new (urn);
 		tracker_resource_set_uri (folder, "rdf:type", "nfo:Folder");
-		maybe_add_root_info (fs, file, folder);
+		maybe_add_root_info (indexer, file, folder);
 
 		tracker_resource_set_relation (resource, "nie:interpretedAs", folder);
 		tracker_resource_set_uri (folder, "nie:isStoredAs", uri);
@@ -314,7 +304,7 @@ tracker_miner_files_process_file (TrackerMinerFS      *fs,
 }
 
 void
-tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
+tracker_miner_files_process_file_attributes (TrackerIndexer      *indexer,
                                              GFile               *file,
                                              GFileInfo           *info,
                                              TrackerSparqlBuffer *buffer)
@@ -328,7 +318,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 
 	mime_type = get_content_type (file);
 
-	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
+	uri = tracker_indexer_get_file_resource_uri (indexer, file);
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 
@@ -372,7 +362,7 @@ tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
 }
 
 void
-tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
+tracker_miner_files_finish_directory (TrackerIndexer      *indexer,
                                       GFile               *file,
                                       TrackerSparqlBuffer *buffer)
 {
@@ -381,18 +371,16 @@ tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
 	g_autofree char *uri = NULL;
 	gboolean is_root;
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (fs);
+	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 	is_root = tracker_indexing_tree_file_is_root (indexing_tree, file);
 
-	uri = tracker_miner_fs_get_file_resource_uri (fs, file);
+	uri = tracker_indexer_get_file_resource_uri (indexer, file);
 	resource = tracker_resource_new (uri);
 	tracker_resource_add_uri (resource, "rdf:type", "nfo:FileDataObject");
 	tracker_resource_set_string (resource, "tracker:extractorHash",
 	                             tracker_extract_module_manager_get_hash (DIRECTORY_MIME));
 
-	folder_resource =
-		miner_files_create_folder_information_element (TRACKER_MINER_FILES (fs),
-		                                               file);
+	folder_resource = create_folder_information_element (indexer, file);
 
 	tracker_sparql_buffer_log_folder (buffer, file,
 	                                  is_root,
@@ -400,15 +388,15 @@ tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
 }
 
 gchar *
-tracker_miner_files_get_content_identifier (TrackerMinerFiles *mf,
-                                            GFile             *file,
-                                            GFileInfo         *info)
+tracker_miner_files_get_content_identifier (TrackerIndexer *indexer,
+                                            GFile          *file,
+                                            GFileInfo      *info)
 {
 	TrackerIndexingTree *indexing_tree;
 	g_autofree gchar *inode = NULL, *str = NULL, *id = NULL;
 	const char *root_id;
 
-	indexing_tree = tracker_miner_fs_get_indexing_tree (TRACKER_MINER_FS (mf));
+	indexing_tree = tracker_indexer_get_indexing_tree (indexer);
 	tracker_indexing_tree_get_root (indexing_tree, file, &root_id, NULL);
 	id = g_strdup (root_id);
 

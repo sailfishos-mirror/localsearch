@@ -18,27 +18,25 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#include "tracker-miner-files.h"
+#pragma once
 
-#ifndef __TRACKER_MINER_FILES_METHODS_H__
-#define __TRACKER_MINER_FILES_METHODS_H__
+#include "tracker-indexer.h"
 
-void tracker_miner_files_process_file (TrackerMinerFS      *fs,
+void tracker_miner_files_process_file (TrackerIndexer      *indexer,
                                        GFile               *file,
                                        GFileInfo           *file_info,
                                        TrackerSparqlBuffer *buffer,
                                        gboolean             create);
-void tracker_miner_files_process_file_attributes (TrackerMinerFS      *fs,
+
+void tracker_miner_files_process_file_attributes (TrackerIndexer      *indexer,
                                                   GFile               *file,
                                                   GFileInfo           *info,
                                                   TrackerSparqlBuffer *buffer);
 
-void tracker_miner_files_finish_directory (TrackerMinerFS      *fs,
+void tracker_miner_files_finish_directory (TrackerIndexer      *indexer,
                                            GFile               *file,
                                            TrackerSparqlBuffer *buffer);
 
-gchar * tracker_miner_files_get_content_identifier (TrackerMinerFiles *files,
-                                                    GFile             *file,
-                                                    GFileInfo         *info);
-
-#endif /* __TRACKER_MINER_FILES_METHODS_H__ */
+gchar * tracker_miner_files_get_content_identifier (TrackerIndexer *indexer,
+                                                    GFile          *file,
+                                                    GFileInfo      *info);

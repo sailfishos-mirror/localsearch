@@ -17,8 +17,7 @@
  * Boston, MA  02110-1301, USA.
  */
 
-#ifndef __LIBTRACKER_MINER_MINER_FS_H__
-#define __LIBTRACKER_MINER_MINER_FS_H__
+#pragma once
 
 #include <glib-object.h>
 #include <gio/gio.h>
@@ -28,22 +27,28 @@
 
 #include "tracker-indexing-tree.h"
 #include "tracker-sparql-buffer.h"
+#include "tracker-error-report.h"
+#include "tracker-monitor.h"
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_MINER_FS tracker_miner_fs_get_type()
-G_DECLARE_FINAL_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER, MINER_FS, TrackerMiner)
+#define TRACKER_TYPE_INDEXER tracker_indexer_get_type()
+G_DECLARE_FINAL_TYPE (TrackerIndexer, tracker_indexer, TRACKER, INDEXER, TrackerMiner)
+
+TrackerIndexer * tracker_indexer_new (TrackerSparqlConnection *connection,
+                                      TrackerIndexingTree     *indexing_tree,
+                                      TrackerMonitor          *monitor,
+                                      TrackerErrorReport      *error_reports,
+                                      GFile                   *root);
 
 /* Properties */
-TrackerIndexingTree * tracker_miner_fs_get_indexing_tree     (TrackerMinerFS  *fs);
+TrackerIndexingTree * tracker_indexer_get_indexing_tree (TrackerIndexer *indexer);
 
 /* URNs */
-const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
-                                               GFile          *file);
+const gchar * tracker_indexer_get_identifier (TrackerIndexer *indexer,
+                                              GFile          *file);
 
-char * tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
-                                               GFile          *file);
+char * tracker_indexer_get_file_resource_uri (TrackerIndexer *indexer,
+                                              GFile          *file);
 
 G_END_DECLS
-
-#endif /* __LIBTRACKER_MINER_MINER_FS_H__ */
