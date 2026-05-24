@@ -81,13 +81,9 @@ typedef struct {
 	TrackerTask *task;
 } UpdateProcessingTaskContext;
 
-typedef struct _TrackerMinerFSPrivate TrackerMinerFSPrivate;
-
 struct _TrackerMinerFS {
 	TrackerMiner parent_instance;
-};
 
-struct _TrackerMinerFSPrivate {
 	TrackerPriorityQueue *items;
 	GHashTable *items_by_file;
 
@@ -224,7 +220,7 @@ static void           task_pool_limit_reached_notify_cb       (GObject        *o
                                                                GParamSpec     *pspec,
                                                                gpointer        user_data);
 
-G_DEFINE_TYPE_WITH_PRIVATE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
+G_DEFINE_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER_TYPE_MINER)
 
 #define EVENT_QUEUE_LOG_PREFIX "[Event Queue] "
 
@@ -324,30 +320,27 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 }
 
 static void
-tracker_miner_fs_init (TrackerMinerFS *object)
+tracker_miner_fs_init (TrackerMinerFS *indexer)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (object);
+	indexer->timer = g_timer_new ();
+	indexer->extraction_timer = g_timer_new ();
 
-	priv->timer = g_timer_new ();
-	priv->extraction_timer = g_timer_new ();
+	g_timer_stop (indexer->timer);
+	g_timer_stop (indexer->extraction_timer);
 
-	g_timer_stop (priv->timer);
-	g_timer_stop (priv->extraction_timer);
+	indexer->timer_stopped = TRUE;
+	indexer->extraction_timer_stopped = TRUE;
 
-	priv->timer_stopped = TRUE;
-	priv->extraction_timer_stopped = TRUE;
+	indexer->items = tracker_priority_queue_new ();
+	indexer->items_by_file = g_hash_table_new_full (g_file_hash,
+	                                                (GEqualFunc) g_file_equal,
+	                                                g_object_unref, NULL);
 
-	priv->items = tracker_priority_queue_new ();
-	priv->items_by_file = g_hash_table_new_full (g_file_hash,
-	                                             (GEqualFunc) g_file_equal,
-	                                             g_object_unref, NULL);
-
-	priv->urn_lru = tracker_lru_new (DEFAULT_URN_LRU_SIZE,
-	                                 g_file_hash,
-	                                 (GEqualFunc) g_file_equal,
-	                                 g_object_unref,
-	                                 g_free);
+	indexer->urn_lru = tracker_lru_new (DEFAULT_URN_LRU_SIZE,
+	                                    g_file_hash,
+	                                    (GEqualFunc) g_file_equal,
+	                                    g_object_unref,
+	                                    g_free);
 }
 
 static QueueEvent *
@@ -504,8 +497,6 @@ delete_index_root (TrackerMinerFS *miner,
 static void
 init_index_roots (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	g_autoptr (GList) roots = NULL;
@@ -545,7 +536,7 @@ init_index_roots (TrackerMinerFS *fs)
 		file = g_file_new_for_uri (uri);
 		g_hash_table_add (handled, file);
 
-		if (tracker_indexing_tree_file_is_root (priv->indexing_tree, file)) {
+		if (tracker_indexing_tree_file_is_root (fs->indexing_tree, file)) {
 			/* Directory is indexed and configured */
 			if (is_removable) {
 				set_up_mount_point (fs, file, TRUE, batch);
@@ -564,7 +555,7 @@ init_index_roots (TrackerMinerFS *fs)
 		}
 	}
 
-	roots = tracker_indexing_tree_list_roots (priv->indexing_tree);
+	roots = tracker_indexing_tree_list_roots (fs->indexing_tree);
 
 	for (l = roots; l; l = l->next) {
 		TrackerDirectoryFlags flags;
@@ -573,7 +564,7 @@ init_index_roots (TrackerMinerFS *fs)
 		if (g_hash_table_contains (handled, file))
 			continue;
 
-		tracker_indexing_tree_get_root (priv->indexing_tree, file, NULL, &flags);
+		tracker_indexing_tree_get_root (fs->indexing_tree, file, NULL, &flags);
 
 		if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME))
 			set_up_mount_point (fs, file, TRUE, batch);
@@ -588,22 +579,17 @@ init_index_roots (TrackerMinerFS *fs)
 static void
 check_unextracted (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_debug ("Starting extractor");
-	tracker_extract_watchdog_ensure_started (priv->extract_watchdog);
+	tracker_extract_watchdog_ensure_started (fs->extract_watchdog);
 }
 
 static gboolean
 extractor_lost_timeout_cb (gpointer user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
 	check_unextracted (fs);
-	priv->grace_period_timeout_id = 0;
+	fs->grace_period_timeout_id = 0;
 	return G_SOURCE_REMOVE;
 }
 
@@ -612,15 +598,12 @@ static void
 on_extractor_lost (TrackerExtractWatchdog *watchdog,
                    TrackerMinerFS         *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_debug ("tracker-extract vanished, maybe restarting.");
 
 	/* Give a period of grace before restarting, so we allow replacing
 	 * from eg. a terminal.
 	 */
-	priv->grace_period_timeout_id =
+	fs->grace_period_timeout_id =
 		g_timeout_add_seconds (1, extractor_lost_timeout_cb, fs);
 }
 
@@ -652,25 +635,21 @@ on_extractor_file_error (TrackerExtractWatchdog *watchdog,
                          const char             *extra,
                          TrackerMinerFS         *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autoptr (GFile) file = NULL;
 
-	if (!priv->error_reports)
+	if (!fs->error_reports)
 		return;
 
 	file = g_file_new_for_uri (uri);
-	tracker_error_report_save (priv->error_reports, file, msg, extra);
+	tracker_error_report_save (fs->error_reports, file, msg, extra);
 }
 
 static gboolean
 retry_after_disk_full_cb (gpointer user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
-	priv->resume_after_disk_full_id = 0;
+	fs->resume_after_disk_full_id = 0;
 	tracker_miner_resume (TRACKER_MINER (fs));
 
 	return G_SOURCE_REMOVE;
@@ -691,18 +670,16 @@ set_up_throttle (TrackerMinerFS *fs,
 static void
 check_battery_status (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	gboolean on_battery, on_low_battery;
 	gboolean should_pause = FALSE;
 	gboolean should_throttle = FALSE;
 
-	if (priv->power == NULL) {
+	if (fs->power == NULL) {
 		return;
 	}
 
-	on_low_battery = tracker_power_get_on_low_battery (priv->power);
-	on_battery = tracker_power_get_on_battery (priv->power);
+	on_low_battery = tracker_power_get_on_low_battery (fs->power);
+	on_battery = tracker_power_get_on_battery (fs->power);
 
 	if (!on_battery) {
 		g_debug ("Running on AC power");
@@ -720,10 +697,10 @@ check_battery_status (TrackerMinerFS *fs)
 
 	set_up_throttle (fs, should_throttle);
 
-	if (priv->low_battery_pause == should_pause)
+	if (fs->low_battery_pause == should_pause)
 		return;
 
-	priv->low_battery_pause = should_pause;
+	fs->low_battery_pause = should_pause;
 
 	if (should_pause) {
 		tracker_miner_pause (TRACKER_MINER (fs));
@@ -746,40 +723,36 @@ battery_status_cb (GObject    *object,
 static void
 fs_finalize (GObject *object)
 {
-	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
+	TrackerMinerFS *indexer = TRACKER_MINER_FS (object);
 
-	g_timer_destroy (priv->timer);
-	g_timer_destroy (priv->extraction_timer);
+	g_timer_destroy (indexer->timer);
+	g_timer_destroy (indexer->extraction_timer);
 
-	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
+	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
-	g_clear_pointer (&priv->urn_lru, tracker_lru_unref);
-	g_clear_handle_id (&priv->item_queues_handler_id, g_source_remove);
-	g_clear_handle_id (&priv->grace_period_timeout_id, g_source_remove);
-	g_clear_handle_id (&priv->resume_after_disk_full_id, g_source_remove);
+	g_clear_pointer (&indexer->urn_lru, tracker_lru_unref);
+	g_clear_handle_id (&indexer->item_queues_handler_id, g_source_remove);
+	g_clear_handle_id (&indexer->grace_period_timeout_id, g_source_remove);
+	g_clear_handle_id (&indexer->resume_after_disk_full_id, g_source_remove);
 
-	if (priv->file_notifier)
-		tracker_file_notifier_stop (priv->file_notifier);
+	if (indexer->file_notifier)
+		tracker_file_notifier_stop (indexer->file_notifier);
 
-	g_clear_object (&priv->sparql_buffer);
-	g_hash_table_unref (priv->items_by_file);
+	g_clear_object (&indexer->sparql_buffer);
+	g_hash_table_unref (indexer->items_by_file);
 
-	tracker_priority_queue_foreach (priv->items,
+	tracker_priority_queue_foreach (indexer->items,
 	                                (GFunc) queue_event_free,
 	                                NULL);
-	tracker_priority_queue_unref (priv->items);
+	tracker_priority_queue_unref (indexer->items);
 
-
-
-	g_clear_object (&priv->indexing_tree);
-	g_clear_object (&priv->file_notifier);
-	g_clear_object (&priv->monitor);
-	g_clear_object (&priv->error_reports);
-	g_clear_object (&priv->extract_watchdog);
+	g_clear_object (&indexer->indexing_tree);
+	g_clear_object (&indexer->file_notifier);
+	g_clear_object (&indexer->monitor);
+	g_clear_object (&indexer->error_reports);
+	g_clear_object (&indexer->extract_watchdog);
 #ifdef HAVE_POWER
-	g_clear_object (&priv->power);
+	g_clear_object (&indexer->power);
 #endif
 
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->finalize (object);
@@ -789,68 +762,56 @@ static void
 fs_constructed (GObject *object)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
-	/* NOTE: We have to do this in this order because initables
-	 * are called _AFTER_ constructed and for subclasses that are
-	 * not initables we don't have any other way than to chain
-	 * constructed and root/indexing tree must exist at that
-	 * point.
-	 *
-	 * If priv->indexing_tree is NULL after this function, the
-	 * initiable functions will fail and this class will not be
-	 * created anyway.
-	 */
 	G_OBJECT_CLASS (tracker_miner_fs_parent_class)->constructed (object);
 
-	g_signal_connect (priv->indexing_tree, "directory-added",
+	g_signal_connect (fs->indexing_tree, "directory-added",
 	                  G_CALLBACK (indexing_tree_directory_added),
 	                  object);
-	g_signal_connect (priv->indexing_tree, "directory-removed",
+	g_signal_connect (fs->indexing_tree, "directory-removed",
 	                  G_CALLBACK (indexing_tree_directory_removed),
 	                  object);
 
-	priv->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 BUFFER_POOL_LIMIT,
-	                                                 priv->root);
-	g_signal_connect (priv->sparql_buffer, "notify::limit-reached",
+	fs->sparql_buffer = tracker_sparql_buffer_new (tracker_miner_get_connection (TRACKER_MINER (object)),
+	                                               BUFFER_POOL_LIMIT,
+	                                               fs->root);
+	g_signal_connect (fs->sparql_buffer, "notify::limit-reached",
 	                  G_CALLBACK (task_pool_limit_reached_notify_cb),
 	                  object);
 
 	/* Create the file notifier */
-	priv->file_notifier = tracker_file_notifier_new (priv->indexing_tree,
-	                                                 tracker_miner_get_connection (TRACKER_MINER (object)),
-	                                                 priv->monitor,
-	                                                 priv->root);
+	fs->file_notifier = tracker_file_notifier_new (fs->indexing_tree,
+	                                               tracker_miner_get_connection (TRACKER_MINER (object)),
+	                                               fs->monitor,
+	                                               fs->root);
 
-	g_signal_connect (priv->file_notifier, "file-created",
+	g_signal_connect (fs->file_notifier, "file-created",
 	                  G_CALLBACK (file_notifier_file_created),
 	                  object);
-	g_signal_connect (priv->file_notifier, "file-updated",
+	g_signal_connect (fs->file_notifier, "file-updated",
 	                  G_CALLBACK (file_notifier_file_updated),
 	                  object);
-	g_signal_connect (priv->file_notifier, "file-deleted",
+	g_signal_connect (fs->file_notifier, "file-deleted",
 	                  G_CALLBACK (file_notifier_file_deleted),
 	                  object);
-	g_signal_connect (priv->file_notifier, "file-moved",
+	g_signal_connect (fs->file_notifier, "file-moved",
 	                  G_CALLBACK (file_notifier_file_moved),
 	                  object);
-	g_signal_connect (priv->file_notifier, "directory-finished",
+	g_signal_connect (fs->file_notifier, "directory-finished",
 	                  G_CALLBACK (file_notifier_directory_finished),
 	                  object);
-	g_signal_connect (priv->file_notifier, "finished",
+	g_signal_connect (fs->file_notifier, "finished",
 	                  G_CALLBACK (file_notifier_finished),
 	                  object);
 
 #ifdef HAVE_POWER
-	priv->power = tracker_power_new ();
+	fs->power = tracker_power_new ();
 
-	if (priv->power) {
-		g_signal_connect (priv->power, "notify::on-low-battery",
+	if (fs->power) {
+		g_signal_connect (fs->power, "notify::on-low-battery",
 		                  G_CALLBACK (battery_status_cb),
 		                  object);
-		g_signal_connect (priv->power, "notify::on-battery",
+		g_signal_connect (fs->power, "notify::on-battery",
 		                  G_CALLBACK (battery_status_cb),
 		                  object);
 
@@ -858,15 +819,15 @@ fs_constructed (GObject *object)
 	}
 #endif
 
-	priv->extract_watchdog =
+	fs->extract_watchdog =
 		tracker_extract_watchdog_new (tracker_miner_get_connection (TRACKER_MINER (object)),
-		                              priv->indexing_tree,
-		                              priv->root);
-	g_signal_connect (priv->extract_watchdog, "lost",
+		                              fs->indexing_tree,
+		                              fs->root);
+	g_signal_connect (fs->extract_watchdog, "lost",
 	                  G_CALLBACK (on_extractor_lost), object);
-	g_signal_connect (priv->extract_watchdog, "status",
+	g_signal_connect (fs->extract_watchdog, "status",
 	                  G_CALLBACK (on_extractor_status), object);
-	g_signal_connect (priv->extract_watchdog, "error",
+	g_signal_connect (fs->extract_watchdog, "error",
 	                  G_CALLBACK (on_extractor_file_error), object);
 
 	g_object_set (object,
@@ -883,8 +844,6 @@ fs_set_property (GObject      *object,
                  GParamSpec   *pspec)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
 	switch (prop_id) {
 	case PROP_THROTTLE:
@@ -892,19 +851,19 @@ fs_set_property (GObject      *object,
 		                               g_value_get_double (value));
 		break;
 	case PROP_INDEXING_TREE:
-		priv->indexing_tree = g_value_dup_object (value);
+		fs->indexing_tree = g_value_dup_object (value);
 		break;
 	case PROP_MONITOR:
-		priv->monitor = g_value_dup_object (value);
+		fs->monitor = g_value_dup_object (value);
 		break;
 	case PROP_ROOT:
-		priv->root = g_value_dup_object (value);
+		fs->root = g_value_dup_object (value);
 		break;
 	case PROP_ERROR_REPORTS:
-		priv->error_reports = g_value_dup_object (value);
+		fs->error_reports = g_value_dup_object (value);
 		break;
 	case PROP_ACTIVE:
-		priv->active = g_value_get_boolean (value);
+		fs->active = g_value_get_boolean (value);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -919,18 +878,16 @@ fs_get_property (GObject    *object,
                  GParamSpec *pspec)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
 	switch (prop_id) {
 	case PROP_THROTTLE:
-		g_value_set_double (value, priv->throttle);
+		g_value_set_double (value, fs->throttle);
 		break;
 	case PROP_INDEXING_TREE:
-		g_value_set_object (value, priv->indexing_tree);
+		g_value_set_object (value, fs->indexing_tree);
 		break;
 	case PROP_ACTIVE:
-		g_value_set_boolean (value, priv->active);
+		g_value_set_boolean (value, fs->active);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -951,15 +908,13 @@ static void
 miner_started (TrackerMiner *miner)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (miner);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
-	if (priv->timer_stopped) {
-		g_timer_start (priv->timer);
-		priv->timer_stopped = FALSE;
+	if (fs->timer_stopped) {
+		g_timer_start (fs->timer);
+		fs->timer_stopped = FALSE;
 	}
 
-	tracker_file_notifier_start (priv->file_notifier);
+	tracker_file_notifier_start (fs->file_notifier);
 	init_index_roots (fs);
 }
 
@@ -972,29 +927,20 @@ static void
 miner_paused (TrackerMiner *miner)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (miner);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
-	priv->is_paused = TRUE;
-
-	tracker_file_notifier_stop (priv->file_notifier);
-
-	if (priv->item_queues_handler_id) {
-		g_source_remove (priv->item_queues_handler_id);
-		priv->item_queues_handler_id = 0;
-	}
+	fs->is_paused = TRUE;
+	tracker_file_notifier_stop (fs->file_notifier);
+	g_clear_handle_id (&fs->item_queues_handler_id, g_source_remove);
 }
 
 static void
 miner_resumed (TrackerMiner *miner)
 {
 	TrackerMinerFS *fs = TRACKER_MINER_FS (miner);
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 
-	priv->is_paused = FALSE;
+	fs->is_paused = FALSE;
 
-	tracker_file_notifier_start (priv->file_notifier);
+	tracker_file_notifier_start (fs->file_notifier);
 
 	/* Only set up queue handler if we have items waiting to be
 	 * processed.
@@ -1007,29 +953,23 @@ static void
 set_active (TrackerMinerFS *fs,
             gboolean        active)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	if (priv->active == !!active)
+	if (fs->active == !!active)
 		return;
 
-	priv->active = !!active;
+	fs->active = !!active;
 	g_object_notify (G_OBJECT (fs), "active");
 }
 
 static void
 process_stop (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
+	g_timer_stop (fs->timer);
+	g_timer_stop (fs->extraction_timer);
 
-	g_timer_stop (priv->timer);
-	g_timer_stop (priv->extraction_timer);
+	fs->timer_stopped = TRUE;
+	fs->extraction_timer_stopped = TRUE;
 
-	priv->timer_stopped = TRUE;
-	priv->extraction_timer_stopped = TRUE;
-
-	g_clear_handle_id (&priv->status_idle_id, g_source_remove);
+	g_clear_handle_id (&fs->status_idle_id, g_source_remove);
 
 	set_active (fs, FALSE);
 
@@ -1041,16 +981,14 @@ process_stop (TrackerMinerFS *fs)
 static void
 check_notifier_high_water (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	gboolean high_water;
 
 	/* If there is more than worth 2 batches left processing, we can tell
 	 * the notifier to stop a bit.
 	 */
-	high_water = (tracker_priority_queue_get_length (priv->items) >
+	high_water = (tracker_priority_queue_get_length (fs->items) >
 	              2 * BUFFER_POOL_LIMIT);
-	tracker_file_notifier_set_high_water (priv->file_notifier, high_water);
+	tracker_file_notifier_set_high_water (fs->file_notifier, high_water);
 }
 
 static void
@@ -1059,8 +997,6 @@ sparql_buffer_flush_cb (GObject      *object,
                         gpointer      user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	GPtrArray *tasks;
 	GError *error = NULL;
 	TrackerTask *task;
@@ -1070,7 +1006,7 @@ sparql_buffer_flush_cb (GObject      *object,
 	tasks = tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
 	                                            result, &error);
 
-	priv->flushing = FALSE;
+	fs->flushing = FALSE;
 
 	if (error) {
 		g_warning ("Could not execute sparql: %s", error->message);
@@ -1084,14 +1020,14 @@ sparql_buffer_flush_cb (GObject      *object,
 			g_signal_emit (fs, signals[NO_SPACE], 0);
 
 			tracker_miner_pause (TRACKER_MINER (fs));
-			priv->resume_after_disk_full_id =
+			fs->resume_after_disk_full_id =
 				g_timeout_add_seconds (RETRY_AFTER_DISK_FULL,
 				                       retry_after_disk_full_cb, fs);
 			return;
 		}
 	}
 
-	if (priv->error_reports) {
+	if (fs->error_reports) {
 		for (i = 0; i < tasks->len; i++) {
 			task = g_ptr_array_index (tasks, i);
 			task_file = tracker_task_get_file (task);
@@ -1100,12 +1036,12 @@ sparql_buffer_flush_cb (GObject      *object,
 				g_autofree char *sparql = NULL;
 
 				sparql = tracker_sparql_task_get_sparql (task);
-				tracker_error_report_save (priv->error_reports,
+				tracker_error_report_save (fs->error_reports,
 				                           task_file,
 				                           error->message,
 				                           sparql);
 			} else {
-				tracker_error_report_delete (priv->error_reports,
+				tracker_error_report_delete (fs->error_reports,
 				                             task_file);
 			}
 		}
@@ -1116,7 +1052,7 @@ sparql_buffer_flush_cb (GObject      *object,
 						 "SPARQL buffer again full after flush",
 						 sparql_buffer_flush_cb,
 						 fs))
-			priv->flushing = TRUE;
+			fs->flushing = TRUE;
 	}
 
 	queue_handler_maybe_set_up (fs);
@@ -1132,8 +1068,6 @@ item_add_or_update (TrackerMinerFS *fs,
                     gboolean        attributes_update,
                     gboolean        create)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autoptr (GFileInfo) info = NULL;
 	g_autofree char *uri = NULL;
 
@@ -1149,7 +1083,7 @@ item_add_or_update (TrackerMinerFS *fs,
 	}
 
 	if (!create) {
-		tracker_lru_remove (priv->urn_lru, file);
+		tracker_lru_remove (fs->urn_lru, file);
 	}
 
 	uri = g_file_get_uri (file);
@@ -1157,11 +1091,11 @@ item_add_or_update (TrackerMinerFS *fs,
 	if (!attributes_update) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing file '%s'...", uri));
 		tracker_miner_files_process_file (fs, file, info,
-		                                  priv->sparql_buffer, create);
+		                                  fs->sparql_buffer, create);
 	} else {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message ("Processing attributes in file '%s'...", uri));
 		tracker_miner_files_process_file_attributes (fs, file, info,
-		                                             priv->sparql_buffer);
+		                                             fs->sparql_buffer);
 	}
 }
 
@@ -1170,8 +1104,6 @@ item_remove (TrackerMinerFS *fs,
              GFile          *file,
              gboolean        is_dir)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autofree char *uri = NULL;
 
 	uri = g_file_get_uri (file);
@@ -1180,15 +1112,15 @@ item_remove (TrackerMinerFS *fs,
 	              g_message ("Removing item: '%s' (Deleted from filesystem or no longer monitored)", uri));
 
 	if (is_dir) {
-		tracker_sparql_buffer_log_delete_content (priv->sparql_buffer,
+		tracker_sparql_buffer_log_delete_content (fs->sparql_buffer,
 		                                          file);
-		tracker_lru_remove_foreach (priv->urn_lru,
+		tracker_lru_remove_foreach (fs->urn_lru,
 		                            (GEqualFunc) g_file_has_prefix,
 		                            file);
 	}
 
-	tracker_sparql_buffer_log_delete (priv->sparql_buffer, file);
-	tracker_lru_remove (priv->urn_lru, file);
+	tracker_sparql_buffer_log_delete (fs->sparql_buffer, file);
+	tracker_lru_remove (fs->urn_lru, file);
 }
 
 static void
@@ -1197,8 +1129,6 @@ item_move (TrackerMinerFS *fs,
            GFile          *source_file,
            gboolean        is_dir)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autofree char *uri = NULL, *source_uri = NULL;
 	TrackerDirectoryFlags source_flags, flags;
 	gboolean source_recursive, dest_recursive;
@@ -1211,19 +1141,19 @@ item_move (TrackerMinerFS *fs,
 	              g_message ("Moving item from '%s' to '%s'",
 	                         source_uri, uri));
 
-	tracker_indexing_tree_get_root (priv->indexing_tree, source_file, NULL, &source_flags);
+	tracker_indexing_tree_get_root (fs->indexing_tree, source_file, NULL, &source_flags);
 	source_recursive = (source_flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
-	tracker_indexing_tree_get_root (priv->indexing_tree, dest_file, NULL, &flags);
+	tracker_indexing_tree_get_root (fs->indexing_tree, dest_file, NULL, &flags);
 	dest_recursive = (flags & TRACKER_DIRECTORY_FLAG_RECURSE) != 0;
 
 	if (is_dir) {
-		tracker_lru_remove_foreach (priv->urn_lru,
+		tracker_lru_remove_foreach (fs->urn_lru,
 		                            (GEqualFunc) g_file_has_prefix,
 		                            source_file);
 	}
 
-	tracker_lru_remove (priv->urn_lru, source_file);
-	tracker_lru_remove (priv->urn_lru, dest_file);
+	tracker_lru_remove (fs->urn_lru, source_file);
+	tracker_lru_remove (fs->urn_lru, dest_file);
 
 	/* If the original location is recursive, but the destination location
 	 * is not, remove all children.
@@ -1232,16 +1162,16 @@ item_move (TrackerMinerFS *fs,
 		TRACKER_NOTE (MINER_FS_EVENTS,
 		              g_message ("Removing children for item: '%s' (No longer monitored)", source_uri));
 
-		tracker_sparql_buffer_log_delete_content (priv->sparql_buffer,
+		tracker_sparql_buffer_log_delete_content (fs->sparql_buffer,
 		                                          source_file);
 	}
 
-	if (tracker_indexing_tree_file_is_root (priv->indexing_tree, dest_file)) {
+	if (tracker_indexing_tree_file_is_root (fs->indexing_tree, dest_file)) {
 		data_source = tracker_miner_fs_get_identifier (fs, dest_file);
 	} else {
 		GFile *root;
 
-		root = tracker_indexing_tree_get_root (priv->indexing_tree,
+		root = tracker_indexing_tree_get_root (fs->indexing_tree,
 		                                       dest_file, NULL, NULL);
 
 		if (root)
@@ -1251,12 +1181,12 @@ item_move (TrackerMinerFS *fs,
 	if (!data_source)
 		return;
 
-	tracker_sparql_buffer_log_move (priv->sparql_buffer,
+	tracker_sparql_buffer_log_move (fs->sparql_buffer,
 	                                source_file, dest_file,
 	                                data_source);
 
 	if (is_dir && source_recursive && dest_recursive) {
-		tracker_sparql_buffer_log_move_content (priv->sparql_buffer,
+		tracker_sparql_buffer_log_move_content (fs->sparql_buffer,
 		                                        source_file, dest_file);
 	}
 }
@@ -1265,24 +1195,19 @@ static void
 item_finish_directory (TrackerMinerFS *fs,
                        GFile          *file)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	tracker_miner_files_finish_directory (fs, file, priv->sparql_buffer);
+	tracker_miner_files_finish_directory (fs, file, fs->sparql_buffer);
 }
 
 static gboolean
 maybe_remove_file_event_node (TrackerMinerFS *fs,
                               QueueEvent     *event)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	QueueEvent *item_event;
 
-	item_event = g_hash_table_lookup (priv->items_by_file, event->file);
+	item_event = g_hash_table_lookup (fs->items_by_file, event->file);
 
 	if (item_event == event) {
-		g_hash_table_remove (priv->items_by_file, event->file);
+		g_hash_table_remove (fs->items_by_file, event->file);
 		return TRUE;
 	}
 
@@ -1310,14 +1235,12 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
                           gboolean                 *attributes_update,
                           gboolean                 *is_dir)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	QueueEvent *event;
 
 	*file = NULL;
 	*source_file = NULL;
 
-	event = tracker_priority_queue_pop (priv->items, NULL);
+	event = tracker_priority_queue_pop (fs->items, NULL);
 
 	if (event) {
 		if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
@@ -1340,8 +1263,6 @@ item_queue_get_next_file (TrackerMinerFS           *fs,
 static gboolean
 miner_handle_next_item (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	GFile *file = NULL;
 	GFile *source_file = NULL;
 	gboolean keep_processing = TRUE;
@@ -1353,31 +1274,31 @@ miner_handle_next_item (TrackerMinerFS *fs)
 	item_queue_get_next_file (fs, &file, &source_file, &info, &type,
 	                          &attributes_update, &is_dir);
 
-	if (priv->timer_stopped) {
-		g_timer_start (priv->timer);
-		priv->timer_stopped = FALSE;
+	if (fs->timer_stopped) {
+		g_timer_start (fs->timer);
+		fs->timer_stopped = FALSE;
 	}
 
-	if (file == NULL && !priv->extraction_timer_stopped) {
-		g_timer_stop (priv->extraction_timer);
-		priv->extraction_timer_stopped = TRUE;
-	} else if (file != NULL && priv->extraction_timer_stopped) {
-		g_timer_continue (priv->extraction_timer);
-		priv->extraction_timer_stopped = FALSE;
+	if (file == NULL && !fs->extraction_timer_stopped) {
+		g_timer_stop (fs->extraction_timer);
+		fs->extraction_timer_stopped = TRUE;
+	} else if (file != NULL && fs->extraction_timer_stopped) {
+		g_timer_continue (fs->extraction_timer);
+		fs->extraction_timer_stopped = FALSE;
 	}
 
 	if (file == NULL) {
-		if (!tracker_file_notifier_is_active (priv->file_notifier)) {
-			if (!priv->flushing &&
-			    tracker_task_pool_get_size (TRACKER_TASK_POOL (priv->sparql_buffer)) == 0) {
+		if (!tracker_file_notifier_is_active (fs->file_notifier)) {
+			if (!fs->flushing &&
+			    tracker_task_pool_get_size (TRACKER_TASK_POOL (fs->sparql_buffer)) == 0) {
 				process_stop (fs);
 			} else {
 				/* Flush any possible pending update here */
-				if (tracker_sparql_buffer_flush (priv->sparql_buffer,
+				if (tracker_sparql_buffer_flush (fs->sparql_buffer,
 								 "Queue handlers NONE",
 								 sparql_buffer_flush_cb,
 								 fs))
-					priv->flushing = TRUE;
+					fs->flushing = TRUE;
 			}
 		}
 
@@ -1406,12 +1327,12 @@ miner_handle_next_item (TrackerMinerFS *fs)
 		g_assert_not_reached ();
 	}
 
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (priv->sparql_buffer))) {
-		if (tracker_sparql_buffer_flush (priv->sparql_buffer,
+	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->sparql_buffer))) {
+		if (tracker_sparql_buffer_flush (fs->sparql_buffer,
 						 "SPARQL buffer limit reached",
 						 sparql_buffer_flush_cb,
 						 fs)) {
-			priv->flushing = TRUE;
+			fs->flushing = TRUE;
 		} else {
 			/* If we cannot flush, wait for the pending operations
 			 * to finish.
@@ -1433,13 +1354,11 @@ static gboolean
 item_queue_handlers_cb (gpointer user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	gint i;
 
 	for (i = 0; i < MAX_SIMULTANEOUS_ITEMS; i++) {
 		if (!miner_handle_next_item (fs)) {
-			priv->item_queues_handler_id = 0;
+			fs->item_queues_handler_id = 0;
 			return G_SOURCE_REMOVE;
 		}
 	}
@@ -1451,14 +1370,12 @@ static gboolean
 update_status_cb (gpointer user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autofree char *status = NULL;
 	guint files_found, files_updated, files_ignored, files_reindexed;
 	TrackerFileNotifierStatus notifier_status;
 	GFile *current_root;
 
-	if (tracker_file_notifier_get_status (priv->file_notifier,
+	if (tracker_file_notifier_get_status (fs->file_notifier,
 	                                      &notifier_status,
 	                                      &current_root,
 	                                      &files_found,
@@ -1490,8 +1407,8 @@ update_status_cb (gpointer user_data)
 		guint elems_left;
 
 		elems_left =
-			tracker_priority_queue_get_length (priv->items) +
-			tracker_task_pool_get_size (TRACKER_TASK_POOL (priv->sparql_buffer));
+			tracker_priority_queue_get_length (fs->items) +
+			tracker_task_pool_get_size (TRACKER_TASK_POOL (fs->sparql_buffer));
 
 		if (elems_left > 0)
 			status = g_strdup_printf ("Processing %d updates…", elems_left);
@@ -1511,13 +1428,11 @@ update_status_cb (gpointer user_data)
 static void
 queue_handler_set_up (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	guint source_id;
 	guint interval;
 
-	g_assert (priv->item_queues_handler_id == 0);
-	interval = TRACKER_CRAWLER_MAX_TIMEOUT_INTERVAL * priv->throttle;
+	g_assert (fs->item_queues_handler_id == 0);
+	interval = TRACKER_CRAWLER_MAX_TIMEOUT_INTERVAL * fs->throttle;
 
 	if (interval == 0) {
 		source_id = g_idle_add_full (TRACKER_TASK_PRIORITY,
@@ -1529,40 +1444,37 @@ queue_handler_set_up (TrackerMinerFS *fs)
 		                                fs, NULL);
 	}
 
-	priv->item_queues_handler_id = source_id;
+	fs->item_queues_handler_id = source_id;
 	set_active (fs, TRUE);
 }
 
 static void
 queue_handler_maybe_set_up (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "Setting up queue handlers..."));
 
-	if (priv->item_queues_handler_id != 0) {
+	if (fs->item_queues_handler_id != 0) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: already one active"));
 		return;
 	}
 
-	if (priv->is_paused) {
+	if (fs->is_paused) {
 		TRACKER_NOTE (MINER_FS_EVENTS, g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: paused"));
 		return;
 	}
 
 	/* Already processing max number of sparql updates */
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (priv->sparql_buffer))) {
+	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (fs->sparql_buffer))) {
 		TRACKER_NOTE (MINER_FS_EVENTS,
 		              g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: pool limit reached (sparql buffer: %u)",
-		                         tracker_task_pool_get_limit (TRACKER_TASK_POOL (priv->sparql_buffer))));
+		                         tracker_task_pool_get_limit (TRACKER_TASK_POOL (fs->sparql_buffer))));
 		return;
 	}
 
-	if (priv->status_idle_id == 0) {
-		priv->status_idle_id = g_timeout_add (250,
-		                                      update_status_cb,
-		                                      fs);
+	if (fs->status_idle_id == 0) {
+		fs->status_idle_id = g_timeout_add (250,
+		                                    update_status_cb,
+		                                    fs);
 		update_status_cb (fs);
 	}
 
@@ -1574,11 +1486,9 @@ static gint
 miner_fs_get_queue_priority (TrackerMinerFS *fs,
                              GFile          *file)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	TrackerDirectoryFlags flags;
 
-	tracker_indexing_tree_get_root (priv->indexing_tree,
+	tracker_indexing_tree_get_root (fs->indexing_tree,
 	                                file, NULL, &flags);
 
 	return (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) ?
@@ -1590,11 +1500,9 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		      QueueEvent     *event,
 		      guint           priority)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	QueueEvent *old = NULL;
 
-	old = g_hash_table_lookup (priv->items_by_file, event->file);
+	old = g_hash_table_lookup (fs->items_by_file, event->file);
 
 	if (old) {
 		QueueCoalesceAction action;
@@ -1603,8 +1511,8 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		action = queue_event_coalesce (old, event, &replacement);
 
 		if (action & QUEUE_ACTION_DELETE_FIRST) {
-			g_hash_table_remove (priv->items_by_file, old->file);
-			tracker_priority_queue_remove_node (priv->items,
+			g_hash_table_remove (fs->items_by_file, old->file);
+			tracker_priority_queue_remove_node (fs->items,
 							    old->queue_node);
 			queue_event_free (old);
 		}
@@ -1624,10 +1532,10 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 			/* Attempt to optimize by removing any children
 			 * of this directory from being processed.
 			 */
-			g_hash_table_foreach_remove (priv->items_by_file,
+			g_hash_table_foreach_remove (fs->items_by_file,
 			                             remove_items_by_file_foreach,
 			                             event->file);
-			tracker_priority_queue_foreach_remove (priv->items,
+			tracker_priority_queue_foreach_remove (fs->items,
 							       (GEqualFunc) queue_event_is_equal_or_descendant,
 							       event->file,
 							       (GDestroyNotify) queue_event_free);
@@ -1636,20 +1544,20 @@ miner_fs_queue_event (TrackerMinerFS *fs,
 		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
 
 		event->queue_node =
-			tracker_priority_queue_add (priv->items, event, priority);
+			tracker_priority_queue_add (fs->items, event, priority);
 
 		if (event->type == TRACKER_MINER_FS_EVENT_MOVED) {
 			if (event->is_dir) {
-				g_hash_table_foreach_remove (priv->items_by_file,
+				g_hash_table_foreach_remove (fs->items_by_file,
 				                             remove_items_by_file_foreach,
 				                             event->dest_file);
 			} else {
-				g_hash_table_remove (priv->items_by_file, event->dest_file);
+				g_hash_table_remove (fs->items_by_file, event->dest_file);
 			}
 
-			g_hash_table_remove (priv->items_by_file, event->file);
+			g_hash_table_remove (fs->items_by_file, event->file);
 		} else {
-			g_hash_table_replace (priv->items_by_file,
+			g_hash_table_replace (fs->items_by_file,
 			                      g_object_ref (event->file),
 			                      event);
 		}
@@ -1768,8 +1676,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
                                  gpointer             user_data)
 {
 	TrackerMinerFS *fs = user_data;
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	GTimer *timer = g_timer_new ();
 	TrackerDirectoryFlags flags;
 	TrackerSparqlConnection *conn;
@@ -1793,10 +1699,10 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	/* Remove anything contained in the removed directory
 	 * from all relevant processing queues.
 	 */
-	g_hash_table_foreach_remove (priv->items_by_file,
+	g_hash_table_foreach_remove (fs->items_by_file,
 	                             remove_items_by_file_foreach,
 	                             directory);
-	tracker_priority_queue_foreach_remove (priv->items,
+	tracker_priority_queue_foreach_remove (fs->items,
 	                                       (GEqualFunc) queue_event_is_equal_or_descendant,
 	                                       directory,
 	                                       (GDestroyNotify) queue_event_free);
@@ -1822,22 +1728,19 @@ void
 tracker_miner_fs_set_throttle (TrackerMinerFS *fs,
                                gdouble         throttle)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_return_if_fail (TRACKER_IS_MINER_FS (fs));
 
 	throttle = CLAMP (throttle, 0, 1);
 
-	if (priv->throttle == throttle) {
+	if (fs->throttle == throttle) {
 		return;
 	}
 
-	priv->throttle = throttle;
+	fs->throttle = throttle;
 
 	/* Update timeouts */
-	if (priv->item_queues_handler_id != 0) {
-		g_clear_handle_id (&priv->item_queues_handler_id, g_source_remove);
+	if (fs->item_queues_handler_id != 0) {
+		g_clear_handle_id (&fs->item_queues_handler_id, g_source_remove);
 		queue_handler_set_up (fs);
 	}
 }
@@ -1856,27 +1759,22 @@ tracker_miner_fs_set_throttle (TrackerMinerFS *fs,
 gdouble
 tracker_miner_fs_get_throttle (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), 0);
 
-	return priv->throttle;
+	return fs->throttle;
 }
 
 const gchar *
 tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 				 GFile          *file)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
 	g_autoptr (GFileInfo) info = NULL;
 	gchar *str;
 
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 	g_return_val_if_fail (G_IS_FILE (file), NULL);
 
-	if (tracker_lru_find (priv->urn_lru, file, (gpointer*) &str))
+	if (tracker_lru_find (fs->urn_lru, file, (gpointer*) &str))
 		return str;
 
 	info = g_file_query_info (file,
@@ -1890,11 +1788,11 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 	if (!info)
 		return NULL;
 
-	if (!tracker_indexing_tree_file_is_indexable (priv->indexing_tree, file, info))
+	if (!tracker_indexing_tree_file_is_indexable (fs->indexing_tree, file, info))
 		return NULL;
 
 	str = tracker_miner_files_get_content_identifier (fs, file, info);
-	tracker_lru_add (priv->urn_lru, g_object_ref (file), str);
+	tracker_lru_add (fs->urn_lru, g_object_ref (file), str);
 
 	return str;
 }
@@ -1916,13 +1814,10 @@ tracker_miner_fs_get_identifier (TrackerMinerFS *fs,
 gboolean
 tracker_miner_fs_has_items_to_process (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), FALSE);
 
-	if (tracker_file_notifier_is_active (priv->file_notifier) ||
-	    !tracker_priority_queue_is_empty (priv->items)) {
+	if (tracker_file_notifier_is_active (fs->file_notifier) ||
+	    !tracker_priority_queue_is_empty (fs->items)) {
 		return TRUE;
 	}
 
@@ -1942,41 +1837,29 @@ tracker_miner_fs_has_items_to_process (TrackerMinerFS *fs)
 TrackerIndexingTree *
 tracker_miner_fs_get_indexing_tree (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
 	g_return_val_if_fail (TRACKER_IS_MINER_FS (fs), NULL);
 
-	return priv->indexing_tree;
+	return fs->indexing_tree;
 }
 
 GFile *
 tracker_miner_fs_get_root (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	return priv->root;
+	return fs->root;
 }
 
 char *
 tracker_miner_fs_get_file_resource_uri (TrackerMinerFS *fs,
                                         GFile          *file)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	return tracker_file_notifier_get_file_resource_uri (priv->file_notifier,
+	return tracker_file_notifier_get_file_resource_uri (fs->file_notifier,
 	                                                    file);
 }
 
 TrackerErrorReport *
 tracker_miner_fs_get_error_reports (TrackerMinerFS *fs)
 {
-	TrackerMinerFSPrivate *priv =
-		tracker_miner_fs_get_instance_private (fs);
-
-	return priv->error_reports;
+	return fs->error_reports;
 }
 
 TrackerMiner *
