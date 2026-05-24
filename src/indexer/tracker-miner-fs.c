@@ -155,7 +155,6 @@ static guint signals[LAST_SIGNAL] = { 0, };
 
 enum {
 	PROP_0,
-	PROP_THROTTLE,
 	PROP_INDEXING_TREE,
 	PROP_MONITOR,
 	PROP_ROOT,
@@ -259,11 +258,6 @@ tracker_miner_fs_class_init (TrackerMinerFSClass *klass)
 	miner_class->paused  = miner_paused;
 	miner_class->resumed = miner_resumed;
 
-	props[PROP_THROTTLE] =
-		g_param_spec_double ("throttle", NULL, NULL,
-		                     0, 1, 0,
-		                     G_PARAM_READWRITE |
-		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_INDEXING_TREE] =
 		g_param_spec_object ("indexing-tree", NULL, NULL,
 		                     TRACKER_TYPE_INDEXING_TREE,
@@ -664,7 +658,18 @@ set_up_throttle (TrackerMinerFS *fs,
 
 	throttle = enable ? 0.25 : 0;
 	g_debug ("Setting new throttle to %0.3f", throttle);
-	tracker_miner_fs_set_throttle (fs, throttle);
+
+	if (fs->throttle == throttle) {
+		return;
+	}
+
+	fs->throttle = throttle;
+
+	/* Update timeouts */
+	if (fs->item_queues_handler_id != 0) {
+		g_clear_handle_id (&fs->item_queues_handler_id, g_source_remove);
+		queue_handler_maybe_set_up (fs);
+	}
 }
 
 static void
@@ -846,10 +851,6 @@ fs_set_property (GObject      *object,
 	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
 
 	switch (prop_id) {
-	case PROP_THROTTLE:
-		tracker_miner_fs_set_throttle (TRACKER_MINER_FS (object),
-		                               g_value_get_double (value));
-		break;
 	case PROP_INDEXING_TREE:
 		fs->indexing_tree = g_value_dup_object (value);
 		break;
@@ -880,9 +881,6 @@ fs_get_property (GObject    *object,
 	TrackerMinerFS *fs = TRACKER_MINER_FS (object);
 
 	switch (prop_id) {
-	case PROP_THROTTLE:
-		g_value_set_double (value, fs->throttle);
-		break;
 	case PROP_INDEXING_TREE:
 		g_value_set_object (value, fs->indexing_tree);
 		break;
@@ -1710,40 +1708,6 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Removed files at %f\n", g_timer_elapsed (timer, NULL)));
 	g_timer_destroy (timer);
-}
-
-/**
- * tracker_miner_fs_set_throttle:
- * @fs: a #TrackerMinerFS
- * @throttle: a double between 0.0 and 1.0
- *
- * Tells the filesystem miner to throttle its operations. A value of
- * 0.0 means no throttling at all, so the miner will perform
- * operations at full speed, 1.0 is the slowest value. With a value of
- * 1.0, the @fs is typically waiting one full second before handling
- * the next batch of queued items to be processed.
- *
- * Since: 0.8
- **/
-void
-tracker_miner_fs_set_throttle (TrackerMinerFS *fs,
-                               gdouble         throttle)
-{
-	g_return_if_fail (TRACKER_IS_MINER_FS (fs));
-
-	throttle = CLAMP (throttle, 0, 1);
-
-	if (fs->throttle == throttle) {
-		return;
-	}
-
-	fs->throttle = throttle;
-
-	/* Update timeouts */
-	if (fs->item_queues_handler_id != 0) {
-		g_clear_handle_id (&fs->item_queues_handler_id, g_source_remove);
-		queue_handler_set_up (fs);
-	}
 }
 
 const gchar *

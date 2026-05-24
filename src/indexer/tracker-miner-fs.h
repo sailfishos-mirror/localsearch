@@ -36,8 +36,6 @@ G_DECLARE_FINAL_TYPE (TrackerMinerFS, tracker_miner_fs, TRACKER, MINER_FS, Track
 
 /* Properties */
 TrackerIndexingTree * tracker_miner_fs_get_indexing_tree     (TrackerMinerFS  *fs);
-void                  tracker_miner_fs_set_throttle          (TrackerMinerFS  *fs,
-                                                              gdouble          throttle);
 
 /* URNs */
 const gchar * tracker_miner_fs_get_identifier (TrackerMinerFS *miner,
