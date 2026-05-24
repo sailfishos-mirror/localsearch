@@ -73,8 +73,6 @@ struct _TrackerIndexer {
 	TrackerPriorityQueue *items;
 	GHashTable *items_by_file;
 
-	guint item_queues_handler_id;
-
 	TrackerMonitor *monitor;
 	TrackerIndexingTree *indexing_tree;
 	TrackerFileNotifier *file_notifier;
@@ -107,6 +105,7 @@ struct _TrackerIndexer {
 	guint status_idle_id;
 	guint grace_period_timeout_id;
 	guint resume_after_disk_full_id;
+	guint item_queues_handler_id;
 };
 
 typedef enum {
