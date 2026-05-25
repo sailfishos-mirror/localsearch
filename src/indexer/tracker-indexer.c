@@ -28,7 +28,6 @@
 #include "tracker-monitor.h"
 #include "tracker-utils.h"
 #include "tracker-priority-queue.h"
-#include "tracker-task-pool.h"
 #include "tracker-sparql-buffer.h"
 #include "tracker-file-notifier.h"
 #include "tracker-lru.h"
@@ -182,7 +181,6 @@ static void           file_notifier_finished              (TrackerFileNotifier *
                                                            gpointer             user_data);
 
 static void           queue_handler_maybe_set_up          (TrackerIndexer *indexer);
-
 
 G_DEFINE_TYPE (TrackerIndexer, tracker_indexer, TRACKER_TYPE_MINER)
 
@@ -908,11 +906,11 @@ sparql_buffer_flush_cb (GObject      *object,
                         GAsyncResult *result,
                         gpointer      user_data)
 {
+	TrackerSparqlBuffer *buffer = TRACKER_SPARQL_BUFFER (object);
 	TrackerIndexer *indexer = user_data;
 	g_autoptr (GError) error = NULL;
 
-	if (!tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
-	                                         result, &error)) {
+	if (!tracker_sparql_buffer_flush_finish (buffer, result, &error)) {
 		g_warning ("Could not execute sparql: %s", error->message);
 
 		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT) ||
@@ -936,8 +934,8 @@ sparql_buffer_flush_cb (GObject      *object,
 
 	indexer->flushing = FALSE;
 
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
-		if (tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),
+	if (tracker_sparql_buffer_limit_reached (buffer)) {
+		if (tracker_sparql_buffer_flush (buffer,
 						 "SPARQL buffer again full after flush",
 						 sparql_buffer_flush_cb,
 						 indexer))
@@ -1125,7 +1123,7 @@ miner_handle_next_item (TrackerIndexer *indexer)
 	if (!event) {
 		if (!tracker_file_notifier_is_active (indexer->file_notifier)) {
 			if (!indexer->flushing &&
-			    tracker_task_pool_get_size (TRACKER_TASK_POOL (indexer->sparql_buffer)) == 0) {
+			    tracker_sparql_buffer_get_size (indexer->sparql_buffer) == 0) {
 				process_stop (indexer);
 			} else {
 				/* Flush any possible pending update here */
@@ -1164,7 +1162,7 @@ miner_handle_next_item (TrackerIndexer *indexer)
 		g_assert_not_reached ();
 	}
 
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (indexer->sparql_buffer))) {
+	if (tracker_sparql_buffer_limit_reached (indexer->sparql_buffer)) {
 		if (tracker_sparql_buffer_flush (indexer->sparql_buffer,
 						 "SPARQL buffer limit reached",
 						 sparql_buffer_flush_cb,
@@ -1243,7 +1241,7 @@ update_status_cb (gpointer user_data)
 
 		elems_left =
 			tracker_priority_queue_get_length (indexer->items) +
-			tracker_task_pool_get_size (TRACKER_TASK_POOL (indexer->sparql_buffer));
+			tracker_sparql_buffer_get_size (indexer->sparql_buffer);
 
 		if (elems_left > 0)
 			status = g_strdup_printf ("Processing %d updates…", elems_left);
@@ -1299,10 +1297,9 @@ queue_handler_maybe_set_up (TrackerIndexer *indexer)
 	}
 
 	/* Already processing max number of sparql updates */
-	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (indexer->sparql_buffer))) {
+	if (tracker_sparql_buffer_limit_reached (indexer->sparql_buffer)) {
 		TRACKER_NOTE (MINER_FS_EVENTS,
-		              g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: pool limit reached (sparql buffer: %u)",
-		                         tracker_task_pool_get_limit (TRACKER_TASK_POOL (indexer->sparql_buffer))));
+		              g_message (EVENT_QUEUE_LOG_PREFIX "   cancelled: buffer limit reached"));
 		return;
 	}
 
