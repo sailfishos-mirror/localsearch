@@ -967,9 +967,6 @@ sparql_buffer_flush_cb (GObject      *object,
 				                           task_file,
 				                           error->message,
 				                           sparql);
-			} else {
-				tracker_error_report_delete (indexer->error_reports,
-				                             task_file);
 			}
 		}
 	}
@@ -1006,6 +1003,12 @@ item_add_or_update (TrackerIndexer *indexer,
 
 	if (!create) {
 		tracker_lru_remove (indexer->urn_lru, event->file);
+	}
+
+	if (!event->attributes_update && indexer->error_reports) {
+		/* Delete any pre-existing error report if the file is being re-indexed */
+		tracker_error_report_delete (indexer->error_reports,
+		                             event->file);
 	}
 
 	uri = g_file_get_uri (event->file);
