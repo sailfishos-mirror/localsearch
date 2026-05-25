@@ -27,7 +27,6 @@
 #include "tracker-indexer-methods.h"
 #include "tracker-monitor.h"
 #include "tracker-utils.h"
-#include "tracker-priority-queue.h"
 #include "tracker-sparql-buffer.h"
 #include "tracker-file-notifier.h"
 #include "tracker-lru.h"
@@ -57,10 +56,15 @@ typedef struct {
 	GList *queue_node;
 } QueueEvent;
 
+typedef struct {
+	TrackerIndexer *indexer;
+	GFile *prefix;
+} QueueForeachData;
+
 struct _TrackerIndexer {
 	TrackerMiner parent_instance;
 
-	TrackerPriorityQueue *items;
+	GQueue *items;
 	GHashTable *items_by_file;
 
 	TrackerMonitor *monitor;
@@ -278,7 +282,7 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 static void
 tracker_indexer_init (TrackerIndexer *indexer)
 {
-	indexer->items = tracker_priority_queue_new ();
+	indexer->items = g_queue_new ();
 	indexer->items_by_file = g_hash_table_new_full (g_file_hash,
 	                                                (GEqualFunc) g_file_equal,
 	                                                g_object_unref, NULL);
@@ -393,12 +397,16 @@ queue_event_coalesce (const QueueEvent  *first,
 	return QUEUE_ACTION_NONE;
 }
 
-static gboolean
-queue_event_is_equal_or_descendant (QueueEvent *event,
-				    GFile      *prefix)
+static void
+delete_nested_queued_events (QueueEvent       *event,
+                             QueueForeachData *foreach_data)
 {
-	return (g_file_equal (event->file, prefix) ||
-		g_file_has_prefix (event->file, prefix));
+	if (g_file_equal (event->file, foreach_data->prefix) ||
+	    g_file_has_prefix (event->file, foreach_data->prefix)) {
+		g_queue_delete_link (foreach_data->indexer->items,
+		                     event->queue_node);
+		queue_event_free (event);
+	}
 }
 
 static void
@@ -702,10 +710,8 @@ fs_finalize (GObject *object)
 	g_clear_object (&indexer->sparql_buffer);
 	g_hash_table_unref (indexer->items_by_file);
 
-	tracker_priority_queue_foreach (indexer->items,
-	                                (GFunc) queue_event_free,
-	                                NULL);
-	tracker_priority_queue_unref (indexer->items);
+	g_queue_free_full (indexer->items,
+	                   (GDestroyNotify) queue_event_free);
 
 	g_clear_object (&indexer->indexing_tree);
 	g_clear_object (&indexer->file_notifier);
@@ -872,7 +878,7 @@ miner_resumed (TrackerMiner *miner)
 	 * processed.
 	 */
 	if (tracker_file_notifier_is_active (indexer->file_notifier) ||
-	    !tracker_priority_queue_is_empty (indexer->items))
+	    !g_queue_is_empty (indexer->items))
 		queue_handler_maybe_set_up (indexer);
 }
 
@@ -896,8 +902,7 @@ check_notifier_high_water (TrackerIndexer *indexer)
 	/* If there is more than worth 2 batches left processing, we can tell
 	 * the notifier to stop a bit.
 	 */
-	high_water = (tracker_priority_queue_get_length (indexer->items) >
-	              2 * BUFFER_POOL_LIMIT);
+	high_water = (g_queue_get_length (indexer->items) > 2 * BUFFER_POOL_LIMIT);
 	tracker_file_notifier_set_high_water (indexer->file_notifier, high_water);
 }
 
@@ -1118,7 +1123,7 @@ miner_handle_next_item (TrackerIndexer *indexer)
 	gboolean keep_processing = TRUE;
 	QueueEvent *event;
 
-	event = tracker_priority_queue_pop (indexer->items, NULL);
+	event = g_queue_pop_head (indexer->items);
 
 	if (!event) {
 		if (!tracker_file_notifier_is_active (indexer->file_notifier)) {
@@ -1240,7 +1245,7 @@ update_status_cb (gpointer user_data)
 		guint elems_left;
 
 		elems_left =
-			tracker_priority_queue_get_length (indexer->items) +
+			g_queue_get_length (indexer->items) +
 			tracker_sparql_buffer_get_size (indexer->sparql_buffer);
 
 		if (elems_left > 0)
@@ -1330,8 +1335,7 @@ indexer_queue_event (TrackerIndexer *indexer,
 
 		if (action & QUEUE_ACTION_DELETE_FIRST) {
 			g_hash_table_remove (indexer->items_by_file, old->file);
-			tracker_priority_queue_remove_node (indexer->items,
-							    old->queue_node);
+			g_queue_delete_link (indexer->items, old->queue_node);
 			queue_event_free (old);
 		}
 
@@ -1347,22 +1351,24 @@ indexer_queue_event (TrackerIndexer *indexer,
 	if (event) {
 		if (event->is_dir &&
 		    event->type == TRACKER_INDEXER_EVENT_DELETED) {
+			QueueForeachData foreach_data = { indexer, event->file };
+
 			/* Attempt to optimize by removing any children
 			 * of this directory from being processed.
 			 */
 			g_hash_table_foreach_remove (indexer->items_by_file,
 			                             remove_items_by_file_foreach,
 			                             event->file);
-			tracker_priority_queue_foreach_remove (indexer->items,
-							       (GEqualFunc) queue_event_is_equal_or_descendant,
-							       event->file,
-							       (GDestroyNotify) queue_event_free);
+			g_queue_foreach (indexer->items,
+			                 (GFunc) delete_nested_queued_events,
+			                 &foreach_data);
 		}
 
 		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
 
-		event->queue_node =
-			tracker_priority_queue_add (indexer->items, event, G_PRIORITY_DEFAULT);
+		event->queue_node = g_list_alloc ();
+		event->queue_node->data = event;
+		g_queue_push_tail_link (indexer->items, event->queue_node);
 
 		if (event->type == TRACKER_INDEXER_EVENT_MOVED) {
 			if (event->is_dir) {
@@ -1499,6 +1505,7 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	TrackerSparqlConnection *conn;
 	g_autoptr (TrackerBatch) batch = NULL;
 	g_autoptr (GError) error = NULL;
+	QueueForeachData foreach_data = { indexer, directory };
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Cancelled processing pool tasks at %f\n", g_timer_elapsed (timer, NULL)));
 
@@ -1520,10 +1527,9 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	g_hash_table_foreach_remove (indexer->items_by_file,
 	                             remove_items_by_file_foreach,
 	                             directory);
-	tracker_priority_queue_foreach_remove (indexer->items,
-	                                       (GEqualFunc) queue_event_is_equal_or_descendant,
-	                                       directory,
-	                                       (GDestroyNotify) queue_event_free);
+	g_queue_foreach (indexer->items,
+	                 (GFunc) delete_nested_queued_events,
+	                 &foreach_data);
 
 	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Removed files at %f\n", g_timer_elapsed (timer, NULL)));
 	g_timer_destroy (timer);
