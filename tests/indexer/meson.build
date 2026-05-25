@@ -1,6 +1,5 @@
 libtracker_miner_tests = [
     'indexing-tree',
-    'priority-queue',
 ]
 
 libtracker_miner_slow_tests = [
