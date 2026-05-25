@@ -1314,23 +1314,9 @@ queue_handler_maybe_set_up (TrackerIndexer *indexer)
 	queue_handler_set_up (indexer);
 }
 
-static gint
-indexer_get_queue_priority (TrackerIndexer *indexer,
-                            GFile          *file)
-{
-	TrackerDirectoryFlags flags;
-
-	tracker_indexing_tree_get_root (indexer->indexing_tree,
-	                                file, NULL, &flags);
-
-	return (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) ?
-	        G_PRIORITY_HIGH : G_PRIORITY_DEFAULT;
-}
-
 static void
 indexer_queue_event (TrackerIndexer *indexer,
-                     QueueEvent     *event,
-                     guint           priority)
+                     QueueEvent     *event)
 {
 	QueueEvent *old = NULL;
 
@@ -1376,7 +1362,7 @@ indexer_queue_event (TrackerIndexer *indexer,
 		TRACKER_NOTE (MINER_FS_EVENTS, debug_print_event (event));
 
 		event->queue_node =
-			tracker_priority_queue_add (indexer->items, event, priority);
+			tracker_priority_queue_add (indexer->items, event, G_PRIORITY_DEFAULT);
 
 		if (event->type == TRACKER_INDEXER_EVENT_MOVED) {
 			if (event->is_dir) {
@@ -1409,7 +1395,7 @@ file_notifier_file_created (TrackerFileNotifier  *notifier,
 	QueueEvent *event;
 
 	event = queue_event_new (TRACKER_INDEXER_EVENT_CREATED, file, info);
-	indexer_queue_event (indexer, event, indexer_get_queue_priority (indexer, file));
+	indexer_queue_event (indexer, event);
 }
 
 static void
@@ -1423,7 +1409,7 @@ file_notifier_file_deleted (TrackerFileNotifier  *notifier,
 
 	event = queue_event_new (TRACKER_INDEXER_EVENT_DELETED, file, NULL);
 	event->is_dir = !!is_dir;
-	indexer_queue_event (indexer, event, indexer_get_queue_priority (indexer, file));
+	indexer_queue_event (indexer, event);
 }
 
 static void
@@ -1438,7 +1424,7 @@ file_notifier_file_updated (TrackerFileNotifier  *notifier,
 
 	event = queue_event_new (TRACKER_INDEXER_EVENT_UPDATED, file, info);
 	event->attributes_update = attributes_only;
-	indexer_queue_event (indexer, event, indexer_get_queue_priority (indexer, file));
+	indexer_queue_event (indexer, event);
 }
 
 static void
@@ -1452,7 +1438,7 @@ file_notifier_file_moved (TrackerFileNotifier *notifier,
 	QueueEvent *event;
 
 	event = queue_event_moved_new (source, dest, is_dir);
-	indexer_queue_event (indexer, event, indexer_get_queue_priority (indexer, source));
+	indexer_queue_event (indexer, event);
 }
 
 static void
@@ -1464,7 +1450,7 @@ file_notifier_directory_finished (TrackerFileNotifier *notifier,
 	QueueEvent *event;
 
 	event = queue_event_new (TRACKER_INDEXER_EVENT_FINISH_DIRECTORY, directory, NULL);
-	indexer_queue_event (indexer, event, indexer_get_queue_priority (indexer, directory));
+	indexer_queue_event (indexer, event);
 }
 
 static void
