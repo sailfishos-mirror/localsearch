@@ -39,9 +39,6 @@ G_BEGIN_DECLS
  * @TRACKER_DIRECTORY_FLAG_RECURSE: Should recurse in the directory.
  * @TRACKER_DIRECTORY_FLAG_PRESERVE: Should preserve items in the
  * directory even if the directory gets removed.
- * @TRACKER_DIRECTORY_FLAG_PRIORITY: Internally a priority queue is
- * used and this flag makes sure the directory is given a priority
- * over other directories queued.
  *
  * Flags used when adding a new directory to be indexed in the
  * #TrackerIndexingTree and #TrackerDataProvider.
@@ -50,8 +47,7 @@ typedef enum {
 	TRACKER_DIRECTORY_FLAG_NONE = 0,
 	TRACKER_DIRECTORY_FLAG_RECURSE = 1 << 1,
 	TRACKER_DIRECTORY_FLAG_PRESERVE = 1 << 2,
-	TRACKER_DIRECTORY_FLAG_PRIORITY = 1 << 3,
-	TRACKER_DIRECTORY_FLAG_IS_VOLUME = 1 << 4,
+	TRACKER_DIRECTORY_FLAG_IS_VOLUME = 1 << 3,
 } TrackerDirectoryFlags;
 
 /**
