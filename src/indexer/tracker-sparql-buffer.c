@@ -82,7 +82,6 @@ struct _UpdateBatchData {
 	TrackerSparqlBuffer *buffer;
 	GPtrArray *tasks;
 	TrackerBatch *batch;
-	GTask *async_task;
 };
 
 G_DEFINE_TYPE_WITH_PRIVATE (TrackerSparqlBuffer, tracker_sparql_buffer, TRACKER_TYPE_TASK_POOL)
@@ -229,8 +228,6 @@ update_batch_data_free (UpdateBatchData *batch_data)
 
 	g_ptr_array_unref (batch_data->tasks);
 
-	g_clear_object (&batch_data->async_task);
-
 	g_slice_free (UpdateBatchData, batch_data);
 }
 
@@ -243,8 +240,10 @@ batch_execute_cb (GObject      *object,
 	TrackerSparqlBuffer *buffer;
 	GError *error = NULL;
 	UpdateBatchData *update_data;
+	g_autoptr (GTask) task = NULL;
 
-	update_data = user_data;
+	task = user_data;
+	update_data = g_task_get_task_data (task);
 	buffer = TRACKER_SPARQL_BUFFER (update_data->buffer);
 	priv = tracker_sparql_buffer_get_instance_private (buffer);
 	priv->n_updates--;
@@ -256,17 +255,10 @@ batch_execute_cb (GObject      *object,
 	if (!tracker_batch_execute_finish (TRACKER_BATCH (object),
 	                                   result,
 	                                   &error)) {
-		g_task_set_task_data (update_data->async_task,
-		                      g_ptr_array_ref (update_data->tasks),
-		                      (GDestroyNotify) g_ptr_array_unref);
-		g_task_return_error (update_data->async_task, error);
+		g_task_return_error (task, error);
 	} else {
-		g_task_return_pointer (update_data->async_task,
-		                       g_ptr_array_ref (update_data->tasks),
-		                       (GDestroyNotify) g_ptr_array_unref);
+		g_task_return_boolean (task, TRUE);
 	}
-
-	update_batch_data_free (update_data);
 }
 
 gboolean
@@ -277,6 +269,7 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 {
 	TrackerSparqlBufferPrivate *priv;
 	UpdateBatchData *update_data;
+	GTask *task;
 
 	priv = tracker_sparql_buffer_get_instance_private (buffer);
 
@@ -293,18 +286,13 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 
 	update_data = g_slice_new0 (UpdateBatchData);
 	update_data->buffer = buffer;
-	update_data->tasks = g_ptr_array_ref (priv->tasks);
-	update_data->batch = g_object_ref (priv->batch);
-	update_data->async_task = g_task_new (buffer, NULL, cb, user_data);
+	update_data->tasks = g_steal_pointer (&priv->tasks);
+	update_data->batch = g_steal_pointer (&priv->batch);
 
-	/* Empty pool, update_data will keep
-	 * references to the tasks to keep
-	 * these alive.
-	 */
-	g_ptr_array_unref (priv->tasks);
-	priv->tasks = NULL;
+	task = g_task_new (buffer, NULL, cb, user_data);
+	g_task_set_task_data (task, update_data, (GDestroyNotify) update_batch_data_free);
+
 	priv->n_updates++;
-	g_clear_object (&priv->batch);
 
 	/* While flushing, remove the tasks from the task pool too, so it's
 	 * hinted as below limits again.
@@ -316,7 +304,7 @@ tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
 	tracker_batch_execute_async (update_data->batch,
 	                             NULL,
 	                             batch_execute_cb,
-	                             update_data);
+	                             task);
 	return TRUE;
 }
 
@@ -434,23 +422,55 @@ tracker_sparql_task_get_sparql (TrackerTask *task)
 	return NULL;
 }
 
-GPtrArray *
+gboolean
 tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
                                     GAsyncResult         *res,
                                     GError              **error)
 {
-	GPtrArray *tasks;
+	UpdateBatchData *update_data;
+	GError *inner_error = NULL;
+	gboolean retval;
 
-	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), NULL);
-	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), NULL);
-	g_return_val_if_fail (!error || !*error, NULL);
+	g_return_val_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer), FALSE);
+	g_return_val_if_fail (G_IS_ASYNC_RESULT (res), FALSE);
+	g_return_val_if_fail (!error || !*error, FALSE);
 
-	tasks = g_task_propagate_pointer (G_TASK (res), error);
+	retval = g_task_propagate_boolean (G_TASK (res), &inner_error);
 
-	if (!tasks)
-		tasks = g_ptr_array_ref (g_task_get_task_data (G_TASK (res)));
+	if (!retval) {
+		if (!g_error_matches (inner_error, TRACKER_SPARQL_ERROR,
+		                      TRACKER_SPARQL_ERROR_NO_SPACE)) {
+			TrackerTask *task;
+			GString *str;
+			unsigned int i;
 
-	return tasks;
+			str = g_string_new ("Unexpected error with batch, elements are:\n");
+			update_data = g_task_get_task_data (G_TASK (res));
+
+			for (i = 0; i < update_data->tasks->len; i++) {
+				g_autofree char *sparql = NULL, *uri = NULL;
+				GFile *task_file;
+
+				task = g_ptr_array_index (update_data->tasks, i);
+				task_file = tracker_task_get_file (task);
+				sparql = tracker_sparql_task_get_sparql (task);
+				uri = g_file_get_uri (task_file);
+
+				g_string_append_printf (str, "URI: %s\nSPARQL: %s\n",
+				                        uri, sparql);
+			}
+
+			g_string_append (str, "Error obtained was: ");
+
+			g_propagate_prefixed_error (error, inner_error,
+			                            "%s", str->str);
+			g_string_free (str, TRUE);
+		} else {
+			g_propagate_error (error, inner_error);
+		}
+	}
+
+	return retval;
 }
 
 static void

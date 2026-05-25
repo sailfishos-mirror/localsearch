@@ -924,18 +924,10 @@ sparql_buffer_flush_cb (GObject      *object,
                         gpointer      user_data)
 {
 	TrackerIndexer *indexer = user_data;
-	g_autoptr (GPtrArray) tasks = NULL;
 	g_autoptr (GError) error = NULL;
-	TrackerTask *task;
-	GFile *task_file;
-	guint i;
 
-	tasks = tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
-	                                            result, &error);
-
-	indexer->flushing = FALSE;
-
-	if (error) {
+	if (!tracker_sparql_buffer_flush_finish (TRACKER_SPARQL_BUFFER (object),
+	                                         result, &error)) {
 		g_warning ("Could not execute sparql: %s", error->message);
 
 		if (g_error_matches (error, TRACKER_SPARQL_ERROR, TRACKER_SPARQL_ERROR_CORRUPT) ||
@@ -952,24 +944,12 @@ sparql_buffer_flush_cb (GObject      *object,
 				                       retry_after_disk_full_cb, indexer);
 			return;
 		}
+
+		/* What to do from here on? */
+		g_assert_not_reached ();
 	}
 
-	if (indexer->error_reports) {
-		for (i = 0; i < tasks->len; i++) {
-			task = g_ptr_array_index (tasks, i);
-			task_file = tracker_task_get_file (task);
-
-			if (error) {
-				g_autofree char *sparql = NULL;
-
-				sparql = tracker_sparql_task_get_sparql (task);
-				tracker_error_report_save (indexer->error_reports,
-				                           task_file,
-				                           error->message,
-				                           sparql);
-			}
-		}
-	}
+	indexer->flushing = FALSE;
 
 	if (tracker_task_pool_limit_reached (TRACKER_TASK_POOL (object))) {
 		if (tracker_sparql_buffer_flush (TRACKER_SPARQL_BUFFER (object),

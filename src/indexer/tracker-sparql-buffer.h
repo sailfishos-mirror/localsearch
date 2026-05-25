@@ -62,7 +62,7 @@ gboolean             tracker_sparql_buffer_flush (TrackerSparqlBuffer *buffer,
                                                   GAsyncReadyCallback  cb,
                                                   gpointer             user_data);
 
-GPtrArray *          tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
+gboolean             tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
                                                          GAsyncResult         *res,
                                                          GError              **error);
 
