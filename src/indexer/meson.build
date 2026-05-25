@@ -30,7 +30,6 @@ private_sources = [
     'tracker-monitor.c',
     'tracker-monitor-glib.c',
     'tracker-priority-queue.c',
-    'tracker-task-pool.c',
     'tracker-sparql-buffer.c',
     'tracker-utils.c',
     files_extract,
