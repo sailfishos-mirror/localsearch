@@ -55,11 +55,11 @@ test_guess_date (void)
 	g_assert_true (result == NULL);
 
 	result = tracker_date_guess ("2008-06-14");
-	g_assert_cmpstr (result, ==, "2008-06-14T00:00:00");
+	g_assert_cmpstr (result, ==, "2008-06-14T00:00:00+02:00");
 	g_free (result);
 
 	result = tracker_date_guess ("20080614000000");
-	g_assert_cmpstr (result, ==, "2008-06-14T00:00:00");
+	g_assert_cmpstr (result, ==, "2008-06-14T00:00:00+02:00");
 	g_free (result);
 
 	result = tracker_date_guess ("20080614000000Z");
@@ -67,11 +67,11 @@ test_guess_date (void)
 	g_free (result);
 
 	result = tracker_date_guess ("Mon Jun 14 04:20:20 2008"); /* MS Office */
-	g_assert_cmpstr (result, ==, "2008-06-14T04:20:20");
+	g_assert_cmpstr (result, ==, "2008-06-14T04:20:20+02:00");
 	g_free (result);
 
 	result = tracker_date_guess ("2008:06:14 04:20:20"); /* Exif style */
-	g_assert_cmpstr (result, ==, "2008-06-14T04:20:20");
+	g_assert_cmpstr (result, ==, "2008-06-14T04:20:20+02:00");
 	g_free (result);
 
         result = tracker_date_guess ("2010");
@@ -95,11 +95,11 @@ test_guess_date (void)
 
         /* "YYYY-MM-DDThh:mm:ss.ff+zz:zz" */
         result = tracker_date_guess ("2010-03-18T01:02:03.10-00:03");
-        g_assert_cmpstr (result, ==, "2010-03-18T01:02:03.10-00:03");
+        g_assert_cmpstr (result, ==, "2010-03-18T01:02:03.100000-00:03");
         g_free (result);
 
         result = tracker_date_guess ("2010-03-18T01:02:03.100");
-        g_assert_cmpstr (result, ==, "2010-03-18T01:02:03.100");
+        g_assert_cmpstr (result, ==, "2010-03-18T01:02:03.100000+01:00");
         g_free (result);
 }
 
@@ -210,13 +210,13 @@ test_date_to_iso8601 ()
         /* Not much to test here because it uses strptime/strftime */
         gchar *result;
 
-        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12:12", "%Y:%m:%d %H:%M:%S");
+        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12:12", "%Y:%m:%d %H:%M:%S", NULL);
         g_assert_true (g_str_has_prefix (result, "2010-03-13T12:12:12"));
         g_assert_cmpint (strlen (result), <=, 25);
         g_free (result);
 
         /* Pattern and string don't match */
-        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12", "%Y:%m:%d %H:%M:%S");
+        result = tracker_date_format_to_iso8601 ("2010:03:13 12:12", "%Y:%m:%d %H:%M:%S", NULL);
         g_assert_true (result == NULL);
 }
 
@@ -286,6 +286,8 @@ int
 main (int argc, char **argv)
 {
 	gint result;
+
+	g_setenv ("TZ", "Europe/Amsterdam", TRUE);
 
 	g_test_init (&argc, &argv, NULL);
 

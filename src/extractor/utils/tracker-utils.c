@@ -44,8 +44,6 @@
 
 #endif /* HAVE_GETLINE */
 
-#define DATE_FORMAT_ISO8601 "%C%y-%m-%dT%T%z"
-
 /**
  * SECTION:tracker-utils
  * @title: Data utilities
@@ -416,6 +414,24 @@ tracker_text_validate_utf8 (const gchar  *text,
 	return FALSE;
 }
 
+gchar *
+tracker_date_format_iso8601 (GDateTime *datetime)
+{
+	gboolean has_offset, has_subsecond;
+
+	has_offset = g_date_time_get_utc_offset (datetime) != 0;
+	has_subsecond = g_date_time_get_microsecond (datetime) != 0;
+
+	if (has_offset && has_subsecond)
+		return g_date_time_format (datetime, "%C%y-%m-%dT%H:%M:%S.%f%:z");
+	else if (has_offset)
+		return g_date_time_format (datetime, "%C%y-%m-%dT%T%:z");
+	else if (has_subsecond)
+		return g_date_time_format (datetime, "%C%y-%m-%dT%H:%M:%S.%fZ");
+	else
+		return g_date_time_format (datetime, "%C%y-%m-%dT%TZ");
+}
+
 /**
  * tracker_date_format_to_iso8601:
  * @date_string: the date in a string pointer
@@ -432,7 +448,8 @@ tracker_text_validate_utf8 (const gchar  *text,
  **/
 gchar *
 tracker_date_format_to_iso8601 (const gchar *date_string,
-                                const gchar *format)
+                                const gchar *format,
+                                GTimeZone   *timezone)
 {
 	g_autoptr (GTimeZone) tz = NULL;
 	g_autoptr (GDateTime) date_time = NULL;
@@ -445,7 +462,9 @@ tracker_date_format_to_iso8601 (const gchar *date_string,
 		return NULL;
 	}
 
-	if (!strstr (format, "%z") && !strstr (format, "%Z"))
+	if (timezone)
+		tz = g_time_zone_ref (timezone);
+	else if (!strstr (format, "%z") && !strstr (format, "%Z"))
 		tz = g_time_zone_new_local ();
 	else
 		tz = g_time_zone_new_offset (date_tm.tm_gmtoff);
@@ -453,12 +472,12 @@ tracker_date_format_to_iso8601 (const gchar *date_string,
 	date_time = g_date_time_new (tz,
 	                             date_tm.tm_year + 1900,
 	                             date_tm.tm_mon + 1,
-	                             date_tm.tm_mday,
+	                             MAX (date_tm.tm_mday, 1),
 	                             date_tm.tm_hour,
 	                             date_tm.tm_min,
 	                             date_tm.tm_sec);
 
-	return g_date_time_format (date_time, DATE_FORMAT_ISO8601);
+	return tracker_date_format_iso8601 (date_time);
 }
 
 static gint
@@ -551,11 +570,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[19] = 'Z';
 		buf[20] = '\0';
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if (len == 10)  {
 		/* Check for date part only YYYY-MM-DD */
 		buf[0] = date_string[0];
@@ -579,11 +593,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[18] = '0';
 		buf[19] = '\0';
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if (len == 14) {
 		/* Check for pdf format EG 20050315113224-08'00' or
 		 * 20050216111533Z
@@ -609,11 +618,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[18] = date_string[13];
 		buf[19] = '\0';
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if (len == 15 && date_string[14] == 'Z') {
 		buf[0] = date_string[0];
 		buf[1] = date_string[1];
@@ -637,11 +641,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[19] = 'Z';
 
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if (len == 21 && (date_string[14] == '-' || date_string[14] == '+' )) {
 		buf[0] = date_string[0];
 		buf[1] = date_string[1];
@@ -671,11 +670,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[25] = '\0';
 
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if ((len == 24) && (date_string[3] == ' ')) {
 		/* Check for msoffice date format "Mon Feb  9 10:10:00 2004" */
 		gint  num_month;
@@ -725,11 +719,6 @@ tracker_date_guess (const gchar *date_string)
 		buf[19] = '\0';
 
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
 	} else if ((len == 19) && (date_string[4] == ':') && (date_string[7] == ':')) {
 		/* Check for Exif date format "2005:04:29 14:56:54" */
 		buf[0] = date_string[0];
@@ -754,19 +743,14 @@ tracker_date_guess (const gchar *date_string)
 		buf[19] = '\0';
 
 		datetime = g_date_time_new_from_iso8601 (buf, tz);
-
-		if (!datetime)
-			return NULL;
-
-		return g_strdup (buf);
+	} else {
+		datetime = g_date_time_new_from_iso8601 (date_string, tz);
 	}
-
-	datetime = g_date_time_new_from_iso8601 (date_string, tz);
 
 	if (!datetime)
 		return NULL;
 
-	return g_strdup (date_string);
+	return tracker_date_format_iso8601 (datetime);
 }
 
 #ifndef HAVE_GETLINE

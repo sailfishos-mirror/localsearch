@@ -41,7 +41,11 @@ gboolean     tracker_text_validate_utf8     (const gchar  *text,
                                              gsize        *valid_len);
 gchar*       tracker_date_guess             (const gchar *date_string);
 gchar*       tracker_date_format_to_iso8601 (const gchar *date_string,
-                                             const gchar *format);
+                                             const gchar *format,
+                                             GTimeZone   *timezone);
+
+gchar * tracker_date_format_iso8601 (GDateTime *datetime);
+
 const gchar* tracker_coalesce_strip         (gint         n_values,
                                                           ...);
 gchar*       tracker_merge_const            (const gchar *delimiter,

@@ -56,7 +56,7 @@ rfc1123_to_iso8601_date (const gchar *date)
 	/* From: ex. RFC1123 date: "22 May 1997 18:07:10 -0600"
 	 * To  : ex. ISO8601 date: "2007-05-22T18:07:10-0600"
 	 */
-	return tracker_date_format_to_iso8601 (date, RFC1123_DATE_FORMAT);
+	return tracker_date_format_to_iso8601 (date, RFC1123_DATE_FORMAT, NULL);
 }
 
 #if defined(PNG_iTXt_SUPPORTED) && (defined(HAVE_EXEMPI) || defined(HAVE_GEXIV2))
