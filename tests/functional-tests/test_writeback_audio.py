@@ -18,6 +18,7 @@
 
 import unittest
 
+import configuration
 import fixtures
 
 import gi
@@ -184,6 +185,9 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             {"nfo:hasHash" : {"nfo:hashAlgorithm": "chromaprint",
                               "nfo:hashValue": "test_hash"}})
 
+    @unittest.skipUnless(
+        configuration.have_mediainfo_with_consistent_disc_info(),
+        "only recent versions of MediaInfoLib report disc number and title consistently")
     def test_ogg_music_album(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -261,6 +265,9 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             {"nfo:hasHash" : {"nfo:hashAlgorithm": "chromaprint",
                               "nfo:hashValue": "test_hash"}})
 
+    @unittest.skipUnless(
+        configuration.have_mediainfo_with_consistent_disc_info(),
+        "only recent versions of MediaInfoLib report disc number and title consistently")
     def test_flac_music_album(self):
         self._writeback_test(
             "writeback-test-7.flac",

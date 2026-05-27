@@ -421,6 +421,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 				                        tag->value,
 				                        "https://musicbrainz.org/doc/Release_Group");
 			}
+
+			if ((tag = find_tag (format, audio_stream, NULL, "disc_subtitle"))) {
+				tracker_resource_set_string (album_disc, "nie:title", tag->value);
+			}
 		}
 
 		if ((tag = find_tag (format, audio_stream, NULL, "cuesheet"))) {

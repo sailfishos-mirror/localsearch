@@ -69,7 +69,8 @@
 		"nmm:musicAlbumDisc": {
 		    "@id": "urn:album-disc:SinCos:2008-01-01:Disc1",
 		    "@type": "nmm:MusicAlbumDisc",
-		    "nmm:setNumber": 1
+		    "nmm:setNumber": 1,
+		    "nie:title": "disc subtitle"
 		},
 		"tracker:hasExternalReference": [
 		    {
