@@ -48,7 +48,19 @@ typedef enum {
 	EVENT_ATTRIBUTES_UPDATE,
 	EVENT_DELETE,
 	EVENT_MOVE,
+	N_EVENTS,
 } EventType;
+
+static const char *event_names[] = {
+	"NONE",
+	"CREATE",
+	"UPDATE",
+	"ATTRIBUTES_UPDATE",
+	"DELETE",
+	"MOVE",
+};
+
+G_STATIC_ASSERT (G_N_ELEMENTS (event_names) == N_EVENTS);
 
 typedef struct {
 	EventType type;
@@ -99,9 +111,6 @@ enum {
 enum {
 	PROP_0,
 	PROP_ENABLED,
-	PROP_LIMIT,
-	PROP_COUNT,
-	PROP_IGNORED,
 };
 
 static GInitableIface *initable_parent_iface = NULL;
@@ -114,25 +123,6 @@ G_DEFINE_TYPE_WITH_CODE (TrackerMonitorFanotify, tracker_monitor_fanotify,
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_monitor_fanotify_initable_iface_init))
 
-static inline const char *
-event_type_to_string (EventType evtype)
-{
-	switch (evtype) {
-	case EVENT_CREATE:
-		return "CREATE";
-	case EVENT_UPDATE:
-		return "UPDATE";
-	case EVENT_ATTRIBUTES_UPDATE:
-		return "ATTRIBUTES_UPDATE";
-	case EVENT_DELETE:
-		return "DELETE";
-	case EVENT_MOVE:
-		return "MOVE";
-	default:
-		g_assert_not_reached ();
-	}
-}
-
 static void
 emit_event (TrackerMonitorFanotify *monitor,
             EventType               evtype,
@@ -140,11 +130,13 @@ emit_event (TrackerMonitorFanotify *monitor,
             GFile                  *other_file,
             gboolean                is_directory)
 {
+	g_assert (evtype < N_EVENTS);
+
 	if (evtype == EVENT_MOVE) {
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for files '%s'->'%s'",
 		                         evtype,
-		                         event_type_to_string (evtype),
+		                         event_names[evtype],
 		                         g_file_peek_path (file),
 		                         g_file_peek_path (other_file)));
 		tracker_monitor_emit_moved (TRACKER_MONITOR (monitor),
@@ -153,7 +145,7 @@ emit_event (TrackerMonitorFanotify *monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for %s:'%s'",
 		                         evtype,
-		                         event_type_to_string (evtype),
+		                         event_names[evtype],
 		                         is_directory ? "directory" : "file",
 		                         g_file_peek_path (file)));
 		switch (evtype) {
@@ -537,22 +529,6 @@ tracker_monitor_fanotify_finalize (GObject *object)
 }
 
 static void
-tracker_monitor_fanotify_set_property (GObject      *object,
-                                       guint         prop_id,
-                                       const GValue *value,
-                                       GParamSpec   *pspec)
-{
-	switch (prop_id) {
-	case PROP_ENABLED:
-		tracker_monitor_set_enabled (TRACKER_MONITOR (object),
-		                             g_value_get_boolean (value));
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-	}
-}
-
-static void
 tracker_monitor_fanotify_get_property (GObject      *object,
                                        guint         prop_id,
                                        GValue       *value,
@@ -563,15 +539,6 @@ tracker_monitor_fanotify_get_property (GObject      *object,
 	switch (prop_id) {
 	case PROP_ENABLED:
 		g_value_set_boolean (value, monitor->enabled);
-		break;
-	case PROP_LIMIT:
-		g_value_set_uint (value, monitor->limit);
-		break;
-	case PROP_COUNT:
-		g_value_set_uint (value, tracker_monitor_get_count (TRACKER_MONITOR (object)));
-		break;
-	case PROP_IGNORED:
-		g_value_set_uint (value, monitor->ignored);
 		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
@@ -932,7 +899,6 @@ tracker_monitor_fanotify_class_init (TrackerMonitorFanotifyClass *klass)
 	monitor_class = TRACKER_MONITOR_CLASS (klass);
 
 	object_class->finalize = tracker_monitor_fanotify_finalize;
-	object_class->set_property = tracker_monitor_fanotify_set_property;
 	object_class->get_property = tracker_monitor_fanotify_get_property;
 
 	monitor_class->add = tracker_monitor_fanotify_add;
@@ -944,9 +910,6 @@ tracker_monitor_fanotify_class_init (TrackerMonitorFanotifyClass *klass)
 	monitor_class->get_count = tracker_monitor_fanotify_get_count;
 
 	g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
-	g_object_class_override_property (object_class, PROP_LIMIT, "limit");
-	g_object_class_override_property (object_class, PROP_COUNT, "count");
-	g_object_class_override_property (object_class, PROP_IGNORED, "ignored");
 }
 
 static void

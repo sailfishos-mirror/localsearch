@@ -23,7 +23,7 @@
 
 #include "tracker-controller.h"
 #include "tracker-dbus-interface.h"
-#include "tracker-miner-files.h"
+#include "tracker-indexer.h"
 
 #ifdef HAVE_MALLOC_TRIM
 #include <malloc.h>
@@ -116,7 +116,6 @@ struct _TrackerApplication
 {
 	GApplication parent_instance;
 
-	TrackerMiner *miner_files;
 	TrackerDBusMiner *indexer_iface;
 	GDBusProxy *systemd_proxy;
 	TrackerMonitor *monitor;
@@ -696,6 +695,7 @@ wait_settle_cb (gpointer user_data)
 	return G_SOURCE_REMOVE;
 }
 
+#if IS_DEDICATED_SERVICE
 static void
 on_domain_vanished (GDBusConnection *connection,
                     const gchar     *name,
@@ -706,6 +706,7 @@ on_domain_vanished (GDBusConnection *connection,
 	g_message ("Domain %s vanished: quitting now.", name);
 	g_application_quit (G_APPLICATION (app));
 }
+#endif /* IS_DEDICATED_SERVICE */
 
 static void
 track_instance_state (TrackerApplication *app,
@@ -782,11 +783,11 @@ initialize_main_instance (TrackerApplication  *app,
 
 	if (instance->sparql_conn) {
 		instance->indexing_tree = tracker_indexing_tree_new ();
-		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
-		                                             instance->indexing_tree,
-		                                             app->monitor,
-		                                             error_reports,
-		                                             NULL);
+		instance->indexer = TRACKER_MINER (tracker_indexer_new (instance->sparql_conn,
+		                                                        instance->indexing_tree,
+		                                                        app->monitor,
+		                                                        error_reports,
+		                                                        NULL));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -883,11 +884,11 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 		tracker_controller_register_indexing_tree (app->controller,
 							   instance->indexing_tree);
 
-		instance->indexer = tracker_miner_files_new (instance->sparql_conn,
-		                                             instance->indexing_tree,
-		                                             app->monitor,
-		                                             error_reports,
-		                                             instance->root);
+		instance->indexer = TRACKER_MINER (tracker_indexer_new (instance->sparql_conn,
+		                                                        instance->indexing_tree,
+		                                                        app->monitor,
+		                                                        error_reports,
+		                                                        instance->root));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -1152,8 +1153,8 @@ tracker_application_dbus_register (GApplication     *application,
 	if (!initialize_main_instance (app, &app->main_instance, dbus_conn, error))
 		return FALSE;
 
-	if (!app->no_daemon &&
-	    g_strcmp0 (DOMAIN_PREFIX, "org.freedesktop") != 0) {
+#if IS_DEDICATED_SERVICE
+	if (!app->no_daemon) {
 		g_debug ("tracker-miner-fs-3 running for domain " DOMAIN_PREFIX ". "
 		         "The service will exit when " DOMAIN_PREFIX " disappears from the bus.");
 		app->domain_watch_id =
@@ -1162,6 +1163,7 @@ tracker_application_dbus_register (GApplication     *application,
 			                                NULL, on_domain_vanished,
 			                                app, NULL);
 	}
+#endif /* IS_DEDICATED_SERVICE */
 
 	app->files_interface = tracker_files_interface_new (dbus_conn);
 
@@ -1298,8 +1300,7 @@ check_eligible (const char *eligible)
 				         dir_path);
 				g_print ("\n");
 				parents_indexable = FALSE;
-			} else if (tracker_file_is_hidden (l->data) &&
-			           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+			} else if (tracker_file_is_hidden (l->data)) {
 				g_print (_("Parent directory “%s” is NOT eligible to be indexed (hidden file)"),
 				         dir_path);
 				g_print ("\n");
@@ -1326,8 +1327,7 @@ check_eligible (const char *eligible)
 		} else if (!is_dir &&
 		           tracker_indexing_tree_file_matches_filter (indexing_tree, TRACKER_FILTER_FILE, file)) {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (based on filters)"));
-		} else if (tracker_file_is_hidden (file) &&
-		           tracker_indexing_tree_get_filter_hidden (indexing_tree)) {
+		} else if (tracker_file_is_hidden (file)) {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (hidden file)"));
 		} else {
 			g_print ("  %s\n", _("File is NOT eligible to be indexed (not an indexed folder)"));
@@ -1360,10 +1360,8 @@ tracker_application_handle_local_options (GApplication *application,
 	if (g_variant_dict_lookup (options, "eligible", "^&ay", &eligible_file))
 		return check_eligible (eligible_file);
 
-	if (g_variant_dict_contains (options, "no-daemon"))
-		app->no_daemon = TRUE;
-	if (g_variant_dict_contains (options, "dry-run"))
-		app->dry_run = TRUE;
+	app->no_daemon = g_variant_dict_contains (options, "no-daemon");
+	app->dry_run = g_variant_dict_contains (options, "dry-run");
 
 	return G_APPLICATION_CLASS (tracker_application_parent_class)->handle_local_options (application, options);
 }

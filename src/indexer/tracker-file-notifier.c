@@ -1105,15 +1105,10 @@ notifier_queue_root (TrackerFileNotifier   *notifier,
 	TrackerIndexRoot *root;
 
 	root = tracker_index_root_new (notifier, file, flags, root_flags);
+	notifier->pending_index_roots = g_list_append (notifier->pending_index_roots, root);
 
-	if (flags & TRACKER_DIRECTORY_FLAG_PRIORITY) {
-		notifier->pending_index_roots = g_list_prepend (notifier->pending_index_roots, root);
-	} else {
-		notifier->pending_index_roots = g_list_append (notifier->pending_index_roots, root);
-	}
-
-       if (!notifier->current_index_root && !notifier->stopped)
-               notifier_check_next_root (notifier);
+	if (!notifier->current_index_root && !notifier->stopped)
+		notifier_check_next_root (notifier);
 }
 
 static GFileInfo *
@@ -1761,11 +1756,14 @@ tracker_file_notifier_stop (TrackerFileNotifier *notifier)
 			 * resumed, best to queue it again and start from
 			 * scratch.
 			 */
-			notifier_queue_root (notifier,
-			                     notifier->current_index_root->root,
-			                     notifier->current_index_root->flags |
-			                     TRACKER_DIRECTORY_FLAG_PRIORITY,
-			                     notifier->current_index_root->root_flags);
+			TrackerIndexRoot *root;
+
+			root = tracker_index_root_new (notifier,
+			                               notifier->current_index_root->root,
+			                               notifier->current_index_root->flags,
+			                               notifier->current_index_root->root_flags);
+
+			notifier->pending_index_roots = g_list_prepend (notifier->pending_index_roots, root);
 			g_clear_pointer (&notifier->current_index_root,
 			                 tracker_index_root_free);
 		}

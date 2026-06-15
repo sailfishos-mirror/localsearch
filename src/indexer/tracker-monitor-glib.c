@@ -46,11 +46,6 @@ struct TrackerMonitorGlibPrivate {
 	gboolean       monitor_limit_warned;
 	guint          monitors_ignored;
 
-	/* For FAM, the _CHANGES_DONE event is not signalled, so we
-	 * have to just use the _CHANGED event instead.
-	 */
-	gboolean       use_changed_event;
-
 	struct {
 		GMainContext *owner_context;
 		GMainContext *monitor_context;
@@ -106,22 +101,29 @@ enum {
 enum {
 	PROP_0,
 	PROP_ENABLED,
-	PROP_LIMIT,
-	PROP_COUNT,
-	PROP_IGNORED,
+};
+
+/* Matches GFileMonitorEvent */
+static const char *event_names[] = {
+	"G_FILE_MONITOR_EVENT_CHANGED",
+	"G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT",
+	"G_FILE_MONITOR_EVENT_DELETED",
+	"G_FILE_MONITOR_EVENT_CREATED",
+	"G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED",
+	"G_FILE_MONITOR_EVENT_PRE_UNMOUNT",
+	"G_FILE_MONITOR_EVENT_UNMOUNTED",
+	"G_FILE_MONITOR_EVENT_MOVED",
+	"G_FILE_MONITOR_EVENT_RENAMED",
+	"G_FILE_MONITOR_EVENT_MOVED_IN",
+	"G_FILE_MONITOR_EVENT_MOVED_OUT",
 };
 
 static void           tracker_monitor_glib_finalize     (GObject        *object);
-static void           tracker_monitor_glib_set_property (GObject        *object,
-                                                         guint           prop_id,
-                                                         const GValue   *value,
-                                                         GParamSpec     *pspec);
 static void           tracker_monitor_glib_get_property (GObject        *object,
                                                          guint           prop_id,
                                                          GValue         *value,
                                                          GParamSpec     *pspec);
-static guint          get_kqueue_limit             (void);
-static guint          get_inotify_limit            (void);
+
 static GFileMonitor * directory_monitor_new        (TrackerMonitorGlib *monitor,
                                                     GFile              *file);
 static void           directory_monitor_cancel     (GFileMonitor     *dir_monitor);
@@ -151,6 +153,47 @@ G_DEFINE_TYPE_WITH_CODE (TrackerMonitorGlib, tracker_monitor_glib, TRACKER_TYPE_
                          G_IMPLEMENT_INTERFACE (G_TYPE_INITABLE,
                                                 tracker_monitor_glib_initable_iface_init)
                          G_ADD_PRIVATE (TrackerMonitorGlib))
+
+#ifdef TRACKER_MONITOR_KQUEUE
+static guint
+get_kqueue_limit (void)
+{
+	guint limit = 400;
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
+		rl.rlim_cur = rl.rlim_max;
+		limit = (rl.rlim_cur * 90) / 100;
+	}
+
+	return limit;
+}
+#endif /* TRACKER_MONITOR_KQUEUE */
+
+#ifdef __linux__
+static guint
+get_inotify_limit (void)
+{
+	g_autoptr (GError) error = NULL;
+	const gchar *filename;
+	g_autofree char *contents = NULL;
+	guint limit = 8192;
+
+	filename = "/proc/sys/fs/inotify/max_user_watches";
+
+	if (!g_file_get_contents (filename,
+	                          &contents,
+	                          NULL,
+	                          &error)) {
+		g_warning ("Couldn't get INotify monitor limit from:'%s', %s",
+		           filename, error->message);
+	} else {
+		limit = atoi (contents);
+	}
+
+	return limit;
+}
+#endif /* __linux__ */
 
 static gpointer
 monitor_thread_func (gpointer user_data)
@@ -182,7 +225,7 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 	priv = tracker_monitor_glib_get_instance_private (TRACKER_MONITOR_GLIB (initable));
 
 	/* For the first monitor we get the type and find out if we
-	 * are using inotify, FAM, polling, etc.
+	 * are using inotify, etc.
 	 */
 	file = g_file_new_for_path (g_get_home_dir ());
 	monitor = g_file_monitor_directory (file,
@@ -203,6 +246,7 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 	name = g_type_name (monitor_backend);
 
 	/* Set limits based on backend... */
+#ifdef __linux__
 	if (strcmp (name, "GInotifyDirectoryMonitor") == 0 ||
 	    strcmp (name, "GInotifyFileMonitor") == 0) {
 		/* Using inotify */
@@ -225,28 +269,18 @@ tracker_monitor_glib_initable_init (GInitable     *initable,
 		 * negative maximum.
 		 */
 		priv->monitor_limit = MAX (priv->monitor_limit, 0);
-	} else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
+	}
+#endif /* __linux__ */
+#ifdef TRACKER_MONITOR_KQUEUE
+	else if (strcmp (name, "GKqueueDirectoryMonitor") == 0 ||
 	           strcmp (name, "GKqueueFileMonitor") == 0) {
 		/* Using kqueue(2) */
 		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is kqueue"));
 
 		priv->monitor_limit = get_kqueue_limit ();
-	} else if (strcmp (name, "GFamDirectoryMonitor") == 0) {
-		/* Using Fam */
-		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Fam"));
-
-		/* Setting limit to an arbitary limit
-		 * based on testing
-		 */
-		priv->monitor_limit = 400;
-		priv->use_changed_event = TRUE;
-	} else if (strcmp (name, "GWin32DirectoryMonitor") == 0) {
-		/* Using Windows */
-		TRACKER_NOTE (MONITORS, g_message ("Monitor backend is Windows"));
-
-		/* Guessing limit... */
-		priv->monitor_limit = 8192;
-	} else {
+	}
+#endif /* TRACKER_MONITOR_KQUEUE */
+	else {
 		/* Unknown */
 		g_warning ("Monitor backend:'%s' is unhandled. Monitoring will be disabled",
 		           name);
@@ -303,7 +337,6 @@ tracker_monitor_glib_class_init (TrackerMonitorGlibClass *klass)
 	monitor_class = TRACKER_MONITOR_CLASS (klass);
 
 	object_class->finalize = tracker_monitor_glib_finalize;
-	object_class->set_property = tracker_monitor_glib_set_property;
 	object_class->get_property = tracker_monitor_glib_get_property;
 
 	monitor_class->add = tracker_monitor_glib_add;
@@ -315,9 +348,6 @@ tracker_monitor_glib_class_init (TrackerMonitorGlibClass *klass)
 	monitor_class->get_count = tracker_monitor_glib_get_count;
 
 	g_object_class_override_property (object_class, PROP_ENABLED, "enabled");
-	g_object_class_override_property (object_class, PROP_LIMIT, "limit");
-	g_object_class_override_property (object_class, PROP_COUNT, "count");
-	g_object_class_override_property (object_class, PROP_IGNORED, "ignored");
 }
 
 static MonitorEvent *
@@ -421,22 +451,6 @@ tracker_monitor_glib_finalize (GObject *object)
 }
 
 static void
-tracker_monitor_glib_set_property (GObject      *object,
-                                   guint         prop_id,
-                                   const GValue *value,
-                                   GParamSpec   *pspec)
-{
-	switch (prop_id) {
-	case PROP_ENABLED:
-		tracker_monitor_set_enabled (TRACKER_MONITOR (object),
-		                             g_value_get_boolean (value));
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-	}
-}
-
-static void
 tracker_monitor_glib_get_property (GObject      *object,
                                    guint         prop_id,
                                    GValue       *value,
@@ -450,63 +464,9 @@ tracker_monitor_glib_get_property (GObject      *object,
 	case PROP_ENABLED:
 		g_value_set_boolean (value, priv->enabled);
 		break;
-	case PROP_LIMIT:
-		g_value_set_uint (value, priv->monitor_limit);
-		break;
-	case PROP_COUNT:
-		g_value_set_uint (value, tracker_monitor_get_count (TRACKER_MONITOR (object)));
-		break;
-	case PROP_IGNORED:
-		g_value_set_uint (value, priv->monitors_ignored);
-		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 	}
-}
-
-static guint
-get_kqueue_limit (void)
-{
-	guint limit = 400;
-#ifdef TRACKER_MONITOR_KQUEUE
-	struct rlimit rl;
-
-	if (getrlimit (RLIMIT_NOFILE, &rl) == 0) {
-		rl.rlim_cur = rl.rlim_max;
-		limit = (rl.rlim_cur * 90) / 100;
-	}
-#endif /* TRACKER_MONITOR_KQUEUE */
-
-	return limit;
-}
-
-static guint
-get_inotify_limit (void)
-{
-	GError      *error = NULL;
-	const gchar *filename;
-	gchar       *contents = NULL;
-	guint        limit;
-
-	filename = "/proc/sys/fs/inotify/max_user_watches";
-
-	if (!g_file_get_contents (filename,
-	                          &contents,
-	                          NULL,
-	                          &error)) {
-		g_warning ("Couldn't get INotify monitor limit from:'%s', %s",
-		           filename,
-		           error ? error->message : "no error given");
-		g_clear_error (&error);
-
-		/* Setting limit to an arbitary limit */
-		limit = 8192;
-	} else {
-		limit = atoi (contents);
-		g_free (contents);
-	}
-
-	return limit;
 }
 
 static gboolean
@@ -699,38 +659,6 @@ tracker_monitor_glib_move (TrackerMonitor *monitor,
 	return items_moved > 0;
 }
 
-static const gchar *
-monitor_event_to_string (GFileMonitorEvent event_type)
-{
-	switch (event_type) {
-	case G_FILE_MONITOR_EVENT_CHANGED:
-		return "G_FILE_MONITOR_EVENT_CHANGED";
-	case G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT:
-		return "G_FILE_MONITOR_EVENT_CHANGES_DONE_HINT";
-	case G_FILE_MONITOR_EVENT_DELETED:
-		return "G_FILE_MONITOR_EVENT_DELETED";
-	case G_FILE_MONITOR_EVENT_CREATED:
-		return "G_FILE_MONITOR_EVENT_CREATED";
-	case G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED:
-		return "G_FILE_MONITOR_EVENT_ATTRIBUTE_CHANGED";
-	case G_FILE_MONITOR_EVENT_PRE_UNMOUNT:
-		return "G_FILE_MONITOR_EVENT_PRE_UNMOUNT";
-	case G_FILE_MONITOR_EVENT_UNMOUNTED:
-		return "G_FILE_MONITOR_EVENT_UNMOUNTED";
-	case G_FILE_MONITOR_EVENT_MOVED:
-		return "G_FILE_MONITOR_EVENT_MOVED";
-	case G_FILE_MONITOR_EVENT_RENAMED:
-		return "G_FILE_MONITOR_EVENT_RENAMED";
-	case G_FILE_MONITOR_EVENT_MOVED_IN:
-		return "G_FILE_MONITOR_EVENT_MOVED_IN";
-	case G_FILE_MONITOR_EVENT_MOVED_OUT:
-		return "G_FILE_MONITOR_EVENT_MOVED_OUT";
-		break;
-	}
-
-	return "unknown";
-}
-
 /* Executed in main thread */
 static gboolean
 emit_signal_for_event (MonitorEvent *event)
@@ -895,7 +823,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for %s:'%s'",
 		                         event_type,
-		                         monitor_event_to_string (event_type),
+		                         event_type < G_N_ELEMENTS (event_names) ? event_names[event_type] : "unknown",
 		                         is_directory ? "directory" : "file",
 		                         file_uri));
 
@@ -934,7 +862,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 		TRACKER_NOTE (MONITORS,
 		              g_message ("Received monitor event:%d (%s) for files '%s'->'%s'",
 		                         event_type,
-		                         monitor_event_to_string (event_type),
+		                         event_type < G_N_ELEMENTS (event_names) ? event_names[event_type] : "unknown",
 		                         file_uri,
 		                         other_file_uri));
 
@@ -967,12 +895,7 @@ monitor_event_cb (GFileMonitor      *file_monitor,
 	switch (event_type) {
 	case G_FILE_MONITOR_EVENT_CREATED:
 	case G_FILE_MONITOR_EVENT_CHANGED:
-		if (!priv->use_changed_event) {
-			cache_event (monitor, file, event_type, is_directory);
-		} else {
-			queue_signal_for_event (monitor, event_type,
-			                        is_directory, file, NULL);
-		}
+		cache_event (monitor, file, event_type, is_directory);
 		break;
 	case G_FILE_MONITOR_EVENT_DELETED:
 		if (prev_event &&

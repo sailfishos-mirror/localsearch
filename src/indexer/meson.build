@@ -1,5 +1,5 @@
 files_extract = files(
-    'tracker-miner-files-methods.c',
+    'tracker-indexer-methods.c',
     'tracker-indexing-tree-methods.c',
 )
 
@@ -8,7 +8,7 @@ miner_fs_enums = gnome.mkenums_simple('tracker-miner-enum-types',
 )
 
 miner_fs_resources = gnome.compile_resources(
-    'miner-fs-resources',
+    'indexer-resources',
     'org.freedesktop.Tracker3.Miner.Files.gresource.xml',
     c_name: 'tracker_miner_fs',
 )
@@ -26,11 +26,9 @@ private_sources = [
     'tracker-files-interface.c',
     'tracker-indexing-tree.c',
     'tracker-lru.c',
-    'tracker-miner-fs.c',
+    'tracker-indexer.c',
     'tracker-monitor.c',
     'tracker-monitor-glib.c',
-    'tracker-priority-queue.c',
-    'tracker-task-pool.c',
     'tracker-sparql-buffer.c',
     'tracker-utils.c',
     files_extract,
@@ -62,7 +60,6 @@ sources = [
     'tracker-controller.c',
     'tracker-extract-watchdog.c',
     'tracker-main.c',
-    'tracker-miner-files.c',
     'tracker-storage.c',
 ]
 

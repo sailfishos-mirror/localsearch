@@ -97,6 +97,8 @@
 
 #mesondefine DOMAIN_PREFIX
 
+#mesondefine IS_DEDICATED_SERVICE
+
 #mesondefine MINER_FS_CACHE_LOCATION
 
 #mesondefine LIBXML2_SUPPORTS_HTML_CTXT

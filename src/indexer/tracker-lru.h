@@ -31,8 +31,7 @@ TrackerLRU * tracker_lru_new (guint                size,
                               GDestroyNotify       elem_destroy,
                               GDestroyNotify       data_destroy);
 
-TrackerLRU *tracker_lru_ref (TrackerLRU *lru);
-void tracker_lru_unref (TrackerLRU *lru);
+void tracker_lru_free (TrackerLRU *lru);
 
 gboolean tracker_lru_find (TrackerLRU *lru,
                            gpointer    elem,

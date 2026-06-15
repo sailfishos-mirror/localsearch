@@ -37,7 +37,6 @@ struct _TrackerLRU {
 	GDestroyNotify elem_destroy;
 	GDestroyNotify data_destroy;
 	guint max_size;
-	gint ref_count;
 };
 
 static void
@@ -66,36 +65,26 @@ tracker_lru_new (guint                size,
 	lru->data_destroy = data_destroy;
 	lru->items = g_hash_table_new (elem_hash_func,
 	                               elem_equal_func);
-	lru->ref_count = 1;
 
-	return lru;
-}
-
-TrackerLRU *
-tracker_lru_ref (TrackerLRU *lru)
-{
-	g_atomic_int_inc (&lru->ref_count);
 	return lru;
 }
 
 void
-tracker_lru_unref (TrackerLRU *lru)
+tracker_lru_free (TrackerLRU *lru)
 {
-	if (g_atomic_int_dec_and_test (&lru->ref_count)) {
-		TrackerLRUElement *node;
-		GHashTableIter iter;
+	TrackerLRUElement *node;
+	GHashTableIter iter;
 
-		g_hash_table_iter_init (&iter, lru->items);
+	g_hash_table_iter_init (&iter, lru->items);
 
-		while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &node)) {
-			g_hash_table_iter_remove (&iter);
-			free_node (node, lru);
-		}
-
-		g_hash_table_unref (lru->items);
-		g_queue_clear (&lru->queue);
-		g_free (lru);
+	while (g_hash_table_iter_next (&iter, NULL, (gpointer *) &node)) {
+		g_hash_table_iter_remove (&iter);
+		free_node (node, lru);
 	}
+
+	g_hash_table_unref (lru->items);
+	g_queue_clear (&lru->queue);
+	g_free (lru);
 }
 
 gboolean

@@ -97,24 +97,6 @@ tracker_controller_set_property (GObject      *object,
 }
 
 static void
-tracker_controller_get_property (GObject    *object,
-                                 guint       prop_id,
-                                 GValue     *value,
-                                 GParamSpec *pspec)
-{
-	TrackerController *controller = TRACKER_CONTROLLER (object);
-
-	switch (prop_id) {
-	case PROP_INDEXING_TREE:
-		g_value_set_object (value, controller->indexing_tree);
-		break;
-	default:
-		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-		break;
-	}
-}
-
-static void
 add_indexed_directory (TrackerController     *controller,
                        GFile                 *file,
                        TrackerDirectoryFlags  flags)
@@ -278,9 +260,6 @@ update_filters (TrackerController   *controller,
 		TrackerIndexingTree *indexing_tree)
 {
 	GStrv strv;
-
-	/* Always ignore hidden */
-	tracker_indexing_tree_set_filter_hidden (indexing_tree, TRUE);
 
 	/* Ignored files */
 	strv = g_settings_get_strv (G_SETTINGS (controller->config), "ignored-files");
@@ -688,6 +667,7 @@ static void
 log_config (TrackerConfig *config)
 {
 #ifdef G_ENABLE_DEBUG
+// LCOV_EXCL_START
 	if (TRACKER_DEBUG_CHECK (CONFIG)) {
 		GSList *dirs, *l;
 
@@ -714,6 +694,7 @@ log_config (TrackerConfig *config)
 		                                   "enable-monitors") ?
 		           "on" : "off");
 	}
+// LCOV_EXCL_STOP
 #endif
 }
 
@@ -812,7 +793,6 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 	GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
 	object_class->set_property = tracker_controller_set_property;
-	object_class->get_property = tracker_controller_get_property;
 	object_class->constructed = tracker_controller_constructed;
 	object_class->finalize = tracker_controller_finalize;
 
@@ -836,7 +816,7 @@ tracker_controller_class_init (TrackerControllerClass *klass)
 		                     "Indexing tree",
 		                     "Indexing tree",
 		                     TRACKER_TYPE_INDEXING_TREE,
-		                     G_PARAM_READWRITE |
+		                     G_PARAM_WRITABLE |
 		                     G_PARAM_CONSTRUCT_ONLY |
 		                     G_PARAM_STATIC_STRINGS);
 	props[PROP_FILES_INTERFACE] =

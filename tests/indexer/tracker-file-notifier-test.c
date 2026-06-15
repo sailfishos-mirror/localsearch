@@ -300,7 +300,6 @@ test_common_context_setup (TestCommonContext *fixture,
 	CREATE_FOLDER (fixture, "non-indexed");
 
 	fixture->indexing_tree = tracker_indexing_tree_new ();
-	tracker_indexing_tree_set_filter_hidden (fixture->indexing_tree, TRUE);
 
 	monitor = tracker_monitor_new (NULL);
 

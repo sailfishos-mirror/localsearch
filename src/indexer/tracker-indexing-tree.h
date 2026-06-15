@@ -19,64 +19,18 @@
  * Author: Carlos Garnacho  <carlos@lanedo.com>
  */
 
-#ifndef __TRACKER_INDEXING_TREE_H__
-#define __TRACKER_INDEXING_TREE_H__
+#pragma once
 
 #include <gio/gio.h>
 #include "tracker-miner-enums.h"
 
 G_BEGIN_DECLS
 
-#define TRACKER_TYPE_INDEXING_TREE         (tracker_indexing_tree_get_type())
-#define TRACKER_INDEXING_TREE(o)           (G_TYPE_CHECK_INSTANCE_CAST ((o), TRACKER_TYPE_INDEXING_TREE, TrackerIndexingTree))
-#define TRACKER_INDEXING_TREE_CLASS(c)     (G_TYPE_CHECK_CLASS_CAST ((c),    TRACKER_TYPE_INDEXING_TREE, TrackerIndexingTreeClass))
-#define TRACKER_IS_INDEXING_TREE(o)        (G_TYPE_CHECK_INSTANCE_TYPE ((o), TRACKER_TYPE_INDEXING_TREE))
-#define TRACKER_IS_INDEXING_TREE_CLASS(c)  (G_TYPE_CHECK_CLASS_TYPE ((c),    TRACKER_TYPE_INDEXING_TREE))
-#define TRACKER_INDEXING_TREE_GET_CLASS(o) (G_TYPE_INSTANCE_GET_CLASS ((o),  TRACKER_TYPE_INDEXING_TREE, TrackerIndexingTreeClass))
-
-/**
- * TrackerIndexingTree:
- *
- * Base object used to configure indexing within #TrackerMinerFS items.
- */
-
-typedef struct _TrackerIndexingTree TrackerIndexingTree;
-
-struct _TrackerIndexingTree {
-	GObject parent_instance;
-	gpointer priv;
-};
-
-/**
- * TrackerIndexingTreeClass:
- * @parent_class: parent object class
- * @directory_added: Called when a directory is added.
- * @directory_removed: Called when a directory is removed.
- * @directory_updated: Called when a directory is updated.
- * @child_updated: Called when a file inside a directory is updated.
- * @padding: Reserved for future API improvements.
- *
- * Class for the #TrackerIndexingTree.
- */
-typedef struct {
-	GObjectClass parent_class;
-
-	void (* directory_added)   (TrackerIndexingTree *indexing_tree,
-	                            GFile               *directory);
-	void (* directory_removed) (TrackerIndexingTree *indexing_tree,
-	                            GFile               *directory);
-	void (* directory_updated) (TrackerIndexingTree *indexing_tree,
-	                            GFile               *directory);
-	void (* child_updated)     (TrackerIndexingTree *indexing_tree,
-	                            GFile               *root,
-	                            GFile               *child);
-	/* <Private> */
-	gpointer padding[9];
-} TrackerIndexingTreeClass;
-
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerIndexingTree, g_object_unref)
-
-GType                 tracker_indexing_tree_get_type (void) G_GNUC_CONST;
+#define TRACKER_TYPE_INDEXING_TREE (tracker_indexing_tree_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerIndexingTree,
+		      tracker_indexing_tree,
+		      TRACKER, INDEXING_TREE,
+		      GObject)
 
 TrackerIndexingTree * tracker_indexing_tree_new      (void);
 
@@ -104,15 +58,10 @@ gboolean  tracker_indexing_tree_file_is_indexable    (TrackerIndexingTree  *tree
 gboolean  tracker_indexing_tree_parent_is_indexable (TrackerIndexingTree  *tree,
                                                      GFile                *file);
 
-gboolean  tracker_indexing_tree_get_filter_hidden    (TrackerIndexingTree  *tree);
-void      tracker_indexing_tree_set_filter_hidden    (TrackerIndexingTree  *tree,
-                                                      gboolean              filter_hidden);
-
 GFile *   tracker_indexing_tree_get_root             (TrackerIndexingTree    *tree,
                                                       GFile                  *file,
                                                       const char            **id,
                                                       TrackerDirectoryFlags  *directory_flags);
-GFile *   tracker_indexing_tree_get_master_root      (TrackerIndexingTree   *tree);
 
 gboolean  tracker_indexing_tree_file_is_root         (TrackerIndexingTree   *tree,
                                                       GFile                 *file);
@@ -138,5 +87,3 @@ gboolean tracker_indexing_tree_check_config (TrackerIndexingTree *tree,
                                              gboolean             check_locations);
 
 G_END_DECLS
-
-#endif /* __TRACKER_INDEXING_TREE_H__ */
