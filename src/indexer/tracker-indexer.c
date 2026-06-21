@@ -95,6 +95,7 @@ struct _TrackerIndexer {
 	guint low_battery_pause : 1;
 
 	guint active : 1;
+	guint extract_content : 1;
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
 
@@ -134,6 +135,7 @@ enum {
 	PROP_ROOT,
 	PROP_ERROR_REPORTS,
 	PROP_ACTIVE,
+	PROP_EXTRACT_CONTENT,
 	N_PROPS,
 };
 
@@ -235,6 +237,12 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 		g_param_spec_boolean ("active", NULL, NULL,
 		                      FALSE,
 		                      G_PARAM_READABLE |
+		                      G_PARAM_STATIC_STRINGS);
+	props[PROP_EXTRACT_CONTENT] =
+		g_param_spec_boolean ("extract-content", NULL, NULL,
+		                      FALSE,
+		                      G_PARAM_WRITABLE |
+		                      G_PARAM_CONSTRUCT_ONLY |
 		                      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
@@ -517,6 +525,9 @@ init_index_roots (TrackerIndexer *indexer)
 static void
 check_unextracted (TrackerIndexer *indexer)
 {
+	if (!indexer->extract_content)
+		return;
+
 	g_debug ("Starting extractor");
 	tracker_extract_watchdog_ensure_started (indexer->extract_watchdog);
 }
@@ -801,6 +812,9 @@ fs_set_property (GObject      *object,
 	case PROP_ERROR_REPORTS:
 		indexer->error_reports = g_value_dup_object (value);
 		break;
+	case PROP_EXTRACT_CONTENT:
+		indexer->extract_content = !!g_value_get_boolean (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -872,7 +886,7 @@ process_stop (TrackerIndexer *indexer)
 
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
-	if (!indexer->ask_unextracted)
+	if (!indexer->ask_unextracted && indexer->extract_content)
 		indexer->ask_unextracted = tracker_load_statement (conn, "ask-unextracted.rq", &error);
 
 	if (indexer->ask_unextracted)
@@ -1606,7 +1620,8 @@ tracker_indexer_new (TrackerSparqlConnection  *connection,
                      TrackerIndexingTree      *indexing_tree,
                      TrackerMonitor           *monitor,
                      TrackerErrorReport       *error_reports,
-                     GFile                    *root)
+                     GFile                    *root,
+                     gboolean                  extract_content)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -1616,5 +1631,6 @@ tracker_indexer_new (TrackerSparqlConnection  *connection,
 	                     "monitor", monitor,
 	                     "error-reports", error_reports,
 	                     "root", root,
+	                     "extract-content", extract_content,
 	                     NULL);
 }
