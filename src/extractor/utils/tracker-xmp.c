@@ -751,7 +751,8 @@ tracker_xmp_new_for_file (GFile *file)
 	init_xmp ();
 
 	xmp_files = xmp_files_open_new (g_file_peek_path (file),
-	                                XMP_OPEN_READ);
+	                                XMP_OPEN_READ |
+					XMP_OPEN_USESMARTHANDLER);
 	xmp = xmp_files_get_new_xmp (xmp_files);
 	xmp_files_close (xmp_files, XMP_CLOSE_NOOPTION);
 	xmp_files_free (xmp_files);
