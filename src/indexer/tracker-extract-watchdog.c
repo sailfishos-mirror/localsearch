@@ -373,6 +373,7 @@ wait_check_async_cb (GObject      *object,
 {
 	TrackerExtractWatchdog *watchdog = user_data;
 	g_autoptr (GError) error = NULL;
+	gboolean success;
 
 	if (!g_subprocess_wait_check_finish (watchdog->extract_process,
 	                                     res, &error)) {
@@ -380,12 +381,12 @@ wait_check_async_cb (GObject      *object,
 			return;
 
 		g_warning ("Extractor subprocess died unexpectedly: %s", error->message);
+		clear_process_state (watchdog);
 		g_signal_emit (watchdog, signals[LOST], 0);
 	} else {
 		g_signal_emit (watchdog, signals[STATUS], 0, "Idle", 1.0, 0);
+		clear_process_state (watchdog);
 	}
-
-	clear_process_state (watchdog);
 }
 
 static GStrv

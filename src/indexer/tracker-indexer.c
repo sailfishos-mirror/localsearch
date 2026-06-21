@@ -99,7 +99,6 @@ struct _TrackerIndexer {
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
 
 	guint status_idle_id;
-	guint grace_period_timeout_id;
 	guint resume_after_disk_full_id;
 	guint item_queues_handler_id;
 };
@@ -522,16 +521,6 @@ check_unextracted (TrackerIndexer *indexer)
 	tracker_extract_watchdog_ensure_started (indexer->extract_watchdog);
 }
 
-static gboolean
-extractor_lost_timeout_cb (gpointer user_data)
-{
-	TrackerIndexer *indexer = user_data;
-
-	check_unextracted (indexer);
-	indexer->grace_period_timeout_id = 0;
-	return G_SOURCE_REMOVE;
-}
-
 static void
 set_active (TrackerIndexer *indexer,
             gboolean        active)
@@ -555,12 +544,7 @@ on_extractor_lost (TrackerExtractWatchdog *watchdog,
                    TrackerIndexer         *indexer)
 {
 	g_debug ("tracker-extract vanished, maybe restarting.");
-
-	/* Give a period of grace before restarting, so we allow replacing
-	 * from eg. a terminal.
-	 */
-	indexer->grace_period_timeout_id =
-		g_timeout_add_seconds (1, extractor_lost_timeout_cb, indexer);
+	check_unextracted (indexer);
 }
 
 static void
@@ -696,7 +680,6 @@ fs_finalize (GObject *object)
 
 	g_clear_pointer (&indexer->urn_lru, tracker_lru_free);
 	g_clear_handle_id (&indexer->item_queues_handler_id, g_source_remove);
-	g_clear_handle_id (&indexer->grace_period_timeout_id, g_source_remove);
 	g_clear_handle_id (&indexer->resume_after_disk_full_id, g_source_remove);
 
 	if (indexer->file_notifier)
