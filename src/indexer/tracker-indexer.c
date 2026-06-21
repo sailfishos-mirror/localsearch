@@ -86,6 +86,8 @@ struct _TrackerIndexer {
 	/* Folder URN cache */
 	TrackerLRU *urn_lru;
 
+	TrackerSparqlStatement *ask_unextracted;
+
 	/* Properties */
 	gdouble throttle;
 
@@ -542,6 +544,13 @@ set_active (TrackerIndexer *indexer,
 }
 
 static void
+indexer_finish (TrackerIndexer *indexer)
+{
+	set_active (indexer, FALSE);
+	g_signal_emit (indexer, signals[FINISHED], 0);
+}
+
+static void
 on_extractor_lost (TrackerExtractWatchdog *watchdog,
                    TrackerIndexer         *indexer)
 {
@@ -561,13 +570,17 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
                      gint                    remaining,
                      TrackerIndexer         *indexer)
 {
+	gboolean finished = g_strcmp0 (status, "Idle") == 0;
+
 	if (!tracker_miner_is_paused (TRACKER_MINER (indexer))) {
-		set_active (indexer, g_strcmp0 (status, "Idle") != 0);
 		g_object_set (indexer,
 		              "status", status,
 		              "progress", progress,
 		              "remaining-time", remaining,
 		              NULL);
+
+		if (finished)
+			indexer_finish (indexer);
 	}
 }
 
@@ -695,6 +708,7 @@ fs_finalize (GObject *object)
 	g_queue_free_full (indexer->items,
 	                   (GDestroyNotify) queue_event_free);
 
+	g_clear_object (&indexer->ask_unextracted);
 	g_clear_object (&indexer->indexing_tree);
 	g_clear_object (&indexer->file_notifier);
 	g_clear_object (&indexer->monitor);
@@ -867,13 +881,30 @@ miner_resumed (TrackerMiner *miner)
 static void
 process_stop (TrackerIndexer *indexer)
 {
+	TrackerSparqlConnection *conn = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
+
+	conn = tracker_miner_get_connection (TRACKER_MINER (indexer));
+
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
-	set_active (indexer, FALSE);
+	if (!indexer->ask_unextracted)
+		indexer->ask_unextracted = tracker_load_statement (conn, "ask-unextracted.rq", &error);
 
-	check_unextracted (indexer);
+	if (indexer->ask_unextracted)
+		cursor = tracker_sparql_statement_execute (indexer->ask_unextracted, NULL, &error);
 
-	g_signal_emit (indexer, signals[FINISHED], 0);
+	if (error)
+		g_warning ("Could not check unextracted files: %s", error->message);
+
+	if (cursor &&
+	    tracker_sparql_cursor_next (cursor, NULL, NULL) &&
+	    tracker_sparql_cursor_get_boolean (cursor, 0)) {
+		check_unextracted (indexer);
+	} else {
+		indexer_finish (indexer);
+	}
 }
 
 static void
