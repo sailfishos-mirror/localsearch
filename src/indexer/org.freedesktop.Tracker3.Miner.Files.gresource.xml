@@ -3,6 +3,9 @@
   <gresource prefix="/org/freedesktop/Tracker3/Miner/Files">
     <file>queries/ask-file-exists.rq</file>
     <file>queries/ask-unextracted.rq</file>
+    <file>queries/cleanup-audio-album-discs.rq</file>
+    <file>queries/cleanup-audio-albums.rq</file>
+    <file>queries/cleanup-audio-artists.rq</file>
     <file>queries/delete-file.rq</file>
     <file>queries/delete-file-content.rq</file>
     <file>queries/delete-folder-contents.rq</file>

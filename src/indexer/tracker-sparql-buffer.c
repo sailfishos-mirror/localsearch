@@ -57,6 +57,9 @@ struct _TrackerSparqlBuffer
 	TrackerSparqlStatement *delete_content;
 	TrackerSparqlStatement *move_file;
 	TrackerSparqlStatement *move_content;
+	TrackerSparqlStatement *cleanup_audio_album_discs;
+	TrackerSparqlStatement *cleanup_audio_albums;
+	TrackerSparqlStatement *cleanup_audio_artists;
 
 	GFile *root;
 };
@@ -104,6 +107,9 @@ tracker_sparql_buffer_finalize (GObject *object)
 	g_object_unref (sparql_buffer->move_content);
 	g_object_unref (sparql_buffer->connection);
 	g_clear_object (&sparql_buffer->root);
+	g_clear_object (&sparql_buffer->cleanup_audio_album_discs);
+	g_clear_object (&sparql_buffer->cleanup_audio_albums);
+	g_clear_object (&sparql_buffer->cleanup_audio_artists);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
 }
@@ -147,6 +153,12 @@ tracker_sparql_buffer_constructed (GObject *object)
 		tracker_load_statement (sparql_buffer->connection, "move-file.rq", NULL);
 	sparql_buffer->move_content =
 		tracker_load_statement (sparql_buffer->connection, "move-folder-contents.rq", NULL);
+	sparql_buffer->cleanup_audio_album_discs =
+		tracker_load_statement (sparql_buffer->connection, "cleanup-audio-album-discs.rq", NULL);
+	sparql_buffer->cleanup_audio_albums =
+		tracker_load_statement (sparql_buffer->connection, "cleanup-audio-albums.rq", NULL);
+	sparql_buffer->cleanup_audio_artists =
+		tracker_load_statement (sparql_buffer->connection, "cleanup-audio-artists.rq", NULL);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->constructed (object);
 }
@@ -432,6 +444,55 @@ push_stmt_task (TrackerSparqlBuffer    *buffer,
 
 	task = sparql_task_data_new_stmt (file, stmt);
 	sparql_buffer_push_task (buffer, task);
+}
+
+static void
+tracker_sparql_buffer_log_statement (TrackerSparqlBuffer    *buffer,
+                                     TrackerSparqlStatement *stmt,
+                                     GFile                  *file)
+{
+	TrackerBatch *batch;
+
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+	g_return_if_fail (stmt != NULL);
+
+	if (!file)
+		file = buffer->root;
+
+	g_return_if_fail (G_IS_FILE (file));
+
+	batch = tracker_sparql_buffer_get_current_batch (buffer);
+	tracker_batch_add_statement (batch, stmt, NULL);
+
+	push_stmt_task (buffer, stmt, file);
+}
+
+void
+tracker_sparql_buffer_log_cleanup (TrackerSparqlBuffer        *buffer,
+                                   TrackerSparqlBufferCleanup  cleanup)
+{
+	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
+
+	switch (cleanup) {
+	case TRACKER_SPARQL_BUFFER_CLEANUP_AUDIO:
+		if (!buffer->cleanup_audio_album_discs ||
+		    !buffer->cleanup_audio_albums ||
+		    !buffer->cleanup_audio_artists)
+			return;
+
+		tracker_sparql_buffer_log_statement (buffer,
+		                                     buffer->cleanup_audio_album_discs,
+		                                     NULL);
+		tracker_sparql_buffer_log_statement (buffer,
+		                                     buffer->cleanup_audio_albums,
+		                                     NULL);
+		tracker_sparql_buffer_log_statement (buffer,
+		                                     buffer->cleanup_audio_artists,
+		                                     NULL);
+		break;
+	default:
+		g_return_if_reached ();
+	}
 }
 
 static char *

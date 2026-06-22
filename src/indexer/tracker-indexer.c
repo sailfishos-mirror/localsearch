@@ -98,6 +98,7 @@ struct _TrackerIndexer {
 	guint extract_content : 1;
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
+	guint cleanup_audio_pending : 1;
 
 	guint status_idle_id;
 	guint resume_after_disk_full_id;
@@ -950,10 +951,16 @@ sparql_buffer_flush_cb (GObject      *object,
 	indexer->flushing = FALSE;
 
 	if (tracker_sparql_buffer_limit_reached (buffer)) {
+		if (indexer->cleanup_audio_pending) {
+			indexer->cleanup_audio_pending = FALSE;
+			tracker_sparql_buffer_log_cleanup (indexer->sparql_buffer,
+			                                   TRACKER_SPARQL_BUFFER_CLEANUP_AUDIO);
+		}
+
 		if (tracker_sparql_buffer_flush (buffer,
-						 "SPARQL buffer again full after flush",
-						 sparql_buffer_flush_cb,
-						 indexer))
+		                                 "SPARQL buffer again full after flush",
+		                                 sparql_buffer_flush_cb,
+		                                 indexer))
 			indexer->flushing = TRUE;
 	}
 
@@ -1022,6 +1029,8 @@ item_remove (TrackerIndexer *indexer,
 	}
 
 	tracker_sparql_buffer_log_delete (indexer->sparql_buffer, event->file);
+	indexer->cleanup_audio_pending = TRUE;
+
 	tracker_lru_remove (indexer->urn_lru, event->file);
 }
 
@@ -1064,6 +1073,7 @@ item_move (TrackerIndexer *indexer,
 
 		tracker_sparql_buffer_log_delete_content (indexer->sparql_buffer,
 		                                          event->file);
+		indexer->cleanup_audio_pending = TRUE;
 	}
 
 	if (tracker_indexing_tree_file_is_root (indexer->indexing_tree, event->dest_file)) {
@@ -1142,10 +1152,16 @@ miner_handle_next_item (TrackerIndexer *indexer)
 				process_stop (indexer);
 			} else {
 				/* Flush any possible pending update here */
+				if (indexer->cleanup_audio_pending) {
+					indexer->cleanup_audio_pending = FALSE;
+					tracker_sparql_buffer_log_cleanup (indexer->sparql_buffer,
+					                                   TRACKER_SPARQL_BUFFER_CLEANUP_AUDIO);
+				}
+
 				if (tracker_sparql_buffer_flush (indexer->sparql_buffer,
-								 "Queue handlers NONE",
-								 sparql_buffer_flush_cb,
-								 indexer))
+				                                 "Queue handlers NONE",
+				                                 sparql_buffer_flush_cb,
+				                                 indexer))
 					indexer->flushing = TRUE;
 			}
 		}
@@ -1178,10 +1194,16 @@ miner_handle_next_item (TrackerIndexer *indexer)
 	}
 
 	if (tracker_sparql_buffer_limit_reached (indexer->sparql_buffer)) {
+		if (indexer->cleanup_audio_pending) {
+			indexer->cleanup_audio_pending = FALSE;
+			tracker_sparql_buffer_log_cleanup (indexer->sparql_buffer,
+			                                   TRACKER_SPARQL_BUFFER_CLEANUP_AUDIO);
+		}
+
 		if (tracker_sparql_buffer_flush (indexer->sparql_buffer,
-						 "SPARQL buffer limit reached",
-						 sparql_buffer_flush_cb,
-						 indexer)) {
+		                                 "SPARQL buffer limit reached",
+		                                 sparql_buffer_flush_cb,
+		                                 indexer)) {
 			indexer->flushing = TRUE;
 		} else {
 			/* If we cannot flush, wait for the pending operations
@@ -1538,7 +1560,9 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	g_autoptr (GError) error = NULL;
 	QueueForeachData foreach_data = { indexer, directory };
 
-	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Cancelled processing pool tasks at %f\n", g_timer_elapsed (timer, NULL)));
+	TRACKER_NOTE (MINER_FS_EVENTS,
+	              g_message ("  Cancelled processing pool tasks at %f\n",
+	                         g_timer_elapsed (timer, NULL)));
 
 	tracker_indexing_tree_get_root (indexing_tree, directory, NULL, &flags);
 	conn = tracker_miner_get_connection (TRACKER_MINER (indexer));
@@ -1549,8 +1573,11 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	else
 		delete_index_root (indexer, directory, batch);
 
-	if (!tracker_batch_execute (batch, NULL, &error))
+	if (!tracker_batch_execute (batch, NULL, &error)) {
 		g_warning ("Error updating indexed folder: %s", error->message);
+	} else {
+		indexer->cleanup_audio_pending = TRUE;
+	}
 
 	/* Remove anything contained in the removed directory
 	 * from all relevant processing queues.
@@ -1562,7 +1589,9 @@ indexing_tree_directory_removed (TrackerIndexingTree *indexing_tree,
 	                 (GFunc) delete_nested_queued_events,
 	                 &foreach_data);
 
-	TRACKER_NOTE (MINER_FS_EVENTS, g_message ("  Removed files at %f\n", g_timer_elapsed (timer, NULL)));
+	TRACKER_NOTE (MINER_FS_EVENTS,
+	              g_message ("  Removed files at %f\n",
+	                         g_timer_elapsed (timer, NULL)));
 	g_timer_destroy (timer);
 }
 
