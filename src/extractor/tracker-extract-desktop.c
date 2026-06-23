@@ -67,6 +67,7 @@ get_desktop_key_file (GFile   *file,
 		*type = g_strstrip (str);
 	}
 
+	g_assert (key_file != NULL);
 	g_free (path);
 
 	return key_file;
@@ -116,6 +117,7 @@ process_desktop_file (TrackerResource  *resource,
 	key_file = get_desktop_key_file (file, &type, &inner_error);
 	if (!key_file) {
 		g_propagate_prefixed_error (error, inner_error, "Could not load desktop file:");
+		g_assert (type == NULL);
 		return FALSE;
 	}
 
