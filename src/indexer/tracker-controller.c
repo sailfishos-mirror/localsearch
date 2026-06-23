@@ -214,6 +214,12 @@ mount_point_removed_cb (TrackerController *controller,
 		g_signal_emit (controller, signals[REMOVABLE_POINT_REMOVED], 0, mount_point_file);
 	} else {
 		GList *roots, *l;
+		gboolean mount_point_indexed;
+
+		mount_point_indexed =
+			tracker_indexing_tree_get_root (controller->indexing_tree,
+			                                mount_point_file,
+			                                NULL, NULL) != NULL;
 
 		roots = tracker_indexing_tree_list_roots (controller->indexing_tree);
 
@@ -221,6 +227,24 @@ mount_point_removed_cb (TrackerController *controller,
 			if (!g_file_equal (l->data, mount_point_file) &&
 			    !g_file_has_prefix (l->data, mount_point_file))
 				continue;
+
+			if (!mount_point_indexed) {
+				TrackerDirectoryFlags flags;
+
+				/* The mount point is not indexed itself, but affects
+				 * configured locations. This means the mount point
+				 * is a parent of all indexed folders (or a disjoint
+				 * subset, e.g. /mnt vs. /home). Add the flag to
+				 * preserve data in this case, before proceeding to
+				 * the removal of the affected configured folder(s).
+				 */
+				tracker_indexing_tree_get_root (controller->indexing_tree,
+				                                l->data,
+				                                NULL, &flags);
+				flags |= TRACKER_DIRECTORY_FLAG_PRESERVE;
+				tracker_indexing_tree_add (controller->indexing_tree,
+				                           l->data, flags);
+			}
 
 			tracker_indexing_tree_remove (controller->indexing_tree,
 			                              l->data);
