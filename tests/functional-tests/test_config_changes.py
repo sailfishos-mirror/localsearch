@@ -371,5 +371,35 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
             self.device_path.rmdir()
 
 
+    def test_parent_non_removable(self):
+        subdir = self.device_path.joinpath("dir")
+        path = subdir.joinpath("file1.txt")
+        path.parent.mkdir(parents=True)
+        path.write_text("Foo bar baz")
+
+        dconf = self.sandbox.get_dconf_client()
+
+        with self.await_document_inserted(path):
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-single-directories', GLib.Variant.new_strv([str(subdir)]))
+            self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
+
+        self.assertResourceExists(subdir.as_uri())
+        self.assertResourceMissing(self.device_path.as_uri())
+        resource_id = self.tracker.get_content_resource_id(subdir.as_uri())
+
+        with self.tracker.await_content_update(
+            fixtures.FILESYSTEM_GRAPH,
+            resource_id,
+            f'tracker:available true',
+            f'tracker:available false'
+        ):
+            self.remove_removable_device(self.device_path)
+
+        self.assertResourceExists(subdir.as_uri())
+        self.assertResourceMissing(self.device_path.as_uri())
+
+
 if __name__ == "__main__":
     fixtures.tracker_test_main()
