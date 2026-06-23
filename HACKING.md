@@ -59,9 +59,20 @@ by Systemd or D-Bus. In order to run the indexer fully under e.g. gdb or valgrin
 you will need stop it first, e.g.:
 
 ```sh
-$ localsearch3 daemon --terminate
+$ systemd --user stop localsearch-3.service
 $ valgrind --leak-check=full --trace-children /usr/libexec/localsearch-3
 ```
 
 Note that the metadata extractor process is fully managed by the indexer, you
 will need to trace both as in the example above.
+
+In some circumstances it is also useful to run as an independent instance while
+preserving the indexed data, e.g.:
+
+```sh
+$ dbus-run-session perf record /usr/libexec/localsearch-3 --dry-run --no-daemon
+```
+
+Note that `--dry-run` will re-index from scratch in an in-memory database,
+`--no-daemon` may be used to exit after data is indexed, and `--no-extractor`
+can be used to disable metadata extraction from file content.
