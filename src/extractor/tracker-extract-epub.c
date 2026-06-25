@@ -498,7 +498,7 @@ opf_start_element_ns (void           *ctx,
 			const xmlChar *value_end   = attributes[i*5 + 4];
 			int value_len = (int) (value_end - value_start);
 
-			if (g_strcmp0 ((const gchar *) attr_local, "href") == 0) {
+			if (!href && g_strcmp0 ((const gchar *) attr_local, "href") == 0) {
 				href = g_strndup ((const gchar *) value_start, value_len);
 			} else if (g_strcmp0 ((const gchar *) attr_local, "media-type") == 0) {
 				g_autofree gchar *mt = g_strndup ((const gchar *) value_start, value_len);

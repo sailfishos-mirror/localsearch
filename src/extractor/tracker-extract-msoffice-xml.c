@@ -763,9 +763,9 @@ msoffice_xml_content_types_start_element_ns (void           *ctx,
 		const xmlChar *v_end   = attributes[i*5 + 4];
 		int v_len = (int) (v_end - v_start);
 
-		if (g_ascii_strcasecmp ((const gchar *) a_local, "PartName") == 0) {
+		if (!part_name && g_ascii_strcasecmp ((const gchar *) a_local, "PartName") == 0) {
 			part_name = g_strndup ((const gchar *) v_start, v_len);
-		} else if (g_ascii_strcasecmp ((const gchar *) a_local, "ContentType") == 0) {
+		} else if (!content_type && g_ascii_strcasecmp ((const gchar *) a_local, "ContentType") == 0) {
 			content_type = g_strndup ((const gchar *) v_start, v_len);
 		}
 	}

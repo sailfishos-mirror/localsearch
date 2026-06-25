@@ -287,7 +287,7 @@ main (int argc, char **argv)
 {
 	gint result;
 
-	g_setenv ("TZ", "Europe/Amsterdam", TRUE);
+	g_assert_true (g_setenv ("TZ", "Europe/Amsterdam", TRUE));
 
 	g_test_init (&argc, &argv, NULL);
 
