@@ -86,6 +86,8 @@ struct _TrackerIndexer {
 	/* Folder URN cache */
 	TrackerLRU *urn_lru;
 
+	TrackerSparqlStatement *ask_unextracted;
+
 	/* Properties */
 	gdouble throttle;
 
@@ -93,11 +95,11 @@ struct _TrackerIndexer {
 	guint low_battery_pause : 1;
 
 	guint active : 1;
+	guint extract_content : 1;
 	guint is_paused : 1;        /* TRUE if miner is paused */
 	guint flushing : 1;         /* TRUE if flushing SPARQL */
 
 	guint status_idle_id;
-	guint grace_period_timeout_id;
 	guint resume_after_disk_full_id;
 	guint item_queues_handler_id;
 };
@@ -133,6 +135,7 @@ enum {
 	PROP_ROOT,
 	PROP_ERROR_REPORTS,
 	PROP_ACTIVE,
+	PROP_EXTRACT_CONTENT,
 	N_PROPS,
 };
 
@@ -234,6 +237,12 @@ tracker_indexer_class_init (TrackerIndexerClass *klass)
 		g_param_spec_boolean ("active", NULL, NULL,
 		                      FALSE,
 		                      G_PARAM_READABLE |
+		                      G_PARAM_STATIC_STRINGS);
+	props[PROP_EXTRACT_CONTENT] =
+		g_param_spec_boolean ("extract-content", NULL, NULL,
+		                      FALSE,
+		                      G_PARAM_WRITABLE |
+		                      G_PARAM_CONSTRUCT_ONLY |
 		                      G_PARAM_STATIC_STRINGS);
 
 	g_object_class_install_properties (object_class, N_PROPS, props);
@@ -516,18 +525,11 @@ init_index_roots (TrackerIndexer *indexer)
 static void
 check_unextracted (TrackerIndexer *indexer)
 {
+	if (!indexer->extract_content)
+		return;
+
 	g_debug ("Starting extractor");
 	tracker_extract_watchdog_ensure_started (indexer->extract_watchdog);
-}
-
-static gboolean
-extractor_lost_timeout_cb (gpointer user_data)
-{
-	TrackerIndexer *indexer = user_data;
-
-	check_unextracted (indexer);
-	indexer->grace_period_timeout_id = 0;
-	return G_SOURCE_REMOVE;
 }
 
 static void
@@ -542,16 +544,18 @@ set_active (TrackerIndexer *indexer,
 }
 
 static void
+indexer_finish (TrackerIndexer *indexer)
+{
+	set_active (indexer, FALSE);
+	g_signal_emit (indexer, signals[FINISHED], 0);
+}
+
+static void
 on_extractor_lost (TrackerExtractWatchdog *watchdog,
                    TrackerIndexer         *indexer)
 {
 	g_debug ("tracker-extract vanished, maybe restarting.");
-
-	/* Give a period of grace before restarting, so we allow replacing
-	 * from eg. a terminal.
-	 */
-	indexer->grace_period_timeout_id =
-		g_timeout_add_seconds (1, extractor_lost_timeout_cb, indexer);
+	check_unextracted (indexer);
 }
 
 static void
@@ -561,13 +565,17 @@ on_extractor_status (TrackerExtractWatchdog *watchdog,
                      gint                    remaining,
                      TrackerIndexer         *indexer)
 {
+	gboolean finished = g_strcmp0 (status, "Idle") == 0;
+
 	if (!tracker_miner_is_paused (TRACKER_MINER (indexer))) {
-		set_active (indexer, g_strcmp0 (status, "Idle") != 0);
 		g_object_set (indexer,
 		              "status", status,
 		              "progress", progress,
 		              "remaining-time", remaining,
 		              NULL);
+
+		if (finished)
+			indexer_finish (indexer);
 	}
 }
 
@@ -683,7 +691,6 @@ fs_finalize (GObject *object)
 
 	g_clear_pointer (&indexer->urn_lru, tracker_lru_free);
 	g_clear_handle_id (&indexer->item_queues_handler_id, g_source_remove);
-	g_clear_handle_id (&indexer->grace_period_timeout_id, g_source_remove);
 	g_clear_handle_id (&indexer->resume_after_disk_full_id, g_source_remove);
 
 	if (indexer->file_notifier)
@@ -695,6 +702,7 @@ fs_finalize (GObject *object)
 	g_queue_free_full (indexer->items,
 	                   (GDestroyNotify) queue_event_free);
 
+	g_clear_object (&indexer->ask_unextracted);
 	g_clear_object (&indexer->indexing_tree);
 	g_clear_object (&indexer->file_notifier);
 	g_clear_object (&indexer->monitor);
@@ -804,6 +812,9 @@ fs_set_property (GObject      *object,
 	case PROP_ERROR_REPORTS:
 		indexer->error_reports = g_value_dup_object (value);
 		break;
+	case PROP_EXTRACT_CONTENT:
+		indexer->extract_content = !!g_value_get_boolean (value);
+		break;
 	default:
 		G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
 		break;
@@ -867,13 +878,30 @@ miner_resumed (TrackerMiner *miner)
 static void
 process_stop (TrackerIndexer *indexer)
 {
+	TrackerSparqlConnection *conn = NULL;
+	g_autoptr (TrackerSparqlCursor) cursor = NULL;
+	g_autoptr (GError) error = NULL;
+
+	conn = tracker_miner_get_connection (TRACKER_MINER (indexer));
+
 	g_clear_handle_id (&indexer->status_idle_id, g_source_remove);
 
-	set_active (indexer, FALSE);
+	if (!indexer->ask_unextracted && indexer->extract_content)
+		indexer->ask_unextracted = tracker_load_statement (conn, "ask-unextracted.rq", &error);
 
-	check_unextracted (indexer);
+	if (indexer->ask_unextracted)
+		cursor = tracker_sparql_statement_execute (indexer->ask_unextracted, NULL, &error);
 
-	g_signal_emit (indexer, signals[FINISHED], 0);
+	if (error)
+		g_warning ("Could not check unextracted files: %s", error->message);
+
+	if (cursor &&
+	    tracker_sparql_cursor_next (cursor, NULL, NULL) &&
+	    tracker_sparql_cursor_get_boolean (cursor, 0)) {
+		check_unextracted (indexer);
+	} else {
+		indexer_finish (indexer);
+	}
 }
 
 static void
@@ -1592,7 +1620,8 @@ tracker_indexer_new (TrackerSparqlConnection  *connection,
                      TrackerIndexingTree      *indexing_tree,
                      TrackerMonitor           *monitor,
                      TrackerErrorReport       *error_reports,
-                     GFile                    *root)
+                     GFile                    *root,
+                     gboolean                  extract_content)
 {
 	g_return_val_if_fail (TRACKER_IS_SPARQL_CONNECTION (connection), NULL);
 
@@ -1602,5 +1631,6 @@ tracker_indexer_new (TrackerSparqlConnection  *connection,
 	                     "monitor", monitor,
 	                     "error-reports", error_reports,
 	                     "root", root,
+	                     "extract-content", extract_content,
 	                     NULL);
 }

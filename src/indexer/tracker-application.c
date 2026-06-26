@@ -56,6 +56,10 @@ static GOptionEntry entries[] = {
 	  G_OPTION_ARG_NONE, NULL,
 	  N_("Runs until all configured locations are indexed and then exits"),
 	  NULL },
+	{ "no-extractor", 'x', 0,
+	  G_OPTION_ARG_NONE, NULL,
+	  N_("Skips metadata extraction from file content"),
+	  NULL },
 	{ "eligible", 'e', 0,
 	  G_OPTION_ARG_FILENAME, NULL,
 	  N_("Checks if FILE is eligible for being mined based on configuration"),
@@ -136,6 +140,7 @@ struct _TrackerApplication
 	guint domain_watch_id;
 	guint legacy_name_id;
 	guint no_daemon : 1;
+	guint no_extractor : 1;
 	guint dry_run : 1;
 	guint got_error : 1;
 	guint paused_by_clients : 1;
@@ -787,7 +792,8 @@ initialize_main_instance (TrackerApplication  *app,
 		                                                        instance->indexing_tree,
 		                                                        app->monitor,
 		                                                        error_reports,
-		                                                        NULL));
+		                                                        NULL,
+		                                                        !app->no_extractor));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -888,7 +894,8 @@ indexer_instance_new_for_mountpoint (TrackerApplication  *app,
 		                                                        instance->indexing_tree,
 		                                                        app->monitor,
 		                                                        error_reports,
-		                                                        instance->root));
+		                                                        instance->root,
+		                                                        !app->no_extractor));
 	}
 
 	if (!start_endpoint_thread (instance, dbus_conn, error))
@@ -1361,6 +1368,7 @@ tracker_application_handle_local_options (GApplication *application,
 		return check_eligible (eligible_file);
 
 	app->no_daemon = g_variant_dict_contains (options, "no-daemon");
+	app->no_extractor = g_variant_dict_contains (options, "no-extractor");
 	app->dry_run = g_variant_dict_contains (options, "dry-run");
 
 	return G_APPLICATION_CLASS (tracker_application_parent_class)->handle_local_options (application, options);

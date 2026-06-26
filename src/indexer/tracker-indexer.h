@@ -39,7 +39,8 @@ TrackerIndexer * tracker_indexer_new (TrackerSparqlConnection *connection,
                                       TrackerIndexingTree     *indexing_tree,
                                       TrackerMonitor          *monitor,
                                       TrackerErrorReport      *error_reports,
-                                      GFile                   *root);
+                                      GFile                   *root,
+                                      gboolean                 extract_content);
 
 /* Properties */
 TrackerIndexingTree * tracker_indexer_get_indexing_tree (TrackerIndexer *indexer);
