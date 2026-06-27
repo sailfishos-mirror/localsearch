@@ -23,9 +23,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2026-02-25 08:49+0000\n"
-"PO-Revision-Date: 2026-03-15 20:27+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-05-08 16:18+0000\n"
+"PO-Revision-Date: 2026-06-23 19:43+0200\n"
 "Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: German <debian-l10n-german@lists.debian.org>\n"
 "Language: de\n"
@@ -33,7 +33,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -232,15 +232,15 @@ msgstr "Indizierung vorübergehend unterdrücken"
 msgid "Erase the indexed data"
 msgstr "Die indizierten Daten löschen"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:418
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
 msgstr "Nach Inhalt suchen"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:727
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "Status und Statistiken zu den indizierten Daten bereitstellen"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "Schlagwörter hinzufügen, entfernen und auflisten"
 
@@ -263,7 +263,7 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "»%s« ist kein localsearch-Befehl. Siehe »localsearch --help«"
 
-#: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Nachricht"
 
@@ -295,8 +295,8 @@ msgstr "Metadaten aus einer Datei auslesen"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
-#: src/cli/tracker-status.c:732 src/cli/tracker-tag.c:419
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Nicht berücksichtigte Optionen"
 
@@ -361,9 +361,9 @@ msgstr "Prüft, ob DATEI für eine Indizierung infrage kommt"
 #: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
 #: src/cli/tracker-status.c:80
 msgid "Removable device mount point to query"
-msgstr ""
+msgstr "Abzufragender Einhängepunkt des absteckbaren Geräts"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "Es konnte keine Verbindung zu LocalSearch aufgebaut werden"
@@ -572,61 +572,61 @@ msgstr "AUSDRUCK"
 msgid "Could not get LocalSearch statistics"
 msgstr "LocalSearch-Statistiken konnten nicht geholt werden"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "Derzeit indiziert"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d Datei"
 msgstr[1] "%d Dateien"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d Ordner"
 msgstr[1] "%d Ordner"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "Verbleibender Speicherplatz auf der Partition mit der Datenbank"
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "Die Indizierung ist pausiert"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "Daten werden noch indiziert"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "Die Indizierung ist arbeitsbereit"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d registrierter Ausfall"
 msgstr[1] "%d registrierte Ausfälle"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "Keine Berichte gefunden"
 
-#: src/cli/tracker-status.c:684
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "SPARQL-Verbindung konnte nicht erlangt werden"
 
-#: src/cli/tracker-status.c:693
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "Es wird nun nach Aktualisierungen für die Datenbank gelauscht"
 
-#: src/cli/tracker-status.c:694
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "Drücken Sie Strg+C zum Anhalten"
 
@@ -674,52 +674,52 @@ msgid "Could not get files related to tag"
 msgstr ""
 "Die mit einem Schlagwort verknüpften Dateien konnten nicht ermittelt werden"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
 msgstr "Es konnten nicht alle Schlagwörter ermittelt werden"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "Schlagwörter (nach Name angezeigt)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "Schlagwort konnte nicht hinzugefügt werden"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "Schlagwort wurde erfolgreich hinzugefügt"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "Schlagwort konnte den Dateien nicht hinzugefügt werden"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "Mit Schlagwort"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "Schlagwort konnte nicht entfernt werden"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "Schlagwort wurde erfolgreich entfernt"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Es konnte keine Verbindung zu LocalSearch aufgebaut werden"
 
-#: src/cli/tracker-tag.c:424
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "Die Option »--list« wird für »--show-files« benötigt"
 
-#: src/cli/tracker-tag.c:426
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr ""
 "Aktionen zum Hinzufügen und Löschen können nicht zugleich verwendet werden"
 
-#: src/cli/tracker-tag.c:428
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr ""
 "Die Option »--description« kann nur zusammen mit »--add« verwendet werden"
@@ -814,10 +814,8 @@ msgid "FD"
 msgstr "DD"
 
 #: src/extractor/tracker-main.c:90
-#, fuzzy
-#| msgid "File to extract metadata for"
 msgid "Filesystem root of the extracted data"
-msgstr "Datei zur Ermittlung der Metadaten"
+msgstr "Dateisystemwurzel der extrahierten Daten"
 
 #: src/extractor/tracker-main.c:262
 msgid "No metadata or extractor modules found to handle this file"
@@ -853,31 +851,31 @@ msgstr ""
 msgid "Avoids changes in the filesystem"
 msgstr "Vermeidet Änderungen im Dateisystem"
 
-#: src/indexer/tracker-application.c:1262
+#: src/indexer/tracker-application.c:1270
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Das Datenobjekt »%s« existiert derzeit"
 
-#: src/indexer/tracker-application.c:1263
+#: src/indexer/tracker-application.c:1271
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Das Datenobjekt »%s« existiert derzeit nicht"
 
-#: src/indexer/tracker-application.c:1289
+#: src/indexer/tracker-application.c:1297
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Übergeordneter Ordner »%s« kommt NICHT für eine Indizierung in Frage "
 "(basierend auf Filtern)"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1303
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Übergeordneter Ordner »%s« kommt NICHT für eine Indizierung in Frage "
 "(verborgene Datei)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1309
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -886,30 +884,30 @@ msgstr ""
 "Übergeordneter Ordner »%s« kommt NICHT für eine Indizierung in Frage "
 "(basierend auf Inhaltsfiltern)"
 
-#: src/indexer/tracker-application.c:1316
+#: src/indexer/tracker-application.c:1324
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Ordner kommt NICHT für eine Indizierung in Frage (basierend auf Filtern)"
 
-#: src/indexer/tracker-application.c:1320
+#: src/indexer/tracker-application.c:1328
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Datei kommt NICHT für eine Indizierung in Frage (basierend auf FIltern)"
 
-#: src/indexer/tracker-application.c:1323
+#: src/indexer/tracker-application.c:1331
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Datei kommt NICHT für eine Indizierung in Frage (verborgene Datei)"
 
-#: src/indexer/tracker-application.c:1325
+#: src/indexer/tracker-application.c:1333
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr ""
 "Datei kommt NICHT für eine Indizierung in Frage (kein indizierter Ordner)"
 
-#: src/indexer/tracker-application.c:1333
+#: src/indexer/tracker-application.c:1341
 msgid "Directory is eligible to be indexed"
 msgstr "Ordner kommt für eine Indizierung in Frage"
 
-#: src/indexer/tracker-application.c:1334
+#: src/indexer/tracker-application.c:1342
 msgid "File is eligible to be indexed"
 msgstr "Datei kommt für eine Indizierung in Frage"
 
