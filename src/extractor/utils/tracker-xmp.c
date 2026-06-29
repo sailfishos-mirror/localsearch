@@ -142,8 +142,8 @@ gps_coordinate_dup (const gchar *coordinates)
 		min = g_match_info_fetch (info, 2);
 		ref = g_match_info_fetch (info, 3);
 
-		d = atof (deg);
-		m = atof (min);
+		d = g_ascii_strtod (deg, NULL);
+		m = g_ascii_strtod (min, NULL);
 
 		r = d + m/60;
 
