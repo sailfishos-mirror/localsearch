@@ -1,0 +1,15 @@
+DELETE {
+  GRAPH tracker:Audio {
+    ?disc a rdfs:Resource .
+  }
+} WHERE {
+  GRAPH tracker:Audio {
+    ?disc a nmm:MusicAlbumDisc .
+
+    FILTER (
+      NOT EXISTS {
+        ?song nmm:musicAlbumDisc ?disc
+      }
+    )
+  }
+}

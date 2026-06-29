@@ -28,6 +28,10 @@
 
 G_BEGIN_DECLS
 
+typedef enum {
+	TRACKER_SPARQL_BUFFER_CLEANUP_AUDIO,
+} TrackerSparqlBufferCleanup;
+
 #define TRACKER_TYPE_SPARQL_BUFFER (tracker_sparql_buffer_get_type())
 G_DECLARE_FINAL_TYPE (TrackerSparqlBuffer,
                       tracker_sparql_buffer,
@@ -82,6 +86,9 @@ void tracker_sparql_buffer_log_attributes_update (TrackerSparqlBuffer *buffer,
                                                   const gchar         *content_graph,
                                                   TrackerResource     *file_resource,
                                                   TrackerResource     *graph_resource);
+
+void tracker_sparql_buffer_log_cleanup (TrackerSparqlBuffer        *buffer,
+                                        TrackerSparqlBufferCleanup  cleanup);
 
 gboolean tracker_sparql_buffer_limit_reached (TrackerSparqlBuffer *buffer);
 

@@ -1,0 +1,36 @@
+DELETE {
+  GRAPH tracker:Audio {
+    ?artist a rdfs:Resource .
+  }
+} WHERE {
+  GRAPH tracker:Audio {
+    ?artist a nmm:Artist .
+
+    FILTER (
+      NOT EXISTS {
+        ?album nmm:albumArtist ?artist
+      } &&
+      NOT EXISTS {
+        ?song nmm:artist ?artist
+      } &&
+      NOT EXISTS {
+        ?song nmm:composer ?artist
+      } &&
+      NOT EXISTS {
+        ?song nmm:lyricist ?artist
+      } &&
+      NOT EXISTS {
+        ?song nmm:performer ?artist
+      } &&
+      NOT EXISTS {
+        ?video nmm:director ?artist
+      } &&
+      NOT EXISTS {
+        ?video nmm:leadActor ?artist
+      } &&
+      NOT EXISTS {
+        ?video nmm:producedBy ?artist
+      }
+    )
+  }
+}
