@@ -1,9 +1,22 @@
-NEW in 3.11.1 - 2026-04-14
-==========================
-  * Fix possible failures when extracting metadata from EPUB, ODF and OOXML
-    documents
+NEW in 3.12.alpha - 2026-06-29
+==============================
+  * Fix possible crash when deleting a directory recursively
+  * Fix `localsearch status --follow` output while extracting metadata
+  * Fix potential metadata extractor stalls with many files resulting in
+    extraction errors
+  * New audio/video metadata extractor based on MediaInfo, it will
+    eventually supersede the libav extractor.
+  * Drop use of GMarkup for XML parsing, replaced with libxml2
+  * Extract `nie:title` for album discs
+  * Refactors of indexer internals
+  * Fixes to Coverity warnings
+  * Improved checks for files remaining to have a pass through the
+    metadata extractor
+  * Cleanup leftover album/disc/artist metadata
+  * Improvements and fixes to XMP metadata extraction
+  * Preserve indexed data on unmounts of parent folders, e.g. '/'
 
-Translations: de, sr
+Translations: be, de, it, kab, lo, nb, nl, sk, th
 
 NEW in 3.11.0 - 2026-03-15
 ==========================
