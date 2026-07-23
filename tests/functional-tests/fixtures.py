@@ -45,6 +45,7 @@ import tempfile
 import time
 import unittest as ut
 import dbusmock
+import pty
 
 import trackertestutils.helpers
 import configuration as cfg
@@ -838,3 +839,23 @@ class TrackerCommandLineTestCase(TrackerMinerTest):
             )
 
         return result.stdout.decode("utf-8")
+
+
+class TrackerPtyCommandLineTestCase(TrackerCommandLineTestCase):
+    def environment(self):
+        extra_env = super(TrackerPtyCommandLineTestCase, self).environment()
+        extra_env["TERM"] = "xterm-256color"
+        return extra_env
+
+    def set_size(self, w, h):
+        self._size = [w, h]
+
+    def run_cli(self, command):
+        pty_helper = pathlib.Path(__file__).parent.joinpath("pty_helper.py")
+        pre_script = ["python3", pty_helper]
+        if hasattr(self, '_size'):
+            size_str = str(self._size[0]) + 'x' + str(self._size[1])
+            pre_script += ['-s', size_str]
+        pre_script += ['--']
+        command = pre_script + command
+        return super(TrackerPtyCommandLineTestCase, self).run_cli(command)

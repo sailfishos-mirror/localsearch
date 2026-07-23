@@ -33,7 +33,7 @@ import fixtures
 import shutil
 import time
 
-class TestCli(fixtures.TrackerCommandLineTestCase):
+class TestStatus(fixtures.TrackerCommandLineTestCase):
     def test_status(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
@@ -233,6 +233,64 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         finally:
             self.assertIn("--asdf", err);
             self.assertIsNone(out)
+
+
+class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
+    def test_status(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        output = self.run_cli(["localsearch", "status"])
+        self.assertIn("1 file", output)
+        self.assertIn("1 folder", output)
+        self.assertIn("idle", output)
+
+    def test_status_follow(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+        output = ""
+        with subprocess.Popen(
+                ["localsearch", "status", "--follow"],
+                bufsize=1,
+                text=True,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL) as proc:
+
+            os.set_blocking(proc.stdout.fileno(), False)
+
+            # Set up a temporary inhibition, this state should be reported in the output
+            with subprocess.Popen(
+                    ["localsearch", "inhibit", "cat"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL) as inhibit_proc:
+
+                n_attempts = 0
+                while b'is paused' not in proc.stdout.buffer.peek():
+                    time.sleep(1)
+                    n_attempts += 1
+                    assert n_attempts < 90
+
+                # Close stdin to end the cat process
+                inhibit_proc.stdin.close()
+
+            # Copy a file and wait for it to be indexed
+            file = datadir.joinpath("text/mango.txt")
+            target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+            with self.await_document_inserted(target):
+                shutil.copy(file, target)
+
+            proc.terminate()
+            output = proc.stdout.read()
+
+        self.assertIn("is paused", output)
+        self.assertIn("Idle", output)
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

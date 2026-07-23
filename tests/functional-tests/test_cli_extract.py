@@ -32,7 +32,13 @@ import fixtures
 import shutil
 
 
-class TestCli(fixtures.TrackerCommandLineTestCase):
+class TestExtract(fixtures.TrackerCommandLineTestCase):
+    def test_extract_file(self):
+        path = pathlib.Path(__file__).parent.joinpath("data/content/text/Document 1.txt")
+        out = self.run_cli(["localsearch", "extract", path])
+        self.assertIn("Document 1", out)
+        self.assertIn("banana", out)
+
     def test_extract_noargs(self):
         out = ""
         err = ""
@@ -69,6 +75,41 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
 
         self.assertEqual("", out)
         self.assertIn("Metadata extraction failed", err)
+
+
+class TestExtractPty(fixtures.TrackerPtyCommandLineTestCase):
+    def test_extract_file(self):
+        path = pathlib.Path(__file__).parent.joinpath("data/content/text/Document 1.txt")
+        out = self.run_cli(["localsearch", "extract", path])
+        self.assertIn("Document 1", out)
+        self.assertIn("banana", out)
+
+    def test_extract_noargs(self):
+        out = ""
+        err = ""
+        try:
+            out = self.run_cli(["localsearch", "extract"])
+        except Exception as e:
+            err = str(e)
+
+        self.assertEqual("", out)
+        self.assertIn("CLI command failed", err)
+
+    def test_extract_help(self):
+        out = self.run_cli(["localsearch", "extract", "--help"])
+        self.assertIn("Usage", out)
+
+    def test_extract_wrongargs(self):
+        out = ""
+        err = ""
+        try:
+            out = self.run_cli(["localsearch", "extract", "--asdf"])
+        except Exception as e:
+            err = str(e)
+
+        self.assertEqual("", out)
+        self.assertIn("CLI command failed", err)
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()
