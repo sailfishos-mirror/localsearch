@@ -122,6 +122,34 @@ class TestSearch(fixtures.TrackerCommandLineTestCase):
         self.assertIn("Usage", output)
 
 
+class TestSearchMount(fixtures.TrackerCommandLineTestCase):
+    def create_test_data(self):
+        for f in ["file1.txt", "file2.txt"]:
+            path = self.device_path.joinpath(f)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("This file exists.")
+
+    def setUp(self):
+        super(TestSearchMount, self).setUp()
+        self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
+        self.device_path.mkdir()
+        self.create_test_data()
+
+    def test_search_mount(self):
+        self.add_removable_device(self.device_path)
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
+        endpoint_helper = self.helper_for_endpoint(object_path)
+        rel_uri = self.get_relative_uri("file1.txt")
+        endpoint_helper.ensure_resource(
+            fixtures.DOCUMENTS_GRAPH, f"nie:isStoredAs <{rel_uri}>",
+        )
+
+        output = self.run_cli(["localsearch", "search", "--mount", self.device_path, "exists"])
+        self.assertIn(rel_uri, output)
+
+
 class TestSearchPty(fixtures.TrackerPtyCommandLineTestCase):
     def test_search(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")

@@ -235,6 +235,36 @@ class TestStatus(fixtures.TrackerCommandLineTestCase):
             self.assertIsNone(out)
 
 
+class TestStatusMount(fixtures.TrackerCommandLineTestCase):
+    def create_test_data(self):
+        for f in ["file1.txt", "file2.txt"]:
+            path = self.device_path.joinpath(f)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("This file exists.")
+
+    def setUp(self):
+        super(TestStatusMount, self).setUp()
+        self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
+        self.device_path.mkdir()
+        self.create_test_data()
+
+    def test_status_mount(self):
+        self.add_removable_device(self.device_path)
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
+        endpoint_helper = self.helper_for_endpoint(object_path)
+        rel_uri = self.get_relative_uri("file1.txt")
+        endpoint_helper.ensure_resource(
+            fixtures.DOCUMENTS_GRAPH, f"nie:isStoredAs <{rel_uri}>",
+        )
+
+        output = self.run_cli(["localsearch", "status", "--mount", self.device_path])
+        self.assertIn("2 files", output)
+        self.assertIn("1 folder", output)
+        self.assertIn("idle", output)
+
+
 class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
     def test_status(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")

@@ -796,9 +796,9 @@ class CliError(Exception):
     pass
 
 
-class TrackerCommandLineTestCase(TrackerMinerTest):
+class TrackerCommandLineTestCase(TrackerMinerRemovableMediaTest):
     def environment(self):
-        extra_env = cfg.test_environment(self.workdir)
+        extra_env = super(TrackerCommandLineTestCase, self).environment()
         extra_env["LANG"] = "en_GB.utf8"
         extra_env["PATH"] = ":".join([cfg.cli_dir()] + os.environ['PATH'].split(":"))
         return extra_env
