@@ -24,7 +24,7 @@
 
 #include <glib.h>
 #include <gio/gio.h>
-
+#include <tinysparql.h>
 
 GList* tracker_cli_get_error_keyfiles (void);
 
@@ -33,5 +33,8 @@ gboolean tracker_cli_print_errors (GList    *keyfiles,
                                    gboolean  piped);
 
 gboolean tracker_cli_check_inside_build_tree (const gchar* argv0);
+
+TrackerSparqlConnection * tracker_create_indexer_connection (const char  *mount,
+							     GError     **error);
 
 #endif /* __TRACKER_CLI_UTILS_H__ */
