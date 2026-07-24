@@ -65,6 +65,9 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             except:
                 pid_exists = False
 
+        # Reset again the database, silent success should happen
+        self.run_cli(["localsearch", "reset"])
+
         # Re-start the indexer, check that file is reindexed
         with self.await_document_inserted(target):
             self.miner_fs = MinerFsHelper(self.sandbox.get_session_bus_connection())
