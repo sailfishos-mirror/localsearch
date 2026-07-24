@@ -114,30 +114,6 @@ print_link (const gchar *url)
 	g_print ("\x1B]8;;%s\a" LINK_STR "\x1B]8;;\a", url);
 }
 
-static TrackerSparqlConnection *
-create_connection (GError **error)
-{
-	TrackerSparqlConnection *connection;
-	g_autofree char *dbus_path = NULL;
-
-	if (mount) {
-		g_autofree char *path = NULL, *encoded_uri = NULL;
-		g_autoptr (GFile) mount_root = NULL;
-
-		mount_root = g_file_new_for_commandline_arg (mount);
-		path = g_file_get_path (mount_root);
-		encoded_uri = tracker_encode_for_object_path (path);
-
-		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
-		                         encoded_uri, NULL);
-	}
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                dbus_path, NULL, error);
-
-	return connection;
-}
-
 static int
 status_stat (void)
 {
@@ -151,7 +127,7 @@ status_stat (void)
 	int longest_class = 0;
 	guint i;
 
-	connection = create_connection (&error);
+	connection = tracker_create_indexer_connection (mount, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
@@ -261,7 +237,7 @@ get_file_and_folder_count (int *files,
 	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (GError) error = NULL;
 
-	connection = create_connection (&error);
+	connection = tracker_create_indexer_connection (mount, &error);
 
 	if (files) {
 		*files = 0;
@@ -672,7 +648,7 @@ status_watch (void)
 	g_autoptr (TrackerNotifier) notifier = NULL;
 	g_autoptr (GError) error = NULL;
 
-	sparql_connection = create_connection (&error);
+	sparql_connection = tracker_create_indexer_connection (mount, &error);
 
 	if (!sparql_connection) {
 		g_critical ("%s, %s",
