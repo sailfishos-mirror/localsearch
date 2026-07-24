@@ -218,19 +218,6 @@ status_stat (void)
 }
 
 static int
-status_run (void)
-{
-	if (show_stat) {
-		return status_stat ();
-	}
-
-	/* All known options have their own exit points */
-	g_warn_if_reached ();
-
-	return EXIT_FAILURE;
-}
-
-static int
 get_file_and_folder_count (int *files,
                            int *folders)
 {
@@ -705,7 +692,7 @@ tracker_status (int          argc,
 	}
 
 	if (show_stat) {
-		return status_run ();
+		return status_stat ();
 	} else if (follow) {
 		return status_follow ();
 	} else if (watch) {
