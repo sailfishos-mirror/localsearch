@@ -280,6 +280,43 @@ class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
         self.assertIn("1 folder", output)
         self.assertIn("idle", output)
 
+    def test_status_error(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/extractor-content")
+
+        # Copy a photo, once as a PNG with JPEG extension, known to not be extracted
+        file = datadir.joinpath("images/png-photo-1.png")
+        target = pathlib.Path(os.path.join(self.indexed_dir, "png-photo-1.png"))
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, "png-photo-1.jpeg"))
+
+        with self.await_file_indexed(target2):
+            shutil.copy(file, target2)
+        with self.await_photo_inserted(target):
+            shutil.copy(file, target)
+
+        # Wait for the failure to be recorded
+        finished = False
+        n_tries = 0
+        while not finished and n_tries < 10:
+            output = self.run_cli(["localsearch", "status"])
+            finished = "1 recorded" in output
+            n_tries = n_tries + 1
+
+        # Set a narrow size to trigger ellipsizing
+        self.set_size(80, 2000)
+
+        # Check for the file with wrong extension
+        proc = self.communicate(["localsearch", "status"])
+
+        # Quit the pager
+        proc.stdin.write(b'q\n');
+        proc.stdin.close()
+        proc.wait()
+        output = proc.stdout.read(-1).decode('utf-8')
+        proc.stdout.close()
+
+        self.assertIn("png-photo-1.jpeg", output)
+        self.assertIn("recorded failure", output)
+
     def test_status_follow(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
         output = ""
