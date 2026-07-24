@@ -127,6 +127,18 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
             output = self.run_cli(["localsearch", "inhibit", "--list"])
             self.assertEqual("", output)
 
+    def test_inhibit_badcommand(self):
+        err = None
+        out = None
+        try:
+            # Pass unknown command
+            out = self.run_cli(["localsearch", "inhibit", "asdf"])
+        except Exception as e:
+            err = str(e)
+        finally:
+            self.assertIn("asdf", err);
+            self.assertIsNone(out)
+
     def test_inhibit_wrongargs(self):
         err = None
         out = None
