@@ -338,19 +338,7 @@ info_run (void)
 
 	tracker_term_pipe_to_pager ();
 
-	if (mount) {
-		g_autofree char *path = NULL, *encoded_uri = NULL;
-
-		mount_root = g_file_new_for_commandline_arg (mount);
-		path = g_file_get_path (mount_root);
-		encoded_uri = tracker_encode_for_object_path (path);
-
-		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
-		                         encoded_uri, NULL);
-	}
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                dbus_path, NULL, &error);
+	connection = tracker_create_indexer_connection (mount, &error);
 
 	if (!connection) {
 		g_printerr ("%s: %s\n",
