@@ -27,18 +27,20 @@
 #include "tracker-help.h"
 
 static int
-exec_man_man (const char *path, const char *page)
+exec_man (const char *path,
+	  const char *page)
 {
-	const gchar *argv[3] = { 0, };
+	const gchar *argv[] = {
+		path,
+		page,
+		NULL
+	};
 	gboolean retval;
 	int status;
 
-	if (!path) {
-		path = "man";
-	}
+	g_return_val_if_fail (path != NULL, -1);
+	g_return_val_if_fail (page != NULL, -1);
 
-	argv[0] = path;
-	argv[1] = page;
 	retval = g_spawn_sync (NULL, (gchar**) argv, NULL,
 	                       G_SPAWN_SEARCH_PATH,
 	                       NULL, NULL, NULL, NULL,
@@ -47,32 +49,21 @@ exec_man_man (const char *path, const char *page)
 	return (!retval || !g_spawn_check_wait_status (status, NULL)) ? -1 : 0;
 }
 
-static char *
-cmd_to_page (const char *cmd)
-{
-	if (!cmd) {
-		return g_strdup (MAIN_COMMAND_NAME);
-	} else if (g_str_has_prefix (cmd, MAIN_COMMAND_NAME "-")) {
-		return g_strdup (cmd);
-	} else {
-		return g_strdup_printf (MAIN_COMMAND_NAME "-%s", cmd);
-	}
-}
-
 int
 tracker_help_show_man_page (const char *cmd)
 {
 	g_autofree char *page = NULL;
-	int retval;
 
-	page = cmd_to_page (cmd);
-	retval = exec_man_man ("man", page);
+	g_return_val_if_fail (cmd != NULL, -1);
 
-	return retval;
+	page = g_strconcat (MAIN_COMMAND_NAME "-", cmd, NULL);
+
+	return exec_man ("man", page);
 }
 
 int
-tracker_help (int argc, const char **argv)
+tracker_help (int          argc,
+	      const char **argv)
 {
 	return tracker_help_show_man_page (argv[1]);
 }
