@@ -33,7 +33,7 @@ import shutil
 
 from minerhelper import MinerFsHelper
 
-class TestCli(fixtures.TrackerCommandLineTestCase):
+class TestReset(fixtures.TrackerCommandLineTestCase):
     def test_reset(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
@@ -141,6 +141,66 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         finally:
             self.assertIn("--asdf", err);
             self.assertIsNone(out)
+
+class TestResetPty(fixtures.TrackerPtyCommandLineTestCase):
+    def test_reset_interactive_y(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        pid = self.sandbox.session_bus.get_connection_unix_process_id_sync(
+            'org.freedesktop.LocalSearch3')
+
+        # Reset the database
+        proc = self.communicate(["localsearch", "reset"])
+
+        proc.stdin.write(b"y\n")
+        proc.stdin.close()
+        proc.stdout.close()
+        proc.wait()
+
+        # Ensure the process is gone
+        pid_exists = True
+        attempts = 0
+        while pid_exists:
+            if attempts == 10:
+                raise RuntimeError("Took too long to stop indexer")
+
+            try:
+                time.sleep(1)
+                program = os.readlink("/proc/" + str(pid) + "/exe")
+                pid_exists = os.path.basename(program) == "localsearch-3"
+                if pid_exists:
+                    attempts += 1
+            except:
+                pid_exists = False
+
+    def test_reset_interactive_n(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        pid = self.sandbox.session_bus.get_connection_unix_process_id_sync(
+            'org.freedesktop.LocalSearch3')
+
+        # Reset the database
+        proc = self.communicate(["localsearch", "reset"])
+
+        proc.stdin.write(b"n\n")
+        proc.stdin.close()
+        proc.stdout.close()
+        proc.wait()
+
+        self.assertResourceExists(self.uri(target))
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

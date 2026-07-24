@@ -850,12 +850,23 @@ class TrackerPtyCommandLineTestCase(TrackerCommandLineTestCase):
     def set_size(self, w, h):
         self._size = [w, h]
 
-    def run_cli(self, command):
+    def command_wrapper(self, command):
         pty_helper = pathlib.Path(__file__).parent.joinpath("pty_helper.py")
         pre_script = ["python3", pty_helper]
         if hasattr(self, '_size'):
             size_str = str(self._size[0]) + 'x' + str(self._size[1])
             pre_script += ['-s', size_str]
         pre_script += ['--']
-        command = pre_script + command
+        return pre_script + command
+
+    def run_cli(self, command):
+        command = self.command_wrapper(command)
         return super(TrackerPtyCommandLineTestCase, self).run_cli(command)
+
+    def communicate(self, command):
+        command = self.command_wrapper(command)
+        command = [str(c) for c in command]
+        log.info("Running: %s", " ".join(command))
+        return subprocess.Popen(
+            command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        )
