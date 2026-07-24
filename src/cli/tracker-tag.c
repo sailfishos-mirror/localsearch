@@ -125,7 +125,7 @@ get_all_tags_show_tag_id (TrackerSparqlConnection *connection,
 		g_print ("  %s\n", tracker_sparql_cursor_get_string (cursor, 0, NULL));
 }
 
-static gboolean
+static int
 get_all_tags (TrackerSparqlConnection *connection,
               gint                     search_offset,
               gint                     search_limit,
@@ -146,10 +146,8 @@ get_all_tags (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get all tags"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not get all tags"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	g_print ("%s:\n", _("Tags (shown by name)"));
@@ -185,10 +183,10 @@ get_all_tags (TrackerSparqlConnection *connection,
 		}
 	}
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
-static gboolean
+static int
 create_tag (TrackerSparqlConnection *connection,
             const gchar             *tag,
             const gchar             *description)
@@ -212,18 +210,16 @@ create_tag (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not add tag"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not add tag"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	g_print ("%s\n", _("Tag was added successfully"));
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
-static gboolean
+static int
 add_tag_for_urn (TrackerSparqlConnection *connection,
                  const char              *uri,
                  const gchar             *tag)
@@ -243,18 +239,16 @@ add_tag_for_urn (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not add tag to files"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not add tag to files"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	g_print ("%s\n", _("Tagged"));
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
-static gboolean
+static int
 remove_tag_for_urn (TrackerSparqlConnection *connection,
                     const gchar             *uri,
                     const gchar             *tag)
@@ -273,15 +267,13 @@ remove_tag_for_urn (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not remove tag"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not remove tag"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	g_print ("%s\n", _("Tag was removed successfully"));
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
 static gboolean
@@ -301,18 +293,16 @@ clear_tag (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not remove tag"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not remove tag"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	g_print ("%s\n", _("Tag was removed successfully"));
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
-static gboolean
+static int
 get_tags_by_file (TrackerSparqlConnection *connection,
                   const gchar             *uri)
 {
@@ -330,16 +320,14 @@ get_tags_by_file (TrackerSparqlConnection *connection,
 	}
 
 	if (error) {
-		g_printerr ("%s, %s\n",
-		            _("Could not get all tags"),
-		            error->message);
-		return FALSE;
+		g_printerr ("%s, %s\n", _("Could not get all tags"), error->message);
+		return EXIT_FAILURE;
 	}
 
 	while (tracker_sparql_cursor_next (cursor, NULL, NULL))
 		g_print ("%s\n", tracker_sparql_cursor_get_string (cursor, 1, NULL));
 
-	return TRUE;
+	return EXIT_SUCCESS;
 }
 
 static int
@@ -367,25 +355,21 @@ tag_run (void)
 	}
 
 	if (list) {
-		if (!get_all_tags (connection, offset, limit, show_resources))
-			return EXIT_FAILURE;
+		return get_all_tags (connection, offset, limit, show_resources);
 	} else if (add_tag) {
-		if (!create_tag (connection, add_tag, description))
+		if (create_tag (connection, add_tag, description) < 0)
 			return EXIT_FAILURE;
 
-		if (uri && !add_tag_for_urn (connection, uri, add_tag))
-			return EXIT_FAILURE;
+		if (uri)
+			return add_tag_for_urn (connection, uri, add_tag);
 	} else if (remove_tag) {
 		if (uri) {
-			if (!remove_tag_for_urn (connection, uri, remove_tag))
-				return EXIT_FAILURE;
+			return remove_tag_for_urn (connection, uri, remove_tag);
 		} else {
-			if (!clear_tag (connection, remove_tag))
-				return EXIT_FAILURE;
+			return clear_tag (connection, remove_tag);
 		}
 	} else if (uri) {
-		if (!get_tags_by_file (connection, uri))
-			return EXIT_FAILURE;
+		return get_tags_by_file (connection, uri);
 	}
 
 	return EXIT_SUCCESS;
