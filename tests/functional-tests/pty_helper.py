@@ -23,6 +23,7 @@
 import argparse
 import os
 import pty
+import select
 import sys
 import termios
 import signal
@@ -52,23 +53,29 @@ if __name__ == "__main__":
         os.execlp(command[0], *command)
     else:
         termios.tcsetwinsize(fd, [height, width])
-        data = b""
 
         # Forward termination
         def signal_handler(signal, frame):
             os.kill(pid, signal)
-
         signal.signal(signal.SIGINT, signal_handler)
         signal.signal(signal.SIGTERM, signal_handler)
 
         while True:
-            try:
-                buf = os.read(fd, 1024)
-                data += buf
-            except:
-                break
+            read_fds, write_fds, ex_fds = select.select([fd, sys.stdin.fileno()], [], [], 10)
 
-        print (data.decode('utf-8'))
+            if fd in read_fds:
+                try:
+                    buf = os.read(fd, 1024)
+                    if not buf:
+                        break
+                    os.write(sys.stdout.fileno(), buf)
+                except:
+                    break
+
+            if sys.stdin.fileno() in read_fds:
+                buf = os.read(sys.stdin.fileno(), 1024)
+                os.write(fd, buf)
+
         ret = os.waitpid(pid, 0)
         os.close(fd)
         sys.exit(os.waitstatus_to_exitcode(ret[1]))
