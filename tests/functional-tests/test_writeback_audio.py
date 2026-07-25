@@ -133,7 +133,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nie:title": "test_title"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_ogg_comment(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -218,7 +217,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nie:title": "test_title"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_flac_comment(self):
         self._writeback_test(
             "writeback-test-7.flac",
