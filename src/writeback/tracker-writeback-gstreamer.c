@@ -828,12 +828,19 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 		}
 
 		if (g_strcmp0 (prop, "nmm:lyrics") == 0) {
-			const gchar *lyrics;
+			TrackerResource *lyrics;
+			const char *text = NULL;
 
-			lyrics = tracker_resource_get_first_string (resource, prop);
-			g_value_init (&val, G_TYPE_STRING);
-			g_value_set_string (&val, lyrics);
-			writeback_gstreamer_set (element, GST_TAG_LYRICS, &val);
+			lyrics = tracker_resource_get_first_relation (resource, prop);
+
+			if (lyrics)
+				text = tracker_resource_get_first_string (lyrics, "nie:plainTextContent");
+
+			if (text) {
+				g_value_init (&val, G_TYPE_STRING);
+				g_value_set_string (&val, text);
+				writeback_gstreamer_set (element, GST_TAG_LYRICS, &val);
+			}
 		}
 
 		if (g_strcmp0 (prop, "nmm:composer") == 0) {
