@@ -623,26 +623,15 @@ tracker_controller_dbus_stop (TrackerController *controller)
 		                                     priv->registration_id);
 	}
 
-	if (priv->bus_name_id != 0) {
-		g_bus_unown_name (priv->bus_name_id);
-	}
-
-	if (priv->old_bus_name_id != 0) {
-		g_bus_unown_name (priv->old_bus_name_id);
-	}
-
-	if (priv->introspection_data) {
-		g_dbus_node_info_unref (priv->introspection_data);
-	}
-
-	if (priv->d_connection) {
-		g_object_unref (priv->d_connection);
-	}
+	g_clear_handle_id (&priv->bus_name_id, g_bus_unown_name);
+	g_clear_handle_id (&priv->old_bus_name_id, g_bus_unown_name);
+	g_clear_pointer (&priv->introspection_data, g_dbus_node_info_unref);
+	g_clear_object (&priv->d_connection);
 }
 
 TrackerController *
-tracker_controller_new (guint             shutdown_timeout,
-                        GError          **error)
+tracker_controller_new (guint    shutdown_timeout,
+                        GError **error)
 {
 	return g_initable_new (TRACKER_TYPE_CONTROLLER,
 	                       NULL, error,

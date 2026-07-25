@@ -23,6 +23,7 @@
 #include <fcntl.h> /* O_WRONLY */
 
 #include <gio/gunixoutputstream.h>
+#include <glib/gstdio.h>
 
 #include <tracker-common.h>
 
@@ -51,81 +52,66 @@ tracker_writeback_file_init (TrackerWritebackFile *writeback_file)
 static GFile *
 create_temporary_file (GFile      *file,
                        GFileInfo  *file_info,
-                       GError    **in_error)
+                       GError    **error)
 {
-	GInputStream *input_stream;
-	GOutputStream *output_stream;
-	GFile *tmp_file, *parent;
-	gchar *dir, *name, *tmp_path;
-	guint32 mode;
-	gint fd;
-	GError *error = NULL;
+	g_autoptr (GInputStream) input_stream = NULL;
+	g_autoptr (GOutputStream) output_stream = NULL;
+	g_autoptr (GFile) tmp_file = NULL, parent = NULL;
+	g_autofree char *dir = NULL, *name = NULL, *tmp_path = NULL;
+	g_autofd int fd = -1;
+	mode_t mode;
 
 	if (!g_file_is_native (file)) {
-		gchar *uri;
+		g_autofree char *uri = NULL;
 
 		uri = g_file_get_uri (file);
-		g_warning ("Could not create temporary file, file is not native: '%s'", uri);
-
-		g_set_error (in_error,
+		g_set_error (error,
 		             G_IO_ERROR,
 		             G_IO_ERROR_FAILED,
-		             "Could not create temporary file, file is not native: '%s'",
+		             "Not writing back on non-native file '%s'",
 		             uri);
-		g_free (uri);
-
 		return NULL;
 	}
 
 	/* Create input stream */
-	input_stream = G_INPUT_STREAM (g_file_read (file, NULL, &error));
-
-	if (error) {
-		g_critical ("Could not create temporary file, %s", error->message);
-		g_propagate_error (in_error, error);
+	input_stream = G_INPUT_STREAM (g_file_read (file, NULL, error));
+	if (!input_stream)
 		return NULL;
-	}
 
 	/* Create output stream in a tmp file */
 	parent = g_file_get_parent (file);
 	dir = g_file_get_path (parent);
-	g_object_unref (parent);
 
 	name = g_file_get_basename (file);
 	tmp_path = g_strdup_printf ("%s" G_DIR_SEPARATOR_S ".tracker-XXXXXX.%s",
 	                            dir, name);
-	g_free (dir);
-	g_free (name);
 
 	mode = g_file_info_get_attribute_uint32 (file_info,
 	                                         G_FILE_ATTRIBUTE_UNIX_MODE);
 	fd = g_mkstemp_full (tmp_path, O_WRONLY, mode);
 
-	output_stream = g_unix_output_stream_new (fd, TRUE);
-
-	/* Splice the original file into the tmp file */
-	g_output_stream_splice (output_stream,
-	                        input_stream,
-	                        G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE |
-	                        G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
-	                        NULL, &error);
-
-	g_object_unref (output_stream);
-	g_object_unref (input_stream);
-
-	tmp_file = g_file_new_for_path (tmp_path);
-	g_free (tmp_path);
-
-	if (error) {
-		g_critical ("Could not copy temporary file, %s", error->message);
-		g_propagate_error (in_error, error);
-		g_file_delete (tmp_file, NULL, NULL);
-		g_object_unref (tmp_file);
-
+	if (fd < 0) {
+		g_set_error (error,
+			     G_IO_ERROR,
+			     G_IO_ERROR_FAILED,
+			     "Could not create temporary file: %m");
 		return NULL;
 	}
 
-	return tmp_file;
+	output_stream = g_unix_output_stream_new (g_steal_fd (&fd), TRUE);
+	tmp_file = g_file_new_for_path (tmp_path);
+
+	/* Splice the original file into the tmp file */
+	if (g_output_stream_splice (output_stream,
+				    input_stream,
+				    G_OUTPUT_STREAM_SPLICE_CLOSE_SOURCE |
+				    G_OUTPUT_STREAM_SPLICE_CLOSE_TARGET,
+				    NULL, error) < 0) {
+		g_file_delete (tmp_file, NULL, NULL);
+		return NULL;
+	}
+
+	return g_steal_pointer (&tmp_file);
 }
 
 static gboolean
@@ -135,14 +121,13 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
                                        GError           **error)
 {
 	TrackerWritebackFileClass *writeback_file_class;
-	gboolean retval;
-	GFile *file, *tmp_file;
-	GFileInfo *file_info;
-	const gchar * const *content_types;
-	const gchar *mime_type, *url = NULL;
-	guint n;
+	g_autoptr (GFile) file = NULL, tmp_file = NULL;
+	g_autoptr (GFileInfo) file_info = NULL;
 	g_autoptr (GList) values = NULL;
-	GError *n_error = NULL;
+	g_autoptr (GError) n_error = NULL;
+	const gchar * const *content_types = NULL;
+	const gchar *mime_type = NULL, *url = NULL;
+	gboolean retval;
 
 	writeback_file_class = TRACKER_WRITEBACK_FILE_GET_CLASS (writeback);
 
@@ -201,8 +186,6 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
 	                               NULL, NULL);
 
 	if (!file_info) {
-		g_object_unref (file);
-
 		g_set_error (error,
 		             G_IO_ERROR,
 		             G_IO_ERROR_FAILED,
@@ -213,9 +196,6 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
 	}
 
 	if (!g_file_info_get_attribute_boolean (file_info, G_FILE_ATTRIBUTE_ACCESS_CAN_WRITE)) {
-		g_object_unref (file_info);
-		g_object_unref (file);
-
 		g_set_error (error,
 		             G_IO_ERROR,
 		             G_IO_ERROR_FAILED,
@@ -228,47 +208,28 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
 	mime_type = g_file_info_get_content_type (file_info);
 	content_types = (writeback_file_class->content_types) (TRACKER_WRITEBACK_FILE (writeback));
 
-	retval = FALSE;
-
-	for (n = 0; content_types[n] != NULL; n++) {
-		if (g_strcmp0 (mime_type, content_types[n]) == 0) {
-			retval = TRUE;
-			break;
-		}
-	}
-
-	if (!retval) {
+	if (!g_strv_contains (content_types, mime_type)) {
 		g_set_error (error,
 		             G_DBUS_ERROR,
 		             G_DBUS_ERROR_NOT_SUPPORTED,
 		             "Module does not support writeback for %s",
 		             mime_type);
-
-		/* module does not support writeback for this file */
-		g_object_unref (file_info);
-		g_object_unref (file);
-
 		return FALSE;
 	}
 
 	/* Copy to a temporary file so we can perform an atomic write on move */
-	tmp_file = create_temporary_file (file, file_info, &n_error);
-
-	if (!tmp_file) {
-		g_object_unref (file);
-		g_propagate_error (error, n_error);
-		g_object_unref (file_info);
+	tmp_file = create_temporary_file (file, file_info, error);
+	if (!tmp_file)
 		return FALSE;
-	}
 
 	retval = (writeback_file_class->write_file_metadata) (TRACKER_WRITEBACK_FILE (writeback),
 	                                                      tmp_file,
 	                                                      resource,
 	                                                      cancellable,
-	                                                      &n_error);
+	                                                      error);
 
 	if (!retval) {
-		GError *inner_error = NULL;
+		g_autoptr (GError) inner_error = NULL;
 
 		/* Delete the temporary file and preserve original */
 		if (!g_file_delete (tmp_file, NULL, &inner_error) &&
@@ -276,25 +237,13 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
 			g_warning ("Failed to delete temporary file: %s", inner_error->message);
 		}
 
-		g_clear_error (&inner_error);
+		return FALSE;
 	} else {
 		/* Move back the modified file to the original location. Correct UNIX
 		 * mode has been set for tmp_file in create_temporary_file() already.
 		 */
-		if (!g_file_move (tmp_file, file,
-		                  G_FILE_COPY_OVERWRITE,
-		                  NULL, NULL, NULL, &n_error)) {
-			g_warning ("Failed to replace file: %s", n_error->message);
-		}
+		return g_file_move (tmp_file, file,
+				    G_FILE_COPY_OVERWRITE,
+				    NULL, NULL, NULL, error);
 	}
-
-	g_object_unref (file_info);
-	g_object_unref (tmp_file);
-	g_object_unref (file);
-
-	if (n_error) {
-		g_propagate_error (error, n_error);
-	}
-
-	return retval;
 }
