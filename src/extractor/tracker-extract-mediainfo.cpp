@@ -119,6 +119,12 @@ static void map_to_mb (TrackerResource *resource,
 		       MediaInfo       *ctx,
 		       gpointer         user_data);
 
+static void map_to_lyrics (TrackerResource *resource,
+			   const char      *property,
+			   const char      *value,
+			   MediaInfo       *ctx,
+			   gpointer         user_data);
+
 enum {
 	MB_TAG_NONE,
 	MB_TAG_ALBUM,
@@ -195,6 +201,7 @@ static PropertyMapping audio_common_mapping[] = {
 	{ "tracker:hasExternalReference", Stream_General, L"MUSICBRAINZ_RELEASETRACKID", map_to_mb, GUINT_TO_POINTER (MB_TAG_RELEASETRACK) },
 	{ "nmm:musicAlbum", Stream_General, L"Album", map_to_album },
 	{ "nfo:hasHash", Stream_General, L"ACOUSTID_FINGERPRINT", map_to_hash, (gpointer) "chromaprint" },
+	{ "nmm:lyrics", Stream_General, L"Lyrics", map_to_lyrics },
 };
 
 static PropertyMapping audio_ogg_mapping[] = {
@@ -608,6 +615,21 @@ map_to_mb (TrackerResource *resource,
 	reference = tracker_extract_new_external_reference (mb_uri_reference_ids[type],
 	                                                    value, uri);
 	tracker_resource_add_relation (resource, property, reference);
+}
+
+static void
+map_to_lyrics (TrackerResource *resource,
+	       const char      *property,
+	       const char      *value,
+	       MediaInfo       *ctx,
+	       gpointer         user_data)
+{
+	g_autoptr (TrackerResource) lyrics = NULL;
+
+	lyrics = tracker_resource_new (NULL);
+	tracker_resource_add_uri (lyrics, "rdf:type", "nmm:SynchronizedText");
+	tracker_resource_set_string (lyrics, "nie:plainTextContent", value);
+	tracker_resource_add_relation (resource, property, lyrics);
 }
 
 static void
