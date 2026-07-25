@@ -202,6 +202,7 @@ static PropertyMapping audio_common_mapping[] = {
 	{ "nmm:musicAlbum", Stream_General, L"Album", map_to_album },
 	{ "nfo:hasHash", Stream_General, L"ACOUSTID_FINGERPRINT", map_to_hash, (gpointer) "chromaprint" },
 	{ "nmm:lyrics", Stream_General, L"Lyrics", map_to_lyrics },
+	{ "nmm:internationalStandardRecordingCode", Stream_General, L"ISRC" },
 };
 
 static PropertyMapping audio_ogg_mapping[] = {
