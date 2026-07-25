@@ -433,6 +433,15 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			cue_sheet = tracker_cue_sheet_guess_from_uri (uri);
 		}
 
+		if ((tag = find_tag (format, video_stream, NULL, "lyrics"))) {
+			g_autoptr (TrackerResource) lyrics = NULL;
+
+			lyrics = tracker_resource_new (NULL);
+			tracker_resource_add_uri (lyrics, "rdf:type", "nmm:SynchronizedText");
+			tracker_resource_set_string (lyrics, "nie:plainTextContent", tag->value);
+			tracker_resource_add_relation (metadata, "nmm:lyrics", lyrics);
+		}
+
 		if (cue_sheet) {
 			tracker_cue_sheet_apply_to_resource (cue_sheet,
 			                                     metadata,
