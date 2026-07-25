@@ -108,6 +108,11 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
                                                      "nco:streetAddress": "test_address",
                                                      "nco:country": "test_country"}}})
 
+    def test_jpeg_creator(self):
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
+
     # TIFF tests
 
     def test_011_tiff_title(self):
@@ -139,6 +144,11 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         self.__writeback_test (
             "writeback-test-2.tif",
             {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_tiff_creator(self):
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
 
     # PNG tests
 
@@ -187,6 +197,12 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
                                                      "nco:region": "test_region",
                                                      "nco:streetAddress": "test_address",
                                                      "nco:country": "test_country"}}})
+
+    def test_png_creator(self):
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()
