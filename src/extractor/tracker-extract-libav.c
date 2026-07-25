@@ -442,6 +442,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 			tracker_resource_add_relation (metadata, "nmm:lyrics", lyrics);
 		}
 
+		if ((tag = find_tag (format, audio_stream, NULL, "isrc"))) {
+			tracker_resource_set_string (metadata,
+						     "nmm:internationalStandardRecordingCode",
+						     tag->value);
+		}
+
 		if (cue_sheet) {
 			tracker_cue_sheet_apply_to_resource (cue_sheet,
 			                                     metadata,
