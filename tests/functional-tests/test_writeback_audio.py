@@ -37,8 +37,10 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self.check_data(path, data)
 
     # Missing metadata:
-    # nmm:artwork, nmm:internationalStandardRecordingCode,
+    # nmm:internationalStandardRecordingCode,
     # nmm:lyrics, nie:description, nao:hasTag
+    #
+    # Note: nmm:artwork is covered in test_writeback_artwork.py
 
     # MP3
 
