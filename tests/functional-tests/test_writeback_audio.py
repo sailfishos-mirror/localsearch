@@ -37,7 +37,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self.check_data(path, data)
 
     # Missing metadata:
-    # nie:description, nao:hasTag
+    # nao:hasTag
     #
     # Note: nmm:artwork is covered in test_writeback_artwork.py
 
@@ -126,6 +126,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-5.mp3",
             {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
 
+    @unittest.skip('MP3 cannot store description info')
+    def test_mp3_description(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nie:description": "test_description"})
+
     # Ogg
 
     def test_ogg_title(self):
@@ -210,6 +216,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
 
+    @unittest.skip('GStreamer mistakenly writes description into comment tag')
+    def test_ogg_description(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nie:description": "test_description"})
+
     # Flac
 
     def test_flac_title(self):
@@ -292,6 +304,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self._writeback_test(
             "writeback-test-7.flac",
             {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    @unittest.skip('GStreamer mistakenly writes description into comment tag')
+    def test_flac_description(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nie:description": "test_description"})
 
     # AAC/MP4
 
@@ -378,6 +396,11 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self._writeback_test(
             "writeback-test-8.mp4",
             {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    def test_aac_description(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nie:description": "test_description"})
 
 
 if __name__ == "__main__":
