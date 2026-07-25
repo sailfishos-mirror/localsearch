@@ -131,6 +131,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-5.mp3",
             {"nie:description": "test_description"})
 
+    @unittest.skip('MP3 cannot store keywords info')
+    def test_mp3_tag(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
+
     # Ogg
 
     def test_ogg_title(self):
@@ -221,6 +227,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nie:description": "test_description"})
 
+    @unittest.skip('OGG cannot store keywords info')
+    def test_ogg_tag(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
+
     # Flac
 
     def test_flac_title(self):
@@ -309,6 +321,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self._writeback_test(
             "writeback-test-7.flac",
             {"nie:description": "test_description"})
+
+    @unittest.skip('FLAC cannot store keywords info')
+    def test_flac_tag(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
     # AAC/MP4
 
@@ -400,6 +418,11 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self._writeback_test(
             "writeback-test-8.mp4",
             {"nie:description": "test_description"})
+
+    def test_aac_tag(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
 
 if __name__ == "__main__":
