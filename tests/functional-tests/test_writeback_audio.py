@@ -37,7 +37,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self.check_data(path, data)
 
     # Missing metadata:
-    # nmm:internationalStandardRecordingCode,
     # nie:description, nao:hasTag
     #
     # Note: nmm:artwork is covered in test_writeback_artwork.py
@@ -170,7 +169,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nie:contentCreated": "1234-12-23T00:00:00Z"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_ogg_isrc(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -256,7 +254,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nie:contentCreated": "1234-12-23T00:00:00Z"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_flac_isrc(self):
         self._writeback_test(
             "writeback-test-7.flac",
