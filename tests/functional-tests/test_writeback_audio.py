@@ -96,7 +96,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-5.mp3",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_mp3_publisher(self):
         self._writeback_test(
             "writeback-test-5.mp3",
@@ -184,7 +183,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
+    @unittest.skip('GStreamer does not write the PUBLISHER vorbis comment')
     def test_ogg_publisher(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -274,7 +273,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
+    @unittest.skip('GStreamer does not write the PUBLISHER vorbis comment')
     def test_flac_publisher(self):
         self._writeback_test(
             "writeback-test-7.flac",
