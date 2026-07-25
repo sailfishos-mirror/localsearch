@@ -38,7 +38,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
 
     # Missing metadata:
     # nmm:internationalStandardRecordingCode,
-    # nmm:lyrics, nie:description, nao:hasTag
+    # nie:description, nao:hasTag
     #
     # Note: nmm:artwork is covered in test_writeback_artwork.py
 
@@ -121,6 +121,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
 
+    @unittest.skip('gstreamer does not write the tag')
+    def test_mp3_lyrics(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
     # Ogg
 
     def test_ogg_title(self):
@@ -200,6 +206,12 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                  {"tracker:referenceSource": "https://musicbrainz.org/doc/Release_Group",
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
+
+    @unittest.skip('gstreamer does not write the tag')
+    def test_ogg_lyrics(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
 
     # Flac
 
@@ -281,6 +293,11 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
 
+    def test_flac_lyrics(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
     # AAC/MP4
 
     def test_aac_title(self):
@@ -361,6 +378,11 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                  {"tracker:referenceSource": "https://musicbrainz.org/doc/Release_Group",
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
+
+    def test_aac_lyrics(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
 
 
 if __name__ == "__main__":
