@@ -287,27 +287,30 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 		if (g_strcmp0 (prop, "nfo:orientation") == 0) {
 			const gchar *orientation;
+			const char *orientation_map[] = {
+				NULL,
+				"nfo:orientation-top",
+				"nfo:orientation-top-mirror",
+				"nfo:orientation-bottom",
+				"nfo:orientation-bottom-mirror",
+				"nfo:orientation-left-mirror",
+				"nfo:orientation-right",
+				"nfo:orientation-right-mirror",
+				"nfo:orientation-left",
+			};
+			int i;
 
 			orientation = tracker_resource_get_first_uri (resource, prop);
 
-			xmp_delete_property (xmp, NS_EXIF, "Orientation");
+			for (i = 1; i < G_N_ELEMENTS (orientation_map); i++) {
+				if (g_strcmp0 (orientation, orientation_map[i]) == 0) {
+					g_autofree char *value = NULL;
 
-			if (g_strcmp0 (orientation, "nfo:orientation-top") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "top - left", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-top-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "top - right", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-bottom") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "bottom - left", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-bottom-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "bottom - right", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-left-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "left - top", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-right") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "right - top", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-right-mirror") == 0) {
-					xmp_set_property (xmp, NS_EXIF, "Orientation", "right - bottom", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-left") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "left - bottom", 0);
+					value = g_strdup_printf ("%d", i);
+					xmp_delete_property (xmp, NS_TIFF, "Orientation");
+					xmp_set_property (xmp, NS_TIFF, "Orientation", value, 0);
+					break;
+				}
 			}
 		}
 
