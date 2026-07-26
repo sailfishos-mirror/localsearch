@@ -694,7 +694,7 @@ tracker_controller_start (TrackerController  *controller,
 	priv->modules = g_hash_table_new_full (g_str_hash,
 	                                       g_str_equal,
 	                                       (GDestroyNotify) g_free,
-	                                       NULL);
+	                                       (GDestroyNotify) g_type_module_unuse);
 
 	modules = tracker_writeback_modules_list ();
 
@@ -703,7 +703,7 @@ tracker_controller_start (TrackerController  *controller,
 		const gchar *path;
 
 		path = modules->data;
-		module = tracker_writeback_module_get (path);
+		module = tracker_writeback_module_new (path);
 
 		if (module) {
 			g_hash_table_insert (priv->modules, g_strdup (path), module);

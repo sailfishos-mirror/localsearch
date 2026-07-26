@@ -104,26 +104,15 @@ writeback_module_unload (GTypeModule *module)
 }
 
 TrackerWritebackModule *
-tracker_writeback_module_get (const gchar *name)
+tracker_writeback_module_new (const gchar *name)
 {
-	static GHashTable *modules = NULL;
 	TrackerWritebackModule *module;
 
 	g_return_val_if_fail (name != NULL, NULL);
 
-	if (G_UNLIKELY (!modules)) {
-		modules = g_hash_table_new (g_str_hash, g_str_equal);
-	}
-
-	module = g_hash_table_lookup (modules, name);
-
-	if (G_UNLIKELY (!module)) {
-		module = g_object_new (TRACKER_TYPE_WRITEBACK_MODULE, NULL);
-		g_type_module_set_name (G_TYPE_MODULE (module), name);
-		module->name = g_strdup (name);
-
-		g_hash_table_insert (modules, module->name, module);
-	}
+	module = g_object_new (TRACKER_TYPE_WRITEBACK_MODULE, NULL);
+	g_type_module_set_name (G_TYPE_MODULE (module), name);
+	module->name = g_strdup (name);
 
 	if (!g_type_module_use (G_TYPE_MODULE (module))) {
 		return NULL;
