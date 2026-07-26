@@ -131,28 +131,8 @@ tracker_writeback_file_write_metadata (TrackerWriteback  *writeback,
 
 	writeback_file_class = TRACKER_WRITEBACK_FILE_GET_CLASS (writeback);
 
-	if (!writeback_file_class->write_file_metadata) {
-		g_set_error (error,
-		             G_IO_ERROR,
-		             G_IO_ERROR_FAILED,
-		             "%s doesn't implement write_file_metadata()",
-		             G_OBJECT_TYPE_NAME (writeback));
-
-		return FALSE;
-	}
-
-	if (!writeback_file_class->content_types) {
-		g_critical ("%s doesn't implement content_types()",
-		            G_OBJECT_TYPE_NAME (writeback));
-
-		g_set_error (error,
-		             G_IO_ERROR,
-		             G_IO_ERROR_FAILED,
-		             "%s doesn't implement content_types()",
-		             G_OBJECT_TYPE_NAME (writeback));
-
-		return FALSE;
-	}
+	g_assert (writeback_file_class->write_file_metadata != NULL);
+	g_assert (writeback_file_class->content_types != NULL);
 
 	/* Get the file from the resource */
 	values = tracker_resource_get_values (resource, "nie:isStoredAs");
