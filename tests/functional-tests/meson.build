@@ -233,6 +233,7 @@ functional_tests = [
   'test_miner_resource_removal',
   'test_power',
   'test_systemd',
+  'test_writeback',
 ]
 
 if libcue.found()
