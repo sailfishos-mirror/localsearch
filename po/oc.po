@@ -5,9 +5,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker master\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2026-02-25 08:49+0000\n"
-"PO-Revision-Date: 2026-02-28 07:26+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-07-20 10:44+0000\n"
+"PO-Revision-Date: 2026-07-29 16:09+0200\n"
 "Last-Translator: Quentin PAGÈS\n"
 "Language-Team: Tot En Òc\n"
 "Language: oc\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Project-Style: gnome\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -215,15 +215,15 @@ msgstr "Inibir l'indexacion temporàriament"
 msgid "Erase the indexed data"
 msgstr "Espotir las donadas indexadas"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:418
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
 msgstr "Recercar dins lo contengut"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:727
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "Fornir l'estat e las estatisticas de las donadas indexadas"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "Apondre, suprimir e listar las etiquetas"
 
@@ -247,7 +247,7 @@ msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr ""
 "« %s » es pas una comanda localsearch. Consultatz « localsearch --help »"
 
-#: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Messatge"
 
@@ -265,7 +265,7 @@ msgstr "FORMAT"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "FICHIÈR"
 
@@ -279,8 +279,8 @@ msgstr "Extraire las metadonadas d’un fichièr"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
-#: src/cli/tracker-status.c:732 src/cli/tracker-tag.c:419
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Opcions pas reconegudas"
 
@@ -347,7 +347,7 @@ msgstr "Verifica se FICHIÈR es susceptible d'èsser indexat"
 msgid "Removable device mount point to query"
 msgstr "Ponch de montatge del periferic amovible d'interrogar"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "Impossible d'establir una connexion cap a LocalSearch"
@@ -555,61 +555,61 @@ msgstr "EXPRESSION"
 msgid "Could not get LocalSearch statistics"
 msgstr "Impossible d'obténer las estatisticas de LocalSearch"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "Actualament indexat"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d fichièr"
 msgstr[1] "%d fichièrs"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d dossièr"
 msgstr[1] "%d dossièrs"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "Demòra de plaça sus la particion de la basa de donadas"
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "L'indexador es en pausa"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "Las donadas son en cors d'indexacion"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "L'indexador es en pausa"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d fracàs enregistrat"
 msgstr[1] "%d fracasses enregistrats"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "Cap de rapòrt pas trobat"
 
-#: src/cli/tracker-status.c:684
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "Impossible d'establir una connexion SPARQL"
 
-#: src/cli/tracker-status.c:693
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "Escota de las mesas a jorn de la basa de donadas"
 
-#: src/cli/tracker-status.c:694
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "Quichatz sus Ctrl+C per arrestar"
 
@@ -655,52 +655,52 @@ msgstr "FICHIÈR…"
 msgid "Could not get files related to tag"
 msgstr "Impossible d'obténer los fichièrs ligats a aquesta etiqueta"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
 msgstr "Impossible d'obténer totas las etiquetas"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "Etiquetas (afichadas per nom)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "Impossible d'apondre l'etiqueta"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "L'etiqueta es estada aponduda corrèctament"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "Impossible d'apondre l'etiqueta als fichièrs"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "Etiquetat"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "Impossible de levar l'etiqueta"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "L'etiqueta es estada suprimida corrèctament"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Impossible d'establir una connexion cap a LocalSearch"
 
-#: src/cli/tracker-tag.c:424
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "L'opcion --list es obligatòria per --show-files"
 
-#: src/cli/tracker-tag.c:426
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr ""
 "Las accions apondre e suprimir pòdon pas èsser utilizadas en meteis temps"
 
-#: src/cli/tracker-tag.c:428
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr "L'opcion --descripcion pòt pas èsser utilizada qu'amb --add"
 
@@ -760,15 +760,15 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d segonda"
 msgstr[1] " %2.2d segondas"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Aficha las informacions de version"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— lançar lo proxy traçador de l'indexador"
 
@@ -823,39 +823,43 @@ msgstr ""
 "puèi quita"
 
 #: src/indexer/tracker-application.c:61
+msgid "Skips metadata extraction from file content"
+msgstr "Ignora l'extraccion de las metadonadas del contengut del fichièr"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Verifica se FICHIÈR es susceptible d'èsser extrach en foncion de la "
 "configuracion"
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 msgid "Avoids changes in the filesystem"
 msgstr "Evita las modificacions dins lo sistèma de fichièrs"
 
-#: src/indexer/tracker-application.c:1262
+#: src/indexer/tracker-application.c:1279
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "L'objècte de donada « %s » existís ja"
 
-#: src/indexer/tracker-application.c:1263
+#: src/indexer/tracker-application.c:1280
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "L'objècte de donada « %s » existís pas encara"
 
-#: src/indexer/tracker-application.c:1289
+#: src/indexer/tracker-application.c:1306
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Lo repertòri parent « %s » es PAS eligible per l'indexacion (segon los "
 "filtres)"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1311
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Lo repertòri parent « %s » es PAS eligible per l'indexacion (fichièr amagat)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1317
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -864,27 +868,27 @@ msgstr ""
 "Lo repertòri parent « %s » es PAS eligible per l'indexacion (segon lo "
 "contengut)"
 
-#: src/indexer/tracker-application.c:1316
+#: src/indexer/tracker-application.c:1332
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Lo repertòri es PAS eligible per l'indexacion (segon los filtres)"
 
-#: src/indexer/tracker-application.c:1320
+#: src/indexer/tracker-application.c:1336
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Lo fichièr es PAS eligible per l'indexacion (segon los filtres)"
 
-#: src/indexer/tracker-application.c:1323
+#: src/indexer/tracker-application.c:1338
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Lo fichièr es PAS eligible per l'indexacion (fichièr amagat)"
 
-#: src/indexer/tracker-application.c:1325
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Lo fichièr es PAS eligible per l'indexacion (pas un dossièr indexat)"
 
-#: src/indexer/tracker-application.c:1333
+#: src/indexer/tracker-application.c:1348
 msgid "Directory is eligible to be indexed"
 msgstr "Lo repertòri es eligible per l'indexacion"
 
-#: src/indexer/tracker-application.c:1334
+#: src/indexer/tracker-application.c:1349
 msgid "File is eligible to be indexed"
 msgstr "Lo fichièr es eligible per l'indexacion"
 
