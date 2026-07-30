@@ -7,9 +7,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tracker\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2026-01-16 18:54+0000\n"
-"PO-Revision-Date: 2026-01-30 11:54+0200\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-07-20 10:44+0000\n"
+"PO-Revision-Date: 2026-07-30 20:18+0300\n"
 "Last-Translator: Yaron Shahrabani <sh.yaron@gmail.com>\n"
 "Language-Team: Hebrew <>\n"
 "Language: he\n"
@@ -18,7 +18,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=4; plural=(n==1 ? 0 : n==2 ? 1 : n>10 && n%10==0 ? "
 "2 : 3);\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Poedit-SourceCharset: UTF-8\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -213,15 +213,15 @@ msgstr "מניעת תיעוד במפתח זמנית"
 msgid "Erase the indexed data"
 msgstr "מחיקת הנתונים שמתועדים במפתח"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:418
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
 msgstr "חיפוש אחר תוכן"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:721
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "אספקת מצב וסטטיסטיקה על הנתונים שנשמרים במפתח"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "הוספה, הסרה והצגה של תגיות"
 
@@ -244,7 +244,7 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "„%s” אינה פקודת localsearch. יש לקרוא את הפלט של „localsearch --help”"
 
-#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "הודעה"
 
@@ -262,7 +262,7 @@ msgstr "FORMAT"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "FILE"
 
@@ -276,8 +276,8 @@ msgstr "חילוץ נתוני על מקובץ"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
-#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Unrecognized options"
 
@@ -342,7 +342,7 @@ msgstr "לבדוק אם קובץ זכאי לתיעוד במפתח"
 msgid "Removable device mount point to query"
 msgstr "נקודת עיגון מכשיר נתיק לתשאול"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "לא ניתן להתחבר ל־LocalSearch"
@@ -544,12 +544,12 @@ msgstr "ביטוי"
 msgid "Could not get LocalSearch statistics"
 msgstr "לא ניתן למשוך את הסטטיסטיקה של LocalSearch"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "כרגע מסודרים במפתח"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
@@ -558,7 +558,7 @@ msgstr[1] "‫%d קבצים"
 msgstr[2] "‫%d קבצים"
 msgstr[3] "‫%d קבצים"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
@@ -567,23 +567,23 @@ msgstr[1] "‫%d תיקיות"
 msgstr[2] "‫%d תיקיות"
 msgstr[3] "‫%d תיקיות"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "לא נותר מקום פנוי במחיצת הנתונים"
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "המתעד במפתח מושהה"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "הנתונים עדיין מסודרים במפתח"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "המתעד במפתח ממתין"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
@@ -592,19 +592,19 @@ msgstr[1] "שני כשלים תועדו"
 msgstr[2] "‫%d כשלים תועדו"
 msgstr[3] "‫%d כשלים תועדו"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "לא נמצאו דיווחים"
 
-#: src/cli/tracker-status.c:678
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "לא ניתן להקים חיבור SPARQL"
 
-#: src/cli/tracker-status.c:687
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "כעת בהאזנה לעדכוני מסד נתונים"
 
-#: src/cli/tracker-status.c:688
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "יש ללחוץ על Ctrl+C כדי לעצור"
 
@@ -644,51 +644,51 @@ msgstr "FILE…"
 msgid "Could not get files related to tag"
 msgstr "Could not get files related to tag"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
 msgstr "לא ניתן למשוך את כל התגיות"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "תגיות (מופיעות לפי שם)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "לא ניתן להוסיף תגית"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "התגית נוספה בהצלחה"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "לא ניתן להוסיף תגיות לקבצים"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "מתויג"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "לא ניתן להסיר תגית"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "התגית הוסרה בהצלחה"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "לא ניתן להקים את החיבור ל־LocalSearch"
 
-#: src/cli/tracker-tag.c:424
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "The --list option is required for --show-files"
 
-#: src/cli/tracker-tag.c:426
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr "Add and delete actions can not be used together"
 
-#: src/cli/tracker-tag.c:428
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr "The --description option can only be used with --add"
 
@@ -756,15 +756,15 @@ msgstr[1] " ‫%2.2d שניות"
 msgstr[2] " ‫%2.2d שניות"
 msgstr[3] " ‫%2.2d שניות"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Displays version information"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— start the tracker index proxy"
 
@@ -815,34 +815,38 @@ msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Runs until all configured locations are indexed and then exits"
 
 #: src/indexer/tracker-application.c:61
+msgid "Skips metadata extraction from file content"
+msgstr "דילוג על חילוץ נתוני על מתוכן הקובץ"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr "Checks if FILE is eligible for being mined based on configuration"
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 msgid "Avoids changes in the filesystem"
 msgstr "Avoids changes in the filesystem"
 
-#: src/indexer/tracker-application.c:1262
+#: src/indexer/tracker-application.c:1279
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Data object “%s” currently exists"
 
-#: src/indexer/tracker-application.c:1263
+#: src/indexer/tracker-application.c:1280
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Data object “%s” currently does not exist"
 
-#: src/indexer/tracker-application.c:1289
+#: src/indexer/tracker-application.c:1306
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1311
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1317
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -851,27 +855,27 @@ msgstr ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
 "filters)"
 
-#: src/indexer/tracker-application.c:1316
+#: src/indexer/tracker-application.c:1332
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Directory is NOT eligible to be indexed (based on filters)"
 
-#: src/indexer/tracker-application.c:1320
+#: src/indexer/tracker-application.c:1336
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "File is NOT eligible to be indexed (based on filters)"
 
-#: src/indexer/tracker-application.c:1323
+#: src/indexer/tracker-application.c:1338
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "File is NOT eligible to be indexed (hidden file)"
 
-#: src/indexer/tracker-application.c:1325
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "File is NOT eligible to be indexed (not an indexed folder)"
 
-#: src/indexer/tracker-application.c:1333
+#: src/indexer/tracker-application.c:1348
 msgid "Directory is eligible to be indexed"
 msgstr "Directory is eligible to be indexed"
 
-#: src/indexer/tracker-application.c:1334
+#: src/indexer/tracker-application.c:1349
 msgid "File is eligible to be indexed"
 msgstr "File is eligible to be indexed"
 
