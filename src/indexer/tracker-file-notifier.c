@@ -470,8 +470,10 @@ _insert_store_info (TrackerIndexRoot *root,
 	TrackerFileData *file_data;
 	const char *current_hash = NULL;
 
-	current_hash = tracker_extract_rules_manager_get_hash (notifier->rules_manager,
-	                                                       mimetype);
+	if (mimetype) {
+		current_hash = tracker_extract_rules_manager_get_hash (notifier->rules_manager,
+		                                                       mimetype);
+	}
 
 	file_data = ensure_file_data (root, file);
 	file_data->in_store = TRUE;
