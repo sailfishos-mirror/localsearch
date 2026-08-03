@@ -416,7 +416,8 @@ tracker_sparql_buffer_flush_finish (TrackerSparqlBuffer  *buffer,
 				task = g_ptr_array_index (update_data->tasks, i);
 				task_file = task->file;
 				sparql = sparql_task_get_sparql (task);
-				uri = g_file_get_uri (task_file);
+				if (task_file)
+					uri = g_file_get_uri (task_file);
 
 				g_string_append_printf (str, "URI: %s\nSPARQL: %s\n",
 				                        uri, sparql);
@@ -455,11 +456,6 @@ tracker_sparql_buffer_log_statement (TrackerSparqlBuffer    *buffer,
 
 	g_return_if_fail (TRACKER_IS_SPARQL_BUFFER (buffer));
 	g_return_if_fail (stmt != NULL);
-
-	if (!file)
-		file = buffer->root;
-
-	g_return_if_fail (G_IS_FILE (file));
 
 	batch = tracker_sparql_buffer_get_current_batch (buffer);
 	tracker_batch_add_statement (batch, stmt, NULL);
