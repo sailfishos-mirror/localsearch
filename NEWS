@@ -1,3 +1,12 @@
+NEW in 3.12.beta - 2026-08-03
+=============================
+  * Handle soft page breaks correctly in ODF documents
+  * Cleanups to the control daemon
+  * Internal refactors to keep "common" code between processes minimal
+  * Increased test coverage
+
+Translations: be, cs, he, ka, kk, oc, pl, ro, sl, uk, zh_CN
+
 NEW in 3.12.alpha - 2026-06-29
 ==============================
   * Fix possible crash when deleting a directory recursively
