@@ -24,6 +24,9 @@
 #include <glib.h>
 #include <gio/gio.h>
 
+#include <libxml/parser.h>
+#include <libxml/SAX2.h>
+
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
@@ -59,6 +62,7 @@ typedef struct {
 	guint in_metadata : 1;
 	guint in_manifest : 1;
 	gchar *savedstring;
+	GString *text_buf;
 } OPFData;
 
 typedef struct {
@@ -74,6 +78,7 @@ opf_data_new (const char *uri,
 
 	data->uri = g_strdup (uri);
 	data->resource = g_object_ref (resource);
+	data->text_buf = g_string_new ("");
 
 	return data;
 }
@@ -101,6 +106,9 @@ opf_data_free (OPFData *data)
 	g_list_foreach (data->pages, (GFunc) g_free, NULL);
 	g_list_free (data->pages);
 
+	if (data->text_buf)
+		g_string_free (data->text_buf, TRUE);
+
 	g_object_unref (data->resource);
 	g_free (data->uri);
 	g_free (data);
@@ -110,160 +118,56 @@ opf_data_free (OPFData *data)
  * pointing to the real metadata/content
  */
 static void
-container_xml_start_element_handler (GMarkupParseContext  *context,
-                                     const gchar          *element_name,
-                                     const gchar         **attribute_names,
-                                     const gchar         **attribute_values,
-                                     gpointer              user_data,
-                                     GError              **error)
+container_start_element_ns (void           *user_data,
+                            const xmlChar  *localname,
+                            const xmlChar  *prefix G_GNUC_UNUSED,
+                            const xmlChar  *URI G_GNUC_UNUSED,
+                            int             nb_namespaces G_GNUC_UNUSED,
+                            const xmlChar **namespaces G_GNUC_UNUSED,
+                            int             nb_attributes,
+                            int             nb_defaulted G_GNUC_UNUSED,
+                            const xmlChar **attributes)
 {
-	gchar **path_out = user_data;
-	gint i;
+	char **path_out = user_data;
 
-	if (g_strcmp0 (element_name, "rootfile") != 0) {
+	if (g_strcmp0 ((const char *) localname, "rootfile") != 0)
 		return;
-	}
 
-	for (i = 0; attribute_names[i] != NULL; i++) {
-		if (g_strcmp0 (attribute_names[i], "full-path") == 0) {
-			if (!*path_out) {
-				*path_out = g_strdup (attribute_values[i]);
+	for (int i = 0; i < nb_attributes; i++) {
+		const xmlChar *attr_local = attributes[i*5 + 0];
+		const xmlChar *value_start = attributes[i*5 + 3];
+		const xmlChar *value_end   = attributes[i*5 + 4];
+		int value_len = (int) (value_end - value_start);
+
+		if (g_strcmp0 ((const char *) attr_local, "full-path") == 0) {
+			if (*path_out == NULL) {
+				*path_out = g_strndup ((const char *) value_start, value_len);
 			}
 			break;
 		}
 	}
 }
 
-/* Methods to parse the OPF document metadata/layout */
 static void
-opf_xml_start_element_handler (GMarkupParseContext  *context,
-                               const gchar          *element_name,
-                               const gchar         **attribute_names,
-                               const gchar         **attribute_values,
-                               gpointer              user_data,
-                               GError              **error)
+opf_characters (void          *user_data,
+		const xmlChar *ch,
+		int            len)
 {
 	OPFData *data = user_data;
-	gint i;
-	gboolean has_role_attr = FALSE;
 
-	if (g_strcmp0 (element_name, "metadata") == 0) {
-		data->in_metadata = TRUE;
-	} else if (g_strcmp0 (element_name, "manifest") == 0) {
-		data->in_manifest = TRUE;
-	} else if (data->in_metadata) {
-		/* epub metadata */
-		if (g_strcmp0 (element_name, "dc:title") == 0) {
-			data->element = OPF_TAG_TYPE_TITLE;
-		} else if (g_strcmp0 (element_name, "dc:creator") == 0) {
-			for (i = 0; attribute_names[i] != NULL; i++) {
-				if (g_strcmp0 (attribute_names[i], "opf:file-as") == 0) {
-					g_debug ("Found creator file-as tag");
-					data->savedstring = g_strdup (attribute_values[i]);
-				} else if (g_strcmp0 (attribute_names[i], "opf:role") == 0) {
-					has_role_attr = TRUE;
-					if (g_strcmp0 (attribute_values[i], "aut") == 0) {
-						data->element = OPF_TAG_TYPE_AUTHOR;
-					} else if (g_strcmp0 (attribute_values[i], "edt") == 0) {
-						data->element = OPF_TAG_TYPE_EDITOR;
-					} else if (g_strcmp0 (attribute_values[i], "ill") == 0) {
-						data->element = OPF_TAG_TYPE_ILLUSTRATOR;
-					} else {
-						data->element = OPF_TAG_TYPE_UNKNOWN;
-						opf_data_clear_saved_string (data);
-						g_debug ("Unknown role, skipping");
-					}
-				}
-			}
-			if (!has_role_attr) {
-				data->element = OPF_TAG_TYPE_AUTHOR;
-			}
-		} else if (g_strcmp0 (element_name, "dc:date") == 0) {
-			for (i = 0; attribute_names[i] != NULL; i++) {
-				if (g_strcmp0 (attribute_names[i], "opf:event") == 0 &&
-				    g_strcmp0 (attribute_values[i], "original-publication") == 0) {
-					data->element = OPF_TAG_TYPE_CREATED;
-					break;
-				}
-			}
-		} else if (g_strcmp0 (element_name, "dc:publisher") == 0) {
-			data->element = OPF_TAG_TYPE_PUBLISHER;
-		} else if (g_strcmp0 (element_name, "dc:description") == 0) {
-			data->element = OPF_TAG_TYPE_DESCRIPTION;
-		} else if (g_strcmp0 (element_name, "dc:language") == 0) {
-			data->element = OPF_TAG_TYPE_LANGUAGE;
-		} else if (g_strcmp0 (element_name, "dc:identifier") == 0) {
-			data->element = OPF_TAG_TYPE_UUID;
-			for (i = 0; attribute_names[i] != NULL; i++) {
-				if (g_strcmp0 (attribute_names[i], "opf:scheme") == 0) {
-					if (g_ascii_strncasecmp (attribute_values[i], "isbn", 4) == 0) {
-						data->element = OPF_TAG_TYPE_ISBN;
-					}
-				}
-			}
-		/* } else if (g_strcmp0 (element_name, "meta") == 0) { */
-		/* 	for (i = 0; attribute_names[i] != NULL; i++) { */
-		/* 		if (g_strcmp0 (attribute_names[i], "name") == 0) { */
-		/* 			if (g_strcmp0 (attribute_values[i], "calibre:rating") == 0) { */
-		/* 				anybool = TRUE; */
-		/* 			} */
-		/* 		} else if (anybool && g_strcmp0 (attribute_names[i], "content")) { */
-		/* 			data->element = OPF_TAG_TYPE_RATING; */
-		/* 			data->savedstring = g_strdup (attribute_values[i]); */
-		/* 		} */
-		/* 	} */
-		/* } else if (g_strcmp0 (element_name, "dc:subject") == 0) { */
-		/* 	data->element = OPF_TAG_TYPE_SUBJECT; */
-		}
-	} else if (data->in_manifest &&
-		   g_strcmp0 (element_name, "item") == 0) {
-		const gchar *rel_path = NULL;
-		gboolean is_xhtml = FALSE;
+	if (len <= 0 || !ch)
+		return;
 
-		/* Keep list of xhtml documents for plain text extraction */
-		for (i = 0; attribute_names[i] != NULL; i++) {
-			if (g_strcmp0 (attribute_names[i], "href") == 0) {
-				rel_path = attribute_values[i];
-			} else if (g_strcmp0 (attribute_names[i], "media-type") == 0 &&
-			           g_strcmp0 (attribute_values[i], "application/xhtml+xml") == 0) {
-				is_xhtml = TRUE;
-			}
-		}
-
-		if (is_xhtml && rel_path) {
-			data->pages = g_list_append (data->pages, g_strdup (rel_path));
-		}
-	}
+	if (data->element != OPF_TAG_TYPE_UNKNOWN)
+		g_string_append_len (data->text_buf, (const gchar *) ch, len);
 }
 
 static void
-opf_xml_end_element_handler (GMarkupParseContext  *context,
-                             const gchar          *element_name,
-                             gpointer              user_data,
-                             GError              **error)
+opf_apply_text (OPFData      *data,
+                const gchar  *text)
 {
-	OPFData *data = user_data;
-
-	if (g_strcmp0 (element_name, "metadata") == 0) {
-		data->in_metadata = FALSE;
-	} else if (g_strcmp0 (element_name, "manifest") == 0) {
-		data->in_manifest = FALSE;
-	} else {
-		data->element = OPF_TAG_TYPE_UNKNOWN;
-	}
-}
-
-static void
-opf_xml_text_handler (GMarkupParseContext   *context,
-                      const gchar           *text,
-                      gsize                  text_len,
-                      gpointer               user_data,
-                      GError               **error)
-{
-	OPFData *data = user_data;
-
 	switch (data->element) {
-	case OPF_TAG_TYPE_PUBLISHER:
+	case OPF_TAG_TYPE_PUBLISHER: {
 		TrackerResource *publisher;
 
 		publisher = tracker_resource_new (NULL);
@@ -273,35 +177,32 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 		tracker_resource_set_relation (data->resource, "nco:publisher", publisher);
 		g_object_unref (publisher);
 		break;
+	}
+
 	case OPF_TAG_TYPE_AUTHOR:
 	case OPF_TAG_TYPE_EDITOR:
 	case OPF_TAG_TYPE_ILLUSTRATOR:
 	case OPF_TAG_TYPE_CONTRIBUTOR: {
 		TrackerResource *contact, *artist = NULL;
-		gchar *fname, *gname, *oname;
+		gchar *fname = NULL, *gname = NULL, *oname = NULL;
 		const gchar *fullname = NULL;
 		gchar *role_uri = NULL;
 		const gchar *role_str = NULL;
 		gint i, j = 0, len;
 
-		fname = NULL;
-		gname = NULL;
-		oname = NULL;
-
-		/* parse name.  may not work for dissimilar cultures. */
+		/* parse name. may not work for dissimilar cultures. */
 		if (data->savedstring != NULL) {
 			fullname = data->savedstring;
 
 			/* <family name>, <given name> <other name> */
-			g_debug ("Parsing 'opf:file-as' attribute:'%s'", data->savedstring);
-			len = strlen (data->savedstring);
+			len = (gint) strlen (data->savedstring);
 
 			for (i = 0; i < len; i++) {
 				if (data->savedstring[i] == ',') {
 					fname = g_strndup (data->savedstring, i);
-					g_debug ("Found family name:'%s'", fname);
 
-					for (; data->savedstring[i] == ',' || data->savedstring[i] == ' '; i++);
+					for (; data->savedstring[i] == ',' || data->savedstring[i] == ' '; i++)
+						;
 					j = i;
 
 					break;
@@ -310,19 +211,16 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 
 			if (!fname && i == len) {
 				fname = g_strdup (data->savedstring);
-				g_debug ("Found only one name");
 			} else {
 				for (; i <= len; i++) {
 					if (i == len || data->savedstring[i] == ' ') {
 						gname = g_strndup (data->savedstring + j, i - j);
-						g_debug ("Found given name:'%s'", gname);
 
-						for (; data->savedstring[i] == ',' || data->savedstring[i] == ' '; i++);
+						for (; data->savedstring[i] == ',' || data->savedstring[i] == ' '; i++)
+							;
 
-						if (i != len) {
+						if (i != len)
 							oname = g_strdup (data->savedstring + i);
-							g_debug ("Found other name:'%s'", oname);
-						}
 
 						break;
 					}
@@ -332,33 +230,25 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 			fullname = text;
 
 			/* <given name> <other name> <family name> */
-			g_debug ("Parsing name, no 'opf:file-as' found: '%s'", text);
-
-			len = strlen (text);
+			len = (gint) strlen (text);
 
 			for (i = 0; i < len; i++) {
 				if (text[i] == ' ') {
 					gname = g_strndup (text, i);
-					g_debug ("Found given name:'%s'", gname);
 					j = i + 1;
-
 					break;
 				}
 			}
 
 			if (j == 0) {
-				fname = g_strdup (data->savedstring);
-				g_debug ("Found only one name:'%s'", fname);
+				fname = g_strdup (text);
 			} else {
 				for (i = len - 1; i >= j - 1; i--) {
 					if (text[i] == ' ') {
 						fname = g_strdup (text + i + 1);
-						g_debug ("Found family name:'%s'", fname);
 
-						if (i > j) {
+						if (i > j)
 							oname = g_strndup (text + j, i - j);
-							g_debug ("Found other name:'%s'", oname);
-						}
 
 						break;
 					}
@@ -372,15 +262,10 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 		if (data->element == OPF_TAG_TYPE_AUTHOR) {
 			role_str = "nco:creator";
 		} else if (data->element == OPF_TAG_TYPE_EDITOR) {
-			/* Should this be nco:contributor ?
-			 * 'Editor' is a bit vague here.
-			 */
 			role_str = "nco:publisher";
-		} else if (data->element == OPF_TAG_TYPE_ILLUSTRATOR) {
-			/* There is no illustrator class, using contributor */
-			role_str = "nco:contributor";
 		} else {
-			g_assert ("Unknown role");
+			/* illustrator/contributor */
+			role_str = "nco:contributor";
 		}
 
 		if (role_uri) {
@@ -391,7 +276,7 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 
 		/* Creator contact details */
 		contact = tracker_resource_new (NULL);
-		tracker_resource_set_uri (contact, "rdf:type",  "nco:PersonContact");
+		tracker_resource_set_uri (contact, "rdf:type", "nco:PersonContact");
 		tracker_resource_set_string (contact, "nco:fullname", fullname);
 
 		if (fname) {
@@ -414,15 +299,18 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 			g_free (role_uri);
 		}
 
-		tracker_resource_set_relation (data->resource, "nco:creator", contact);
+		tracker_resource_set_relation (data->resource, role_str, contact);
+
 		g_clear_object (&artist);
 		g_object_unref (contact);
 
 		break;
 	}
+
 	case OPF_TAG_TYPE_TITLE:
 		tracker_resource_set_string (data->resource, "nie:title", text);
 		break;
+
 	case OPF_TAG_TYPE_CREATED: {
 		gchar *date = tracker_date_guess (text);
 
@@ -431,25 +319,28 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 			g_free (date);
 		} else {
 			g_warning ("Could not parse creation time (%s) in EPUB '%s'",
-				   text, data->uri);
+			           text, data->uri);
 		}
 		break;
 	}
+
 	case OPF_TAG_TYPE_LANGUAGE:
 		tracker_resource_set_string (data->resource, "nie:language", text);
 		break;
+
 	case OPF_TAG_TYPE_SUBJECT:
 		tracker_resource_set_string (data->resource, "nie:subject", text);
 		break;
+
 	case OPF_TAG_TYPE_DESCRIPTION:
 		tracker_resource_set_string (data->resource, "nie:description", text);
 		break;
+
 	case OPF_TAG_TYPE_UUID:
 	case OPF_TAG_TYPE_ISBN:
 		tracker_resource_set_string (data->resource, "nie:identifier", text);
 		break;
-	/* case OPF_TAG_TYPE_RATING: */
-	case OPF_TAG_TYPE_UNKNOWN:
+
 	default:
 		break;
 	}
@@ -457,86 +348,321 @@ opf_xml_text_handler (GMarkupParseContext   *context,
 	opf_data_clear_saved_string (data);
 }
 
-/* Methods to extract XHTML text content */
 static void
-content_xml_text_handler (GMarkupParseContext   *context,
-                          const gchar           *text,
-                          gsize                  text_len,
-                          gpointer               user_data,
-                          GError               **error)
+opf_start_element_ns (void           *ctx,
+                      const xmlChar  *localname,
+                      const xmlChar  *prefix,
+                      const xmlChar  *URI G_GNUC_UNUSED,
+                      int             nb_namespaces G_GNUC_UNUSED,
+                      const xmlChar **namespaces G_GNUC_UNUSED,
+                      int             nb_attributes,
+                      int             nb_defaulted G_GNUC_UNUSED,
+                      const xmlChar **attributes)
 {
-	OPFContentData *content_data = user_data;
-	gsize written_bytes = 0;
+	OPFData *data = ctx;
+	const gchar *lname = (const gchar *) localname;
+	g_autofree gchar *qname = NULL;
 
-	if (text_len <= 0) {
+	if (g_strcmp0 (lname, "metadata") == 0) {
+		data->in_metadata = TRUE;
+		return;
+	} else if (g_strcmp0 (lname, "manifest") == 0) {
+		data->in_manifest = TRUE;
 		return;
 	}
 
-	if (tracker_text_validate_utf8 (text,
-	                                MIN (text_len, content_data->limit),
-	                                &content_data->contents,
-	                                &written_bytes)) {
-		if (content_data->contents->str[content_data->contents->len - 1] != ' ') {
-			g_string_append_c (content_data->contents, ' ');
+	if (prefix && *prefix)
+		qname = g_strdup_printf ("%s:%s", (const gchar *) prefix, lname);
+	else
+		qname = g_strdup (lname);
+
+	if (data->in_metadata) {
+		gboolean has_role_attr = FALSE;
+
+		if (g_strcmp0 (qname, "dc:title") == 0) {
+			data->element = OPF_TAG_TYPE_TITLE;
+		} else if (g_strcmp0 (qname, "dc:creator") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *attr_local  = attributes[i*5 + 0];
+				const xmlChar *attr_prefix = attributes[i*5 + 1];
+				const xmlChar *value_start = attributes[i*5 + 3];
+				const xmlChar *value_end   = attributes[i*5 + 4];
+				int value_len = (int) (value_end - value_start);
+				g_autofree gchar *attr_q = NULL;
+
+				if (attr_prefix && *attr_prefix)
+					attr_q = g_strdup_printf ("%s:%s",
+					                          (const gchar *) attr_prefix,
+					                          (const gchar *) attr_local);
+				else
+					attr_q = g_strdup ((const gchar *) attr_local);
+
+				if (g_strcmp0 (attr_q, "opf:file-as") == 0 || g_strcmp0 (attr_q, "file-as") == 0) {
+					g_free (data->savedstring);
+					data->savedstring = g_strndup ((const gchar *) value_start, value_len);
+				} else if (g_strcmp0 (attr_q, "opf:role") == 0 || g_strcmp0 (attr_q, "role") == 0) {
+					g_autofree gchar *role = g_strndup ((const gchar *) value_start, value_len);
+
+					has_role_attr = TRUE;
+
+					if (g_strcmp0 (role, "aut") == 0)
+						data->element = OPF_TAG_TYPE_AUTHOR;
+					else if (g_strcmp0 (role, "edt") == 0)
+						data->element = OPF_TAG_TYPE_EDITOR;
+					else if (g_strcmp0 (role, "ill") == 0)
+						data->element = OPF_TAG_TYPE_ILLUSTRATOR;
+					else {
+						data->element = OPF_TAG_TYPE_UNKNOWN;
+						opf_data_clear_saved_string (data);
+					}
+				}
+			}
+			if (!has_role_attr)
+				data->element = OPF_TAG_TYPE_AUTHOR;
+
+		} else if (g_strcmp0 (qname, "dc:date") == 0) {
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *attr_local  = attributes[i*5 + 0];
+				const xmlChar *attr_prefix = attributes[i*5 + 1];
+				const xmlChar *value_start = attributes[i*5 + 3];
+				const xmlChar *value_end   = attributes[i*5 + 4];
+				int value_len = (int) (value_end - value_start);
+				g_autofree gchar *attr_q = NULL;
+
+				if (attr_prefix && *attr_prefix)
+					attr_q = g_strdup_printf ("%s:%s",
+					                          (const gchar *) attr_prefix,
+					                          (const gchar *) attr_local);
+				else
+					attr_q = g_strdup ((const gchar *) attr_local);
+
+				if (g_strcmp0 (attr_q, "opf:event") == 0) {
+					g_autofree gchar *val = g_strndup ((const gchar *) value_start, value_len);
+
+					if (g_strcmp0 (val, "original-publication") == 0) {
+						data->element = OPF_TAG_TYPE_CREATED;
+						break;
+					}
+				}
+			}
+		} else if (g_strcmp0 (qname, "dc:publisher") == 0) {
+			data->element = OPF_TAG_TYPE_PUBLISHER;
+		} else if (g_strcmp0 (qname, "dc:description") == 0) {
+			data->element = OPF_TAG_TYPE_DESCRIPTION;
+		} else if (g_strcmp0 (qname, "dc:language") == 0) {
+			data->element = OPF_TAG_TYPE_LANGUAGE;
+		} else if (g_strcmp0 (qname, "dc:subject") == 0) {
+			data->element = OPF_TAG_TYPE_SUBJECT;
+		} else if (g_strcmp0 (qname, "dc:identifier") == 0) {
+			data->element = OPF_TAG_TYPE_UUID;
+
+			for (int i = 0; i < nb_attributes; i++) {
+				const xmlChar *attr_local  = attributes[i*5 + 0];
+				const xmlChar *attr_prefix = attributes[i*5 + 1];
+				const xmlChar *value_start = attributes[i*5 + 3];
+				const xmlChar *value_end   = attributes[i*5 + 4];
+				int value_len = (int) (value_end - value_start);
+				g_autofree gchar *attr_q = NULL;
+
+				if (attr_prefix && *attr_prefix)
+					attr_q = g_strdup_printf ("%s:%s",
+					                          (const gchar *) attr_prefix,
+					                          (const gchar *) attr_local);
+				else
+					attr_q = g_strdup ((const gchar *) attr_local);
+
+				if (g_strcmp0 (attr_q, "opf:scheme") == 0) {
+					g_autofree gchar *val = g_strndup ((const gchar *) value_start, value_len);
+
+					if (g_ascii_strncasecmp (val, "isbn", 4) == 0)
+						data->element = OPF_TAG_TYPE_ISBN;
+				}
+			}
 		}
+
+		g_string_set_size (data->text_buf, 0);
+		return;
 	}
 
-	content_data->limit -= written_bytes;
+	/* Outside <metadata> we don't want to accumulate metadata text */
+	if (!data->in_metadata)
+		data->element = OPF_TAG_TYPE_UNKNOWN;
+
+	if (data->in_manifest && g_strcmp0 (lname, "item") == 0) {
+		g_autofree gchar *href = NULL;
+		gboolean is_xhtml = FALSE;
+
+		for (int i = 0; i < nb_attributes; i++) {
+			const xmlChar *attr_local  = attributes[i*5 + 0];
+			const xmlChar *value_start = attributes[i*5 + 3];
+			const xmlChar *value_end   = attributes[i*5 + 4];
+			int value_len = (int) (value_end - value_start);
+
+			if (g_strcmp0 ((const gchar *) attr_local, "href") == 0) {
+				href = g_strndup ((const gchar *) value_start, value_len);
+			} else if (g_strcmp0 ((const gchar *) attr_local, "media-type") == 0) {
+				g_autofree gchar *mt = g_strndup ((const gchar *) value_start, value_len);
+
+				if (g_strcmp0 (mt, "application/xhtml+xml") == 0)
+					is_xhtml = TRUE;
+			}
+		}
+
+		if (is_xhtml && href)
+			data->pages = g_list_append (data->pages, g_strdup (href));
+	}
+}
+
+static void
+opf_end_element_ns (void          *ctx,
+                    const xmlChar *localname,
+                    const xmlChar *prefix G_GNUC_UNUSED,
+                    const xmlChar *URI G_GNUC_UNUSED)
+{
+	OPFData *data = ctx;
+	const gchar *lname = (const gchar *) localname;
+
+	if (g_strcmp0 (lname, "metadata") == 0) {
+		data->in_metadata = FALSE;
+	} else if (g_strcmp0 (lname, "manifest") == 0) {
+		data->in_manifest = FALSE;
+	} else if (data->in_metadata) {
+		g_autofree gchar *qname = NULL;
+
+		if (prefix && *prefix)
+			qname = g_strdup_printf ("%s:%s", (const gchar *) prefix, (const gchar *) localname);
+		else
+			qname = g_strdup ((const gchar *) localname);
+
+		if ((g_strcmp0 (qname, "dc:title") == 0 ||
+		     g_strcmp0 (qname, "dc:creator") == 0 ||
+		     g_strcmp0 (qname, "dc:date") == 0 ||
+		     g_strcmp0 (qname, "dc:publisher") == 0 ||
+		     g_strcmp0 (qname, "dc:description") == 0 ||
+		     g_strcmp0 (qname, "dc:language") == 0 ||
+		     g_strcmp0 (qname, "dc:subject") == 0 ||
+		     g_strcmp0 (qname, "dc:identifier") == 0) &&
+		    data->element != OPF_TAG_TYPE_UNKNOWN &&
+		    data->text_buf->len > 0) {
+			opf_apply_text (data, data->text_buf->str);
+		}
+
+		data->element = OPF_TAG_TYPE_UNKNOWN;
+		g_string_set_size (data->text_buf, 0);
+	}
+}
+
+static void
+content_characters (void          *ctx,
+		    const xmlChar *ch,
+		    int            len)
+{
+	OPFContentData *content_data = ctx;
+	gsize written_bytes = 0;
+
+	if (len <= 0 || !ch || content_data->limit == 0)
+		return;
+
+	tracker_text_validate_utf8 ((const gchar *) ch,
+	                            MIN ((gsize) len, content_data->limit),
+	                            &content_data->contents,
+	                            &written_bytes);
+
+	if (written_bytes > 0) {
+		content_data->limit -= written_bytes;
+
+		/* Padding between libxml2 "characters" chunks */
+		if (content_data->contents->len > 0 && content_data->limit > 0) {
+			gchar last = content_data->contents->str[content_data->contents->len - 1];
+
+			if (last != ' ' && last != '\n' && last != '\t' && last != '\r') {
+				g_string_append_c (content_data->contents, ' ');
+				content_data->limit--;
+			}
+		}
+	}
 }
 
 #define ZIP_XML_BUFFER_SIZE 8192
 
-static gboolean
-parse_xml_from_zip (const gchar          *zip_uri,
-                    const gchar          *member_name,
-                    GMarkupParseContext  *context,
-                    GError              **error)
+G_MODULE_EXPORT gboolean
+tracker_extract_module_init (GError **error)
 {
-	GInputStream *stream;
-	GBytes *bytes;
+	xmlInitParser ();
+	return TRUE;
+}
+
+static gboolean
+parse_xml_from_zip_sax (const gchar          *zip_uri,
+                        const gchar          *member_name,
+                        const xmlSAXHandler  *sax,
+                        gpointer              user_data,
+                        GError              **error)
+{
+	g_autoptr (GInputStream) stream = NULL;
+	g_autoptr (GError) inner_error = NULL;
+	g_autoptr (GBytes) bytes = NULL;
+	xmlParserCtxtPtr ctx;
 	const guint8 *data;
 	gsize len;
-	gboolean ok;
-
-	stream = NULL;
-	bytes = NULL;
-	ok = TRUE;
+	gboolean ok = TRUE;
 
 	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
+	/* Push parser context */
+	ctx = xmlCreatePushParserCtxt ((xmlSAXHandler*) sax, user_data, NULL, 0, NULL);
+	g_assert (ctx != NULL);
+
+	ctx->options |= XML_PARSE_NONET;
+
 	while ((bytes = g_input_stream_read_bytes (stream,
 	                                           ZIP_XML_BUFFER_SIZE,
 	                                           NULL,
-	                                           error)) != NULL) {
+	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
 		if (len == 0) {
-			g_bytes_unref (bytes);
-			bytes = NULL;
-			break; /* EOF */
+			break;
 		}
 
 		data = g_bytes_get_data (bytes, NULL);
 
-		ok = g_markup_parse_context_parse (context,
-		                                   (const gchar *) data,
-		                                   len,
-		                                   error);
-		g_bytes_unref (bytes);
-		bytes = NULL;
-
-		if (!ok)
+		if (xmlParseChunk (ctx, (const char *) data, (int) len, 0) != 0) {
+			ok = FALSE;
 			break;
+		}
+
+		g_clear_pointer (&bytes, g_bytes_unref);
 	}
 
-	/* If we broke out because of a read error, make sure we report failure */
-	if (error && *error)
+	if (inner_error)
 		ok = FALSE;
 
+	if (ok) {
+		if (xmlParseChunk (ctx, NULL, 0, 1) != 0)
+			ok = FALSE;
+	}
+
+	if (!ok) {
+		if (inner_error) {
+			g_propagate_error (error, inner_error);
+		} else if (ctx->lastError.message) {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s (line %d): %s",
+			             member_name,
+			             ctx->lastError.line,
+			             ctx->lastError.message);
+		} else {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s", member_name);
+		}
+	}
+
+	xmlFreeParserCtxt (ctx);
+
 	g_input_stream_close (stream, NULL, NULL);
-	g_object_unref (stream);
 
 	return ok;
 }
@@ -544,31 +670,21 @@ parse_xml_from_zip (const gchar          *zip_uri,
 static gchar *
 extract_opf_path (const gchar *uri)
 {
-	GMarkupParseContext *context;
-	gchar *path = NULL;
-	GError *error = NULL;
-	GMarkupParser parser = {
-		container_xml_start_element_handler,
-		NULL, NULL, NULL, NULL
+	g_autofree char *path = NULL;
+	g_autoptr(GError) error = NULL;
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.startElementNs = container_start_element_ns,
 	};
 
-	/* Create parsing context */
-	context = g_markup_parse_context_new (&parser, 0, &path, NULL);
-
-	/* Load the internal container file from the Zip archive,
-	 * and parse it to extract the .opf file to get metadata from
-	 */
-	parse_xml_from_zip (uri, "META-INF/container.xml", context, &error);
-	g_markup_parse_context_free (context);
+	parse_xml_from_zip_sax (uri, "META-INF/container.xml", &sax, &path, &error);
 
 	if (error) {
-		g_warning ("Could not get EPUB container.xml file: %s\n",
-		           error->message);
-		g_error_free (error);
+		g_warning ("Could not get EPUB container.xml file: %s", error->message);
 		return NULL;
 	}
 
-	return path;
+	return g_steal_pointer (&path);
 }
 
 static gchar *
@@ -580,10 +696,9 @@ extract_opf_contents (TrackerExtractInfo *info,
 	OPFContentData content_data = { 0 };
 	GError *error = NULL;
 	GList *l;
-	GMarkupParser xml_parser = {
-		NULL, NULL,
-		content_xml_text_handler,
-		NULL, NULL
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.characters = content_characters,
 	};
 
 	content_data.contents = g_string_new ("");
@@ -592,14 +707,15 @@ extract_opf_contents (TrackerExtractInfo *info,
 	g_debug ("Extracting up to %" G_GSIZE_FORMAT " bytes of content", content_data.limit);
 
 	for (l = content_files; l; l = l->next) {
-		GMarkupParseContext *context;
 		gchar *path;
 
-		context = g_markup_parse_context_new (&xml_parser, 0, &content_data, NULL);
-
 		/* Page file is relative to OPF file location */
-		path = g_build_filename (content_prefix, l->data, NULL);
-		parse_xml_from_zip (uri, path, context, &error);
+		if (g_strcmp0 (content_prefix, ".") == 0)
+			path = g_strdup (l->data);
+		else
+			path = g_build_filename (content_prefix, l->data, NULL);
+
+		parse_xml_from_zip_sax (uri, path, &sax, &content_data, &error);
 
 		if (error) {
 			g_warning ("Error extracting EPUB contents (%s): %s",
@@ -607,8 +723,6 @@ extract_opf_contents (TrackerExtractInfo *info,
 			g_clear_error (&error);
 		}
 		g_free (path);
-
-		g_markup_parse_context_free (context);
 
 		if (content_data.limit <= 0) {
 			/* Reached plain text extraction limit */
@@ -625,16 +739,15 @@ extract_opf (TrackerExtractInfo *info,
              const gchar        *opf_path)
 {
 	TrackerResource *ebook;
-	GMarkupParseContext *context;
 	OPFData *data = NULL;
 	GError *error = NULL;
 	gchar *dirname, *contents, *resource_uri;
 	GFile *file;
-	GMarkupParser opf_parser = {
-		opf_xml_start_element_handler,
-		opf_xml_end_element_handler,
-		opf_xml_text_handler,
-		NULL, NULL
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.startElementNs = opf_start_element_ns,
+		.endElementNs = opf_end_element_ns,
+		.characters = opf_characters,
 	};
 
 	g_debug ("Extracting OPF file contents from EPUB '%s'", uri);
@@ -648,14 +761,7 @@ extract_opf (TrackerExtractInfo *info,
 
 	data = opf_data_new (uri, ebook);
 
-	/* Create parsing context */
-	context = g_markup_parse_context_new (&opf_parser, 0, data, NULL);
-
-	/* Load the internal container file from the Zip archive,
-	 * and parse it to extract the .opf file to get metadata from
-	 */
-	parse_xml_from_zip (uri, opf_path, context, &error);
-	g_markup_parse_context_free (context);
+	parse_xml_from_zip_sax (uri, opf_path, &sax, data, &error);
 
 	if (error) {
 		g_warning ("Could not get EPUB '%s' file: %s\n", opf_path,
@@ -684,8 +790,8 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *ebook;
-	gchar *opf_path, *uri;
+	g_autoptr (TrackerResource) ebook = NULL;
+	g_autofree char *opf_path = NULL, *uri = NULL;
 	GFile *file;
 
 	file = tracker_extract_info_get_file (info);
@@ -693,17 +799,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 	opf_path = extract_opf_path (uri);
 
-	if (!opf_path) {
-		g_free (uri);
+	if (!opf_path)
 		return FALSE;
-	}
 
 	ebook = extract_opf (info, uri, opf_path);
-	g_free (opf_path);
-	g_free (uri);
 
 	tracker_extract_info_set_resource (info, ebook);
-	g_object_unref (ebook);
 
 	return TRUE;
 }

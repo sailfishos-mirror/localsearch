@@ -26,6 +26,9 @@
 #include <glib.h>
 #include <gio/gio.h>
 
+#include <libxml/parser.h>
+#include <libxml/SAX2.h>
+
 #include <tracker-common.h>
 
 #include "utils/tracker-extract.h"
@@ -62,6 +65,7 @@ typedef struct {
 	TrackerResource *metadata;
 	GQueue *tag_stack;            /* (element-type: ODTTagType) */
 	const gchar *uri;
+	GString *text_buf;
 } ODTMetadataParseInfo;
 
 typedef struct {
@@ -69,98 +73,129 @@ typedef struct {
 	ODTFileType file_type;
 	GString *content;
 	gulong bytes_pending;
+	gboolean limit_reached;
 } ODTContentParseInfo;
 
-GQuark maximum_size_error_quark = 0;
+static GQuark maximum_size_error_quark = 0;
 
-static void xml_start_element_handler_metadata (GMarkupParseContext   *context,
-                                                const gchar           *element_name,
-                                                const gchar          **attribute_names,
-                                                const gchar          **attribute_values,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void xml_end_element_handler_metadata   (GMarkupParseContext   *context,
-                                                const gchar           *element_name,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void xml_text_handler_metadata          (GMarkupParseContext   *context,
-                                                const gchar           *text,
-                                                gsize                  text_len,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void xml_start_element_handler_content  (GMarkupParseContext   *context,
-                                                const gchar           *element_name,
-                                                const gchar          **attribute_names,
-                                                const gchar          **attribute_values,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void xml_end_element_handler_content    (GMarkupParseContext   *context,
-                                                const gchar           *element_name,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void xml_text_handler_content           (GMarkupParseContext   *context,
-                                                const gchar           *text,
-                                                gsize                  text_len,
-                                                gpointer               user_data,
-                                                GError               **error);
-static void extract_oasis_content              (const gchar           *uri,
-                                                gulong                 total_bytes,
-                                                ODTFileType            file_type,
-                                                TrackerResource       *metadata);
+static void oasis_metadata_start_element_ns    (void           *ctx,
+                                                const xmlChar  *localname,
+                                                const xmlChar  *prefix,
+                                                const xmlChar  *URI,
+                                                int             nb_namespaces,
+                                                const xmlChar **namespaces,
+                                                int             nb_attributes,
+                                                int             nb_defaulted,
+                                                const xmlChar **attributes);
+static void oasis_metadata_end_element_ns      (void          *ctx,
+                                                const xmlChar *localname,
+                                                const xmlChar *prefix,
+                                                const xmlChar *URI);
+static void oasis_metadata_characters	       (void          *ctx,
+                                                const xmlChar *ch,
+                                                int            len);
+static void oasis_content_start_element_ns     (void           *ctx,
+                                            	const xmlChar  *localname,
+                                            	const xmlChar  *prefix,
+                                            	const xmlChar  *URI,
+                                            	int             nb_namespaces,
+                                            	const xmlChar **namespaces,
+                                            	int             nb_attributes,
+                                            	int             nb_defaulted,
+                                             	const xmlChar **attributes);
+static void oasis_content_end_element_ns       (void          *ctx,
+                                            	const xmlChar *localname,
+                                             	const xmlChar *prefix,
+                                             	const xmlChar *URI);
+static void oasis_content_characters           (void          *ctx,
+                                             	const xmlChar *ch,
+                                            	int            len);
+static void extract_oasis_content              (const gchar     *uri,
+                                                gulong           total_bytes,
+                                                ODTFileType      file_type,
+                                                TrackerResource *metadata);
+
+G_MODULE_EXPORT gboolean
+tracker_extract_module_init (GError **error)
+{
+	xmlInitParser ();
+	return TRUE;
+}
 
 #define ZIP_XML_BUFFER_SIZE 8192
 
 static gboolean
-parse_xml_from_zip (const gchar          *zip_uri,
-                    const gchar          *member_name,
-                    GMarkupParseContext  *context,
-                    GError              **error)
+parse_xml_from_zip_sax (const gchar          *zip_uri,
+                        const gchar          *member_name,
+                        const xmlSAXHandler  *sax,
+                        gpointer              user_data,
+                        GError              **error)
 {
-	GInputStream *stream;
-	GBytes *bytes;
+	g_autoptr (GError) inner_error = NULL;
+	g_autoptr (GInputStream) stream = NULL;
+	g_autoptr (GBytes) bytes = NULL;
+	xmlParserCtxtPtr ctxt;
 	const guint8 *data;
 	gsize len;
-	gboolean ok;
-
-	stream = NULL;
-	bytes = NULL;
-	ok = TRUE;
+	gboolean ok = TRUE;
 
 	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
+	ctxt = xmlCreatePushParserCtxt ((xmlSAXHandler *) sax, user_data,
+	                                NULL, 0, member_name);
+	g_assert (ctxt != NULL);
+
+	ctxt->options |= XML_PARSE_NONET;
+
 	while ((bytes = g_input_stream_read_bytes (stream,
 	                                           ZIP_XML_BUFFER_SIZE,
 	                                           NULL,
-	                                           error)) != NULL) {
+	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
 		if (len == 0) {
-			g_bytes_unref (bytes);
-			bytes = NULL;
 			break; /* EOF */
 		}
 
 		data = g_bytes_get_data (bytes, NULL);
 
-		ok = g_markup_parse_context_parse (context,
-		                                   (const gchar *) data,
-		                                   len,
-		                                   error);
-		g_bytes_unref (bytes);
-		bytes = NULL;
-
-		if (!ok)
+		if (xmlParseChunk (ctxt, (const char *) data, (int) len, 0) != 0) {
+			ok = FALSE;
+			bytes = NULL;
 			break;
+		}
+
+		g_clear_pointer (&bytes, g_bytes_unref);
 	}
 
-	/* If we broke out because of a read error, make sure we report failure */
-	if (error && *error)
+	if (inner_error)
 		ok = FALSE;
 
+	if (ok) {
+		if (xmlParseChunk (ctxt, NULL, 0, 1) != 0)
+			ok = FALSE;
+	}
+
+	if (!ok) {
+		if (inner_error) {
+			g_propagate_error (error, inner_error);
+		} else if (ctxt->lastError.message) {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s (line %d): %s",
+			             member_name,
+			             ctxt->lastError.line,
+			             ctxt->lastError.message);
+		} else {
+			g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
+			             "XML error in %s", member_name);
+		}
+	}
+
+	xmlFreeParserCtxt (ctxt);
+
 	g_input_stream_close (stream, NULL, NULL);
-	g_object_unref (stream);
 
 	return ok;
 }
@@ -173,14 +208,12 @@ extract_oasis_content (const gchar     *uri,
 {
 	gchar *content = NULL;
 	ODTContentParseInfo info;
-	GMarkupParseContext *context;
 	GError *error = NULL;
-	GMarkupParser parser = {
-		xml_start_element_handler_content,
-		xml_end_element_handler_content,
-		xml_text_handler_content,
-		NULL,
-		NULL
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.startElementNs = oasis_content_start_element_ns,
+		.endElementNs = oasis_content_end_element_ns,
+		.characters = oasis_content_characters,
 	};
 
 	/* If no content requested, return */
@@ -193,13 +226,15 @@ extract_oasis_content (const gchar     *uri,
 	info.file_type = file_type;
 	info.content = g_string_new ("");
 	info.bytes_pending = total_bytes;
+	info.limit_reached = FALSE;
 
-	/* Create parsing context */
-	context = g_markup_parse_context_new (&parser, 0, &info, NULL);
+	parse_xml_from_zip_sax (uri, "content.xml", &sax, &info, &error);
 
-	/* Load the internal XML file from the Zip archive, and parse it
-	 * using the given context */
-	parse_xml_from_zip (uri, "content.xml", context, &error);
+	if (info.limit_reached) {
+		g_clear_error (&error);
+		g_set_error_literal (&error, maximum_size_error_quark, 0,
+		                     "Maximum text limit reached");
+	}
 
 	if (!error || g_error_matches (error, maximum_size_error_quark, 0)) {
 		content = g_string_free (info.content, FALSE);
@@ -214,7 +249,6 @@ extract_oasis_content (const gchar     *uri,
 	}
 
 	g_free (content);
-	g_markup_parse_context_free (context);
 	g_queue_free (info.tag_stack);
 }
 
@@ -228,13 +262,11 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	GFile *file;
 	gchar *uri, *resource_uri;
 	const gchar *mime_used;
-	GMarkupParseContext *context;
-	GMarkupParser parser = {
-		xml_start_element_handler_metadata,
-		xml_end_element_handler_metadata,
-		xml_text_handler_metadata,
-		NULL,
-		NULL
+	xmlSAXHandler sax = {
+		.initialized = XML_SAX2_MAGIC,
+		.startElementNs = oasis_metadata_start_element_ns,
+		.endElementNs = oasis_metadata_end_element_ns,
+		.characters = oasis_metadata_characters,
 	};
 
 	if (G_UNLIKELY (maximum_size_error_quark == 0)) {
@@ -260,14 +292,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	info.metadata = metadata;
 	info.tag_stack = g_queue_new ();
 	info.uri = uri;
+	info.text_buf = g_string_new ("");
 
-	/* Create parsing context */
-	context = g_markup_parse_context_new (&parser, 0, &info, NULL);
-
-	/* Load the internal XML file from the Zip archive, and parse it
-	 * using the given context */
-	parse_xml_from_zip (uri, "meta.xml", context, NULL);
-	g_markup_parse_context_free (context);
+	parse_xml_from_zip_sax (uri, "meta.xml", &sax, &info, NULL);
 
 	if (g_ascii_strcasecmp (mime_used, "application/vnd.oasis.opendocument.text") == 0) {
 		file_type = FILE_TYPE_ODT;
@@ -288,6 +315,9 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	                       file_type,
 	                       metadata);
 
+	if (info.text_buf)
+ 		g_string_free (info.text_buf, TRUE);
+
 	g_queue_free (info.tag_stack);
 
 	g_free (uri);
@@ -298,235 +328,267 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	return TRUE;
 }
 
-static void
-xml_start_element_handler_metadata (GMarkupParseContext  *context,
-                                    const gchar          *element_name,
-                                    const gchar         **attribute_names,
-                                    const gchar         **attribute_values,
-                                    gpointer              user_data,
-                                    GError              **error)
+/* ------------------------- SAX helpers ----------------------------------- */
+
+static inline gchar *
+make_qname (const xmlChar *localname,
+            const xmlChar *prefix)
 {
-	ODTMetadataParseInfo *data = user_data;
+	if (prefix && *prefix)
+		return g_strdup_printf ("%s:%s", (const gchar *) prefix, (const gchar *) localname);
 
-	#define push_tag(id) \
-		g_queue_push_head (data->tag_stack, GINT_TO_POINTER(id));
+	return g_strdup ((const gchar *) localname);
+}
 
-	#define handle_tag_and_return(name, id) \
-		if (g_ascii_strcasecmp (element_name, name) == 0) { \
-			push_tag (id); \
-			return; \
-		};
+/* ------------------------- METADATA (meta.xml) SAX ----------------------------------- */
 
-	handle_tag_and_return ("dc:title", ODT_TAG_TYPE_TITLE);
-	handle_tag_and_return ("dc:subject", ODT_TAG_TYPE_SUBJECT);
-	handle_tag_and_return ("dc:creator", ODT_TAG_TYPE_AUTHOR);
-	handle_tag_and_return ("meta:keyword", ODT_TAG_TYPE_KEYWORDS);
-	handle_tag_and_return ("dc:description", ODT_TAG_TYPE_COMMENTS);
-	handle_tag_and_return ("meta:creation-date", ODT_TAG_TYPE_CREATED);
-	handle_tag_and_return ("meta:generator", ODT_TAG_TYPE_GENERATOR);
+static void
+oasis_metadata_start_element_ns (void           *ctx,
+                                 const xmlChar  *localname,
+                                 const xmlChar  *prefix,
+                                 const xmlChar  *URI G_GNUC_UNUSED,
+                                 int             nb_namespaces G_GNUC_UNUSED,
+                                 const xmlChar **namespaces G_GNUC_UNUSED,
+                                 int             nb_attributes,
+                                 int             nb_defaulted G_GNUC_UNUSED,
+                                 const xmlChar **attributes)
+{
+	ODTMetadataParseInfo *data = ctx;
+	g_autofree gchar *qname = make_qname (localname, prefix);
 
-	if (g_ascii_strcasecmp (element_name, "meta:document-statistic") == 0) {
-		TrackerResource *metadata;
-		const gchar **a, **v;
+	if (g_ascii_strcasecmp (qname, "dc:title") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_TITLE));
+	} else if (g_ascii_strcasecmp (qname, "dc:subject") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_SUBJECT));
+	} else if (g_ascii_strcasecmp (qname, "dc:creator") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_AUTHOR));
+	} else if (g_ascii_strcasecmp (qname, "meta:keyword") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_KEYWORDS));
+	} else if (g_ascii_strcasecmp (qname, "dc:description") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_COMMENTS));
+	} else if (g_ascii_strcasecmp (qname, "meta:creation-date") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_CREATED));
+	} else if (g_ascii_strcasecmp (qname, "meta:generator") == 0) {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_GENERATOR));
+	} else if (g_ascii_strcasecmp (qname, "meta:document-statistic") == 0) {
+		/* Parse attributes like meta:word-count and meta:page-count */
+		for (int i = 0; i < nb_attributes; i++) {
+			const xmlChar *a_local  = attributes[i*5 + 0];
+			const xmlChar *a_prefix = attributes[i*5 + 1];
+			const xmlChar *v_start  = attributes[i*5 + 3];
+			const xmlChar *v_end    = attributes[i*5 + 4];
+			int v_len = (int) (v_end - v_start);
+			g_autofree gchar *attr = make_qname (a_local, a_prefix);
+			g_autofree gchar *val  = g_strndup ((const gchar *) v_start, v_len);
 
-		metadata = data->metadata;
-
-		for (a = attribute_names, v = attribute_values; *a; ++a, ++v) {
-			if (g_ascii_strcasecmp (*a, "meta:word-count") == 0) {
-				tracker_resource_set_string (metadata, "nfo:wordCount", *v);
-			} else if (g_ascii_strcasecmp (*a, "meta:page-count") == 0) {
-				tracker_resource_set_string (metadata, "nfo:pageCount", *v);
+			if (g_ascii_strcasecmp (attr, "meta:word-count") == 0) {
+				tracker_resource_set_string (data->metadata, "nfo:wordCount", val);
+			} else if (g_ascii_strcasecmp (attr, "meta:page-count") == 0) {
+				tracker_resource_set_string (data->metadata, "nfo:pageCount", val);
 			}
 		}
 
-		push_tag (ODT_TAG_TYPE_STATS);
-
-		return;
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_STATS));
+	} else {
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_UNKNOWN));
 	}
 
-	push_tag (ODT_TAG_TYPE_UNKNOWN);
-
-	#undef push_tag
-	#undef handle_tag_and_return
+	/* Reset buffer for any element; only used when tag != UNKNOWN */
+	g_string_set_size (data->text_buf, 0);
 }
 
 static void
-xml_end_element_handler_metadata (GMarkupParseContext  *context,
-                                  const gchar          *element_name,
-                                  gpointer              user_data,
-                                  GError              **error)
+oasis_metadata_characters (void          *ctx,
+                           const xmlChar *ch,
+                           int            len)
 {
-	ODTMetadataParseInfo *data = user_data;
-
-	g_queue_pop_head (data->tag_stack);
-}
-
-static void
-xml_text_handler_metadata (GMarkupParseContext  *context,
-                           const gchar          *text,
-                           gsize                 text_len,
-                           gpointer              user_data,
-                           GError              **error)
-{
-	ODTMetadataParseInfo *data;
+	ODTMetadataParseInfo *data = ctx;
 	ODTTagType current;
-	TrackerResource *metadata;
-	gchar *date;
 
-	data = user_data;
-	metadata = data->metadata;
-
-	if (text_len == 0) {
-		/* ignore empty values */
+	if (len <= 0)
 		return;
-	}
 
 	current = GPOINTER_TO_INT (g_queue_peek_head (data->tag_stack));
-	switch (current) {
-	case ODT_TAG_TYPE_TITLE:
-		tracker_resource_set_string (metadata, "nie:title", text);
-		break;
+	if (current == ODT_TAG_TYPE_UNKNOWN || current == ODT_TAG_TYPE_STATS)
+		return;
 
-	case ODT_TAG_TYPE_SUBJECT:
-		tracker_resource_set_string (metadata, "nie:subject", text);
-		break;
-
-	case ODT_TAG_TYPE_AUTHOR: {
-		TrackerResource *publisher = tracker_extract_new_contact (text);
-
-		tracker_resource_set_relation (metadata, "nco:publisher", publisher);
-		g_object_unref (publisher);
-		break;
-	}
-
-	case ODT_TAG_TYPE_KEYWORDS: {
-		gchar *keywords;
-		gchar *lasts, *keyw;
-
-		keywords = g_strdup (text);
-
-		for (keyw = strtok_r (keywords, ",; ", &lasts);
-		     keyw;
-		     keyw = strtok_r (NULL, ",; ", &lasts)) {
-			tracker_resource_add_string (metadata, "nie:keyword", keyw);
-		}
-
-		g_free (keywords);
-
-		break;
-	}
-
-	case ODT_TAG_TYPE_COMMENTS:
-		tracker_resource_set_string (metadata, "nie:comment", text);
-		break;
-
-	case ODT_TAG_TYPE_CREATED: {
-		date = tracker_date_guess (text);
-		if (date) {
-			tracker_resource_set_string (metadata, "nie:contentCreated", date);
-			g_free (date);
-		} else {
-			g_warning ("Could not parse creation time (%s) in OASIS document '%s'",
-				   text, data->uri);
-		}
-		break;
-	}
-
-	case ODT_TAG_TYPE_GENERATOR:
-		tracker_resource_set_string (metadata, "nie:generator", text);
-		break;
-
-	default:
-	case ODT_TAG_TYPE_STATS:
-		break;
-	}
+	g_string_append_len (data->text_buf, (const gchar *) ch, len);
 }
 
 static void
-xml_start_element_handler_content (GMarkupParseContext  *context,
-                                   const gchar          *element_name,
-                                   const gchar         **attribute_names,
-                                   const gchar         **attribute_values,
-                                   gpointer              user_data,
-                                   GError              **error)
+oasis_metadata_end_element_ns (void          *ctx,
+                               const xmlChar *localname G_GNUC_UNUSED,
+                               const xmlChar *prefix G_GNUC_UNUSED,
+                               const xmlChar *URI G_GNUC_UNUSED)
 {
-	ODTContentParseInfo *data = user_data;
+	ODTMetadataParseInfo *data = ctx;
+	ODTTagType current;
 
-	#define push_tag(id) \
-		g_queue_push_head (data->tag_stack, GINT_TO_POINTER(id));
+	current = GPOINTER_TO_INT (g_queue_peek_head (data->tag_stack));
 
-	#define handle_tag_and_return(name, id) \
-		if (g_ascii_strcasecmp (element_name, name) == 0) { \
-			push_tag (id); \
-			return; \
-		};
+	/* Flush buffered text on end for relevant tags */
+	if (data->text_buf->len > 0) {
+		const gchar *text = data->text_buf->str;
 
-	#define handle_tag_and_return_n(name, id, n) \
-		if (g_ascii_strncasecmp (element_name, name, n) == 0) { \
-			push_tag (id); \
-			return; \
-		};
+		switch (current) {
+		case ODT_TAG_TYPE_TITLE:
+			tracker_resource_set_string (data->metadata, "nie:title", text);
+			break;
+
+		case ODT_TAG_TYPE_SUBJECT:
+			tracker_resource_set_string (data->metadata, "nie:subject", text);
+			break;
+
+		case ODT_TAG_TYPE_AUTHOR: {
+			TrackerResource *publisher = tracker_extract_new_contact (text);
+			tracker_resource_set_relation (data->metadata, "nco:publisher", publisher);
+			g_object_unref (publisher);
+			break;
+		}
+
+		case ODT_TAG_TYPE_KEYWORDS: {
+			gchar *keywords = g_strdup (text);
+			gchar *lasts = NULL;
+			gchar *keyw = NULL;
+
+			for (keyw = strtok_r (keywords, ",;", &lasts);
+				keyw;
+				keyw = strtok_r (NULL, ",;", &lasts)) {
+				g_strstrip (keyw);
+				if (*keyw)
+					tracker_resource_add_string (data->metadata, "nie:keyword", keyw);
+			}
+
+			g_free (keywords);
+			break;
+		}
+
+		case ODT_TAG_TYPE_COMMENTS:
+			tracker_resource_set_string (data->metadata, "nie:comment", text);
+			break;
+
+		case ODT_TAG_TYPE_CREATED: {
+			gchar *date = tracker_date_guess (text);
+			if (date) {
+				tracker_resource_set_string (data->metadata, "nie:contentCreated", date);
+				g_free (date);
+			} else {
+				g_warning ("Could not parse creation time (%s) in OASIS document '%s'",
+				           text, data->uri);
+			}
+			break;
+		}
+
+		case ODT_TAG_TYPE_GENERATOR:
+			tracker_resource_set_string (data->metadata, "nie:generator", text);
+			break;
+
+		default:
+			break;
+		}
+	}
+
+	/* Pop stack and reset buffer */
+	g_queue_pop_head (data->tag_stack);
+	g_string_set_size (data->text_buf, 0);
+}
+
+/* ------------------------- CONTENT (content.xml) SAX ----------------------------------- */
+
+static void
+oasis_content_start_element_ns (void           *ctx,
+                                const xmlChar  *localname,
+                                const xmlChar  *prefix,
+                                const xmlChar  *URI G_GNUC_UNUSED,
+                                int             nb_namespaces G_GNUC_UNUSED,
+                                const xmlChar **namespaces G_GNUC_UNUSED,
+                                int             nb_attributes G_GNUC_UNUSED,
+                                int             nb_defaulted G_GNUC_UNUSED,
+                                const xmlChar **attributes G_GNUC_UNUSED)
+{
+	ODTContentParseInfo *data = ctx;
+	g_autofree gchar *qname = make_qname (localname, prefix);
 
 	switch (data->file_type) {
 	case FILE_TYPE_ODT:
-		handle_tag_and_return ("text:p", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:h", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:a", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:span", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:s", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:tab", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("text:line-break", ODT_TAG_TYPE_WORD_TEXT);
-		handle_tag_and_return ("table:table-cell", ODT_TAG_TYPE_WORD_TABLE_CELL);
+		/* Explicit whitespace-ish elements in ODT */
+		if (g_ascii_strcasecmp (qname, "text:s") == 0 ||
+		    g_ascii_strcasecmp (qname, "text:tab") == 0 ||
+		    g_ascii_strcasecmp (qname, "text:line-break") == 0) {
 
-		push_tag (ODT_TAG_TYPE_UNKNOWN);
+			if (data->bytes_pending > 0) {
+				if (data->content->len > 0) {
+					gchar last = data->content->str[data->content->len - 1];
+					if (last != ' ' && last != '\n' && last != '\t' && last != '\r') {
+						g_string_append_c (data->content, ' ');
+						data->bytes_pending--;
+					}
+				} else {
+					g_string_append_c (data->content, ' ');
+					data->bytes_pending--;
+				}
+			} else {
+				data->limit_reached = TRUE;
+			}
+
+			g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_WORD_TEXT));
+			return;
+		}
+
+		/* Regular text containers in ODT */
+		if (g_ascii_strcasecmp (qname, "text:p") == 0 ||
+		    g_ascii_strcasecmp (qname, "text:h") == 0 ||
+		    g_ascii_strcasecmp (qname, "text:a") == 0 ||
+		    g_ascii_strcasecmp (qname, "text:span") == 0) {
+			g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_WORD_TEXT));
+			return;
+		} else if (g_ascii_strcasecmp (qname, "table:table-cell") == 0) {
+			g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_WORD_TABLE_CELL));
+			return;
+		}
+
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_UNKNOWN));
 		return;
 
 	case FILE_TYPE_ODP:
-		push_tag (ODT_TAG_TYPE_SLIDE_TEXT);
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_SLIDE_TEXT));
 		return;
 
 	case FILE_TYPE_ODS:
-		handle_tag_and_return_n ("text", ODT_TAG_TYPE_SPREADSHEET_TEXT, 4);
-		push_tag (ODT_TAG_TYPE_UNKNOWN);
+		/* Match any "text:*" */
+		if (g_ascii_strncasecmp (qname, "text:", 5) == 0) {
+			g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_SPREADSHEET_TEXT));
+			return;
+		}
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_UNKNOWN));
 		return;
 
 	case FILE_TYPE_ODG:
-		handle_tag_and_return_n ("text", ODT_TAG_TYPE_GRAPHICS_TEXT, 4);
-		push_tag (ODT_TAG_TYPE_UNKNOWN);
+		if (g_ascii_strncasecmp (qname, "text:", 5) == 0) {
+			g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_GRAPHICS_TEXT));
+			return;
+		}
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_UNKNOWN));
 		return;
 
 	case FILE_TYPE_INVALID:
-		g_debug ("Open Office Document type: %d invalid", data->file_type);
-		push_tag (ODT_TAG_TYPE_UNKNOWN);
+	default:
+		g_queue_push_head (data->tag_stack, GINT_TO_POINTER (ODT_TAG_TYPE_UNKNOWN));
 		return;
 	}
-
-	#undef push_tag
-	#undef handle_tag_and_return
-	#undef handle_tag_and_return_n
 }
 
 static void
-xml_end_element_handler_content (GMarkupParseContext  *context,
-                                 const gchar          *element_name,
-                                 gpointer              user_data,
-                                 GError              **error)
+oasis_content_characters (void          *ctx,
+                          const xmlChar *ch,
+                          int            len)
 {
-	ODTContentParseInfo *data = user_data;
-
-	g_queue_pop_head (data->tag_stack);
-}
-
-static void
-xml_text_handler_content (GMarkupParseContext  *context,
-                          const gchar          *text,
-                          gsize                 text_len,
-                          gpointer              user_data,
-                          GError              **error)
-{
-	ODTContentParseInfo *data = user_data;
+	ODTContentParseInfo *data = ctx;
 	ODTTagType current;
 	gsize written_bytes = 0;
+
+	if (len <= 0)
+		return;
 
 	current = GPOINTER_TO_INT (g_queue_peek_head (data->tag_stack));
 	switch (current) {
@@ -536,33 +598,15 @@ xml_text_handler_content (GMarkupParseContext  *context,
 	case ODT_TAG_TYPE_SPREADSHEET_TEXT:
 	case ODT_TAG_TYPE_GRAPHICS_TEXT:
 		if (data->bytes_pending == 0) {
-			g_set_error_literal (error,
-			                     maximum_size_error_quark, 0,
-			                     "Maximum text limit reached");
-			break;
+			data->limit_reached = TRUE;
+			return;
 		}
 
-		/* Look for valid UTF-8 text */
-		if (tracker_text_validate_utf8 (text,
-		                                MIN (text_len, data->bytes_pending),
+		if (tracker_text_validate_utf8 ((const gchar *) ch,
+		                                MIN ((gsize) len, (gsize) data->bytes_pending),
 		                                &data->content,
 		                                &written_bytes)) {
-			/* We found valid text! */
-
-			if (data->content->str[data->content->len - 1] != ' ') {
-				if (current == ODT_TAG_TYPE_WORD_TEXT) {
-					/* We're inside a text field in a word document, so trust
-					 * the spacing given. Tag boundries mark things like bold
-					 * and italic spans.
-					 */
-				} else {
-					/* We don't know the context, we may be combining text from
-					 * multiple spreadsheet cells for example, so make sure the
-					 * text ends with a space.
-					 */
-					g_string_append_c (data->content, ' ');
-				}
-			}
+			data->bytes_pending -= written_bytes;
 		}
 
 		data->bytes_pending -= written_bytes;
@@ -571,4 +615,33 @@ xml_text_handler_content (GMarkupParseContext  *context,
 	default:
 		break;
 	}
+}
+
+static void
+oasis_content_end_element_ns (void          *ctx,
+                              const xmlChar *localname G_GNUC_UNUSED,
+                              const xmlChar *prefix G_GNUC_UNUSED,
+                              const xmlChar *URI G_GNUC_UNUSED)
+{
+	ODTContentParseInfo *data = ctx;
+	ODTTagType current = GPOINTER_TO_INT (g_queue_peek_head (data->tag_stack));
+
+	if (current == ODT_TAG_TYPE_WORD_TABLE_CELL ||
+	    current == ODT_TAG_TYPE_SPREADSHEET_TEXT ||
+	    current == ODT_TAG_TYPE_GRAPHICS_TEXT ||
+	    current == ODT_TAG_TYPE_SLIDE_TEXT) {
+
+		if (data->bytes_pending > 0 && data->content->len > 0) {
+			gchar last = data->content->str[data->content->len - 1];
+			if (last != ' ' && last != '\n' && last != '\t' && last != '\r') {
+				g_string_append_c (data->content, ' ');
+				data->bytes_pending--;
+			}
+		} else if (data->bytes_pending == 0) {
+			data->limit_reached = TRUE;
+		}
+	}
+
+	/* Pop current element */
+	g_queue_pop_head (data->tag_stack);
 }
