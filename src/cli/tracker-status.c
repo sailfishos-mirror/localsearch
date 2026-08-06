@@ -114,34 +114,9 @@ print_link (const gchar *url)
 	g_print ("\x1B]8;;%s\a" LINK_STR "\x1B]8;;\a", url);
 }
 
-static TrackerSparqlConnection *
-create_connection (GError **error)
-{
-	TrackerSparqlConnection *connection;
-	g_autofree char *dbus_path = NULL;
-
-	if (mount) {
-		g_autofree char *path = NULL, *encoded_uri = NULL;
-		g_autoptr (GFile) mount_root = NULL;
-
-		mount_root = g_file_new_for_commandline_arg (mount);
-		path = g_file_get_path (mount_root);
-		encoded_uri = tracker_encode_for_object_path (path);
-
-		dbus_path = g_strconcat ("/org/freedesktop/LocalSearch3/",
-		                         encoded_uri, NULL);
-	}
-
-	connection = tracker_sparql_connection_bus_new ("org.freedesktop.LocalSearch3",
-	                                                dbus_path, NULL, error);
-
-	return connection;
-}
-
 static int
-status_stat (void)
+status_stat (TrackerSparqlConnection *connection)
 {
-	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (TrackerSparqlStatement) stmt = NULL;
 	g_autoptr (TrackerSparqlCursor) cursor = NULL;
 	const char *last_graph = NULL;
@@ -150,15 +125,6 @@ status_stat (void)
 	g_autoptr (GError) error = NULL;
 	int longest_class = 0;
 	guint i;
-
-	connection = create_connection (&error);
-
-	if (!connection) {
-		g_printerr ("%s: %s\n",
-		            _("Could not connect to LocalSearch"),
-		            error->message);
-		return EXIT_FAILURE;
-	}
 
 	stmt = tracker_sparql_connection_load_statement_from_gresource (connection,
 	                                                                GET_STATS_QUERY,
@@ -242,41 +208,11 @@ status_stat (void)
 }
 
 static int
-status_run (void)
+get_file_and_folder_count (TrackerSparqlConnection *connection,
+			   int                     *files,
+                           int                     *folders)
 {
-	if (show_stat) {
-		return status_stat ();
-	}
-
-	/* All known options have their own exit points */
-	g_warn_if_reached ();
-
-	return EXIT_FAILURE;
-}
-
-static int
-get_file_and_folder_count (int *files,
-                           int *folders)
-{
-	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (GError) error = NULL;
-
-	connection = create_connection (&error);
-
-	if (files) {
-		*files = 0;
-	}
-
-	if (folders) {
-		*folders = 0;
-	}
-
-	if (!connection) {
-		g_printerr ("%s: %s\n",
-		            _("Could not connect to LocalSearch"),
-		            error->message);
-		return EXIT_FAILURE;
-	}
 
 	if (files) {
 		g_autoptr (TrackerSparqlStatement) stmt = NULL;
@@ -409,7 +345,7 @@ print_errors (GList *keyfiles)
 }
 
 static int
-get_no_args (void)
+get_no_args (TrackerSparqlConnection *conn)
 {
 	gchar *str;
 	gchar *data_dir;
@@ -420,7 +356,7 @@ get_no_args (void)
 	gboolean use_pager, paused;
 
 	/* How many files / folders do we have? */
-	if (get_file_and_folder_count (&files, &folders) != 0) {
+	if (get_file_and_folder_count (conn, &files, &folders) != 0) {
 		return EXIT_FAILURE;
 	}
 
@@ -665,21 +601,11 @@ status_follow (void)
 }
 
 static int
-status_watch (void)
+status_watch (TrackerSparqlConnection *sparql_connection)
 {
 	g_autoptr (GMainLoop) main_loop = NULL;
-	g_autoptr (TrackerSparqlConnection) sparql_connection = NULL;
 	g_autoptr (TrackerNotifier) notifier = NULL;
 	g_autoptr (GError) error = NULL;
-
-	sparql_connection = create_connection (&error);
-
-	if (!sparql_connection) {
-		g_critical ("%s, %s",
-		            _("Could not get SPARQL connection"),
-		            error->message);
-		return EXIT_FAILURE;
-	}
 
 	notifier = tracker_sparql_connection_create_notifier (sparql_connection);
 	g_signal_connect (notifier, "events",
@@ -699,15 +625,16 @@ status_watch (void)
 }
 
 static int
-status_run_default (void)
+status_run_default (TrackerSparqlConnection *conn)
 {
-	return get_no_args ();
+	return get_no_args (conn);
 }
 
 int
 tracker_status (int          argc,
                 const char **argv)
 {
+	g_autoptr (TrackerSparqlConnection) connection = NULL;
 	g_autoptr (GOptionContext) context = NULL;
 	g_autoptr (GError) error = NULL;
 
@@ -728,12 +655,21 @@ tracker_status (int          argc,
 		return EXIT_FAILURE;
 	}
 
+	connection = tracker_create_indexer_connection (mount, &error);
+
+	if (!connection) {
+		g_printerr ("%s: %s\n",
+		            _("Could not connect to LocalSearch"),
+		            error->message);
+		return EXIT_FAILURE;
+	}
+
 	if (show_stat) {
-		return status_run ();
+		return status_stat (connection);
 	} else if (follow) {
 		return status_follow ();
 	} else if (watch) {
-		return status_watch ();
+		return status_watch (connection);
 	}
 
 	if (terms) {
@@ -750,5 +686,5 @@ tracker_status (int          argc,
 		return result;
 	}
 
-	return status_run_default ();
+	return status_run_default (connection);
 }

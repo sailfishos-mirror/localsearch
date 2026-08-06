@@ -45,6 +45,7 @@ import tempfile
 import time
 import unittest as ut
 import dbusmock
+import pty
 
 import trackertestutils.helpers
 import configuration as cfg
@@ -795,9 +796,9 @@ class CliError(Exception):
     pass
 
 
-class TrackerCommandLineTestCase(TrackerMinerTest):
+class TrackerCommandLineTestCase(TrackerMinerRemovableMediaTest):
     def environment(self):
-        extra_env = cfg.test_environment(self.workdir)
+        extra_env = super(TrackerCommandLineTestCase, self).environment()
         extra_env["LANG"] = "en_GB.utf8"
         extra_env["PATH"] = ":".join([cfg.cli_dir()] + os.environ['PATH'].split(":"))
         return extra_env
@@ -838,3 +839,34 @@ class TrackerCommandLineTestCase(TrackerMinerTest):
             )
 
         return result.stdout.decode("utf-8")
+
+
+class TrackerPtyCommandLineTestCase(TrackerCommandLineTestCase):
+    def environment(self):
+        extra_env = super(TrackerPtyCommandLineTestCase, self).environment()
+        extra_env["TERM"] = "xterm-256color"
+        return extra_env
+
+    def set_size(self, w, h):
+        self._size = [w, h]
+
+    def command_wrapper(self, command):
+        pty_helper = pathlib.Path(__file__).parent.joinpath("pty_helper.py")
+        pre_script = ["python3", pty_helper]
+        if hasattr(self, '_size'):
+            size_str = str(self._size[0]) + 'x' + str(self._size[1])
+            pre_script += ['-s', size_str]
+        pre_script += ['--']
+        return pre_script + command
+
+    def run_cli(self, command):
+        command = self.command_wrapper(command)
+        return super(TrackerPtyCommandLineTestCase, self).run_cli(command)
+
+    def communicate(self, command):
+        command = self.command_wrapper(command)
+        command = [str(c) for c in command]
+        log.info("Running: %s", " ".join(command))
+        return subprocess.Popen(
+            command, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+        )

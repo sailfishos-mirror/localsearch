@@ -33,7 +33,7 @@ import fixtures
 import shutil
 import time
 
-class TestCli(fixtures.TrackerCommandLineTestCase):
+class TestStatus(fixtures.TrackerCommandLineTestCase):
     def test_status(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
@@ -233,6 +233,131 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
         finally:
             self.assertIn("--asdf", err);
             self.assertIsNone(out)
+
+
+class TestStatusMount(fixtures.TrackerCommandLineTestCase):
+    def create_test_data(self):
+        for f in ["file1.txt", "file2.txt"]:
+            path = self.device_path.joinpath(f)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("This file exists.")
+
+    def setUp(self):
+        super(TestStatusMount, self).setUp()
+        self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
+        self.device_path.mkdir()
+        self.create_test_data()
+
+    def test_status_mount(self):
+        self.add_removable_device(self.device_path)
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
+        endpoint_helper = self.helper_for_endpoint(object_path)
+        rel_uri = self.get_relative_uri("file1.txt")
+        endpoint_helper.ensure_resource(
+            fixtures.DOCUMENTS_GRAPH, f"nie:isStoredAs <{rel_uri}>",
+        )
+
+        output = self.run_cli(["localsearch", "status", "--mount", self.device_path])
+        self.assertIn("2 files", output)
+        self.assertIn("1 folder", output)
+        self.assertIn("idle", output)
+
+
+class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
+    def test_status(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # Copy a file and wait for it to be indexed, in order to ensure idle state
+        file = datadir.joinpath("text/mango.txt")
+        target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+        with self.await_document_inserted(target):
+            shutil.copy(file, self.indexed_dir)
+
+        output = self.run_cli(["localsearch", "status"])
+        self.assertIn("1 file", output)
+        self.assertIn("1 folder", output)
+        self.assertIn("idle", output)
+
+    def test_status_error(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/extractor-content")
+
+        # Copy a photo, once as a PNG with JPEG extension, known to not be extracted
+        file = datadir.joinpath("images/png-photo-1.png")
+        target = pathlib.Path(os.path.join(self.indexed_dir, "png-photo-1.png"))
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, "png-photo-1.jpeg"))
+
+        with self.await_file_indexed(target2):
+            shutil.copy(file, target2)
+        with self.await_photo_inserted(target):
+            shutil.copy(file, target)
+
+        # Wait for the failure to be recorded
+        finished = False
+        n_tries = 0
+        while not finished and n_tries < 10:
+            output = self.run_cli(["localsearch", "status"])
+            finished = "1 recorded" in output
+            n_tries = n_tries + 1
+
+        # Set a narrow size to trigger ellipsizing
+        self.set_size(80, 2000)
+
+        # Check for the file with wrong extension
+        proc = self.communicate(["localsearch", "status"])
+
+        # Quit the pager
+        proc.stdin.write(b'q\n');
+        proc.stdin.close()
+        proc.wait()
+        output = proc.stdout.read(-1).decode('utf-8')
+        proc.stdout.close()
+
+        self.assertIn("png-photo-1.jpeg", output)
+        self.assertIn("recorded failure", output)
+
+    def test_status_follow(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+        output = ""
+        with subprocess.Popen(
+                ["localsearch", "status", "--follow"],
+                bufsize=1,
+                text=True,
+                stdin=subprocess.DEVNULL,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL) as proc:
+
+            os.set_blocking(proc.stdout.fileno(), False)
+
+            # Set up a temporary inhibition, this state should be reported in the output
+            with subprocess.Popen(
+                    ["localsearch", "inhibit", "cat"],
+                    stdin=subprocess.PIPE,
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL) as inhibit_proc:
+
+                n_attempts = 0
+                while b'is paused' not in proc.stdout.buffer.peek():
+                    time.sleep(1)
+                    n_attempts += 1
+                    assert n_attempts < 90
+
+                # Close stdin to end the cat process
+                inhibit_proc.stdin.close()
+
+            # Copy a file and wait for it to be indexed
+            file = datadir.joinpath("text/mango.txt")
+            target = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file)))
+            with self.await_document_inserted(target):
+                shutil.copy(file, target)
+
+            proc.terminate()
+            output = proc.stdout.read()
+
+        self.assertIn("is paused", output)
+        self.assertIn("Idle", output)
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

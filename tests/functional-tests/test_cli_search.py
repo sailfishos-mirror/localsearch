@@ -29,7 +29,7 @@ import configuration
 import fixtures
 import shutil
 
-class TestCli(fixtures.TrackerCommandLineTestCase):
+class TestSearch(fixtures.TrackerCommandLineTestCase):
     def test_search(self):
         datadir = pathlib.Path(__file__).parent.joinpath("data/content")
 
@@ -120,6 +120,98 @@ class TestCli(fixtures.TrackerCommandLineTestCase):
     def test_search_help(self):
         output = self.run_cli(["localsearch", "search", "--help"])
         self.assertIn("Usage", output)
+
+
+class TestSearchMount(fixtures.TrackerCommandLineTestCase):
+    def create_test_data(self):
+        for f in ["file1.txt", "file2.txt"]:
+            path = self.device_path.joinpath(f)
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text("This file exists.")
+
+    def setUp(self):
+        super(TestSearchMount, self).setUp()
+        self.device_path = pathlib.Path(self.workdir).joinpath("removable-device-1")
+        self.device_path.mkdir()
+        self.create_test_data()
+
+    def test_search_mount(self):
+        self.add_removable_device(self.device_path)
+        self.miner_fs.await_endpoint_added(self.device_path.as_uri())
+
+        object_path = self.miner_fs.removable_device_object_path (self.device_path)
+        endpoint_helper = self.helper_for_endpoint(object_path)
+        rel_uri = self.get_relative_uri("file1.txt")
+        endpoint_helper.ensure_resource(
+            fixtures.DOCUMENTS_GRAPH, f"nie:isStoredAs <{rel_uri}>",
+        )
+
+        output = self.run_cli(["localsearch", "search", "--mount", self.device_path, "exists"])
+        self.assertIn(rel_uri, output)
+
+
+class TestSearchPty(fixtures.TrackerPtyCommandLineTestCase):
+    def test_search(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        # FIXME: synchronous `tracker index` isn't ready yet;
+        # see https://gitlab.gnome.org/GNOME/tracker/-/issues/188
+        # in the meantime we manually wait for it to finish.
+
+        file1 = datadir.joinpath("text/Document 1.txt")
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        file2 = datadir.joinpath("text/Document 2.txt")
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file2)))
+        with self.await_document_inserted(target2):
+            shutil.copy(file2, self.indexed_dir)
+
+        folder_name = "test-folder"
+        folder_path = pathlib.Path(os.path.join(self.indexed_dir, folder_name))
+        with self.await_insert_dir(folder_path):
+            try:
+                os.mkdir(os.path.join(self.indexed_dir, folder_name))
+            except OSError as error:
+                print(error)
+
+        output = self.run_cli(["localsearch", "search", "banana"])
+        self.assertIn(target1.as_uri(), output)
+        self.assertNotIn(target2.as_uri(), output)
+
+        folder_output = self.run_cli(
+            ["localsearch", "search", "--folders", "test-monitored"]
+        )
+        self.assertIn(self.indexed_dir, folder_output)
+        self.assertNotIn(folder_path.as_uri(), folder_output)
+
+    def test_search_filename(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        file1 = datadir.joinpath("text/mango.txt")
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        target2 = pathlib.Path(os.path.join(self.indexed_dir, "Document 2.txt"))
+
+        search_output = self.run_cli(["localsearch", "search", "mango"])
+        self.assertIn(target1.as_uri(), search_output)
+        self.assertNotIn(target2.as_uri(), search_output)
+
+    def test_search_detailed(self):
+        datadir = pathlib.Path(__file__).parent.joinpath("data/content")
+
+        file1 = datadir.joinpath("text/mango.txt")
+        target1 = pathlib.Path(os.path.join(self.indexed_dir, os.path.basename(file1)))
+        with self.await_document_inserted(target1):
+            shutil.copy(file1, self.indexed_dir)
+
+        # Check we get fts context
+        search_output = self.run_cli(["localsearch", "search", "--detailed", "lorem"])
+        self.assertIn(target1.as_uri(), search_output)
+        self.assertIn("dolor", search_output)
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()
