@@ -10,9 +10,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Tracker\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2026-01-16 18:54+0000\n"
-"PO-Revision-Date: 2026-03-07 17:14+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-07-23 11:21+0000\n"
+"PO-Revision-Date: 2026-08-09 09:13+0000\n"
 "Last-Translator: Jordi Mas i Hernàndez <jmas@softcatala.org>\n"
 "Language-Team: Catalan <tradgnome@softcatala.org>\n"
 "Language: ca\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-DamnedLies-Scope: partial\n"
-"X-Generator: Poedit 3.6\n"
+"X-Generator: Minairó 0.1.0\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
@@ -222,15 +222,15 @@ msgstr "Inhibeix temporalment la indexació"
 msgid "Erase the indexed data"
 msgstr "Suprimeix les dades indexades"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:418
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
 msgstr "Cerca continguts"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:721
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "Proporciona l'estat i estadístiques de les dades indexades"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "Afegeix, suprimeix i llista etiquetes"
 
@@ -252,7 +252,7 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "«%s» no és una ordre «localsearch». Vegeu «localsearch --help»"
 
-#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Missatge"
 
@@ -270,7 +270,7 @@ msgstr "FORMAT"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "FITXER"
 
@@ -284,8 +284,8 @@ msgstr "Extreu les metadades d'un fitxer"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
-#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "No s'han reconegut les opcions"
 
@@ -352,7 +352,7 @@ msgstr "Comprova si el FITXER es pot indexar"
 msgid "Removable device mount point to query"
 msgstr "Punt de muntatge del dispositiu extraïble a consultar"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "No s'ha pogut connectar amb el LocalSearch"
@@ -369,7 +369,7 @@ msgstr "No hi ha metadades disponibles per a aquest URI"
 msgid "Could not get eligible status: "
 msgstr "No s'ha pogut obtenir l'estat d'elegibilitat: "
 
-#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:165
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Format de serialització no compatible «%s»\n"
@@ -560,61 +560,61 @@ msgstr "EXPRESSIÓ"
 msgid "Could not get LocalSearch statistics"
 msgstr "No s'han pogut obtenir les estadístiques del LocalSearch"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "Actualment indexat"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d fitxer"
 msgstr[1] "%d fitxers"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d carpeta"
 msgstr[1] "%d carpetes"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "Espai lliure a la partició de la base de dades"
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "L'indexador està en pausa"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "Les dades encara s'estan indexant"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "L'indexador està inactiu"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d fallada enregistrada"
 msgstr[1] "%d fallades enregistrades"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "No s'ha trobat cap informe"
 
-#: src/cli/tracker-status.c:678
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "No s'ha pogut obtenir una connexió SPARQL"
 
-#: src/cli/tracker-status.c:687
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "S'està seguint si hi ha actualitzacions a la base de dades"
 
-#: src/cli/tracker-status.c:688
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "Premeu Ctrl+C per a aturar"
 
@@ -659,51 +659,51 @@ msgstr "FITXER…"
 msgid "Could not get files related to tag"
 msgstr "No s'han pogut obtenir els fitxers relacionats amb l'etiqueta"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
 msgstr "No s'han pogut obtenir totes les etiquetes"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "Etiquetes (se'n mostra el nom)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "No s'ha pogut afegir l'etiqueta"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "S'ha afegit l'etiqueta correctament"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "No s'ha pogut afegir l'etiqueta als fitxers"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "Etiquetat"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "No s'ha pogut suprimir l'etiqueta"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "S'ha suprimit l'etiqueta correctament"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "No s'ha pogut establir una connexió amb el LocalSearch"
 
-#: src/cli/tracker-tag.c:424
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "L'opció «--show-files» requereix també l'opció «--list»"
 
-#: src/cli/tracker-tag.c:426
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr "No es poden utilitzar alhora les accions d'afegir i suprimir"
 
-#: src/cli/tracker-tag.c:428
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr "L'opció «--description» només es pot utilitzar juntament amb «--add»"
 
@@ -763,15 +763,15 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d segon"
 msgstr[1] " %2.2d segons"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Mostra la informació de la versió"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— inicia el servidor intermediari de l'índex del Tracker"
 
@@ -799,23 +799,23 @@ msgstr "FD"
 msgid "Filesystem root of the extracted data"
 msgstr "Arrel del sistema de fitxers de les dades extretes"
 
-#: src/extractor/tracker-main.c:262
+#: src/extractor/tracker-main.c:235
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "No s'han trobat mòduls de metadades o extractors per a gestionar aquest "
 "fitxer"
 
-#: src/extractor/tracker-main.c:270
+#: src/extractor/tracker-main.c:243
 msgid "Metadata extraction failed"
 msgstr "Ha fallat l'extractor de metadades"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:333
+#: src/extractor/tracker-main.c:306
 msgid "— Extract file meta data"
 msgstr "— Extreu les metadades del fitxer"
 
-#: src/extractor/tracker-main.c:347
+#: src/extractor/tracker-main.c:320
 msgid "Filename and mime type must be provided together"
 msgstr "S'ha de proporcionar alhora el nom de fitxer i el tipus MIME"
 
@@ -826,35 +826,40 @@ msgstr ""
 "aleshores surt"
 
 #: src/indexer/tracker-application.c:61
+#| msgid "Metadata extraction failed"
+msgid "Skips metadata extraction from file content"
+msgstr "Omet l'extracció de metadades del contingut del fitxer"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Comprova si, segons la configuració, s'han d'extreure les dades del FITXER"
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 msgid "Avoids changes in the filesystem"
 msgstr "Evita canvis al sistema de fitxers"
 
-#: src/indexer/tracker-application.c:1262
+#: src/indexer/tracker-application.c:1283
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "L'objecte de dades «%s» ja existeix"
 
-#: src/indexer/tracker-application.c:1263
+#: src/indexer/tracker-application.c:1284
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "L'objecte de dades «%s» encara no existeix"
 
-#: src/indexer/tracker-application.c:1289
+#: src/indexer/tracker-application.c:1310
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "El directori pare «%s» no és apte per a ser indexat (basat en filtres)"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1315
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "El directori pare «%s» no és apte per a ser indexat (fitxer amagat)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1321
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -863,27 +868,27 @@ msgstr ""
 "El directori pare «%s» no és apte per a ser indexat (basat en filtres de "
 "contingut)"
 
-#: src/indexer/tracker-application.c:1316
+#: src/indexer/tracker-application.c:1336
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "El directori no és apte per a ser indexat (basat en filtres)"
 
-#: src/indexer/tracker-application.c:1320
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "El fitxer no és apte per a ser indexat (basant-se en les regles)"
 
-#: src/indexer/tracker-application.c:1323
+#: src/indexer/tracker-application.c:1342
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "El fitxer no és apte per a ser indexat (fitxer amagat)"
 
-#: src/indexer/tracker-application.c:1325
+#: src/indexer/tracker-application.c:1344
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "El fitxer no és apte per a ser indexat (no és una carpeta indexada)"
 
-#: src/indexer/tracker-application.c:1333
+#: src/indexer/tracker-application.c:1352
 msgid "Directory is eligible to be indexed"
 msgstr "El directori és apte per a ser indexat"
 
-#: src/indexer/tracker-application.c:1334
+#: src/indexer/tracker-application.c:1353
 msgid "File is eligible to be indexed"
 msgstr "El fitxer és apte per a ser indexat"
 
@@ -912,537 +917,3 @@ msgstr "Inhabilita l'aturada després de 30 segons d'inactivitat"
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— inicia el servei d'escriptura del Tracker"
-
-#~ msgid "Error message"
-#~ msgstr "Missatge d'error"
-
-#~ msgid "Cookie not recognized to resume paused miner"
-#~ msgstr ""
-#~ "No s'ha reconegut la galeta per a reprendre l'extractor de dades en pausa"
-
-#~ msgid "Pause application and reason match an already existing pause request"
-#~ msgstr "Ja existeix una petició de pausa de la mateixa aplicació i motiu"
-
-#~ msgid ""
-#~ "Simplify the words to their root to provide more results. E.g. “shelves” "
-#~ "and “shelf” to “shel”"
-#~ msgstr ""
-#~ "Simplifica les paraules a la seva arrel per a proporcionar més resultats. "
-#~ "Per exemple: «prestatgeria» i «prestatge» a «prestat»"
-
-#~ msgid ""
-#~ "Translate accented characters to the equivalent unaccented. E.g. “Idéa” "
-#~ "to “Idea” for improved matching."
-#~ msgstr ""
-#~ "Tradueix els caràcters accentuats al seu equivalent sense accentuar. Per "
-#~ "exemple: «català» a «catala» per a millorar la coincidència."
-
-#~ msgid "If enabled, numbers will not be indexed."
-#~ msgstr "Si està habilitat, els nombres no s'indexaran."
-
-#~ msgid "Initial sleep time, in seconds."
-#~ msgstr "Temps d'espera inicial, en segons."
-
-#~ msgid "Indexing speed, the higher the slower."
-#~ msgstr "Velocitat de la indexació, com més alta més lenta."
-
-#~ msgid ""
-#~ "Disk space threshold in percent at which to pause indexing, or -1 to "
-#~ "disable."
-#~ msgstr ""
-#~ "Llindar d'espai de disc, en percentatge, en el qual s'atura la indexació, "
-#~ "o -1 per a desactivar-ho."
-
-#~ msgid ""
-#~ "Interval in days to check whether the filesystem is up to date in the "
-#~ "database. 0 forces crawling anytime, -1 forces it only after unclean "
-#~ "shutdowns, and -2 disables it entirely."
-#~ msgstr ""
-#~ "Interval, en dies, per a comprovar si el sistema de fitxers està "
-#~ "actualitzat a la base de dades. El 0 força el rastreig en qualsevol "
-#~ "moment, el -1 la força només després d'aturades incorrectes i el -2 la "
-#~ "desactiva completament."
-
-#~ msgid ""
-#~ "Threshold in days after which files from removables devices will be "
-#~ "removed from database if not mounted. 0 means never, maximum is 365."
-#~ msgstr ""
-#~ "Llindar, en dies, després del qual els fitxers dels dispositius "
-#~ "extraïbles se suprimiran de la base de dades si no s'han muntat. 0 "
-#~ "significa mai i el 365 és el màxim."
-
-#~ msgid ""
-#~ "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
-#~ "removable devices are not indexed, optical discs won’t be either)"
-#~ msgstr ""
-#~ "Establiu «true» (cert) per a activar la indexació de CD's, DVD's i "
-#~ "dispositius òptics en general (si els dispositius extraïbles no "
-#~ "s'indexen, tampoc s'indexaran els discs òptics)"
-
-#~ msgid "Set to true to index while running on battery"
-#~ msgstr ""
-#~ "Establiu «true» (cert) per a indexar quan s'estigui utilitzant la bateria"
-
-#~ msgid ""
-#~ "Set to true to index while running on battery for the first time only"
-#~ msgstr ""
-#~ "Establiu «true» (cert) per a indexar, només la primera vegada, quan "
-#~ "s'estigui utilitzant la bateria"
-
-#~ msgid ""
-#~ "Start, stop, restart and list daemons responsible for indexing content"
-#~ msgstr ""
-#~ "Inicia, atura, reinicia i llista els dimonis responsables d'indexar el "
-#~ "contingut"
-
-#~ msgid "Trigger content indexing of a location"
-#~ msgstr "Inicia la indexació de contingut d'una ubicació"
-
-#~ msgid "Reset the index and configuration"
-#~ msgstr "Reinicia l'índex i la configuració"
-
-#~ msgid "Unavailable"
-#~ msgstr "No disponible"
-
-#~ msgid "Initializing"
-#~ msgstr "S'està inicialitzant"
-
-#~ msgid "Processing…"
-#~ msgstr "S'està processant…"
-
-#~ msgid "Fetching…"
-#~ msgstr "S'està recollint…"
-
-#, c-format
-#~ msgid "Crawling single directory “%s”"
-#~ msgstr "S'està rastrejant el directori «%s»"
-
-#, c-format
-#~ msgid "Crawling recursively directory “%s”"
-#~ msgstr "S'està rastrejant el directori «%s» de forma recursiva"
-
-#~ msgid "Paused"
-#~ msgstr "Pausada"
-
-#~ msgid "Idle"
-#~ msgstr "Inactiu"
-
-#~ msgid "List common statuses for miners"
-#~ msgstr "Llista els estats comuns dels miners"
-
-#~ msgid "Pause a miner (you must use this with --miner)"
-#~ msgstr ""
-#~ "Fes una pausa a un extractor de dades (heu d'utilitzar-ho conjuntament "
-#~ "amb «--miner»)"
-
-#~ msgid "REASON"
-#~ msgstr "MOTIU"
-
-#~ msgid ""
-#~ "Pause a miner while the calling process is alive or until resumed (you "
-#~ "must use this with --miner)"
-#~ msgstr ""
-#~ "Fes una pausa a un extractor de dades mentre el procés de crida estigui "
-#~ "actiu o fins que es reprengui (heu d'utilitzar-ho conjuntament amb «--"
-#~ "miner»)"
-
-#~ msgid "Resume a miner (you must use this with --miner)"
-#~ msgstr ""
-#~ "Reprèn un extractor de dades (heu d'utilitzar-ho conjuntament amb «--"
-#~ "miner»)"
-
-#~ msgid "COOKIE"
-#~ msgstr "GALETA"
-
-#~ msgid ""
-#~ "Miner to use with --resume or --pause (you can use suffixes, e.g. Files "
-#~ "or Applications)"
-#~ msgstr ""
-#~ "L'extractor de dades que s'utilitzarà amb «--resume» o «--pause» (podeu "
-#~ "utilitzar sufixos, per exemple Fitxers o Aplicacions)"
-
-#~ msgid "MINER"
-#~ msgstr "EXTRACTOR-DE-DADES"
-
-#~ msgid "List all miners currently running"
-#~ msgstr "Llista tots els extractors de dades que s'estan executant"
-
-#~ msgid "List all miners installed"
-#~ msgstr "Llista tots els extractors de dades instal·lats"
-
-#~ msgid "List pause reasons"
-#~ msgstr "Llista les raons de la pausa"
-
-#~ msgid "List all Tracker processes"
-#~ msgstr "Llista tots els processos del Tracker"
-
-#~ msgid "Use SIGKILL to stop all miners"
-#~ msgstr "Utilitza SIGKILL per a aturar tots els miners"
-
-#~ msgid "APPS"
-#~ msgstr "Aplicacions"
-
-#~ msgid "Use SIGTERM to stop all miners"
-#~ msgstr "Utilitza SIGTERM per a aturar tots els miners"
-
-#~ msgid "Starts miners"
-#~ msgstr "Inicia els miners"
-
-#, c-format
-#~ msgid "Could not get status from miner: %s"
-#~ msgstr "No s'ha pogut obtenir l'estat de l'extractor de dades: %s"
-
-#, c-format
-#~ msgid "%s remaining"
-#~ msgstr "Queden %s"
-
-#~ msgid "unknown time left"
-#~ msgstr "es desconeix el temps per a acabar"
-
-#~ msgid "PAUSED"
-#~ msgstr "EN PAUSA"
-
-#~ msgid "Not running or is a disabled plugin"
-#~ msgstr "No s'està executant o és un connector inhabilitat"
-
-#, c-format
-#~ msgid "Could not pause miner, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'ha pogut fer una pausa a l'extractor de dades, no s'ha pogut crear "
-#~ "el gestor, %s"
-
-#~ msgid "No error given"
-#~ msgstr "No s'ha rebut cap error"
-
-#, c-format
-#~ msgid "Attempting to pause miner “%s” with reason “%s”"
-#~ msgstr ""
-#~ "S'està intentant fer una pausa a l'extractor de dades «%s» amb el motiu "
-#~ "«%s»"
-
-#, c-format
-#~ msgid "Could not pause miner: %s"
-#~ msgstr "No s'ha pogut fer una pausa a l'extractor de dades: %s"
-
-#, c-format
-#~ msgid "Cookie is %d"
-#~ msgstr "La galeta és %d"
-
-#, c-format
-#~ msgid "Could not resume miner, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'ha pogut reprendre l'extractor de dades, no s'ha pogut crear el "
-#~ "gestor, %s"
-
-#, c-format
-#~ msgid "Attempting to resume miner %s with cookie %d"
-#~ msgstr "S'està intentant reprendre l'extractor de dades %s amb la galeta %d"
-
-#~ msgid "Done"
-#~ msgstr "Fet"
-
-#, c-format
-#~ msgid "Could not list miners, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'han pogut llistar els extractors de dades, no s'ha pogut crear el "
-#~ "gestor, %s"
-
-#, c-format
-#~ msgid "Found %d miner installed"
-#~ msgid_plural "Found %d miners installed"
-#~ msgstr[0] "S'ha trobat %d extractor de dades instal·lat"
-#~ msgstr[1] "S'han trobat %d extractors de dades instal·lats"
-
-#, c-format
-#~ msgid "Found %d miner running"
-#~ msgid_plural "Found %d miners running"
-#~ msgstr[0] "S'ha trobat %d extractor de dades executant-se"
-#~ msgstr[1] "S'han trobat %d extractors de dades executant-se"
-
-#, c-format
-#~ msgid "Could not get pause details, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'han pogut obtenir els detalls de la pausa, no s'ha pogut crear el "
-#~ "gestor, %s"
-
-#~ msgid "No miners are running"
-#~ msgstr "No hi ha cap extractor de dades executant-se"
-
-#~ msgid "Miners"
-#~ msgstr "Extractors de dades"
-
-#~ msgid "No miners are paused"
-#~ msgstr "No hi ha cap extractor de dades en pausa"
-
-#~ msgid "All nie:plainTextContent properties are omitted"
-#~ msgstr "S'ignoren totes les propietats de «nie:plainTextContent»"
-
-#~ msgid "Common statuses include"
-#~ msgstr "Els estats més comuns són"
-
-#, c-format
-#~ msgid "Could not get status, manager could not be created, %s"
-#~ msgstr "No s'ha pogut obtenir l'estat, no s'ha pogut crear el gestor, %s"
-
-#, c-format
-#~ msgid "Could not get display name for miner “%s”"
-#~ msgstr "No s'ha pogut obtenir el nom visible de l'extractor de dades «%s»"
-
-#~ msgid "You can not use miner pause and resume switches together"
-#~ msgstr ""
-#~ "No podeu utilitzar els arguments de fer una pausa i de reprendre-la alhora"
-
-#~ msgid "You must provide the miner for pause or resume commands"
-#~ msgstr ""
-#~ "Heu de proporcionar un extractor de dades al que fer-li la pausa o "
-#~ "reprendre'l"
-
-#~ msgid "You must provide a pause or resume command for the miner"
-#~ msgstr ""
-#~ "Heu de proporcionar l'ordre de fer una pausa o de reprendre a l'extractor "
-#~ "de dades"
-
-#~ msgid "You can not use the --kill and --terminate arguments together"
-#~ msgstr "No podeu utilitzar els arguments «--kill» i «--terminate» alhora"
-
-#, c-format
-#~ msgid "Found %d PID…"
-#~ msgid_plural "Found %d PIDs…"
-#~ msgstr[0] "S'ha trobat %d PID…"
-#~ msgstr[1] "S'han trobat %d PID…"
-
-#, c-format
-#~ msgid "Found process ID %d for “%s”"
-#~ msgstr "S'ha trobat l'identificador del procés %d per a «%s»"
-
-#~ msgid "Starting miners…"
-#~ msgstr "S'estan iniciant els extractors de dades…"
-
-#, c-format
-#~ msgid "Could not start miners, manager could not be created, %s"
-#~ msgstr ""
-#~ "No s'han pogut iniciar els extractors de dades, no s'ha pogut crear el "
-#~ "gestor, %s"
-
-#~ msgid "perhaps a disabled plugin?"
-#~ msgstr "potser hi ha algun connector inhabilitat?"
-
-#~ msgid "If no arguments are given, the status of the data miners is shown"
-#~ msgstr "Si no es donen arguments, es mostra l'estat dels miners de dades"
-
-#~ msgid "Could not get D-Bus connection"
-#~ msgstr "No s'ha pogut obtenir una connexió D-Bus"
-
-#~ msgid "Could not create D-Bus proxy to tracker-store"
-#~ msgstr ""
-#~ "No s'ha pogut crear el servidor intermediari, mitjançant D-Bus, a la "
-#~ "«tracker-store»"
-
-#~ msgid ""
-#~ "Instead of looking up a file name, treat the FILE arguments as actual "
-#~ "IRIs (e.g. <file:///path/to/some/file.txt>)"
-#~ msgstr ""
-#~ "En lloc de cercar un nom de fitxer, tracta els arguments FITXER com a IRI "
-#~ "reals (p. ex. <file///camí/a/algun/fitxer.txt>)"
-
-#~ msgid "Output results as RDF in Turtle format"
-#~ msgstr "Resultats de la sortida com a RDF en format Turtle"
-
-#~ msgid "RDF property to treat as URL (eg. “nie:url”)"
-#~ msgstr "Propietat RDF a tractar com a URL (p. ex. «nie:url»)"
-
-#~ msgid "Unable to retrieve URN for URI"
-#~ msgstr "No s'ha pogut recuperar URN per URI"
-
-#, c-format
-#~ msgid "Could not kill process %d — “%s”"
-#~ msgstr "No s'ha pogut matar el procés %d — «%s»"
-
-#, c-format
-#~ msgid "Killed process %d — “%s”"
-#~ msgstr "S'ha matat el procés %d — «%s»"
-
-#~ msgid "Search for content matching TERMS, by type or across all types."
-#~ msgstr ""
-#~ "Cerqueu continguts coincidents amb TERMES, d'un tipus o de tots els tipus."
-
-#~ msgid "Search for music albums (--all has no effect on this)"
-#~ msgstr "Cerca per àlbums de música («--all» no modifica la cerca)"
-
-#~ msgid "Search for music artists (--all has no effect on this)"
-#~ msgstr "Cerca per artistes de música («--all» no modifica la cerca)"
-
-#~ msgid "Search for software (--all has no effect on this)"
-#~ msgstr "Cerca per a programari («--all» no modifica la cerca)"
-
-#~ msgid "Search for software categories (--all has no effect on this)"
-#~ msgstr "Cerca per categories de programari («--all» no modifica la cerca)"
-
-#~ msgid "Search for feeds (--all has no effect on this)"
-#~ msgstr "Cerca per canals («--all» no modifica la cerca)"
-
-#~ msgid "Use OR for search terms instead of AND (the default)"
-#~ msgstr "Utilitza «o» en comptes de «i» (predeterminat) per a cercar termes"
-
-#~ msgid ""
-#~ "Show URNs for results (doesn’t apply to --music-albums, --music-artists, "
-#~ "--feeds, --software, --software-categories)"
-#~ msgstr ""
-#~ "Mostra els URN's dels resultats (no s'aplica a «--music-albums», «--music-"
-#~ "artists», «--feeds», «--software», «--software-categories»)"
-
-#~ msgid ""
-#~ "Disable showing snippets with results. This is only shown for some "
-#~ "categories, e.g. Documents, Music…"
-#~ msgstr ""
-#~ "No mostris el context en els resultats. Només es mostra per algunes "
-#~ "categories, p. ex. Documents, Música…"
-
-#~ msgid "Disable Full Text Search (FTS). Implies --disable-snippets"
-#~ msgstr ""
-#~ "Inhabilita la cerca de text complet (FTS). Implica «--disable-snippets»"
-
-#~ msgid "Disable color when printing snippets and results"
-#~ msgstr "Inhabilita el color en imprimir fragments i resultats"
-
-#~ msgid "Could not get search results"
-#~ msgstr "No s'han pogut obtenir els resultats de cerca"
-
-#~ msgid "No files were found"
-#~ msgstr "No s'ha trobat cap fitxer"
-
-#~ msgid "No artists were found"
-#~ msgstr "No s'ha trobat cap artista"
-
-#~ msgid "No music was found"
-#~ msgstr "No s'ha trobat música"
-
-#~ msgid "No feeds were found"
-#~ msgstr "No s'ha trobat cap canal"
-
-#~ msgid "Feeds"
-#~ msgstr "Canals"
-
-#~ msgid "No software was found"
-#~ msgstr "No s'ha trobat cap programari"
-
-#~ msgid "Software"
-#~ msgstr "Programari"
-
-#~ msgid "No software categories were found"
-#~ msgstr "No s'ha trobat cap categoria de programari"
-
-#~ msgid "Software Categories"
-#~ msgstr "Categories de programari"
-
-#~ msgid "No results were found matching your query"
-#~ msgstr "No s'ha trobat cap resultat que coincideixi amb la consulta"
-
-#~ msgid "No statistics available"
-#~ msgstr "No hi ha estadístiques disponibles"
-
-#~ msgid "Statistics:"
-#~ msgstr "Estadístiques:"
-
-#~ msgid "None"
-#~ msgstr "Sense"
-
-#~ msgid "Could not get basic status for Tracker"
-#~ msgstr "No s'ha pogut obtenir l'estat bàsic del Tracker"
-
-#, c-format
-#~ msgid "Estimated %s left"
-#~ msgstr "%s restant estimat"
-
-#~ msgid "All data miners are idle, indexing complete"
-#~ msgstr "Tots els extractors de dades estan inactius, s'ha completat l'índex"
-
-#~ msgid ""
-#~ "List all tags (using FILTER if specified; FILTER always uses logical OR)"
-#~ msgstr ""
-#~ "Llista totes les etiquetes (si s'especifica es farà servir «FILTRE», "
-#~ "aquest sempre utilitza una «OR» lògica)"
-
-#~ msgid "FILTER"
-#~ msgstr "FILTRE"
-
-#~ msgid "Use AND for search terms instead of OR (the default)"
-#~ msgstr ""
-#~ "Utilitzeu «AND» (i) en comptes d'«OR» (o, per defecte) per a cercar termes"
-
-#~ msgid "FILE [FILE…]"
-#~ msgstr "FITXER [FITXER…]"
-
-#~ msgid ""
-#~ "NOTE: Limit was reached, there are more items in the database not listed "
-#~ "here"
-#~ msgstr ""
-#~ "NOTA: s'ha arribat al límit, la base de dades conté més elements que no "
-#~ "estan llistats aquí"
-
-#~ msgid "Could not get file URNs"
-#~ msgstr "No s'han pogut obtenir les URN del fitxer"
-
-#~ msgid "Could not get all tags in the database"
-#~ msgstr "No s'han pogut obtenir totes les etiquetes de la base de dades"
-
-#~ msgid "No files have been tagged"
-#~ msgstr "No hi ha cap fitxer etiquetat"
-
-#~ msgid "Could not get files for matching tags"
-#~ msgstr "No s'ha pogut obtenir cap fitxer amb les etiquetes seleccionades"
-
-#~ msgid "No files were found matching ALL of those tags"
-#~ msgstr "No s'ha trobat cap fitxer que coincideixi amb totes les etiquetes"
-
-#~ msgid "No tags were found"
-#~ msgstr "No s'ha trobat cap etiqueta"
-
-#~ msgid "No files were modified"
-#~ msgstr "No s'havia modificat cap fitxer"
-
-#~ msgid "Files do not exist or aren’t indexed"
-#~ msgstr "Els fitxers, o bé no existeixen o bé no estan indexats"
-
-#~ msgid "Not tagged, file is not indexed"
-#~ msgstr "No està etiquetat, el fitxer no està indexat"
-
-#~ msgid "Could not get tag by label"
-#~ msgstr "No s'ha pogut obtenir l'etiqueta per la marca"
-
-#~ msgid "No tags were found by that name"
-#~ msgstr "No s'ha trobat cap etiqueta amb aquest nom"
-
-#~ msgid "None of the files had this tag set"
-#~ msgstr "Cap fitxer tenia aquesta etiqueta"
-
-#~ msgid "Untagged"
-#~ msgstr "Sense etiquetes"
-
-#~ msgid "File not indexed or already untagged"
-#~ msgstr "El fitxer, o bé no està indexat o ja no té cap etiqueta"
-
-#~ msgid ""
-#~ "The --and-operator option can only be used with --list and tag label "
-#~ "arguments"
-#~ msgstr ""
-#~ "L'opció «--and-operator» només es pot utilitzar juntament amb «--list» i "
-#~ "amb arguments d'etiqueta"
-
-#~ msgid "Force a module to be used for extraction (e.g. “foo” for “foo.so”)"
-#~ msgstr ""
-#~ "Força l'ús d'un mòdul per a extreure dades (p. ex. «imatges» per "
-#~ "«imatge.jpg»)"
-
-#~ msgid "MODULE"
-#~ msgstr "MÒDUL"
-
-#~ msgid "Runs for a specific domain ontology"
-#~ msgstr "Executa per una ontologia de domini específic"
-
-#~ msgid "Initial sleep time in seconds, 0->1000 (default=15)"
-#~ msgstr ""
-#~ "Temps d'espera inicial (en segons), entre 0 i 1000 (predeterminat =15)"
-
-#~ msgid "— start the tracker indexer"
-#~ msgstr "— inicia l'indexador del Tracker"
