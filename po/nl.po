@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
-"POT-Creation-Date: 2026-03-15 00:39+0000\n"
-"PO-Revision-Date: 2026-04-19 19:31+0200\n"
+"POT-Creation-Date: 2026-07-23 11:21+0000\n"
+"PO-Revision-Date: 2026-08-09 16:45+0200\n"
 "Last-Translator: Nathan Follens <nfollens@gnome.org>\n"
 "Language-Team: GNOME-NL https://matrix.to/#/#nl:gnome.org\n"
 "Language: nl\n"
@@ -29,11 +29,11 @@ msgstr ""
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
 msgid "Max bytes to extract"
-msgstr "Maximaal aantal bytes om uit te pakken"
+msgstr "Maximaal aantal bytes om te extraheren"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:24
 msgid "Maximum number of UTF-8 bytes to extract."
-msgstr "Maximaal aantal UTF-8-bytes om uit te pakken."
+msgstr "Maximaal aantal UTF-8-bytes om te extraheren."
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:30
 msgid "Text file allowlist"
@@ -206,7 +206,7 @@ msgstr "Hulp tonen bij subopdrachten"
 
 #: src/cli/main.c:69
 msgid "Show metadata extractor output"
-msgstr "Uitvoer van metadata-uitpakprogramma tonen"
+msgstr "Uitvoer van metadata-extractieprogramma tonen"
 
 #: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
@@ -228,7 +228,7 @@ msgstr "Geïndexeerde gegevens verwijderen"
 msgid "Search for content"
 msgstr "Zoek naar inhoud"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:727
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "Geef status en statistieken over de geïndexeerde gegevens"
 
@@ -255,7 +255,7 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "‘%s’ is geen localsearch-opdracht. Zie ’localsearch --help’"
 
-#: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Bericht"
 
@@ -273,7 +273,7 @@ msgstr "FORMAAT"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "BESTAND"
 
@@ -288,7 +288,7 @@ msgstr "Extraheer metadata uit een bestand"
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
 #: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
-#: src/cli/tracker-status.c:732 src/cli/tracker-tag.c:416
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Opties zijn onbekend"
 
@@ -373,7 +373,7 @@ msgstr "Geen metadata beschikbaar voor die URI"
 msgid "Could not get eligible status: "
 msgstr "Kon aanmerkingsstatus niet ophalen: "
 
-#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:165
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Serialisatieformaat “%s” wordt niet ondersteund\n"
@@ -565,63 +565,63 @@ msgstr "EXPRESSIE"
 msgid "Could not get LocalSearch statistics"
 msgstr "Kon LocalSearch-statistieken niet ophalen"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "Momenteel geïndexeerd"
 
 # Genegeerde bestandspatronen/genegeerde bestanden
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:179
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d bestand"
 msgstr[1] "%d bestanden"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d map"
 msgstr[1] "%d mappen"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "Resterende ruimte op databasepartitie"
 
 # snelheid
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "Indexeerder is gepauzeerd"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "Gegevens worden nog steeds geïndexeerd"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "Indexeerder is inactief"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d fout geregistreerd"
 msgstr[1] "%d fouten geregistreerd"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "Geen rapporten gevonden"
 
-#: src/cli/tracker-status.c:684
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "Kon geen SPARQL-verbinding verkrijgen"
 
-#: src/cli/tracker-status.c:693
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "Luistert nu naar database-updates"
 
-#: src/cli/tracker-status.c:694
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "Druk op Ctrl+C om te stoppen"
 
@@ -771,15 +771,15 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d seconde"
 msgstr[1] " %2.2d seconden"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Toont versie-informatie"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— Tracker-indexproxy starten"
 
@@ -807,21 +807,21 @@ msgstr "FD"
 msgid "Filesystem root of the extracted data"
 msgstr "Rootmap van het bestandssysteem van de geëxtraheerde metadata"
 
-#: src/extractor/tracker-main.c:262
+#: src/extractor/tracker-main.c:235
 msgid "No metadata or extractor modules found to handle this file"
-msgstr "Geen metadata of extraheermodules gevonden om dit bestand te verwerken"
+msgstr "Geen metadata of extractiemodules gevonden om dit bestand te verwerken"
 
-#: src/extractor/tracker-main.c:270
+#: src/extractor/tracker-main.c:243
 msgid "Metadata extraction failed"
-msgstr "Uitpakken van metadata mislukt"
+msgstr "Extractie van metadata mislukt"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:333
+#: src/extractor/tracker-main.c:306
 msgid "— Extract file meta data"
-msgstr "— Metadata van bestand uitpakken"
+msgstr "— Metadata van bestand extraheren"
 
-#: src/extractor/tracker-main.c:347
+#: src/extractor/tracker-main.c:320
 msgid "Filename and mime type must be provided together"
 msgstr "Bestandsnaam en mime-type dienen tegelijkertijd te worden opgegeven"
 
@@ -832,37 +832,41 @@ msgstr ""
 "vervolgens"
 
 #: src/indexer/tracker-application.c:61
+msgid "Skips metadata extraction from file content"
+msgstr "Slaat extractie van metadata uit bestandsinhoud over"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Controleert of inhoud van BESTAND op basis van configuratie gemined kan "
 "worden"
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 msgid "Avoids changes in the filesystem"
 msgstr "Vermijdt wijzigingen in het bestandssysteem"
 
-#: src/indexer/tracker-application.c:1268
+#: src/indexer/tracker-application.c:1283
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Gegevensobject “%s” bestaat momenteel"
 
-#: src/indexer/tracker-application.c:1269
+#: src/indexer/tracker-application.c:1284
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Gegevensobject “%s” bestaat momenteel niet"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1310
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Bovenliggende map ‘%s’ kan NIET geïndexeerd worden (gebaseerd op filters)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1315
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Bovenliggende map ‘%s’ kan NIET geïndexeerd worden (verborgen bestand)"
 
-#: src/indexer/tracker-application.c:1307
+#: src/indexer/tracker-application.c:1321
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -871,27 +875,27 @@ msgstr ""
 "Bovenliggende map ‘%s’ kan NIET geïndexeerd worden (gebaseerd op "
 "inhoudsfilters)"
 
-#: src/indexer/tracker-application.c:1322
+#: src/indexer/tracker-application.c:1336
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Map kan NIET geïndexeerd worden (gebaseerd op filters)"
 
-#: src/indexer/tracker-application.c:1326
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Bestand kan NIET geïndexeerd worden (gebaseerd op filters)"
 
-#: src/indexer/tracker-application.c:1329
+#: src/indexer/tracker-application.c:1342
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Bestand kan NIET geïndexeerd worden (verborgen bestand)"
 
-#: src/indexer/tracker-application.c:1331
+#: src/indexer/tracker-application.c:1344
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Bestand kan NIET geïndexeerd worden (geen geïndexeerde map)"
 
-#: src/indexer/tracker-application.c:1339
+#: src/indexer/tracker-application.c:1352
 msgid "Directory is eligible to be indexed"
 msgstr "Map kan geïndexeerd worden"
 
-#: src/indexer/tracker-application.c:1340
+#: src/indexer/tracker-application.c:1353
 msgid "File is eligible to be indexed"
 msgstr "Bestand kan geïndexeerd worden"
 
