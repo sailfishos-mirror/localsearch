@@ -8,9 +8,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: tracker.HEAD.gl\n"
-"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/-/issues\n"
-"POT-Creation-Date: 2026-01-16 18:54+0000\n"
-"PO-Revision-Date: 2026-02-02 12:18+0100\n"
+"Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
+"POT-Creation-Date: 2026-07-23 11:21+0000\n"
+"PO-Revision-Date: 2026-08-10 20:39+0200\n"
 "Last-Translator: Fran Dieguez <fran.dieguez@gnome.org>\n"
 "Language-Team: Galician <proxecto@trasno.gal>\n"
 "Language: gl\n"
@@ -23,7 +23,7 @@ msgstr ""
 "X-DL-Module: tracker-miners\n"
 "X-DL-State: Translating\n"
 "X-DL-Team: gl\n"
-"X-Generator: Poedit 3.8\n"
+"X-Generator: Poedit 3.9\n"
 "X-Project-Style: gnome\n"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:23
@@ -50,15 +50,15 @@ msgstr "Agardar polo mineiro de FS que remate antes de extraer"
 
 #: data/org.freedesktop.Tracker.Extract.gschema.xml:38
 msgid ""
-"When true, tracker-extract will wait for tracker-miner-fs to be done "
-"crawling before extracting meta-data. This option is useful on constrained "
-"environment where it is important to list files as fast as possible and can "
-"wait to get meta-data later."
+"When true, tracker-extract will wait for tracker-miner-fs to be done crawling "
+"before extracting meta-data. This option is useful on constrained environment "
+"where it is important to list files as fast as possible and can wait to get "
+"meta-data later."
 msgstr ""
 "Cando é verdadeiro, tracker-extract agardará polo tracker-miner-fs a que "
 "remate a exploración antes de extraer metadatos. Esta opcion é útil en "
-"ambientes con restricci'ons onde é máis importante listar os ficheiros canto"
-" máis rápido sexa posíbel e pode agardar a obter os metadatos máis tarde."
+"ambientes con restricci'ons onde é máis importante listar os ficheiros canto "
+"máis rápido sexa posíbel e pode agardar a obter os metadatos máis tarde."
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
 msgid "Enable stemmer"
@@ -113,16 +113,15 @@ msgstr "Activar monitores"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:59
 msgid "Set to false to completely disable any file monitoring"
 msgstr ""
-"Estabelecer a falso para desactivar completamente a monitorización de "
-"calquera ficheiro"
+"Estabelecer a falso para desactivar completamente a monitorización de calquera "
+"ficheiro"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:64
 msgid "Index removable devices"
 msgstr "Indexar dispositivos extraíbeis"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:65
-msgid ""
-"Set to true to enable indexing mounted directories for removable devices."
+msgid "Set to true to enable indexing mounted directories for removable devices."
 msgstr ""
 "Estabelecer a certo para activar a indexación de cartafoles de dispositivos "
 "extraíbeis montados."
@@ -147,15 +146,15 @@ msgstr "Cartafol que indexar recursivamente"
 #. are keys used by Tracker.
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:91
 msgid ""
-"List of directories to index recursively, Special values include: "
-"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
-"and $HOME/.config/user-dirs.default"
+"List of directories to index recursively, Special values include: ‘&DESKTOP’, "
+"‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
+"‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and $HOME/.config/"
+"user-dirs.default"
 msgstr ""
-"Lista de cartafoles para indexar recursivamente. Os valores especiais "
-"inclúen: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. Consulte /etc/xdg/user-"
-"dirs.defaults e $HOME/.config/user-dirs.default"
+"Lista de cartafoles para indexar recursivamente. Os valores especiais inclúen: "
+"‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, ‘&PUBLIC_SHARE’, "
+"‘&TEMPLATES’, ‘&VIDEOS’. Consulte /etc/xdg/user-dirs.defaults e $HOME/.config/"
+"user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:102
 msgid "Directories to index non-recursively"
@@ -167,13 +166,13 @@ msgstr "Cartafol que indexar non recursivamente"
 msgid ""
 "List of directories to index without inspecting subfolders, Special values "
 "include: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, ‘&PICTURES’, "
-"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults "
-"and $HOME/.config/user-dirs.default"
+"‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. See /etc/xdg/user-dirs.defaults and "
+"$HOME/.config/user-dirs.default"
 msgstr ""
 "Lista de cartafoles a indexar sen analizar os subcartafoles. Os valores "
 "especiais inclúen: ‘&DESKTOP’, ‘&DOCUMENTS’, ‘&DOWNLOAD’, ‘&MUSIC’, "
-"‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. Consulte "
-"/etc/xdg/user-dirs.defaults e $HOME/.config/user-dirs.default"
+"‘&PICTURES’, ‘&PUBLIC_SHARE’, ‘&TEMPLATES’, ‘&VIDEOS’. Consulte /etc/xdg/user-"
+"dirs.defaults e $HOME/.config/user-dirs.default"
 
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:116
 msgid "Ignored files"
@@ -223,15 +222,15 @@ msgstr "Inhibir o indexado temporalmente"
 msgid "Erase the indexed data"
 msgstr "Eliminar os datos indexados"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:418
+#: src/cli/main.c:74 src/cli/tracker-search.c:415
 msgid "Search for content"
 msgstr "Buscar contido"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:721
+#: src/cli/main.c:75 src/cli/tracker-status.c:722
 msgid "Provide status and statistics on the data indexed"
 msgstr "Fornecer o estado e estatísticas dos datos indexados"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:414
+#: src/cli/main.c:76 src/cli/tracker-tag.c:411
 msgid "Add, remove and list tags"
 msgstr "Engadir, eliminar ou listar etiquetas"
 
@@ -252,7 +251,7 @@ msgstr "Vexa «localsearch hep <orde>» para ler sobre unha suborde específica.
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "«%s» non é unha orde de localsearch. Vexa «localsearch --help»"
 
-#: src/cli/tracker-cli-utils.c:176 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
 msgid "Message"
 msgstr "Mensaxe"
 
@@ -268,9 +267,9 @@ msgstr "FORMATO"
 
 #: src/cli/tracker-extract.c:47 src/cli/tracker-extract.c:48
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
-#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
-#: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85 src/cli/tracker-reset.c:52
+#: src/extractor/tracker-main.c:76 src/extractor/tracker-main.c:91
+#: src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "FICHEIRO"
 
@@ -284,8 +283,8 @@ msgstr "Extrae os metadatos dun ficheiro"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
 #: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:431
-#: src/cli/tracker-status.c:726 src/cli/tracker-tag.c:419
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
+#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
 msgid "Unrecognized options"
 msgstr "Non se recoñeceron as opcións"
 
@@ -336,8 +335,8 @@ msgstr "Especifique unha ou máis localizacións a indexar."
 #: src/cli/tracker-info.c:67
 msgid "Show full namespaces (i.e. don’t use nie:title, use full URLs)"
 msgstr ""
-"Mostrar os espazos de nomes completos (p.ex. non usar nie:title, usar as "
-"URLs completas)"
+"Mostrar os espazos de nomes completos (p.ex. non usar nie:title, usar as URLs "
+"completas)"
 
 #: src/cli/tracker-info.c:71
 msgid "Show plain text content if available for resources"
@@ -352,7 +351,7 @@ msgstr "Comproba se o FICHEIRO é elixíbel para ser indexado"
 msgid "Removable device mount point to query"
 msgstr "Punto de montaxe de dispositivo extraíbel a consultar"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:373
+#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
 #: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
 msgid "Could not connect to LocalSearch"
 msgstr "Non foi posíbel estabelecer unha conexión con LocalSearch"
@@ -369,7 +368,7 @@ msgstr "Non hai metadatos dispoñíbeis para a URI"
 msgid "Could not get eligible status: "
 msgstr "Non foi posíbel obter un estado elixíbel: "
 
-#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
+#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:165
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Formato «%s» de serialización non admitido\n"
@@ -415,11 +414,10 @@ msgid "Remove filesystem indexer database"
 msgstr "Eliminar a base de datos do indexador do sistema de ficheiros"
 
 #: src/cli/tracker-reset.c:51
-msgid ""
-"Erase indexed information about a file, works recursively for directories"
+msgid "Erase indexed information about a file, works recursively for directories"
 msgstr ""
-"Elimina a información indexada dun ficheiro, funciona de forma recursiva "
-"para os cartafoles"
+"Elimina a información indexada dun ficheiro, funciona de forma recursiva para "
+"os cartafoles"
 
 #. Now, delete the element recursively
 #: src/cli/tracker-reset.c:95
@@ -430,14 +428,14 @@ msgstr "Eliminando…"
 msgid ""
 "The indexed data for this file has been deleted and will be reindexed again."
 msgstr ""
-"Os datos indexados para este ficheiro foi eliminado e volverá a indexarse de"
-" novo."
+"Os datos indexados para este ficheiro foi eliminado e volverá a indexarse de "
+"novo."
 
 #: src/cli/tracker-reset.c:223
 msgid "The LocalSearch indexed data is about to be deleted, proceed? [y/N]"
 msgstr ""
-"Os datos indexados de LocalSearch están a piques de elminarse, desexa "
-"seguir?  [s/N]"
+"Os datos indexados de LocalSearch están a piques de elminarse, desexa seguir?  "
+"[s/N]"
 
 #. TRANSLATORS: this is our test for a [y|N] question in the command line.
 #. * A partial or full match will be considered an affirmative answer,
@@ -547,8 +545,8 @@ msgid ""
 "Watch changes to the database in real time (e.g. resources or files being "
 "added)"
 msgstr ""
-"Vexa os cambios na base de datos en tempo real (p.ex. os recursos ou "
-"ficheiros que se engaden)"
+"Vexa os cambios na base de datos en tempo real (p.ex. os recursos ou ficheiros "
+"que se engaden)"
 
 #: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
@@ -559,61 +557,61 @@ msgstr "EXPRESIÓN"
 msgid "Could not get LocalSearch statistics"
 msgstr "Non se puideron obter as estatísticas do LocalSearch"
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:429
 #, c-format
 msgid "Currently indexed"
 msgstr "Indexados actualmente"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:180
+#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d ficheiro"
 msgstr[1] "%d ficheiros"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:438
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d cartafol"
 msgstr[1] "%d cartafoles"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:452
 msgid "Remaining space on database partition"
 msgstr "Espazo libre na partición da base de datos"
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
 msgid "Indexer is paused"
 msgstr "O indexador está pausado"
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:463
 msgid "Data is still being indexed"
 msgstr "Os datos aínda se están indexando"
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:465
 msgid "Indexer is idle"
 msgstr "O idnexador está ocioso"
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:472
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d fallo gravado"
 msgstr[1] "%d fallos gravados"
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:502
 msgid "No reports found"
 msgstr "Non se atopou ningún rexistro"
 
-#: src/cli/tracker-status.c:678
+#: src/cli/tracker-status.c:679
 msgid "Could not get SPARQL connection"
 msgstr "Non foi posíbel estabelecer unha conexión con SPARQL"
 
-#: src/cli/tracker-status.c:687
+#: src/cli/tracker-status.c:688
 msgid "Now listening to database updates"
 msgstr "Escoitando as actualizacións de recursos na base de datos"
 
-#: src/cli/tracker-status.c:688
+#: src/cli/tracker-status.c:689
 msgid "Press Ctrl+C to stop"
 msgstr "Prema «Ctrl+C» para parar"
 
@@ -629,8 +627,8 @@ msgstr ""
 #: src/cli/tracker-tag.c:75
 msgid "Add a tag (if FILEs are omitted, TAG is not associated with any files)"
 msgstr ""
-"Engadir unha etiqueta (se se omiten os FICHEIROS, A ETIQUETA non se asocia "
-"con ningún ficheiro)"
+"Engadir unha etiqueta (se se omiten os FICHEIROS, A ETIQUETA non se asocia con "
+"ningún ficheiro)"
 
 #: src/cli/tracker-tag.c:76 src/cli/tracker-tag.c:80
 msgid "TAG"
@@ -639,8 +637,8 @@ msgstr "ETIQUETA"
 #: src/cli/tracker-tag.c:79
 msgid "Delete a tag (if FILEs are omitted, TAG is removed for all files)"
 msgstr ""
-"Eliminar unha etiqueta (se se omiten os FICHEIROS, a ETIQUETA elimínase para"
-" todos os ficheiros)"
+"Eliminar unha etiqueta (se se omiten os FICHEIROS, a ETIQUETA elimínase para "
+"todos os ficheiros)"
 
 #: src/cli/tracker-tag.c:83
 msgid "Description for a tag (this is only used with --add)"
@@ -658,51 +656,51 @@ msgstr "FICHEIRO…"
 msgid "Could not get files related to tag"
 msgstr "Non foi posíbel obter ficheiros relacionados coa etiqueta"
 
-#: src/cli/tracker-tag.c:151 src/cli/tracker-tag.c:335
+#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
 msgid "Could not get all tags"
 msgstr "Non foi posíbel obter todas as etiquetas"
 
-#: src/cli/tracker-tag.c:156
+#: src/cli/tracker-tag.c:155
 msgid "Tags (shown by name)"
 msgstr "Etiquetas (mostradas por nome)"
 
-#: src/cli/tracker-tag.c:217
+#: src/cli/tracker-tag.c:216
 msgid "Could not add tag"
 msgstr "Non foi posíbel engadir a etiqueta"
 
-#: src/cli/tracker-tag.c:222
+#: src/cli/tracker-tag.c:221
 msgid "Tag was added successfully"
 msgstr "Etiqueta engadida correctamente"
 
-#: src/cli/tracker-tag.c:248
+#: src/cli/tracker-tag.c:247
 msgid "Could not add tag to files"
 msgstr "Non foi posíbel engadir as etiquetas aos ficheiros"
 
-#: src/cli/tracker-tag.c:253
+#: src/cli/tracker-tag.c:252
 msgid "Tagged"
 msgstr "Etiquetado"
 
-#: src/cli/tracker-tag.c:278 src/cli/tracker-tag.c:306
+#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
 msgid "Could not remove tag"
 msgstr "Non foi posíbel quitar a etiqueta"
 
-#: src/cli/tracker-tag.c:283 src/cli/tracker-tag.c:311
+#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
 msgid "Tag was removed successfully"
 msgstr "Etiqueta quitada correctamente"
 
-#: src/cli/tracker-tag.c:360
+#: src/cli/tracker-tag.c:357
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Non foi posíbel estabelecer unha conexión con LocalSearch"
 
-#: src/cli/tracker-tag.c:424
+#: src/cli/tracker-tag.c:421
 msgid "The --list option is required for --show-files"
 msgstr "Requírese a opción «--list» para «--show-files»"
 
-#: src/cli/tracker-tag.c:426
+#: src/cli/tracker-tag.c:423
 msgid "Add and delete actions can not be used together"
 msgstr "Engadir ou borrar accións que non se poden usar conxuntamente"
 
-#: src/cli/tracker-tag.c:428
+#: src/cli/tracker-tag.c:425
 msgid "The --description option can only be used with --add"
 msgstr "A opción «--description» só se pode usar con «--add»"
 
@@ -762,14 +760,14 @@ msgid_plural " %2.2d seconds"
 msgstr[0] " %2.2d segundo"
 msgstr[1] " %2.2d segundos"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Mostra a información da versión"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 msgid "— start the tracker index proxy"
 msgstr "— iniciar o proxy do indexador do tracker"
 
@@ -797,21 +795,21 @@ msgstr "FD"
 msgid "Filesystem root of the extracted data"
 msgstr "Sistema de ficheiro raíz dos datos extraídos"
 
-#: src/extractor/tracker-main.c:262
+#: src/extractor/tracker-main.c:235
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Non foi posíbel atopar un módulo para xestionar este ficheiro"
 
-#: src/extractor/tracker-main.c:270
+#: src/extractor/tracker-main.c:243
 msgid "Metadata extraction failed"
 msgstr "Produciuse un fallo na extracción de metadatos"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:333
+#: src/extractor/tracker-main.c:306
 msgid "— Extract file meta data"
 msgstr "— Extraer os metadatos do ficheiro"
 
-#: src/extractor/tracker-main.c:347
+#: src/extractor/tracker-main.c:320
 msgid "Filename and mime type must be provided together"
 msgstr "O nome do ficheiro de o tipo mime deben ser indicados conxuntamente"
 
@@ -820,68 +818,69 @@ msgid "Runs until all configured locations are indexed and then exits"
 msgstr "Execútase até que tódalas localizacións configuradas se indexan e sae"
 
 #: src/indexer/tracker-application.c:61
+msgid "Skips metadata extraction from file content"
+msgstr "Omite a extracción de metadatos desde o contido do ficheiro"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 "Comproba se o FICHEIRO é elexíbel para ser escrutado segundo a configuración"
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 msgid "Avoids changes in the filesystem"
 msgstr "Evita cambios no sistema de ficheiros"
 
-#: src/indexer/tracker-application.c:1262
+#: src/indexer/tracker-application.c:1283
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "O obxecto de datos «%s» xa existe"
 
-#: src/indexer/tracker-application.c:1263
+#: src/indexer/tracker-application.c:1284
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "O obxecto de datos «%s» non existe"
 
-#: src/indexer/tracker-application.c:1289
+#: src/indexer/tracker-application.c:1310
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "O cartafol pai «%s» NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1315
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
-msgstr ""
-"O cartafol pai «%s» NON é elixíbel para ser escrutado (ficheiro oculto)"
+msgstr "O cartafol pai «%s» NON é elixíbel para ser escrutado (ficheiro oculto)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1321
 #, c-format
 msgid ""
-"Parent directory “%s” is NOT eligible to be indexed (based on content "
-"filters)"
+"Parent directory “%s” is NOT eligible to be indexed (based on content filters)"
 msgstr ""
-"O cartafol pai «%s» NON é elixíbel para ser escrutado (segundo os filtros de"
-" contido)"
+"O cartafol pai «%s» NON é elixíbel para ser escrutado (segundo os filtros de "
+"contido)"
 
-#: src/indexer/tracker-application.c:1316
+#: src/indexer/tracker-application.c:1336
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "O cartafol NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/indexer/tracker-application.c:1320
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "O ficheiro NON é elixíbel para ser escrutado (segundo os filtros)"
 
-#: src/indexer/tracker-application.c:1323
+#: src/indexer/tracker-application.c:1342
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "O ficheiro NON é elixíbel para ser escrutado (ficheiro oculto)"
 
-#: src/indexer/tracker-application.c:1325
+#: src/indexer/tracker-application.c:1344
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr ""
-"O ficheiro NON é elixíbel para ser escrutado (non está nun cartafol "
-"escrutado)"
+"O ficheiro NON é elixíbel para ser escrutado (non está nun cartafol escrutado)"
 
-#: src/indexer/tracker-application.c:1333
+#: src/indexer/tracker-application.c:1352
 msgid "Directory is eligible to be indexed"
 msgstr "O cartafol é elixíbel para ser escrutado"
 
-#: src/indexer/tracker-application.c:1334
+#: src/indexer/tracker-application.c:1353
 msgid "File is eligible to be indexed"
 msgstr "O ficheiro é elixíbel para ser escrutado"
 
@@ -895,8 +894,7 @@ msgstr "DIR"
 
 #: src/writeback/tracker-main.c:54
 msgid ""
-"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug "
-"(default=0)"
+"Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default=0)"
 msgstr ""
 "Rexistro, 0 = só erros, 1 = mínimo, 2 = detallado e 3 = depuración "
 "(predeterminado = 0)"
@@ -926,8 +924,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ msgstr "— iniciar o indexador do tracker"
 
 #~ msgid ""
-#~ "Simplify the words to their root to provide more results. E.g. “shelves” and"
-#~ " “shelf” to “shel”"
+#~ "Simplify the words to their root to provide more results. E.g. “shelves” "
+#~ "and “shelf” to “shel”"
 #~ msgstr ""
 #~ "Simplificar as palabras á súa raíz para fornecer máis resultados. Ex. \"\n"
 #~ "\"«estanterías» e «estante» a «estant»."
@@ -936,7 +934,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Translate accented characters to the equivalent unaccented. E.g. “Idéa” to "
 #~ "“Idea” for improved matching."
 #~ msgstr ""
-#~ "Traducir caracteres acentuados ao seu equivalente sin acentuar. Ex. «Idéa» a \"\n"
+#~ "Traducir caracteres acentuados ao seu equivalente sin acentuar. Ex. «Idéa» "
+#~ "a \"\n"
 #~ "\"«Idea» para mellorar a coincidencia."
 
 #~ msgid "If enabled, numbers will not be indexed."
@@ -975,9 +974,9 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Set to true to enable indexing CDs, DVDs, and generally optical media (if "
 #~ "removable devices are not indexed, optical discs won’t be either)"
 #~ msgstr ""
-#~ "Estabelecer a certo para activar a indexación de CD, DVD e medios ópticos en"
-#~ " xeral (se os dispositivos extraíbeis non están indexados, os discos ópticos"
-#~ " tampouco o estarán)"
+#~ "Estabelecer a certo para activar a indexación de CD, DVD e medios ópticos "
+#~ "en xeral (se os dispositivos extraíbeis non están indexados, os discos "
+#~ "ópticos tampouco o estarán)"
 
 #~ msgid "Set to true to index while running on battery"
 #~ msgstr "Estabelecer a certo para indexar ao funcionar con baterías"
@@ -1091,8 +1090,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Miner to use with --resume or --pause (you can use suffixes, e.g. Files or "
 #~ "Applications)"
 #~ msgstr ""
-#~ "Mineiro que usar con --resume ou --pause (pode usar sufixos, ex. «Ficheiros»"
-#~ " ou «Aplicacións»)"
+#~ "Mineiro que usar con --resume ou --pause (pode usar sufixos, ex. "
+#~ "«Ficheiros» ou «Aplicacións»)"
 
 #~ msgid "MINER"
 #~ msgstr "MINEIRO"
@@ -1311,11 +1310,11 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ msgstr "Use OR para buscar termos en lugar de AND (o predeterminado)"
 
 #~ msgid ""
-#~ "Show URNs for results (doesn’t apply to --music-albums, --music-artists, "
-#~ "--feeds, --software, --software-categories)"
+#~ "Show URNs for results (doesn’t apply to --music-albums, --music-artists, --"
+#~ "feeds, --software, --software-categories)"
 #~ msgstr ""
-#~ "Mostrar a URN para os resultados (non se aplica para «--music-albums», "
-#~ "«--music-artists», «--feeds», «--software», «--software-categories»)"
+#~ "Mostrar a URN para os resultados (non se aplica para «--music-albums», «--"
+#~ "music-artists», «--feeds», «--software», «--software-categories»)"
 
 #~ msgid ""
 #~ "Disable showing snippets with results. This is only shown for some "
@@ -1488,8 +1487,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ msgstr "Ignorar palabras de parada"
 
 #~ msgid ""
-#~ "If enabled, the words listed in the stop-words list are ignored. E.g. common"
-#~ " words like “the”, “yes”, “no”, etc."
+#~ "If enabled, the words listed in the stop-words list are ignored. E.g. "
+#~ "common words like “the”, “yes”, “no”, etc."
 #~ msgstr ""
 #~ "Se está activo, as palabras listadas na lista de palabras de parada "
 #~ "ignóranse. Ex. as palabras comúns como «o» , «si», «non», etc."
@@ -1498,8 +1497,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ msgstr "Indexa información sobre as aplicacións instaladas"
 
 #~ msgid ""
-#~ "If this option is enabled, the filesystem miner will look for .desktop files"
-#~ " in the standard XDG system and user data directories."
+#~ "If this option is enabled, the filesystem miner will look for .desktop "
+#~ "files in the standard XDG system and user data directories."
 #~ msgstr ""
 #~ "Se esta opción está activa, o sistema de ficheiros do mineiro buscará por "
 #~ "ficheiros .desktop no sistema XDG estándar e nos cartafoles de datos do "
@@ -1662,17 +1661,17 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "application will be executed by the CPU next. Each application has an "
 #~ "associated scheduling policy and priority."
 #~ msgstr ""
-#~ "O planificador é o compoñente do núcleo que decide que aplicación executábel"
-#~ " debe executar despois a CPU. Cada aplicación ten asociada unha política e "
-#~ "unha prioridade de planificación."
+#~ "O planificador é o compoñente do núcleo que decide que aplicación "
+#~ "executábel debe executar despois a CPU. Cada aplicación ten asociada unha "
+#~ "política e unha prioridade de planificación."
 
 #~ msgid "Enable writeback"
 #~ msgstr "Activar a escritura en diferido"
 
 #~ msgid "Set to false to completely disable any file writeback"
 #~ msgstr ""
-#~ "Estabelecer a falso para desactivar completamente a escritura en diferido de"
-#~ " calquera ficheiro"
+#~ "Estabelecer a falso para desactivar completamente a escritura en diferido "
+#~ "de calquera ficheiro"
 
 #~ msgid "File System"
 #~ msgstr "Sistema de ficheiros"
@@ -1699,8 +1698,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ msgstr "Metadatos do extractor de Tracker"
 
 #~ msgid ""
-#~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default ="
-#~ " 0)"
+#~ "Logging, 0 = errors only, 1 = minimal, 2 = detailed and 3 = debug (default "
+#~ "= 0)"
 #~ msgstr ""
 #~ "Inicio de sesión, 0 = só erros, 1 = mínimo, 2 = detallado e 3 = depuración "
 #~ "(predeterminado = 0)"
@@ -1717,15 +1716,15 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Use SIGKILL to stop all matching processes, either “store”, “miners” or "
 #~ "“all” may be used, no parameter equals “all”"
 #~ msgstr ""
-#~ "USar SIGKILL para parar tódolos procesos coincidentes, se debe usar «store»,"
-#~ " «miners», «all» ningún parámetro iguala a «all»"
+#~ "USar SIGKILL para parar tódolos procesos coincidentes, se debe usar "
+#~ "«store», «miners», «all» ningún parámetro iguala a «all»"
 
 #~ msgid ""
 #~ "Use SIGTERM to stop all matching processes, either “store”, “miners” or "
 #~ "“all” may be used, no parameter equals “all”"
 #~ msgstr ""
-#~ "Usar SIGTERM para parar todos os procesos coincidentes, débese usar «store»,"
-#~ " «miners» ou «all», ningún parámetro equivale a «all»"
+#~ "Usar SIGTERM para parar todos os procesos coincidentes, débese usar "
+#~ "«store», «miners» ou «all», ningún parámetro equivale a «all»"
 
 #~ msgid "Starts miners (which indirectly starts tracker-store too)"
 #~ msgstr "Inicia mineiros (que indirectamente inicia Tracker tamén)"
@@ -1832,8 +1831,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Only one action (--backup, --restore, --index-file or --import) can be used "
 #~ "at a time"
 #~ msgstr ""
-#~ "Só pode usar á vez unha acción (--backup, --restore, --index-file ou "
-#~ "--import)"
+#~ "Só pode usar á vez unha acción (--backup, --restore, --index-file ou --"
+#~ "import)"
 
 #~ msgid "Missing one or more files which are required"
 #~ msgstr "Faltan un ou máis ficheiros que son requiridos"
@@ -1845,8 +1844,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 #~ "Actions (--backup, --restore, --index-file and --import) can not be used "
 #~ "with --reindex-mime-type"
 #~ msgstr ""
-#~ "As accións (--backup, --restore, --index-file and --import) non poden usarse"
-#~ " con --reindex-mime-type"
+#~ "As accións (--backup, --restore, --index-file and --import) non poden "
+#~ "usarse con --reindex-mime-type"
 
 #~ msgid "Kill all Tracker processes and remove all databases"
 #~ msgstr "Matar todos os procesos de Tracker e borrar todas as bases de datos"
@@ -1857,8 +1856,8 @@ msgstr "— iniciar o servizo de escrita en diferido"
 
 #~ msgid "Remove all configuration files so they are re-generated on next start"
 #~ msgstr ""
-#~ "Quitar todos os ficheiros de configuración para que se rexeneren no seguinte"
-#~ " inicio"
+#~ "Quitar todos os ficheiros de configuración para que se rexeneren no "
+#~ "seguinte inicio"
 
 #~ msgid "You can not use the --hard and --soft arguments together"
 #~ msgstr "Non é posíbel usar os argumentos «--hard» e «--soft» á vez"
