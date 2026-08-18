@@ -1019,6 +1019,9 @@ tracker_decorator_paused (TrackerMiner *miner)
 	}
 
 	g_clear_handle_id (&decorator->throttle_id, g_source_remove);
+	g_clear_object (&decorator->batch);
+	g_clear_pointer (&decorator->buffer, g_ptr_array_unref);
+	g_clear_pointer (&decorator->commit_buffer, g_ptr_array_unref);
 	decorator_clear_cache (decorator);
 	g_timer_stop (decorator->timer);
 }
