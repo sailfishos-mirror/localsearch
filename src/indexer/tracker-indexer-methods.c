@@ -142,6 +142,8 @@ create_text_file_information_element (TrackerIndexer *indexer,
 	for (i = 0; rdf_types[i]; i++)
 		tracker_resource_add_uri (resource, "rdf:type", rdf_types[i]);
 
+	tracker_resource_set_string (resource, "nie:mimeType", mime_type);
+
 	g_strfreev (rdf_types);
 
 	return resource;
