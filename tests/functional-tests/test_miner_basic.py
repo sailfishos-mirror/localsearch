@@ -871,6 +871,44 @@ class MinerCrawlTest(fixtures.TrackerMinerTest):
         unpacked_result = [r[0] for r in result]
         self.assertIn(self.uri("test-monitored/file1.txt"), unpacked_result)
 
+    def test_24_ignored_text_file(self):
+        """
+        Ensure that text files not in allow list setting are not reindexed
+        across restarts
+        """
+        source = os.path.join(self.workdir, "test-no-monitored", "file0.txt")
+        dest = os.path.join(self.workdir, "test-monitored", "file0.rq")
+        self.destUri = self.uri("test-monitored/file0.rq")
+
+        with self.await_document_inserted(dest) as resource:
+            shutil.copyfile(source, dest)
+
+        # Verify if miner indexed this file.
+        result = self.__get_text_documents()
+        self.assertEqual(len(result), 4)
+        unpacked_result = [r[0] for r in result]
+        self.assertIn(self.uri("test-monitored/file0.rq"), unpacked_result)
+
+        self.changedFiles = []
+
+        # Ensure that indexer restart triggers no further changes on the file
+        def count_events_cb(notifier, service, graph, events):
+            for ev in events:
+                self.changedFiles.append(ev.get_urn())
+
+        notifier = self.tracker.conn.create_notifier()
+        notifier.connect('events', count_events_cb)
+
+        self.sandbox.stop_daemon('org.freedesktop.LocalSearch3')
+
+        try:
+            dest2 = os.path.join(self.workdir, "test-monitored", "file0.txt")
+
+            with self.await_document_inserted(dest2) as resource:
+                shutil.copyfile(source, dest2)
+        finally:
+            self.assertNotIn(self.uri("test-monitored/file0.rq"), self.changedFiles)
+
 class IndexedFolderTest(fixtures.TrackerMinerTest):
     """
     Tests handling of data across multiple data sources
