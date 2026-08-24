@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: tracker 1.13.x\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
-"POT-Creation-Date: 2026-03-15 00:39+0000\n"
-"PO-Revision-Date: 2026-05-05 22:01+0200\n"
-"Last-Translator: Kjartan Maraas <kjartan.maraas@gmail.com>\n"
+"POT-Creation-Date: 2026-08-06 08:15+0000\n"
+"PO-Revision-Date: 2026-08-24 21:10+0200\n"
+"Last-Translator: Kjartan Maraas <kmaraas@gnome.org>\n"
 "Language-Team: Norwegian bokmål <i18n-nb@lister.ping.uio.no>\n"
 "Language: nb\n"
 "MIME-Version: 1.0\n"
@@ -46,10 +46,8 @@ msgid ""
 msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:24
-#, fuzzy
-#| msgid "Enable monitors"
 msgid "Enable stemmer"
-msgstr "Slå på overvåkin"
+msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:25
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:31
@@ -63,13 +61,11 @@ msgstr "Slå på overvåkin"
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:77
 #: data/org.freedesktop.Tracker.Miner.Files.gschema.xml:83
 msgid "This setting is deprecated"
-msgstr ""
+msgstr "Denne innstillingen er utgått"
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:30
-#, fuzzy
-#| msgid "Enable monitors"
 msgid "Enable unaccent"
-msgstr "Slå på overvåkin"
+msgstr ""
 
 #: data/org.freedesktop.Tracker.FTS.gschema.xml:36
 msgid "Ignore numbers"
@@ -178,19 +174,17 @@ msgstr ""
 
 #: src/cli/main.c:68
 msgid "Show help on subcommands"
-msgstr ""
+msgstr "Vis hjelp for underkommandoer"
 
 #: src/cli/main.c:69
-#, fuzzy
-#| msgid "Metadata extractor"
 msgid "Show metadata extractor output"
-msgstr "Metadatauthenter"
+msgstr "Vis data fra metadatauthenter"
 
 #: src/cli/main.c:70 src/cli/tracker-index.c:382
 msgid "List and change indexed folders"
 msgstr ""
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:533
+#: src/cli/main.c:71 src/cli/tracker-info.c:521
 msgid "Retrieve information available for files and resources"
 msgstr ""
 
@@ -200,17 +194,17 @@ msgstr ""
 
 #: src/cli/main.c:73 src/cli/tracker-reset.c:202
 msgid "Erase the indexed data"
-msgstr ""
+msgstr "Slett indekserte data"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:415
+#: src/cli/main.c:74 src/cli/tracker-search.c:403
 msgid "Search for content"
-msgstr ""
+msgstr "Søke etter innhold"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:727
+#: src/cli/main.c:75 src/cli/tracker-status.c:649
 msgid "Provide status and statistics on the data indexed"
 msgstr ""
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:411
+#: src/cli/main.c:76 src/cli/tracker-tag.c:395
 msgid "Add, remove and list tags"
 msgstr ""
 
@@ -231,9 +225,9 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr ""
 
-#: src/cli/tracker-cli-utils.c:179 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:312
 msgid "Message"
-msgstr ""
+msgstr "Melding"
 
 #: src/cli/tracker-extract.c:44 src/cli/tracker-info.c:75
 #: src/extractor/tracker-main.c:82
@@ -251,7 +245,7 @@ msgstr "FORMAT"
 #: src/cli/tracker-index.c:60 src/cli/tracker-index.c:61
 #: src/cli/tracker-info.c:84 src/cli/tracker-info.c:85
 #: src/cli/tracker-reset.c:52 src/extractor/tracker-main.c:76
-#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:62
+#: src/extractor/tracker-main.c:91 src/indexer/tracker-application.c:66
 msgid "FILE"
 msgstr "FIL"
 
@@ -264,9 +258,9 @@ msgid "Extract metadata from a file"
 msgstr "Hent ut metadata fra en fil"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
-#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
-#: src/cli/tracker-status.c:732 src/cli/tracker-tag.c:416
+#: src/cli/tracker-info.c:528 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:416
+#: src/cli/tracker-status.c:654 src/cli/tracker-tag.c:400
 msgid "Unrecognized options"
 msgstr ""
 
@@ -279,15 +273,13 @@ msgid "Removes FILE from indexed locations"
 msgstr ""
 
 #: src/cli/tracker-index.c:57
-#, fuzzy
-#| msgid "Directories to index recursively"
 msgid "Makes indexing recursive"
-msgstr "Kataloger som skal indekseres rekursivt"
+msgstr "Gjør indeksering rekursiv"
 
 #: src/cli/tracker-index.c:205
 #, c-format
 msgid "“%s” is not a directory"
-msgstr ""
+msgstr "«%s» er ikke en katalog"
 
 #. TRANSLATORS: These are commandline options
 #: src/cli/tracker-index.c:281
@@ -304,13 +296,13 @@ msgstr ""
 msgid "--recursive requires --add"
 msgstr ""
 
-#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:311
 msgid "Path"
-msgstr ""
+msgstr "Sti"
 
 #: src/cli/tracker-index.c:354
 msgid "Recursive"
-msgstr ""
+msgstr "Rekursiv"
 
 #: src/cli/tracker-index.c:396
 msgid "Please specify one or more locations to index."
@@ -328,33 +320,33 @@ msgstr ""
 msgid "Checks if FILE is eligible for being indexed"
 msgstr ""
 
-#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:190
 #: src/cli/tracker-status.c:80
 msgid "Removable device mount point to query"
 msgstr ""
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
-#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
+#: src/cli/tracker-info.c:345 src/cli/tracker-search.c:358
+#: src/cli/tracker-status.c:662
 #, fuzzy
 #| msgid "Could not establish a connection to Tracker"
 msgid "Could not connect to LocalSearch"
 msgstr "Kunne ikke etablere en tilkobling til Tracker"
 
-#: src/cli/tracker-info.c:405
+#: src/cli/tracker-info.c:393
 #, fuzzy
 #| msgid "File to extract metadata for"
 msgid "Unable to retrieve data for URI"
 msgstr "Fil som det skal hentes metadata for"
 
-#: src/cli/tracker-info.c:412
+#: src/cli/tracker-info.c:400
 msgid "No metadata available for that URI"
 msgstr ""
 
-#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
+#: src/cli/tracker-info.c:410 src/cli/tracker-info.c:487
 msgid "Could not get eligible status: "
 msgstr ""
 
-#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
+#: src/cli/tracker-info.c:439 src/extractor/tracker-main.c:165
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Ikke støttet serialiseringsformat «%s»\n"
@@ -365,11 +357,11 @@ msgstr ""
 
 #: src/cli/tracker-inhibit.c:45
 msgid "command"
-msgstr ""
+msgstr "kommando"
 
 #: src/cli/tracker-inhibit.c:46
 msgid "COMMAND"
-msgstr ""
+msgstr "KOMMANDO"
 
 #: src/cli/tracker-inhibit.c:65
 msgid "Application"
@@ -377,7 +369,7 @@ msgstr "Program"
 
 #: src/cli/tracker-inhibit.c:66
 msgid "Reason"
-msgstr ""
+msgstr "Årsak"
 
 #: src/cli/tracker-inhibit.c:136
 msgid "Indexing inhibited through command line"
@@ -428,89 +420,89 @@ msgstr ""
 msgid "yes"
 msgstr "ja"
 
-#: src/cli/tracker-search.c:115
+#: src/cli/tracker-search.c:116
 msgid "Results"
 msgstr "Resultater"
 
-#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
-#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
-#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:117 src/cli/tracker-search.c:118
+#: src/cli/tracker-search.c:120 src/cli/tracker-search.c:123
+#: src/cli/tracker-search.c:124 src/cli/tracker-search.c:125
 msgid "Files"
 msgstr "Filer"
 
-#: src/cli/tracker-search.c:118
+#: src/cli/tracker-search.c:119
 msgid "Folders"
 msgstr "Mapper"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:121
 msgid "Albums"
 msgstr "Album"
 
-#: src/cli/tracker-search.c:121
+#: src/cli/tracker-search.c:122
 msgid "Artists"
 msgstr "Artister"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:133
 msgid "Search for files"
 msgstr "Søk etter filer"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:137
 msgid "Search for folders"
 msgstr "Søk etter mapper"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:141
 msgid "Search for audio files"
 msgstr "Søk etter lydfiler"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:145
 msgid "Search for music albums"
 msgstr "Søk etter musikkalbum"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:149
 msgid "Search for music artists"
 msgstr "Søk etter musikkartister"
 
-#: src/cli/tracker-search.c:152
+#: src/cli/tracker-search.c:153
 msgid "Search for image files"
 msgstr "Søk etter bildefiler"
 
-#: src/cli/tracker-search.c:156
+#: src/cli/tracker-search.c:157
 msgid "Search for video files"
 msgstr "Søk etter videofiler"
 
-#: src/cli/tracker-search.c:160
+#: src/cli/tracker-search.c:161
 msgid "Search for document files"
 msgstr "Søk etter dokumentfiler"
 
-#: src/cli/tracker-search.c:164
+#: src/cli/tracker-search.c:165
 msgid "Search for software files"
 msgstr "Søk etter programvarefiler"
 
-#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:174 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr ""
 
-#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:178 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr ""
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:182
 msgid "Show URNs for results"
 msgstr ""
 
-#: src/cli/tracker-search.c:185
+#: src/cli/tracker-search.c:186
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 
-#: src/cli/tracker-search.c:193
+#: src/cli/tracker-search.c:194
 msgid "Show help options"
-msgstr ""
+msgstr "Vis alternativer for hjelp"
 
-#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
+#: src/cli/tracker-search.c:201 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr ""
 
-#: src/cli/tracker-search.c:201
+#: src/cli/tracker-search.c:202
 msgid "TERMS"
 msgstr ""
 
@@ -530,72 +522,65 @@ msgstr ""
 
 #: src/cli/tracker-status.c:86
 msgid "EXPRESSION"
-msgstr ""
+msgstr "UTTRYKK"
 
-#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
-#: src/cli/tracker-status.c:317
+#: src/cli/tracker-status.c:138 src/cli/tracker-status.c:231
+#: src/cli/tracker-status.c:253
 msgid "Could not get LocalSearch statistics"
 msgstr ""
 
-#: src/cli/tracker-status.c:434
+#: src/cli/tracker-status.c:365
 #, fuzzy, c-format
 #| msgid "Would be indexed"
 msgid "Currently indexed"
 msgstr "Vil bli indeksert"
 
-#: src/cli/tracker-status.c:437 src/cli/tracker-tag.c:179
-#, fuzzy, c-format
-#| msgid "Ignored files"
+#: src/cli/tracker-status.c:368 src/cli/tracker-tag.c:177
+#, c-format
 msgid "%d file"
 msgid_plural "%d files"
-msgstr[0] "Ignorerte filer"
-msgstr[1] "Ignorerte filer"
+msgstr[0] "%d fil"
+msgstr[1] "%d filer"
 
-#: src/cli/tracker-status.c:443
+#: src/cli/tracker-status.c:374
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "%d mappe"
+msgstr[1] "%d mapper"
 
-#: src/cli/tracker-status.c:457
+#: src/cli/tracker-status.c:388
 msgid "Remaining space on database partition"
 msgstr ""
 
-#: src/cli/tracker-status.c:467 src/cli/tracker-status.c:619
+#: src/cli/tracker-status.c:398 src/cli/tracker-status.c:550
 msgid "Indexer is paused"
 msgstr ""
 
-#: src/cli/tracker-status.c:468
+#: src/cli/tracker-status.c:399
 msgid "Data is still being indexed"
 msgstr ""
 
-#: src/cli/tracker-status.c:470
+#: src/cli/tracker-status.c:401
 msgid "Indexer is idle"
 msgstr ""
 
-#: src/cli/tracker-status.c:477
+#: src/cli/tracker-status.c:408
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/cli/tracker-status.c:507
+#: src/cli/tracker-status.c:438
 msgid "No reports found"
-msgstr ""
+msgstr "Fant ingen rapporter"
 
-#: src/cli/tracker-status.c:684
-#, fuzzy
-#| msgid "Could not establish a connection to Tracker"
-msgid "Could not get SPARQL connection"
-msgstr "Kunne ikke etablere en tilkobling til Tracker"
-
-#: src/cli/tracker-status.c:693
+#: src/cli/tracker-status.c:614
 msgid "Now listening to database updates"
 msgstr ""
 
-#: src/cli/tracker-status.c:694
+#: src/cli/tracker-status.c:615
 msgid "Press Ctrl+C to stop"
 msgstr ""
 
@@ -625,73 +610,70 @@ msgstr ""
 
 #: src/cli/tracker-tag.c:84
 msgid "STRING"
-msgstr ""
+msgstr "STRENG"
 
 #: src/cli/tracker-tag.c:96
-#, fuzzy
-#| msgid "FILE"
 msgid "FILE…"
-msgstr "FIL"
+msgstr "FIL …"
 
 #: src/cli/tracker-tag.c:119
 msgid "Could not get files related to tag"
 msgstr ""
 
-#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
+#: src/cli/tracker-tag.c:149 src/cli/tracker-tag.c:323
 #, fuzzy
 #| msgid "Could not add feed"
 msgid "Could not get all tags"
 msgstr "Kunne ikke legge til strøm"
 
-#: src/cli/tracker-tag.c:155
+#: src/cli/tracker-tag.c:153
 msgid "Tags (shown by name)"
 msgstr ""
 
-#: src/cli/tracker-tag.c:216
+#: src/cli/tracker-tag.c:213
 #, fuzzy
 #| msgid "Could not add feed"
 msgid "Could not add tag"
 msgstr "Kunne ikke legge til strøm"
 
-#: src/cli/tracker-tag.c:221
+#: src/cli/tracker-tag.c:217
 msgid "Tag was added successfully"
 msgstr ""
 
-#: src/cli/tracker-tag.c:247
+#: src/cli/tracker-tag.c:242
 #, fuzzy
 #| msgid "Could not add feed"
 msgid "Could not add tag to files"
 msgstr "Kunne ikke legge til strøm"
 
-#: src/cli/tracker-tag.c:252
+#: src/cli/tracker-tag.c:246
 msgid "Tagged"
 msgstr ""
 
-#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
+#: src/cli/tracker-tag.c:270 src/cli/tracker-tag.c:296
 #, fuzzy
-#| msgid "Could not add feed"
 msgid "Could not remove tag"
 msgstr "Kunne ikke legge til strøm"
 
-#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
+#: src/cli/tracker-tag.c:274 src/cli/tracker-tag.c:300
 msgid "Tag was removed successfully"
 msgstr ""
 
-#: src/cli/tracker-tag.c:357
+#: src/cli/tracker-tag.c:345
 #, fuzzy
 #| msgid "Could not establish a connection to Tracker"
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Kunne ikke etablere en tilkobling til Tracker"
 
-#: src/cli/tracker-tag.c:421
+#: src/cli/tracker-tag.c:405
 msgid "The --list option is required for --show-files"
 msgstr ""
 
-#: src/cli/tracker-tag.c:423
+#: src/cli/tracker-tag.c:407
 msgid "Add and delete actions can not be used together"
 msgstr ""
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:409
 msgid "The --description option can only be used with --add"
 msgstr ""
 
@@ -751,15 +733,15 @@ msgid_plural " %2.2d seconds"
 msgstr[0] "%2.2d sekund"
 msgstr[1] "%2.2d sekunder"
 
-#: src/control/tracker-main.c:61 src/extractor/tracker-main.c:94
-#: src/indexer/tracker-application.c:69 src/writeback/tracker-main.c:50
+#: src/control/tracker-main.c:56 src/extractor/tracker-main.c:94
+#: src/indexer/tracker-application.c:73 src/writeback/tracker-main.c:50
 msgid "Displays version information"
 msgstr "Vis versjonsinformasjon"
 
 #. Translators: this messagge will apper immediately after the
 #. * usage string - Usage: COMMAND <THIS_MESSAGE>
 #.
-#: src/control/tracker-main.c:136 src/indexer/tracker-endpoint-helper.c:77
+#: src/control/tracker-main.c:116 src/indexer/tracker-endpoint-helper.c:77
 #, fuzzy
 #| msgid "— start the tracker indexer"
 msgid "— start the tracker index proxy"
@@ -791,22 +773,22 @@ msgstr ""
 msgid "Filesystem root of the extracted data"
 msgstr "Fil som det skal hentes metadata for"
 
-#: src/extractor/tracker-main.c:262
+#: src/extractor/tracker-main.c:235
 msgid "No metadata or extractor modules found to handle this file"
 msgstr ""
 "Ingen metadata eller uthentingsmoduler funnet for håndtering av denne filen"
 
-#: src/extractor/tracker-main.c:270
+#: src/extractor/tracker-main.c:243
 msgid "Metadata extraction failed"
 msgstr "Uthenting av metadata feilet"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:333
+#: src/extractor/tracker-main.c:306
 msgid "— Extract file meta data"
 msgstr "– Hent ut metadata for fil"
 
-#: src/extractor/tracker-main.c:347
+#: src/extractor/tracker-main.c:320
 msgid "Filename and mime type must be provided together"
 msgstr "Filnavn og MIME-type må oppgis sammen"
 
@@ -815,38 +797,44 @@ msgid "Runs until all configured locations are indexed and then exits"
 msgstr ""
 
 #: src/indexer/tracker-application.c:61
+#, fuzzy
+#| msgid "Metadata extraction failed"
+msgid "Skips metadata extraction from file content"
+msgstr "Uthenting av metadata feilet"
+
+#: src/indexer/tracker-application.c:65
 msgid "Checks if FILE is eligible for being mined based on configuration"
 msgstr ""
 
-#: src/indexer/tracker-application.c:65
+#: src/indexer/tracker-application.c:69
 #, fuzzy
 #| msgid "Crawls and processes files on the file system"
 msgid "Avoids changes in the filesystem"
 msgstr "Graver etter og prosesserer filer i filsystemet"
 
-#: src/indexer/tracker-application.c:1268
+#: src/indexer/tracker-application.c:1283
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Dataobjekt «%s» eksisterer allerede"
 
-#: src/indexer/tracker-application.c:1269
+#: src/indexer/tracker-application.c:1284
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Dataobjekt «%s» eksisterer ikke"
 
-#: src/indexer/tracker-application.c:1295
+#: src/indexer/tracker-application.c:1310
 #, fuzzy, c-format
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1301
+#: src/indexer/tracker-application.c:1315
 #, fuzzy, c-format
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1307
+#: src/indexer/tracker-application.c:1321
 #, fuzzy, c-format
 #| msgid "Directory is NOT eligible to be mined (based on contents)"
 msgid ""
@@ -854,37 +842,37 @@ msgid ""
 "filters)"
 msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på innhold)"
 
-#: src/indexer/tracker-application.c:1322
+#: src/indexer/tracker-application.c:1336
 #, fuzzy
 #| msgid "Directory is NOT eligible to be mined (based on rules)"
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Katalogen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1326
+#: src/indexer/tracker-application.c:1340
 #, fuzzy
 #| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1329
+#: src/indexer/tracker-application.c:1342
 #, fuzzy
 #| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1331
+#: src/indexer/tracker-application.c:1344
 #, fuzzy
 #| msgid "File is NOT eligible to be mined (based on rules)"
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Filen er IKKE kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1339
+#: src/indexer/tracker-application.c:1352
 #, fuzzy
 #| msgid "Directory is eligible to be mined (based on rules)"
 msgid "Directory is eligible to be indexed"
 msgstr "Katalogen er kvalifisert for utgraving (basert på regler)"
 
-#: src/indexer/tracker-application.c:1340
+#: src/indexer/tracker-application.c:1353
 #, fuzzy
 #| msgid "File is eligible to be mined (based on rules)"
 msgid "File is eligible to be indexed"
