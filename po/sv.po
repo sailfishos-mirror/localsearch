@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: localsearch\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/localsearch/issues/\n"
-"POT-Creation-Date: 2026-07-20 10:44+0000\n"
-"PO-Revision-Date: 2026-07-23 00:53+0200\n"
+"POT-Creation-Date: 2026-08-06 08:15+0000\n"
+"PO-Revision-Date: 2026-08-28 00:42+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -203,7 +203,7 @@ msgstr "Visa utdata för metadataextraherare"
 msgid "List and change indexed folders"
 msgstr "Lista och ändra indexerade mappar"
 
-#: src/cli/main.c:71 src/cli/tracker-info.c:533
+#: src/cli/main.c:71 src/cli/tracker-info.c:521
 msgid "Retrieve information available for files and resources"
 msgstr "Erhåll information som finns tillgänglig för filer och resurser"
 
@@ -215,15 +215,15 @@ msgstr "Hindra tillfälligt indexering"
 msgid "Erase the indexed data"
 msgstr "Ta bort indexerade data"
 
-#: src/cli/main.c:74 src/cli/tracker-search.c:415
+#: src/cli/main.c:74 src/cli/tracker-search.c:403
 msgid "Search for content"
 msgstr "Sök innehåll"
 
-#: src/cli/main.c:75 src/cli/tracker-status.c:722
+#: src/cli/main.c:75 src/cli/tracker-status.c:649
 msgid "Provide status and statistics on the data indexed"
 msgstr "Tillhandahåll status och statistik om indexerade data"
 
-#: src/cli/main.c:76 src/cli/tracker-tag.c:411
+#: src/cli/main.c:76 src/cli/tracker-tag.c:395
 msgid "Add, remove and list tags"
 msgstr "Lägg till, ta bort och lista taggar"
 
@@ -245,7 +245,7 @@ msgstr ""
 msgid "“%s” is not a localsearch command. See “localsearch --help”"
 msgstr "”%s” är inte ett localsearch-kommando. Se ”localsearch --help”"
 
-#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:376
+#: src/cli/tracker-cli-utils.c:194 src/cli/tracker-status.c:312
 msgid "Message"
 msgstr "Meddelande"
 
@@ -276,9 +276,9 @@ msgid "Extract metadata from a file"
 msgstr "Extrahera metadata från en fil"
 
 #: src/cli/tracker-extract.c:138 src/cli/tracker-index.c:387
-#: src/cli/tracker-info.c:540 src/cli/tracker-inhibit.c:113
-#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:428
-#: src/cli/tracker-status.c:727 src/cli/tracker-tag.c:416
+#: src/cli/tracker-info.c:528 src/cli/tracker-inhibit.c:113
+#: src/cli/tracker-reset.c:207 src/cli/tracker-search.c:416
+#: src/cli/tracker-status.c:654 src/cli/tracker-tag.c:400
 msgid "Unrecognized options"
 msgstr "Okända flaggor"
 
@@ -314,7 +314,7 @@ msgstr "--add och --remove är ömsesidigt uteslutande"
 msgid "--recursive requires --add"
 msgstr "--recursive kräver --add"
 
-#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:375
+#: src/cli/tracker-index.c:353 src/cli/tracker-status.c:311
 msgid "Path"
 msgstr "Sökväg"
 
@@ -340,29 +340,29 @@ msgstr "Visa textinnehåll om tillgängligt för resurser"
 msgid "Checks if FILE is eligible for being indexed"
 msgstr "Kontrollerar om FIL är lämplig för att indexeras"
 
-#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:189
+#: src/cli/tracker-info.c:81 src/cli/tracker-search.c:190
 #: src/cli/tracker-status.c:80
 msgid "Removable device mount point to query"
 msgstr "Flyttbar enhetsmonteringspunkt att fråga"
 
-#: src/cli/tracker-info.c:357 src/cli/tracker-search.c:370
-#: src/cli/tracker-status.c:158 src/cli/tracker-status.c:276
+#: src/cli/tracker-info.c:345 src/cli/tracker-search.c:358
+#: src/cli/tracker-status.c:662
 msgid "Could not connect to LocalSearch"
 msgstr "Kunde inte ansluta till LocalSearch"
 
-#: src/cli/tracker-info.c:405
+#: src/cli/tracker-info.c:393
 msgid "Unable to retrieve data for URI"
 msgstr "Kunde inte hämta data för URI"
 
-#: src/cli/tracker-info.c:412
+#: src/cli/tracker-info.c:400
 msgid "No metadata available for that URI"
 msgstr "Inga metadata tillgängliga för denna URI"
 
-#: src/cli/tracker-info.c:422 src/cli/tracker-info.c:499
+#: src/cli/tracker-info.c:410 src/cli/tracker-info.c:487
 msgid "Could not get eligible status: "
 msgstr "Kunde inte få tag på lämplighetsstatus: "
 
-#: src/cli/tracker-info.c:451 src/extractor/tracker-main.c:189
+#: src/cli/tracker-info.c:439 src/extractor/tracker-main.c:165
 #, c-format
 msgid "Unsupported serialization format “%s”\n"
 msgstr "Serialiseringsformatet ”%s” stöds inte\n"
@@ -436,91 +436,91 @@ msgstr "Indexerade LocalSearch-data kommer tas bort, fortsätt? [j/N]"
 msgid "yes"
 msgstr "ja"
 
-#: src/cli/tracker-search.c:115
+#: src/cli/tracker-search.c:116
 msgid "Results"
 msgstr "Resultat"
 
-#: src/cli/tracker-search.c:116 src/cli/tracker-search.c:117
-#: src/cli/tracker-search.c:119 src/cli/tracker-search.c:122
-#: src/cli/tracker-search.c:123 src/cli/tracker-search.c:124
+#: src/cli/tracker-search.c:117 src/cli/tracker-search.c:118
+#: src/cli/tracker-search.c:120 src/cli/tracker-search.c:123
+#: src/cli/tracker-search.c:124 src/cli/tracker-search.c:125
 msgid "Files"
 msgstr "Filer"
 
-#: src/cli/tracker-search.c:118
+#: src/cli/tracker-search.c:119
 msgid "Folders"
 msgstr "Mappar"
 
-#: src/cli/tracker-search.c:120
+#: src/cli/tracker-search.c:121
 msgid "Albums"
 msgstr "Album"
 
-#: src/cli/tracker-search.c:121
+#: src/cli/tracker-search.c:122
 msgid "Artists"
 msgstr "Artister"
 
-#: src/cli/tracker-search.c:132
+#: src/cli/tracker-search.c:133
 msgid "Search for files"
 msgstr "Sök efter filer"
 
-#: src/cli/tracker-search.c:136
+#: src/cli/tracker-search.c:137
 msgid "Search for folders"
 msgstr "Sök efter mappar"
 
-#: src/cli/tracker-search.c:140
+#: src/cli/tracker-search.c:141
 msgid "Search for audio files"
 msgstr "Sök efter ljudfiler"
 
-#: src/cli/tracker-search.c:144
+#: src/cli/tracker-search.c:145
 msgid "Search for music albums"
 msgstr "Sök efter musikalbum"
 
-#: src/cli/tracker-search.c:148
+#: src/cli/tracker-search.c:149
 msgid "Search for music artists"
 msgstr "Sök efter musikartister"
 
-#: src/cli/tracker-search.c:152
+#: src/cli/tracker-search.c:153
 msgid "Search for image files"
 msgstr "Sök efter bildfiler"
 
-#: src/cli/tracker-search.c:156
+#: src/cli/tracker-search.c:157
 msgid "Search for video files"
 msgstr "Sök efter videofiler"
 
-#: src/cli/tracker-search.c:160
+#: src/cli/tracker-search.c:161
 msgid "Search for document files"
 msgstr "Sök efter dokumentfiler"
 
-#: src/cli/tracker-search.c:164
+#: src/cli/tracker-search.c:165
 msgid "Search for software files"
 msgstr "Sök efter programfiler"
 
-#: src/cli/tracker-search.c:173 src/cli/tracker-tag.c:87
+#: src/cli/tracker-search.c:174 src/cli/tracker-tag.c:87
 msgid "Limit the number of results shown"
 msgstr "Begränsa antalet visade resultat"
 
-#: src/cli/tracker-search.c:177 src/cli/tracker-tag.c:91
+#: src/cli/tracker-search.c:178 src/cli/tracker-tag.c:91
 msgid "Offset the results"
 msgstr "Positionera resultat"
 
-#: src/cli/tracker-search.c:181
+#: src/cli/tracker-search.c:182
 msgid "Show URNs for results"
 msgstr "Visa URN:er för resultat"
 
-#: src/cli/tracker-search.c:185
+#: src/cli/tracker-search.c:186
 msgid "Return all non-existing matches too (i.e. include unmounted volumes)"
 msgstr ""
 "Returnera även alla icke-existerande matchningar (inkludera alltså "
 "avmonterade volymer)"
 
-#: src/cli/tracker-search.c:193
+#: src/cli/tracker-search.c:194
 msgid "Show help options"
 msgstr "Visa hjälpflaggor"
 
-#: src/cli/tracker-search.c:200 src/cli/tracker-status.c:85
+#: src/cli/tracker-search.c:201 src/cli/tracker-status.c:85
 msgid "search terms"
 msgstr "sökvillkor"
 
-#: src/cli/tracker-search.c:201
+#: src/cli/tracker-search.c:202
 msgid "TERMS"
 msgstr "TERMER"
 
@@ -544,66 +544,62 @@ msgstr ""
 msgid "EXPRESSION"
 msgstr "UTTRYCK"
 
-#: src/cli/tracker-status.c:172 src/cli/tracker-status.c:295
-#: src/cli/tracker-status.c:317
+#: src/cli/tracker-status.c:138 src/cli/tracker-status.c:231
+#: src/cli/tracker-status.c:253
 msgid "Could not get LocalSearch statistics"
 msgstr "Kunde inte få tag på LocalSearch-statistik"
 
-#: src/cli/tracker-status.c:429
+#: src/cli/tracker-status.c:365
 #, c-format
 msgid "Currently indexed"
 msgstr "Indexerade just nu"
 
-#: src/cli/tracker-status.c:432 src/cli/tracker-tag.c:179
+#: src/cli/tracker-status.c:368 src/cli/tracker-tag.c:177
 #, c-format
 msgid "%d file"
 msgid_plural "%d files"
 msgstr[0] "%d fil"
 msgstr[1] "%d filer"
 
-#: src/cli/tracker-status.c:438
+#: src/cli/tracker-status.c:374
 #, c-format
 msgid "%d folder"
 msgid_plural "%d folders"
 msgstr[0] "%d mapp"
 msgstr[1] "%d mappar"
 
-#: src/cli/tracker-status.c:452
+#: src/cli/tracker-status.c:388
 msgid "Remaining space on database partition"
 msgstr "Återstående utrymme på databaspartitionen"
 
-#: src/cli/tracker-status.c:462 src/cli/tracker-status.c:614
+#: src/cli/tracker-status.c:398 src/cli/tracker-status.c:550
 msgid "Indexer is paused"
 msgstr "Indexeraren är pausad"
 
-#: src/cli/tracker-status.c:463
+#: src/cli/tracker-status.c:399
 msgid "Data is still being indexed"
 msgstr "Data indexeras fortfarande"
 
-#: src/cli/tracker-status.c:465
+#: src/cli/tracker-status.c:401
 msgid "Indexer is idle"
 msgstr "Indexeraren är inaktiv"
 
-#: src/cli/tracker-status.c:472
+#: src/cli/tracker-status.c:408
 #, c-format
 msgid "%d recorded failure"
 msgid_plural "%d recorded failures"
 msgstr[0] "%d dokumenterat fel"
 msgstr[1] "%d dokumenterade fel"
 
-#: src/cli/tracker-status.c:502
+#: src/cli/tracker-status.c:438
 msgid "No reports found"
 msgstr "Inga rapporter hittades"
 
-#: src/cli/tracker-status.c:679
-msgid "Could not get SPARQL connection"
-msgstr "Kunde inte hämta SPARQL-anslutning"
-
-#: src/cli/tracker-status.c:688
+#: src/cli/tracker-status.c:614
 msgid "Now listening to database updates"
 msgstr "Lyssnar nu efter uppdateringar till databasen"
 
-#: src/cli/tracker-status.c:689
+#: src/cli/tracker-status.c:615
 msgid "Press Ctrl+C to stop"
 msgstr "Tryck Ctrl+C för att stoppa"
 
@@ -645,51 +641,51 @@ msgstr "FIL…"
 msgid "Could not get files related to tag"
 msgstr "Kunde inte få tag på filer relaterade till taggen"
 
-#: src/cli/tracker-tag.c:150 src/cli/tracker-tag.c:334
+#: src/cli/tracker-tag.c:149 src/cli/tracker-tag.c:323
 msgid "Could not get all tags"
 msgstr "Kunde inte få tag på alla taggar"
 
-#: src/cli/tracker-tag.c:155
+#: src/cli/tracker-tag.c:153
 msgid "Tags (shown by name)"
 msgstr "Taggar (visade efter namn)"
 
-#: src/cli/tracker-tag.c:216
+#: src/cli/tracker-tag.c:213
 msgid "Could not add tag"
 msgstr "Kunde inte lägga till taggen"
 
-#: src/cli/tracker-tag.c:221
+#: src/cli/tracker-tag.c:217
 msgid "Tag was added successfully"
 msgstr "Taggen lades till"
 
-#: src/cli/tracker-tag.c:247
+#: src/cli/tracker-tag.c:242
 msgid "Could not add tag to files"
 msgstr "Kunde inte lägga till tagg till filer"
 
-#: src/cli/tracker-tag.c:252
+#: src/cli/tracker-tag.c:246
 msgid "Tagged"
 msgstr "Taggad"
 
-#: src/cli/tracker-tag.c:277 src/cli/tracker-tag.c:305
+#: src/cli/tracker-tag.c:270 src/cli/tracker-tag.c:296
 msgid "Could not remove tag"
 msgstr "Kunde inte ta bort taggen"
 
-#: src/cli/tracker-tag.c:282 src/cli/tracker-tag.c:310
+#: src/cli/tracker-tag.c:274 src/cli/tracker-tag.c:300
 msgid "Tag was removed successfully"
 msgstr "Taggen togs bort"
 
-#: src/cli/tracker-tag.c:357
+#: src/cli/tracker-tag.c:345
 msgid "Could not establish a connection to LocalSearch"
 msgstr "Kunde inte etablera en anslutning till LocalSearch"
 
-#: src/cli/tracker-tag.c:421
+#: src/cli/tracker-tag.c:405
 msgid "The --list option is required for --show-files"
 msgstr "Flaggan --list krävs för --show-files"
 
-#: src/cli/tracker-tag.c:423
+#: src/cli/tracker-tag.c:407
 msgid "Add and delete actions can not be used together"
 msgstr "Åtgärder för att lägga till och ta bort kan inte användas samtidigt"
 
-#: src/cli/tracker-tag.c:425
+#: src/cli/tracker-tag.c:409
 msgid "The --description option can only be used with --add"
 msgstr "Flaggan --description kan endast användas med --add"
 
@@ -785,21 +781,21 @@ msgstr "FD"
 msgid "Filesystem root of the extracted data"
 msgstr "Filsystemsrot för extraherade data"
 
-#: src/extractor/tracker-main.c:262
+#: src/extractor/tracker-main.c:235
 msgid "No metadata or extractor modules found to handle this file"
 msgstr "Fann inga metadata- eller extraherarmoduler som kan hantera denna fil"
 
-#: src/extractor/tracker-main.c:270
+#: src/extractor/tracker-main.c:243
 msgid "Metadata extraction failed"
 msgstr "Misslyckades med extrahering av metadata"
 
 #. Translators: this message will appear immediately after the
 #. usage string - Usage: COMMAND [OPTION]... <THIS_MESSAGE>
-#: src/extractor/tracker-main.c:333
+#: src/extractor/tracker-main.c:306
 msgid "— Extract file meta data"
 msgstr "— Extrahera filmetadata"
 
-#: src/extractor/tracker-main.c:347
+#: src/extractor/tracker-main.c:320
 msgid "Filename and mime type must be provided together"
 msgstr "Filnamn och mime-typ måste anges tillsammans"
 
@@ -820,30 +816,30 @@ msgstr ""
 msgid "Avoids changes in the filesystem"
 msgstr "Undviker ändringar på filsystemet"
 
-#: src/indexer/tracker-application.c:1279
+#: src/indexer/tracker-application.c:1283
 #, c-format
 msgid "Data object “%s” currently exists"
 msgstr "Dataobjektet ”%s” finns för tillfället"
 
-#: src/indexer/tracker-application.c:1280
+#: src/indexer/tracker-application.c:1284
 #, c-format
 msgid "Data object “%s” currently does not exist"
 msgstr "Dataobjektet ”%s” finns inte för tillfället"
 
-#: src/indexer/tracker-application.c:1306
+#: src/indexer/tracker-application.c:1310
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (based on filters)"
 msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (baserat på "
 "filter)"
 
-#: src/indexer/tracker-application.c:1311
+#: src/indexer/tracker-application.c:1315
 #, c-format
 msgid "Parent directory “%s” is NOT eligible to be indexed (hidden file)"
 msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (dold fil)"
 
-#: src/indexer/tracker-application.c:1317
+#: src/indexer/tracker-application.c:1321
 #, c-format
 msgid ""
 "Parent directory “%s” is NOT eligible to be indexed (based on content "
@@ -852,27 +848,27 @@ msgstr ""
 "Överordnade katalogen ”%s” kvalificerar INTE till att indexeras (baserat på "
 "innehållsfilter)"
 
-#: src/indexer/tracker-application.c:1332
+#: src/indexer/tracker-application.c:1336
 msgid "Directory is NOT eligible to be indexed (based on filters)"
 msgstr "Katalogen kvalificerar INTE till att indexeras (baserat på filter)"
 
-#: src/indexer/tracker-application.c:1336
+#: src/indexer/tracker-application.c:1340
 msgid "File is NOT eligible to be indexed (based on filters)"
 msgstr "Filen kvalificerar INTE till att indexeras (baserat på filter)"
 
-#: src/indexer/tracker-application.c:1338
+#: src/indexer/tracker-application.c:1342
 msgid "File is NOT eligible to be indexed (hidden file)"
 msgstr "Filen kvalificerar INTE till att indexeras (dold fil)"
 
-#: src/indexer/tracker-application.c:1340
+#: src/indexer/tracker-application.c:1344
 msgid "File is NOT eligible to be indexed (not an indexed folder)"
 msgstr "Filen kvalificerar INTE till att indexeras (inte en indexerad mapp)"
 
-#: src/indexer/tracker-application.c:1348
+#: src/indexer/tracker-application.c:1352
 msgid "Directory is eligible to be indexed"
 msgstr "Katalogen kvalificerar till att indexeras"
 
-#: src/indexer/tracker-application.c:1349
+#: src/indexer/tracker-application.c:1353
 msgid "File is eligible to be indexed"
 msgstr "Filen kvalificerar till att indexeras"
 
@@ -901,6 +897,9 @@ msgstr "Inaktivera avstängning efter 30 sekunders inaktivitet"
 #: src/writeback/tracker-main.c:93
 msgid "— start the tracker writeback service"
 msgstr "— starta trackers skrivtjänst"
+
+#~ msgid "Could not get SPARQL connection"
+#~ msgstr "Kunde inte hämta SPARQL-anslutning"
 
 #~ msgid "Error message"
 #~ msgstr "Felmeddelande"
