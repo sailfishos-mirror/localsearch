@@ -21,6 +21,7 @@ from gi.repository import GLib
 
 import logging
 import os
+import select
 import shutil
 import signal
 import subprocess
@@ -142,10 +143,14 @@ class DBusDaemon:
         stderr_log = logging.getLogger(self.name + '.stderr')
         stdout_log = logging.getLogger(self.name + '.stdout')
 
+        self.stdout_fd = os.dup(self.process.stdout.fileno())
+        self.stderr_fd = os.dup(self.process.stderr.fileno())
+        self.dbus_stopped = False
+
         # We must read from the pipes continuously, otherwise the daemon
         # process will block.
-        self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.process.stdout, stdout_log), daemon=True),
-                        threading.Thread(target=self.pipe_to_log, args=(self.process.stderr, stderr_log), daemon=True)]
+        self._threads=[threading.Thread(target=self.pipe_to_log, args=(self.stdout_fd, stdout_log), daemon=True),
+                       threading.Thread(target=self.pipe_to_log, args=(self.stderr_fd, stderr_log), daemon=True)]
         self._threads[0].start()
         self._threads[1].start()
 
@@ -164,43 +169,56 @@ class DBusDaemon:
         if self.process:
             log.debug("  Stopping DBus daemon")
             self.process.terminate()
+            self.process.wait()
+
             self.process.stdout.close()
             self.process.stderr.close()
-            self.process.wait()
             self.process = None
+
         if len(self._threads) > 0:
             log.debug("  Stopping %i pipe reader threads", len(self._threads))
+            self.dbus_stopped = True
             for thread in self._threads:
                 thread.join()
             self.threads = []
         log.debug("DBus daemon stopped")
 
-    def pipe_to_log(self, pipe, dbuslog):
+    def pipe_to_log(self, fd, dbuslog):
         """This function processes the output from our dbus-daemon instance."""
-        while True:
-            line_raw = pipe.readline()
+        buf = b""
+        while not self.dbus_stopped:
+            rfds, _, _ = select.select([fd], [], [], 0.5)
+            if not rfds:
+                continue
 
-            if len(line_raw) == 0:
-                break
+            try:
+                chunk = os.read(fd, 4096)
+            except:
+                break;
 
-            line = line_raw.decode('utf-8').rstrip()
-
-            if line.startswith('(tracker-'):
-                # We set G_MESSAGES_PREFIXED=all, meaning that all log messages
-                # output by Tracker processes have a prefix. Note that
-                # g_print() will NOT be captured here.
-                dbuslog.info(line)
+            if chunk:
+                buf += chunk
             else:
-                # Log messages from other daemons, including the dbus-daemon
-                # itself, go here. Any g_print() messages also end up here.
-                dbuslog.debug(line)
-        log.debug("Thread stopped")
+                buf += b'\n'
 
-        # I'm not sure why this is needed, or if it's correct, but without it
-        # we see warnings like this:
-        #
-        #    ResourceWarning: unclosed file <_io.BufferedReader name=3>
-        pipe.close()
+            while b"\n" in buf:
+                line_raw, buf = buf.split(b"\n", 1)
+                line = line_raw.decode('utf-8').rstrip()
+
+                if line.startswith('(tracker-'):
+                    # We set G_MESSAGES_PREFIXED=all, meaning that all log messages
+                    # output by Tracker processes have a prefix. Note that
+                    # g_print() will NOT be captured here.
+                    dbuslog.info(line)
+                else:
+                    # Log messages from other daemons, including the dbus-daemon
+                    # itself, go here. Any g_print() messages also end up here.
+                    dbuslog.debug(line)
+
+            if not chunk:
+                break # child closed stdout
+
+        os.close(fd)
 
     def _sigterm_handler(self, signal, frame):
         log.info("Received signal %s", signal)
