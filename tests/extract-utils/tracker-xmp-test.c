@@ -286,9 +286,9 @@ test_xmp_orientation (void)
 static void
 test_xmp_apply (void)
 {
-	TrackerResource *resource;
-	TrackerResource *artist;
-	TrackerXmpData *data;
+	g_autoptr (TrackerResource) resource = NULL;
+	TrackerResource *artist = NULL;
+	TrackerXmpData *data = NULL;
 
 	resource = tracker_resource_new ("urn:uuid:test");
 
@@ -312,7 +312,8 @@ static void
 test_xmp_apply_location (void)
 {
 	TrackerXmpData data = { 0, };
-	TrackerResource *resource, *location, *address;
+	g_autoptr (TrackerResource) resource = NULL;
+	TrackerResource *location, *address;
 
 	data.address = g_strdup ("Itamerenkatu 11-13");
 	data.city = g_strdup ("Helsinki");

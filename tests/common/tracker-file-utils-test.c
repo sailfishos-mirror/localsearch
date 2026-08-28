@@ -99,8 +99,8 @@ test_path_list_filter_duplicates (void)
 	g_assert_true (string_in_list (result, "/tmp"));
 	g_assert_true (string_in_list (result, "/usr"));
 
-	g_slist_foreach (input_as_list, (GFunc) g_free, NULL);
-	g_slist_foreach (result, (GFunc) g_free, NULL);
+	g_clear_slist (&input_as_list, g_free);
+	g_clear_slist (&result, g_free);
 }
 
 static void
@@ -119,15 +119,15 @@ test_path_list_filter_duplicates_with_exceptions ()
 	g_assert_true (string_in_list (result, "/home/user/MyDocs"));
 	g_assert_true (string_in_list (result, "/home/user/MyDocs/.sounds"));
 	g_assert_true (string_in_list (result, "/home/user/MyDocs/visible"));
-	g_slist_foreach (result, (GFunc) g_free, NULL);
+	g_clear_slist (&result, g_free);
 
 
         result = tracker_path_list_filter_duplicates (input_as_list, "/home/user/MyDocs", TRUE);
         g_assert_cmpint (g_slist_length (result), ==, 1);
 	g_assert_true (string_in_list (result, "/home/user/MyDocs"));
-	g_slist_foreach (result, (GFunc) g_free, NULL);
+	g_clear_slist (&result, g_free);
 
-	g_slist_foreach (input_as_list, (GFunc) g_free, NULL);
+	g_clear_slist (&input_as_list, g_free);
 }
 
 static void
@@ -387,7 +387,7 @@ test_file_utils_is_hidden ()
 static void
 test_file_utils_cmp ()
 {
-        GFile *one, *two, *three;
+        g_autoptr (GFile) one = NULL, two = NULL, three = NULL;
 
         one = g_file_new_for_path (TEST_FILENAME);
         two = g_file_new_for_path (TEST_FILENAME);

@@ -4,7 +4,7 @@ G_MODULE_EXPORT gboolean
 tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
-	TrackerResource *resource;
+	g_autoptr (TrackerResource) resource = NULL;
 
 	sleep (60);
 
