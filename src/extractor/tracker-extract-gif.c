@@ -110,7 +110,7 @@ read_metadata (GifFileType        *gifFile,
 #ifdef HAVE_EXEMPI
 	TrackerXmpData *xd = NULL;
 #endif
-	gchar *sidecar = NULL;
+	g_autofree char *sidecar = NULL;
 	int width = 0, height = 0;
 	g_autofree char *resource_uri = NULL, *comment = NULL;
 

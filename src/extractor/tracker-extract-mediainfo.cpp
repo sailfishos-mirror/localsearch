@@ -674,7 +674,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 {
 	g_autofree char *path = NULL, *uri = NULL, *res_utf8 = NULL;
 	g_autoptr (TrackerResource) metadata = NULL, file_resource = NULL;
-	const char *resource_uri;
+	g_autofree char *resource_uri = NULL;
 	std::wstring path_str;
 	GFile *file;
 	gboolean has_video, has_audio, success = FALSE;

@@ -44,7 +44,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info_,
 	/* File information */
 	GFile *file;
 	GError *inner_error = NULL;
-	gchar *filename, *resource_uri;
+	g_autofree char *filename = NULL, *resource_uri = NULL;
 	OsinfoLoader *loader = NULL;
 	OsinfoMedia *media;
 	OsinfoDb *db;
@@ -63,22 +63,20 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info_,
 
 	resource_uri = tracker_extract_info_get_content_id (info_, NULL);
 	metadata = tracker_resource_new (resource_uri);
-	g_free (resource_uri);
 
 	media = osinfo_media_create_from_location (filename, NULL, &inner_error);
 	if (inner_error != NULL) {
 		if (inner_error->code != OSINFO_MEDIA_ERROR_NOT_BOOTABLE) {
 			g_object_unref (metadata);
-			g_free (filename);
 			g_propagate_prefixed_error (error, inner_error, "Could not extract ISO info:");
 			return FALSE;
 		}
+		g_clear_error (&inner_error);
 		bootable = FALSE;
 		goto no_os;
 	} else {
 		bootable = TRUE;
 	}
-	g_free (filename);
 
 	loader = osinfo_loader_new ();
 	osinfo_loader_process_default_path (loader, &inner_error);

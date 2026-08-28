@@ -1438,7 +1438,7 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 		const gchar *text_performer;
 		gint text_instrument_len;
 		gint text_performer_len;
-		gchar *performer = NULL;
+		g_autofree char *performer = NULL;
 
 		text_instrument = &data[pos + offset];
 		text_instrument_len = id3v2_strlen (text_encode, text_instrument, csize - offset);
@@ -1465,6 +1465,7 @@ extract_performers_tags (id3v2tag *tag, const gchar *data, guint pos, size_t csi
 	if (performers) {
 		GSList *list;
 
+		g_clear_pointer (&tag->performers, g_strfreev);
 		tag->performers = g_new (gchar *, n_performers + 1);
 		tag->performers[n_performers] = NULL;
 		for (list = performers; list != NULL; list = list->next) {

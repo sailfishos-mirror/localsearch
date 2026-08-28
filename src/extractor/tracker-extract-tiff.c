@@ -352,7 +352,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (TIFFGetField (image, TIFFTAG_XMLPACKET, &size, &xmp_offset)) {
 		xd = tracker_xmp_new (xmp_offset, size, uri);
 	} else {
-		gchar *sidecar = NULL;
+		g_autofree char *sidecar = NULL;
 
 		xd = tracker_xmp_new_from_sidecar (file, &sidecar);
 
