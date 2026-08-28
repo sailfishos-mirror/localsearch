@@ -593,7 +593,7 @@ update_indexed_files_from_proxy (TrackerController *controller,
 {
 	TrackerIndexingTree *indexing_tree;
 	const gchar **indexed_uris = NULL;
-	GVariant *v;
+	g_autoptr (GVariant) v = NULL;
 	gint i;
 
 	v = g_dbus_proxy_get_cached_property (proxy, "IndexedLocations");
@@ -681,15 +681,16 @@ on_control_proxy_ready (GObject      *source,
                         gpointer      user_data)
 {
 	TrackerController *controller = user_data;
-	GError *error = NULL;
+	g_autoptr (GDBusProxy) proxy = NULL;
+	g_autoptr (GError) error = NULL;
 
-	controller->control_proxy = g_dbus_proxy_new_finish (res, &error);
+	proxy = g_dbus_proxy_new_finish (res, &error);
 	if (error) {
 		g_critical ("Could not set up proxy: %s", error->message);
-		g_error_free (error);
 		return;
 	}
 
+	controller->control_proxy = g_steal_pointer (&proxy);
 	g_signal_connect (controller->control_proxy, "g-properties-changed",
 	                  G_CALLBACK (proxy_properties_changed_cb), controller);
 	update_indexed_files_from_proxy (controller, controller->control_proxy);
@@ -736,6 +737,8 @@ tracker_controller_constructed (GObject *object)
 	TrackerController *controller = TRACKER_CONTROLLER (object);
 
 	G_OBJECT_CLASS (tracker_controller_parent_class)->constructed (object);
+
+	controller->control_proxy_cancellable = g_cancellable_new ();
 
 	controller->storage = tracker_storage_new ();
 	g_signal_connect_object (controller->storage,
@@ -784,7 +787,7 @@ tracker_controller_constructed (GObject *object)
 	                          "org.freedesktop.LocalSearch3.Control",
 	                          "/org/freedesktop/Tracker3/Miner/Files/Proxy",
 	                          "org.freedesktop.Tracker3.Miner.Files.Proxy",
-	                          NULL,
+				  controller->control_proxy_cancellable,
 	                          on_control_proxy_ready,
 	                          controller);
 

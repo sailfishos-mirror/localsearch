@@ -372,10 +372,14 @@ monitor_event_new (TrackerMonitorGlib *monitor,
 static void
 monitor_event_free (MonitorEvent *event)
 {
+	if (event->source) {
+		g_source_destroy (event->source);
+		g_source_unref (event->source);
+	}
+
 	g_object_unref (event->monitor);
 	g_object_unref (event->file);
 	g_clear_object (&event->other_file);
-	g_clear_pointer (&event->source, g_source_destroy);
 	g_free (event);
 }
 
