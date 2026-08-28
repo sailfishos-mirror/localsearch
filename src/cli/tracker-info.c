@@ -117,15 +117,17 @@ accumulate_value (GHashTable  *values,
                   const gchar *pred,
                   const gchar *object)
 {
+	gboolean is_first;
 	GList *list;
 
 	list = g_hash_table_lookup (values, pred);
+	is_first = list == NULL;
 
-	if (!g_list_find_custom (list, object, (GCompareFunc) g_strcmp0)) {
-		g_hash_table_steal (values, pred);
-		list = g_list_prepend (list, g_strdup (object));
+	if (!g_list_find_custom (list, object, (GCompareFunc) g_strcmp0))
+		list = g_list_append (list, g_strdup (object));
+
+	if (is_first)
 		g_hash_table_insert (values, g_strdup (pred), list);
-	}
 }
 
 static void

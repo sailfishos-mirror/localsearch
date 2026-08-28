@@ -140,7 +140,7 @@ delete_location (GFile *dir)
 {
 	g_autoptr (GFileEnumerator) enumerator = NULL;
 	g_autoptr (GError) error = NULL;
-	g_autoptr (GFileInfo) info = NULL;
+	GFileInfo *info = NULL;
 
 	enumerator = g_file_enumerate_children (dir,
 	                                        G_FILE_ATTRIBUTE_STANDARD_NAME,
@@ -159,6 +159,7 @@ delete_location (GFile *dir)
 		g_autoptr (GFile) child = NULL;
 
 		child = g_file_enumerator_get_child (enumerator, info);
+		g_clear_object (&info);
 
 		if (!g_file_delete (child, NULL, &error)) {
 			g_critical ("Failed to delete '%s': %s",

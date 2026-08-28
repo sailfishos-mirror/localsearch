@@ -157,6 +157,8 @@ strv_add (GStrv        strv,
 		g_array_append_val (array, copy);
 	}
 
+	g_free (strv);
+
 	return (GStrv) g_array_free (g_steal_pointer (&array), FALSE);
 }
 
