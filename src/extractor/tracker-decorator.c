@@ -193,7 +193,7 @@ tracker_decorator_info_complete (TrackerDecoratorInfo *info,
 
 static void
 tracker_decorator_info_complete_error (TrackerDecoratorInfo *info,
-                                       GError               *error)
+                                       const GError         *error)
 {
 	TrackerDecorator *decorator = info->decorator;
 
@@ -397,6 +397,7 @@ retry_synchronously (TrackerDecorator *decorator,
 		if (error) {
 			g_autofree gchar *sparql = NULL;
 			g_autoptr (GError) inner_error = NULL;
+			g_autoptr (TrackerBatch) error_batch = NULL;
 			TrackerResource *resource;
 			const gchar *graph;
 			GFile *file;
@@ -415,9 +416,9 @@ retry_synchronously (TrackerDecorator *decorator,
 			tracker_decorator_raise_error (decorator, file,
 			                               error->message, sparql);
 
-			batch = g_steal_pointer (&decorator->batch);
-			if (batch)
-				tracker_batch_execute (batch, NULL, &inner_error);
+			error_batch = g_steal_pointer (&decorator->batch);
+			if (error_batch)
+				tracker_batch_execute (error_batch, NULL, &inner_error);
 
 			if (inner_error) {
 				g_autofree char *uri = NULL;
@@ -807,7 +808,7 @@ get_metadata_cb (TrackerExtract   *extract,
                  TrackerDecorator *decorator)
 {
 	g_autoptr (TrackerExtractInfo) info = NULL;
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
 
 	info = tracker_extract_file_finish (extract, result, &error);
 
