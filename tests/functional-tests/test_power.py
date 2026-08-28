@@ -121,5 +121,49 @@ class TestPower(fixtures.TrackerMinerTest):
         self.assertResourceExists(uri2)
 
 
+    def test_low_battery_extractor_pause(self):
+        """
+        Trigger critical battery when the extractor is working, trigger more
+        filesystem changes, ensure everything is indexed at the end.
+        """
+        dest = self.path("test-monitored")
+        check_file = self.path("test-monitored/file-211.txt")
+
+        # We need large amounts text to ensure batches take long to commit
+        DEFAULT_TEXT = 'some filler text ' * 10000
+        # We need multiple batches worth of data
+        N_FILES = 500
+
+        # Set discharging battery to enable throttle
+        self.set_battery_state(
+            50., UPowerGlib.DeviceState.DISCHARGING,
+            UPowerGlib.DeviceLevel.NONE)
+
+        with self.await_document_inserted(check_file):
+            # Add a decent amount of files, wait for the first to ensure extractor is working
+            for i in range(N_FILES):
+                filename = self.path("test-monitored/file-%d.txt" % i)
+                with open(filename, "w") as f:
+                    f.write(DEFAULT_TEXT)
+
+        # Set critical battery level
+        self.set_battery_state(
+            5., UPowerGlib.DeviceState.DISCHARGING,
+            UPowerGlib.DeviceLevel.CRITICAL)
+
+        # Create another file
+        other_file = self.path('test-monitored/other-file.txt')
+        with open(other_file, "w") as f:
+            f.write(DEFAULT_TEXT)
+
+        with self.await_document_inserted(other_file):
+            # Restore charging state to let indexer continue
+            self.set_battery_state(
+                50., UPowerGlib.DeviceState.CHARGING,
+                UPowerGlib.DeviceLevel.NONE)
+
+        self.assertEqual(N_FILES + 1, self.tracker.count_instances("nfo:TextDocument"))
+
+
 if __name__ == "__main__":
     fixtures.tracker_test_main()

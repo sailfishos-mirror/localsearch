@@ -353,7 +353,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 	TrackerResource *ie_performer, *ie_composer;
 	g_autoptr (TrackerResource) file_resource = NULL, album_disc = NULL, album = NULL;
 	g_autofree char *basename = NULL;
-	const char *uri;
+	const char *uri, *mimetype;
 	g_autoptr (GHashTable) artists = NULL;
 	gint64 total_duration = 0;
 	GFile *file;
@@ -361,6 +361,7 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 
 	uri = tracker_extract_info_get_file_id (info);
 	file = tracker_extract_info_get_file (info);
+	mimetype = tracker_extract_info_get_mimetype (info);
 	basename = g_file_get_basename (file);
 
 	artists = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_object_unref);
@@ -503,6 +504,8 @@ tracker_cue_sheet_apply_to_resource (TrackerToc         *toc,
 			tracker_resource_set_relation (track_resource, "nmm:performer", performer);
 		if (composer)
 			tracker_resource_set_relation (track_resource, "nmm:composer", composer);
+
+		tracker_resource_set_string (track_resource, "nie:mimeType", mimetype);
 	}
 }
 

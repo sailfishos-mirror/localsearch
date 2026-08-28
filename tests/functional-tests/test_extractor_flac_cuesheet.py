@@ -40,6 +40,7 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
             "nmm:performer": {"@id": "urn:artist:My%20Bloody%20Valentine"},
             "nie:title": "Only Shallow",
             "nfo:duration": 257,
+            "nie:mimeType": "audio/flac",
             "nie:isStoredAs": {
                 "@id": audio_uri,
                 "nie:interpretedAs": {
@@ -52,6 +53,7 @@ class FlacCuesheetTest(fixtures.TrackerExtractTestCase):
                     "nfo:sampleRate": 44100,
                     "nie:title": "Loomer",
                     "nfo:duration": 102,
+                    "nie:mimeType": "audio/flac",
                     "nmm:musicAlbum": {
                         "@id": "urn:album:Loveless:My%20Bloody%20Valentine:1991-01-01",
                         "nie:title": "Loveless",

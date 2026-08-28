@@ -104,9 +104,9 @@ build_basic_resource (TrackerExtractInfo *info,
                       GFile              *cue,
                       GFile              *image)
 {
-	TrackerResource *metadata, *child;
+	TrackerResource *metadata;
 	g_autofree char *resource_uri = NULL;
-	gchar *uri;
+	g_autofree char *uri = NULL, *data_uri = NULL;
 
 	resource_uri = tracker_extract_info_get_content_id (info, NULL);
 	metadata = tracker_resource_new (resource_uri);
@@ -115,15 +115,9 @@ build_basic_resource (TrackerExtractInfo *info,
 
 	uri = g_file_get_uri (cue);
 	tracker_resource_add_uri (metadata, "nie:isStoredAs", uri);
-	g_free (uri);
 
-	/* In addition to the cue file, link the information element to the data file */
-	uri = g_file_get_uri (image);
-	child = tracker_resource_new (uri);
-	tracker_resource_add_uri (child, "rdf:type", "nfo:FileDataObject");
-	tracker_resource_set_uri (child, "nie:interpretedAs", resource_uri);
-	tracker_resource_set_take_relation (metadata, "nie:isStoredAs", child);
-	g_free (uri);
+	data_uri = g_file_get_uri (image);
+	tracker_resource_set_uri (metadata, "nie:isStoredAs", data_uri);
 
 	return metadata;
 }
