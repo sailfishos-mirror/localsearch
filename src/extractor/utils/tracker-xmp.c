@@ -430,6 +430,8 @@ iterate_simple (const gchar    *uri,
 			data->gps_longitude = gps_coordinate_dup (value);
 		} else if (!data->gps_direction && g_ascii_strcasecmp (name, "GPSImgDirection") == 0) {
 			data->gps_direction = div_str_dup (value);
+		} else if (!data->user_comment && g_ascii_strcasecmp (name, "UserComment") == 0) {
+			data->user_comment = g_strdup (value);
 		}
 		/* TIFF */
 	} else if (g_ascii_strcasecmp (schema, NS_TIFF) == 0) {
@@ -881,6 +883,7 @@ tracker_xmp_free (TrackerXmpData *data)
 	g_free (data->gps_latitude);
 	g_free (data->gps_longitude);
 	g_free (data->gps_direction);
+	g_free (data->user_comment);
 
         g_slist_free_full (data->regions, xmp_region_free);
 	g_free (data);
@@ -999,6 +1002,10 @@ tracker_xmp_apply_to_resource (TrackerResource *resource,
 
 	if (data->license) {
 		tracker_resource_set_string (resource, "nie:license", data->license);
+	}
+
+	if (data->user_comment) {
+		tracker_resource_set_string (resource, "nie:comment", data->user_comment);
 	}
 
 	if (data->make || data->model) {

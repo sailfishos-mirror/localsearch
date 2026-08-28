@@ -37,8 +37,9 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
         self.check_data(path, data)
 
     # Missing metadata:
-    # nmm:artwork, nmm:internationalStandardRecordingCode,
-    # nmm:lyrics, nie:description, nao:hasTag
+    # nao:hasTag
+    #
+    # Note: nmm:artwork is covered in test_writeback_artwork.py
 
     # MP3
 
@@ -95,7 +96,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-5.mp3",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_mp3_publisher(self):
         self._writeback_test(
             "writeback-test-5.mp3",
@@ -119,6 +119,24 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
 
+    @unittest.skip('gstreamer does not write the tag')
+    def test_mp3_lyrics(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    @unittest.skip('MP3 cannot store description info')
+    def test_mp3_description(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nie:description": "test_description"})
+
+    @unittest.skip('MP3 cannot store keywords info')
+    def test_mp3_tag(self):
+        self._writeback_test(
+            "writeback-test-5.mp3",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
+
     # Ogg
 
     def test_ogg_title(self):
@@ -126,7 +144,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nie:title": "test_title"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_ogg_comment(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -162,7 +179,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nie:contentCreated": "1234-12-23T00:00:00Z"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_ogg_isrc(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -173,7 +189,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-6.ogg",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
+    @unittest.skip('GStreamer does not write the PUBLISHER vorbis comment')
     def test_ogg_publisher(self):
         self._writeback_test(
             "writeback-test-6.ogg",
@@ -199,6 +215,24 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
 
+    @unittest.skip('gstreamer does not write the tag')
+    def test_ogg_lyrics(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    @unittest.skip('GStreamer mistakenly writes description into comment tag')
+    def test_ogg_description(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nie:description": "test_description"})
+
+    @unittest.skip('OGG cannot store keywords info')
+    def test_ogg_tag(self):
+        self._writeback_test(
+            "writeback-test-6.ogg",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
+
     # Flac
 
     def test_flac_title(self):
@@ -206,7 +240,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nie:title": "test_title"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_flac_comment(self):
         self._writeback_test(
             "writeback-test-7.flac",
@@ -242,7 +275,6 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nie:contentCreated": "1234-12-23T00:00:00Z"})
 
-    @unittest.skip('gstreamer does not write the tag')
     def test_flac_isrc(self):
         self._writeback_test(
             "writeback-test-7.flac",
@@ -253,7 +285,7 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
             "writeback-test-7.flac",
             {"nmm:composer": {"nmm:artistName": "test_composer"}})
 
-    @unittest.skip('gstreamer does not write the tag')
+    @unittest.skip('GStreamer does not write the PUBLISHER vorbis comment')
     def test_flac_publisher(self):
         self._writeback_test(
             "writeback-test-7.flac",
@@ -278,6 +310,23 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                  {"tracker:referenceSource": "https://musicbrainz.org/doc/Release_Group",
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
+
+    def test_flac_lyrics(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    @unittest.skip('GStreamer mistakenly writes description into comment tag')
+    def test_flac_description(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nie:description": "test_description"})
+
+    @unittest.skip('FLAC cannot store keywords info')
+    def test_flac_tag(self):
+        self._writeback_test(
+            "writeback-test-7.flac",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
     # AAC/MP4
 
@@ -359,6 +408,21 @@ class WritebackAudioTest(fixtures.TrackerWritebackTest):
                                                                  {"tracker:referenceSource": "https://musicbrainz.org/doc/Release_Group",
                                                                   "tracker:referenceIdentifier": "test_mb_release_group"}]},
              "nmm:musicAlbumDisc": {"nmm:setNumber": 42}})
+
+    def test_aac_lyrics(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nmm:lyrics": {"nie:plainTextContent": "lo lo lololo lolololo lololo"}})
+
+    def test_aac_description(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nie:description": "test_description"})
+
+    def test_aac_tag(self):
+        self._writeback_test(
+            "writeback-test-8.mp4",
+            {"nao:hasTag": {"nao:prefLabel": "test_tag"}})
 
 
 if __name__ == "__main__":

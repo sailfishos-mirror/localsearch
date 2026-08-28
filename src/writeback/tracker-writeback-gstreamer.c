@@ -36,6 +36,7 @@
 
 typedef struct TrackerWritebackGstreamer         TrackerWritebackGstreamer;
 typedef struct TrackerWritebackGstreamerClass    TrackerWritebackGstreamerClass;
+typedef struct TrackerWritebackGstreamerElements TrackerWritebackGstreamerElements;
 typedef struct TrackerWritebackGstreamerElements TagElements;
 
 typedef enum {
@@ -72,7 +73,33 @@ static gboolean            writeback_gstreamer_write_file_metadata  (TrackerWrit
                                                                      GError                 **error);
 static const gchar* const *writeback_gstreamer_content_types        (TrackerWritebackFile    *writeback_file);
 
+static TrackerWritebackGstreamerElements * tracker_writeback_gstreamer_elements_new (void);
+
+static void tracker_writeback_gstreamer_elements_free (TrackerWritebackGstreamerElements *data);
+
+G_DEFINE_AUTOPTR_CLEANUP_FUNC (TrackerWritebackGstreamerElements,
+                               tracker_writeback_gstreamer_elements_free)
+
 G_DEFINE_DYNAMIC_TYPE (TrackerWritebackGstreamer, tracker_writeback_gstreamer, TRACKER_TYPE_WRITEBACK_FILE);
+
+static TrackerWritebackGstreamerElements *
+tracker_writeback_gstreamer_elements_new (void)
+{
+	TrackerWritebackGstreamerElements *data;
+
+	data = g_new0 (TrackerWritebackGstreamerElements, 1);
+	data->taggers = g_hash_table_new (g_str_hash, g_str_equal);
+
+	return data;
+}
+
+static void
+tracker_writeback_gstreamer_elements_free (TrackerWritebackGstreamerElements *data)
+{
+	g_clear_pointer (&data->tags, gst_tag_list_unref);
+	g_clear_pointer (&data->taggers, g_hash_table_unref);
+	g_free (data);
+}
 
 static void
 tracker_writeback_gstreamer_class_init (TrackerWritebackGstreamerClass *klass)
@@ -123,7 +150,7 @@ link_named_pad (GstPad      *srcpad,
                 GstElement  *element,
                 const gchar *sinkpadname)
 {
-	GstPad *sinkpad;
+	g_autoptr (GstPad) sinkpad = NULL;
 	GstPadLinkReturn result;
 
 	sinkpad = gst_element_get_static_pad (element, sinkpadname);
@@ -135,7 +162,6 @@ link_named_pad (GstPad      *srcpad,
 #endif
 	}
 	result = gst_pad_link (srcpad, sinkpad);
-	gst_object_unref (sinkpad);
 
 	if (GST_PAD_LINK_SUCCESSFUL (result)) {
 		return TRUE;
@@ -204,17 +230,20 @@ vorbis_tagger (GstElement *pipeline,
                GstPad     *srcpad,
                GstTagList *tags)
 {
-	GstElement *mux;
-	GstElement *tagger;
-	GstElement *parser;
+	g_autoptr (GstElement) mux = NULL, tagger = NULL, parser = NULL;
 
 	mux = gst_element_factory_make ("oggmux", NULL);
 	parser = gst_element_factory_make ("vorbisparse", NULL);
 	tagger = gst_element_factory_make ("vorbistag", NULL);
 	if (mux == NULL || parser == NULL || tagger == NULL)
-		goto error;
+		return NULL;
 
-	gst_bin_add_many (GST_BIN (pipeline), parser, tagger, mux, NULL);
+	gst_bin_add_many (GST_BIN (pipeline),
+	                  gst_object_ref (parser),
+	                  gst_object_ref (tagger),
+	                  gst_object_ref (mux),
+	                  NULL);
+
 	if (!link_named_pad (srcpad, parser, "sink"))
 		return NULL;
 	if (!gst_element_link_many (parser, tagger, mux, NULL))
@@ -227,15 +256,6 @@ vorbis_tagger (GstElement *pipeline,
 		gst_tag_setter_merge_tags (GST_TAG_SETTER (tagger), tags, GST_TAG_MERGE_REPLACE_ALL);
 	}
 	return mux;
-
- error:
-	if (parser != NULL)
-		g_object_unref (parser);
-	if (tagger != NULL)
-		g_object_unref (tagger);
-	if (mux != NULL)
-		g_object_unref (mux);
-	return NULL;
 }
 
 static GstElement *
@@ -265,9 +285,9 @@ pad_added_cb (GstElement  *decodebin,
               GstPad      *pad,
               TagElements *element)
 {
+	g_autoptr (GstCaps) caps = NULL;
 	TrackerWritebackGstAddTaggerElem add_tagger_func = NULL;
 	GstElement *retag_end;
-	GstCaps *caps;
 	gchar *caps_str = NULL;
 	GHashTableIter iter;
 	gpointer key;
@@ -291,8 +311,8 @@ pad_added_cb (GstElement  *decodebin,
 
 	g_hash_table_iter_init (&iter, element->taggers);
 	while (g_hash_table_iter_next (&iter, &key, &value)) {
-		GstCaps *tagger_caps;
-		const gchar *media_type = (const gchar *)key;
+		g_autoptr (GstCaps) tagger_caps = NULL;
+		const gchar *media_type = (const gchar *) key;
 
 		if (strcmp (media_type, "audio/mpeg") == 0)
 			tagger_caps = gst_caps_from_string ("audio/mpeg, mpegversion=(int)1");
@@ -308,22 +328,19 @@ pad_added_cb (GstElement  *decodebin,
 			g_debug ("matched sink caps %s", caps_str);
 			g_free (caps_str);
 
-			gst_caps_unref (tagger_caps);
 			add_tagger_func = (TrackerWritebackGstAddTaggerElem) value;
 			break;
 		}
-		gst_caps_unref (tagger_caps);
 	}
-	gst_caps_unref (caps);
 
 	/* add retagging element(s) */
 	if (add_tagger_func == NULL) {
-		GError *error;
+		g_autoptr (GError) error = NULL;
+
 		error = g_error_new (GST_STREAM_ERROR,
 		                     GST_STREAM_ERROR_FORMAT,
 		                     "Unable to write tags to this file as it is not encoded in a supported format");
 		gst_element_post_message (decodebin, gst_message_new_error (GST_OBJECT (decodebin), error, NULL));
-		g_error_free (error);
 		return;
 	}
 	retag_end = add_tagger_func (element->pipeline, pad, element->tags);
@@ -342,20 +359,18 @@ factory_src_caps_intersect (GstElementFactory *factory,
 
 	templates = gst_element_factory_get_static_pad_templates (factory);
 	for (l = templates; l != NULL; l = l->next) {
+		g_autoptr (GstCaps) tcaps = NULL;
 		GstStaticPadTemplate *t = l->data;
-		GstCaps *tcaps;
 
 		if (t->direction != GST_PAD_SRC) {
 			continue;
 		}
 
 		tcaps = gst_static_pad_template_get_caps (t);
-		if (gst_caps_can_intersect (tcaps, caps)) {
-			gst_caps_unref (tcaps);
+		if (gst_caps_can_intersect (tcaps, caps))
 			return TRUE;
-		}
-		gst_caps_unref (tcaps);
 	}
+
 	return FALSE;
 }
 
@@ -400,26 +415,26 @@ autoplug_select_cb (GstElement        *decodebin,
 	return GST_AUTOPLUG_SELECT_EXPOSE;
 }
 
-static void
+static gboolean
 writeback_gstreamer_save (TagElements *element,
                           GFile       *file,
                           GError     **error)
 {
-	GstElement *pipeline = NULL;
+	g_autoptr (GstElement) pipeline = NULL;
+	g_autoptr (GOutputStream) stream = NULL;
+	g_autofree char *uri = NULL;
 	GstElement *urisrc = NULL;
 	GstElement *decodebin = NULL;
-	GOutputStream *stream = NULL;
-	GError *io_error = NULL;
 	GstBus *bus;
-	gboolean done;
-	gchar *uri = g_file_get_uri (file);
+	gboolean done = FALSE;
+
+	uri = g_file_get_uri (file);
 
 	g_debug ("saving metadata for uri: %s", uri);
 
-	stream = G_OUTPUT_STREAM (g_file_replace (file, NULL, FALSE, G_FILE_CREATE_NONE, NULL, &io_error));
-	if (io_error != NULL) {
-		goto gio_error;
-	}
+	stream = G_OUTPUT_STREAM (g_file_replace (file, NULL, FALSE, G_FILE_CREATE_NONE, NULL, error));
+	if (!stream)
+		return FALSE;
 
 	/* set up pipeline */
 	pipeline = gst_pipeline_new ("pipeline");
@@ -429,18 +444,18 @@ writeback_gstreamer_save (TagElements *element,
 	urisrc = gst_element_make_from_uri (GST_URI_SRC, uri, "urisrc", NULL);
 	if (urisrc == NULL) {
 		g_warning ("Failed to create gstreamer 'source' element from uri %s", uri);
-		goto out;
+		return FALSE;
 	}
 	decodebin = gst_element_factory_make ("decodebin", "decoder");
 	if (decodebin == NULL) {
 		g_warning ("Failed to create a 'decodebin' element");
-		goto out;
+		return FALSE;
 	}
 
 	element->sink = gst_element_factory_make ("giostreamsink", "sink");
 	if (element->sink == NULL) {
 		g_warning ("Failed to create a 'sink' element");
-		goto out;
+		return FALSE;
 	}
 	g_object_set (element->sink, "stream", stream, NULL);
 
@@ -453,9 +468,9 @@ writeback_gstreamer_save (TagElements *element,
 	/* run pipeline .. */
 	gst_element_set_state (pipeline, GST_STATE_PLAYING);
 	bus = gst_element_get_bus (pipeline);
-	done = FALSE;
+
 	while (done == FALSE) {
-		GstMessage *message;
+		g_autoptr (GstMessage) message = NULL;
 
 		message = gst_bus_timed_pop (bus, GST_CLOCK_TIME_NONE);
 		if (message == NULL) {
@@ -464,21 +479,10 @@ writeback_gstreamer_save (TagElements *element,
 		}
 
 		switch (GST_MESSAGE_TYPE (message)) {
-		case GST_MESSAGE_ERROR:
-			{
-				GError *gerror;
-				gchar *debug;
-
-				gst_message_parse_error (message, &gerror, &debug);
-				g_warning ("caught error: %s (%s)", gerror->message, debug);
-
-				g_propagate_error (error, gerror);
-				done = TRUE;
-
-				g_free (debug);
-			}
-			break;
-
+		case GST_MESSAGE_ERROR: {
+			gst_message_parse_error (message, error, NULL);
+			return FALSE;
+		}
 		case GST_MESSAGE_EOS:
 			g_debug ("got eos message");
 			done = TRUE;
@@ -487,60 +491,43 @@ writeback_gstreamer_save (TagElements *element,
 		default:
 			break;
 		}
-
-		gst_message_unref (message);
 	}
+
 	gst_element_set_state (pipeline, GST_STATE_NULL);
 
-	if (g_output_stream_close (stream, NULL, &io_error) == FALSE) {
-		goto gio_error;
-	}
-	g_object_unref (stream);
-	stream = NULL;
-
-	if (*error == NULL)
-		goto out;
-
- gio_error:
-	if (io_error != NULL)
-		g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED, "%s", io_error->message);
- out:
-	if (pipeline != NULL)
-		gst_object_unref (GST_OBJECT (pipeline));
+	return g_output_stream_close (stream, NULL, error);
 }
 
 static GstSample *
 generate_gst_sample_from_image (const GValue *val)
 {
+	g_autofree char *filename = NULL;
+	g_autoptr (GError) err = NULL;
+	g_autoptr (GMappedFile) mapped_file = NULL;
 	GstSample *img_sample = NULL;
-	GMappedFile *mapped_file = NULL;
-	GError *err = NULL;
-	GByteArray *byte_arr = NULL;
-	gchar *filename;
-	const gchar *image_url = g_value_get_string (val);
+	const char *image_url = NULL;
+
+	image_url = g_value_get_string (val);
 
 	filename = g_filename_from_uri (image_url, NULL, &err);
 	if (!filename) {
-		g_assert (err != NULL);
 		g_warning ("could not get filename for url (%s): %s", image_url, err->message);
-		g_clear_error (&err);
 		return img_sample;
 	}
 
 	mapped_file = g_mapped_file_new (filename, TRUE, &err);
-	if (!mapped_file && err != NULL) {
+	if (!mapped_file) {
 		g_warning ("encountered error reading image file (%s): %s", filename, err->message);
-		g_error_free (err);
 	} else {
-		GBytes *bytes = g_mapped_file_get_bytes (mapped_file);
-		byte_arr = g_bytes_unref_to_array (bytes);
-		img_sample = gst_tag_image_data_to_image_sample (byte_arr->data,
-		                                                 byte_arr->len, GST_TAG_IMAGE_TYPE_NONE);
-		g_byte_array_unref (byte_arr);
-		g_mapped_file_unref (mapped_file);
-	}
+		g_autoptr (GBytes) bytes = NULL;
+		const char *data;
+		size_t size;
 
-	g_free (filename);
+		bytes = g_mapped_file_get_bytes (mapped_file);
+		data = g_bytes_get_data (bytes, &size);
+		img_sample = gst_tag_image_data_to_image_sample (data, size,
+		                                                 GST_TAG_IMAGE_TYPE_NONE);
+	}
 
 	return img_sample;
 }
@@ -651,42 +638,39 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
                                          GCancellable          *cancellable,
                                          GError               **error)
 {
-	gboolean ret = FALSE;
-	TagElements *element = (TagElements *) g_malloc (sizeof (TagElements));
-	GList *l, *properties;
-
-	element->tags = NULL;
-	element->taggers = g_hash_table_new (g_str_hash, g_str_equal);
+	g_autoptr (TrackerWritebackGstreamerElements) element = NULL;
+	g_autoptr (GList) properties = NULL;
+	GList *l;
 
 	if (gst_element_factory_find ("giostreamsink") == NULL) {
 		g_warning ("giostreamsink not found, can't tag anything");
-		g_hash_table_unref (element->taggers);
-		g_free (element);
-		return ret;
-	} else {
-		if (gst_element_factory_find ("vorbistag") &&
-		    gst_element_factory_find ("vorbisparse") &&
-		    gst_element_factory_find ("oggmux")) {
-			g_debug ("ogg vorbis tagging available");
-			g_hash_table_insert (element->taggers, "audio/x-vorbis", (gpointer) vorbis_tagger);
-		}
+		return FALSE;
+	}
 
-		if (gst_element_factory_find ("flactag")) {
-			g_debug ("flac tagging available");
-			g_hash_table_insert (element->taggers, "audio/x-flac", flac_tagger);
-		}
+	element = tracker_writeback_gstreamer_elements_new ();
 
-		if (gst_element_factory_find ("id3v2mux") ||
-		    gst_element_factory_find ("id3mux")) {
-			g_debug ("id3 tagging available");
-			g_hash_table_insert (element->taggers, "audio/mpeg", mp3_tagger);
-		}
+	if (gst_element_factory_find ("vorbistag") &&
+	    gst_element_factory_find ("vorbisparse") &&
+	    gst_element_factory_find ("oggmux")) {
+		g_debug ("ogg vorbis tagging available");
+		g_hash_table_insert (element->taggers, "audio/x-vorbis", (gpointer) vorbis_tagger);
+	}
 
-		if (gst_element_factory_find ("mp4mux")) {
-			g_debug ("mp4 tagging available");
-			g_hash_table_insert (element->taggers, "audio/mp4", mp4_tagger);
-			g_hash_table_insert (element->taggers, "audio/x-ac3", mp4_tagger);
-		}
+	if (gst_element_factory_find ("flactag")) {
+		g_debug ("flac tagging available");
+		g_hash_table_insert (element->taggers, "audio/x-flac", flac_tagger);
+	}
+
+	if (gst_element_factory_find ("id3v2mux") ||
+	    gst_element_factory_find ("id3mux")) {
+		g_debug ("id3 tagging available");
+		g_hash_table_insert (element->taggers, "audio/mpeg", mp3_tagger);
+	}
+
+	if (gst_element_factory_find ("mp4mux")) {
+		g_debug ("mp4 tagging available");
+		g_hash_table_insert (element->taggers, "audio/mp4", mp4_tagger);
+		g_hash_table_insert (element->taggers, "audio/x-ac3", mp4_tagger);
 	}
 
 	gst_tag_register_musicbrainz_tags ();
@@ -844,12 +828,19 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 		}
 
 		if (g_strcmp0 (prop, "nmm:lyrics") == 0) {
-			const gchar *lyrics;
+			TrackerResource *lyrics;
+			const char *text = NULL;
 
-			lyrics = tracker_resource_get_first_string (resource, prop);
-			g_value_init (&val, G_TYPE_STRING);
-			g_value_set_string (&val, lyrics);
-			writeback_gstreamer_set (element, GST_TAG_LYRICS, &val);
+			lyrics = tracker_resource_get_first_relation (resource, prop);
+
+			if (lyrics)
+				text = tracker_resource_get_first_string (lyrics, "nie:plainTextContent");
+
+			if (text) {
+				g_value_init (&val, G_TYPE_STRING);
+				g_value_set_string (&val, text);
+				writeback_gstreamer_set (element, GST_TAG_LYRICS, &val);
+			}
 		}
 
 		if (g_strcmp0 (prop, "nmm:composer") == 0) {
@@ -917,10 +908,12 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 		}
 
 		if (g_strcmp0 (prop, "nao:hasTag") == 0) {
-			GList *keywords, *k;
-			GString *keyword_str = g_string_new (NULL);
+			g_autoptr (GList) keywords = NULL;
+			g_autoptr (GString) keyword_str = NULL;
+			GList *k;
 
 			keywords = tracker_resource_get_values (resource, prop);
+			keyword_str = g_string_new (NULL);
 
 			for (k = keywords; k; k = k->next) {
 				GValue *value;
@@ -945,9 +938,6 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 				writeback_gstreamer_set (element, GST_TAG_KEYWORDS, &val);
 				g_value_unset (&val);
 			}
-
-			g_string_free (keyword_str, TRUE);
-			g_list_free (keywords);
 		}
 
 		if (g_strcmp0 (prop, "tracker:hasExternalReference") == 0) {
@@ -990,22 +980,7 @@ writeback_gstreamer_write_file_metadata (TrackerWritebackFile  *writeback,
 		}
 	}
 
-	writeback_gstreamer_save (element, file, error);
-
-	if (*error != NULL) {
-		g_warning ("Error (%s) occured while attempting to write tags", (*error)->message);
-	} else {
-		ret = TRUE;
-	}
-
-	if (element->tags != NULL)
-		gst_tag_list_unref (element->tags);
-	if (element->taggers != NULL)
-		g_hash_table_unref (element->taggers);
-	g_list_free (properties);
-	g_free (element);
-
-	return ret;
+	return writeback_gstreamer_save (element, file, error);
 }
 
 TrackerWriteback *

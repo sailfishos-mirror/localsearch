@@ -115,6 +115,7 @@ typedef struct {
 	gchar *iso_speed_ratings;
 	gchar *white_balance;
 	gchar *copyright;
+	char *user_comment;
 
 	/* TODO NS_XAP*/
 	gchar *rating;

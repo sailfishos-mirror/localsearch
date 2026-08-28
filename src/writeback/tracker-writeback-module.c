@@ -50,7 +50,7 @@ writeback_module_load (GTypeModule *module)
 {
 	TrackerWritebackModule *writeback_module;
 	const gchar *writeback_modules_dir;
-	gchar *path;
+	g_autofree char *path = NULL;
 
 	writeback_module = TRACKER_WRITEBACK_MODULE (module);
 
@@ -63,7 +63,6 @@ writeback_module_load (GTypeModule *module)
 
 	path = g_build_filename (writeback_modules_dir, writeback_module->name, NULL);
 	writeback_module->module = g_module_open (path, G_MODULE_BIND_LOCAL);
-	g_free (path);
 
 	if (G_UNLIKELY (!writeback_module->module)) {
 		g_warning ("Could not load writeback module '%s': %s\n",
@@ -105,26 +104,15 @@ writeback_module_unload (GTypeModule *module)
 }
 
 TrackerWritebackModule *
-tracker_writeback_module_get (const gchar *name)
+tracker_writeback_module_new (const gchar *name)
 {
-	static GHashTable *modules = NULL;
 	TrackerWritebackModule *module;
 
 	g_return_val_if_fail (name != NULL, NULL);
 
-	if (G_UNLIKELY (!modules)) {
-		modules = g_hash_table_new (g_str_hash, g_str_equal);
-	}
-
-	module = g_hash_table_lookup (modules, name);
-
-	if (G_UNLIKELY (!module)) {
-		module = g_object_new (TRACKER_TYPE_WRITEBACK_MODULE, NULL);
-		g_type_module_set_name (G_TYPE_MODULE (module), name);
-		module->name = g_strdup (name);
-
-		g_hash_table_insert (modules, module->name, module);
-	}
+	module = g_object_new (TRACKER_TYPE_WRITEBACK_MODULE, NULL);
+	g_type_module_set_name (G_TYPE_MODULE (module), name);
+	module->name = g_strdup (name);
 
 	if (!g_type_module_use (G_TYPE_MODULE (module))) {
 		return NULL;
@@ -136,10 +124,10 @@ tracker_writeback_module_get (const gchar *name)
 GList *
 tracker_writeback_modules_list (void)
 {
-	GError *error = NULL;
+	g_autoptr (GError) error = NULL;
+	g_autoptr (GDir) dir = NULL;
 	const gchar *writeback_modules_dir, *name;
 	GList *list = NULL;
-	GDir *dir;
 
 	writeback_modules_dir = g_getenv("TRACKER_WRITEBACK_MODULES_DIR");
 	if (G_LIKELY (writeback_modules_dir == NULL)) {
@@ -152,7 +140,6 @@ tracker_writeback_modules_list (void)
 
 	if (error) {
 		g_critical ("Could not get writeback modules list: %s", error->message);
-		g_error_free (error);
 		return NULL;
 	}
 
@@ -163,8 +150,6 @@ tracker_writeback_modules_list (void)
 
 		list = g_list_prepend (list, g_strdup (name));
 	}
-
-	g_dir_close (dir);
 
 	return g_list_reverse (list);
 }

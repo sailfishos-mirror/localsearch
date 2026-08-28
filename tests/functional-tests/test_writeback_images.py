@@ -108,6 +108,22 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
                                                      "nco:streetAddress": "test_address",
                                                      "nco:country": "test_country"}}})
 
+    def test_jpeg_creator(self):
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
+
+    @ut.skip('JPEG extractor prefers embedded nie:comment')
+    def test_jpeg_comment(self):
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nie:comment": "test_comment"})
+
+    def test_jpeg_orientation(self):
+        self.__writeback_test(
+            "writeback-test-1.jpeg",
+            {"nfo:orientation": "nfo:orientation-bottom"})
+
     # TIFF tests
 
     def test_011_tiff_title(self):
@@ -139,6 +155,22 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
         self.__writeback_test (
             "writeback-test-2.tif",
             {"nie:contentCreated": "2001-01-01T12:23:34Z"})
+
+    def test_tiff_creator(self):
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
+
+    @ut.skip('TIFF extractor prefers embedded XMP')
+    def test_tiff_comment(self):
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nie:comment": "test_comment"})
+
+    def test_tiff_orientation(self):
+        self.__writeback_test(
+            "writeback-test-2.tif",
+            {"nfo:orientation": "nfo:orientation-bottom"})
 
     # PNG tests
 
@@ -187,6 +219,22 @@ class WritebackImagesTest(fixtures.TrackerWritebackTest):
                                                      "nco:region": "test_region",
                                                      "nco:streetAddress": "test_address",
                                                      "nco:country": "test_country"}}})
+
+    def test_png_creator(self):
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nco:creator": {"nco:fullname": "test_creator"}})
+
+    def test_png_comment(self):
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nie:comment": "test_comment"})
+
+    def test_png_orientation(self):
+        self.__writeback_test(
+            "writeback-test-4.png",
+            {"nfo:orientation": "nfo:orientation-bottom"})
+
 
 if __name__ == "__main__":
     fixtures.tracker_test_main()

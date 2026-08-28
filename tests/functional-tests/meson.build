@@ -233,6 +233,7 @@ functional_tests = [
   'test_miner_resource_removal',
   'test_power',
   'test_systemd',
+  'test_writeback',
 ]
 
 if libcue.found()
@@ -246,7 +247,10 @@ if have_tracker_writeback and libjpeg.found() and libgif.found() and libpng.foun
 endif
 
 if have_tracker_writeback and gstreamer.found()
-  functional_tests += 'test_writeback_audio'
+  functional_tests += [
+    'test_writeback_audio',
+    'test_writeback_artwork',
+  ]
 endif
 
 if have_tracker_writeback and totem_plparser.found()

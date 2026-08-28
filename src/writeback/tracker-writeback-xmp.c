@@ -112,8 +112,8 @@ write_gps_coord (XmpPtr       xmp,
                  gchar        more,
                  gchar        less)
 {
+	g_autofree char *val = NULL;
 	double degrees, minutes;
-	gchar *val;
 
 	minutes = modf (coord, &degrees);
 
@@ -124,7 +124,6 @@ write_gps_coord (XmpPtr       xmp,
 
 	xmp_delete_property (xmp, NS_EXIF, label);
 	xmp_set_property (xmp, NS_EXIF, label, val, 0);
-	g_free (val);
 }
 
 static gboolean
@@ -134,8 +133,9 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
                                    GCancellable          *cancellable,
                                    GError               **error)
 {
-	GList *properties, *l;
-	gchar *path;
+	g_autofree char *path = NULL;
+	g_autoptr (GList) properties = NULL;
+	GList *l;
 	XmpFilePtr xmp_files;
 	XmpPtr xmp;
 #ifdef DEBUG_XMP
@@ -153,7 +153,6 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 		             "Can't open '%s' for update with Exempi (Exempi error code = %d)",
 		             path,
 		             xmp_get_error ());
-		g_free (path);
 		return FALSE;
 	}
 
@@ -245,9 +244,11 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 		}
 
 		if (g_strcmp0 (prop, "nao:hasTag") == 0) {
-			GList *keywords, *k;
-			GString *keyword_str = g_string_new (NULL);
+			g_autoptr (GList) keywords = NULL;
+			g_autoptr (GString) keyword_str = NULL;
+			GList *k;
 
+			keyword_str = g_string_new (NULL);
 			keywords = tracker_resource_get_values (resource, prop);
 
 			for (k = keywords; k; k = k->next) {
@@ -272,9 +273,6 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 				xmp_delete_property (xmp, NS_DC, "subject");
 				xmp_set_property (xmp, NS_DC, "subject", keyword_str->str, 0);
 			}
-
-			g_string_free (keyword_str, TRUE);
-			g_list_free (keywords);
 		}
 
 		if (g_strcmp0 (prop, "nie:contentCreated") == 0) {
@@ -289,27 +287,30 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 		if (g_strcmp0 (prop, "nfo:orientation") == 0) {
 			const gchar *orientation;
+			const char *orientation_map[] = {
+				NULL,
+				"nfo:orientation-top",
+				"nfo:orientation-top-mirror",
+				"nfo:orientation-bottom",
+				"nfo:orientation-bottom-mirror",
+				"nfo:orientation-left-mirror",
+				"nfo:orientation-right",
+				"nfo:orientation-right-mirror",
+				"nfo:orientation-left",
+			};
+			int i;
 
 			orientation = tracker_resource_get_first_uri (resource, prop);
 
-			xmp_delete_property (xmp, NS_EXIF, "Orientation");
+			for (i = 1; i < G_N_ELEMENTS (orientation_map); i++) {
+				if (g_strcmp0 (orientation, orientation_map[i]) == 0) {
+					g_autofree char *value = NULL;
 
-			if (g_strcmp0 (orientation, "nfo:orientation-top") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "top - left", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-top-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "top - right", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-bottom") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "bottom - left", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-bottom-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "bottom - right", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-left-mirror") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "left - top", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-right") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "right - top", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-right-mirror") == 0) {
-					xmp_set_property (xmp, NS_EXIF, "Orientation", "right - bottom", 0);
-			} else if (g_strcmp0 (orientation, "nfo:orientation-left") == 0) {
-				xmp_set_property (xmp, NS_EXIF, "Orientation", "left - bottom", 0);
+					value = g_strdup_printf ("%d", i);
+					xmp_delete_property (xmp, NS_TIFF, "Orientation");
+					xmp_set_property (xmp, NS_TIFF, "Orientation", value, 0);
+					break;
+				}
 			}
 		}
 
@@ -542,8 +543,6 @@ writeback_xmp_write_file_metadata (TrackerWritebackFile  *wbf,
 
 	xmp_free (xmp);
 	xmp_files_free (xmp_files);
-	g_free (path);
-	g_list_free (properties);
 
 	return TRUE;
 }

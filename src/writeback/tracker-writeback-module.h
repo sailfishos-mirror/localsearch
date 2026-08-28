@@ -80,7 +80,7 @@ const gchar * const *   writeback_module_get_rdf_types      (void);
 
 GType                   tracker_writeback_module_get_type      (void) G_GNUC_CONST;
 
-TrackerWritebackModule *tracker_writeback_module_get           (const gchar             *name);
+TrackerWritebackModule *tracker_writeback_module_new           (const gchar             *name);
 TrackerWriteback *      tracker_writeback_module_create        (TrackerWritebackModule  *module);
 const gchar * const *   tracker_writeback_module_get_rdf_types (TrackerWritebackModule  *module);
 GList *                 tracker_writeback_modules_list         (void);
