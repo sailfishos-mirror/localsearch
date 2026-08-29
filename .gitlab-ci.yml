@@ -554,6 +554,26 @@ coverity:
   only:
     - main
 
+asan:
+  extends:
+    - .fdo.distribution-image@fedora
+    - .tracker-miners.fedora:latest@x86_64
+  stage: analysis
+  needs:
+    - build-fedora-container@x86_64
+  script:
+    - git clone https://gitlab.gnome.org/GNOME/tinysparql.git
+    - pushd tinysparql; meson setup build --libdir lib64 --prefix=/usr -Ddocs=false; ninja -C build install; popd
+    - meson setup --buildtype=debug build -Db_sanitize=address -Dseccomp=false -Dlandlock=disabled
+    - meson compile -C build
+    # Add verify_asan_link_order=0 over asan defaults, for functional tests with python interpreter
+    - TRACKER_TESTS_AWAIT_TIMEOUT=30 LOCALSEARCH_DEBUG=tests ASAN_OPTIONS=verify_asan_link_order=0:halt_on_error=1:abort_on_error=1:print_summary=1 dbus-run-session meson test -C build -t $MESON_TEST_TIMEOUT_MULTIPLIER --print-errorlogs
+  artifacts:
+    expire_in: 1 day
+    when: always
+    paths:
+    - build/meson-logs/*.txt
+
 pages:
   extends:
     - .fdo.distribution-image@fedora
