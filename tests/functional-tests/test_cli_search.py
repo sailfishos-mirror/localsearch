@@ -121,6 +121,11 @@ class TestSearch(fixtures.TrackerCommandLineTestCase):
         output = self.run_cli(["localsearch", "search", "--help"])
         self.assertIn("Usage", output)
 
+    def test_list_help(self):
+        output = self.run_cli(["localsearch", "list", "--help"])
+        self.assertIn("Usage", output)
+        self.assertIn("localsearch list", output)
+
 
 class TestSearchMount(fixtures.TrackerCommandLineTestCase):
     def create_test_data(self):

@@ -31,6 +31,8 @@ data.
   Inhibit indexing temporarily.
 *reset*::
   Erase the indexed data.
+*list*::
+  Alias for *search*.
 *search*::
   Search for content.
 *status*::
