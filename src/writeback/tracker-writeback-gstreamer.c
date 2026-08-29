@@ -422,10 +422,10 @@ writeback_gstreamer_save (TagElements *element,
 {
 	g_autoptr (GstElement) pipeline = NULL;
 	g_autoptr (GOutputStream) stream = NULL;
+	g_autoptr (GstBus) bus = NULL;
 	g_autofree char *uri = NULL;
 	GstElement *urisrc = NULL;
 	GstElement *decodebin = NULL;
-	GstBus *bus;
 	gboolean done = FALSE;
 
 	uri = g_file_get_uri (file);
@@ -449,12 +449,15 @@ writeback_gstreamer_save (TagElements *element,
 	decodebin = gst_element_factory_make ("decodebin", "decoder");
 	if (decodebin == NULL) {
 		g_warning ("Failed to create a 'decodebin' element");
+		g_object_unref (urisrc);
 		return FALSE;
 	}
 
 	element->sink = gst_element_factory_make ("giostreamsink", "sink");
 	if (element->sink == NULL) {
 		g_warning ("Failed to create a 'sink' element");
+		g_object_unref (urisrc);
+		g_object_unref (decodebin);
 		return FALSE;
 	}
 	g_object_set (element->sink, "stream", stream, NULL);

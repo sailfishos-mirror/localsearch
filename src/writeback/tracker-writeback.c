@@ -484,7 +484,10 @@ handle_method_call (GDBusConnection       *connection,
 	if (g_strcmp0 (method_name, "Writeback") == 0) {
 		handle_method_call_writeback (controller, invocation, parameters);
 	} else {
-		g_warning ("Unknown method '%s' called", method_name);
+		g_dbus_method_invocation_return_error (invocation,
+		                                       G_DBUS_ERROR,
+		                                       G_DBUS_ERROR_UNKNOWN_METHOD,
+		                                       "Unknown method '%s' called", method_name);
 	}
 }
 
