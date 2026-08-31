@@ -1,3 +1,13 @@
+NEW in 3.11.2 - 2026-08-31
+==========================
+  * Fix possible crash after a directory is deleted
+  * Fix extraction errors with some EPUB files
+  * Fix "localsearch status -f" when extractor is active
+  * Prevent possible main thread stalls when handling many errors
+  * Fix possible situations where files are needlessly re-extracted
+
+Translations: be, ca@valencia, de, it, kab, lo, nb, nl, sk, th
+
 NEW in 3.11.1 - 2026-04-14
 ==========================
   * Fix possible failures when extracting metadata from EPUB, ODF and OOXML
