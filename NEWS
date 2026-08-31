@@ -1,3 +1,11 @@
+NEW in 3.12.rc - 2026-08-31
+===========================
+  * Fix situations where files would be needlessly re-extracted
+  * Improve test coverage of CLI tools
+  * Improve test coverage of writeback service
+
+Translations: bg, ca, eu, fa, fr, gl, ko, lt, nb, nl, pt_BR, ru, sv, tr, ug
+
 NEW in 3.12.beta - 2026-08-03
 =============================
   * Handle soft page breaks correctly in ODF documents
