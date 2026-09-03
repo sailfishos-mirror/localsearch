@@ -81,6 +81,9 @@ alias_to_path (const gchar *alias)
 {
 	guint i;
 
+	if (alias[0] != '&')
+		return NULL;
+
 	for (i = 0; i < G_N_ELEMENTS (special_dirs); i++) {
 		if (g_strcmp0 (special_dirs[i].symbol, alias) == 0)
 			return g_get_user_special_dir (special_dirs[i].user_dir);
@@ -94,8 +97,11 @@ envvar_to_path (const gchar *envvar)
 {
 	const gchar *path;
 
+	if (envvar[0] != '$')
+		return NULL;
+
 	path = g_getenv (&envvar[1]);
-	if (g_file_test (path, G_FILE_TEST_EXISTS))
+	if (path && g_file_test (path, G_FILE_TEST_EXISTS))
 		return path;
 
 	return NULL;
@@ -151,7 +157,7 @@ strv_add (GStrv        strv,
 		g_array_append_val (array, copy);
 	}
 
-	return (GStrv) g_array_free (array, FALSE);
+	return (GStrv) g_array_free (g_steal_pointer (&array), FALSE);
 }
 
 static GStrv
@@ -172,7 +178,7 @@ strv_remove (GStrv        strv,
 		g_array_append_val (array, copy);
 	}
 
-	return (GStrv) g_array_free (array, FALSE);
+	return (GStrv) g_array_free (g_steal_pointer (&array), FALSE);
 }
 
 static int
@@ -269,6 +275,8 @@ index_remove (void)
 		g_object_unref (file);
 		g_free (path);
 	}
+
+	g_settings_sync ();
 
 	return EXIT_SUCCESS;
 }
