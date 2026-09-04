@@ -302,23 +302,31 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
 
 
     def test_preconfigured_non_removable_in_index_single_directories(self):
-        dconf = self.sandbox.get_dconf_client()
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-single-directories', GLib.Variant.new_strv([str(self.device_path)]))
-
         with self.await_insert_dir(self.device_path):
             self.device_path.mkdir()
-            self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
+            dconf = self.sandbox.get_dconf_client()
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-single-directories',
+                GLib.Variant.new_strv([str(self.device_path)]))
 
         self.assertResourceExists(self.device_path.as_uri())
-        resource_id = self.tracker.get_resource_id_by_uri(self.device_path.as_uri())
+        resource_id = self.tracker.get_content_resource_id(self.device_path.as_uri())
+
+        with self.tracker.await_content_update(
+            fixtures.FILESYSTEM_GRAPH,
+            resource_id,
+            f'',
+            f'tracker:available true'
+        ):
+            self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
+            os.utime(self.device_path)
 
         with self.tracker.await_delete(
             fixtures.FILESYSTEM_GRAPH, resource_id, timeout=cfg.AWAIT_TIMEOUT
         ):
             self.remove_removable_device(self.device_path)
-            self.device_path.rmdir()
+            os.utime(self.device_path)
 
         self.assertResourceMissing(self.device_path.as_uri())
 
@@ -348,18 +356,25 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
 
 
     def test_preconfigured_non_removable_in_index_recursive_directories(self):
-        dconf = self.sandbox.get_dconf_client()
-        dconf.write (
-            'org.freedesktop.Tracker3.Miner.Files',
-            'index-recursive-directories',
-            GLib.Variant.new_strv([self.indexed_dir, str(self.device_path)]))
-
         with self.await_insert_dir(self.device_path):
             self.device_path.mkdir()
-            self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
+            dconf = self.sandbox.get_dconf_client()
+            dconf.write (
+                'org.freedesktop.Tracker3.Miner.Files',
+                'index-recursive-directories',
+                GLib.Variant.new_strv([self.indexed_dir, str(self.device_path)]))
 
         self.assertResourceExists(self.device_path.as_uri())
         resource_id = self.tracker.get_content_resource_id(self.device_path.as_uri())
+
+        with self.tracker.await_content_update(
+            fixtures.FILESYSTEM_GRAPH,
+            resource_id,
+            f'',
+            f'tracker:available true'
+        ):
+            self.add_removable_device(self.device_path, MountFlags.NON_REMOVABLE)
+            os.utime(self.device_path)
 
         with self.tracker.await_content_update(
             fixtures.FILESYSTEM_GRAPH,
@@ -368,7 +383,7 @@ class TestConfigMount(fixtures.TrackerMinerRemovableMediaTest):
             f'tracker:available false'
         ):
             self.remove_removable_device(self.device_path)
-            self.device_path.rmdir()
+            os.utime(self.device_path)
 
 
     def test_parent_non_removable(self):
