@@ -27,10 +27,18 @@
 
 #include "tracker-zip-input-stream.h"
 
+struct _TrackerZip {
+	GObject parent_instance;
+
+	zip_t *zip;
+};
+
+G_DEFINE_TYPE (TrackerZip, tracker_zip, G_TYPE_OBJECT)
+
 struct _TrackerZipInputStream {
 	GInputStream parent_instance;
 
-	zip_t *zip;
+	TrackerZip *zip;
 	zip_file_t *zfile;
 
 	zip_uint64_t size;
@@ -40,6 +48,68 @@ struct _TrackerZipInputStream {
 };
 
 G_DEFINE_TYPE (TrackerZipInputStream, tracker_zip_input_stream, G_TYPE_INPUT_STREAM)
+
+static void
+tracker_zip_finalize (GObject *object)
+{
+	TrackerZip *self = TRACKER_ZIP (object);
+
+	if (self->zip) {
+		zip_close (self->zip);
+		self->zip = NULL;
+	}
+
+	G_OBJECT_CLASS (tracker_zip_parent_class)->finalize (object);
+}
+
+static void
+tracker_zip_class_init (TrackerZipClass *klass)
+{
+	GObjectClass *object_class = G_OBJECT_CLASS (klass);
+
+	object_class->finalize = tracker_zip_finalize;
+}
+
+static void
+tracker_zip_init (TrackerZip *self)
+{
+}
+
+TrackerZip *
+tracker_zip_new (GFile   *file,
+                 GError **error)
+{
+	g_autofree gchar *filename = NULL;
+	TrackerZip *self;
+	int errcode = 0;
+
+	g_return_val_if_fail (G_IS_FILE (file), NULL);
+
+	filename = g_file_get_path (file);
+	if (!filename) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_NOT_SUPPORTED,
+		             "ZIP file must be a local file");
+		return NULL;
+	}
+
+	self = g_object_new (TRACKER_TYPE_ZIP, NULL);
+
+	self->zip = zip_open (filename, 0, &errcode);
+	if (!self->zip) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_FAILED,
+		             "Failed to open zip '%s' (libzip errcode=%d)",
+		             filename,
+		             errcode);
+		g_object_unref (self);
+		return NULL;
+	}
+
+	return self;
+}
 
 static gssize
 tracker_zip_input_stream_read (GInputStream  *stream,
@@ -111,11 +181,6 @@ tracker_zip_input_stream_close (GInputStream  *stream,
 			self->zfile = NULL;
 		}
 
-		if (self->zip) {
-			zip_close (self->zip);
-			self->zip = NULL;
-		}
-
 		self->closed = TRUE;
 	}
 
@@ -125,7 +190,11 @@ tracker_zip_input_stream_close (GInputStream  *stream,
 static void
 tracker_zip_input_stream_finalize (GObject *object)
 {
+	TrackerZipInputStream *self = TRACKER_ZIP_INPUT_STREAM (object);
+
 	g_input_stream_close (G_INPUT_STREAM (object), NULL, NULL);
+	g_clear_object (&self->zip);
+
 	G_OBJECT_CLASS (tracker_zip_input_stream_parent_class)->finalize (object);
 }
 
@@ -146,54 +215,57 @@ tracker_zip_input_stream_init (TrackerZipInputStream *self)
 }
 
 GInputStream *
-tracker_zip_read_file (const gchar   *zip_file_uri,
+tracker_zip_read_file (TrackerZip    *zip,
                        const gchar   *member_name,
                        GCancellable  *cancellable,
                        GError       **error)
 {
-	g_autofree gchar *filename = NULL;
-	zip_t *zip = NULL;
 	zip_file_t *zfile = NULL;
 	zip_stat_t st;
-	int errcode = 0;
 	zip_error_t *ze = NULL;
 	const char *msg = NULL;
 	TrackerZipInputStream *self = NULL;
 
-	g_return_val_if_fail (zip_file_uri != NULL, NULL);
+	g_return_val_if_fail (TRACKER_IS_ZIP (zip), NULL);
 	g_return_val_if_fail (member_name != NULL, NULL);
 
-	filename = g_filename_from_uri (zip_file_uri, NULL, error);
-	if (!filename)
-		return NULL;
-
-	zip = zip_open (filename, 0, &errcode);
-	if (!zip) {
-		g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-		             "Failed to open zip '%s' (libzip errcode=%d)", filename, errcode);
+	if (cancellable &&
+	    g_cancellable_is_cancelled (cancellable)) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_CANCELLED,
+		             "Operation cancelled");
 		return NULL;
 	}
 
 	zip_stat_init (&st);
-	if (zip_stat (zip, member_name, 0, &st) != 0) {
-		zip_close (zip);
-		g_set_error (error, G_IO_ERROR, G_IO_ERROR_NOT_FOUND,
-		             "No member '%s' in zip '%s'", member_name, filename);
+
+	if (zip_stat (zip->zip, member_name, 0, &st) != 0) {
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_NOT_FOUND,
+		             "No member '%s' in zip",
+		             member_name);
 		return NULL;
 	}
 
-	zfile = zip_fopen (zip, member_name, 0);
+	zfile = zip_fopen (zip->zip, member_name, 0);
 	if (!zfile) {
-		ze = zip_get_error (zip);
+		ze = zip_get_error (zip->zip);
 		msg = ze ? zip_error_strerror (ze) : "Unknown libzip error";
-		zip_close (zip);
-		g_set_error (error, G_IO_ERROR, G_IO_ERROR_FAILED,
-		             "Failed to open member '%s' in zip '%s': %s", member_name, filename, msg);
+
+		g_set_error (error,
+		             G_IO_ERROR,
+		             G_IO_ERROR_FAILED,
+		             "Failed to open member '%s': %s",
+		             member_name,
+		             msg);
 		return NULL;
 	}
 
 	self = g_object_new (TRACKER_TYPE_ZIP_INPUT_STREAM, NULL);
-	self->zip = zip;
+
+	self->zip = g_object_ref (zip);
 	self->zfile = zfile;
 	self->size = st.size;
 	self->pos = 0;

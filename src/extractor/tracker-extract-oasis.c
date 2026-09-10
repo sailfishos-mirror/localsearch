@@ -111,7 +111,7 @@ static void oasis_content_end_element_ns       (void          *ctx,
 static void oasis_content_characters           (void          *ctx,
                                              	const xmlChar *ch,
                                             	int            len);
-static void extract_oasis_content              (const gchar     *uri,
+static void extract_oasis_content              (TrackerZip      *zip,
                                                 gulong           total_bytes,
                                                 ODTFileType      file_type,
                                                 TrackerResource *metadata);
@@ -126,7 +126,7 @@ tracker_extract_module_init (GError **error)
 #define ZIP_XML_BUFFER_SIZE 8192
 
 static gboolean
-parse_xml_from_zip_sax (const gchar          *zip_uri,
+parse_xml_from_zip_sax (TrackerZip           *zip,
                         const gchar          *member_name,
                         const xmlSAXHandler  *sax,
                         gpointer              user_data,
@@ -140,7 +140,7 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 	gsize len;
 	gboolean ok = TRUE;
 
-	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	stream = tracker_zip_read_file (zip, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
@@ -156,9 +156,8 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
-		if (len == 0) {
-			break; /* EOF */
-		}
+		if (len == 0)
+			break;
 
 		data = g_bytes_get_data (bytes, NULL);
 
@@ -202,7 +201,7 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 }
 
 static void
-extract_oasis_content (const gchar     *uri,
+extract_oasis_content (TrackerZip      *zip,
                        gulong           total_bytes,
                        ODTFileType      file_type,
                        TrackerResource *metadata)
@@ -217,19 +216,16 @@ extract_oasis_content (const gchar     *uri,
 		.characters = oasis_content_characters,
 	};
 
-	/* If no content requested, return */
-	if (total_bytes == 0) {
+	if (total_bytes == 0)
 		return;
-	}
 
-	/* Create parse info */
 	info.tag_stack = g_queue_new ();
 	info.file_type = file_type;
 	info.content = g_string_new ("");
 	info.bytes_pending = total_bytes;
 	info.limit_reached = FALSE;
 
-	parse_xml_from_zip_sax (uri, "content.xml", &sax, &info, &error);
+	parse_xml_from_zip_sax (zip, "content.xml", &sax, &info, &error);
 
 	if (info.limit_reached) {
 		g_clear_error (&error);
@@ -243,16 +239,16 @@ extract_oasis_content (const gchar     *uri,
 		if (file_type == FILE_TYPE_ODT)
 			content = g_strchomp (content);
 
-		tracker_resource_set_string (metadata, "nie:plainTextContent",
+		tracker_resource_set_string (metadata,
+		                             "nie:plainTextContent",
 		                             content);
 	} else {
 		g_warning ("Got error parsing XML file: %s\n", error->message);
 		g_string_free (info.content, TRUE);
 	}
 
-	if (error) {
+	if (error)
 		g_error_free (error);
-	}
 
 	g_free (content);
 	g_queue_free (info.tag_stack);
@@ -265,6 +261,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	TrackerResource *metadata;
 	ODTMetadataParseInfo info = { 0 };
 	ODTFileType file_type;
+	g_autoptr (TrackerZip) zip = NULL;
 	GFile *file;
 	gchar *uri, *resource_uri;
 	const gchar *mime_used;
@@ -280,6 +277,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	}
 
 	file = tracker_extract_info_get_file (extract_info);
+
+	zip = tracker_zip_new (file, error);
+	if (!zip)
+		return FALSE;
 
 	resource_uri = tracker_extract_info_get_content_id (extract_info, NULL);
 	metadata = tracker_resource_new (resource_uri);
@@ -300,7 +301,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	info.uri = uri;
 	info.text_buf = g_string_new ("");
 
-	parse_xml_from_zip_sax (uri, "meta.xml", &sax, &info, NULL);
+	parse_xml_from_zip_sax (zip, "meta.xml", &sax, &info, NULL);
 
 	if (g_ascii_strcasecmp (mime_used, "application/vnd.oasis.opendocument.text") == 0) {
 		file_type = FILE_TYPE_ODT;
@@ -316,13 +317,13 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	}
 
 	/* Extract content with the given limitations */
-	extract_oasis_content (uri,
+	extract_oasis_content (zip,
 	                       tracker_extract_info_get_max_text (extract_info),
 	                       file_type,
 	                       metadata);
 
 	if (info.text_buf)
- 		g_string_free (info.text_buf, TRUE);
+		g_string_free (info.text_buf, TRUE);
 
 	g_queue_free (info.tag_stack);
 

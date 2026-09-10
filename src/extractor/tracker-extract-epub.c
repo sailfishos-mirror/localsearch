@@ -593,7 +593,7 @@ tracker_extract_module_init (GError **error)
 }
 
 static gboolean
-parse_xml_from_zip_sax (const gchar          *zip_uri,
+parse_xml_from_zip_sax (TrackerZip           *zip,
                         const gchar          *member_name,
                         const xmlSAXHandler  *sax,
                         gpointer              user_data,
@@ -607,7 +607,7 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 	gsize len;
 	gboolean ok = TRUE;
 
-	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	stream = tracker_zip_read_file (zip, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
@@ -623,9 +623,8 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
-		if (len == 0) {
+		if (len == 0)
 			break;
-		}
 
 		data = g_bytes_get_data (bytes, NULL);
 
@@ -668,16 +667,20 @@ parse_xml_from_zip_sax (const gchar          *zip_uri,
 }
 
 static gchar *
-extract_opf_path (const gchar *uri)
+extract_opf_path (TrackerZip *zip)
 {
 	g_autofree char *path = NULL;
-	g_autoptr(GError) error = NULL;
+	g_autoptr (GError) error = NULL;
 	xmlSAXHandler sax = {
 		.initialized = XML_SAX2_MAGIC,
 		.startElementNs = container_start_element_ns,
 	};
 
-	parse_xml_from_zip_sax (uri, "META-INF/container.xml", &sax, &path, &error);
+	parse_xml_from_zip_sax (zip,
+	                        "META-INF/container.xml",
+	                        &sax,
+	                        &path,
+	                        &error);
 
 	if (error) {
 		g_warning ("Could not get EPUB container.xml file: %s", error->message);
@@ -689,7 +692,7 @@ extract_opf_path (const gchar *uri)
 
 static gchar *
 extract_opf_contents (TrackerExtractInfo *info,
-                      const gchar        *uri,
+                      TrackerZip         *zip,
                       const gchar        *content_prefix,
                       GList              *content_files)
 {
@@ -704,7 +707,8 @@ extract_opf_contents (TrackerExtractInfo *info,
 	content_data.contents = g_string_new ("");
 	content_data.limit = (gsize) tracker_extract_info_get_max_text (info);
 
-	g_debug ("Extracting up to %" G_GSIZE_FORMAT " bytes of content", content_data.limit);
+	g_debug ("Extracting up to %" G_GSIZE_FORMAT " bytes of content",
+	         content_data.limit);
 
 	for (l = content_files; l; l = l->next) {
 		gchar *path;
@@ -715,13 +719,19 @@ extract_opf_contents (TrackerExtractInfo *info,
 		else
 			path = g_build_filename (content_prefix, l->data, NULL);
 
-		parse_xml_from_zip_sax (uri, path, &sax, &content_data, &error);
+		parse_xml_from_zip_sax (zip,
+		                        path,
+		                        &sax,
+		                        &content_data,
+		                        &error);
 
 		if (error) {
 			g_warning ("Error extracting EPUB contents (%s): %s",
-				   path, error->message);
+			           path,
+			           error->message);
 			g_clear_error (&error);
 		}
+
 		g_free (path);
 
 		if (content_data.limit <= 0) {
@@ -735,6 +745,7 @@ extract_opf_contents (TrackerExtractInfo *info,
 
 static TrackerResource *
 extract_opf (TrackerExtractInfo *info,
+             TrackerZip         *zip,
              const gchar        *uri,
              const gchar        *opf_path)
 {
@@ -761,10 +772,15 @@ extract_opf (TrackerExtractInfo *info,
 
 	data = opf_data_new (uri, ebook);
 
-	parse_xml_from_zip_sax (uri, opf_path, &sax, data, &error);
+	parse_xml_from_zip_sax (zip,
+	                        opf_path,
+	                        &sax,
+	                        data,
+	                        &error);
 
 	if (error) {
-		g_warning ("Could not get EPUB '%s' file: %s\n", opf_path,
+		g_warning ("Could not get EPUB '%s' file: %s\n",
+		           opf_path,
 		           error->message);
 		g_error_free (error);
 		opf_data_free (data);
@@ -773,12 +789,14 @@ extract_opf (TrackerExtractInfo *info,
 	}
 
 	dirname = g_path_get_dirname (opf_path);
-	contents = extract_opf_contents (info, uri, dirname, data->pages);
+	contents = extract_opf_contents (info,
+	                                 zip,
+	                                 dirname,
+	                                 data->pages);
 	g_free (dirname);
 
-	if (contents && *contents) {
+	if (contents && *contents)
 		tracker_resource_set_string (ebook, "nie:plainTextContent", contents);
-	}
 
 	opf_data_free (data);
 	g_free (contents);
@@ -791,18 +809,24 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
                               GError             **error)
 {
 	g_autoptr (TrackerResource) ebook = NULL;
+	g_autoptr (TrackerZip) zip = NULL;
 	g_autofree char *opf_path = NULL, *uri = NULL;
 	GFile *file;
 
 	file = tracker_extract_info_get_file (info);
 	uri = g_file_get_uri (file);
 
-	opf_path = extract_opf_path (uri);
+	zip = tracker_zip_new (file, error);
+	if (!zip)
+		return FALSE;
 
+	opf_path = extract_opf_path (zip);
 	if (!opf_path)
 		return FALSE;
 
-	ebook = extract_opf (info, uri, opf_path);
+	ebook = extract_opf (info, zip, uri, opf_path);
+	if (!ebook)
+		return FALSE;
 
 	tracker_extract_info_set_resource (info, ebook);
 
