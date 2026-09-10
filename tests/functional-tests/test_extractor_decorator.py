@@ -111,13 +111,17 @@ class ExtractorDecoratorTest(fixtures.TrackerMinerTest):
 
         try:
             store.update(
-                "INSERT DATA { GRAPH tracker:Audio { <id:1234> a nie:InformationElement  . <%s> a nfo:FileDataObject; nie:interpretedAs <id:1234> } }" % (file_urn)
+                "INSERT DATA { GRAPH tracker:Audio { <%s> a rdfs:Resource } }" % (file_urn)
             )
+
             # Forcibly insert unrelated file into the audio graph, and check it is removed
             with self.tracker.await_delete(
                 fixtures.AUDIO_GRAPH, file_id,
                 timeout=cfg.AWAIT_TIMEOUT,
             ):
+                store.update(
+                    "INSERT DATA { GRAPH tracker:Audio { <id:1234> a nie:InformationElement  . <%s> a nfo:FileDataObject; nie:interpretedAs <id:1234> } }" % (file_urn)
+                )
                 store.update(
                     "INSERT DATA { GRAPH tracker:Audio { <%s> a nfo:FileDataObject ; nie:url '%s' } }" % (file_urn, file_urn)
                 )
