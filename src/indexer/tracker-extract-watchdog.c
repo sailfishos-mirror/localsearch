@@ -374,7 +374,7 @@ wait_check_async_cb (GObject      *object,
 	TrackerExtractWatchdog *watchdog = user_data;
 	g_autoptr (GError) error = NULL;
 
-	if (!g_subprocess_wait_check_finish (watchdog->extract_process,
+	if (!g_subprocess_wait_check_finish (G_SUBPROCESS (object),
 	                                     res, &error)) {
 		if (g_error_matches (error, G_IO_ERROR, G_IO_ERROR_CANCELLED))
 			return;

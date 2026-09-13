@@ -1556,6 +1556,7 @@ tracker_file_notifier_finalize (GObject *object)
 	g_clear_object (&notifier->content_query);
 	g_clear_object (&notifier->deleted_query);
 	g_clear_object (&notifier->file_exists_query);
+	g_clear_object (&notifier->rules_manager);
 
 	if (notifier->monitor) {
 		g_signal_handlers_disconnect_by_data (notifier->monitor, object);

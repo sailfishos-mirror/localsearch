@@ -101,7 +101,8 @@ error_thread_func (gpointer data,
 
 	if (report->keyfile) {
 		if (g_mkdir_with_parents (g_file_peek_path (errors->report_dir), 0700) < 0) {
-			g_warning ("Failed to create location for error reports: %m");
+			g_warning_once ("Failed to create location for error reports: %m");
+			file_report_free (report);
 			return;
 		}
 
@@ -124,6 +125,8 @@ error_thread_func (gpointer data,
 			           report_path);
 		}
 	}
+
+	file_report_free (report);
 }
 
 static void

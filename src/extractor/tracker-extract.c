@@ -181,6 +181,7 @@ tracker_extract_finalize (GObject *object)
 	}
 #endif
 
+	g_clear_object (&extract->rules_manager);
 	g_clear_object (&extract->module_manager);
 
 	G_OBJECT_CLASS (tracker_extract_parent_class)->finalize (object);

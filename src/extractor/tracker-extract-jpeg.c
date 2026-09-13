@@ -260,7 +260,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 
 #ifdef HAVE_EXEMPI
 	if (!xd) {
-		gchar *sidecar = NULL;
+		g_autofree char *sidecar = NULL;
 
 		xd = tracker_xmp_new_from_sidecar (file, &sidecar);
 

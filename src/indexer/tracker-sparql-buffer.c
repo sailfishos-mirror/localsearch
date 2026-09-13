@@ -110,6 +110,8 @@ tracker_sparql_buffer_finalize (GObject *object)
 	g_clear_object (&sparql_buffer->cleanup_audio_album_discs);
 	g_clear_object (&sparql_buffer->cleanup_audio_albums);
 	g_clear_object (&sparql_buffer->cleanup_audio_artists);
+	g_clear_object (&sparql_buffer->batch);
+	g_clear_pointer (&sparql_buffer->tasks, g_ptr_array_unref);
 
 	G_OBJECT_CLASS (tracker_sparql_buffer_parent_class)->finalize (object);
 }

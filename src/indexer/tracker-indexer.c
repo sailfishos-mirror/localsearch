@@ -1540,7 +1540,7 @@ indexing_tree_directory_added (TrackerIndexingTree *indexing_tree,
 
 	if (!!(flags & TRACKER_DIRECTORY_FLAG_IS_VOLUME)) {
 		TrackerSparqlConnection *conn;
-		TrackerBatch *batch;
+		g_autoptr (TrackerBatch) batch = NULL;
 		g_autoptr (GError) error = NULL;
 
 		conn = tracker_miner_get_connection (user_data);

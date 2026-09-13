@@ -133,6 +133,7 @@ tracker_extract_info_unref (TrackerExtractInfo *info)
 	if (g_atomic_int_dec_and_test (&info->ref_count)) {
 		g_object_unref (info->file);
 		g_free (info->content_id);
+		g_free (info->file_id);
 		g_free (info->mimetype);
 		g_free (info->graph);
 

@@ -64,8 +64,8 @@ rule_info_clear (RuleInfo *rule)
 	g_clear_pointer (&rule->graph, g_free);
 	g_clear_pointer (&rule->hash, g_free);
 	g_clear_pointer (&rule->fallback_rdf_types, g_strfreev);
-	g_clear_list (&rule->allow_patterns, g_free);
-	g_clear_list (&rule->block_patterns, g_free);
+	g_clear_list (&rule->allow_patterns, (GDestroyNotify) g_pattern_spec_free);
+	g_clear_list (&rule->block_patterns, (GDestroyNotify) g_pattern_spec_free);
 }
 
 static void

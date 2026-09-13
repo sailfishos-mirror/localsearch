@@ -150,7 +150,7 @@ best_pager (void)
 gboolean
 tracker_term_pipe_to_pager (void)
 {
-	GSubprocessLauncher *launcher;
+	g_autoptr (GSubprocessLauncher) launcher = NULL;
 	gchar *pager_command;
 	gint fds[2];
 

@@ -162,8 +162,6 @@ main (gint argc, gchar *argv[])
 
 	g_debug ("Shutdown started");
 
-	g_main_loop_unref (main_loop);
-
 	return EXIT_SUCCESS;
  error:
 	g_printerr ("%s\n", error->message);

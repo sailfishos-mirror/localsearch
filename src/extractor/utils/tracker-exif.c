@@ -473,6 +473,7 @@ tracker_exif_free (TrackerExifData *data)
 	g_free (data->gps_longitude);
 	g_free (data->gps_direction);
 	g_free (data->date);
+	g_free (data->fnumber);
 
 	g_free (data);
 }

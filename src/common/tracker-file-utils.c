@@ -465,25 +465,23 @@ tracker_path_list_filter_duplicates (GSList      *roots,
 	return new_list;
 }
 
-const struct {
-	const gchar *symbol;
-	GUserDirectory user_dir;
-} special_dirs[] = {
-	{"&DESKTOP",      G_USER_DIRECTORY_DESKTOP},
-	{"&DOCUMENTS",    G_USER_DIRECTORY_DOCUMENTS},
-	{"&DOWNLOAD",     G_USER_DIRECTORY_DOWNLOAD},
-	{"&MUSIC",        G_USER_DIRECTORY_MUSIC},
-	{"&PICTURES",     G_USER_DIRECTORY_PICTURES},
-	{"&PUBLIC_SHARE", G_USER_DIRECTORY_PUBLIC_SHARE},
-	{"&TEMPLATES",    G_USER_DIRECTORY_TEMPLATES},
-	{"&VIDEOS",       G_USER_DIRECTORY_VIDEOS}
-};
-
-
 static gboolean
 get_user_special_dir_if_not_home (const gchar  *path,
                                   gchar       **special_dir)
 {
+	const struct {
+		const gchar *symbol;
+		GUserDirectory user_dir;
+	} special_dirs[] = {
+		{"&DESKTOP",      G_USER_DIRECTORY_DESKTOP},
+		{"&DOCUMENTS",    G_USER_DIRECTORY_DOCUMENTS},
+		{"&DOWNLOAD",     G_USER_DIRECTORY_DOWNLOAD},
+		{"&MUSIC",        G_USER_DIRECTORY_MUSIC},
+		{"&PICTURES",     G_USER_DIRECTORY_PICTURES},
+		{"&PUBLIC_SHARE", G_USER_DIRECTORY_PUBLIC_SHARE},
+		{"&TEMPLATES",    G_USER_DIRECTORY_TEMPLATES},
+		{"&VIDEOS",       G_USER_DIRECTORY_VIDEOS}
+	};
 	int i;
 	const gchar *real_path;
 	GFile *home, *file;

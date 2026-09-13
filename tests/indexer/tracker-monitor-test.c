@@ -169,8 +169,8 @@ check_events (TrackerMonitorTestFixture *fixture,
 	GFile *file = NULL;
 	GList *keys, *l;
 	MonitorSignal require_event_mask, prohibit_event_mask, events;
-	GList *files_missing_required_events = NULL;
-	GList *files_with_prohibited_events = NULL;
+	g_autoptr (GList) files_missing_required_events = NULL;
+	g_autoptr (GList) files_with_prohibited_events = NULL;
 
 	keys = g_hash_table_get_keys (fixture->require_events);
 	for (l = keys; l; l = l->next) {
@@ -418,7 +418,7 @@ test_monitor_common_setup (TrackerMonitorTestFixture *fixture,
 	/* Create hash table to store received events */
 	fixture->events = g_hash_table_new_full (g_file_hash,
 	                                         (GEqualFunc) g_file_equal,
-	                                         NULL,
+	                                         (GDestroyNotify) g_object_unref,
 	                                         NULL);
 
 	/* Create and setup the tracker monitor */
@@ -499,19 +499,16 @@ create_directory (const gchar  *parent,
                   const gchar  *directory_name,
                   GFile       **outfile)
 {
-	GFile *dirfile;
-	gchar *path;
+	g_autoptr (GFile) dirfile = NULL;
+	g_autofree char *path = NULL;
 
 	path = g_build_path (G_DIR_SEPARATOR_S, parent, directory_name, NULL);
 	dirfile = g_file_new_for_path (path);
 	g_assert_true (dirfile != NULL);
 	g_assert_cmpint (g_file_make_directory_with_parents (dirfile, NULL, NULL), ==, TRUE);
 	if (outfile) {
-		*outfile = dirfile;
-	} else {
-		g_object_unref (dirfile);
+		*outfile = g_steal_pointer (&dirfile);
 	}
-	g_free (path);
 }
 
 static void
@@ -1094,13 +1091,8 @@ static void
 test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonitorTestFixture *fixture,
                                                                    gconstpointer              data)
 {
-	GFile *source_dir;
-	gchar *source_path;
-	GFile *dest_dir;
-	gchar *dest_path;
-	GFile *file_in_source_dir;
-	GFile *file_in_dest_dir;
-	gchar *file_in_dest_dir_path;
+	g_autoptr (GFile) source_dir = NULL, dest_dir = NULL, file_in_source_dir = NULL, file_in_dest_dir = NULL;
+	g_autofree char *source_path = NULL, *dest_path = NULL, *file_in_dest_dir_path = NULL;
 
 	/* Create directory to test with, before setting up the environment */
 	create_directory (fixture->monitored_directory, "directory", &source_dir);
@@ -1108,7 +1100,7 @@ test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonito
 	g_assert_true (source_dir != NULL);
 
 	/* Add some file to the new dir */
-	set_file_contents (source_path, "file.txt", "whatever", &file_in_source_dir);
+	set_file_contents (source_path, "file.txt", "whatever", NULL);
 
 	/* Set up environment */
 	tracker_monitor_set_enabled (fixture->monitor, TRUE);
@@ -1166,13 +1158,6 @@ test_monitor_directory_event_moved_to_monitored_after_file_update (TrackerMonito
 	g_assert_cmpint (tracker_monitor_remove (fixture->monitor, dest_dir), !=, TRUE);
 	g_assert_cmpint (g_file_delete (file_in_dest_dir, NULL, NULL), ==, TRUE);
 	g_assert_cmpint (g_file_delete (dest_dir, NULL, NULL), ==, TRUE);
-	g_object_unref (source_dir);
-	g_object_unref (file_in_source_dir);
-	g_object_unref (dest_dir);
-	g_object_unref (file_in_dest_dir);
-	g_free (source_path);
-	g_free (file_in_dest_dir_path);
-	g_free (dest_path);
 }
 
 static void

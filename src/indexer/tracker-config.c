@@ -134,9 +134,11 @@ update_directories (TrackerConfig *config)
 	g_auto (GStrv) recursive = NULL, single = NULL;
 
 	recursive = g_settings_get_strv (G_SETTINGS (config), "index-recursive-directories");
+	g_slist_free_full (config->index_recursive_directories_unfiltered, g_free);
 	config->index_recursive_directories_unfiltered = strv_to_gslist (recursive);
 
 	single = g_settings_get_strv (G_SETTINGS (config), "index-single-directories");
+	g_slist_free_full (config->index_single_directories_unfiltered, g_free);
 	config->index_single_directories_unfiltered = strv_to_gslist (single);
 
 	rebuild_filtered_lists (config);

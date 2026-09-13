@@ -337,7 +337,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 	if (xml && *xml) {
 		xd = tracker_xmp_new (xml, strlen (xml), uri);
 	} else {
-		gchar *sidecar = NULL;
+		g_autofree char *sidecar = NULL;
 
 		xd = tracker_xmp_new_from_sidecar (file, &sidecar);
 
@@ -353,8 +353,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *info,
 		}
 	}
 
-	if (xd)
+	if (xd) {
 		tracker_xmp_apply_to_resource (metadata, xd);
+		tracker_xmp_free (xd);
+	}
 #endif
 
 	write_pdf_data (pd, metadata, keywords);

@@ -161,7 +161,7 @@ tracker_lru_remove_foreach (TrackerLRU *lru,
 		next = link->next;
 
 		if (equal_func (node->element, elem) == TRUE) {
-			g_queue_unlink (&lru->queue, node->link);
+			g_queue_delete_link (&lru->queue, node->link);
 			free_node (node, lru);
 		}
 
