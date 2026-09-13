@@ -1,3 +1,12 @@
+NEW in 3.12.0 - 2026-08-31
+==========================
+  * Sandbox fixes for musl libc
+  * Fix "localsearch index --remove" applying the configuration
+  * Memory leak fixes
+  * Add "localsearch list" alias to "localsearch search"
+
+Translations: da, es, hu, sr
+
 NEW in 3.12.rc - 2026-08-31
 ===========================
   * Fix situations where files would be needlessly re-extracted
