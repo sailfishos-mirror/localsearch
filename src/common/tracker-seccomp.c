@@ -328,6 +328,7 @@ tracker_seccomp_init (gboolean readonly)
 		ALLOW_RULE (open);
 		ALLOW_RULE (openat);
 		ALLOW_RULE (pwrite64);
+		ALLOW_RULE (pwritev2);
 		ALLOW_RULE (fdatasync);
 		ALLOW_RULE (ftruncate);
 		ALLOW_RULE (setsockopt);
