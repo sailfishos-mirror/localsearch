@@ -56,6 +56,9 @@ tracker_help_show_man_page (const char *cmd)
 
 	g_return_val_if_fail (cmd != NULL, -1);
 
+	if (g_strcmp0 (cmd, "list") == 0)
+		cmd = "search";
+
 	page = g_strconcat (MAIN_COMMAND_NAME "-", cmd, NULL);
 
 	return exec_man ("man", page);

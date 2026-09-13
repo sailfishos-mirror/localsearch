@@ -388,6 +388,7 @@ tracker_search (int          argc,
 {
 	g_autoptr (GOptionContext) context = NULL;
 	GOptionGroup *resource_type;
+	gboolean invoked_as_list;
 	g_autoptr (GError) error = NULL;
 	g_autofree char *help = NULL;
 
@@ -397,7 +398,8 @@ tracker_search (int          argc,
 	bind_textdomain_codeset (GETTEXT_PACKAGE, "UTF-8");
 	textdomain (GETTEXT_PACKAGE);
 
-	argv[0] = "localsearch search";
+	invoked_as_list = g_strcmp0 (argv[0], "list") == 0;
+	argv[0] = invoked_as_list ? "localsearch list" : "localsearch search";
 
 	context = g_option_context_new (NULL);
         g_option_context_set_summary (context, _("Search for content"));

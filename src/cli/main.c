@@ -72,6 +72,7 @@ static struct cmd_struct commands[] = {
 	{ "inhibit", tracker_inhibit, N_("Inhibit indexing temporarily") },
 	{ "reset", tracker_reset, N_("Erase the indexed data") },
 	{ "search", tracker_search, N_("Search for content") },
+	{ "list", tracker_search, N_("Search for content") },
 	{ "status", tracker_status, N_("Provide status and statistics on the data indexed") },
 	{ "tag", tracker_tag, N_("Add, remove and list tags") },
 	{ "test-sandbox", launch_external_command, N_("Sandbox for a testing environment") },
