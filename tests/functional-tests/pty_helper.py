@@ -36,6 +36,12 @@ if __name__ == "__main__":
     width = 1000
     height = 2000
 
+    # Clear some environment variables overriding the TIOCGWINSZ output
+    # for less:
+    for var in ['LINES', 'COLUMNS', 'LESS_LINES', 'LESS_COLUMNS']:
+        if var in os.environ:
+            os.environ.pop(var)
+
     if args.s:
         size = args.s.split('x')
         width = int(size[0])
