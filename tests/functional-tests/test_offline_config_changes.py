@@ -298,6 +298,7 @@ class TestMakeHomedirRecursive(fixtures.TrackerMinerTest):
         os.makedirs(self.nested_non_recursive_dir, exist_ok=True)
         self.folder_in_nested_non_recursive_dir = os.path.join(self.nested_non_recursive_dir, 'folder2')
         os.makedirs(self.folder_in_nested_non_recursive_dir, exist_ok=True)
+        self.indexed_dir = self.non_recursive_dir
         super(TestMakeHomedirRecursive, self).setUp()
 
 

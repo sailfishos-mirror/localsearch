@@ -146,6 +146,9 @@ class TrackerMinerTest(DBusTestCase):
             self.tracker = trackertestutils.helpers.StoreHelper(
                 self.miner_fs.get_sparql_connection()
             )
+
+            with self.await_insert_dir(self.indexed_dir):
+                log.info('Awaiting for recursive dir')
         except Exception:
             self.sandbox.stop()
             raise
