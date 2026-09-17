@@ -26,6 +26,13 @@
 
 G_BEGIN_DECLS
 
+#define TRACKER_TYPE_ZIP (tracker_zip_get_type ())
+G_DECLARE_FINAL_TYPE (TrackerZip,
+                      tracker_zip,
+                      TRACKER,
+                      ZIP,
+                      GObject)
+
 #define TRACKER_TYPE_ZIP_INPUT_STREAM (tracker_zip_input_stream_get_type ())
 G_DECLARE_FINAL_TYPE (TrackerZipInputStream,
                       tracker_zip_input_stream,
@@ -33,7 +40,10 @@ G_DECLARE_FINAL_TYPE (TrackerZipInputStream,
                       ZIP_INPUT_STREAM,
                       GInputStream)
 
-GInputStream * tracker_zip_read_file (const gchar   *zip_file_uri,
+TrackerZip * tracker_zip_new (GFile   *file,
+                              GError **error);
+
+GInputStream * tracker_zip_read_file (TrackerZip    *zip,
                                       const gchar   *member_name,
                                       GCancellable  *cancellable,
                                       GError       **error);
@@ -41,3 +51,4 @@ GInputStream * tracker_zip_read_file (const gchar   *zip_file_uri,
 G_END_DECLS
 
 #endif /* TRACKER_ZIP_INPUT_STREAM_H */
+

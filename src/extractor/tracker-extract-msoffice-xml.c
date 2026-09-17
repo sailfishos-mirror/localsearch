@@ -68,6 +68,7 @@ typedef enum {
 typedef struct {
 	/* Common constant stuff */
 	const gchar *uri;
+	TrackerZip *zip;
 	MsOfficeXMLFileType file_type;
 
 	/* Tag type, reused by Content and Metadata parsers */
@@ -598,7 +599,7 @@ tracker_extract_module_init (GError **error)
 }
 
 static gboolean
-parse_xml_from_zip_sax (const gchar         *zip_uri,
+parse_xml_from_zip_sax (TrackerZip          *zip,
                         const gchar         *member_name,
                         const xmlSAXHandler *sax,
                         gpointer             user_data,
@@ -612,7 +613,7 @@ parse_xml_from_zip_sax (const gchar         *zip_uri,
 	gsize len;
 	gboolean ok = TRUE;
 
-	stream = tracker_zip_read_file (zip_uri, member_name, NULL, error);
+	stream = tracker_zip_read_file (zip, member_name, NULL, error);
 	if (!stream)
 		return FALSE;
 
@@ -630,9 +631,8 @@ parse_xml_from_zip_sax (const gchar         *zip_uri,
 	                                           &inner_error)) != NULL) {
 		len = g_bytes_get_size (bytes);
 
-		if (len == 0) {
-			break; /* EOF */
-		}
+		if (len == 0)
+			break;
 
 		data = g_bytes_get_data (bytes, NULL);
 
@@ -713,7 +713,7 @@ xml_read (MsOfficeXMLParserInfo *parser_info,
 		return TRUE;
 	}
 
-	if (!parse_xml_from_zip_sax (parser_info->uri, xml_filename, &sax, parser_info, &error) && error) {
+	if (!parse_xml_from_zip_sax (parser_info->zip, xml_filename, &sax, parser_info, &error) && error) {
 		g_debug ("Parsing internal '%s' gave error: '%s'",
 		         xml_filename,
 		         error->message);
@@ -890,6 +890,7 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	MsOfficeXMLFileType file_type;
 	TrackerResource *metadata;
 	GError *inner_error = NULL;
+	g_autoptr (TrackerZip) zip = NULL;
 	GFile *file;
 	gchar *uri, *resource_uri;
 	xmlSAXHandler sax = {
@@ -902,6 +903,10 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	}
 
 	file = tracker_extract_info_get_file (extract_info);
+	zip = tracker_zip_new (file, error);
+	if (!zip)
+		return FALSE;
+	
 	uri = g_file_get_uri (file);
 
 	/* Get current Content Type */
@@ -922,11 +927,12 @@ tracker_extract_get_metadata (TrackerExtractInfo  *extract_info,
 	info.style_element_present = FALSE;
 	info.preserve_attribute_present = FALSE;
 	info.uri = uri;
+	info.zip = zip;
 	info.content = NULL;
 	info.bytes_pending = tracker_extract_info_get_max_text (extract_info);
 	info.text_buf = g_string_new ("");
 
-	if (!parse_xml_from_zip_sax (uri, "[Content_Types].xml", &sax, &info, &inner_error)) {
+	if (!parse_xml_from_zip_sax (zip, "[Content_Types].xml", &sax, &info, &inner_error)) {
 		if (inner_error)
 			g_propagate_prefixed_error (error, inner_error, "Could not open:");
 		else
