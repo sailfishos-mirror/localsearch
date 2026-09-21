@@ -320,7 +320,7 @@ build-debian-stable@x86_64:
       unset $(env|grep -o '^CI_[^=]*')
       mkdir tmp
       export TMPDIR=`pwd`/tmp
-      meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 4 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
+      meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 1 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
 
   after_script:
     - pushd build
@@ -439,7 +439,7 @@ test-dist:
       unset $(env|grep -o '^CI_[^=]*')
       mkdir tmp
       export TMPDIR=`pwd`/tmp
-      meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 4 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
+      meson devenv dbus-run-session -- env LANG=C.UTF-8 LC_ALL=C.UTF-8 meson test --suite localsearch --print-errorlogs --num-processes 1 --timeout-multiplier ${MESON_TEST_TIMEOUT_MULTIPLIER} ${MESON_TEST_EXTRA_ARGS}
 
   artifacts:
     expire_in: 1 day
@@ -567,7 +567,7 @@ asan:
     - meson setup --buildtype=debug build -Db_sanitize=address -Dseccomp=false -Dlandlock=disabled
     - meson compile -C build
     # Add verify_asan_link_order=0 over asan defaults, for functional tests with python interpreter
-    - TRACKER_TESTS_AWAIT_TIMEOUT=30 LOCALSEARCH_DEBUG=tests ASAN_OPTIONS=verify_asan_link_order=0:halt_on_error=1:abort_on_error=1:print_summary=1 dbus-run-session meson test -C build -t $MESON_TEST_TIMEOUT_MULTIPLIER --print-errorlogs
+    - TRACKER_TESTS_AWAIT_TIMEOUT=30 LOCALSEARCH_DEBUG=tests ASAN_OPTIONS=verify_asan_link_order=0:halt_on_error=1:abort_on_error=1:print_summary=1 dbus-run-session meson test -C build -t $MESON_TEST_TIMEOUT_MULTIPLIER --num-processes 1 --print-errorlogs
   artifacts:
     expire_in: 1 day
     when: always
