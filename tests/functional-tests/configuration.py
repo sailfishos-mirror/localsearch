@@ -99,12 +99,11 @@ def remove_monitored_test_dir(path):
     if tests_no_cleanup():
         print("\nLOCALSEARCH_DEBUG=tests-no-cleanup: Test data kept in %s" % path)
     else:
-        shutil.rmtree(path)
-
         # We delete the parent directory if possible, to avoid cluttering the user's
         # home dir, but there may be other tests running in parallel so we ignore
         # an error if there are still files present in it.
         try:
+            shutil.rmtree(path)
             os.rmdir(_TEST_MONITORED_TMP_DIR)
         except OSError as e:
             if e.errno == errno.ENOTEMPTY:

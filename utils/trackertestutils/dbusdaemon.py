@@ -33,6 +33,8 @@ DEFAULT_TIMEOUT = 10
 
 log = logging.getLogger(__name__)
 
+class AwaitTimeoutException(RuntimeError):
+    pass
 
 class DaemonNotStartedError(Exception):
     pass

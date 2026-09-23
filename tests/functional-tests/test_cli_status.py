@@ -166,8 +166,6 @@ class TestStatus(fixtures.TrackerCommandLineTestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL) as proc:
 
-            os.set_blocking(proc.stdout.fileno(), False)
-
             # Set up a temporary inhibition, this state should be reported in the output
             with subprocess.Popen(
                     ["localsearch", "inhibit", "cat"],
@@ -175,14 +173,12 @@ class TestStatus(fixtures.TrackerCommandLineTestCase):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL) as inhibit_proc:
 
-                n_attempts = 0
-                while b'is paused' not in proc.stdout.buffer.peek():
-                    time.sleep(1)
-                    n_attempts += 1
-                    assert n_attempts < 90
+                while 'is paused' not in output:
+                    output += proc.stdout.read(1)
 
                 # Close stdin to end the cat process
                 inhibit_proc.stdin.close()
+                inhibit_proc.wait()
 
             # Copy a file and wait for it to be indexed
             file = datadir.joinpath("text/mango.txt")
@@ -190,8 +186,10 @@ class TestStatus(fixtures.TrackerCommandLineTestCase):
             with self.await_document_inserted(target):
                 shutil.copy(file, target)
 
+            while 'Idle' not in output:
+                output += proc.stdout.read(1)
             proc.terminate()
-            output = proc.stdout.read()
+            proc.wait()
 
         self.assertIn("is paused", output)
         self.assertIn("Idle", output)
@@ -328,8 +326,6 @@ class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL) as proc:
 
-            os.set_blocking(proc.stdout.fileno(), False)
-
             # Set up a temporary inhibition, this state should be reported in the output
             with subprocess.Popen(
                     ["localsearch", "inhibit", "cat"],
@@ -337,14 +333,12 @@ class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL) as inhibit_proc:
 
-                n_attempts = 0
-                while b'is paused' not in proc.stdout.buffer.peek():
-                    time.sleep(1)
-                    n_attempts += 1
-                    assert n_attempts < 90
+                while 'is paused' not in output:
+                    output += proc.stdout.read(1)
 
                 # Close stdin to end the cat process
                 inhibit_proc.stdin.close()
+                inhibit_proc.wait()
 
             # Copy a file and wait for it to be indexed
             file = datadir.joinpath("text/mango.txt")
@@ -352,8 +346,10 @@ class TestStatusPty(fixtures.TrackerPtyCommandLineTestCase):
             with self.await_document_inserted(target):
                 shutil.copy(file, target)
 
+            while 'Idle' not in output:
+                output += proc.stdout.read(1)
             proc.terminate()
-            output = proc.stdout.read()
+            proc.wait()
 
         self.assertIn("is paused", output)
         self.assertIn("Idle", output)
