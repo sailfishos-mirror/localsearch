@@ -14,7 +14,7 @@ order of events is:
 3. The process gets restarted.
 4. When the database is re-opened, the TinySPARQL library will detect the
    prior corruption, and run repair attempts. See the
-   [related library documentation](https://gnome.pages.gitlab.gnome.org/tracker/ctor.SparqlConnection.new.html)
+   [related library documentation](https://gnome.pages.gitlab.gnome.org/tinysparql/ctor.SparqlConnection.new.html)
    for more details.
 5. If the repair attempt failed, the corrupted database file(s) will be moved
    aside at `~/.cache/tracker3/files.$TIMESTAMP`, and the filesystem data will
