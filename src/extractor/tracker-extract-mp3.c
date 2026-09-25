@@ -506,15 +506,37 @@ strnlen (const char *str, size_t max)
 inline static guint32
 extract_uint32 (gconstpointer data)
 {
-	const guint32 *ptr = data;
-	return GUINT32_FROM_BE (*ptr);
+	const guchar *ptr = data;
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+	return ((ptr[0] << 24) |
+	        (ptr[1] << 16) |
+	        (ptr[2] << 8) |
+	        (ptr[3] << 0));
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+	return ((ptr[0] << 0) |
+	        (ptr[1] << 8) |
+	        (ptr[2] << 16) |
+	        (ptr[3] << 24));
+#else
+	#error "Can’t figure endianness"
+	return 0;
+#endif
 }
 
 inline static guint16
 extract_uint16 (gconstpointer data)
 {
-	const guint16 *ptr = data;
-	return GUINT16_FROM_BE (*ptr);
+	const guchar *ptr = data;
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+	return ((ptr[0] << 8) |
+	        (ptr[1] << 0));
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+	return ((ptr[0] << 0) |
+	        (ptr[1] << 8));
+#else
+	#error "Can’t figure endianness"
+	return 0;
+#endif
 }
 
 inline static guint32
