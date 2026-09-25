@@ -41,6 +41,35 @@
                          FAN_MOVED_TO | FAN_MOVED_FROM | FAN_MOVE_SELF | \
                          FAN_EVENT_ON_CHILD | FAN_ONDIR)
 
+/* The event_len field is the first u32 in the struct. This
+ * define exists to read this avoiding memory alignment issues
+ */
+#if (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define TRACKER_FAN_EVENT_LEN(meta)	\
+	(((char *) meta)[0] << 0 |	\
+	 ((char *) meta)[1] << 8 |	\
+	 ((char *) meta)[2] << 16 |	\
+	 ((char *) meta)[3] << 24)
+#elif (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define TRACKER_FAN_EVENT_LEN(meta)	\
+	(((char *) meta)[0] << 24 |	\
+	 ((char *) meta)[1] << 16 |	\
+	 ((char *) meta)[2] << 8 |	\
+	 ((char *) meta)[3] << 0)
+#else
+#error "Can’t figure endianness"
+#endif
+
+#define TRACKER_FAN_EVENT_NEXT(meta, len)				\
+	((len) -= TRACKER_FAN_EVENT_LEN (meta),				\
+	 (struct fanotify_event_metadata*) (((char *) (meta)) + TRACKER_FAN_EVENT_LEN (meta)))
+
+#define TRACKER_FAN_EVENT_OK(meta, len)					\
+	((long) (len) >= (long) FAN_EVENT_METADATA_LEN &&		\
+	 TRACKER_FAN_EVENT_LEN (meta) >= (long) FAN_EVENT_METADATA_LEN && \
+	 TRACKER_FAN_EVENT_LEN (meta) <= (long) (len))
+
+
 typedef enum {
 	EVENT_NONE,
 	EVENT_CREATE,
@@ -326,20 +355,22 @@ fanotify_events_cb (int          fd,
                     gpointer     user_data)
 {
 	TrackerMonitorFanotify *monitor = user_data;
-	struct fanotify_event_metadata buf[200], *event;
+	struct fanotify_event_metadata buf[200], *cur;
 	ssize_t len;
 
 	len = read (monitor->fanotify_fd, buf, sizeof (buf));
+	cur = buf;
 
-	event = buf;
-
-	while (FAN_EVENT_OK (event, len)) {
+	while (TRACKER_FAN_EVENT_OK (cur, len)) {
+		g_autofree struct fanotify_event_metadata *event = NULL;
 		struct fanotify_event_info_fid *fid;
 		HandleData *handle;
 		MonitoredFile *data;
 		const gchar *file_name;
 		GBytes *fid_bytes;
 		GFile *child;
+
+		event = g_memdup2 (cur, TRACKER_FAN_EVENT_LEN (cur));
 
 		/* Check that run-time and compile-time structures match. */
 		if (event->vers != FANOTIFY_METADATA_VERSION) {
@@ -393,7 +424,7 @@ fanotify_events_cb (int          fd,
 		g_object_unref (child);
 
 	cont:
-		event = FAN_EVENT_NEXT (event, len);
+		cur = TRACKER_FAN_EVENT_NEXT (cur, len);
 	}
 
 	flush_moved_file_event (monitor);

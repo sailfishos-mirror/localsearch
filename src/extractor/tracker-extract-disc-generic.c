@@ -75,11 +75,25 @@ typedef struct {
 #define PS_DISC_FRAME_HEADER_SIZE 12
 #define PS_DISC_FRAME_CONTENT_SIZE 2048
 
+#if (G_BYTE_ORDER == G_BIG_ENDIAN)
+#define INT32_FROM_LE(ptr)	\
+	((ptr[0] << 24) |	\
+	 (ptr[1] << 16) |	\
+	 (ptr[2] << 8) |	\
+	 (ptr[3] << 0))
+#elif (G_BYTE_ORDER == G_LITTLE_ENDIAN)
+#define INT32_FROM_LE(ptr)	\
+	((ptr[0] << 0) |	\
+	 (ptr[1] << 8) |	\
+	 (ptr[2] << 16) |	\
+	 (ptr[3] << 24))
+#endif
+
 #define PS_DISC_TIME_TO_EXTENT(time)	  \
 	((time->minute * 60 + time->second - 2) * PS_DISC_FRAMES_PER_SECOND + time->frame)
 #define PS_DISC_EXTENT_TO_TIME(extent, time)	  \
 	G_STMT_START { \
-		gint32 block = GINT32_FROM_LE (*((gint32 *) extent)); \
+		gint32 block = INT32_FROM_LE (extent); \
 		block += 2 * PS_DISC_FRAMES_PER_SECOND; \
 		(time)->minute = block / (60 * PS_DISC_FRAMES_PER_SECOND); \
 		block = block - (time)->minute * (60 * PS_DISC_FRAMES_PER_SECOND); \
