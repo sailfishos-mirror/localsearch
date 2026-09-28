@@ -23,7 +23,7 @@ It consists of the following daemons:
   RDF description. This service only starts on requests from applications, see its
   [D-Bus API](dbus-api.md#orgfreedesktoplocalsearch3writeback) for more information.
 
-LocalSearch is friendly to [sandboxing](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html).
+LocalSearch is friendly to [sandboxing](https://gnome.pages.gitlab.gnome.org/tinysparql/sandboxing.html).
 The data is segmented in a way that different types of consumers may only
 get the portions of data that are relevant to them. See how [this works](endpoint.md#graphs).
 

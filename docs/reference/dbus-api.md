@@ -64,7 +64,7 @@ Writeback (IN  a{sv}  rdf)
 The `rdf` argument expresses RDF data corresponding to the file
 whose metadata is being modified, in the same format that it would be
 accepted by the SPARQL endpoint. This can be obtained through e.g.
-[tracker_resource_serialize()](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/method.Resource.serialize.html).
+[tracker_resource_serialize()](https://gnome.pages.gitlab.gnome.org/tinysparql/method.Resource.serialize.html).
 
 This method may raise an error if the metadata could not be written.
 

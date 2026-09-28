@@ -21,10 +21,10 @@ $ tinysparql3 sparql -b org.freedesktop.LocalSearch3 -q \
 
 You should not provide access within flatpaks to this D-Bus name.
 Access from within the sandbox is handled through the
-[TinySPARQL portal](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html).
+[TinySPARQL portal](https://gnome.pages.gitlab.gnome.org/tinysparql/sandboxing.html).
 
 Data is offered in the format of the Nepomuk ontology, see
-the [Nepomuk documentation](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/ontologies.html#nepomuk)
+the [Nepomuk documentation](https://gnome.pages.gitlab.gnome.org/tinysparql/ontologies.html#nepomuk)
 to learn about the different classes and properties that may be
 handled through this ontology.
 
@@ -39,7 +39,7 @@ The filesystem indexer uses the following graphs to store data:
 - `tracker:Pictures`
 - `tracker:Software`
 
-See how the TinySPARQL portal [uses graphs](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/sandboxing.html#how-it-works)
+See how the TinySPARQL portal [uses graphs](https://gnome.pages.gitlab.gnome.org/tinysparql/sandboxing.html#how-it-works)
 as the data units to perform isolation between clients.
 
 The `tracker:FileSystem` graph contains all nfo:FileDataObject
@@ -54,4 +54,4 @@ data (e.g. audio albums and performers)
 
 This way to partition the data is enabled by the split between
 interpretation and content present in the Nepomuk ontology,
-read more [about its design](https://gnome.pages.gitlab.gnome.org/tracker/docs/developer/nie-ontology.html#overview).
+read more [about its design](https://gnome.pages.gitlab.gnome.org/tinysparql/nie-ontology.html#overview).
