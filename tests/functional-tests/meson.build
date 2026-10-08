@@ -65,6 +65,12 @@ if avformat.found() or libmediainfo.found()
   extractor_tests += 'audio/vorbis'
 endif
 
+# These exercise the GUPnP DLNA profile guessing in the libmediainfo extractor
+if libmediainfo.found() and gupnp_dlna.found()
+  extractor_tests += 'audio/mp3-misnamed-as-mp4'
+  extractor_tests += 'audio/wma-basic'
+endif
+
 if have_mediainfo_with_consistent_disc_info
   extractor_tests += 'audio/flac-disc-subtitle'
   extractor_tests += 'audio/vorbis-disc-subtitle'

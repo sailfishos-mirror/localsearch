@@ -625,6 +625,7 @@ tracker_gupnp_dlna_container_information_get_variant (GUPnPDLNAContainerInformat
 	const char *iso_mimetypes[] = {
 		"audio/mp4",
 		"video/mp4",
+		NULL,
 	};
 
 	mimetype = ctx_get_string_property (cont_info->ctx, Stream_General, L"InternetMediaType");
@@ -653,6 +654,7 @@ tracker_gupnp_dlna_container_information_get_mime (GUPnPDLNAContainerInformation
 	const char *asf_mimetypes[] = {
 		"audio/x-ms-wma",
 		"audio/x-wma",
+		NULL,
 	};
 
 	mimetype = ctx_get_string_property (cont_info->ctx, Stream_General, L"InternetMediaType");

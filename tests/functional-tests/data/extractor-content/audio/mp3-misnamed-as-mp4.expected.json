@@ -1,0 +1,19 @@
+{
+    "test": {
+        "Filename": "mp3-misnamed-as-mp4.mp4",
+        "Comment": "MP3 stream with a .mp4 extension, container MIME type is not a QuickTime or ASF one"
+    },
+    "metadata": {
+        "@graph": [
+	    {
+		"@type": [
+		    "nfo:Audio",
+		    "nmm:MusicPiece"
+		],
+		"nfo:channels": "2",
+		"nfo:sampleRate": "44100",
+		"nfo:duration": "1"
+	    }
+	]
+    }
+}

@@ -1,0 +1,21 @@
+{
+    "test": {
+        "Filename": "wma-basic.wma",
+        "Comment": "WMA audio, matches a DLNA profile so the container variant is checked"
+    },
+    "metadata": {
+        "@graph": [
+	    {
+		"@type": [
+		    "nfo:Audio",
+		    "nmm:MusicPiece"
+		],
+		"nfo:channels": "1",
+		"nfo:sampleRate": "22050",
+		"nfo:duration": "1",
+		"nmm:dlnaProfile": "WMABASE",
+		"nmm:dlnaMime": "audio/x-ms-wma"
+	    }
+	]
+    }
+}
