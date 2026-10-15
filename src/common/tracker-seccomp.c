@@ -42,10 +42,6 @@
 
 #include <linux/netlink.h>
 
-#ifdef HAVE_BTRFS_IOCTL
-#include <linux/btrfs.h>
-#endif
-
 #include <seccomp.h>
 
 #include "valgrind.h"
@@ -251,7 +247,7 @@ tracker_seccomp_init (gboolean readonly)
 	ALLOW_RULE (clock_getres);
 	ALLOW_RULE (gettimeofday);
 	ALLOW_RULE (timerfd_create);
-	ERROR_RULE (ioctl, EBADF);
+	ALLOW_RULE (ioctl);
 	/* Descriptors */
 	CUSTOM_RULE (close, SCMP_ACT_ALLOW, SCMP_CMP (0, SCMP_CMP_GT, STDERR_FILENO));
 	CUSTOM_RULE (dup2, SCMP_ACT_ALLOW, SCMP_CMP (1, SCMP_CMP_GT, STDERR_FILENO));
@@ -293,12 +289,6 @@ tracker_seccomp_init (gboolean readonly)
 
 	/* Special requirements for socketpair, only on AF_UNIX */
 	CUSTOM_RULE (socketpair, SCMP_ACT_ALLOW, SCMP_CMP(0, SCMP_CMP_EQ, AF_UNIX));
-
-#ifdef HAVE_BTRFS_IOCTL
-	/* Special requirements for btrfs, allowed for BTRFS_IOC_GET_SUBVOL_INFO */
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, BTRFS_IOC_GET_SUBVOL_INFO));
-#endif
-	CUSTOM_RULE (ioctl, SCMP_ACT_ALLOW, SCMP_CMP(1, SCMP_CMP_EQ, FS_IOC_GETFSUUID));
 
 	if (readonly) {
 		/* Special requirements for open/openat, allow O_RDONLY calls,
