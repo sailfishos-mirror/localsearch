@@ -40,4 +40,4 @@ formats:
 These metadata extractors will collect information from the content of files
 based on their detected mimetype, and make this information available in the
 index. This metadata will be stored in a structured manner, expressed by the
-[Nepomuk ontology](https://gnome.pages.gitlab.gnome.org/tinysparql/docs/developer/ontologies.html#nepomuk).
+[Nepomuk ontology](https://gnome.pages.gitlab.gnome.org/tinysparql/ontologies.html#nepomuk).
